@@ -203,8 +203,8 @@ RESOURCE MENU_PANE r_file_menu
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
       MENU_ITEM { txt=ogg_skins; 
                   cascade=r_skin_menu; },
-      MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
-                  flags=EEikMenuItemSeparatorAfter;},
+   /*   MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
+                  flags=EEikMenuItemSeparatorAfter;},*/
       MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
       MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
   };

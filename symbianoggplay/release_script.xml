@@ -1,0 +1,84 @@
+<project name="MyProject" default="dist" basedir=".">
+    <description>
+        S60 OggPlay build file
+    </description>
+
+  <!-- set global properties for this build -->  
+  <property environment="env"/>
+  <property name="epocroot" location="c:\${env.EPOCROOT}" />
+  <property name="oggplaydir" value="symbianoggplay" />
+  <property name="oggplayfulldir" location="${epocroot}\${oggplaydir}"/>
+
+  <target name="CreateZIP" depends="CreateSIS">
+       <zip destfile="${oggplayfulldir}/release.zip"
+       basedir="${oggplayfulldir}\install"
+       includes="oggplay_s60.SIS,recognizer.SIS" />
+  </target>
+
+  <target name="CreateSIS" depends="OggPlay,skins,recognizer">
+     <exec executable="subst" >  <arg line="x: ${epocroot}"/>  </exec> 
+     <exec dir="x:\${oggplaydir}\install" executable="makesis.exe" failonerror="true">
+        <arg line="oggplay_lang_urel.s60.pkg oggplay_s60.SIS"/>	
+     </exec> 
+     <exec dir="x:\${oggplaydir}\install" executable="makesis.exe" failonerror="true">
+        <arg line="recognizer.s60.pkg recognizer.SIS"/>	
+     </exec> 
+  </target>
+
+  <target name="OggPlay"  description="compile the sources" >
+    <antcall target="BuildFromMMP">
+         <param name="MMPDir" value="${oggplayfulldir}\vorbis\group"/>
+         <param name="HWtarget" value="armi urel"/>
+    </antcall>  
+    <antcall target="BuildFromMMP">
+         <param name="MMPDir" value="${oggplayfulldir}\group"/>
+         <param name="HWtarget" value="armi urel"/>
+    </antcall>
+  </target>
+
+ <target name="recognizer"  description="compile the sources" >
+    <antcall target="BuildFromMMP">
+         <param name="MMPDir" value="${oggplayfulldir}\recognizer\group"/>
+         <param name="HWtarget" value="thumb urel"/>
+    </antcall>  
+  </target>
+
+  <target name="skins"  description="generate the skins" depends="fullsteel,greyzone"/>
+
+
+  <target name="fullsteel">
+     <property name="fullsteeldir" value="${oggplayfulldir}\bitmaps\skins\FullSteel" />
+     <exec dir="${fullsteeldir}" executable="bmconv.exe" output="fullsteel.txt">
+        <arg line="FullSteel.cmd"/>	
+     </exec> 
+     <copy file="${fullsteeldir}\FullSteel.mbm" todir="${epocroot}\epoc32\Release\wins\UDEB\Z\SYSTEM\apps\OGGPLAY" />
+     <copy file="${fullsteeldir}\FullSteel.skn" todir="${epocroot}\epoc32\Release\wins\UDEB\Z\SYSTEM\apps\OGGPLAY" />
+  </target>
+
+  <target name="greyzone">
+     <property name="greyzonedir" value="${oggplayfulldir}\bitmaps\skins\GreyZone" />
+     <exec dir="${greyzonedir}" executable="bmconv.exe " output="GreyZone.txt">
+        <arg line="greyzone.cmd"/>	
+     </exec> 
+     <copy file="${greyzonedir}\greyzone.mbm" todir="${epocroot}\epoc32\Release\wins\UDEB\Z\SYSTEM\apps\OGGPLAY" />
+     <copy file="${greyzonedir}\greyzone.skn" todir="${epocroot}\epoc32\Release\wins\UDEB\Z\SYSTEM\apps\OGGPLAY" />
+  </target>
+
+
+
+  <target name="BuildFromMMP">
+    <!-- Property MMPDir should be set before.-->  
+    <!-- Also     HWtarget can be set. -->
+    <echo message="Building from MMP in ${MMPDir}"/>
+    <!--bldmake bldfiles -->
+    <exec dir="${MMPDir}" executable="bldmake.bat" output="dir.txt">
+       <arg line="bldfiles"/>	
+    </exec>  
+    <!--abld build  -->
+    <exec dir="${MMPDir}" executable="${MMPDir}\abld.bat" 
+         output="building.log" failonerror="true">
+       <arg line="build ${HWtarget}"/>
+    </exec>  
+  </target>
+
+</project>

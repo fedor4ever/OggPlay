@@ -321,10 +321,12 @@ TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
 
 void TOggFiles::AddDirectoryStop()
 {
-  delete iDs; iDs=0;
+ delete iDs; iDs=0;
   delete iDirectory; iDirectory = 0;
-  iOggPlayback->ClearComments();
-  iPathArray->Reset();
+  if (iOggPlayback)
+    iOggPlayback->ClearComments();
+  if (iPathArray)
+    iPathArray->Reset();
   delete iPathArray; iPathArray = 0;
 
 }
