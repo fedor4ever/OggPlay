@@ -540,7 +540,7 @@ void COggPlayAppView::SetupListBox(COggListBox* aListBox)
 void COggPlayAppView::SetNextFocus() {
   COggControl* c;
   c=iFocusControlsIter;
-  //OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
+  //RDebug::Print(_L("SetNextFocus from 0x%x"),c);
   //__ASSERT_DEBUG(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
   //__ASSERT_DEBUG(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
   c->SetFocus(EFalse);
@@ -549,7 +549,7 @@ void COggPlayAppView::SetNextFocus() {
     if(!iFocusControlsIter) iFocusControlsIter.SetToFirst();
     c=iFocusControlsIter;
   } while (!c->IsVisible() || c->IsDimmed());
-  //OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
+  //RDebug::Print(_L("SetNextFocus to 0x%x"),c);
   //__ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
   c->SetFocus(ETrue);
   Update();
@@ -558,7 +558,7 @@ void COggPlayAppView::SetNextFocus() {
 void COggPlayAppView::SetPrevFocus() {
   COggControl* c;
   c=iFocusControlsIter;
-  //OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
+  //RDebug::Print(_L("SetNextFocus from 0x%x"),c);
   //__ASSERT_ALWAYS(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
   //__ASSERT_ALWAYS(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
   c->SetFocus(EFalse);
@@ -567,7 +567,7 @@ void COggPlayAppView::SetPrevFocus() {
     if(!iFocusControlsIter) iFocusControlsIter.SetToLast();
     c=iFocusControlsIter;
   } while (!c->IsVisible() || c->IsDimmed());
-  //OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
+  //RDebug::Print(_L("SetNextFocus to 0x%x"),c);
   //__ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
   c->SetFocus(ETrue);
   Update();
@@ -1180,6 +1180,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
 
 #if defined(SERIES60)
+
   enum EOggKeys {
     EOggConfirm=EKeyDevice3
   };
@@ -1189,7 +1190,108 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     EOggRight=EStdKeyRightArrow,
     EOggLeft=EStdKeyLeftArrow
     };
-#else
+
+  TInt code     = aKeyEvent.iCode;
+//  TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
+//  TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
+
+  COggControl* c=iFocusControlsIter;
+  
+  if (code==0 && aType==EEventKeyDown) { 
+    if(aKeyEvent.iScanCode==EOggLeft) {
+      SetPrevFocus();
+      return EKeyWasConsumed;
+    } else if (aKeyEvent.iScanCode==EOggRight) {
+      SetNextFocus();
+      return EKeyWasConsumed;
+    } else {
+      if(c==iListBox[iMode]) {
+        TInt idx= iListBox[iMode]->CurrentItemIndex();
+        if (aKeyEvent.iScanCode==EOggDown) {
+          SelectSong(idx+1);
+          return EKeyWasConsumed;
+        } else if (aKeyEvent.iScanCode==EOggUp && idx>0) {
+          SelectSong(idx-1);
+          return EKeyWasConsumed;
+        } 
+      } else if(c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown)) {
+        if (aKeyEvent.iScanCode==EOggUp)  {
+          iApp->iVolume+= KStepVolume;
+        } else  if (aKeyEvent.iScanCode==EOggDown ) {
+          iApp->iVolume-= KStepVolume;
+        }
+        if (iApp->iVolume>KMaxVolume) iApp->iVolume = KMaxVolume;
+        if (iApp->iVolume<0) iApp->iVolume = 0;
+        iApp->iOggPlayback->SetVolume(iApp->iVolume);
+		    UpdateVolume();
+        return EKeyWasConsumed;
+      } 
+    }   
+  }  
+
+  if(code == EOggConfirm) {
+    if(c==iPlayButton[iMode]) { 
+      // manually move focus to pause button
+      c->SetFocus(EFalse);
+      do {
+        iFocusControlsIter++;
+        if(!iFocusControlsIter) iFocusControlsIter.SetToFirst();
+        c=iFocusControlsIter;
+      } while (c!=iPauseButton[iMode]);
+      c->SetFocus(ETrue);
+      iApp->HandleCommandL(EOggPauseResume);
+    } else if (c==iPauseButton[iMode]) {
+      c->SetFocus(EFalse);
+      do {
+        iFocusControlsIter++;
+        if(!iFocusControlsIter) iFocusControlsIter.SetToFirst();
+        c=iFocusControlsIter;
+      } while (c!=iPlayButton[iMode]);
+      c->SetFocus(ETrue);
+      iApp->HandleCommandL(EOggPauseResume);
+    } else if(c==iStopButton[iMode]) {
+        iApp->HandleCommandL(EOggStop);
+    } else if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
+	             iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
+           iApp->HandleCommandL(EOggStop);
+      else iApp->HandleCommandL(EOggPlay);
+    return EKeyWasConsumed;
+  }
+
+  if (code>0) {
+    if (aKeyEvent.iScanCode==EStdKeyDeviceD) { iApp->NextSong(); return EKeyWasConsumed; }           // jog dial up
+    else if (aKeyEvent.iScanCode==EStdKeyDeviceE) { iApp->PreviousSong(); return EKeyWasConsumed; }  // jog dial down
+    else if (aKeyEvent.iScanCode==167) { AppToForeground(EFalse); return EKeyWasConsumed; }          // back key <-
+    else if (aKeyEvent.iScanCode==174) { iApp->HandleCommandL(EOggStop); return EKeyWasConsumed; }   // "C" key
+    //else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
+    else if (aKeyEvent.iScanCode==173) { 
+    } else if (aKeyEvent.iScanCode==133) { // "*"
+      if (iTitle[iMode]) iTitle[iMode]->ScrollNow();
+      if (iAlbum[iMode]) iAlbum[iMode]->ScrollNow();
+      if (iArtist[iMode]) iArtist[iMode]->ScrollNow();
+      if (iGenre[iMode]) iGenre[iMode]->ScrollNow();
+      return EKeyWasConsumed;
+    }
+    else if (aKeyEvent.iScanCode==127) { // "#"
+      ToggleRepeat();
+      return EKeyWasConsumed;
+    }
+    // 48..57 == "0"..."9"
+    // 172 jog dial press
+    // 179    == OK
+  }
+
+
+  return EKeyWasNotConsumed;
+
+
+
+
+#else // UIQ keyhandling
+
+
+
+
   enum EOggKeys {
       EOggConfirm=EQuartzKeyConfirm,
   };
@@ -1198,70 +1300,10 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     EOggDown=EStdQuartzKeyTwoWayDown
   };
 
-#endif
-
   TInt code     = aKeyEvent.iCode;
   TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
   TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
 
-#if defined(SERIES60) // SERIES60-specific keyhandling 
-  // - needs to be upfront since it might intercept EOggConfirm
-  COggControl* c=iFocusControlsIter;
-  //__ASSERT_DEBUG(c,OGGPANIC(_L("Need at least one control with focus !"),1321));
-  if (code==0 && aType==EEventKeyDown) { 
-    if(aKeyEvent.iScanCode==EOggLeft) {
-      _LIT(KS,"Key Left");
-      RDebug::Print(KS);
-      SetPrevFocus();
-      return EKeyWasConsumed;
-    } else if (aKeyEvent.iScanCode==EOggRight) {
-      _LIT(KS,"Key Right");
-      RDebug::Print(KS);
-      SetNextFocus();
-      return EKeyWasConsumed;
-    } else {
-      if(c==iListBox[iMode]) {
-        TInt idx= iListBox[iMode]->CurrentItemIndex();
-        if (aKeyEvent.iScanCode==EOggDown) {
-          _LIT(KS,"Listbox key down");
-          RDebug::Print(KS);
-          SelectSong(idx+1);
-          return EKeyWasConsumed;
-        } else if (aKeyEvent.iScanCode==EOggUp && idx>0) {
-          _LIT(KS,"Listbox key up");
-          RDebug::Print(KS);
-          SelectSong(idx-1);
-          return EKeyWasConsumed;
-        } 
-      } else if(c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown)) {
-        if (aKeyEvent.iScanCode==EOggUp)  {
-          _LIT(KS,"Volume key up");
-          RDebug::Print(KS);
-          iApp->iVolume+= KStepVolume;
-        } else  if (aKeyEvent.iScanCode==EOggDown ) {
-          _LIT(KS,"Volume key down");
-          RDebug::Print(KS);
-          iApp->iVolume-= KStepVolume;
-        }
-        if (iApp->iVolume>KMaxVolume)
-            {
-            iApp->iVolume = KMaxVolume;
-            }
-        if (iApp->iVolume<0)
-            {
-            iApp->iVolume = 0;
-        }
-        iApp->iOggPlayback->SetVolume(iApp->iVolume);
-		    UpdateVolume();
-        return EKeyWasConsumed;
-      } else if((c==iPlayButton[iMode] || c==iPauseButton[iMode]) && code == EOggConfirm ) {
-        iApp->HandleCommandL(EOggPauseResume);
-      } else if(c==iStopButton[iMode] && code == EOggConfirm ) {
-        iApp->HandleCommandL(EOggStop);
-      }
-    }   
-  }  
-#endif // S60 keyhandling
 
   if (iHotkey && aType == EEventKey &&
      code == keycodes[iHotkey-1].code && modifiers==keycodes[iHotkey-1].mask) {
@@ -1289,12 +1331,10 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     else if (aKeyEvent.iScanCode==174) { iApp->HandleCommandL(EOggStop); return EKeyWasConsumed; }   // "C" key
     //else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
     else if (aKeyEvent.iScanCode==173) { 
-#if !defined (SERIES60)
       iApp->LaunchPopupMenuL(R_POPUP_MENU,TPoint(100,100),EPopupTargetTopLeft);
       //Invalidate();
       //Update();
       return EKeyWasConsumed; 
-#endif
     } else if (aKeyEvent.iScanCode==133) { // "*"
       if (iTitle[iMode]) iTitle[iMode]->ScrollNow();
       if (iAlbum[iMode]) iAlbum[iMode]->ScrollNow();
@@ -1311,7 +1351,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     // 179    == OK
   }
 
-#if !defined(SERIES60) // UIQ-specific keyhandling:
   if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying || !IsFlipOpen() ) {
     // volume
     if (code==0 && aType==EEventKeyDown) { 
@@ -1336,12 +1375,13 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         return EKeyWasConsumed;
       }
     }
-  }
-#endif
-  
+  }  
 
   return EKeyWasNotConsumed;
+
+#endif  // UIQ keyhandling
 }
+
 
 void
 COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt /*aValue*/)
