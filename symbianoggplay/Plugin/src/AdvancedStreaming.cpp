@@ -80,6 +80,7 @@ void CAdvancedStreaming::ConstructL() {
 }
 
 CAdvancedStreaming::~CAdvancedStreaming() {
+  iState = EDestroying;
   delete  iStartAudioStreamingTimer;
   delete  iStopAudioStreamingTimer;
   iStream->Stop();
@@ -342,7 +343,7 @@ void CAdvancedStreaming::MaoscPlayComplete(TInt aError)
   // KErrDied       -13  (interrupted by higher priority)
   // KErrInUse      -14
 
-  if ( iState != EStopping ) 
+  if ( (iState != EStopping) && (iState != EDestroying) ) 
   {
       NotifyPlayInterrupted(aError);
       return;

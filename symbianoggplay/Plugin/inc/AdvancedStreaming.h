@@ -68,7 +68,8 @@ class CAdvancedStreaming : public CBase,
   enum TState {
     EIdle,
     EStopping,
-    EStreaming
+    EStreaming,
+    EDestroying
   };
 
  private:

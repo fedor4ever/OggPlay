@@ -1,5 +1,6 @@
 // Test functions
 
+#include "..\..\..\inc\OggOs.h"
 
 TARGET        oggtremortest.exe
 TARGETTYPE    exe
@@ -8,7 +9,12 @@ UID 0
 SOURCEPATH    .
 SOURCE        console.cpp oggtremortest.cpp
 SOURCEPATH    ..\..\..\src
-SOURCE        OggPluginAdaptor.cpp
+SOURCE        OggPluginAdaptor.cpp OggLog.cpp
+
+#ifndef MMF_AVAILABLE
+SOURCEPATH    ..\..\..\Plugin\src
+SOURCE        PseudoMMFFcts.cpp
+#endif
 
 USERINCLUDE   .
 USERINCLUDE   ..\..
@@ -17,6 +23,8 @@ USERINCLUDE   ..\..\..\inc
 SYSTEMINCLUDE \Epoc32\include
 SYSTEMINCLUDE \Epoc32\include\libc
 
-LIBRARY       euser.lib estlib.lib
-LIBRARY       MediaClientAudio.lib
-LIBRARY       MMFControllerFramework.lib 
+LIBRARY       euser.lib 
+LIBRARY       flogger.lib 
+#ifdef MMF_AVAILABLE
+LIBRARY       MMFControllerFramework.lib MediaClientAudio.lib 
+#endif

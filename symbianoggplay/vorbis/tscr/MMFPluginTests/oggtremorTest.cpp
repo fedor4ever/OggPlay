@@ -47,7 +47,7 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
     case 'g' :
         {
         iConsole->Printf(_L("Volume Up!\n"));
-        iVolume++;
+        iVolume+=10;
         iPlayer->SetVolume(iVolume);
         return(ETrue);
         break;
@@ -55,7 +55,7 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
     case '5' :
     case 'j' :
         iConsole->Printf(_L("Volume Down!\n"));
-        iVolume--;
+        iVolume-=10;
         iPlayer->SetVolume(iVolume);
         return(ETrue);
         break;
@@ -101,11 +101,6 @@ void CIvorbisTest::NotifyPlayInterrupted()
 }
 
 
-#ifdef MMF_AVAILABLE
-////////////////////////////////////////////////////
-// Interface using the MMF
-////////////////////////////////////////////////////
-
 void CIvorbisTest::ConstructL(CConsoleBase *aConsole)
     {
     iConsole = aConsole;
@@ -119,37 +114,31 @@ CIvorbisTest::~CIvorbisTest()
     delete (iPlayer);
 }
 
-#else
-////////////////////////////////////////////////////
-// Interface when MMF is not available
-////////////////////////////////////////////////////
 
 
-void CIvorbisTest::ConstructL(CConsoleBase *aConsole)
-    {
-    iConsole = aConsole;
-    // Load the plugin.
-    // Dynamically load the DLL
-    const TUid KOggDecoderLibraryUid={0x101FD21D};
-    TUidType uidType(KDynamicLibraryUid,KOggDecoderLibraryUid);
-    User::LeaveIfError ( iLibrary.Load(_L("OGGPLUGINDECODER.DLL"), uidType) );
 
-    // Function at ordinal 1 creates new C
-    TLibraryFunction entry=iLibrary.Lookup(1);
-    // Call the function to create new CMessenger
-    iPlayer = (CPseudoMMFController*) entry();
-    iPlayer->SetObserver(*this);
-    iPlayer->OpenFile(_L("C:\\test.ogg"));
-}
+////////////////////////////////////////////////////////////////
+//
+// CAbsPlayback
+//
+////////////////////////////////////////////////////////////////
 
-CIvorbisTest::~CIvorbisTest()
+// Just the constructor is defined in this class, everything else is 
+// virtual
+
+CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
+  iState(CAbsPlayback::EClosed),
+  iObserver(anObserver),
+  
+  iBitRate(0),
+  iChannels(2),
+  iFileSize(0),
+  iRate(44100),
+  iTime(0),
+  iAlbum(),
+  iArtist(),
+  iGenre(),
+  iTitle(),
+  iTrackNumber()
 {
-     delete (iPlayer);
-    // Finished with the DLL
-    //
-    iLibrary.Close();
 }
-
-#endif
-
-

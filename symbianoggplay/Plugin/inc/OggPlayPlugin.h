@@ -36,12 +36,12 @@
 class CMMFMetaDataEntry : public CBase
 	{
 public:
-	IMPORT_C static CMMFMetaDataEntry* NewL(const TDesC& aName, const TDesC& aValue);
-	IMPORT_C ~CMMFMetaDataEntry();
-	IMPORT_C const TDesC& Name() const;
-	IMPORT_C const TDesC& Value() const;
-	IMPORT_C void SetNameL(const TDesC& aName);
-	IMPORT_C void SetValueL(const TDesC& aValue);
+	static CMMFMetaDataEntry* NewL(const TDesC& aName, const TDesC& aValue);
+	~CMMFMetaDataEntry();
+	const TDesC& Name() const;
+	const TDesC& Value() const;
+	void SetNameL(const TDesC& aName);
+	void SetValueL(const TDesC& aValue);
 
 private:
 	CMMFMetaDataEntry();
@@ -67,7 +67,7 @@ class CPseudoMMFController : public CBase
     
 public:
     virtual void SetObserver(MMdaAudioPlayerCallback &anObserver) = 0;
-    virtual void OpenFile(const TDesC& aFile) = 0;
+    virtual void OpenFileL(const TDesC& aFile) = 0;
     virtual void ConstructL()= 0;
     virtual void Play() = 0;
     virtual void Pause() = 0;
@@ -75,7 +75,7 @@ public:
     virtual TTimeIntervalMicroSeconds PositionL() const = 0;
     virtual void SetPositionL(const TTimeIntervalMicroSeconds& aPosition) = 0;
     virtual TTimeIntervalMicroSeconds DurationL() const = 0;
-    virtual void GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries) = 0;
+    virtual TInt GetNumberOfMetaDataEntries(TInt& aNumberOfEntries) = 0;
     virtual CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex) =0;
 
     virtual TInt MaxVolume() = 0;

@@ -19,12 +19,13 @@
 
 #include "..\..\inc\OggOs.h"  // MMF_AVAILABLE IS DEFINED IN THERE
 
-TARGET          OGGPLUGINDECODER.DLL
 #if defined MMF_AVAILABLE
+TARGET          OGGPLUGINDECODER.DLL
 TARGETTYPE      ECOMIIC
 UID             0x10009D8D 0x101FF683
 TARGETPATH      \System\Libs\Plugins
 #else
+TARGET          OGGPLUGINDECODERPREMMF.DLL
 TARGETTYPE      DLL
 UID             0x101FD21D 0x101FD21D
 #endif
@@ -53,6 +54,11 @@ SOURCE        OggPlayController.cpp
 SOURCEPATH    ..\Plugin
 SOURCE        OggTremorPluginFactory.cpp
 SOURCE        TremorDecoder.cpp
+
+#ifndef MMF_AVAILABLE
+SOURCEPATH    ..\..\Plugin\src
+SOURCE        PseudoMMFFcts.cpp
+#endif
 
 #if defined MMF_AVAILABLE
 SYSTEMINCLUDE	\epoc32\include\ecom

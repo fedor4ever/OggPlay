@@ -154,3 +154,15 @@ void CEventHandler::ProcessKeyPress(TChar aChar)
         CActiveScheduler::Stop();  // Leave the test.
     }
 
+TAny * iPtr; // For TLS stuff
+
+TInt Dll::SetTls(TAny* aPtr)
+{
+    iPtr = aPtr;
+    return(KErrNone);
+}
+
+void * Dll::Tls(void)
+{
+    return(iPtr);
+}

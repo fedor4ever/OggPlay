@@ -1,6 +1,25 @@
+/*
+*  Copyright (c) 2004 OggPlay Team
+*
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
 #include <e32base.h>
 #include "OggAbsPlayback.h"
 #include "OggPluginAdaptor.h"
+#include <e32svr.h>
 #include "OggLog.h"
 
 ////////////////////////////////////////////////////////////////
@@ -30,12 +49,16 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
     if (aFileName != iFileName)
     {
     TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
-        //   iPlayer->Close(); // Otherwise, will panic with -15 on HW 
+    
+        ConstructAPlayerL();
+
         iPlayer->OpenFileL(aFileName);
         // Wait for the init completed callback
         iError = KErrNone;
+#ifdef MMF_AVAILABLE
         CActiveScheduler::Start(); // This is not good symbian practise, but hey! 
                                    // It's simple and working :-)
+#endif
         User::LeaveIfError(iError);
         iFileName = aFileName;
         TInt nbMetaData;
@@ -158,6 +181,21 @@ void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
 
 
 
+void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
+{
+    iError = aError;    
+    TRACEF(COggLog::VA(_L("MapcInitComplete %d"), aError ));
+#ifdef MMF_AVAILABLE
+    CActiveScheduler::Stop(); // Gives back the control to the waiting OpenL()
+#endif
+}
+
+void COggPluginAdaptor::MapcPlayComplete(TInt aError)
+{
+    TRACEF(COggLog::VA(_L("MapcPlayComplete %d"), aError ));
+    iObserver->NotifyPlayComplete();
+}
+
 #ifdef MMF_AVAILABLE
 ////////////////////////////////////////////////////
 // Interface using the MMF
@@ -165,8 +203,6 @@ void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
 
 void COggPluginAdaptor::ConstructL()
     {
-    iPlayer = CMdaAudioPlayerUtility::NewL(
-        *this);
     RDebug::Print(_L("Leaving constructl"));
     iFilename = _L("C:\\test.ogg");
     }
@@ -176,41 +212,23 @@ COggPluginAdaptor::~COggPluginAdaptor()
     delete (iPlayer);
 }
 
-void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
+void COggPluginAdaptor::ConstructAPlayerL()
 {
-    iError = aError;    
-    TRACEF(COggLog::VA(_L("MapcInitComplete %d"), aError ));
-         
-    CActiveScheduler::Stop(); // Gives back the control to the waiting OpenL()
-}
-
-void COggPluginAdaptor::MapcPlayComplete(TInt aError)
-{
-    TRACEF(COggLog::VA(_L("MapcPlayComplete %d"), aError ));
-    iObserver->NotifyPlayComplete();
+    // Stupid, but true, we must delete the player when loading a new file
+    // Otherwise, will panic with -15 on some HW   
+    delete(iPlayer);
+    iPlayer=NULL;
+    iPlayer = CMdaAudioPlayerUtility::NewL(
+        *this);
 }
 #else
-
 
 ////////////////////////////////////////////////////
 // Interface when MMF is not available
 ////////////////////////////////////////////////////
 
-
 void COggPluginAdaptor::ConstructL()
-    {
-    // Load the plugin.
-    // Dynamically load the DLL
-    const TUid KOggDecoderLibraryUid={0x101FD21D};
-    TUidType uidType(KDynamicLibraryUid,KOggDecoderLibraryUid);
-    User::LeaveIfError ( iLibrary.Load(_L("OGGPLUGINDECODER.DLL"), uidType) );
-
-    // Function at ordinal 1 creates new C
-    TLibraryFunction entry=iLibrary.Lookup(1);
-    // Call the function to create new CMessenger
-    iPlayer = (CPseudoMMFController*) entry();
-    iPlayer->SetObserver(*this);
-    iPlayer->OpenFile(_L("C:\\test.ogg"));
+{
 }
 
 COggPluginAdaptor::~COggPluginAdaptor()
@@ -221,15 +239,22 @@ COggPluginAdaptor::~COggPluginAdaptor()
     iLibrary.Close();
 }
 
-void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
+void COggPluginAdaptor::ConstructAPlayerL()
 {
-    iError = aError; 
-    RDebug::Print(_L("MapcInitComplete"));
+    // Load the plugin.
+    // Dynamically load the DLL
+    if (iPlayer == NULL)
+    {
+        const TUid KOggDecoderLibraryUid={0x101FD21D};
+        TUidType uidType(KDynamicLibraryUid,KOggDecoderLibraryUid);
+        User::LeaveIfError ( iLibrary.Load(_L("OGGPLUGINDECODERPREMMF.DLL"), uidType) );
+        
+        // Function at ordinal 1 creates new C
+        TLibraryFunction entry=iLibrary.Lookup(1);
+        // Call the function to create new CMessenger
+        iPlayer = (CPseudoMMFController*) entry();
+        iPlayer->SetObserver(*this);
+    }
 }
 
-void COggPluginAdaptor::MapcPlayComplete(TInt aError)
-{
-    RDebug::Print(_L("PlayComplete"));
-    iObserver->NotifyPlayComplete();
-}
 #endif

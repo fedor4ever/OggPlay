@@ -32,6 +32,11 @@ SOURCE OggUserHotkeys.cpp
 
 SOURCE OggPluginAdaptor.cpp
 
+#ifndef MMF_AVAILABLE
+SOURCEPATH ..\plugin\src
+SOURCE PseudoMMFFcts.cpp
+#endif
+
 #else
 #if defined(MOTOROLA)
 SOURCE OggTremor_Motorola.cpp
@@ -164,7 +169,9 @@ LIBRARY avkon.lib
 LIBRARY qikctl.lib
 #endif
 LIBRARY flogger.lib 
+#ifndef PLUGIN_SYSTEM
 LIBRARY libvorbisidec.lib
+#endif
 LIBRARY mediaclientaudiostream.lib
 #if defined SERIES60
 LIBRARY MediaClientImage.lib 

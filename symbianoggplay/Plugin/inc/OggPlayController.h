@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2004 
+ *  Copyright (c) 2004 OggPlay Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -146,6 +146,7 @@ class COggPlayController :	public CPseudoMMFController,
         TInt MaxVolume();
         void SetVolume(TInt aVolume);
         TInt GetVolume(TInt& aVolume);
+		TInt GetNumberOfMetaDataEntries(TInt& aNumberOfEntries);
 #endif
 		/**
         * From CMMFController Reset controller.
@@ -211,21 +212,7 @@ class COggPlayController :	public CPseudoMMFController,
         */
 		TTimeIntervalMicroSeconds DurationL() const;
 
-
-		/**
-        * From CMMFController Get number of metadata entries.
-        * @since
-        * @param aNumberOfEntries Reference used to return metadata count.
-        * @return void
-        */
 		void GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries);
-
-		/**
-        * From CMMFController Returns metadata entry.
-        * @since
-        * @param aIndex Index to metadata entry.
-        * @return Metadata entry
-        */
 		CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex);
 
         void MapdSetVolumeL(TInt aVolume);
@@ -255,7 +242,8 @@ class COggPlayController :	public CPseudoMMFController,
 			EStateNotOpened = 0,
             EStateOpen,
 			EStatePlaying,
-            EStatePaused
+            EStatePaused,
+            EStateDestroying
 		};
 
 	    TOggPlayControllerState iState;

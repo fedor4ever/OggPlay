@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2004 
+*  Copyright (c) 2004 OggPlayTeam
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -47,11 +47,14 @@ COggPlayController::COggPlayController(MDecoder *aDecoder)
 
 COggPlayController::~COggPlayController()
 {
+    iState = EStateDestroying;
+    PRINT("COggPlayController::~COggPlayController In");
     iDecoder->Clear();
-    CloseSTDLIB();    	// Just in case
-    COggLog::Exit();  
     delete iAdvancedStreaming;
     delete iDecoder;
+    CloseSTDLIB();    	// Just in case
+    PRINT("COggPlayController::~COggPlayController Out");
+    COggLog::Exit();  // MUST BE AFTER LAST TRACE, otherwise will leak memory
 }
 
 void COggPlayController::ConstructL()
@@ -138,39 +141,45 @@ void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& /*aPrio
     // Not implemented yet
 }
 
-void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration)
+void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& /*aRampDuration*/)
 {
     PRINT("COggPlayController::MapdSetVolumeRampL");
-    // Not implemented yet
+    // No implementation
+    User::Leave(KErrNotSupported);
 }
-void COggPlayController::MapdSetBalanceL(TInt aBalance)
+void COggPlayController::MapdSetBalanceL(TInt /*aBalance*/)
 {
     PRINT("COggPlayController::MapdSetBalanceL");
-    // Not implemented yet
+    // No implementation
+    User::Leave(KErrNotSupported);
 }
 
-void COggPlayController::MapdGetBalanceL(TInt& aBalance)
+void COggPlayController::MapdGetBalanceL(TInt& /*aBalance*/)
 {
     PRINT("COggPlayController::MapdGetBalanceL");
-    // Not implemented yet
+    // No implementation
+    User::Leave(KErrNotSupported);
 }
-void COggPlayController::MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart,
-                            const TTimeIntervalMicroSeconds& aEnd)
+void COggPlayController::MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& /*aStart*/,
+                            const TTimeIntervalMicroSeconds& /*aEnd*/)
 {
     PRINT("COggPlayController::MapcSetPlaybackWindowL");
-    // Not implemented yet
+    // No implementation
+    User::Leave(KErrNotSupported);
 }
 void COggPlayController::MapcDeletePlaybackWindowL()
 {
     
     PRINT("COggPlayController::MapcDeletePlaybackWindowL");
-    // Not implemented yet
+    // No implementation
+    User::Leave(KErrNotSupported);
 }
-void COggPlayController::MapcGetLoadingProgressL(TInt& aPercentageComplete)
+void COggPlayController::MapcGetLoadingProgressL(TInt& /*aPercentageComplete*/)
 {
     
     PRINT("COggPlayController::MapcGetLoadingProgressL");
-    // Not implemented yet
+    // No implementation
+    User::Leave(KErrNotSupported);
 }
 
 
@@ -279,7 +288,7 @@ CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
         break;
         
     case 2:
-        return (CMMFMetaDataEntry::NewL(_L("OggPlayPlugArtist"), iArtist));
+        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginArtist"), iArtist));
         break;
         
     case 3:
@@ -318,7 +327,6 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
     
       // Parse tag information and put it in the provided buffers.
     iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
-
 
 } 
 
@@ -388,6 +396,11 @@ TInt COggPlayController::GetVolume(TInt& aVolume)
     return(error);
 }
 
+TInt COggPlayController::GetNumberOfMetaDataEntries(TInt& aNumberOfEntries)
+{                
+    TRAPD(error, GetNumberOfMetaDataEntriesL(aNumberOfEntries));
+    return error;
+}
 #endif
 
 
@@ -412,10 +425,13 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
 void COggPlayController::NotifyPlayInterrupted(TInt aError)
 {
    TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError));
+   if (iState != EStateDestroying)
+   {
 #ifdef MMF_AVAILABLE
-    DoSendEventToClient(TMMFEvent(KMMFEventCategoryPlaybackComplete, aError));
+       DoSendEventToClient(TMMFEvent(KMMFEventCategoryPlaybackComplete, aError));
 #else
-   iObserver->MapcPlayComplete(aError);
+       iObserver->MapcPlayComplete(aError);
 #endif
+   }
 }
 

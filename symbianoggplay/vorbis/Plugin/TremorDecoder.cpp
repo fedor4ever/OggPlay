@@ -25,7 +25,6 @@
 #include <utf.h>
 #include <f32file.h>
 
-#include "autoconvert.c"
 
 CTremorDecoder::~CTremorDecoder() 
 {
