@@ -1020,9 +1020,11 @@ void
 COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TViews thePreviousView, const TDesC& aSelection)
 {
   TBuf<32> buf;
-  TInt dummy = -1;
+  TBuf<16> dummy;
+  TBuf<256> back;
 
   if (theNewView==COggPlayAppUi::ETop) {
+    TInt dummy = -1;
     GetTextArray()->Reset();
     iEikonEnv->ReadResource(buf, R_OGG_STRING_6);
     TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ETitle, buf, dummy);
@@ -1038,7 +1040,6 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EFileName, buf, dummy);
   }
   else if (thePreviousView==COggPlayAppUi::ETop) {
-    TBuf<16> dummy;
     switch (theNewView) {
     case COggPlayAppUi::ETitle: iOggFiles->FillTitles(*GetTextArray(), dummy, dummy, dummy, dummy); break;
     case COggPlayAppUi::EAlbum: iOggFiles->FillAlbums(*GetTextArray(), dummy, dummy); break;
@@ -1048,8 +1049,8 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     case COggPlayAppUi::EFileName: iOggFiles->FillFileNames(*GetTextArray(), dummy, dummy, dummy, dummy); break;
     default: break;
     }
-    TBuf<256> back;
-    back.Num(6);
+
+	back.Num(6);
     back.Append(KColumnListSeparator);
 #if defined(UIQ)
     back.Append(_L(".."));
@@ -1062,7 +1063,6 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     GetTextArray()->InsertL(0,back);
   }
   else {
-    TBuf<16> dummy;
     switch (thePreviousView) {
     case COggPlayAppUi::ETitle    : iOggFiles->FillTitles(*GetTextArray(), dummy, dummy, dummy, dummy); break;
     case COggPlayAppUi::EAlbum    : iOggFiles->FillTitles(*GetTextArray(), aSelection, dummy, dummy, dummy); break;
@@ -1073,7 +1073,6 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     default: break;
     }
     if (aSelection.Length()>0) {
-      TBuf<256> back;
       back.Num(6);
       back.Append(KColumnListSeparator);
 #if defined(UIQ)
