@@ -757,6 +757,7 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
   // Error codes:
   // KErrCancel      -3
   // KErrUnderflow  -10
+  // KErrDied       -13  (interrupted by higher priority)
   // KErrInUse      -14
 
   if (iState==EPaused || iState==EClosed) return;
@@ -765,6 +766,11 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
   if (aError == KErrInUse) aError= KErrNone;
 
   if (aError == KErrCancel) return;
+
+  if (aError == KErrDied) {
+    iObserver->NotifyPlayInterrupted();
+    return;
+  }
 
   if (aError != KErrNone) {
     TBuf<256> buf,tbuf;
@@ -792,6 +798,7 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
   // Error codes:
   // KErrCancel      -3  (not sure when this happens, but ignore for now)
   // KErrUnderflow  -10  (ignore this, do as if nothing has happend, and live happily ever after)
+  // KErrDied       -13  (interrupted by higher priority)
   // KErrInUse      -14  (the sound device was stolen from us)
   // KErrAbort      -39  (stream was stopped before this buffer was copied)
 
@@ -799,6 +806,7 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
   if (aError == KErrAbort ||
       aError == KErrInUse ||
+      aError == KErrDied  ||
       aError == KErrCancel) return;
 
   if (iState != EPlaying) return;
