@@ -536,7 +536,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 			break;
 		}
 		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) {
-			iAppView->FillView(ETitle, iViewBy, curFile);
+   
+      HBufC *aBuf;
+      aBuf = curFile.Alloc();
+      CleanupStack::PushL(aBuf);
+      iAppView->FillView(ETitle, iViewBy, *aBuf);
+      CleanupStack::PopAndDestroy();
 			//iViewBy= ETitle;
 			if (iCurrentSong.Length()>0) SetCurrent(iCurrentSong);
 			break;
