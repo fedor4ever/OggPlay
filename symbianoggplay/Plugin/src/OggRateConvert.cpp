@@ -175,14 +175,14 @@ TInt COggSampleRateConverter::FillBuffer( TDes8 &aBuffer)
     {
     case ENoGain:
         break;
-    case EMinus6dB:
-        {
-            ApplyNegativeGain(aBuffer,1);
-            break;
-        }
     case EMinus12dB:
         {
             ApplyNegativeGain(aBuffer,2);
+            break;
+        }
+    case EMinus18dB:
+        {
+            ApplyNegativeGain(aBuffer,3);
             break;
         }
     case EStatic6dB:

@@ -9,8 +9,8 @@ public:
 
 
 typedef enum {
+    EMinus18dB,
     EMinus12dB,
-    EMinus6dB,
     ENoGain,
     EStatic6dB,  // A static gain of 6dB, with saturation
     EStatic12dB   // A static gain of 12 dB, with saturation
@@ -53,4 +53,5 @@ private:
     MOggSampleRateFillBuffer * iFillBufferProvider;
     TReal  iSamplingRateFactor ;
 };
+
 #endif

@@ -141,6 +141,8 @@ CHARACTER_SET UTF8
 #define ogg_random_on                "Случайное проигрывание"
 #define ogg_random_off               "Обычное проигрывание"
 #define ogg_volume_boost             "Повышенная громкость"
+#define ogg_volume_boost_m12db        "-12dB"
+#define ogg_volume_boost_m18db        "-18dB"
 #define ogg_volume_boost_none        "Отключена"
 #define ogg_volume_boost_6db         "+6dB"
 #define ogg_volume_boost_12db        "+12dB"
