@@ -87,6 +87,8 @@
 #define ogg_format_text_rewind       "Rewind"
 #define ogg_format_text_page_up      "File list page up"
 #define ogg_format_text_page_down    "File list page down"
+#define ogg_format_text_next_song	 ogg_next_song
+#define ogg_format_text_prev_song	 ogg_prev_song
 
 #define ogg_settings                 "Settings"  // in the menu
 #define ogg_settings_title           "Oggplay Settings" // on top of the settings screen

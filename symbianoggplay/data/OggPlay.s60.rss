@@ -508,7 +508,10 @@ RESOURCE ARRAY r_user_hotkey_items
     LBUF { txt = ogg_format_text_fast_forward; },
 	LBUF { txt = ogg_format_text_rewind; },
 	LBUF { txt = ogg_format_text_page_up; },
-	LBUF { txt = ogg_format_text_page_down; }
+	LBUF { txt = ogg_format_text_page_down; },
+	LBUF { txt = ogg_format_text_next_song; },
+	LBUF { txt = ogg_format_text_prev_song; }
+
   };
 }
 

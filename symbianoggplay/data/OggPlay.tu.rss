@@ -90,6 +90,8 @@ CHARACTER_SET UTF8
 #define ogg_format_text_rewind       "Geri al"
 #define ogg_format_text_page_up      "Dosya listesi yukarı"
 #define ogg_format_text_page_down    "Dosya listesi aşağı"
+#define ogg_format_text_next_song	 ogg_next_song
+#define ogg_format_text_prev_song	 ogg_prev_song
 
 #define ogg_settings                 "Ayarlar"  // in the menu
 #define ogg_settings_title           "Oggplay Ayarları" // on top of the settings screen

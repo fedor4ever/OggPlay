@@ -1512,6 +1512,26 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         SelectSong(index - iListBox[iMode]->NofVisibleLines() + 1);
       return EKeyWasConsumed;
       }
+	case TOggplaySettings::ENextSong : {
+		if(index < iListBox[iMode]->CountText() - 1)
+			{
+			// the need of selecting the song first is just a workaround and
+			// should be removed, when NextSong() is finally fixed (Hayo)
+			SelectSong(index+1);
+			iApp->NextSong();
+			}
+		return EKeyWasConsumed;
+		}
+	case TOggplaySettings::EPreviousSong : {
+		if (index > 1)
+			{
+			// the need of selecting the song first is just a workaround and
+			// should be removed, when PreviousSong() is finally fixed (Hayo)
+			SelectSong(index-1);
+			iApp->PreviousSong();
+			}
+		return EKeyWasConsumed;
+		}
     default :
       break;
     }
