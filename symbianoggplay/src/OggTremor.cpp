@@ -604,6 +604,7 @@ void COggPlayback::Stop()
   iTime= 0;
   iEof= 0;
   iStoppedFromEof = EFalse;
+  iUnderflowing = EFalse;
 
   if (iObserver) iObserver->NotifyUpdate();
 }
@@ -755,7 +756,8 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
   if (iState != EPlaying) return;
 
-  for (iB=0; iB<KBuffers; iB++) if (&aBuffer == iBuffer[iB]) break;
+  TInt b;
+  for (b=0; b<KBuffers; b++) if (&aBuffer == iBuffer[b]) break;
   if ( (iEof) && (iSent[iSentIdx] == &aBuffer) )
   {
       // All the buffers have been sent, stop the playback
@@ -763,20 +765,30 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
       // since not all phone supports that.
 
       iStoppedFromEof = ETrue;
+	  iUnderflowing = EFalse;
       iStopAudioStreamingTimer->Wait(0.1E6);
 	  return;
   }
   else if (aError == KErrUnderflow)
   {
 #ifdef DELAY_AUDIO_STREAMING_START
-      iRestartAudioStreamingTimer->Wait(0.1E6);
+      if (!iUnderflowing)
+      {
+          iFirstUnderflowBuffer = b;
+          iLastUnderflowBuffer = b;
+          iUnderflowing = ETrue;
+      }
+      else
+          iLastUnderflowBuffer = b;
+
+	  iRestartAudioStreamingTimer->Wait(0.1E6);
 	  return;
 #else
 	  aError = KErrNone;
 #endif
   }
 
-  if (aError == KErrNone) SendBuffer(*iBuffer[iB]); 
+  if (aError == KErrNone) SendBuffer(*iBuffer[b]); 
   else {
     // An unknown error condition. This should never ever happen.
 	RDebug::Print(_L("Oggplay: MaoscBufferCopied unknown error (Error18 Error16)"));
@@ -847,7 +859,23 @@ TInt COggPlayback::RestartAudioStreamingCallBack(TAny* aPtr)
 {
   COggPlayback* self= (COggPlayback*) aPtr;
   
-  self->SendBuffer(*(self->iBuffer[self->iB]));
+  self->iUnderflowing = EFalse;
+  TInt firstUnderflowBuffer = self->iFirstUnderflowBuffer;
+  TInt lastUnderflowBuffer = self->iLastUnderflowBuffer;
+  TInt i;
+  if (lastUnderflowBuffer>=firstUnderflowBuffer)
+  {
+	for (i = firstUnderflowBuffer ; i<=lastUnderflowBuffer ; i++)
+		self->SendBuffer(*(self->iBuffer[i]));
+  }
+  else
+  {
+	for (i = firstUnderflowBuffer ; i<KBuffers ; i++)
+		self->SendBuffer(*(self->iBuffer[i]));
+
+	for (i = 0 ; i<=lastUnderflowBuffer ; i++)
+		self->SendBuffer(*(self->iBuffer[i]));
+  }
   return 0;
 }
 

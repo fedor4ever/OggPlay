@@ -130,7 +130,9 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
   static TInt RestartAudioStreamingCallBack(TAny* aPtr);
   COggTimer *              iRestartAudioStreamingTimer;
-  TInt iB;
+  TBool iUnderflowing;
+  TInt iFirstUnderflowBuffer;
+  TInt iLastUnderflowBuffer;
 
 #ifdef MDCT_FREQ_ANALYSER
   TReal  iLatestPlayTime;
