@@ -1,0 +1,20 @@
+
+// Can somebody make the next line read "#include <OggPlayUid.h>" 
+// and on top make it build, then it would be really neat...
+#include "..\..\..\epoc32\include\OggPlayUid.h"
+
+TARGET          RECOGG.MDL
+TARGETTYPE      MDL
+UID				0x10003A19 KOggPlayRecognizerUidValue
+
+SYSTEMINCLUDE . \Epoc32\Include
+USERINCLUDE .. \Epoc32\Include
+
+SOURCEPATH ..
+TARGETPATH      \System\Recogs\
+
+SOURCE          RECOGG.CPP
+
+LIBRARY         EUSER.LIB 
+LIBRARY         APMIME.LIB
+

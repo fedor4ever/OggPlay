@@ -203,6 +203,7 @@ void
 COggPlayAppUi::ConstructL()
 {
 
+  TRACELF("COggPlayAppUi::ConstructL()");
 
 #if defined(SERIES60_SPLASH)
   #include <S60default.mbg>
@@ -211,7 +212,7 @@ COggPlayAppUi::ConstructL()
   // http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
   //   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
 
-  TRACEL("COggPlayAppUi::ConstructL() - RFbsSession::Connect()");
+  TRACELF("COggPlayAppUi::ConstructL() - RFbsSession::Connect()");
   RFbsSession::Connect();
   TRACEL("RFbsSession.Connect(). Ok.");
   CFbsScreenDevice *iDevice = NULL;
@@ -247,7 +248,7 @@ COggPlayAppUi::ConstructL()
 
   TSize iSize = iDevice->SizeInPixels();
   iGc->DrawBitmap(TRect(0,0,iSize.iWidth,iSize.iHeight-KCBAPaneHeight),iBitmap);
-  TRACEL("iDevice->Update();");
+  TRACELF("iDevice->Update();");
   iDevice->Update();
   
   RFbsSession::Disconnect();
@@ -255,11 +256,6 @@ COggPlayAppUi::ConstructL()
 #endif
 
   BaseConstructL();
-
-  TRACEL("Starting OggPlay ...");
-
-  //_LIT(KS,"Starting OggPlay ...");
-  //OGGLOG.WriteFormat(KS);
 
   const TFileName aAppFilename=Application()->AppFullName();
   TParsePtrC aP(aAppFilename);
@@ -365,10 +361,12 @@ COggPlayAppUi::~COggPlayAppUi()
 
   delete iIniFileName;
   delete iSkins;
-  //OGGLOG.Close();
-  //delete COggLog::InstanceL();
+
+  COggLog::Exit();  
+  
   CloseSTDLIB();
 }
+
 
 void COggPlayAppUi::ActivateOggViewL()
 {

@@ -12,7 +12,7 @@
 */
 
 #include <aiftool.rh>
-#include <..\inc\OggOs.h>
+#include "OggOs.h"
 
 RESOURCE AIF_DATA
     {
@@ -23,6 +23,7 @@ RESOURCE AIF_DATA
 #if defined(SERIES60_SPLASH)
     launch=KAppLaunchInBackground;
 #endif
+    datatype_list={DATATYPE{ priority=EDataTypePriorityNormal; type="application/ogg";}};
     }
 
 // End of File

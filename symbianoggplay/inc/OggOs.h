@@ -30,16 +30,16 @@ chSTR2(__LINE__) "):" #desc)
 #define chmsg(desc)
 #endif
 
+// VERSION
+//
+#define KVersionMajor 0
+#define KVersionMinor 96
+#define KVersionString "0.96"
 
 
 // DEBUGGING
 //
-//#define TRACE_ON          // See OggLog
-
-
-// NEW CODE ENABLERS
-//
-//#define SERIES60_SPLASH   // OggPlayAif.s60.rss and OggPlay.cpp
+//#define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
 
 
 // BUILD TARGETS
@@ -59,6 +59,14 @@ chSTR2(__LINE__) "):" #desc)
   #endif
   //#pragma chmsg(Building for UIQ)
 #endif
+
+
+// NEW CODE ENABLERS
+//
+#if defined(SERIES60)
+#define SERIES60_SPLASH   // On trial. See OggPlayAif.s60.rss and OggPlay.cpp
+#endif
+
 
 
 #endif

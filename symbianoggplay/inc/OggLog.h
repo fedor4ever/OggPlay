@@ -25,40 +25,62 @@
 #define OGGLOG COggLog::InstanceL()->iLog
 #define OGGPANIC(msg,reason) COggLog::InstanceL()->Panic(msg,reason)
 
-
+// MACROS
+//
 // One reason for putting RDebug::Print in a macro is that the literals in 
 // the debug messages will always be present in the binary, even on urel builds.
+// You do not have to use these macros, it is always possible to access the
+// OggLog static methods directly.
 // 
 #ifdef TRACE_ON
-#define TRACE(x)  RDebug::Print(x)
+/// Print simple descriptor to console and file. Ex TRACEF( COggLog::VA(_L("1+1=%d"),2));
+#define TRACEF(x)  RDebug::Print(x); COggLog::FilePrint(x)
+/// Print simple descriptor to console only. Ex TRACE( COggLog::VA(_L("1+1=%d"),2));
+#define TRACE(x)   RDebug::Print(x);
+/// Print simple text to console only. Ex TRACEL("Hi there");
 #define TRACEL(x)  TRACE(COggLog::VA(_L(x)))
+/// Print simple text to console and file. Ex TRACELF("Hi there");
+#define TRACELF(x) TRACEF(COggLog::VA(_L(x)))
 #else
+#define TRACEF(x)  ;
 #define TRACE(x)  ;
 #define TRACEL(x)  ;
+#define TRACELF(x) ;
 #endif
 
-// OggLog is a class giving access to the RFileLogger facility for all OggPlay classes.
-// It's implemented closely to the singleton pattern 
-// ...with a twist due to Symbian not allowing global storage.
-
-class COggLog : CBase
+/// OggLog is a class giving access to the RFileLogger facility for all OggPlay classes.
+/** It's implemented closely to the singleton pattern 
+...with a twist due to Symbian not allowing global storage.<BR>
+Remember to manually create "C:\Logs\OggPlay\" to get disk logging.
+*/
+class COggLog : public CBase
 {
 
 public:
-  ~COggLog();
-  static COggLog* InstanceL();
-  //static RFileLogger LogL();
+  
+  /// Prints to file. No initializations are needed beforehand.
+  /**
+  \sa Exit(), KLogFileName
+  */
+  static void FilePrint(const TDesC& msg);
 
+  /// Not up-to-date
   void Panic(const TDesC& msg,TInt aReason);
-  RFileLogger iLog;
+
+  /// Must be called explicitly. Somebody fix this :-)
+  static void Exit();
 
   /// Variable list argument formatting. I.e. TRACE(COggLog::VA(_L("1+1=%d"), 2 )
-  static TRefByValue<const TDesC> VA( TRefByValue<const TDesC> aLit,... );
-
+  static const TDesC& VA( TRefByValue<const TDesC> aLit,... );
   
 protected:
-  COggLog();
-  void ConstructL();
+
+  RFileLogger iLog;
+  TBuf<100> iBuf;
+
+private:
+
+  static COggLog* InstanceL();
 
 };
 

@@ -66,6 +66,7 @@ const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
 
 CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
   iState(CAbsPlayback::EClosed),
+  iObserver(anObserver),
   iTitle(),
   iAlbum(),
   iArtist(),
@@ -75,8 +76,7 @@ CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
   iRate(44100),
   iChannels(2),
   iFileSize(0),
-  iBitRate(0),
-  iObserver(anObserver)
+  iBitRate(0)
 {
 }
 
@@ -181,8 +181,8 @@ COggPlayback::COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
 
 void COggPlayback::ConstructL() {
 
-  //COggAudioCapabilityPoll pollingAudio;
-  //iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
+  COggAudioCapabilityPoll pollingAudio;
+  iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
 
   iStream  = CMdaAudioOutputStream::NewL(*this);
   
@@ -683,14 +683,6 @@ void COggPlayback::MaoscOpenComplete(TInt aError)
 }
 
 
-COggAudioCapabilityPoll::COggAudioCapabilityPoll()
-    {
-    }
-
-COggAudioCapabilityPoll::~COggAudioCapabilityPoll()
-    {
-    delete iStream;
-    }
 
 
 TInt COggAudioCapabilityPoll::PollL()
@@ -725,19 +717,23 @@ TInt COggAudioCapabilityPoll::PollL()
             }
         iSettings.Query();
         
+        TRACEF(COggLog::VA(_L("Probing %d start"), i ));
         iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
         iSettings.iSampleRate= iRate;
         iSettings.iVolume = 0;
         
         iStream  = CMdaAudioOutputStream::NewL(*this);
+        TRACELF("Opening stream..");
         iStream->Open(&iSettings);
         CActiveScheduler::Start();
+        TRACEF(COggLog::VA(_L("Probing end") ));
         delete iStream; // This is rude...
         iStream = NULL;
         
         }
     return iCaps;
     }
+
 
 void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError) 
     {
@@ -746,6 +742,7 @@ void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError)
         // Mode supported.
         iCaps |= iRate;
         }
+    TRACEF(COggLog::VA(_L("Result = %d"), aError ));
     CActiveScheduler::Stop();
     }
 

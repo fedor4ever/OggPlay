@@ -63,7 +63,7 @@ class CAbsPlayback : public CBase {
     EPaused
   };
 
-  CAbsPlayback(MPlaybackObserver* anObserver=0);
+  CAbsPlayback(MPlaybackObserver* anObserver=NULL);
 
   // Here is a bunch of abstract methods which need to implemented for
   // each audio format:
@@ -194,17 +194,15 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
 
 
-class COggAudioCapabilityPoll : public MMdaAudioOutputStreamCallback
+class COggAudioCapabilityPoll : public CBase, public MMdaAudioOutputStreamCallback
     {
     public:
-        ~COggAudioCapabilityPoll();
-        COggAudioCapabilityPoll();
         TInt PollL();
     private:
         // these are abstract methods in MMdaAudioOutputStreamCallback:
-        virtual void MaoscPlayComplete(TInt aError);
-        virtual void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
-        virtual void MaoscOpenComplete(TInt aError);
+        void MaoscPlayComplete(TInt aError);
+        void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
+        void MaoscOpenComplete(TInt aError);
         
     private:
         CMdaAudioOutputStream* iStream;

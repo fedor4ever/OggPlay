@@ -22,66 +22,70 @@
 _LIT(KLogFolder,"Oggplay");
 _LIT(KLogFileName,"Oggplay.log");
 
-COggLog* COggLog::InstanceL() {
-  COggLog* iInstance =(COggLog*) 0; //Dll::Tls();
 
-	if(iInstance==0) {
-		iInstance=new(ELeave) COggLog;
-		iInstance->ConstructL();
-		//Dll::SetTls(iInstance);
-	}
+COggLog* COggLog::InstanceL() 
+  {
+  COggLog* iInstance =(COggLog*) Dll::Tls();
+
+  if( !iInstance ) 
+    {
+    iInstance=new(ELeave) COggLog;
+    Dll::SetTls(iInstance);
+
+    TInt ret=iInstance->iLog.Connect();
+    if (ret==KErrNone)	
+      {
+		  iInstance->iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
+		  iInstance->iLog.SetDateAndTime(EFalse,ETrue);
+		  _LIT(KS,"OggLog started...");
+		  iInstance->iLog.WriteFormat(KS);
+	    } 
+    else 
+      {
+      User::Panic(_L("OggLog"),11);	
+      }
+    }
 	return iInstance;
-}
+  }
 
-/*
-RFileLogger COggLog::LogL() {
-	
-	if(iInstance==0) {
-		iInstance=new(ELeave) COggLog;
-		iInstance->ConstructL();
-		
-	}
-	return iLog;
-}
-*/
 
-COggLog::COggLog() {
-	
-}
 
-COggLog::~COggLog() {
+void COggLog::Exit() 
+  {
+  COggLog* iInstance =(COggLog*) Dll::Tls();
+  if( iInstance )
+    {
+	  iInstance->iLog.WriteFormat(_L("OggLog closed.."));
+    iInstance->iLog.CloseLog();
+    iInstance->iLog.Close();
+    delete iInstance;
+    Dll::SetTls(NULL);
+    }
+  }
 
-  //Dll::SetTls(0);
-	
-}
 
-void COggLog::ConstructL() {
-	TInt ret=iLog.Connect();
-	if (ret==KErrNone)	{
-		iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
-		iLog.SetDateAndTime(EFalse,ETrue);
-		_LIT(KS,"OggLog started...");
-		iLog.WriteFormat(KS);
-	} else {
-    User::Panic(_L("OggLog"),11);	
-	}
+void COggLog::FilePrint(const TDesC& msg) 
+  {
+  InstanceL()->iLog.WriteFormat(msg);
+  }
 
-}
 
-void COggLog::Panic(const TDesC& msg,TInt aReason) {
+
+void COggLog::Panic(const TDesC& msg,TInt aReason) 
+  {
   iLog.Write(_L("** Fatal: **"));
   iLog.Write(msg);
   User::Panic(_L("OggPlay"),aReason);	
-}
+  }
 
 
-TRefByValue<const TDesC> COggLog::VA( TRefByValue<const TDesC> aLit,... )
+const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   {
   VA_LIST list;
   VA_START(list, aLit);
-  TBuf<100> buf(_L("***OggPlay*** "));
-  buf.AppendFormatList(aLit,list);
-  return buf;
+  COggLog::InstanceL()->iBuf.Zero();
+  COggLog::InstanceL()->iBuf.AppendFormatList(aLit,list);
+  return COggLog::InstanceL()->iBuf;
   }
 
 

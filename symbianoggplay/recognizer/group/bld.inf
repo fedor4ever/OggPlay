@@ -1,0 +1,21 @@
+/*
+* ============================================================================
+*  Name     : bld.inf
+*  Part of  : RecOgg
+*  Created  : 19.07.2003 by Claus Bjerre
+*  Description: Recognizer dll for .ogg files (OggPlay)
+*  Version  :
+*  Copyright: 
+* ============================================================================
+*/
+
+
+PRJ_PLATFORMS
+WINS THUMB
+
+PRJ_EXPORTS
+
+PRJ_MMPFILES
+RecOgg.mmp
+
+PRJ_TESTMMPFILES
