@@ -39,11 +39,12 @@ CPluginInfo::CPluginInfo()
 CPluginInfo* CPluginInfo::NewL(const TDesC& anExtension, 
 	   const TDesC& aName,
 	   const TDesC& aSupplier,
-	   const TInt aVersion)
+	   const TInt aVersion,
+       const TUid aControllerUid)
   {
   CPluginInfo* self = new (ELeave) CPluginInfo();
   CleanupStack::PushL(self);
-  self->ConstructL(anExtension, aName, aSupplier, aVersion);
+  self->ConstructL(anExtension, aName, aSupplier, aVersion, aControllerUid);
   CleanupStack::Pop(); // self
   return self;
   }
@@ -53,12 +54,14 @@ void
 CPluginInfo::ConstructL( const TDesC& anExtension, 
 	   const TDesC& aName,
 	   const TDesC& aSupplier,
-	   const TInt aVersion ) 
+	   const TInt aVersion,
+       const TUid aControllerUid) 
 {
     iExtension = anExtension.AllocL();
     iName = aName.AllocL();
     iSupplier = aSupplier.AllocL();
     iVersion = aVersion;
+    iControllerUid = aControllerUid;
 }
 
 CPluginInfo::~CPluginInfo()
@@ -71,14 +74,58 @@ CPluginInfo::~CPluginInfo()
 
 ////////////////////////////////////////////////////////////////
 //
+// CExtensionSupportedPluginList
+//
+////////////////////////////////////////////////////////////////
+
+CExtensionSupportedPluginList::CExtensionSupportedPluginList(const TDesC& anExtension) : 
+iExtension(anExtension),
+iSelectedPlugin(NULL)
+{}
+
+void CExtensionSupportedPluginList::ConstructL()
+{
+     iListPluginInfos = new(ELeave) CArrayPtrFlat<CPluginInfo>(3);
+}
+
+CExtensionSupportedPluginList::~CExtensionSupportedPluginList()
+{
+    iListPluginInfos->ResetAndDestroy();
+    delete(iListPluginInfos);
+}
+
+void CExtensionSupportedPluginList::AddPluginL(const TDesC& aName,
+            const TDesC& aSupplier,
+            const TInt aVersion,
+            const TUid aControllerUid)
+{
+
+    CPluginInfo* info = CPluginInfo::NewL(iExtension,aName, aSupplier, aVersion, aControllerUid);
+        
+    iListPluginInfos->AppendL(info);
+    iSelectedPlugin = info; // To be removed when UI/OggPlay takes care of selecting the plugins
+                            // at the initialization
+}
+
+const TDesC & CExtensionSupportedPluginList::GetExtension()
+{
+    return(iExtension);
+}
+
+CPluginInfo & CExtensionSupportedPluginList::GetSelectedPluginInfo(void)
+{
+    return(*iSelectedPlugin);
+}
+
+////////////////////////////////////////////////////////////////
+//
 // COggPluginAdaptor
 //
 ////////////////////////////////////////////////////////////////
 
 COggPluginAdaptor::COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver=0) :
 CAbsPlayback(anObserver),
-iEnv(anEnv), 
-iPluginInfos(0)
+iEnv(anEnv)
 {
     iVolume = KMaxVolume;
 }
@@ -86,7 +133,7 @@ iPluginInfos(0)
 TInt COggPluginAdaptor::Info(const TDesC& aFileName, TBool /*silent*/)
 {
     // That's unfortunate, but we must open the file first before the info 
-    // can be retrieved. This adds some series delay when discovering the files
+    // can be retrieved. This adds some serious delay when discovering the files
   
     return  Open(aFileName);
 }
@@ -100,7 +147,13 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
     TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
     
         ConstructAPlayerL( aFileName );
-        iPlayer->OpenFileL(aFileName);
+  
+        // Find the selected plugin, corresponding to file type
+        TParsePtrC p( aFileName);
+        TPtrC pp (p.Ext().Mid(1));
+        TUid pluginControllerUID = GetPluginListL(pp).GetSelectedPluginInfo().iControllerUid;
+        iPlayer->OpenFileL(aFileName, KNullUid , pluginControllerUID );
+       
         // Wait for the init completed callback
         iError = KErrNone;
 #ifdef MMF_AVAILABLE
@@ -111,7 +164,9 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         iFileName = aFileName;
         TInt nbMetaData;
         CMMFMetaDataEntry * aMetaData;
-        User::LeaveIfError( iPlayer->GetNumberOfMetaDataEntries(nbMetaData));
+        TInt err = iPlayer->GetNumberOfMetaDataEntries(nbMetaData);
+        if (err)
+          nbMetaData = 0;
         for (TInt i=0; i< nbMetaData; i++)
         {
             aMetaData = iPlayer->GetMetaDataEntryL(i);
@@ -130,6 +185,7 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
             // title, trackname, ...
             delete(aMetaData);
         }
+        
 #if 0
         // Currently the MMF Plugin doesn't give access to these.
         // This could be added in the future as a custom command. 
@@ -158,16 +214,15 @@ TInt COggPluginAdaptor::Open(const TDesC& aFileName)
 void COggPluginAdaptor::Pause()
 {
     TRACEF(_L("COggPluginAdaptor::Pause()"));
-    iPlayer->Pause();
+    iLastPosition = iPlayer->Position();
+    iPlayer->Stop();
     iState = EPaused;
 }
 
 void COggPluginAdaptor::Resume()
 {
     TRACEF(_L("COggPluginAdaptor::Resume()"));
-    TBool wasInterrupted = iInterrupted;  
-    if (wasInterrupted)
-        iPlayer->SetPosition(iLastPosition);
+    iPlayer->SetPosition(iLastPosition);
     Play();
     TInt time = TInt(iLastPosition.Int64().GetTInt() /1E6);
     TInt hours = time/3600;
@@ -183,7 +238,8 @@ void COggPluginAdaptor::Play()
     iInterrupted = EFalse;
     if (iState == EClosed)
         return;
-    iPlayer->Play();
+    TRAPD(err,iPlayer->PlayL()); 
+    if (err) return; // Silently ignore the problem :-(
     iState = EPlaying;
     TRACEF(_L("COggPluginAdaptor::Play() Out"));
 }
@@ -213,23 +269,30 @@ void   COggPluginAdaptor::SetVolume(TInt aVol)
     iPlayer->SetVolume(vol) ;
 }
 
-void   COggPluginAdaptor::SetPosition(TInt64 aPos)
+void COggPluginAdaptor::SetPosition(TInt64 aPos)
 {
     
     TRACEF(COggLog::VA(_L("COggPluginAdaptor::SetPosition %i"), aPos ));
     if (iPlayer)
     {
-        iPlayer->Pause(); // Must pause before changing position. Some MMF Plugins panics otherwise.
-        iPlayer->SetPosition(aPos * 1000);
-        iPlayer->Play();
+        // Do not change the position if it is bigger than the lenght of the tune,
+        // it would otherwise wrap the tune to the beginning.
+        if (aPos*1000 < iPlayer->Duration().Int64() ) 
+        {
+            iPlayer->Stop(); // Must pause before changing position. Some MMF Plugins panics otherwise.
+            iPlayer->SetPosition(aPos * 1000);
+            iPlayer->PlayL();
+        }
     }
 }
 
 TInt64 COggPluginAdaptor::Position()
 {
     TTimeIntervalMicroSeconds aPos(0);
-    if (iPlayer)
-       iPlayer->GetPosition(aPos);
+    if (iState == EPaused)
+        aPos = iLastPosition;
+    else if (iPlayer)
+       aPos = iPlayer->Position();
     if (aPos != TTimeIntervalMicroSeconds(0))
         iLastPosition = aPos;
     return(aPos.Int64()/1000); // Dividing by 1000, to get millisecs from microsecs
@@ -259,46 +322,89 @@ void COggPluginAdaptor::SetVolumeGain(TGainType /*aGain*/)
     // Not Implemented yet
 }
 
-
-
-void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& /*aDuration*/)
+void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode)
 {
-    iError = aError;    
-    TRACEF(COggLog::VA(_L("MapcInitComplete %d"), aError ));
-#ifdef MMF_AVAILABLE
-    CActiveScheduler::Stop(); // Gives back the control to the waiting OpenL()
-#endif
-}
-
-void COggPluginAdaptor::MapcPlayComplete(TInt aError)
-{
-    TRACEF(COggLog::VA(_L("MapcPlayComplete %d"), aError ));
-    if (aError == KErrDied)
+    
+  TRACEF(COggLog::VA(_L("MoscoStateChange :%d %d %d "), aPreviousState,  aCurrentState,  aErrorCode));
+  if ((aPreviousState == 0) && (aCurrentState == 1))
     {
-        // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
-        iObserver->NotifyPlayInterrupted();
-        iInterrupted = ETrue;
+        // From not opened to opened
+        TRACEF(COggLog::VA(_L("MoscoStateChange : InitComplete %d"), aErrorCode ));
+        iError = aErrorCode;
+#ifdef MMF_AVAILABLE
+        CActiveScheduler::Stop(); // Gives back the control to the waiting OpenL()
+#endif
     }
-    else
-    iObserver->NotifyPlayComplete();
+
+    if ( (aCurrentState == 2) && aErrorCode)
+    {
+        // From opened to Playing
+        // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
+            iObserver->NotifyPlayInterrupted();
+            iInterrupted = ETrue;
+    }
+    
+    if ((aPreviousState == 2) && (aCurrentState ==1))
+    {
+        // From Playing to stopped playing
+        TRACEF(COggLog::VA(_L("MoscoStateChange : PlayComplete %d"), aErrorCode ));
+        if (aErrorCode == KErrDied)
+        {
+            // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
+            iObserver->NotifyPlayInterrupted();
+            iInterrupted = ETrue;
+        }
+        else
+            iObserver->NotifyPlayComplete();
+    }
 }
+ 
 
 void COggPluginAdaptor::ConstructL()
 {
-    RDebug::Print(_L("Leaving constructl"));
     
-    // Discovery of the supported formats
-    iPluginInfos = new(ELeave) CArrayPtrFlat<CPluginInfo>(3);
+    iExtensionSupportedPluginList = new (ELeave) CArrayPtrFlat <CExtensionSupportedPluginList> (3);
+
     // iPluginInfos will be updated, if required plugin has been found
     SearchPluginsL(_L("ogg"));
     SearchPluginsL(_L("mp3"));
     SearchPluginsL(_L("aac"));
+    //SearchPluginsL(_L("wav"));
 }
 
-CArrayPtrFlat <CPluginInfo> & COggPluginAdaptor::PluginList()
+
+CDesCArrayFlat * COggPluginAdaptor::SupportedExtensions()
 {
-    return *iPluginInfos;
+    CDesCArrayFlat * extensions;
+    extensions = new (ELeave) CDesCArrayFlat (3);
+    CleanupStack::PushL(extensions);
+    for (TInt i=0; i<iExtensionSupportedPluginList->Count(); i++)
+    {
+        extensions->AppendL((*iExtensionSupportedPluginList)[i]->GetExtension());
+    }
+    CleanupStack::Pop();
+    return(extensions);
 }
+
+CExtensionSupportedPluginList & COggPluginAdaptor::GetPluginListL(const TDesC & anExtension)
+{
+    TInt i;
+    TBool found = EFalse;
+
+    for (i=0; i<iExtensionSupportedPluginList->Count(); i++)
+    {
+        if ((*iExtensionSupportedPluginList)[i]->GetExtension() == anExtension)
+        {
+            found = ETrue;
+            break;
+        }
+    }
+    if (!found)
+        User::Leave(KErrNotFound);
+
+    return *(*iExtensionSupportedPluginList)[i];
+}
+
 
 #ifdef MMF_AVAILABLE
 ////////////////////////////////////////////////////
@@ -309,8 +415,8 @@ CArrayPtrFlat <CPluginInfo> & COggPluginAdaptor::PluginList()
 COggPluginAdaptor::~COggPluginAdaptor()
 {
     delete (iPlayer);
-    iPluginInfos->ResetAndDestroy();
-    delete(iPluginInfos);
+    iExtensionSupportedPluginList->ResetAndDestroy();
+    delete(iExtensionSupportedPluginList);
 }
 
 void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
@@ -319,12 +425,16 @@ void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
     // Otherwise, will panic with -15 on some HW   
     delete(iPlayer);
     iPlayer=NULL;
-    iPlayer = CMdaAudioPlayerUtility::NewL(
+    iPlayer = CMdaAudioRecorderUtility::NewL(
         *this);
 }
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
 {
+    CExtensionSupportedPluginList * newPluginList = new (ELeave) CExtensionSupportedPluginList (anExtension);
+    CleanupStack::PushL(newPluginList);
+    newPluginList->ConstructL();
+
     CMMFControllerPluginSelectionParameters * cSelect = CMMFControllerPluginSelectionParameters::NewLC();
     CMMFFormatSelectionParameters * fSelect = CMMFFormatSelectionParameters::NewLC();
 
@@ -334,13 +444,12 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
     RMMFControllerImplInfoArray controllers;
     CleanupResetAndDestroyPushL(controllers);
     cSelect->ListImplementationsL(controllers); 
+    TInt nbFound = 0;
     
-    if (controllers.Count() >0 )
+    for (TInt ii=0; ii< controllers.Count(); ii++)
     {
         // Found at least one controller !  
-        // Take the first one for the time being. At some time, users should be able to select 
-        // their favorite one...
-        const RMMFFormatImplInfoArray& formatArray = controllers[0]->PlayFormats();
+        const RMMFFormatImplInfoArray& formatArray = controllers[ii]->PlayFormats();
     
         TBuf8 <10> anEx8;
         anEx8.Copy(anExtension); // Convert the 16 bit descriptor to 8 bits
@@ -365,20 +474,28 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
         __ASSERT_ALWAYS ( found, User::Panic(_L("Extension not found"), 999) );
         
         
-        TRACEF(COggLog::VA(_L(".%S Plugin Found:%S %S %i"), &anExtension,
+        TRACEF(COggLog::VA(_L(".%S Plugin Found:%S %S %i %x"), &anExtension,
             &formatArray[i]->DisplayName(),
             &formatArray[i]->Supplier(),
-            formatArray[i]->Version() ));
-        CPluginInfo* info = CPluginInfo::NewL(
-            anExtension,
-            formatArray[i]->DisplayName(),
+            formatArray[i]->Version(),
+            controllers[ii]->Uid()
+            ));
+       
+        nbFound++;
+        newPluginList->AddPluginL(formatArray[i]->DisplayName(),
             formatArray[i]->Supplier(),
-            formatArray[i]->Version());
-        
-        iPluginInfos->AppendL(info);
+            formatArray[i]->Version(),
+            controllers[ii]->Uid() );
     }
     
     CleanupStack::PopAndDestroy(3); /* cSelect, fSelect, controllers */
+
+    if (nbFound)
+        iExtensionSupportedPluginList->AppendL(newPluginList);
+    else
+        delete newPluginList;
+
+    CleanupStack::Pop(1); /*newPluginList*/
 }
 
 #else

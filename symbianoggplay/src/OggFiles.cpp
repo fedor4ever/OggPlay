@@ -907,13 +907,14 @@ TBool TOggFiles::isSupportedAudioFile(TParsePtrC& p)
     if (p.ExtPresent())
     {
         TPtrC pp (p.Ext().Mid(1)); // Remove the . in front of the extension
-        CArrayPtrFlat <CPluginInfo> & pluginList= iOggPlayback->PluginList();
-        for (TInt i=0; i<pluginList.Count(); i++)
+        CDesCArrayFlat * pluginList= iOggPlayback->SupportedExtensions();
+        for (TInt i=0; i<pluginList->Count(); i++)
         {
-            result=(pp.CompareF( pluginList[i]->iExtension->Des() ) == 0 );  
+            result=(pp.CompareF( (*pluginList)[i] ) == 0 );  
             if (result)
                 break;
         }
+        delete pluginList;
     }
     return result;
 }

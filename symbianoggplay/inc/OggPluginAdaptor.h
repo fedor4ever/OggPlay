@@ -17,11 +17,12 @@
 */
 
 #include <OggOs.h>
+#include <badesca.h>
 #include "OggRateConvert.h"  // For TGainType
 #include "OggMsgEnv.h"
 #include "OggAbsPlayback.h"
 
-#include <MdaAudioSamplePlayer.h>
+#include <MdaAudioSampleEditor.h>
 #ifndef MMF_AVAILABLE
 #include <e32uid.h>
 #include <OggPlayPlugin.h>
@@ -30,8 +31,7 @@
 #ifndef OGGPLUGINADAPTOR_H
 #define OGGPLUGINADAPTOR_H
 
-
-class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
+class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObserver
 {
   
  public:
@@ -60,10 +60,14 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
 #endif
   virtual void SetVolumeGain(TGainType aGain);
   
-  virtual void MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration);
-  virtual void MapcPlayComplete(TInt aError);
-  virtual CArrayPtrFlat <CPluginInfo> & PluginList();
+  virtual CDesCArrayFlat * SupportedExtensions();
+  virtual CExtensionSupportedPluginList & GetPluginListL(const TDesC & anExtension);
+
+  private:
+      // From MMdaObjectStateChangeObserver
+  virtual void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
  private:
+      // New Functions
   void SearchPluginsL(const TDesC &aName);
   void OpenL(const TDesC& aFileName);
   void ConstructAPlayerL(const TDesC &aFileName);
@@ -72,10 +76,13 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   TBuf<100> iFilename;
   TInt iError;
 
-  CArrayPtrFlat <CPluginInfo>* iPluginInfos; 
+  CArrayPtrFlat <CExtensionSupportedPluginList>* iExtensionSupportedPluginList; 
 
 #ifdef MMF_AVAILABLE
-  CMdaAudioPlayerUtility *iPlayer;
+  // RecorderUtility is used instead of PlayerUtility to be able to choose which plugin
+  // we will use, in case of conflits (2 codecs supporting same type)
+  // The PlayerUtility doesn't allow this choice.
+  CMdaAudioRecorderUtility *iPlayer; 
 #else
   CPseudoMMFController * iPlayer;
   

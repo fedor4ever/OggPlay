@@ -16,6 +16,7 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 #include "OggOs.h"
+#include <badesca.h>
 #include "OggRateConvert.h"
 
 
@@ -33,6 +34,7 @@ const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making s
 
 
 #ifdef PLUGIN_SYSTEM
+
 //
 // CPluginInfo class
 //------------------------------------------------------
@@ -46,18 +48,47 @@ public:
    static CPluginInfo* NewL( const TDesC& anExtension, 
 	   const TDesC& aName,
 	   const TDesC& aSupplier,
-	   const TInt aVersion);
+	   const TInt aVersion,
+       const TUid aControllerUid);
    void ConstructL ( const TDesC& anExtension, 
 	   const TDesC& aName,
 	   const TDesC& aSupplier,
-	   const TInt aVersion );
+	   const TInt aVersion,
+       const TUid aControllerUid);
    
   HBufC* iExtension;
   HBufC* iName;
   HBufC* iSupplier;
   TInt iVersion;
+  TUid iControllerUid;
 
 };
+
+//
+// CPluginSupportedList class
+//------------------------------------------------------
+class CExtensionSupportedPluginList: public CBase
+{
+    public:
+
+        CExtensionSupportedPluginList( const TDesC& anExtension );
+        void ConstructL();
+        ~CExtensionSupportedPluginList();
+
+        void AddPluginL(const TDesC& aName, const TDesC& aSupplier,
+            const TInt aVersion, const TUid aControllerUid);
+        const TDesC & GetExtension();
+        void SelectPlugin(TUid aUid);
+        CArrayPtrFlat <CPluginInfo> & GetPluginInfoList();
+        CPluginInfo & GetSelectedPluginInfo();
+
+    private:
+        TBuf <10> iExtension;
+        CArrayPtrFlat <CPluginInfo>* iListPluginInfos; 
+        CPluginInfo * iSelectedPlugin; // Plugin that has been selected
+};
+
+
 #endif
 
 //
@@ -115,7 +146,8 @@ class CAbsPlayback : public CBase {
 #endif
 
 #ifdef PLUGIN_SYSTEM
-  virtual CArrayPtrFlat <CPluginInfo> & PluginList() = 0; 
+  virtual CDesCArrayFlat * SupportedExtensions() = 0;
+  virtual CExtensionSupportedPluginList & GetPluginListL(const TDesC & anExtension) = 0;
 #endif
    // Implemented Helpers 
    ////////////////////////////////////////////////////////////////
