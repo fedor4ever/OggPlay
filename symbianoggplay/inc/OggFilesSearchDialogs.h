@@ -49,7 +49,11 @@ class COggFilesSearchContainer : public CCoeControl
         ~COggFilesSearchContainer ();
         void UpdateControl();
         
-    public: // from CoeControl
+#if defined(SERIES60) || defined(SERIES80)
+        void UpdateCba();
+#endif
+	
+	public: // from CoeControl
                 
         void ConstructL( const TRect& aRect);
         TInt CountComponentControls() const;
@@ -75,15 +79,24 @@ class COggFilesSearchContainer : public CCoeControl
         TInt iFishPosition;
     };
 
-class COggFilesSearchAO : public CTimer
+class COggFilesSearchAO : public CActive
 {
 public:
     COggFilesSearchAO( COggFilesSearchContainer * aContainer );
+	~COggFilesSearchAO();
+
     void StartL();
 private:
 	void RunL();
+	void DoCancel();
+
+	void SelfComplete();
+	static TInt CallBack(TAny* aPtr);
+
     COggFilesSearchContainer * iContainer;
-    TTime iTime;
+
+	CPeriodic* iTimer;
+	TCallBack* iCallBack;
 };
 
 #endif

@@ -134,6 +134,19 @@ void COggFilesSearchContainer::Draw(const TRect& aRect) const
     }
 
 
+#if defined(SERIES60) || defined(SERIES80)
+void COggFilesSearchContainer::UpdateCba()
+{
+#if defined(SERIES60)
+	iCba->SetCommandSetL(  R_AVKON_SOFTKEYS_OK_EMPTY );
+#elif defined(SERIES80)
+    iCba->SetCommandSetL(  R_EIK_BUTTONS_CONTINUE );
+#endif
+
+    iCba->DrawNow();
+}
+#endif
+
 COggFilesSearchContainer::~COggFilesSearchContainer ()
     {
     if (iFontLatinPlain)
@@ -169,17 +182,6 @@ void COggFilesSearchContainer::UpdateControl()
      TBuf<10> number2;
     number2.AppendNum(aNbFiles);
     (*iLabels)[4]->SetTextL(number2); 
-#ifdef SERIES60 
-    if (  iBackgroundProcess->FileSearchIsProcessDone()) {
-        iCba->SetCommandSetL(  R_AVKON_SOFTKEYS_OK_EMPTY );
-        iCba->DrawNow();
-    }
-#elif defined SERIES80
-    if (  iBackgroundProcess->FileSearchIsProcessDone()) {
-        iCba->SetCommandSetL(  R_EIK_BUTTONS_CONTINUE );
-        iCba->DrawNow();
-    }
-#endif
 
     DrawNow();
     iFishPosition = iFishPosition - 5;
@@ -188,11 +190,18 @@ void COggFilesSearchContainer::UpdateControl()
 }
 
 
-COggFilesSearchAO::COggFilesSearchAO( COggFilesSearchContainer * aContainer) : CTimer(EPriorityLow)
+COggFilesSearchAO::COggFilesSearchAO( COggFilesSearchContainer * aContainer)
+: CActive(EPriorityIdle), iContainer(aContainer)
 {
-    CTimer::ConstructL();
     CActiveScheduler::Add(this);
-    iContainer = aContainer;
+}
+
+COggFilesSearchAO::~COggFilesSearchAO()
+{
+	Cancel();
+
+	delete iCallBack;
+	delete iTimer;
 }
 
 void COggFilesSearchAO::RunL()
@@ -206,27 +215,42 @@ void COggFilesSearchAO::RunL()
     if (longProcess->FileSearchIsProcessDone() )
     {
         iContainer->UpdateControl();
+
+#if defined(SERIES60) || defined(SERIES80)
+		iContainer->UpdateCba();
+#endif
+		iTimer->Cancel();
     } 
     else
-    {
-        TTime time;
-        TTimeIntervalMicroSeconds secondsDelta;
-        // Get Universal time
-        time.UniversalTime();
-        secondsDelta = time.MicroSecondsFrom(iTime);
-        iTime = time;
-        if (secondsDelta> TTimeIntervalMicroSeconds (0.1E6)) {
-            iContainer->UpdateControl();
-        }
-        After(0); // Give control back to the framework, RunL will be called as soon as possible.
-    }
-    
+		SelfComplete();
+}
+
+void COggFilesSearchAO::DoCancel()
+{
+	if (iTimer)
+		iTimer->Cancel();
 }
 
 void COggFilesSearchAO::StartL()
 {
-    After(0); // Give control back to the framework, RunL will be called as soon as possible.
+	iTimer = CPeriodic::New(CActive::EPriorityStandard);
+	iCallBack = new (ELeave) TCallBack(COggFilesSearchAO::CallBack, iContainer);
+	iTimer->Start(TTimeIntervalMicroSeconds32(100000), TTimeIntervalMicroSeconds32(100000), *iCallBack);
+
+	SelfComplete();
 }
 
+void COggFilesSearchAO::SelfComplete()
+{
+	TRequestStatus* status = &iStatus;
+	User::RequestComplete(status, KErrNone);
 
+	SetActive();
+}
+
+TInt COggFilesSearchAO::CallBack(TAny* aPtr)
+{
+	((COggFilesSearchContainer *) aPtr)->UpdateControl();
+	return 1;
+}
 
