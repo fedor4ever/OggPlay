@@ -898,7 +898,7 @@ COggDigits::SetText(const TDesC& aText)
 
 void COggDigits::Draw(CBitmapContext& aBitmapContext)
 {
-  if (iBitmaps.Length() == 0) return;
+  if (iBitmaps.Count() == 0) return;
   if (!iText) return;
 
   TInt x=0;
@@ -925,7 +925,10 @@ void COggDigits::Draw(CBitmapContext& aBitmapContext)
       idx= EDigitDot;
     }
     if (idx>=0) b= iBitmaps[idx];
-    if (iMasks.Length() >0 ) m= iMasks[idx]; else m= iBitmaps[idx];
+    if (iMasks.Count() >0 )
+        m= iMasks[idx];
+    else
+        m= iBitmaps[idx];
 
     if (!b || !m) continue;
 
