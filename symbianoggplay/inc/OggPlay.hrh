@@ -110,6 +110,8 @@ enum TOggplaySettingId
 	EOggSettingScanDir,
 	EOggSettingManeuvringSpeed,
 	EOggSettingAutoPlayId,
+	EOggSettingRepeatId,
+	EOggSettingRandomId,
 	EOggSettingWarningsId,
     EOggSettingRskIdle,
     EOggSettingRskPlay,
@@ -131,7 +133,8 @@ enum TOggplayMiscSeries60 // Also used for Series80
   EUserPlayCBA,
   EUserBackCBA,
   EUserSoftkeyOptions,
-  EUserModifyCBA
+  EUserModifyCBA,
+  EUserSelectCBA
   };
 
 #endif      // OGGPLAY_HRH

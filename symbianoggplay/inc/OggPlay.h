@@ -299,6 +299,7 @@ public:
 
   void OpenFileL(const TDesC& aFileName);
   void WriteIniFile();
+  void SetRandomL(TBool aRandom);
   void SetRepeat(TBool aRepeat);
 #ifdef SERIES80
   CEikButtonGroupContainer * Cba()  
