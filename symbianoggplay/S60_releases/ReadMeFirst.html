@@ -23,12 +23,11 @@ This document covers the following topics:
 </p>
 <ol>
   <ul>
-    <li>
-      <a href="#Versions">OggPlay Versions</a></li>
-    <li>
-      <a href="#File%20Format">File Format Supported</a></li>
-    <li>
-      <a href="#Audio%20Format">Audio Format Supported</a></li>
+    <li> <a href="#Versions">OggPlay Versions</a></li>
+    <li> <a href="#File%20Format">File Format Supported</a></li>
+    <li> <a href="#Audio%20Format">Audio Format Supported</a></li>
+    <li><a href="#Random_Ringing_Tone">Random Ringing Tones</a><br>
+    </li>
   </ul>
 </ol>
 <h3>
@@ -36,18 +35,17 @@ This document covers the following topics:
 <blockquote>
   <div class="11BodyText">OggPlay is a music player for phones running
 on
-the Symbian Operating system. It was originally playing only .ogg file
-format, but some of the latest versions now plays mp3 and other music
-formats
-in addition to .ogg files</div>
+the Symbian Operating system. Latest versions comes bundled with a .ogg
+file format decoder, but it detects and uses MMF plugings which may
+come built-in your phone or that might have been installed later on.</div>
 </blockquote>
 <blockquote>
   <div class="11BodyText">OggPlay comes in several flavors, depending
 on
 HW and Operating System version of the phone it is running on. This
 text
-concentrates on Series60 versions. Please consult
-  <a href="http://symbianoggplay.sourceforge.net/">Oggplay
+concentrates on Series60 MMF versions. Please consult <a
+ href="http://symbianoggplay.sourceforge.net/">Oggplay
 webpage</a> for the other versions, new releases and much more details
 about OggPlay.</div>
   <div class="11BodyText">For Series60 phones, two different versions
@@ -62,7 +60,8 @@ mambo-jambo:
 Framework)
 is a feature of Symbian Operating System (SOS) that allows (among other
 things) 3<sup>rd</sup> parties to use audio decoder plugins. With MMF,
-Oggplay can use the phone built-in audio decoders (MP3, AAC), as well
+Oggplay can use the phone built-in audio decoders (MP3, AAC, MP4), as
+well
 as
 decoders installed by users. The MMF comes bundled together with the
 SOS
@@ -73,8 +72,7 @@ The user should carefully select which package to install on their
 phones,
 depending on their phone type. The table below shows which package you
 should install depending on your phone model. It is suggested, but not
-mandatory, to install the MMF Version, if your HW supports the MMF:
-  <br>
+mandatory, to install the MMF Version, if your HW supports the MMF: <br>
 &nbsp;
   <center>
   <table border="1" cols="3">
@@ -84,10 +82,8 @@ mandatory, to install the MMF Version, if your HW supports the MMF:
         <center>Phone Model</center>
         </td>
         <td width="100">
-        <center>OggPlay&nbsp;
-        <br>
-MMF&nbsp;
-        <br>
+        <center>OggPlay&nbsp; <br>
+MMF&nbsp; <br>
 Version</center>
         </td>
         <td width="100">
@@ -213,8 +209,7 @@ in future releases. Next table shows the properties of each phone:</div>
         <center>Ogg</center>
         </td>
         <td align="center" width="100">
-        <center>MP3
-        <br>
+        <center>MP3 <br>
 Built-in Plugin</center>
         </td>
         <td width="100">
@@ -333,7 +328,7 @@ Built-in Plugin<br>
         <td>
         <center>?</center>
         </td>
-        <td style="vertical-align: top;">?<br>
+        <td style="vertical-align: top; text-align: center;">?<br>
         </td>
       </tr>
       <tr>
@@ -355,14 +350,12 @@ Built-in Plugin<br>
  style="margin: 0cm 0cm 0.0001pt 54pt; text-indent: -18pt;">(1):
 This phone does have built-in MP3/AAC reader, but it doesn&#8217;t allow 3<sup>rd</sup>
 party developers to use it, thus Oggplay cannot use the built-in
-decoder
-  </p>
+decoder </p>
   <p class="MsoNormal" style="margin-left: 36pt;">An MP3 Downloadable
 plugin
 is currently under development. Keep an eye on OggPlay webpage for
 release
-announcements!
-  <br>
+announcements! <br>
 &nbsp;<br>
 Apple's iTunes format (M4A) can be decoded by OggPlay. However, you
 must rename the extension of each files to MP4.<br>
@@ -386,8 +379,7 @@ is
         <center>Phone Model</center>
         </td>
         <td width="100">
-        <center>Highest Sampling Rate&nbsp;
-        <br>
+        <center>Highest Sampling Rate&nbsp; <br>
 (Hz)</center>
         </td>
         <td width="100">
@@ -502,7 +494,42 @@ audio player of this phone supports 44100Hz in Stereo, but it doesn&#8217;t
 allow
 3<sup>rd</sup> party developers to use it, thus Oggplay is restricted
 to
-use 16000Hz in Mono.</p>
+use 16000Hz in Mono.<br>
+  </p>
+</blockquote>
+<h3 class="MsoNormal" style="margin-left: 36pt;"><a
+ name="Random_Ringing_Tone"></a>Random Ringing Tone</h3>
+<div style="margin-left: 80px;" class="11BodyText">The .ogg plugin
+provided with this release can be used as a random ringing tone :
+everytime a phone call is received, the ringing tone played will be
+randomly choosen from the list of available .ogg files in the device.
+To enable this random ringing tone, the following must be done:<br>
+<ul>
+  <li>A file named <span style="font-style: italic;">random_ringing_tone.ogg</span>
+should be created. The file doesn't need to be a real .ogg file, an
+empty file will just do the trick. The name is the important thing: it
+has to be <span style="font-style: italic;">random_ringing_tone.ogg</span>
+. The location of the file doesn't really matters, but only the
+directory where the the file is located will be searched for the random
+songs. So create the file in the same directory than the .ogg files you
+want
+to be used as ringing tones.<span style="font-style: italic;"></span><br>
+  </li>
+  <li>Select the file <span style="font-style: italic;">random_ringing_tone.ogg
+    </span>to be your ringing tone. The way to do this depends on your
+device. But it's usually from the <span style="font-style: italic;">profile</span>
+menu, or from the phone's <span style="font-style: italic;">music
+player</span>. <br>
+  </li>
+  <li>When you will receive a phone call, the tone will be selected
+from the .ogg files found in same directory than&nbsp; the <span
+ style="font-style: italic;">random_ringing_tone.ogg.</span></li>
+</ul>
+A word of warning... This feature relies a lot on your HW Firmware. It
+might not work, and there are no guarantees that it will work in all
+situations. <br>
+</div>
+<blockquote> <br>
 </blockquote>
 <blockquote>&nbsp;</blockquote>
 </body>
