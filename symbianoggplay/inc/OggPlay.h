@@ -102,7 +102,8 @@ class COggActive
 {
  public:
    
-  COggActive(COggPlayAppUi* theAppUi);
+  COggActive();
+  void ConstructL(COggPlayAppUi* theAppUi);
   ~COggActive();
 
   void IssueRequest();
@@ -112,15 +113,17 @@ class COggActive
   RTelServer*    iServer;
   RPhone*        iPhone;
   RLine*         iLine;
-  RCall::TStatus iLineStatus;
   TRequestStatus iRequestStatusChange;
   
   CPeriodic*     iTimer;
   TCallBack*     iCallBack;
 
-  int iInterrupted;
+  TInt           iInterrupted;
+  TInt           iLineCallsReportedAtIdle;
+  TInt           iLineToMonitor;
   COggPlayAppUi* iAppUi;
 };
+
 
 #ifdef SERIES60
 class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver
@@ -194,6 +197,7 @@ private:
   void FindSkins();
 #if defined(SERIES60_SPLASH)
   void ShowSplashL();
+  TBool iSplashActive;
 #endif
 
 
