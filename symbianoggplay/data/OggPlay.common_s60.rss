@@ -62,6 +62,24 @@ RESOURCE DIALOG r_dialog_about {
 		txt=ogg_vorbis_c;
 		horiz_align=EEikLabelAlignHLeft;
 	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	id = EOggLabelAboutVersion5;
+	control = LABEL 
+	{
+		txt=ogg_translation;
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	id = EOggLabelAboutVersion6;
+	control = LABEL 
+	{
+		txt=ogg_port;
+		horiz_align=EEikLabelAlignHLeft;
+	};
     }	
   };
 }

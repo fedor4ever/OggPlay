@@ -12,6 +12,7 @@
 #define ogg_link_txt "se www.geocities.com/p800tools för mer info"
 #define ogg_vorbis_c "(c) Ogg/Vorbis codec by Xiph.org"
 #define ogg_translation "Översättning: Peter Karlsson"
+#define ogg_port "Port to S60: Claus Bjerre, Berthier Blemieux, Pascal Wolff"
 #define ogg_file_prop "Egenskaper för fil"
 #define ogg_filename_txt "Filnamn:"
 #define ogg_filename_unknown "okänd"
