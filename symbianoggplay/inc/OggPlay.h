@@ -77,14 +77,18 @@ _LIT(KQTimeResourceFile, "Z:\\System\\Apps\\QTime\\QTime.mbm");
 const TInt KMaxFileNameLength = 0x200;
 
 
-static const struct {
+struct TKeyCodes
+{
   int code; 
   int mask;
-} keycodes[] = {
-  { EKeyApplication1,	0 }, // camera
-  { EKeyApplication0,	0 }, // browser
-  { EKeyDevice0,	0 }, // power
-  { 0,			0 }, // flip open
+};
+
+const TInt KMaxKeyCodes = 4;
+static const TKeyCodes keycodes[] = 
+{ { EKeyApplication1, 0 }, // camera
+  { EKeyApplication0, 0 }, // browser
+  { EKeyDevice0,      0 }, // power
+  { 0,                0 }, // flip open
   // EKeyDevice8 confirm (jog dial push)
   // EKeyDevice1/2  two way controller
   // EKeyDevice4..7 four way controller 
@@ -276,6 +280,8 @@ public:
 private: 
 
   void ReadIniFile();
+  TInt32 IniRead32( TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = 0x7FFFFFFF );
+  TInt64 IniRead64( TFileText& aFile, TInt64 aDefault = 0 );
   void SetHotKey();
   TBool IsAlarmTime();
   void SetProcessPriority();
