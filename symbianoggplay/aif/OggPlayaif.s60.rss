@@ -21,8 +21,8 @@ RESOURCE AIF_DATA
     embeddability=KAppEmbeddable;
     newfile=KAppDoesNotSupportNewFile;
 #if defined(SERIES60_SPLASH)
-//    launch=KAppLaunchInBackground;
-	hidden=KAppIsHidden;
+    launch=KAppLaunchInBackground;
+//	hidden=KAppIsHidden;
 #endif
     datatype_list={DATATYPE{ 
 		priority=EDataTypePriorityNormal; 
