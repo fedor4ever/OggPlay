@@ -768,7 +768,8 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
       return;
   if (aError == KErrInUse) aError= KErrNone;
 
-  if (aError == KErrCancel) aError = KErrNone; 
+  if (aError == KErrCancel)
+      return;
 
   if (aError == KErrDied) {
     iObserver->NotifyPlayInterrupted();
@@ -781,19 +782,14 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
     CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_16);
     buf.AppendNum(aError);
     iEnv->OggErrorMsgL(tbuf,buf);
+    if (iObserver )
+    {
+        if (!iEof ) 
+            iObserver->NotifyPlayInterrupted();
+    }
   }
 
-  if (iObserver) {
-    if (iEof /*&& iState==EPlaying*/) {
-      Stop();
-      ClearComments();
-      iTime= 0;
-      iObserver->NotifyPlayComplete();
-      //Stop();
-      return;
-    }
-    if (!iEof /*&& iState==EPlaying && aError!=KErrNone*/) iObserver->NotifyPlayInterrupted();
-  }
+  
 }
 
 void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
@@ -878,6 +874,17 @@ TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
   COggPlayback* self= (COggPlayback*) aPtr;
   
   self->iStream->Stop();
+
+  if (self->iObserver) {
+    if ( self->iEof ) {
+      self->Stop();
+      self->ClearComments();
+      self->iTime= 0;
+      self->iObserver->NotifyPlayComplete();
+      return 0;
+    }
+    
+  }
   return 0;
 }
 
