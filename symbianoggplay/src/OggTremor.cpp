@@ -766,6 +766,8 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
       iStoppedFromEof = ETrue;
 	  iUnderflowing = EFalse;
+
+	  iRestartAudioStreamingTimer->Cancel();
       iStopAudioStreamingTimer->Wait(0.1E6);
 	  return;
   }
