@@ -1,0 +1,13 @@
+// BLD.INF
+// Component description file
+
+PRJ_MMPFILES
+oggvorbis.mmp
+
+PRJ_EXPORTS
+
+// API Headers
+..\ivorbiscodec.h
+..\ivorbisfile.h
+..\ogg.h
+..\os_types.h
