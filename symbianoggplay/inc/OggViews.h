@@ -20,6 +20,9 @@
 #define __OggViews_h
 
 #include <coecntrl.h>
+//!#if defined(SERIES60)
+#include <aknview.h>
+//!#endif
 
 class COggPlayAppView;
 
@@ -66,5 +69,59 @@ class COggFCView : public COggViewBase
   virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
 			      const TDesC8& /*aCustomMessage*/);
 };
+
+//!#if defined(SERIES60)
+
+class COggSettingsContainer;
+
+class COggSettingsView : public CBase, public MCoeView 
+{
+  public:
+
+  COggSettingsView();
+  ~COggSettingsView();
+  virtual TVwsViewId ViewId() const;
+//  virtual TVwsViewIdAndMessage ViewScreenDeviceChangedL();
+//  virtual TBool ViewScreenModeCompatible(TInt aScreenMode);
+  
+  private:
+    // implements MCoeView:
+  virtual void ViewDeactivated();
+//  virtual void ViewConstructL();
+  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+			      const TDesC8& /*aCustomMessage*/);
+  
+  COggSettingsContainer* iContainer;
+};
+
+#if 0
+
+class COggSettingsView : public CAknView  
+
+{
+
+    //    void ConstructL();
+//    public: // Functions from base classes
+//        void HandleCommandL(TInt aCommand);
+//        void HandleClientRectChange();
+
+  public:
+
+  COggSettingsView();
+  ~COggSettingsView();
+  virtual TUid Id() const;
+//  virtual TVwsViewIdAndMessage ViewScreenDeviceChangedL();
+//  virtual TBool ViewScreenModeCompatible(TInt aScreenMode);
+  
+  private:
+  void DoDeactivate();
+  void DoActivateL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+			      const TDesC8& /*aCustomMessage*/);
+  
+  COggSettingsContainer* iContainer;
+};
+#endif
+
+//#endif
 
 #endif

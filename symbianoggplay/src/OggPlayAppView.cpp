@@ -35,9 +35,9 @@
 
 
 const TInt KCallBackPeriod = 75000;  /** Time (usecs) between canvas Refresh() for graphics updating */
-const TInt KUserInactivityTimeoutMSec = 600;
+const TInt KUserInactivityTimeoutMSec = 1600;
 const TInt KUserInactivityTimeoutTicks = KUserInactivityTimeoutMSec * 1000 / KCallBackPeriod;
-
+const TInt KFfRwdStep=20000;
 
 #if defined(UIQ)
 _LIT(KDirectoryBackString, "..");
@@ -738,7 +738,7 @@ COggPlayAppView::isPlayableFile( TInt aIndex )
 
   TInt selType = GetItemType(aIndex);
   TDesC& fileName = GetFileName(aIndex);
-  TRACEF(COggLog::VA(_L("isPlayable() Type=%d / filename='%S'"), selType, &fileName ));
+  //TRACEF(COggLog::VA(_L("isPlayable() Type=%d / filename='%S'"), selType, &fileName ));
 	
   if( fileName.Length() && (selType == COggPlayAppUi::ETitle || 
                             selType == COggPlayAppUi::ETrackTitle ||
@@ -845,7 +845,7 @@ COggPlayAppView::ListBoxNavigationTimerTick()
   if( --iUserInactivityTickCount == 0 )
     {
     // Fire navi-center event on non-ogg files only, and only when playing.
-    if( !isPlayableFile() && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying )
+    if( !isPlayableFile() && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
       iApp->HandleCommandL(EOggPlay);
     }
   }
@@ -1240,7 +1240,9 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 #if defined(SERIES60)
 
   enum EOggKeys {
-    EOggConfirm=EKeyDevice3
+    EOggConfirm=EKeyDevice3,
+    EOggFF=54, // key 6
+    EOggRWD=49 // key 1
   };
   enum EOggScancodes {
     EOggUp=EStdKeyUpArrow,
@@ -1294,9 +1296,12 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 
   if(code == EOggConfirm) {
     if(!iFocusControlsPresent) {
+      TInt idx= iListBox[iMode]->CurrentItemIndex();
+      TRACE(COggLog::VA(_L("OfferKeyEvent -Idx=%d"), idx));    // FIXIT
+
       if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
 	        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
-           iApp->HandleCommandL(EOggStop);
+           iApp->HandleCommandL(EOggPauseResume);
       else iApp->HandleCommandL(EOggPlay);
 
     } else if(c==iPlayButton[iMode]) { 
@@ -1324,6 +1329,16 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 	             iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
            iApp->HandleCommandL(EOggStop);
       else iApp->HandleCommandL(EOggPlay);
+    return EKeyWasConsumed;
+  } else if(code==EOggFF) {
+    TInt64 pos=iApp->iOggPlayback->Position();
+    pos+=KFfRwdStep;
+    iApp->iOggPlayback->SetPosition(pos);
+    return EKeyWasConsumed;
+  } else if(code==EOggRWD) {
+    TInt64 pos=iApp->iOggPlayback->Position();
+    pos-=KFfRwdStep;
+    iApp->iOggPlayback->SetPosition(pos);
     return EKeyWasConsumed;
   }
 

@@ -63,6 +63,8 @@ const TUid KOggPlayUid  = { UID3 }; //0x1000A661;
 
 const TUid KOggPlayUidFOView = { UID3 +1 };
 const TUid KOggPlayUidFCView = { UID3 +2 };
+const TUid KOggPlayUidSettingsView = { UID3 +3 };
+
 
 //_LIT(KAudioResourceFile, "Z:\\System\\Apps\\Audio\\audio.mbm");
 _LIT(KAudioResourceFile, "Z:\\System\\Apps\\OggPlay\\OggPlay.mbm");
@@ -177,6 +179,7 @@ public:
   void ShowFileInfo();
 
   void ActivateOggViewL();
+  void ActivateOggViewL(const TUid aViewId);
 
   // from CQikAppUi:
   void HandleCommandL(int aCommand);
@@ -212,6 +215,7 @@ private:
 
   COggFOView* iFOView;
   COggFCView* iFCView;
+  COggSettingsView* iSettingsView;
   COggMsgEnv* iOggMsgEnv;
   RArray<TInt> iViewHistoryStack;
 };

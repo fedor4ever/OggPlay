@@ -20,6 +20,7 @@
 
 #include "OggViews.h"
 #include "OggPlayAppView.h"
+#include "OggSettingsContainer.h"
 
 #include <eikmenub.h>
 
@@ -138,3 +139,67 @@ void COggFCView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
   CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(EFalse);
   iOggViewCtl.ChangeLayout(ETrue);
 }
+
+
+////////////////////////////////////////////////////////////////
+//
+// class COggSettingsView
+//
+////////////////////////////////////////////////////////////////
+
+COggSettingsView::COggSettingsView()
+{
+}
+
+COggSettingsView::~COggSettingsView()
+{
+}
+
+void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+				  const TDesC8& /*aCustomMessage*/)
+//void COggSettingsView::DoActivateL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+//				  const TDesC8& /*aCustomMessage*/)
+{
+  TPixelsAndRotation sizeAndRotation;
+  CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
+  CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
+  //iOggViewCtl.Activated();
+  if (!iContainer)
+    {
+    iContainer = new (ELeave) COggSettingsContainer;
+    //iContainer->SetMopParent(this);
+    iContainer->ConstructL( ((CAknAppUi*)CEikonEnv::Static()->AppUi())->ClientRect() );
+    //AppUi()->AddToStackL( *this, iContainer );
+    }
+
+}
+
+void COggSettingsView::ViewDeactivated()
+//void COggSettingsView::DoDeactivate()
+{
+/*  if ( iContainer )
+    {
+    AppUi()->RemoveFromViewStack( *this, iContainer );
+    }
+*/
+  delete iContainer;
+  iContainer = NULL;
+
+  //iOggViewCtl.Deactivated();
+}
+
+/*void COggSettingsView::ViewConstructL()
+{
+  TInt a;
+  a=2;
+}
+*/
+
+TVwsViewId COggSettingsView::ViewId() const
+//TUid COggSettingsView::Id() const
+{
+  return TVwsViewId(KOggPlayUid, KOggPlayUidSettingsView);
+//  return KOggPlayUidSettingsView;
+}
+
+

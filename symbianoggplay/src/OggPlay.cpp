@@ -332,7 +332,12 @@ COggPlayAppUi::ConstructL()
 		iFOView=new(ELeave) COggFOView(*iAppView);
 		RegisterViewL(*iFOView);
 	}
-	
+
+#if defined(SERIES60)
+	iSettingsView=new(ELeave) COggSettingsView();
+	RegisterViewL(*iSettingsView);
+#endif
+
 	SetProcessPriority();
 	SetThreadPriority();
 	
@@ -353,7 +358,11 @@ COggPlayAppUi::~COggPlayAppUi()
 		DeregisterView(*iFCView);
 		delete iFCView;
 	}
-	
+	if (iSettingsView) {
+		DeregisterView(*iSettingsView);
+  	delete iSettingsView;
+	}
+
 	if (iActive) { delete iActive; iActive=0; }
 	WriteIniFile();
 	if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
@@ -371,9 +380,16 @@ COggPlayAppUi::~COggPlayAppUi()
 
 void COggPlayAppUi::ActivateOggViewL()
 {
+  TUid iViewUid;
+  iViewUid = iAppView->IsFlipOpen() ? KOggPlayUidFOView : KOggPlayUidFCView;
+  ActivateOggViewL(iViewUid);
+}
+
+void COggPlayAppUi::ActivateOggViewL(const TUid aViewId)
+{
 	TVwsViewId viewId;
 	viewId.iAppUid = KOggPlayUid;
-	viewId.iViewUid = iAppView->IsFlipOpen() ? KOggPlayUidFOView : KOggPlayUidFCView;
+	viewId.iViewUid = aViewId;
 	
 	TRAPD(err, ActivateViewL(viewId));
 	if (err) ActivateTopViewL();
@@ -456,10 +472,12 @@ COggPlayAppUi::NotifyPlayComplete()
 	if (iCurrent+1==nSongs && iRepeat && (!iIsRunningEmbedded)) {
 		// We are at the end of the playlist, and "repeat" is enabled
 		if (iAppView->GetItemType(0)==6) SetCurrent(1); else SetCurrent(0);
-	} 
+    iAppView->SelectSong(iCurrent);
+  } 
 	else if (iCurrent+1<nSongs) {
 		// We are in the middle of the playlist. Now play the next song.
 		SetCurrent(iCurrent+1);
+    iAppView->SelectSong(iCurrent);
 	}
 	else {
 		// We are at the end of the playlist. Stop playing.
@@ -509,9 +527,9 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	
 	int idx = iAppView->GetSelectedIndex();
 	const TDesC& curFile= iAppView->GetFileName(idx);
-    //TRACE(COggLog::VA(_L("Index=%d, curFile='%S'"), idx, &curFile ));    // FIXIT
-	
-	switch (aCommand) {
+//  TRACE(COggLog::VA(_L("HandleCommandL -Index=%d, icurrent=%d, curFile='%S'"), idx, iCurrent,&curFile ));    // FIXIT
+
+  switch (aCommand) {
 		
 	case EOggPlay: {
 		if (iViewBy==ETop) {
@@ -561,16 +579,20 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		}
 		if (iViewBy==ETitle || iViewBy==EFileName) {
 			if (curFile.Length()>0) {
-				if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
-					iOggPlayback->State()==CAbsPlayback::EPaused) iOggPlayback->Stop();
-				if (iOggPlayback->Open(curFile)==KErrNone) {
-					iOggPlayback->SetVolume(iVolume);
-					if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
-						iAppView->SetTime(iOggPlayback->Time());
+				if (iOggPlayback->State()==CAbsPlayback::EPaused && idx==iCurrent)
 						iOggPlayback->Play();
-					}
-					SetCurrent(idx);
-				} else SetCurrent(-1);
+        else {
+				  if (iOggPlayback->State()==CAbsPlayback::EPlaying)
+            iOggPlayback->Pause();
+				  if (iOggPlayback->Open(curFile)==KErrNone) {
+					  iOggPlayback->SetVolume(iVolume);
+					  if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
+						  iAppView->SetTime(iOggPlayback->Time());
+						  iOggPlayback->Play();
+					  }
+					  SetCurrent(idx);
+				  } else SetCurrent(-1);
+        }
 			}
 		}
 		break;
@@ -586,9 +608,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 				   }
 		
 	case EOggPauseResume: {
-		if (iOggPlayback->State()==CAbsPlayback::EPlaying) iOggPlayback->Pause();
-		else if (iOggPlayback->State()==CAbsPlayback::EPaused) iOggPlayback->Play();
-		else HandleCommandL(EOggPlay);
+		if (iOggPlayback->State()==CAbsPlayback::EPlaying) 
+      iOggPlayback->Pause();
+//		else if (iOggPlayback->State()==CAbsPlayback::EPaused) 
+//      iOggPlayback->Play();
+		else 
+      HandleCommandL(EOggPlay);
 		iAppView->Update();
 		break;
 						  }
@@ -616,6 +641,9 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 			SetHotKey();
 			iAppView->SetAlarm();
 		}
+#else
+    ActivateOggViewL(KOggPlayUidSettingsView);
+//    ActivateLocalViewL(KOggPlayUidSettingsView);
 #endif
 		break;
 					  }
@@ -680,8 +708,11 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 					  }
 		
 #if defined(SERIES60)
-	case EAknSoftkeyBack:
+  case EAknSoftkeyBack: {
 		HandleCommandL(EOggStop);
+    Exit();
+    break;
+  }
 #endif
 	case EEikCmdExit: {
 		Exit();
