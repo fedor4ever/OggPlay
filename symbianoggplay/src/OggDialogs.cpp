@@ -334,6 +334,7 @@ CScrollableRichTextControl ::~CScrollableRichTextControl()
 {
     delete iTextView; // text view
     delete iLayout; // text layout
+    delete iSBFrame;  // Scroll bar
 }
 
 void CScrollableRichTextControl::UpdateModelL(CRichText * aRichText)
@@ -362,6 +363,9 @@ void CScrollableRichTextControl::UpdateModelL(CRichText * aRichText)
         ); // new view
     
     CleanupStack::PopAndDestroy();
+    
+    iTextView->FormatTextL();
+    UpdateScrollIndicatorL();
     DrawNow();
 }
 
@@ -379,10 +383,7 @@ void CScrollableRichTextControl::Draw(const TRect& /*aRect*/) const
     gc.SetPenColor(KRgbBlack);
     gc.DrawRect(rect);
     // draw editable text - will work unless OOM
-    TInt err;
-    TRAP(err,iTextView->FormatTextL());
-    if (err) return;
-    TRAP(err,iTextView->DrawL(Rect() ) );
+    TRAPD(err,iTextView->DrawL(Rect() ) );
 }
 
 
@@ -413,9 +414,41 @@ TKeyResponse CScrollableRichTextControl::OfferKeyEventL(const TKeyEvent& aKeyEve
                 break;
             }
         }
+        UpdateScrollIndicatorL();
     }
     return CCoeControl::OfferKeyEventL(aKeyEvent, aType);
 }
+
+
+void CScrollableRichTextControl::UpdateScrollIndicatorL()
+    {
+
+    if ( !iSBFrame )
+        {
+        iSBFrame = new( ELeave ) CEikScrollBarFrame( this, NULL, ETrue );
+        iSBFrame->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
+                                           CEikScrollBarFrame::EAuto );
+        iSBFrame->SetTypeOfVScrollBar( CEikScrollBarFrame::EArrowHead );
+        }
+
+    TEikScrollBarModel hSbarModel;
+    TEikScrollBarModel vSbarModel;
+    
+    TInt aaa = iLayout->FormattedHeightInPixels() ;
+    aaa = iLayout->BandHeight() ;
+    aaa = iLayout->PixelsAboveBand();
+
+    vSbarModel.iThumbPosition = iLayout->PixelsAboveBand(); 
+    vSbarModel.iScrollSpan = iLayout->FormattedHeightInPixels() - iLayout->BandHeight(); 
+    vSbarModel.iThumbSpan = 1; 
+    
+    TEikScrollBarFrameLayout layout;
+    TRect rect( Rect() );
+    iSBFrame->TileL( &hSbarModel, &vSbarModel, rect, rect, layout );        
+    iSBFrame->SetVFocusPosToThumbPos( vSbarModel.iThumbPosition );
+    }
+
+    
 
 #endif /*SERIES60*/
     

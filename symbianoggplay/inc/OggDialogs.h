@@ -23,6 +23,7 @@
 #include <txtrich.h>
 #include <coemain.h>
 #include <barsread.h>
+#include <eiksbfrm.h>
 
 
 class CHotkeyDialog : public CEikDialog
@@ -99,6 +100,7 @@ public:
         void ConstructFromResourceL(TResourceReader& aReader);
         
 private:
+    void UpdateScrollIndicatorL();
         
     CRichText* iRichText; // global text object pointer, not owned.
         TStreamId iStreamId; // required when storing and restoring global text
@@ -106,6 +108,8 @@ private:
         CTextLayout* iLayout; // text layout
         CTextView* iTextView; // text view
         TRect iViewRect; // rectangle through which to view text
+    
+    CEikScrollBarFrame * iSBFrame ; //Scrollbar
 };
 
 class CScrollableTextDialog : public CEikDialog

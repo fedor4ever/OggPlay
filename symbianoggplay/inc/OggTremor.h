@@ -33,8 +33,14 @@
 // V0.6:  6 @ 4096*10
 // V0.9:  12 @ 4096*10
 
+
+#ifdef SERIES60
+const TInt KBuffers= 4;
+const TInt KBufferSize = 4096;
+#else
 const TInt KBuffers= 12;
 const TInt KBufferSize = 4096*10;
+#endif
 
 const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
@@ -168,6 +174,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   void ParseComments(char** ptr);
   TInt SetAudioCaps(TInt theChannels, TInt theRate);
   void GetString(TBuf<256>& aBuf, const char* aStr);
+  void SamplingRateSupportedMessage();
 
   COggMsgEnv*               iEnv;
 
