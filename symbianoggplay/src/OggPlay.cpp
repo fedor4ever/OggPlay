@@ -113,15 +113,13 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 	iLineToMonitor = 0;
 	iLineCallsReportedAtIdle = 0;
 #else
-	// Series 60 reports 3 lines 0='Fax' 1='Data' and 2='VoiceLine1' 
+	// Series 60 1.X reports 3 lines 0='Fax' 1='Data' and 2='VoiceLine1' 
+    // Series 60 2.0 reports 4 lines 0='Voice1' 1='Voice2' 2='Data' 3='Fax'
 	// (and 'VoiceLine1' reports '1' in EnumerateCall() when in idle ?!?)
-	// Should probably use the name instead of the magic number in iLineToMonitor..
+
+
 	TInt linesToTest = nofLines;
-	iLineToMonitor = 2;     // i.e. 'VoiceLine1' only
-	iLineCallsReportedAtIdle = 1;
-#endif
 	
-	// Test code
 	// S60: Why is 'iLineCallsReportedAtIdle' not '0' at idle as 
 	// should be expected ??? The voice line reports '1' ???
 	RPhone::TLineInfo LInfo;
@@ -135,13 +133,24 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 		}
 		else
 		{
+            // Test code, left here because this is likely to change between
+            // phone and it's nice to keep it in traces.
 			User::LeaveIfError( iLine->Open(*iPhone,LInfo.iName) );
 			TInt nCalls=-1;
 			iLine->EnumerateCall(nCalls);
 			iLine->Close();
 			TRACEF(COggLog::VA(_L("Line%d:%S=%d"), i, &LInfo.iName, nCalls ));
-		}
+            // End of test code
+
+            if (LInfo.iName.Match(_L("Voice*1")) != KErrNotFound)
+            {
+                
+                iLineToMonitor = i;
+                iLineCallsReportedAtIdle = nCalls;
+	     	}
+         }
     }
+#endif
 #endif
 }
 
