@@ -17,12 +17,16 @@
  */
 
 #include <eikappui.h>
+#include <eikmenub.h>
+#include <aknlists.h>
+#include <akntitle.h>
 
+#include "OggLog.h"
 #include "OggViews.h"
 #include "OggPlayAppView.h"
 #include "OggSettingsContainer.h"
+#include "OggUserHotkeys.h"
 
-#include <eikmenub.h>
 
 enum
 {
@@ -202,4 +206,78 @@ TVwsViewId COggSettingsView::ViewId() const
 //  return KOggPlayUidSettingsView;
 }
 
+
+
+////////////////////////////////////////////////////////////////
+//
+// class COggUserView
+//
+////////////////////////////////////////////////////////////////
+
+COggUserHotkeysView::COggUserHotkeysView(COggPlayAppView& aOggViewCtl )
+: COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
+	{
+  ;
+	}
+
+COggUserHotkeysView::~COggUserHotkeysView()
+	{
+  delete iUserHotkeysContainer;
+	}
+
+
+TVwsViewId COggUserHotkeysView::ViewId() const
+	{
+	return TVwsViewId(KOggPlayUid, KOggPlayUidUserView);
+	}
+
+
+void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, 
+                            TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+	{
+#ifdef SERIES60
+  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+
+	iUserHotkeysContainer = new (ELeave) COggUserHotkeys(*iOggViewCtl.iHotkeys );
+	iUserHotkeysContainer->SetMopParent(appUi);
+	TRect rec(0,44,176,188); // FIXIT
+	iUserHotkeysContainer->ConstructL( rec );
+  appUi->AddToStackL(*this, iUserHotkeysContainer);
+
+  // Push new softkeys
+  appUi->Cba()->AddCommandSetToStackL(R_USER_HOTKEYS_CBA);
+
+  // Enable statuspane
+  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+  CAknTitlePane* titlePane=(CAknTitlePane*)statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
+  TBuf<32> buf;
+  CEikonEnv::Static()->ReadResource(buf,R_OGG_USER_HOTKEYS);
+  titlePane->SetTextL(buf);
+
+  iOggViewCtl.SetRect( TRect(0,0,176,208)); // FIXIT
+
+  statusPane->MakeVisible(ETrue);
+#endif
+	}
+
+
+void COggUserHotkeysView::ViewDeactivated()
+  {
+#ifdef SERIES60
+  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+
+  // Remove status pane
+  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+  statusPane->MakeVisible(EFalse);
+  iOggViewCtl.SetRect(appUi->ClientRect());
+  
+  appUi->RemoveFromStack(iUserHotkeysContainer);
+
+  // Restore softkeys
+  ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
+
+  delete iUserHotkeysContainer;
+  iUserHotkeysContainer = NULL;
+#endif
+  }
 

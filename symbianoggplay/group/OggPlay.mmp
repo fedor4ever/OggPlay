@@ -1,4 +1,6 @@
 
+#include "..\inc\OggOs.h"
+
 TARGET  OggPlay.app
 TARGETTYPE  app
 UID  0x100039CE 0x101FF67D
@@ -18,11 +20,10 @@ SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
 SOURCE OggSettingsContainer.cpp
 SOURCE OggFilesSearchDialogs.cpp
+IFDEF_S60( SOURCE OggUserHotkeys.cpp )
 
 RESOURCE ..\data\OggPlay.rss
 RESOURCE ..\data\OggPlay_caption.rss
-
-#include "..\inc\OggOs.h"
 
 #if defined MULTI_LINGUAL_INSTALLER
 LANG SC EN FR GE DU IT SP SW TU DA

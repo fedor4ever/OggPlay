@@ -234,6 +234,11 @@ RESOURCE MENU_PANE r_skin_menu
   };
 }
 
+RESOURCE LISTBOX r_user_hotkey_setting_list
+{
+  flags = EAknListBoxSelectionList;
+}
+
 RESOURCE CBA r_user_hotkeys_cba
 {
   buttons = { 
@@ -262,7 +267,7 @@ RESOURCE ARRAY r_user_hotkey_items
 {
   items = {
     LBUF { txt = ogg_format_text_fast_forward; },
-	LBUF { txt = ogg_format_text_fast_rewind; },
+	LBUF { txt = ogg_format_text_rewind; },
 	LBUF { txt = ogg_hotkey_none; }
   };
 }
@@ -279,12 +284,14 @@ RESOURCE MENU_PANE r_file_menu
                   cascade=r_skin_menu; },
    /*   MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
                   flags=EEikMenuItemSeparatorAfter;},*/
-      MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
-      MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
+      MENU_ITEM { command=EOggAbout;	    txt=ogg_about_label; },
+	  MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; },
+      MENU_ITEM { command=EEikCmdExit;	    txt=ogg_exit_label; }
   };
 }
-
-RESOURCE TBUF r_ogg_repeat { buf=ogg_repeat; }	/** Should support '%S' field for on/off indicator strings */ 
+	
+RESOURCE TBUF32 r_ogg_repeat_on    { buf=ogg_repeat_on; }			// New
+RESOURCE TBUF32 r_ogg_repeat_off   { buf=ogg_repeat_off; }			// New
 
 RESOURCE TBUF r_ogg_error_1 { buf=ogg_text_error_1; }
 RESOURCE TBUF r_ogg_error_2 { buf=ogg_text_error_2; }
@@ -322,3 +329,4 @@ RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
 RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
 
+RESOURCE TBUF r_ogg_user_hotkeys { buf=ogg_user_hotkey; }

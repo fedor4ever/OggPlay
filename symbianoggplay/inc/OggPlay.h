@@ -64,6 +64,7 @@ const TUid KOggPlayUid  = { KOggPlayApplicationUidValue }; //0x1000A661;
 const TUid KOggPlayUidFOView = { KOggPlayApplicationUidValue +1 };
 const TUid KOggPlayUidFCView = { KOggPlayApplicationUidValue +2 };
 const TUid KOggPlayUidSettingsView = { KOggPlayApplicationUidValue +3 };
+const TUid KOggPlayUidUserView = { KOggPlayApplicationUidValue+4 };
 
 
 //_LIT(KAudioResourceFile, "Z:\\System\\Apps\\Audio\\audio.mbm");
@@ -180,6 +181,8 @@ public:
 
   void ActivateOggViewL();
   void ActivateOggViewL(const TUid aViewId);
+  void UpdateSeries60Softkeys();
+
 
   // from CQikAppUi:
   void HandleCommandL(int aCommand);
@@ -218,6 +221,7 @@ private:
   COggSettingsView* iSettingsView;
   COggMsgEnv* iOggMsgEnv;
   RArray<TInt> iViewHistoryStack;
+  COggUserHotkeysView* iUserHotkeys;
 };
 
 #ifdef SERIES60

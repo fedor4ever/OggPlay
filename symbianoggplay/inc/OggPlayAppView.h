@@ -24,6 +24,7 @@
 #include "OggControls.h"
 #include "OggPlay.h"
 #include "OggFiles.h"
+#include "OggUserHotkeys.h"
 
 class CCoeControl;
 enum COggPlayAppUi::TViews;
@@ -110,10 +111,11 @@ public:
   virtual void OggControlEvent(COggControl* c, TInt aEventType, TInt aValue);
   virtual void AddControlToFocusList(COggControl* c);
 
-  TInt       iPosChanged;
-  TBuf<512>  iCurrentSong;
-  TOggFiles* iOggFiles;
-  TCallBack* iCallBack;
+  TInt                  iPosChanged;
+  TBuf<512>             iCurrentSong;
+  TOggFiles*            iOggFiles;
+  TCallBack*            iCallBack;
+  COggUserHotkeysData*  iHotkeys;
 
 private:
 

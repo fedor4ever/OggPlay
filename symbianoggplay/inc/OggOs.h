@@ -82,4 +82,14 @@ chSTR2(__LINE__) "):" #desc)
 
 #define SEARCH_OGGS_FROM_ROOT
 
+
+// OTHERS
+//
+#if defined SERIES60    // Alternative to #ifdef/#endif around Series 60 code
+#define IFDEF_S60(x)   x
+#else
+#define IFDEF_S60(x)   ;
+#endif
+
+
 #endif

@@ -333,6 +333,8 @@ COggPlayAppUi::ConstructL()
 #if defined(SERIES60)
 	iSettingsView=new(ELeave) COggSettingsView();
 	RegisterViewL(*iSettingsView);
+  iUserHotkeys=new(ELeave) COggUserHotkeysView(*iAppView);
+	RegisterViewL(*iUserHotkeys);
 #endif
 
 	SetProcessPriority();
@@ -360,6 +362,11 @@ COggPlayAppUi::~COggPlayAppUi()
   	delete iSettingsView;
 	}
 
+  if( iUserHotkeys ) {
+    DeregisterView(*iUserHotkeys);
+    delete iUserHotkeys;
+    }
+
 	if (iActive) { delete iActive; iActive=0; }
 	WriteIniFile();
 	if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
@@ -368,7 +375,7 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iIniFileName;
 	delete iSkins;
 	delete iOggMsgEnv ;
-    iViewHistoryStack.Close();
+  iViewHistoryStack.Close();
 	COggLog::Exit();  
 	
 	CloseSTDLIB();
@@ -520,6 +527,24 @@ COggPlayAppUi::SetHotKey()
 #endif
 }
 
+
+void
+COggPlayAppUi::UpdateSeries60Softkeys()
+{
+#ifdef SERIES60
+  if( iOggPlayback->State() == CAbsPlayback::EPaused ||
+			iOggPlayback->State() == CAbsPlayback::EPlaying )
+    {
+    Cba()->AddCommandSetToStackL(R_PLAY_CBA);
+    }
+  else
+    {
+    Cba()->AddCommandSetToStackL(R_IDLE_CBA);
+    }
+  Cba()->DrawNow();
+#endif
+}
+
 void
 COggPlayAppUi::HandleCommandL(int aCommand)
 {
@@ -596,11 +621,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 					  if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
 						  iAppView->SetTime(iOggPlayback->Time());
 						  iOggPlayback->Play();
-#ifdef SERIES60
-              Cba()->AddCommandSetToStackL(R_PLAY_CBA);
-              Cba()->DrawNow();
-#endif
-
+              UpdateSeries60Softkeys();
 					  }
 					  SetCurrent(idx);
 				  } else SetCurrent(-1);
@@ -611,14 +632,10 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 				   }
 		
 	case EOggStop: {
-#ifdef SERIES60
-    Cba()->AddCommandSetToStackL(R_IDLE_CBA);
-    Cba()->DrawNow();
-#endif
-
 		if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
 			iOggPlayback->State()==CAbsPlayback::EPaused) {
 			iOggPlayback->Stop();
+      UpdateSeries60Softkeys();
 			SetCurrent(-1);
 		}
 		break;
@@ -738,7 +755,17 @@ COggPlayAppUi::HandleCommandL(int aCommand)
  		HandleCommandL(EOggStop);
     break;
     }
+
+  case EOggUserHotkeys :
+    ActivateOggViewL(KOggPlayUidUserView);
+    break;
+
+  case EUserHotKeyCBABack: {
+    ActivateOggViewL(KOggPlayUidFOView);
+    }
+    break;
 #endif
+
 	case EEikCmdExit: {
 		Exit();
 		break;
@@ -864,13 +891,10 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
         if (iRepeat) 
             aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
 #else
-        // Temporary hack. The literals should be localized.
-        TBuf<50> buf;
-        iEikonEnv->ReadResource(buf, R_OGG_REPEAT);
-        if (iRepeat) 
-            aMenuPane->SetItemTextL( EOggRepeat, COggLog::VA( buf, &_L(" on")) );
-        else
-            aMenuPane->SetItemTextL( EOggRepeat, COggLog::VA( buf, &_L(" off")) );
+    // FIXIT - Should perhaps be in the options menu instead ??
+    TBuf<50> buf;
+    iEikonEnv->ReadResource(buf, (iRepeat) ? R_OGG_REPEAT_ON : R_OGG_REPEAT_OFF );
+    aMenuPane->SetItemTextL( EOggRepeat, buf );
 #endif
 		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName));
 		aMenuPane->SetItemDimmed(EOggInfo   , iCurrentSong.Length()==0 && (iAppView->GetSelectedIndex()<0 || !isSongList));

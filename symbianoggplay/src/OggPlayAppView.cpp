@@ -82,6 +82,8 @@ COggPlayAppView::~COggPlayAppView()
   }
 
   delete iOggFiles;
+
+  IFDEF_S60(delete iHotkeys;)
 }
 
 void
@@ -97,6 +99,8 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iOggFiles= new TOggFiles(iApp->iOggPlayback);
  
   iControls = new(ELeave)CArrayPtrFlat<CCoeControl>(10);
+
+  IFDEF_S60( iHotkeys = COggUserHotkeysData::NewL(); )
 
   iIconFileName.Copy(iApp->Application()->AppFullName());
   iIconFileName.SetLength(iIconFileName.Length() - 3);
@@ -984,10 +988,10 @@ COggPlayAppView::UpdateListbox()
     // 8: paused
     if (buf[0]!=L'6') {
       if (GetFileName(i)==iApp->iCurrentSong && iApp->iCurrentSong.Length()>0) {
-	if (iApp->iOggPlayback->State()==CAbsPlayback::EPaused) buf[0]='8'; else buf[0]='7'; 
+        if (iApp->iOggPlayback->State()==CAbsPlayback::EPaused) buf[0]='8'; else buf[0]='7'; 
       } 
       else {
-	if (iApp->iViewBy==COggPlayAppUi::ETitle) buf[0]='0'; else buf[0]='5';
+	      if (iApp->iViewBy==COggPlayAppUi::ETitle) buf[0]='0'; else buf[0]='5';
       }
     }
 
@@ -1237,9 +1241,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 #if defined(SERIES60)
 
   enum EOggKeys {
-    EOggConfirm=EKeyDevice3,
-    EOggFF=54, // key 6
-    EOggRWD=49 // key 1
+    EOggConfirm=EKeyDevice3
   };
   enum EOggScancodes {
     EOggUp=EStdKeyUpArrow,
@@ -1293,8 +1295,8 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 
   if(code == EOggConfirm) {
     if(!iFocusControlsPresent) {
-      TInt idx= iListBox[iMode]->CurrentItemIndex();
-      TRACE(COggLog::VA(_L("OfferKeyEvent -Idx=%d"), idx));    // FIXIT
+      //TInt idx= iListBox[iMode]->CurrentItemIndex();
+      //TRACE(COggLog::VA(_L("OfferKeyEvent -Idx=%d"), idx));    // FIXIT
 
       if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
 	        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
@@ -1327,17 +1329,20 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
            iApp->HandleCommandL(EOggStop);
       else iApp->HandleCommandL(EOggPlay);
     return EKeyWasConsumed;
-  } else if(code==EOggFF) {
-    TInt64 pos=iApp->iOggPlayback->Position();
-    pos+=KFfRwdStep;
-    iApp->iOggPlayback->SetPosition(pos);
-    return EKeyWasConsumed;
-  } else if(code==EOggRWD) {
-    TInt64 pos=iApp->iOggPlayback->Position();
-    pos-=KFfRwdStep;
-    iApp->iOggPlayback->SetPosition(pos);
-    return EKeyWasConsumed;
-  }
+    } 
+    IFDEF_S60( 
+      else if(iHotkeys->Hotkey(code) == COggUserHotkeysData::EFastForward) {
+      TInt64 pos=iApp->iOggPlayback->Position();
+      pos+=KFfRwdStep;
+      iApp->iOggPlayback->SetPosition(pos);
+      return EKeyWasConsumed;
+    } else if(iHotkeys->Hotkey(code) == COggUserHotkeysData::ERewind) {
+      TInt64 pos=iApp->iOggPlayback->Position();
+      pos-=KFfRwdStep;
+      iApp->iOggPlayback->SetPosition(pos);
+      return EKeyWasConsumed;
+    }
+  )
 
   if (code>0) {
     if (aKeyEvent.iScanCode==EStdKeyDeviceD) { iApp->NextSong(); return EKeyWasConsumed; }           // jog dial up

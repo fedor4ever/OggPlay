@@ -25,6 +25,7 @@
 //!#endif
 
 class COggPlayAppView;
+class COggUserHotkeys;
 
 class COggViewBase : public CBase, public MCoeView
 {
@@ -122,6 +123,19 @@ class COggSettingsView : public CAknView
 };
 #endif
 
-//#endif
+class COggUserHotkeysView : public COggViewBase
+	{
+	public:
+		COggUserHotkeysView(COggPlayAppView& aOggViewCtl);
+		~COggUserHotkeysView();
+		virtual TVwsViewId ViewId() const;
+		virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+			const TDesC8& /*aCustomMessage*/);
+    void ViewDeactivated();
+
+  private:
+		COggUserHotkeys* iUserHotkeysContainer;
+    COggPlayAppView& iOggViewCtl;
+	};
 
 #endif

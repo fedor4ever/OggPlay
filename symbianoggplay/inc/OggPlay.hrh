@@ -100,7 +100,8 @@ enum TOggplayMiscSeries60
     {
     EUserStopPlayingCBA = 30000,          // "Stop" softkey
     EUserHotKeyCBABack,
-    EUserHotKeyCBAEmpty
+    EUserHotKeyCBAEmpty,
+	EOggUserHotkeys
     };	
 
 #endif      // OGGPLAY_HRH

@@ -24,7 +24,8 @@
 #define ogg_hotkey_flipopen "Flip open"
 #define ogg_skin_default "default"
 #define ogg_file_info "File info..."
-#define ogg_repeat "Repeat - %S"						// Modified 2003-11-24
+#define ogg_repeat_on         "Repeat is on"						// New
+#define ogg_repeat_off        "Repeat is off"						// New
 #define ogg_shuffle_playlist "Shuffle playlist"
 #define ogg_find_files "Find new files"
 #define ogg_skins "Skins"
@@ -78,3 +79,9 @@
 #define ogg_text_string_10 "(subfolders)"
 #define ogg_text_string_11 "(files)"
 #define ogg_text_string_12 "(unassigned)"
+
+// NEW STRINGS
+
+#define ogg_format_text_fast_forward "Fast forward"
+#define ogg_format_text_rewind       "Rewind"
+#define ogg_user_hotkey              "Hotkeys"
