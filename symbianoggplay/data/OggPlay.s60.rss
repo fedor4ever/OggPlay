@@ -90,7 +90,7 @@ RESOURCE MENU_BAR r_oggplay_menubar
   };
 }
   
-RESOURCE TBUF r_ogg_version { buf=ogg_txt_version; }
+RESOURCE TBUF r_ogg_version { buf=KVersionString; }
 
 // About view
 RESOURCE TBUF r_ogg_about_line_1 { buf=ogg_version_txt; }

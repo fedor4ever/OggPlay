@@ -255,6 +255,7 @@ COggAboutDialog::PreLayoutDynInitL()
   pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
   iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
   iRichText->InsertL(0,iVersion);
+  IFDEF_S60( iRichText->InsertL(0,_L("OggPlay ")) );
 
   // One paragraph to add some space.
 
