@@ -113,7 +113,7 @@ void COggFOView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
   CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(ETrue);
 #if defined(SERIES60)
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(EFalse);
-  ((COggPlayAppUi*) CEikonEnv::Static()->AppUi())->UpdateSeries60Softkeys(ETrue); // we KNOW we're the right view!
+  ((COggPlayAppUi*) CEikonEnv::Static()->AppUi())->UpdateSoftkeys(ETrue); // we KNOW we're the right view!
 #endif
   iOggViewCtl.ChangeLayout(EFalse);
 }
@@ -184,7 +184,7 @@ void COggS60Utility::RemoveStatusPane()
   CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
   statusPane->MakeVisible(EFalse);
     // Restore softkeys
-  ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
+  ((COggPlayAppUi*) appUi)->UpdateSoftkeys();
 }
 
 ////////////////////////////////////////////////////////////////

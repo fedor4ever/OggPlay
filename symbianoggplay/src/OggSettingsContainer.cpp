@@ -147,10 +147,10 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
       iData.iWarningsEnabled);
   case EOggSettingRskIdle:
     return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
-      iData.iRskIdle);
+      iData.iRskIdle[0]);
   case EOggSettingRskPlay:
     return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
-      iData.iRskPlay);
+      iData.iRskPlay[0]);
   case EOggSettingVolumeBoost:
      return new (ELeave) CGainSettingItem(aIdentifier,   iAppUi);
   default:
