@@ -282,23 +282,48 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
       inverse2(vb,look->floor_look[submap],floormemo[i],pcm);
   }
 
+  /* Using the MDCT coefficients is typically enough for the frequency
+     analyzer, together with a max search and kind of 'sample and hold' filter.
+     This is the fastest way to get frequency spectrum estimation.
+
+     According to [1], a more precise estimation can be acheived by using 
+     the "regularized" set of MDCT coefficient.
+
+     Regularized coefs :
+      S[k] = D[k]^2 + (D[k+1] - D[k-1]) ^2
+     
+     [1] : Direct Estimation of frequncy from MDCT-encoded files
+           S. Merdjani and L.Daudet
+           Proc. of the 6th Int. Conference on Digital Audio Effects (DAFx-03)
+           http://www.elec.qmul.ac.uk/dafx03/proceedings/pdfs/dafx01.pdf
+        
+  */
+#define USE_REGULARIZED_COEFS 1
+#define KNUMBER_OF_FREQBINS 16
   if ( (vb->performAnalysys) && (n>=256*2) )
   {
       int c;
-      ogg_int32_t y;
+      ogg_int32_t max;
       ogg_int32_t *pcm=vb->pcm[0];
-#define KNUMBER_OF_FREQBINS 16
-      static const int xscale[KNUMBER_OF_FREQBINS+1] = { 0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 256};
+      static const int xscale[KNUMBER_OF_FREQBINS+1] = { 0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 255};
       
+      ogg_int32_t prev_coef = 0;
       int scale = n >> 9 ; // n/(256*2); 
       for (j=0; j<KNUMBER_OF_FREQBINS;j++)
-          
-      {    
-          for(c = xscale[j]*scale, y = 0; c < xscale[j + 1]*scale; c++)
-          {
-              if (pcm[c] > y) y= pcm[c]; // Find max in the bin
-          }
-          vb->dctcoefs[j] = y;
+	{    
+          for(c = xscale[j]*scale, max = 0; c < xscale[j + 1]*scale; c++)
+	    {
+#if USE_REGULARIZED_COEFS
+	      /* Uses Regularized coefs */
+	      ogg_int32_t coef = abs(pcm[c+1] - prev_coef) + abs(pcm[c]);
+	      prev_coef = pcm[c];
+#else
+              /* Use basic coefs */
+	      ogg_int32_t coef = pcm[c];
+#endif
+          if (coef > max) max= coef; // Find max in the bin
+	    }
+          vb->dctcoefs[j] = max;
       }
   }
   
