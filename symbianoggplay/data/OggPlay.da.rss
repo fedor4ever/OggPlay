@@ -1,4 +1,4 @@
-CHARACTER_SET UTF8 
+﻿CHARACTER_SET UTF8 
 
 #define ogg_options_title "Opsætninger"
 #define ogg_hotkey "Genvej:"
@@ -84,7 +84,7 @@ CHARACTER_SET UTF8
 #define ogg_text_string_11 "(filer)"
 
 #ifdef PLAYLIST_SUPPORT
-#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_12 "(playlister)"
 #define ogg_text_string_13 "(ukendte)"
 #else
 #define ogg_text_string_12 "(ukendte)"
@@ -129,17 +129,17 @@ CHARACTER_SET UTF8
 #define ogg_random_on                "Shuffle Play"
 #define ogg_random_off               "Normal Play"
 #define ogg_volume_boost             "Volume Boost"
-#define ogg_volume_boost_none        "No Extra Gain"
+#define ogg_volume_boost_none        "Normal"
 #define ogg_volume_boost_6db         "6dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
 
 #define ogg_codec_selection          "Codecs"
-#define ogg_no_plugin_found          "No Plugin Found"
+#define ogg_no_plugin_found          "Ingen plugins fundet"
 #define ogg_codec_ogg                "OGG"
 #define ogg_codec_mp3                "MP3"
 #define ogg_codec_aac                "AAC"
 
-#define ogg_codec_info_name          "Name"
-#define ogg_codec_info_supplier      "Supplier"
+#define ogg_codec_info_name          "Navn"
+#define ogg_codec_info_supplier      "Leverandør"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
