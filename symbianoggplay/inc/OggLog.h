@@ -76,7 +76,7 @@ public:
 protected:
 
   RFileLogger iLog;
-  TBuf<0x200> iBuf;
+  TBuf<0x400> iBuf;
 
 private:
 

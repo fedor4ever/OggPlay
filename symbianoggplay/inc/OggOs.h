@@ -30,8 +30,7 @@ chSTR2(__LINE__) "):" #desc)
 #define chmsg(desc)
 #endif
 
-// VERSION
-//
+//# Version String
 #define KVersionMajor 0
 #define KVersionMinor 98
 #define KVersionString "0.98"

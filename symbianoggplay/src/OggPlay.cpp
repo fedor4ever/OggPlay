@@ -586,6 +586,9 @@ COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
     case TOggplaySettings::ECbaPlay:
       Cba()->AddCommandSetToStackL(R_OPTION_PLAY_CBA);
       break;
+    case TOggplaySettings::ECbaBack:
+      Cba()->AddCommandSetToStackL(R_OPTION_BACK_CBA);
+      break;
     default:
       //!FIXME
       TInt a=5;
@@ -786,6 +789,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     }
   case EUserPlayCBA : {
  		HandleCommandL(EOggPlay);
+		iAppView->Update();
+    break;
+    }
+
+  case EUserBackCBA : {
+ 		SelectPreviousView();
 		iAppView->Update();
     break;
     }

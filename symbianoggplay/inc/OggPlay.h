@@ -113,7 +113,8 @@ public:
     ECbaExit,
     ECbaStop,
     ECbaPause,
-    ECbaPlay
+    ECbaPlay,
+    ECbaBack
   };
   TInt iRskIdle;
   TInt iRskPlay;

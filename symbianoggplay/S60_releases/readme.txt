@@ -1,3 +1,4 @@
+//# Version String
 This is the README for Release 0.98 of Oggplay for Series60.
 
 For more information about Oggplay, please see the webpage at

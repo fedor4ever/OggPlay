@@ -39,7 +39,7 @@ NAME OGGP
 
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf="Oggplay"; }
-
+//# Version string
 #define ogg_txt_version "OggPlay 0.98 (beta)"
 
 // Languages : EN/SC FR GE DU IT SP SW TU DA
@@ -425,8 +425,9 @@ RESOURCE ARRAY r_oggplay_rsk_idle_setting_page_list
     items = { 
 		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
 		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
-		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; },
-		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_cba_play; }
+		// skipped:  value = 2; text = ogg_cba_pause;
+		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_cba_play; },
+		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_cba_back; }
 		};
 	}
 
@@ -435,8 +436,8 @@ RESOURCE ARRAY r_oggplay_rsk_idle_item_array
     items = { 
 		LBUF { txt = ogg_cba_exit; },
 		LBUF { txt = ogg_cba_stop; },
-		LBUF { txt = ogg_cba_pause; },
-		LBUF { txt = ogg_cba_play; }
+		LBUF { txt = ogg_cba_play; },
+		LBUF { txt = ogg_cba_back; }
 		};
     }
 
@@ -462,8 +463,9 @@ RESOURCE ARRAY r_oggplay_rsk_play_setting_page_list
     items = { 
 		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
 		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
-		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; }
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; },
 		// skipped: value = 3; text = ogg_cba_play;
+		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_cba_back; }
 		};
 	}
 
@@ -472,7 +474,8 @@ RESOURCE ARRAY r_oggplay_rsk_play_item_array
     items = { 
 		LBUF { txt = ogg_cba_exit; },
 		LBUF { txt = ogg_cba_stop; },
-		LBUF { txt = ogg_cba_pause; }
+		LBUF { txt = ogg_cba_pause; },
+		LBUF { txt = ogg_cba_back; }
     };
     }
 
@@ -524,6 +527,14 @@ RESOURCE CBA r_option_play_cba
   buttons = { 
     CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
     CBA_BUTTON { id = EUserPlayCBA; txt = ogg_cba_play; }
+  };
+}  
+
+RESOURCE CBA r_option_back_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
+    CBA_BUTTON { id = EUserBackCBA; txt = ogg_cba_back; }
   };
 }  
 

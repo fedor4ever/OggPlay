@@ -114,7 +114,8 @@ enum TOggplayMiscSeries60
   EUserHotKeyCBAEmpty,
   EOggUserHotkeys,
   EUserPauseCBA,
-  EUserPlayCBA
+  EUserPlayCBA,
+  EUserBackCBA
   };	
 
 #endif      // OGGPLAY_HRH
