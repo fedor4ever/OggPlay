@@ -1605,3 +1605,9 @@ EXPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int bytes_req,int *bitstre
     return(samples);
   }
 }
+
+EXPORT_C void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin)
+{
+    vf->vb.performAnalysys = active;
+    vf->vb.dctcoefs = freqBin;
+}

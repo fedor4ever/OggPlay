@@ -218,7 +218,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
 #ifdef MDCT_FREQ_ANALYSER
 // BL : Frequency analyser changes
-  TInt32 Freq_coefs[17]; 
+  TInt32 iFreqCoefs[17]; 
 #endif
 
   // communication with the tremor/ogg codec:

@@ -28,4 +28,5 @@ EXPORTS
 	ov_time_seek_page @ 27 NONAME
 	ov_time_tell @ 28 NONAME
 	ov_time_total @ 29 NONAME
+	ov_getFreqBin @ 30 NONAME
 

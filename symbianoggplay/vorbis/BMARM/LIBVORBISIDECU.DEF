@@ -22,4 +22,5 @@ EXPORTS
 	ov_time_seek @ 21 NONAME ; (null)
 	ov_time_tell @ 22 NONAME R3UNUSED ; (null)
 	ov_bitrate @ 23 NONAME R3UNUSED ; (null)
+	ov_getFreqBin @ 24 NONAME R3UNUSED ; (null)
 

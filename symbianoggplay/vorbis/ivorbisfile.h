@@ -121,6 +121,8 @@ IMPORT_C vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 IMPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int *bitstream);
 
+IMPORT_C void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
