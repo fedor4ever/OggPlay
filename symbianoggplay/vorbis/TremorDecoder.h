@@ -19,8 +19,8 @@
 #ifndef TREMORDECODER_H
 #define TREMORDECODER_H
 
-#include <stdio.h> //FIXMAD: this NULL redefinition thing. Help.
 #include <e32base.h>
+#include <stdio.h>
 #include "Decoder.h"
 #include "ivorbisfile.h"
 
