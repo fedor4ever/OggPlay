@@ -245,7 +245,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
     iFileOpen= 0;
     //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
-
+    TRACE(COggLog::VA(_L("COggPlayback::Open(%S). Failed"), &aFileName ));
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
     return KErrOggFileNotFound;
   };

@@ -51,7 +51,8 @@ public:
   void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
 
   void ReadL(TFileText& tf, TInt aVersion);
-  TBool Write(TFileText& tf);
+  //TBool Write(TInt aLineNumber, TFileText& tf);
+  TBool Write(TInt aLineNumber, HBufC* aBuf );
 
   HBufC* iTitle;
   HBufC* iAlbum;
@@ -92,7 +93,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void  CreateDb(RFs& session);
   TBool  CreateDbWithSingleFile(const TDesC& aFile);
   TBool ReadDb(const TFileName& aFileName, RFs& session);
-  void  WriteDb(const TFileName& aFileName, RFs& session);
+  void  WriteDbL(const TFileName& aFileName, RFs& session);
 
   void FillTitles(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TDesC& aSubFolder);
   void FillAlbums(CDesCArray& arr, const TDesC& anArtist, const TFileName& aSubFolder);

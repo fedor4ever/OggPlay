@@ -146,6 +146,38 @@ void COggFCView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
   iOggViewCtl.ChangeLayout(ETrue);
 }
 
+////////////////////////////////////////////////////////////////
+//
+// class COggS60Utility
+//
+////////////////////////////////////////////////////////////////
+
+#if defined(SERIES60)
+void COggS60Utility::DisplayStatusPane( TInt aTitleID )
+{
+  // Enable statuspane
+  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+  statusPane->SwitchLayoutL(R_AVKON_STATUS_PANE_LAYOUT_USUAL);
+  if( aTitleID )
+    {
+    CAknTitlePane* titlePane=(CAknTitlePane*)statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
+    TBuf<32> buf;
+    CEikonEnv::Static()->ReadResource(buf,aTitleID);
+    titlePane->SetTextL(buf);
+    }
+  statusPane->MakeVisible(ETrue);
+}
+
+void COggS60Utility::RemoveStatusPane()
+{
+  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+  statusPane->MakeVisible(EFalse);
+    // Restore softkeys
+  ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////
 //
@@ -172,11 +204,13 @@ void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*
 #if defined(SERIES60)
   CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
   if(Cba) {
-    Cba->AddCommandSetToStackL(R_USER_HOTKEYS_CBA);
+    Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
     Cba->DrawNow();
   }
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
 #endif
+
+  COggS60Utility::DisplayStatusPane(R_OGG_SETTINGS);
 
   if (!iContainer)
     {
@@ -196,12 +230,7 @@ void COggSettingsView::ViewDeactivated()
   }
   
 #ifdef SERIES60
-  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
-  // Remove status pane
-  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
-  statusPane->MakeVisible(EFalse);
-  // Restore softkeys
-  ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
+  COggS60Utility::RemoveStatusPane();
 #endif
   
 }
@@ -212,7 +241,7 @@ TVwsViewId COggSettingsView::ViewId() const
 }
 ////////////////////////////////////////////////////////////////
 //
-// class COggUserView
+// class COggUserHotkeysView
 //
 ////////////////////////////////////////////////////////////////
 
@@ -247,18 +276,11 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
   appUi->AddToStackL(*this, iUserHotkeysContainer);
 
   // Push new softkeys
-  appUi->Cba()->AddCommandSetToStackL(R_USER_HOTKEYS_CBA);
+  appUi->Cba()->AddCommandSetToStackL(R_USER_CLEAR_BACK_CBA);
 
-  // Enable statuspane
-  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
-  CAknTitlePane* titlePane=(CAknTitlePane*)statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
-  TBuf<32> buf;
-  CEikonEnv::Static()->ReadResource(buf,R_OGG_USER_HOTKEYS);
-  titlePane->SetTextL(buf);
+  iOggViewCtl.SetRect( TRect(0,0,176,208) ); // FIXIT
 
-  iOggViewCtl.SetRect( TRect(0,0,176,208)); // FIXIT
-
-  statusPane->MakeVisible(ETrue);
+  COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
 #endif
 	}
 
@@ -266,20 +288,13 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
 void COggUserHotkeysView::ViewDeactivated()
   {
 #ifdef SERIES60
+  COggS60Utility::RemoveStatusPane();
+
   CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
-
-  // Remove status pane
-  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
-  statusPane->MakeVisible(EFalse);
-  iOggViewCtl.SetRect(appUi->ClientRect());
-  
   appUi->RemoveFromStack(iUserHotkeysContainer);
-
-  // Restore softkeys
-  ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
-
   delete iUserHotkeysContainer;
   iUserHotkeysContainer = NULL;
+
 #endif
   }
 

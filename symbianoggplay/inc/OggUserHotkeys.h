@@ -16,8 +16,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// $CVSHeader$
+
 /* OggUserHotkeys.cpp - Series 60 only.
- * Let's the user assign hotkeys (0..9,*,#) for specified actions like FWD and REW.
+ * Let's the user assign hotkeys (0..9,*,#,backspace,shift) for specified actions like FWD and REW.
  */
 
 #ifndef OGGUSERHOTKEYS_H
@@ -35,13 +37,13 @@ class CEikTextListBox;
 /// Control hosting listbox for user hotkey assignments.
 //
 class COggUserHotkeys : public CCoeControl
-{
+  {
 public:
   COggUserHotkeys( TOggplaySettings& aData );
   void ConstructL(const TRect& aRect);
   ~COggUserHotkeys();
 
-  static TOggplaySettings::THotkeys Hotkey( TInt aScanCode, TOggplaySettings* aData );
+  static TOggplaySettings::THotkeys Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData );
 
 private : // New
 	void RefreshListboxModel();
@@ -51,7 +53,6 @@ private : // Framework
   TInt CountComponentControls() const;
   CCoeControl* ComponentControl(TInt aIndex) const;
   TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType );
-
 private:
   TOggplaySettings& iData;
   CEikTextListBox *iListBox;

@@ -16,7 +16,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// $CVSHeader$
 
+#include <w32std.h>
 #include <aknlists.h> 
 #include <barsread.h>  // Resource reading
 #include <aknapp.h>
@@ -26,6 +28,7 @@
 #include <OggPlay.rsg>
 #include "OggPlay.hrh"
 #include "OggLog.h"
+
 
 
 COggUserHotkeys::COggUserHotkeys( TOggplaySettings& aData ) : iData(aData)
@@ -42,9 +45,9 @@ void COggUserHotkeys::ConstructL(const TRect& aRect)
   iListBox->ConstructL( this, EAknListBoxSelectionList );
   iListBox->Model()->SetOwnershipType(ELbmOwnsItemArray);
 
-  // Enable this scrollbar code if nof items gets too large
-  // iListBox->CreateScrollBarFrameL(ETrue);
-	// iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff,CEikScrollBarFrame::EAuto);
+  // Scroll bar arrow indicators
+  iListBox->CreateScrollBarFrameL(ETrue);
+	iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff,CEikScrollBarFrame::EAuto);
 
   RefreshListboxModel();
  
@@ -62,10 +65,9 @@ COggUserHotkeys::~COggUserHotkeys()
 
 void COggUserHotkeys::SetHotkey( TInt aRow, TInt aCode )
   {
-  const TInt offset = 1;
-  aRow += offset;
+  aRow += TOggplaySettings::KFirstHotkeyIndex;
 
-  for( TInt i=offset; i<TOggplaySettings::ENofHotkeys; i++ )
+  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
     {
     if( i == aRow )
       continue;
@@ -77,14 +79,22 @@ void COggUserHotkeys::SetHotkey( TInt aRow, TInt aCode )
   }
 
 // Static method
-TOggplaySettings::THotkeys COggUserHotkeys::Hotkey( TInt aScanCode, TOggplaySettings* aData )
+TOggplaySettings::THotkeys COggUserHotkeys::Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData )
   {
-  const TInt offset = 1;
+  TRACE(COggLog::VA(_L("Hotkeys:%X:%X"), aKeyEvent.iScanCode, aKeyEvent.iModifiers ));    // FIXIT 
 
-  for( TInt i=offset; i<TOggplaySettings::ENofHotkeys; i++ )
+  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
     {
-    if( aData->iUserHotkeys[i] == aScanCode )
-      return (TOggplaySettings::THotkeys) i;
+    if(aKeyEvent.iScanCode == EStdKeyLeftShift || 
+      aKeyEvent.iScanCode == EStdKeyRightShift ) {
+      if( (aData->iUserHotkeys[i] == aKeyEvent.iScanCode && aType == EEventKeyDown ) )
+        return (TOggplaySettings::THotkeys) i;
+      }
+    else
+      {
+      if( (aData->iUserHotkeys[i] == aKeyEvent.iScanCode && aType == EEventKey ) )
+        return (TOggplaySettings::THotkeys) i;
+      }
     }
   return TOggplaySettings::ENoHotkey;
   }
@@ -98,22 +108,31 @@ void COggUserHotkeys::RefreshListboxModel()
   
   CDesCArray* modelArray = static_cast<CDesCArray*>(iListBox->Model()->ItemTextArray());
 
-  const TInt offset = 1;
-
-  for( TInt i=offset; i<TOggplaySettings::ENofHotkeys; i++ ) 
+  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ ) 
     {
     keyBuf.Zero();
-    if( iData.iUserHotkeys[i] == TOggplaySettings::ENoHotkey )
-      keyBuf.Copy(array->MdcaPoint(TOggplaySettings::ENoHotkey));
-    else
-      keyBuf.Append(iData.iUserHotkeys[i]);
+    switch( iData.iUserHotkeys[i] ) {
+      case TOggplaySettings::ENoHotkey : 
+        keyBuf.Copy(array->MdcaPoint(TOggplaySettings::ENoHotkey)); break;
+      case EStdKeyBackspace : 
+        iEikonEnv->ReadResource(keyBuf, R_OGG_BACKSPACE); break;
+      case EStdKeyLeftShift : 
+      case EStdKeyRightShift :
+        iEikonEnv->ReadResource(keyBuf, R_OGG_SHIFT); break;
+      case EStdKeyNkpAsterisk : 
+        keyBuf.Append(_L("*")); break;
+      case EStdKeyHash : 
+        keyBuf.Append(_L("#")); break;
+      default : 
+        keyBuf.Append(iData.iUserHotkeys[i]); break;
+      }
 
     TBuf<64> title;
     title.Copy(array->MdcaPoint(i));
     listboxBuf.Format(_L("\t%S\t\t%S"), &title, &keyBuf);
-	  modelArray->InsertL(i-offset,listboxBuf);
-    if( modelArray->MdcaCount()-1 > i-offset )
-      modelArray->Delete(i-offset+1);
+	  modelArray->InsertL(i-TOggplaySettings::KFirstHotkeyIndex,listboxBuf);
+    if( modelArray->MdcaCount()-1 > i-TOggplaySettings::KFirstHotkeyIndex )
+      modelArray->Delete(i-TOggplaySettings::KFirstHotkeyIndex+1);
     }
 	iListBox->HandleItemAdditionL();
   DrawDeferred();
@@ -138,14 +157,18 @@ TKeyResponse COggUserHotkeys::OfferKeyEventL(
     TEventCode aType )
   {
   TInt validKey = TOggplaySettings::ENoHotkey;
-  if( Rng((TInt)'0', aKeyEvent.iScanCode, (TInt)'9') )
-    validKey = aKeyEvent.iScanCode;
-  else if( aKeyEvent.iScanCode == EStdKeyNkpAsterisk || aKeyEvent.iScanCode == 42 /* Idrk */ )
-    validKey = '*';
-  else if( aKeyEvent.iScanCode == EStdKeyHash )
-    validKey = '#';
 
-  if( validKey != TOggplaySettings::ENoHotkey || aKeyEvent.iScanCode == EStdKeyBackspace )
+  if( (Rng((TInt)'0', aKeyEvent.iScanCode, (TInt)'9') || 
+      aKeyEvent.iScanCode == EStdKeyHash || 
+      aKeyEvent.iScanCode == EStdKeyNkpAsterisk ||
+      aKeyEvent.iScanCode == '*' ||
+      aKeyEvent.iScanCode == EStdKeyBackspace ||
+      aKeyEvent.iScanCode == EStdKeyLeftShift ||
+      aKeyEvent.iScanCode == EStdKeyRightShift) && aType == EEventKeyDown )
+    validKey = aKeyEvent.iScanCode;
+ 
+  // Save if a valid key or save a ENoHotkey to clear current entry if LSK (Clear) were pressed
+  if( validKey != TOggplaySettings::ENoHotkey || aKeyEvent.iScanCode == EStdKeyDevice0 )
     {
     TInt row = iListBox->CurrentItemIndex();
     SetHotkey(row, validKey);
@@ -155,5 +178,6 @@ TKeyResponse COggUserHotkeys::OfferKeyEventL(
   else
 		return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
+
 
 // End of File  

@@ -1333,7 +1333,7 @@ int j_code3(const char * buff, int count)
 
 	c_gb = c_b5 = 0;
 
-	for(phz=buff; (int)phz < ((int)buff + count); phz++){
+	for(phz=(unsigned char */*FIXIT*/)buff; (int)phz < ((int)buff + count); phz++){
 		if(*phz & 0x80){
 			/* First Byte not in GB range. 
 			 * We don't do user defined chars. 
@@ -1357,9 +1357,9 @@ int j_code3(const char * buff, int count)
 			/* Valid GB and BIG5? see which one is more likely. */
 			if ((*phz >= 0xA1 && *phz <= 0xF7) && (* (phz+1) >= 0xA1 && *(phz+1) <= 0xFE)){
 
-				if(temphz = inGB(phz, 2))
+				if((temphz = inGB((char */*FIXIT*/)phz, 2)))
 					c_gb += temphz->percent;
-				if(temphz = inBig5(phz, 2))
+				if((temphz = inBig5((char */*FIXIT*/)phz, 2)))
 					c_b5 += temphz->percent;
 
 				/* Every valid GB and BIG5 codes
@@ -1398,7 +1398,7 @@ int j_code(const char * buff,int count)
 /* first we look up "ÎÒ"  and "µÄ" ,both gb and big5
  * in the text.
  */
-	for(phz=buff;phz<(buff+count);phz++){
+	for(phz=(unsigned char */*FIXIT*/)buff;phz<((unsigned char */*FIXIT*/)buff+count);phz++){
 		if(*phz & 0x80){
 			if((*phz==0xB5&&*(phz+1)==0xC4) || ((*phz==0xCE)&&*(phz+1)==0xD2)){
 				c_gb++;

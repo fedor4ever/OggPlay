@@ -113,9 +113,12 @@ public:
     ENoHotkey,
     EFastForward,
     ERewind,
-    ENofHotkeys
-    //,    ENotAssigned = ENofHotkeys
+    EPageUp,
+    EPageDown,
+    ENofHotkeys,
+    KFirstHotkeyIndex = EFastForward
     };
+
   TInt iUserHotkeys[ENofHotkeys];
 	};
 

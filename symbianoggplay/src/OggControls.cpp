@@ -1795,10 +1795,22 @@ COggListBox::CurrentItemIndex()
   return iSelected;
 }
 
+TInt
+COggListBox::NofVisibleLines()
+{
+  return iLinesVisible;
+}
+
+
 TInt 
 COggListBox::SetCurrentItemIndex(TInt idx)
 {
-  if (idx<0) idx=-1;
+#if defined(UIQ)
+  // UIQ_?
+  if (idx<0) idx-1;
+#else
+  if (idx<0) idx=0; // FIXIT Quest : Newer a listbox without an valid selection
+#endif
   else if (idx>=iText->Count()) idx= iText->Count()-1;
   if (idx!=iSelected) {
     iSelected= idx;

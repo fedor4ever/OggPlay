@@ -68,6 +68,15 @@ class COggFCView : public COggViewBase
 			      const TDesC8& /*aCustomMessage*/);
 };
 
+#if defined(SERIES60)
+class COggS60Utility
+{
+public:
+  static void DisplayStatusPane( TInt aTitleID );
+  static void RemoveStatusPane();
+};
+#endif
+
 class COggSettingsContainer;
 
 class COggSettingsView : public COggViewBase

@@ -37,16 +37,10 @@
 const TInt KCallBackPeriod = 75000;  /** Time (usecs) between canvas Refresh() for graphics updating */
 const TInt KUserInactivityTimeoutMSecNormal = 1600;
 const TInt KUserInactivityTimeoutTicksNormal = KUserInactivityTimeoutMSecNormal * 1000 / KCallBackPeriod;
-const TInt KUserInactivityTimeoutMSecFast = 400;
+const TInt KUserInactivityTimeoutMSecFast = 600;
 const TInt KUserInactivityTimeoutTicksFast = KUserInactivityTimeoutMSecFast * 1000 / KCallBackPeriod;
 
 const TInt KFfRwdStep=20000;
-
-#if defined(UIQ)
-_LIT(KDirectoryBackString, "..");
-#else
-_LIT(KDirectoryBackString, "(Back)");
-#endif
 
 
 COggPlayAppView::COggPlayAppView() :
@@ -104,13 +98,6 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iIconFileName.Copy(iApp->Application()->AppFullName());
   iIconFileName.SetLength(iIconFileName.Length() - 3);
   iIconFileName.Append(_L("mbm"));
-
-  //iSkinFileDir.Copy(iApp->Application()->AppFullName());
-  //iSkinFileDir.SetLength(iSkinFileDir.Length()-);
-
-  //iBackgroundFileName.Copy(iApp->Application()->AppFullName());
-  //iBackgroundFileName.SetLength(iBackgroundFileName.Length() - 3);
-  //iBackgroundFileName.Append(_L("bmp"));
 
   // construct the two canvases for flip-open and closed mode:
   //----------------------------------------------------------
@@ -828,23 +815,37 @@ COggPlayAppView::CallBack(TAny* aPtr)
     
     self->iCanvas[self->iMode]->Refresh();
 
-    IFDEF_S60( self->ListBoxNavigationTimerTick(); )
+    IFDEF_S60( self->ListBoxNavigationTimerTick( EFalse ); )
   }
 
   return 1;
 }
 
 void
-COggPlayAppView::ListBoxNavigationTimerTick()
+COggPlayAppView::ListBoxNavigationTimerTick( TBool aRestart )
   {
-  if( iUserInactivityTickCount <= 0 )
-    return;
-
-  if( --iUserInactivityTickCount == 0 )
+  if( aRestart )
     {
-    // Fire navi-center event on non-ogg files only, and only when playing.
-    if( !isPlayableFile() && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
-      iApp->HandleCommandL(EOggPlay);
+    // User moved cursor, (re)install timeout counter
+    if( iApp->iSettings.iManeuvringSpeed == 0 )
+      iUserInactivityTickCount = KUserInactivityTimeoutTicksNormal;
+    else if( iApp->iSettings.iManeuvringSpeed == 1 )
+      iUserInactivityTickCount = KUserInactivityTimeoutTicksFast;
+    else
+      iUserInactivityTickCount = -1;
+    }
+  else
+    {
+    // Timer tick - check for a timeout if the counter is active
+    if( iUserInactivityTickCount <= 0 )
+      return;
+
+    if( --iUserInactivityTickCount == 0 )
+      {
+      // Fire navi-center event on non-ogg files only, and only when playing.
+      if( !isPlayableFile() && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
+        iApp->HandleCommandL(EOggPlay);
+      }
     }
   }
 
@@ -862,7 +863,7 @@ COggPlayAppView::InitView()
   // fill the list box with some initial content:
   if (!iOggFiles->ReadDb(iApp->iDbFileName,iCoeEnv->FsSession())) {
     iOggFiles->CreateDb(iCoeEnv->FsSession());
-    iOggFiles->WriteDb(iApp->iDbFileName, iCoeEnv->FsSession());
+    iOggFiles->WriteDbL(iApp->iDbFileName, iCoeEnv->FsSession());
   }
 
   const TBuf<16> dummy;
@@ -907,7 +908,12 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     TBuf<256> back;
     back.Num(6);
     back.Append(KColumnListSeparator);
-    back.Append(KDirectoryBackString);
+#if defined(UIQ)
+    back.Append(_L(".."));
+#else
+    iEikonEnv->ReadResource(buf, R_OGG_BACK_DIR);
+    back.Append(buf);
+#endif
     back.Append(KColumnListSeparator);
     back.AppendNum((TInt)thePreviousView);
     GetTextArray()->InsertL(0,back);
@@ -927,7 +933,12 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
       TBuf<256> back;
       back.Num(6);
       back.Append(KColumnListSeparator);
-      back.Append(KDirectoryBackString);
+#if defined(UIQ)
+      back.Append(_L(".."));
+#else
+      iEikonEnv->ReadResource(buf, R_OGG_BACK_DIR);
+      back.Append(buf);
+#endif
       back.Append(KColumnListSeparator);
       back.AppendNum((TInt)thePreviousView);
       GetTextArray()->InsertL(0,back);
@@ -1050,6 +1061,8 @@ COggPlayAppView::UpdateControls()
  
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iRepeat);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iRepeat);
+
+  iApp->UpdateSeries60Softkeys();
 }
 
 void
@@ -1250,6 +1263,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   TInt code     = aKeyEvent.iCode;
 //  TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
 //  TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
+  TInt index = iListBox[iMode]->CurrentItemIndex();
 
   COggControl* c=iFocusControlsIter;
   
@@ -1265,23 +1279,11 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         TInt idx= iListBox[iMode]->CurrentItemIndex();
         if (aKeyEvent.iScanCode==EOggDown) {
           SelectSong(idx+1);
-          // FIXIT -> Code is ugly and should not even be here 
-          if( iApp->iSettings.iManeuvringSpeed == 0 )
-            iUserInactivityTickCount = KUserInactivityTimeoutTicksNormal;
-          else if( iApp->iSettings.iManeuvringSpeed == 1 )
-            iUserInactivityTickCount = KUserInactivityTimeoutTicksFast;
-          else
-            iUserInactivityTickCount = -1;
+          ListBoxNavigationTimerTick( ETrue );
           return EKeyWasConsumed;
-        } else if (aKeyEvent.iScanCode==EOggUp && idx>0) {
+        } else if (aKeyEvent.iScanCode==EOggUp ) {
           SelectSong(idx-1);
-          // FIXIT -> Code is ugly and should not even be here 
-          if( iApp->iSettings.iManeuvringSpeed == 0 )
-            iUserInactivityTickCount = KUserInactivityTimeoutTicksNormal;
-          else if( iApp->iSettings.iManeuvringSpeed == 1 )
-            iUserInactivityTickCount = KUserInactivityTimeoutTicksFast;
-          else
-            iUserInactivityTickCount = -1;
+          ListBoxNavigationTimerTick( ETrue );
           return EKeyWasConsumed;
         } 
       } 
@@ -1304,9 +1306,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 
   if(code == EOggConfirm) {
     if(!iFocusControlsPresent) {
-      //TInt idx= iListBox[iMode]->CurrentItemIndex();
-      //TRACE(COggLog::VA(_L("OfferKeyEvent -Idx=%d"), idx));    // FIXIT
-
       if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
 	        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
            iApp->HandleCommandL(EOggPauseResume);
@@ -1338,17 +1337,35 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
            iApp->HandleCommandL(EOggStop);
       else iApp->HandleCommandL(EOggPlay);
     return EKeyWasConsumed;
-    } 
-    else if(COggUserHotkeys::Hotkey(code,&iApp->iSettings) == TOggplaySettings::EFastForward) {
-      TInt64 pos=iApp->iOggPlayback->Position();
-      pos+=KFfRwdStep;
+  } 
+  // S60 User Hotkeys
+  switch(COggUserHotkeys::Hotkey(aKeyEvent,aType,&iApp->iSettings)) {
+    case TOggplaySettings::EFastForward : {
+      TInt64 pos=iApp->iOggPlayback->Position()+=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
       return EKeyWasConsumed;
-    } else if(COggUserHotkeys::Hotkey(code,&iApp->iSettings) == TOggplaySettings::ERewind) {
-      TInt64 pos=iApp->iOggPlayback->Position();
-      pos-=KFfRwdStep;
+      }
+    case TOggplaySettings::ERewind : {
+      TInt64 pos=iApp->iOggPlayback->Position()-=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
       return EKeyWasConsumed;
+      }
+    case TOggplaySettings::EPageDown : {
+      if(index == iListBox[iMode]->CountText() - 1)
+        ListBoxNavigationTimerTick( ETrue );
+      else
+        SelectSong(index + iListBox[iMode]->NofVisibleLines() - 1);
+      return EKeyWasConsumed;
+      }
+    case TOggplaySettings::EPageUp : {
+      if(index == 0)
+        ListBoxNavigationTimerTick( ETrue );
+      else
+        SelectSong(index - iListBox[iMode]->NofVisibleLines() + 1);
+      return EKeyWasConsumed;
+      }
+    default :
+      break;
     }
 
   if (code>0) {

@@ -95,7 +95,7 @@ public:
   TBool PlayDimmed();
 
   static TInt CallBack(TAny* aPtr); // registered with iTimer (CPeriodic)
-  void ListBoxNavigationTimerTick();
+  void ListBoxNavigationTimerTick( TBool aRestart );
 
 
   // from MCoeControlObserver:

@@ -81,9 +81,13 @@
 #define ogg_text_string_11 "(files)"
 #define ogg_text_string_12 "(unassigned)"
 
+// S60 Hotkey settings
+#define ogg_user_hotkey              "Hotkeys"
 #define ogg_format_text_fast_forward "Fast forward"
 #define ogg_format_text_rewind       "Rewind"
-#define ogg_user_hotkey              "Hotkeys"
+#define ogg_format_text_page_up      "File list page up"
+#define ogg_format_text_page_down    "File list page down"
+
 #define ogg_settings                 "Settings"  // in the menu
 #define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
 #define ogg_filescanmode             "File scan mode"
@@ -97,6 +101,8 @@
 #define ogg_off                      "Off"
 #define ogg_popup_on                 "Enabled"
 #define ogg_popup_off                "Disabled"
-
+#define ogg_back_dir                 "back"
+#define ogg_backspace                "Backspace"
+#define ogg_shift                    "Shift (no repeat)"
 
 

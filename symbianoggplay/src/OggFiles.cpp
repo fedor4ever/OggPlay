@@ -26,6 +26,8 @@
 
 const TInt KTFileTextBufferMaxSize = 0x100;
 const TInt KMaxFileLength = 0x200;
+const TInt KDiskWriteBufferSize = 20000;
+const TInt KNofOggDescriptors = 9;         /** Nof descriptor fields in an internal ogg store */
 
 ////////////////////////////////////////////////////////////////
 //
@@ -155,16 +157,12 @@ TOggFile::ReadL(TFileText& tf, TInt aVersion)
 
 
 TBool
-TOggFile::Write(TFileText& tf)
+TOggFile::Write( TInt aLineNumber, HBufC* aBuf )
 {
-  tf.Write(*iTitle);
-  tf.Write(*iAlbum);
-  tf.Write(*iArtist);
-  tf.Write(*iGenre);
-  tf.Write(*iSubFolder);
-  tf.Write(*iFileName);
-  tf.Write(*iShortName);
-  tf.Write(*iTrackNumber);
+  aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n"), 
+    aLineNumber, 
+    iTitle, iAlbum, iArtist, iGenre, iSubFolder, iFileName, iShortName, iTrackNumber);
+ 
   return ETrue;
 }
 
@@ -602,7 +600,7 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
   return EFalse;
 }
 
-void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
+void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
 {
   CEikonEnv::Static()->BusyMsgL(R_OGG_STRING_2);
   RFile out;
@@ -619,24 +617,39 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
     line.Num(1);
     tf.Write(line);
      
-    if (err==KErrNone) {
+    HBufC* dat = HBufC::NewLC(KDiskWriteBufferSize);
+    HBufC* tempBuf = HBufC::NewLC(KTFileTextBufferMaxSize*KNofOggDescriptors);
 
+    if (err==KErrNone) {
       for (TInt i=0; i<iFiles->Count(); i++) {
-	line.Num(i);
-	tf.Write(line);
-	if (!(*iFiles)[i]->Write(tf)) break;
+        if (!(*iFiles)[i]->Write(i,tempBuf)) 
+            break;
+          TInt newSize = dat->Length() + tempBuf->Length();
+          if( KDiskWriteBufferSize < newSize ) {
+            // Write to disk. Remove the last '\n' since Write() will add this
+            dat->Des().SetLength( dat->Des().Length()-1 ); 
+            tf.Write(dat->Des());
+            dat->Des().Zero();
+            }
+          dat->Des().Append(tempBuf->Des());
+        }
       }
-    }
-    
+
+    // Final write to disk.
+    dat->Des().SetLength( dat->Des().Length()-1 ); 
+    tf.Write(dat->Des());
+
+    CleanupStack::PopAndDestroy(2); // dat + tempBuf
+
     if (err!=KErrNone) {
       buf.Append(_L("Error at write: "));
       buf.AppendNum(err);
       User::InfoPrint(buf);
       User::After(TTimeIntervalMicroSeconds32(1000000));
     }
-
     out.Close();
     CEikonEnv::Static()->BusyMsgCancel();
+
   } else {
     CEikonEnv::Static()->BusyMsgCancel();
     buf.SetLength(0);

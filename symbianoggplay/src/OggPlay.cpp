@@ -253,7 +253,7 @@ COggPlayAppUi::ConstructL()
 	
 #if defined(SERIES60)
 	CEikStatusPane* sp = CEikonEnv::Static()->AppUiFactory()->StatusPane();
-	sp->MakeVisible(EFalse);
+  sp->MakeVisible(EFalse);
 #endif
 	
 	TParsePtrC aP(Application()->AppFullName());
@@ -741,7 +741,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 #else
 		iAppView->iOggFiles->CreateDb(iCoeEnv->FsSession());
 #endif
-		iAppView->iOggFiles->WriteDb(iDbFileName, iCoeEnv->FsSession());
+		iAppView->iOggFiles->WriteDbL(iDbFileName, iCoeEnv->FsSession());
 		TBuf<16> dummy;
 		iAppView->FillView(ETop, ETop, dummy);
 		break;
@@ -1118,15 +1118,13 @@ COggPlayAppUi::ReadIniFile()
 		parse.Val(iSettings.iManeuvringSpeed);
 	};
 
-  if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-    parse.Val(iSettings.iUserHotkeys[TOggplaySettings::EFastForward]);
-	};
-
-  if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-    parse.Val(iSettings.iUserHotkeys[TOggplaySettings::ERewind]);
-	};
+  for( TInt j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
+    {
+    if (tf.Read(line) == KErrNone) {
+		  TLex parse(line);
+      parse.Val(iSettings.iUserHotkeys[j]);
+      }
+  	}
 
   } // version 2 onwards
 
@@ -1150,7 +1148,7 @@ COggPlayAppUi::WriteIniFile()
 
   // this should do the trick for forward compatibility:
   TInt magic=0xdb;
-  TInt iniversion=2;
+  TInt iniversion=3;
   
   num.Num(magic);
   tf.Write(num);
@@ -1198,12 +1196,13 @@ COggPlayAppUi::WriteIniFile()
 	tf.Write(num);
  	num.Num(iSettings.iManeuvringSpeed);
 	tf.Write(num);
-  num.Num(iSettings.iUserHotkeys[TOggplaySettings::EFastForward]);
-	tf.Write(num);
-  num.Num(iSettings.iUserHotkeys[TOggplaySettings::ERewind]);
-	tf.Write(num);
 
-  	
+  for( TInt j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
+    {
+    num.Num(iSettings.iUserHotkeys[j]);
+	  tf.Write(num);
+  	}
+
 	//please increase iIniversion when adding stuff
 	
 	out.Close();
