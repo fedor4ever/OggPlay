@@ -1,0 +1,17 @@
+// Test functions
+
+
+TARGET        oggvorbistest.exe
+TARGETTYPE    exe
+UID 0
+
+SOURCEPATH    .
+SOURCE        console.cpp oggvorbistest.cpp
+
+USERINCLUDE   .
+SYSTEMINCLUDE \Epoc32\include
+SYSTEMINCLUDE \Epoc32\include\libc
+
+LIBRARY       euser.lib estlib.lib
+LIBRARY       libvorbisidec.lib
+LIBRARY		  mediaclientaudiostream.lib 
