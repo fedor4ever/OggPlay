@@ -7,7 +7,6 @@
 #include <aknappui.h>
 #include <avkon.rsg>
 #include <eikapp.h>
-#include "OggLog.h"
 #endif
 
 
@@ -126,7 +125,6 @@ void COggFilesSearchContainer::Draw(const TRect& aRect) const
 
 COggFilesSearchContainer::~COggFilesSearchContainer ()
     {
-    TRACEF(COggLog::VA(_L("XContYt") ));  // FIXIT
     if (iFontLatinPlain)
     {
         CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFontLatinPlain);
@@ -164,11 +162,10 @@ void COggFilesSearchContainer::UpdateControl()
     if (  iBackgroundProcess->FileSearchIsProcessDone()) {
         iCba->SetCommandSetL(  R_AVKON_SOFTKEYS_OK_EMPTY );
         iCba->DrawNow();
-        TRACEF(COggLog::VA(_L("XisDone") ));  // FIXIT
     }
 #endif
 
-    DrawDeferred();
+    DrawNow();
     iFishPosition = iFishPosition - 5;
     if (iFishPosition <5)
         iFishPosition = 100;
