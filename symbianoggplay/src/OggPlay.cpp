@@ -358,7 +358,8 @@ void COggPlayAppUi::PostConstructL()
 
   if ( iIsRunningEmbedded || (iSettings.iAutoplay && iIsStartup) 
       && iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
-     NextSong();
+		iIsStartup=EFalse; // this is not redundant - needed if there's an error in NextSong()
+    NextSong();
 	}
   iIsStartup=EFalse;
 
