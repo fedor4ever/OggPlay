@@ -17,7 +17,6 @@
  */
 
 /* OggUserHotkeys.cpp - Series 60 only.
- * Contains class 'COggUserHotkeysData' and 'COggUserHotkeys'
  * Let's the user assign hotkeys (0..9,*,#) for specified actions like FWD and REW.
  */
 
@@ -33,56 +32,28 @@
 
 class CEikTextListBox;
 
-const TInt ENoHotkey = -1;
-
-
-/// Data store for COggUserHotkeys
-//
-class COggUserHotkeysData : public CBase
-  {
-public:
-  enum THotkeys {
-    EFastForward,
-    ERewind,
-    ENofHotkeys,
-    ENotAssigned = ENofHotkeys
-    };
-  
-  static COggUserHotkeysData* NewL();
-
-  ~COggUserHotkeysData();
-
-  THotkeys Hotkey( TInt aScanCode ) const;
-
-private:
-
-  void InternalizeModelL();
-  void ExternalizeModelL() const;
-
-  void SetHotkey( TInt aRow, TInt aScanCode );
-
-  TInt iHotkeys[ENofHotkeys];
-  TFileName modelFileName;
-  friend class COggUserHotkeys;
-  };
-
 /// Control hosting listbox for user hotkey assignments.
 //
 class COggUserHotkeys : public CCoeControl
 {
 public:
-  COggUserHotkeys( COggUserHotkeysData& aData );
+  COggUserHotkeys( TOggplaySettings& aData );
   void ConstructL(const TRect& aRect);
   ~COggUserHotkeys();
 
-private:
+  static TOggplaySettings::THotkeys Hotkey( TInt aScanCode, TOggplaySettings* aData );
+
+private : // New
 	void RefreshListboxModel();
+  void SetHotkey( TInt aRow, TInt aScanCode );
+
+private : // Framework
   TInt CountComponentControls() const;
   CCoeControl* ComponentControl(TInt aIndex) const;
   TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType );
 
 private:
-  COggUserHotkeysData& iData;
+  TOggplaySettings& iData;
   CEikTextListBox *iListBox;
   };
 #endif

@@ -87,9 +87,12 @@
 #define ogg_settings                 "Settings"  // in the menu
 #define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
 #define ogg_filescanmode             "File scan mode"
+#define ogg_maneuvring_speed         "Auto Change Dir"
 #define ogg_autostart                "Autoplay on start"
 #define ogg_fullscan                 "Full Scan"
 #define ogg_mmcdir                   "E:\Ogg"
+#define ogg_normal                   "Normal"
+#define ogg_fast                     "Fast"
 #define ogg_on                       "On"
 #define ogg_off                      "Off"
 #define ogg_popup_on                 "Enabled"

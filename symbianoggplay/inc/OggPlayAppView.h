@@ -115,7 +115,6 @@ public:
   TBuf<512>             iCurrentSong;
   TOggFiles*            iOggFiles;
   TCallBack*            iCallBack;
-  COggUserHotkeysData*  iHotkeys;
 
 private:
 

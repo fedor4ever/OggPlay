@@ -253,6 +253,13 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			},
 		AVKON_SETTING_ITEM
 			{
+			identifier = EOggSettingManeuvringSpeed;
+			setting_page_resource = r_oggplay_maneuvring_speed;
+			associated_resource = r_oggplay_maneuvring_speed_setting_item_list;
+			name = ogg_maneuvring_speed;
+			},
+		AVKON_SETTING_ITEM
+			{
 			identifier=EOggSettingAutoPlayId;
 			setting_page_resource=r_oggplay_binary_setting_page;
 			associated_resource=r_oggplay_popup_setting_binary_texts;
@@ -302,6 +309,40 @@ RESOURCE ARRAY r_oggplay_scandir_item_array
 // -------------------------------------------------------------------------
 // 
 
+RESOURCE AVKON_SETTING_PAGE r_oggplay_maneuvring_speed
+    {   
+    label = ogg_maneuvring_speed;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_maneuvring_speed_setting_item_list
+    {
+    setting_texts_resource = r_oggplay_maneuvring_speed_setting_page_list;
+    popped_up_texts_resource = r_oggplay_maneuvring_speed_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_maneuvring_speed_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_normal; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_fast; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_off; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_maneuvring_speed_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_normal; },
+		LBUF { txt = ogg_fast; },
+		LBUF { txt = ogg_off; }
+		};
+    }
+
+// -------------------------------------------------------------------------
+// 
+
 RESOURCE AVKON_SETTING_PAGE r_oggplay_binary_setting_page
 	{
 	number=4;
@@ -334,10 +375,8 @@ RESOURCE ARRAY r_oggplay_popped_up_on_off_texts
 		};
 	}
 
-RESOURCE LISTBOX r_user_hotkey_setting_list
-{
-  flags = EAknListBoxSelectionList;
-}
+// CBA's (Softkey) definitions
+///////////////////////////////////////////////////////////////////////////////
 
 RESOURCE CBA r_user_hotkeys_cba
 {
@@ -363,12 +402,15 @@ RESOURCE CBA r_play_cba
   };
 }  
 
+// User hotkey listbox settings resources (listbox is code only)
+///////////////////////////////////////////////////////////////////////////////
+
 RESOURCE ARRAY r_user_hotkey_items
 {
   items = {
+    LBUF { txt = ogg_hotkey_none; },
     LBUF { txt = ogg_format_text_fast_forward; },
-	LBUF { txt = ogg_format_text_rewind; },
-	LBUF { txt = ogg_hotkey_none; }
+	LBUF { txt = ogg_format_text_rewind; }
   };
 }
 

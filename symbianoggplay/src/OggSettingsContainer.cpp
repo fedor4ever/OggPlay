@@ -31,6 +31,9 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   case EOggSettingScanDir:
     return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
       iData.iScanmode);
+  case EOggSettingManeuvringSpeed:
+    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
+      iData.iManeuvringSpeed);
   case EOggSettingAutoPlayId:
     return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
       iData.iAutoplay);

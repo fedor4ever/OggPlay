@@ -1058,6 +1058,22 @@ COggPlayAppUi::ReadIniFile()
 		parse.Val(iSettings.iAutoplay);
 	};
 	
+  if (tf.Read(line) == KErrNone) {
+		TLex parse(line);
+		parse.Val(iSettings.iManeuvringSpeed);
+	};
+
+  if (tf.Read(line) == KErrNone) {
+		TLex parse(line);
+    parse.Val(iSettings.iUserHotkeys[TOggplaySettings::EFastForward]);
+	};
+
+  if (tf.Read(line) == KErrNone) {
+		TLex parse(line);
+    parse.Val(iSettings.iUserHotkeys[TOggplaySettings::ERewind]);
+	};
+
+
 	//iViewBy= ETitle;
 	//if (tf.Read(line) == KErrNone) {
 	//TLex parse(line);
@@ -1109,6 +1125,12 @@ COggPlayAppUi::WriteIniFile()
 	num.Num(iSettings.iScanmode);
 	tf.Write(num);
 	num.Num(iSettings.iAutoplay);
+	tf.Write(num);
+ 	num.Num(iSettings.iManeuvringSpeed);
+	tf.Write(num);
+  num.Num(iSettings.iUserHotkeys[TOggplaySettings::EFastForward]);
+	tf.Write(num);
+  num.Num(iSettings.iUserHotkeys[TOggplaySettings::ERewind]);
 	tf.Write(num);
 
   //num.Num(iViewBy);

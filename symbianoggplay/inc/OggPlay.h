@@ -99,15 +99,24 @@ _LIT(KMmcSearchDir,"E:\\Ogg\\");
 class TOggplaySettings
 	{
 public:
-  enum TScanmode
+  enum TScanmode    // COggplayDisplaySettingItemList - COggSettingsContainer
 		{
       EFullScan,
       EMmcOgg,
       EMmmcFull
 		};
   TInt iScanmode;
+  TInt iAutoplay;
+  TInt iManeuvringSpeed;
 
-  TInt iAutoplay;  
+  enum THotkeys {   // COggUserHotkeys
+    ENoHotkey,
+    EFastForward,
+    ERewind,
+    ENofHotkeys
+    //,    ENotAssigned = ENofHotkeys
+    };
+  TInt iUserHotkeys[ENofHotkeys];
 	};
 
 // Forward declarations:
@@ -194,7 +203,7 @@ public:
   COggPlayAppView* iAppView;
   COggPlayback*    iOggPlayback;
   COggActive*      iActive;
-  COggMsgEnv* iOggMsgEnv;
+  COggMsgEnv*      iOggMsgEnv;
 
   // from MPlaybackObserver:
   virtual void NotifyPlayComplete();

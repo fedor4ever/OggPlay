@@ -238,9 +238,9 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
                             TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 	{
 #ifdef SERIES60
-  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+  COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
 
-	iUserHotkeysContainer = new (ELeave) COggUserHotkeys(*iOggViewCtl.iHotkeys );
+	iUserHotkeysContainer = new (ELeave) COggUserHotkeys( appUi->iSettings );
 	iUserHotkeysContainer->SetMopParent(appUi);
 	TRect rec(0,44,176,188); // FIXIT
 	iUserHotkeysContainer->ConstructL( rec );

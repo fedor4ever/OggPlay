@@ -33,10 +33,13 @@
 #include <stdlib.h>
 #include "OggTremor.h"
 
-
+// S60 file-listbox maneuvring speed constants
 const TInt KCallBackPeriod = 75000;  /** Time (usecs) between canvas Refresh() for graphics updating */
-const TInt KUserInactivityTimeoutMSec = 1600;
-const TInt KUserInactivityTimeoutTicks = KUserInactivityTimeoutMSec * 1000 / KCallBackPeriod;
+const TInt KUserInactivityTimeoutMSecNormal = 1600;
+const TInt KUserInactivityTimeoutTicksNormal = KUserInactivityTimeoutMSecNormal * 1000 / KCallBackPeriod;
+const TInt KUserInactivityTimeoutMSecFast = 400;
+const TInt KUserInactivityTimeoutTicksFast = KUserInactivityTimeoutMSecFast * 1000 / KCallBackPeriod;
+
 const TInt KFfRwdStep=20000;
 
 #if defined(UIQ)
@@ -82,8 +85,6 @@ COggPlayAppView::~COggPlayAppView()
   }
 
   delete iOggFiles;
-
-  IFDEF_S60(delete iHotkeys;)
 }
 
 void
@@ -99,8 +100,6 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iOggFiles= new TOggFiles(iApp->iOggPlayback);
  
   iControls = new(ELeave)CArrayPtrFlat<CCoeControl>(10);
-
-  IFDEF_S60( iHotkeys = COggUserHotkeysData::NewL(); )
 
   iIconFileName.Copy(iApp->Application()->AppFullName());
   iIconFileName.SetLength(iIconFileName.Length() - 3);
@@ -1266,11 +1265,23 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         TInt idx= iListBox[iMode]->CurrentItemIndex();
         if (aKeyEvent.iScanCode==EOggDown) {
           SelectSong(idx+1);
-          iUserInactivityTickCount = KUserInactivityTimeoutTicks;
+          // FIXIT -> Code is ugly and should not even be here 
+          if( iApp->iSettings.iManeuvringSpeed == 0 )
+            iUserInactivityTickCount = KUserInactivityTimeoutTicksNormal;
+          else if( iApp->iSettings.iManeuvringSpeed == 1 )
+            iUserInactivityTickCount = KUserInactivityTimeoutTicksFast;
+          else
+            iUserInactivityTickCount = -1;
           return EKeyWasConsumed;
         } else if (aKeyEvent.iScanCode==EOggUp && idx>0) {
           SelectSong(idx-1);
-          iUserInactivityTickCount = KUserInactivityTimeoutTicks;
+          // FIXIT -> Code is ugly and should not even be here 
+          if( iApp->iSettings.iManeuvringSpeed == 0 )
+            iUserInactivityTickCount = KUserInactivityTimeoutTicksNormal;
+          else if( iApp->iSettings.iManeuvringSpeed == 1 )
+            iUserInactivityTickCount = KUserInactivityTimeoutTicksFast;
+          else
+            iUserInactivityTickCount = -1;
           return EKeyWasConsumed;
         } 
       } 
@@ -1328,12 +1339,12 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       else iApp->HandleCommandL(EOggPlay);
     return EKeyWasConsumed;
     } 
-    else if(iHotkeys->Hotkey(code) == COggUserHotkeysData::EFastForward) {
+    else if(COggUserHotkeys::Hotkey(code,&iApp->iSettings) == TOggplaySettings::EFastForward) {
       TInt64 pos=iApp->iOggPlayback->Position();
       pos+=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
       return EKeyWasConsumed;
-    } else if(iHotkeys->Hotkey(code) == COggUserHotkeysData::ERewind) {
+    } else if(COggUserHotkeys::Hotkey(code,&iApp->iSettings) == TOggplaySettings::ERewind) {
       TInt64 pos=iApp->iOggPlayback->Position();
       pos-=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
