@@ -3,7 +3,7 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA
 ;
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,97,0
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,98,0
 ;
 ; 0x101F6F88 for S60 v0.9 and later
 (0x101F6F88),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}

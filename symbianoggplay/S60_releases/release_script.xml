@@ -20,7 +20,7 @@
   <target name="CreateSIS" depends="OggPlay,skins,recognizer">
      <exec executable="subst" >  <arg line="x: ${epocroot}"/>  </exec> 
      <exec dir="x:\${oggplaydir}\install" executable="makesis.exe" failonerror="true">
-        <arg line="oggplay_lang_urel.s60.pkg oggplay_s60.SIS"/>	
+        <arg line="oggplay.s60.pkg oggplay_s60.SIS"/>	
      </exec> 
      <exec dir="x:\${oggplaydir}\install" executable="makesis.exe" failonerror="true">
         <arg line="recognizer.s60.pkg ogg_recognizer.SIS"/>	
