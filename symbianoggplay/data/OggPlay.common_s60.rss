@@ -87,6 +87,26 @@ RESOURCE DIALOG r_dialog_infowin {
   };
 }
 
+
+RESOURCE DIALOG r_dialog_files_search {
+  buttons =  R_AVKON_SOFTKEYS_BACK; 
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type =  EOggFileSearchControl;
+	id =    EOggScrollableTextDialog;
+	control = FILESEARCHCONTROL
+	{
+	height= 75;
+	title = ogg_filescan_title;
+    dirScannedStr =ogg_filescan_label1;
+    filesFoundStr =ogg_filescan_label2;
+	};
+    }	
+  };
+}
+
+
 RESOURCE DIALOG r_dialog_info {
   title   = ogg_file_prop;
   buttons = R_OGG_DIALOG_BUTTONS1;

@@ -7,3 +7,12 @@ STRUCT SCROLLABLERICHTEXT
 	WORD width  = 176;
 	WORD height = 100;
 	}
+
+STRUCT FILESEARCHCONTROL
+    {
+	WORD width  = 176;
+	WORD height = 100;
+	LTEXT title = "";
+	LTEXT dirScannedStr = "";
+	LTEXT filesFoundStr = "";
+    }

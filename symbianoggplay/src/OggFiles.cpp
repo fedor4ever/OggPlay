@@ -270,7 +270,17 @@ void TOggFiles::CreateDb(RFs& session)
 }
 
 void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
-  {
+{
+    if (AddDirectoryStart(aDir,session) ==KErrNone) {
+        while ( !FileSearchIsProcessDone() ) {
+            FileSearchStepL();
+        }
+    }
+    AddDirectoryStop();
+}
+
+TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
+{
   TRACE(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir ));
 
   // Check if the drive is available (i.e. memory stick is inserted)
@@ -282,39 +292,57 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
 #endif
     {
     TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
-    return;
+      return KErrNotFound;
     }
  
-  CDirScan* ds = CDirScan::NewL(session);
-  TRAPD(err,ds->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
+    iDs = CDirScan::NewL(session);
+    TRAPD(err,iDs->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) 
     {
     TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aDir ));
-    delete ds; ds=0;
-    return;
+        delete iDs; iDs=0;
+        return KErrNotFound;
     }
+    iDirScanFinished = EFalse;
+    iDirScanSession = &session;
+    iDirScanDir = const_cast < TDesC *> (&aDir);
+    iNbDirScanned = 0;
+    iNbFilesFound = 0;
+    return KErrNone;
+}
 
+void TOggFiles::AddDirectoryStop()
+{
+  delete iDs; iDs=0;
+  iOggPlayback->ClearComments();
+}
+
+void  TOggFiles::FileSearchStepL()
+{
   CDir* c=0;
-  for(;;) 
-    {
-    TRAPD(err,ds->NextL(c));
+    TRAPD(err,iDs->NextL(c));
     if (err!=KErrNone) 
       {
-      TRACEF(COggLog::VA(_L("Unable to scan directory %S for oggfiles"), &aDir ));
-      delete ds; ds=0;
+        TRACEF(COggLog::VA(_L("Unable to scan directory %S for oggfiles"), &iDirScanDir ));
+        delete iDs; iDs=0;
+        iDirScanFinished = ETrue;
       return;
       }
 
-	  if (c==0) break;
+    if (c==0) 
+    {
+        iDirScanFinished = ETrue;
+        return;
+    }
 
     HBufC* fullname = HBufC::NewLC(KMaxFileLength);
     HBufC* path = HBufC::NewLC(KMaxFileLength);
-
+    iNbDirScanned++;
     for (TInt i=0; i<c->Count(); i++) 
       {
       const TEntry e= (*c)[i];
 
-      fullname->Des().Copy(ds->FullPath());
+        fullname->Des().Copy(iDs->FullPath());
       fullname->Des().Append(e.iName);
 
       TParsePtrC p( fullname->Des() );
@@ -324,7 +352,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
     	  TBuf<256> shortname;
 	      shortname.Append(e.iName);
 	      shortname.Delete(shortname.Length()-4,4); // get rid of the .ogg extension
-        path->Des().Copy(ds->AbbreviatedPath());
+            path->Des().Copy(iDs->AbbreviatedPath());
 
 	      if (path->Des().Length()>1 && path->Des()[path->Des().Length()-1]==L'\\')
 	        path->Des().SetLength( path->Des().Length()-1); // get rid of trailing back slash
@@ -344,6 +372,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
 				        iOggPlayback->TrackNumber());
 	      
 	        iFiles->AppendL(o);
+                iNbFilesFound++;
           }
         else
           {
@@ -353,10 +382,33 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
       }
     delete c; c=0;
     CleanupStack::PopAndDestroy(2); // fullname + path
-    }
-  delete ds; c=0;
-  iOggPlayback->ClearComments();
-  }
+}
+
+TBool TOggFiles::FileSearchIsProcessDone() const
+{
+    TBuf <100> a;
+    a.Format(_L("FileSearchIsProcessDone %i"), iDirScanFinished);
+    RDebug::Print(a);
+    return iDirScanFinished;
+};
+
+void  TOggFiles::FileSearchProcessFinished()
+{// Not used
+};
+void  TOggFiles::FileSearchDialogDismissedL(TInt /*aButtonId*/)
+{// Not used
+};
+
+TInt  TOggFiles::FileSearchCycleError(TInt aError)
+{// Not used
+    return(aError);
+};
+void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles)
+{
+    aNbDir = iNbDirScanned;
+    aNbFiles = iNbFilesFound;
+};
+
 
 TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
 

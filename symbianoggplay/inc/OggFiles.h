@@ -23,6 +23,7 @@
 #include "gulutil.h"
 
 #include "OggPlay.h"
+#include "OggFilesSearchDialogs.h"
 
 class COggPlayback;
 
@@ -80,7 +81,7 @@ class TOggKey : public TKeyArrayFix
   TOggFile*                iSample;
 };
 
-class TOggFiles : public CBase
+class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
 {
  public:
 
@@ -100,12 +101,24 @@ class TOggFiles : public CBase
   void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
   static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName);
+  
+  
+  TInt AddDirectoryStart(const TDesC& aDir, RFs& session);
+  void AddDirectoryStop();
+ public:
+     // from MOggFilesSearchBackgroundProcess
+     void  FileSearchStepL();
+     TBool FileSearchIsProcessDone() const ;
+     void  FileSearchProcessFinished();
+     void  FileSearchDialogDismissedL(TInt /*aButtonId*/);
+     TInt  FileSearchCycleError(TInt aError);
+     void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles);
+     void ClearFiles();
 
  protected:
 
   void AddDirectory(const TDesC& aDir, RFs& session);
   void AddFile(const TDesC& aFile);
-  void ClearFiles();
 
   CArrayPtrFlat<TOggFile>* iFiles; 
   COggPlayback*            iOggPlayback;
@@ -117,6 +130,14 @@ class TOggFiles : public CBase
   TOggKey                  iOggKeyFileNames;
   TOggKey                  iOggKeyTrackTitle;
   TInt                     iVersion;
+
+  // Following members are only valid during the directory search:
+  CDirScan* iDs;
+  TBool     iDirScanFinished;
+  TDesC   * iDirScanDir;
+  RFs     * iDirScanSession;
+  TInt      iNbDirScanned;
+  TInt      iNbFilesFound;
 
 };
 

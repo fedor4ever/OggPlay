@@ -120,9 +120,11 @@ TOggParser::ReadToken()
   TBool start(ETrue),stop(EFalse);
   do {
     c= fgetc(iFile);
-    if (start && c==32) continue;
+    //32 = Space
+    // 9 = Tab
+    if (start && (c==32 || c==9)) continue;
     start= EFalse;
-    stop= c==32 || c==EOF || c==13 || c==10 || c==12;
+    stop= c==32 || c == 9 || c==EOF || c==13 || c==10 || c==12;
     if (!stop) iToken.Append((unsigned char)c);
   } while (!stop);
   TBool eol= c!=32;

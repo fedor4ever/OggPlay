@@ -37,6 +37,10 @@
 #define ogg_play "Play"
 #define ogg_pause "Pause"
 
+#define ogg_filescan_title "Looking for ogg files"
+#define ogg_filescan_label1 "Directories scanned:"
+#define ogg_filescan_label2 "Number of .ogg found:"
+
 #define ogg_text_error_1 "COggButton: Error reading mask bitmap."
 #define ogg_text_error_2 "COggCanvas: Error converting background bitmap: "
 #define ogg_text_error_3 "COggPlayAppUi: Cannot set process priority: Err code "

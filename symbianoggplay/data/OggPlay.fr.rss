@@ -36,6 +36,9 @@
 #define ogg_stop "Stop"
 #define ogg_play "Play"
 #define ogg_pause "Pause"
+#define ogg_filescan_title "Looking for ogg files"
+#define ogg_filescan_label1 "Directories scanned:"
+#define ogg_filescan_label2 "Number of .ogg found:"
 
 #define ogg_text_error_1 "COggButton: Erreur de lecture de l'image de masque."
 #define ogg_text_error_2 "COggCanvas: Erreur de conversion de l'image d'arrière-plan:"

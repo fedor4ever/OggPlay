@@ -35,6 +35,9 @@
 #define ogg_stop "Stop"
 #define ogg_play "Wiedergabe"
 #define ogg_pause "Pause"
+#define ogg_filescan_title "Looking for ogg files"
+#define ogg_filescan_label1 "Directories scanned:"
+#define ogg_filescan_label2 "Number of .ogg found:"
 
 
 #define ogg_text_error_1 "COggButton: Fehler beim lesen der Maske."
