@@ -22,6 +22,7 @@
 #include "OggPlay.h"
 
 #include <coecntrl.h>
+#if defined(SERIES60)
 #include <aknsettingitemlist.h>  
 
 
@@ -36,6 +37,7 @@ protected:
 private:
   TOggplaySettings& iData;
 };
+#endif
 
 
 /**
@@ -69,7 +71,9 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
         TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
 
     private: //data
+#if defined(SERIES60)
         COggplayDisplaySettingItemList* iListBox;
+#endif
     };
 
 #endif

@@ -30,13 +30,15 @@ NAME OGGP
 #define R_OGG_DIALOG_BUTTONS2 R_EIK_BUTTONS_CANCEL_DONE
 #define R_OGG_DIALOG_BUTTONS1 R_EIK_BUTTONS_CONTINUE
 
+#include "../inc/OggDialogs.rh"
+
 #include "OggPlay.hrh"
 
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf=""; }
 
 //# Version string
-#define ogg_txt_version "OggPlay 1.00"
+#define ogg_txt_version "OggPlay 1.11"
 
 
 RESOURCE EIK_APP_INFO
@@ -212,6 +214,24 @@ RESOURCE DIALOG r_dialog_info {
   };
 }
 
+RESOURCE DIALOG r_dialog_files_search {
+  buttons = R_EIK_BUTTONS_CANCEL; 
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type =  EOggFileSearchControl;
+	id =    EOggScrollableTextDialog;
+	control = FILESEARCHCONTROL
+	{
+	height= 90;
+	title = ogg_filescan_title;
+    dirScannedStr =ogg_filescan_label1;
+    filesFoundStr =ogg_filescan_label2;
+	};
+    }	
+  };
+}
+
 RESOURCE ARRAY r_hotkey_array {
   items= {
     LBUF { txt=ogg_hotkey_none; },
@@ -235,7 +255,7 @@ RESOURCE MENU_PANE r_file_menu
 {
   items= {
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
-      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
+      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat2;
                   flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
@@ -284,6 +304,10 @@ RESOURCE TBUF r_ogg_error_20 { buf=ogg_text_error_20; }
 RESOURCE TBUF r_ogg_error_21 { buf=ogg_text_error_21; }
 RESOURCE TBUF r_ogg_error_22 { buf=ogg_text_error_22; }
 RESOURCE TBUF r_ogg_error_23 { buf=ogg_text_error_23; }
+RESOURCE TBUF r_ogg_error_24 { buf=ogg_text_error_24; }
+RESOURCE TBUF r_ogg_error_25 { buf=ogg_text_error_25; }
+RESOURCE TBUF r_ogg_error_26 { buf=ogg_text_error_26; }
+RESOURCE TBUF r_ogg_error_27 { buf=ogg_text_error_27; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }
@@ -297,4 +321,15 @@ RESOURCE TBUF r_ogg_string_9 { buf=ogg_text_string_9; }
 RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
 RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
+
+RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view title
+RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title
+RESOURCE TBUF32 r_ogg_repeat_on    { buf=ogg_repeat_on; }			// New
+RESOURCE TBUF32 r_ogg_repeat_off   { buf=ogg_repeat_off; }			// New
+RESOURCE TBUF32 r_ogg_random_on    { buf=ogg_random_on; }			// New
+RESOURCE TBUF32 r_ogg_random_off   { buf=ogg_random_off; }			// New
+RESOURCE TBUF32 r_ogg_back_dir     { buf=ogg_back_dir; }			// Oggs listbox '..' string
+RESOURCE TBUF32 r_ogg_backspace    { buf=ogg_backspace; }
+RESOURCE TBUF32 r_ogg_shift        { buf=ogg_shift; }
+RESOURCE TBUF32 r_ogg_by           { buf=ogg_by; }
 

@@ -1,11 +1,16 @@
-&EN,GE,IT,FR,TU,DU,SP,SW
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,97,0
-(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID"}
-(0x101F617B),2,0,0,{"UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID"}
+&EN,GE,IT,FR,TU,DU,SP,SW,DA,CA
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,10,0
+(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID"}
+(0x101F617B),2,0,0,{"UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID"}
 "OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
-{"data/OggPlay.rsc" "data/OggPlay.ge.rsc" "data/OggPlay.it.rsc" "data/OggPlay.fr.rsc" "data/OggPlay.tu.rsc" "data/OggPlay.du.rsc" "data/OggPlay.sp.rsc" "data/OggPlay.sw.rsc"}-"!:\system\apps\OggPlay\OggPlay.rsc"
-"OggPlay.mbm"-"!:\system\apps\OggPlay\OggPlay.mbm"
+{"data/OggPlay.rsc" "data/OggPlay.ge.rsc" "data/OggPlay.it.rsc" "data/OggPlay.fr.rsc" "data/OggPlay.tu.rsc" "data/OggPlay.du.rsc" "data/OggPlay.sp.rsc" "data/OggPlay.sw.rsc" "data/OggPlay.da.rsc" "data/OggPlay.ca.rsc"}-"!:\system\apps\OggPlay\OggPlay.rsc"
+IF MachineUID=0x101F408B
+"bitmaps/OggPlay.mbm"-"!:\system\apps\OggPlay\OggPlay.mbm"
 "OggPlay.skn"-"!:\system\apps\OggPlay\OggPlay.skn"
+ELSE
+"bitmaps/OggPlayP900.mbm"-"!:\system\apps\OggPlay\OggPlay.mbm"
+"OggPlayP900.skn"-"!:\system\apps\OggPlay\OggPlay.skn"
+ENDIF
 "Symbian.skn"-"!:\system\apps\OggPlay\Symbian.skn"
 "bitmaps/Symbian.mbm"-"!:\system\apps\OggPlay\Symbian.mbm"

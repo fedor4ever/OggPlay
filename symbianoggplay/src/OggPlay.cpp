@@ -403,6 +403,7 @@ COggPlayAppUi::~COggPlayAppUi()
 		DeregisterView(*iFCView);
 		delete iFCView;
 	}
+#if defined(SERIES60)
 	if (iSettingsView) {
 		DeregisterView(*iSettingsView);
   	delete iSettingsView;
@@ -412,6 +413,7 @@ COggPlayAppUi::~COggPlayAppUi()
     DeregisterView(*iUserHotkeys);
     delete iUserHotkeys;
     }
+#endif
 
 	if (iActive) { delete iActive; iActive=0; }
 	if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }

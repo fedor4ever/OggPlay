@@ -24,9 +24,11 @@
 #define ogg_hotkey_flipopen "Flip open"
 #define ogg_skin_default "default"
 #define ogg_file_info "File info..."
-#define ogg_repeat_on         "Repeat is on"
-#define ogg_repeat_off        "Repeat is off"
-
+#define ogg_repeat_on         "Repeat is on"						// New
+#define ogg_repeat_off        "Repeat is off"						// New
+#define ogg_shuffle_playlist "Shuffle playlist"
+#define ogg_repeat "Repeat - %S"
+#define ogg_repeat2 "Repeat"
 #define ogg_find_files "Find new files"
 #define ogg_skins "Skins"
 #define ogg_options_cascade "Options..." 

@@ -33,7 +33,7 @@ NAME OGGP
 #include <avkon.loc>
 
 #include "OggPlay.hrh" 
-#include "oggdialogs.rh"
+#include "OggDialogs.rh"
 
 #define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OPTIONS_BACK 
 

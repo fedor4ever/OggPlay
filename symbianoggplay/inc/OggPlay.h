@@ -31,7 +31,6 @@
 
 const TInt KFullScreenWidth = 176;
 const TInt KFullScreenHeight = 188;
-const TInt ENoFileSelected = -1;
 
 #else
 #include <qikappui.h>
@@ -42,6 +41,8 @@ const TInt KFullScreenWidth = 208;
 const TInt KFullScreenHeight = 320;
 
 #endif
+
+const TInt ENoFileSelected = -1;
 
 #include <coeccntx.h>  // MCoeControlContex
 #include <e32base.h>
@@ -280,11 +281,13 @@ private:
 
   COggFOView* iFOView;
   COggFCView* iFCView;
+#if defined(SERIES60)
   COggSettingsView* iSettingsView;
+  COggUserHotkeysView* iUserHotkeys;
+#endif
   RArray<TInt> iViewHistoryStack;
   RArray<TInt> iRestoreStack;
   TInt iRestoreCurrent;
-  COggUserHotkeysView* iUserHotkeys;
 };
 
 // COggSongList:

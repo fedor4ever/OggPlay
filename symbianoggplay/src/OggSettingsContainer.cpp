@@ -18,6 +18,7 @@
 
 #include "OggSettingsContainer.h"
 
+#if defined(SERIES60)
 COggplayDisplaySettingItemList::COggplayDisplaySettingItemList(TOggplaySettings& aData)
 : iData(aData)
 {
@@ -51,7 +52,7 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
 		}
   return NULL;
 }
-
+#endif
 
 // ---------------------------------------------------------
 

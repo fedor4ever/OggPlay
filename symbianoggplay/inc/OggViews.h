@@ -75,7 +75,6 @@ public:
   static void DisplayStatusPane( TInt aTitleID );
   static void RemoveStatusPane();
 };
-#endif
 
 class COggSettingsContainer;
 
@@ -111,4 +110,5 @@ class COggUserHotkeysView : public COggViewBase
     COggPlayAppView& iOggViewCtl;
 	};
 
+#endif
 #endif

@@ -1,5 +1,8 @@
 
-#include "..\inc\OggOs.h"
+//#include "..\inc\OggOs.h"
+#include "../inc/OggOs.h"
+
+#include "OggPlay.en.rss"
 
 #if defined(UIQ)
 #include "OggPlay.uiq.rss"

@@ -25,6 +25,9 @@ _LIT(KLogFileName,"Oggplay.log");
 
 COggLog* COggLog::InstanceL() 
   {
+#if defined(UIQ)
+    return 0;
+#else
   COggLog* iInstance =(COggLog*) Dll::Tls();
 
   if( !iInstance ) 
@@ -46,12 +49,16 @@ COggLog* COggLog::InstanceL()
       }
     }
 	return iInstance;
+#endif
   }
 
 
 
 void COggLog::Exit() 
   {
+#if defined(UIQ)
+  return;
+#else
   COggLog* iInstance =(COggLog*) Dll::Tls();
   if( iInstance )
     {
@@ -61,31 +68,41 @@ void COggLog::Exit()
     delete iInstance;
     Dll::SetTls(NULL);
     }
+#endif
   }
 
 
 void COggLog::FilePrint(const TDesC& msg) 
   {
+#if defined(SERIES60)
   InstanceL()->iLog.WriteFormat(msg);
+#endif
   }
 
 
 
 void COggLog::Panic(const TDesC& msg,TInt aReason) 
   {
+#if defined(SERIES60)
   iLog.Write(_L("** Fatal: **"));
   iLog.Write(msg);
+#endif
   User::Panic(_L("OggPlay"),aReason);	
   }
 
 
 const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   {
+#if defined(UIQ)
+    TBuf<16> buf;
+    return buf;
+#else
   VA_LIST list;
   VA_START(list, aLit);
   COggLog::InstanceL()->iBuf.Zero();
   COggLog::InstanceL()->iBuf.AppendFormatList(aLit,list);
   return COggLog::InstanceL()->iBuf;
+#endif
   }
 
 

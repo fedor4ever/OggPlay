@@ -18,14 +18,18 @@
 
 #include <eikappui.h>
 #include <eikmenub.h>
+#if defined(SERIES60)
 #include <aknlists.h>
 #include <akntitle.h>
+#endif
 
 #include "OggLog.h"
 #include "OggViews.h"
 #include "OggPlayAppView.h"
+#if defined(SERIES60)
 #include "OggSettingsContainer.h"
 #include "OggUserHotkeys.h"
+#endif
 
 enum
 {
@@ -177,7 +181,6 @@ void COggS60Utility::RemoveStatusPane()
     // Restore softkeys
   ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
 }
-#endif
 
 ////////////////////////////////////////////////////////////////
 //
@@ -201,21 +204,19 @@ void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*
   CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
   CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
 
-#if defined(SERIES60)
   CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
   if(Cba) {
     Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
     Cba->DrawNow();
   }
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
-#endif
 
   COggS60Utility::DisplayStatusPane(R_OGG_SETTINGS);
 
   if (!iContainer)
     {
     iContainer = new (ELeave) COggSettingsContainer;
-    iContainer->ConstructL( ((CAknAppUi*)CEikonEnv::Static()->AppUi())->ClientRect() );
+    iContainer->ConstructL( ((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect() );
     ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->AddToStackL( *this, iContainer );
     }
 }
@@ -229,9 +230,7 @@ void COggSettingsView::ViewDeactivated()
     iContainer = NULL;
   }
   
-#ifdef SERIES60
   COggS60Utility::RemoveStatusPane();
-#endif
   
 }
 
@@ -266,7 +265,6 @@ TVwsViewId COggUserHotkeysView::ViewId() const
 void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, 
                             TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 	{
-#ifdef SERIES60
   COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
 
   COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
@@ -280,13 +278,11 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
 
   // Added in order to get the CBA drawn
   iOggViewCtl.SetRect( appUi->ApplicationRect() );
-#endif
 	}
 
 
 void COggUserHotkeysView::ViewDeactivated()
   {
-#ifdef SERIES60
   COggS60Utility::RemoveStatusPane();
 
   CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
@@ -294,6 +290,6 @@ void COggUserHotkeysView::ViewDeactivated()
   delete iUserHotkeysContainer;
   iUserHotkeysContainer = NULL;
 
-#endif
   }
 
+#endif

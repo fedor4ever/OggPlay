@@ -27,7 +27,9 @@
 
 #include <coecntrl.h>
 #include <bautils.h>            // BaflUtils
+#if defined(SERIES60)
 #include <aknquerydialog.h>
+#endif
 
 #include "OggPlay.h"
 #include "OggLog.h"

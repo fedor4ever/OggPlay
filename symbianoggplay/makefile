@@ -50,7 +50,7 @@ LIBS=	$(EPOCTRGREL)/euser.lib \
 	$(EPOCTRGREL)/flogger.lib
 
 NAME=OggPlay
-OBJECTS=src/OggPlay.o src/OggPlayAppView.o src/OggDialogs.o src/OggTremor.o src/OggViews.o src/OggControls.o src/OggFiles.o vorbis/window.o vorbis/synthesis.o vorbis/bitwise.o vorbis/block.o vorbis/sharedbook.o vorbis/registry.o vorbis/floor0.o vorbis/floor1.o vorbis/codebook.o vorbis/res012.o vorbis/mapping0.o vorbis/mdct.o vorbis/ivorbisfile.o vorbis/framing.o vorbis/info.o src/OggLog.o
+OBJECTS=src/OggPlay.o src/OggPlayAppView.o src/OggDialogs.o src/OggTremor.o src/OggViews.o src/OggControls.o src/OggFiles.o vorbis/window.o vorbis/synthesis.o vorbis/bitwise.o vorbis/block.o vorbis/sharedbook.o vorbis/registry.o vorbis/floor0.o vorbis/floor1.o vorbis/codebook.o vorbis/res012.o vorbis/mapping0.o vorbis/mdct.o vorbis/ivorbisfile.o vorbis/framing.o vorbis/info.o src/OggLog.o src/OggMsgEnv.o src/OggRateConvert.o src/OggHelperFcts.o
 TARGET=$(NAME).app
 PKGVERS=0,97
 
@@ -60,12 +60,14 @@ U1 = 1000007a
 U2 = 100039ce 
 U3 = 1000A661
 
-CFLAGS = -O -I. -Iinc -Idata -DUID3=0x$(U3) -I$(EPOC)/include/libc -Ivorbis -D_P800 -D_EPOC32_70 -D_ARM_ASSEM_ -Wall -D_LOW_ACCURACY_
-CPPFLAGS += -D_P800 -D_EPOC32_70 -D_ARM_ASSEM_ -D_LOW_ACCURACY_
+CFLAGS = -O -I. -Iinc -Idata -DUID3=0x$(U3) -I$(EPOC)/include/libc -Ivorbis -D_P800 -D_EPOC32_70 -D_ARM_ASSEM_ -Wall
+#-D_LOW_ACCURACY_
+CPPFLAGS += -D_P800 -D_EPOC32_70 -D_ARM_ASSEM_
+#-D_LOW_ACCURACY_
 
 all: $(PKGFILES) $(NAME).sis
 
-$(NAME).sis: $(NAME).app data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc data/$(NAME).tu.rsc data/$(NAME).du.rsc data/$(NAME).sp.rsc data/$(NAME).sw.rsc $(NAME).pkg bitmaps/$(NAME).mbm
+$(NAME).sis: $(NAME).app data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc data/$(NAME).tu.rsc data/$(NAME).du.rsc data/$(NAME).sp.rsc data/$(NAME).sw.rsc data/$(NAME).da.rsc data/$(NAME).ca.rsc $(NAME).pkg bitmaps/$(NAME).mbm
 
 $(TARGET):$(OBJECTS)
 
@@ -74,7 +76,7 @@ $(TARGET):$(OBJECTS)
 #	echo "mbmfile=rednote.mbm" > $(NAME).aifspec
 #	echo "ELangEnglish=$(NAME)" >> $(NAME).aifspec
 
-src/$(NAME).o: data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc data/$(NAME).tu.rsc data/$(NAME).du.rsc data/$(NAME).sp.rsc data/$(NAME).sw.rsc $(NAME).h
+src/$(NAME).o: data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc data/$(NAME).tu.rsc data/$(NAME).du.rsc data/$(NAME).sp.rsc data/$(NAME).sw.rsc data/$(NAME).da.rsc data/$(NAME).ca.rsc $(NAME).h
 
 clean:
 	rm -f $(GENERATED) $(NAME).aifspec vorbis/*.o

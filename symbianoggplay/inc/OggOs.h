@@ -45,7 +45,7 @@ chSTR2(__LINE__) "):" #desc)
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-#define SERIES60
+//#define SERIES60
 
 // Switches at least the splash bitmap
 #define UNSTABLE_RELEASE
@@ -82,7 +82,9 @@ chSTR2(__LINE__) "):" #desc)
 // so that Application drawing have been done.
 #define DELAY_AUDIO_STREAMING_START
 
+#if defined(SERIES60)
 #define SEARCH_OGGS_FROM_ROOT
+#endif
 
 // Use MDCT coeffs to generate the freq analyser
 // Not ready yet for prime time!
