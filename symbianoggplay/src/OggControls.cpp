@@ -54,13 +54,8 @@ TOggParser::TOggParser(const TFileName& aFileName)
   buf.Append(0);
   if ((iFile=wfopen((wchar_t*)buf.Ptr(),L"rb"))==NULL) {
     iState= EFileNotFound;
-    _LIT(KS,"File not found");
-    //OGGLOG.WriteFormat(KS);
- 
     return;
   }
-  _LIT(KSS,"Reading file %s");
-  //OGGLOG.WriteFormat(KSS,aFileName.Ptr());
 
   iState= ESuccess;
 }
@@ -184,11 +179,7 @@ TOggParser::ReadFont()
   TFontSpec fs(name,size);
   if (style==1) fs.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
   CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(result,fs);
-  #if defined(SERIES60)
-    // UIQ_?
-    // Prevent WINS emulator panic
-    CCoeEnv::Static()->ScreenDevice()->ReleaseFont(result);
-  #endif
+
   return result;
 }
 
@@ -424,7 +415,7 @@ COggControl::ReadArguments(TOggParser& p)
   } else if (p.iToken==_L("FocusIcon")) {
     p.Debug(_L("Setting focused icon."));
     CGulIcon* aIcon=p.ReadIcon(iBitmapFile);
-    TSize aSize=aIcon->Bitmap()->SizeInPixels();
+    //TSize aSize=aIcon->Bitmap()->SizeInPixels();
     //if(aSize.iHeight>ih) OGGLOG.WriteFormat(_L("Info: Bitmap height (%d) > control height (%d)"),aSize.iHeight,ih);
     //if(aSize.iWidth>iw) OGGLOG.WriteFormat(_L("Info: Bitmap width (%d)> control width (%d)"),aSize.iWidth,iw);
 
@@ -458,13 +449,18 @@ COggText::COggText() :
 COggText::~COggText()
 {
   if (iText) { delete iText; iText= 0; }
+  if ((iFont) && (iOwnedByControl)) { 
+      CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFont);
+      iFont = 0;
+  }
 }
 
 void 
-COggText::SetFont(CFont* aFont)
+COggText::SetFont(CFont* aFont,TBool ownedByControl )
 {
   iFont= aFont;
   iRedraw= ETrue;
+  iOwnedByControl = ownedByControl;
 }
 
 void
@@ -549,7 +545,7 @@ TBool COggText::ReadArguments(TOggParser& p)
   if (success && p.iToken==_L("Font")) {
     p.Debug(_L("Setting font."));
     CFont* aFont= p.ReadFont();
-    if (aFont) SetFont(aFont);
+    if (aFont) SetFont(aFont, ETrue);
     success= aFont!=0;
   }
   if (success && p.iToken==_L("FontColor")) {
@@ -1193,10 +1189,10 @@ TInt COggSlider::GetPosFromValue(TInt aValue)
   if (!iKnobIcon) return 0;
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
   switch (iStyle) {
-  case 0: return (float)iw/iMaxValue*aValue; break;
-  case 1: return (float)ih/iMaxValue*aValue; break;
-  case 2: return ix+(float)(iw-s.iWidth)/iMaxValue*aValue; break;
-  case 3: return iy+(ih-s.iHeight) - (float)(ih-s.iHeight)/iMaxValue*aValue; break;
+  case 0: return (TInt)((float)iw/iMaxValue*aValue); break;
+  case 1: return (TInt)((float)ih/iMaxValue*aValue); break;
+  case 2: return ix+(TInt)((float)(iw-s.iWidth)/iMaxValue*aValue); break;
+  case 3: return iy+(ih-s.iHeight) - TInt((float)(ih-s.iHeight)/iMaxValue*aValue); break;
   }
   return 0;
 }
@@ -1206,10 +1202,10 @@ TInt COggSlider::GetValueFromPos(TInt aPos)
   if (!iKnobIcon) return 0;
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
   switch (iStyle) {
-  case 0: return (float)aPos*iMaxValue/iw; break;
-  case 1: return (float)aPos*iMaxValue/ih; break;
-  case 2: return (float)(aPos-s.iWidth/2)*iMaxValue/(iw-s.iWidth); break;
-  case 3: return (float)((ih-s.iHeight) - (aPos-s.iHeight/2))*iMaxValue/(ih-s.iHeight); break;
+  case 0: return (TInt)((float)aPos*iMaxValue/iw); break;
+  case 1: return (TInt)((float)aPos*iMaxValue/ih); break;
+  case 2: return (TInt)((float)(aPos-s.iWidth/2)*iMaxValue/(iw-s.iWidth)); break;
+  case 3: return (TInt)((float)((ih-s.iHeight) - (aPos-s.iHeight/2))*iMaxValue/(ih-s.iHeight)); break;
   }
   return 0;
 }
@@ -1405,8 +1401,8 @@ COggScrollBar::GetPosFromValue(TInt aValue)
   if (!iKnobIcon || iMaxValue==0) return 0;
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
   switch (iStyle) {
-  case 0: return ix+iScrollerSize+(float)(iw-s.iWidth-2*iScrollerSize)/iMaxValue*aValue; break;
-  case 1: return iy+iScrollerSize+(float)(ih-s.iHeight-2*iScrollerSize)/iMaxValue*aValue; break;
+  case 0: return ix+iScrollerSize+(TInt)((float)(iw-s.iWidth-2*iScrollerSize)/iMaxValue*aValue); break;
+  case 1: return iy+iScrollerSize+(TInt)((float)(ih-s.iHeight-2*iScrollerSize)/iMaxValue*aValue); break;
   }
   return 0;
 }
@@ -1417,8 +1413,8 @@ COggScrollBar::GetValueFromPos(TInt aPos)
   if (!iKnobIcon) return 0;
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
   switch (iStyle) {
-  case 0: return (float)(aPos-ix-s.iWidth/2-iScrollerSize)*iMaxValue/(iw-s.iWidth-2*iScrollerSize); break;
-  case 1: return (float)(aPos-iy-iScrollerSize-s.iHeight/2)*iMaxValue/(ih-s.iHeight-2*iScrollerSize); break;
+  case 0: return (TInt)((float)(aPos-ix-s.iWidth/2-iScrollerSize)*iMaxValue/(iw-s.iWidth-2*iScrollerSize)); break;
+  case 1: return (TInt)((float)(aPos-iy-iScrollerSize-s.iHeight/2)*iMaxValue/(ih-s.iHeight-2*iScrollerSize)); break;
   }
   return 0;
 }
@@ -1475,7 +1471,7 @@ COggAnalyzer::COggAnalyzer() :
 {
   iValues= new TInt[iNumValues];
   iPeaks= new TInt[iNumValues];
-  iDx= (float)iw/iNumValues;
+  iDx= (TInt)((float)iw/iNumValues);
 }
 
 COggAnalyzer::~COggAnalyzer()
@@ -1489,7 +1485,7 @@ void
 COggAnalyzer::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
 {
   COggControl::SetPosition(ax,ay,aw,ah);
-  iDx= (float)iw/iNumValues;
+  iDx= (TInt)((float)iw/iNumValues);
 }
 
 void
@@ -1622,7 +1618,7 @@ void COggAnalyzer::RenderFrequencies(short int data[256])
     for(c = xscale[i], y = 10; c < xscale[i + 1]; c++)
       if (data[c] < y) y= data[c];
 
-    iValues[i]= (float)(y+100.)/110.*ih;
+    iValues[i]= (TInt)((float)(y+100.)/110.*ih);
   }
   
   iRedraw= ETrue;
@@ -1694,6 +1690,10 @@ COggListBox::~COggListBox()
     delete iData;
     iData=0;
   }
+  if ((iFont) && (iOwnedByControl)) {
+      CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFont);
+      iFont = 0;
+  }
 }
 
 void
@@ -1710,10 +1710,11 @@ COggListBox::SetText(CDesCArray* aText)
 }
 
 void
-COggListBox::SetFont(CFont* aFont)
+COggListBox::SetFont(CFont* aFont, TBool aOwnedByControl)
 {
   iFont= aFont;
   iRedraw= ETrue;
+  iOwnedByControl = aOwnedByControl;
 }
 
 void
@@ -1964,7 +1965,7 @@ TBool COggListBox::ReadArguments(TOggParser& p)
     p.Debug(_L("Setting font."));
     CFont* aFont= p.ReadFont();
     success= aFont!=0;
-    if (success) SetFont(aFont);
+    if (success) SetFont(aFont, ETrue);
   }
   if (success && p.iToken==_L("FontColor")) {
     p.Debug(_L("Setting font color."));

@@ -173,7 +173,7 @@ class COggText : public COggControl {
   virtual ~COggText();
 
   void SetText(const TDesC& aText);
-  void SetFont(CFont* aFont);
+  void SetFont(CFont* aFont, TBool ownedByControl = EFalse);
   void SetFontColor(TRgb aColor);
   void ScrollNow();  // restart the text scrolling
 
@@ -186,6 +186,7 @@ class COggText : public COggControl {
 
   HBufC* iText;
   CFont* iFont;
+  TBool  iOwnedByControl;
   TRgb   iFontColor;
 
   TInt   iTextWidth;
@@ -440,7 +441,8 @@ class COggListBox : public COggControl
 
   void SetText(CDesCArray* aText);
   void SetVertScrollBar(COggScrollBar* aScrollBar);
-  void SetFont(CFont* aFont);
+  void SetFont(CFont* aFont, TBool ownedByControl = EFalse);
+    
   void SetFontColor(TRgb aColor);
   void SetFontColorSelected(TRgb aColor);
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
@@ -475,6 +477,7 @@ class COggListBox : public COggControl
   void UpdateScrollBar();
 
   CFont* iFont;
+  TBool  iOwnedByControl;
   TRgb   iFontColor;
   TRgb   iFontColorSelected;
   TInt   iTop;

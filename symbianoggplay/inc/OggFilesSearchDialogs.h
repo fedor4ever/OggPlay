@@ -65,6 +65,9 @@ class COggFilesSearchContainer : public CCoeControl
          
     private:
         CArrayPtrFlat <CEikLabel> * iLabels;
+        
+        CFont* iFontLatinPlain;
+        CFont* iFontLatinBold12;
         COggFilesSearchAO * iAO;
         CEikButtonGroupContainer * iCba;
         CFbsBitmap * ifish1; 

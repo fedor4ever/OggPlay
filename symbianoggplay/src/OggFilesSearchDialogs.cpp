@@ -41,18 +41,16 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     SetSize(containerSize);
     
     // Prepare fonts.
-    CFont* fontLatinPlain = NULL;
     TFontSpec fs(_L("LatinPlain12"), 0);
-    CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(fontLatinPlain,fs);
-    CFont* fontLatinBold12 = NULL;
+    CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinPlain,fs);
     TFontSpec fs2(_L("LatinBold12"), 0);
-    CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(fontLatinBold12,fs2);
+    CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinBold12,fs2);
 
     
     iLabels = new(ELeave)CArrayPtrFlat<CEikLabel>(5);
     
     TPtrC text[] = { aReader.ReadTPtrC(),  aReader.ReadTPtrC(),  aReader.ReadTPtrC(), _L("0"), _L("0") };
-    const CFont* fonts[] = {fontLatinBold12, fontLatinPlain, fontLatinPlain,fontLatinBold12,fontLatinBold12};
+    const CFont* fonts[] = {iFontLatinBold12, iFontLatinPlain, iFontLatinPlain,iFontLatinBold12,iFontLatinBold12};
     const TInt  PosValues [][4] = { {10, 2, 156, 16}, {2, 25, 140, 16}, {2,45,140,16}, {145,25,20,16}, {145,45,20,16} };
     const TInt Colors[][3] = { {0,0,255}, {0,0,0}, {0,0,0},{0,0,0},{0,0,0} };
     const TGulAlignmentValue Align[] = { EHCenterVCenter,EHRightVTop,EHRightVTop,EHLeftVTop,EHLeftVTop };
@@ -70,9 +68,6 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
         c->SetAlignment(Align[i]);
         iLabels->AppendL(c);
     }
-
-    CCoeEnv::Static()->ScreenDevice()->ReleaseFont(fontLatinPlain);
-    CCoeEnv::Static()->ScreenDevice()->ReleaseFont(fontLatinBold12);
 
      //Load bitmaps
 
@@ -130,6 +125,16 @@ void COggFilesSearchContainer::Draw(const TRect& aRect) const
 
 COggFilesSearchContainer::~COggFilesSearchContainer ()
     {
+    
+    if (iFontLatinPlain)
+    {
+        CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFontLatinPlain);
+    }
+    if (iFontLatinBold12)
+    {
+        CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFontLatinBold12);
+    }
+
     iLabels->ResetAndDestroy();
     delete iLabels;
     delete ifish1;
