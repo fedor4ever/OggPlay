@@ -395,12 +395,13 @@ void  TOggFiles::FileSearchStepL()
                 TRAPD(err,iDs->SetScanDataL((*iPathArray)[iCurrentDriveIndex],
                     KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
                 if (err!=KErrNone) 
-    {
-                    TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &(*iPathArray)[iCurrentDriveIndex] ));
+                {
+                    TPtrC aBuf((*iPathArray)[iCurrentDriveIndex]);
+                    TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aBuf ));
                     delete iDs; iDs=0;
-        iDirScanFinished = ETrue;
-        return;
-    }
+                    iDirScanFinished = ETrue;
+                    return;
+                }
                 iCurrentIndexInDirectory = 0;
                 return;
             } else {
@@ -499,9 +500,9 @@ TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& sessio
     TInt driveNumber;
     for (driveNumber=EDriveA; driveNumber<=EDriveZ; driveNumber++) {
       session.Drive(driveInfo,driveNumber); 
-      if (driveInfo.iDriveAtt == KDriveAbsent)
+      if (driveInfo.iDriveAtt == (TUint)KDriveAbsent)
           continue; 
-      if ( (driveInfo.iType != EMediaRom) 
+      if ( (driveInfo.iType != (TUint) EMediaRom) 
 #ifdef __WINS__
           // For some reasons, the emulator finds a non-existing drive X, which blows up everything...
           && (driveInfo.iType != EMediaHardDisk) 
@@ -571,7 +572,7 @@ TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
 }
 
 void TOggFiles::AddFile(const TDesC& aFile){
-	_LIT(KS,"adding File %s to oggfiles");
+	//_LIT(KS,"adding File %s to oggfiles");
 	//OGGLOG.WriteFormat(KS,aFile.Ptr());
 	
 	

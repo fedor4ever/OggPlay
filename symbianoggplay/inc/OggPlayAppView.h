@@ -56,22 +56,18 @@ public:
   void ToggleRepeat();
   void SetTime(TInt64 aTime);
 
-  // access/manipulation of the playlist:
-  // BERT : 2B removed/modified
-  TInt        GetNSongs();
-  void        SelectSong(TInt idx);
-  /// Default argument will use GetSelectedIndex() as index
-  TBool       isPlayableFile( TInt aIndex = -1 );
-  //////////////////////////
+  /* Functions to interract with the listbox */
+  void        SelectItem(TInt idx);
   TInt        GetItemType(TInt idx);
-  void        ShufflePlaylist();
   TInt        GetSelectedIndex();
   CDesCArray* GetTextArray();
-
   TBool HasAFileName(TInt idx);
-  const TDesC&  GetFileName(TInt idx);
+  const TDesC & GetFileName(TInt idx);
+  const TInt  GetFileAbsoluteIndex(TInt idx);
   const TInt    GetViewName(TInt idx);
   void GetFilterData(TInt idx, TDes &aData);
+  void SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex);
+
 
   void  SetAlarm();
   void  ClearAlarm();
@@ -145,6 +141,7 @@ private:
   TInt       iSelected; 
 
   TInt iUserInactivityTickCount;
+  TInt64 iSeed; //Random seed
   
   //keyboard focus handling: 
   // do we do keyboard focus handling ?

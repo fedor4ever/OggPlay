@@ -139,6 +139,11 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   //FIXME: only start timer once all initialization has been done
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(KCallBackPeriod),*iCallBack);
 
+  // Initialize the random seed
+  TTime t;
+  t.HomeTime();
+  iSeed = t.DateTime().MicroSecond();
+
   ActivateL();
 }
 
@@ -651,11 +656,6 @@ COggPlayAppView::AppToForeground(const TBool aForeground) const
     tApatsk.SendToBackground();
 }
 
-TInt
-COggPlayAppView::GetNSongs()
-{
-  return GetTextArray()->Count();
-}
 
 _LIT(KEmpty,"");
 
@@ -692,8 +692,8 @@ COggPlayAppView::HasAFileName(TInt idx)
     return(EFalse);
 }
 
-const TDesC&
-COggPlayAppView::GetFileName(TInt idx)
+const TInt
+COggPlayAppView::GetFileAbsoluteIndex(TInt idx)
 {
     
     TInt type = GetItemType(idx) ;
@@ -708,13 +708,22 @@ COggPlayAppView::GetFileName(TInt idx)
     // 7: playing
     // 8: paused
   __ASSERT_ALWAYS ( ( (type == 0) || (type == 5) || (type ==7) || (type == 8)), 
-      User::Panic(_L("GetFileName called with wrong argument"),0 ) );
+      User::Panic(_L("GetFileAbsoluteIndex called with wrong argument"),0 ) );
 
   TInt index = GetValueFromTextLine(idx);
-  if (index >=0)
-    return iOggFiles->FindFromIndex( index );
-  return KEmpty;
+  return index;
 }
+
+const TDesC &
+COggPlayAppView::GetFileName(TInt idx)
+{
+    TInt absoluteIndex = GetFileAbsoluteIndex(idx);
+    if (absoluteIndex <0) 
+  return KEmpty;
+    return (iOggFiles->FindFromIndex(absoluteIndex));
+}
+
+
 
 const TInt
 COggPlayAppView::GetViewName(TInt idx)
@@ -790,13 +799,42 @@ COggPlayAppView::GetItemType(TInt idx)
 }
 
 void
-COggPlayAppView::SelectSong(TInt idx)
+COggPlayAppView::SelectItem(TInt idx)
 {
   iSelected= idx;
   if (iListBox[iMode]) {
     iSelected = iListBox[iMode]->SetCurrentItemIndex(idx);
   }
 }
+
+void
+COggPlayAppView::SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex)
+{
+  TInt found = -1;
+  for (TInt i=0; i<GetTextArray()->Count(); i++)
+  {
+      if( HasAFileName(i) )
+      {
+          if (GetFileAbsoluteIndex(i) == anAbsoluteIndex)
+          {
+              // A match !
+              found = i;
+              break;
+          }
+      }
+  }
+
+  if (found != -1)
+  {
+      // If found, select it.
+      iSelected= found;
+      if (iListBox[iMode]) {
+          iSelected = iListBox[iMode]->SetCurrentItemIndex(found);
+      }
+  } // Otherwise, do nothing
+
+}
+
 
 TInt
 COggPlayAppView::GetSelectedIndex()
@@ -810,62 +848,11 @@ COggPlayAppView::GetSelectedIndex()
   */
 }
 
-TBool
-COggPlayAppView::isPlayableFile( TInt aIndex )
-  {
-  // This is very unlikely the smartest implementation of this utility ?.
-  // Feel free to make more clever.
-  if( aIndex < 0 )
-	  aIndex = GetSelectedIndex();
-
-  TInt selType = GetItemType(aIndex);
-  const TDesC& fileName = GetFileName(aIndex);
-  //TRACEF(COggLog::VA(_L("isPlayable() Type=%d / filename='%S'"), selType, &fileName ));
-	
-  if( fileName.Length() && (selType == COggPlayAppUi::ETitle || 
-                            selType == COggPlayAppUi::ETrackTitle ||
-                            selType == COggPlayAppUi::EFileName ))
-    return ETrue;
-  else
-    return EFalse;
-  }
-
 
 CDesCArray*
 COggPlayAppView::GetTextArray()
 {
   return iTextArray;
-}
-
-void
-COggPlayAppView::ShufflePlaylist()
-{
-  if (iApp->iViewBy!=COggPlayAppUi::ETitle && iApp->iViewBy!=COggPlayAppUi::EFileName) return;
-
-  CDesCArray *arr= GetTextArray();
-  TTime t;
-  t.HomeTime();
-  srand(t.DateTime().MicroSecond());
-  TInt offset(0);
-  if (GetItemType(0)==6) offset=1;
-  for (TInt i=offset; i<arr->Count(); i++) {
-    float rnd= (float)rand()/RAND_MAX;
-    TInt pick= (int)(rnd*(arr->Count()-i));
-    pick += i;
-    if (pick>=arr->Count()) pick= arr->Count()-1;
-    TBuf<512> buf((*arr)[pick]);
-      arr->Delete(pick);
-      arr->InsertL(offset,buf);
-    }
-  if (iListBox[iMode]) iListBox[iMode]->Redraw();
-  SelectSong(0);
-  Invalidate();
-  if (!IsFlipOpen()) 
-    {
-    TBuf<128> buf;
-    iEikonEnv->ReadResource(buf, R_OGG_STRING_5);
-    User::InfoPrint(buf);
-    }
 }
 
 void
@@ -926,12 +913,16 @@ COggPlayAppView::CallBack(TAny* aPtr)
   return 1;
 }
 
+#ifdef NEW_LISTBOX_STYLE_FIXIT
+void
+COggPlayAppView::ListBoxNavigationTimerTick( TBool /*aRestart*/ )
+{
+    return;
+}
+#else
 void
 COggPlayAppView::ListBoxNavigationTimerTick( TBool aRestart )
   {
-#ifdef NEW_LISTBOX_STYLE_FIXIT
-  return;
-#endif
   if( aRestart )
     {
     // User moved cursor, (re)install timeout counter
@@ -951,12 +942,12 @@ COggPlayAppView::ListBoxNavigationTimerTick( TBool aRestart )
     if( --iUserInactivityTickCount == 0 )
       {
       // Fire navi-center event on non-ogg files only, and only when playing.
-      if( !isPlayableFile() && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
+      if( ! HasAFileName(GetSelectedIndex()) && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
         iApp->HandleCommandL(EOggPlay);
       }
     }
   }
-
+#endif
 
 void
 COggPlayAppView::Invalidate()
@@ -1057,7 +1048,36 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
   iApp->iViewBy= theNewView;
 
   UpdateListbox();
-  if (theNewView!=COggPlayAppUi::ETop) SelectSong(1); else SelectSong(0);
+  // Choose the selected item.
+  // If random is turned off: First of the list, unless it is a "back" icon, in that case 2nd
+  // If random is turned on: 
+  //   When playing a file, do as if random wasn't turned on
+  //   If not playing a file, choose a random file
+
+  if (theNewView==COggPlayAppUi::ETop) 
+  {
+      SelectItem(0);
+  } else
+  {
+      if (iApp->iRandom)
+      {
+          if ( iApp->iSongList->AnySongPlaying() )
+          {
+              // When a song has been playing, give full power to the user
+              // Do not select a random value.
+              SelectItem(1); 
+          } else
+          {
+              // Select a random value for the first index
+              TReal rnd = Math::FRand(iSeed);
+              TInt pick= (int)(rnd*( GetTextArray()->Count() -1 ))+1;
+              SelectItem(pick);
+          }
+      } else
+      {
+          SelectItem(1);
+      }
+  }
   Invalidate();
 }
 
@@ -1094,7 +1114,7 @@ COggPlayAppView::UpdateListbox()
   CDesCArray* txt= GetTextArray();
   // BERT: Add a check if there is a song currently playing...
   TBool paused = iApp->iOggPlayback->State()==CAbsPlayback::EPaused;
-  const TDesC& currSong = iApp->iSongList->GetPlaying();
+  const TInt currSong = iApp->iSongList->GetPlayingAbsoluteIndex();
 
   for (TInt i=0; i<txt->Count(); i++) {
     TPtrC sel;
@@ -1108,7 +1128,7 @@ COggPlayAppView::UpdateListbox()
     // 7: playing
     // 8: paused
     if (buf[0]!=L'6') {
-        if (GetFileName(i)== currSong && currSong.Length()>0) {
+        if ( GetFileAbsoluteIndex(i) == currSong ) {
             if (paused) buf[0]='8'; else buf[0]='7'; 
       } 
       else {
@@ -1402,11 +1422,11 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       if(c==iListBox[iMode] || !iFocusControlsPresent) {
         TInt idx= iListBox[iMode]->CurrentItemIndex();
         if (aKeyEvent.iScanCode==EOggDown) {
-          SelectSong(idx+1);
+          SelectItem(idx+1);
           ListBoxNavigationTimerTick( ETrue );
           return EKeyWasConsumed;
         } else if (aKeyEvent.iScanCode==EOggUp ) {
-          SelectSong(idx-1);
+          SelectItem(idx-1);
           ListBoxNavigationTimerTick( ETrue );
           return EKeyWasConsumed;
         } 
@@ -1502,34 +1522,22 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       if(index == iListBox[iMode]->CountText() - 1)
         ListBoxNavigationTimerTick( ETrue );
       else
-        SelectSong(index + iListBox[iMode]->NofVisibleLines() - 1);
+        SelectItem(index + iListBox[iMode]->NofVisibleLines() - 1);
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageUp : {
       if(index == 0)
         ListBoxNavigationTimerTick( ETrue );
       else
-        SelectSong(index - iListBox[iMode]->NofVisibleLines() + 1);
+        SelectItem(index - iListBox[iMode]->NofVisibleLines() + 1);
       return EKeyWasConsumed;
       }
 	case TOggplaySettings::ENextSong : {
-		if(index < iListBox[iMode]->CountText() - 1)
-			{
-			// the need of selecting the song first is just a workaround and
-			// should be removed, when NextSong() is finally fixed (Hayo)
-			SelectSong(index+1);
-			iApp->NextSong();
-			}
+		iApp->NextSong();
 		return EKeyWasConsumed;
 		}
 	case TOggplaySettings::EPreviousSong : {
-		if (index > 1)
-			{
-			// the need of selecting the song first is just a workaround and
-			// should be removed, when PreviousSong() is finally fixed (Hayo)
-			SelectSong(index-1);
-			iApp->PreviousSong();
-			}
+		iApp->PreviousSong();
 		return EKeyWasConsumed;
 		}
     default :
@@ -1652,11 +1660,11 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     if (code==0 && aType==EEventKeyDown) {
       TInt idx= iListBox[iMode]->CurrentItemIndex();
       if (aKeyEvent.iScanCode==EOggUp && idx>0) {
-        SelectSong(idx-1);
+        SelectItem(idx-1);
         return EKeyWasConsumed;
       }
       if (aKeyEvent.iScanCode==EOggDown) {
-        SelectSong(idx+1);
+        SelectItem(idx+1);
         return EKeyWasConsumed;
       }
     }

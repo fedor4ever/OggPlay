@@ -44,9 +44,6 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <OggPlay.rsg>
 #include "OggFilesSearchDialogs.h"
 
-#include <stdlib.h> // For random
-
-
 #if defined(UIQ)
 const TInt KThreadPriority = EPriorityAbsoluteHigh;
 #else
@@ -301,7 +298,11 @@ COggPlayAppUi::ConstructL()
 	iAppView=new(ELeave) COggPlayAppView;
 	iAppView->ConstructL(this, ClientRect());
 
+    if (iRandom)
+        iSongList = new(ELeave) COggRandomPlay();
+    else
     iSongList = new(ELeave) COggNormalPlay();
+
     iSongList->ConstructL(iAppView, iOggPlayback);
 	SetRepeat(iRepeat);
 
@@ -356,10 +357,10 @@ void COggPlayAppUi::PostConstructL()
   if(iSettings.iAutoplay) {
     for(TInt i=0;i<iRestoreStack.Count();i++) {
       TRACEF(COggLog::VA(_L("Setting istack[%d]:%d"), i,iRestoreStack[i]));
-      iAppView->SelectSong(iRestoreStack[i]);
+      iAppView->SelectItem(iRestoreStack[i]);
       HandleCommandL(EOggPlay);
     }
-    iAppView->SelectSong(iRestoreCurrent);
+    iAppView->SelectItem(iRestoreCurrent);
   }
 
   if ( iIsRunningEmbedded || (iSettings.iAutoplay && iIsStartup) 
@@ -611,7 +612,21 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		
 	case EOggShuffle: {
 		HandleCommandL(EOggStop);
-		iAppView->ShufflePlaylist();
+        // Toggle random
+        delete(iSongList);
+        iSongList = NULL;
+        if (iRandom)
+        {
+            iRandom = EFalse;
+            iSongList = new(ELeave) COggNormalPlay();
+        }
+        else
+        {
+            iRandom = ETrue;
+            iSongList = new(ELeave) COggRandomPlay();
+        }
+        iSongList->ConstructL(iAppView, iOggPlayback);
+        iSongList->SetRepeat(iRepeat);
 		break;
 					  }
 		
@@ -855,7 +870,7 @@ COggPlayAppUi::SelectPreviousView()
   #if defined(SERIES60)
   // UIQ_?
   // Select the entry which were left.
-  iAppView->SelectSong(previousListboxLine);
+  iAppView->SelectItem(previousListboxLine);
   #endif
   return;
 }
@@ -895,7 +910,8 @@ COggPlayAppUi::ShowFileInfo()
 		// no song is playing, show info for selected song if possible
 		if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) return;
 		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==ETop) return;
-		if (iOggPlayback->Info(iAppView->GetFileName(iAppView->GetSelectedIndex()))!=KErrNone) return;
+		if (iOggPlayback->Info( iAppView->GetFileName(iAppView->GetSelectedIndex()))!=KErrNone)
+            return;
 	}
 	COggInfoDialog *d = new COggInfoDialog();
 	d->SetFileName(iOggPlayback->FileName());
@@ -941,7 +957,7 @@ COggPlayAppUi::NextSong()
             HandleCommandL(EOggPlay); // play it!
         } else {
             // if no song is playing, play the currently selected song
-            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) iAppView->SelectSong(1);
+            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) iAppView->SelectItem(1);
             HandleCommandL(EOggPlay); // play it!
         } 
 	}
@@ -970,11 +986,13 @@ COggPlayAppUi::PreviousSong()
         if (iViewBy==ETop) {
             HandleCommandL(EOggPlay); // select the current category
             HandleCommandL(EOggPlay); // select the 1st song in that category
-            iAppView->SelectSong(iAppView->GetNSongs()-1); // select the last song in that category
             HandleCommandL(EOggPlay); // play it!
         } else if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) {
             HandleCommandL(EOggPlay); // select the 1st song in the current category
-            iAppView->SelectSong(iAppView->GetNSongs()-1); // select the last song in that category
+            HandleCommandL(EOggPlay); // play it!
+        } else {
+            // if no song is playing, play the currently selected song
+            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) iAppView->SelectItem(1);
             HandleCommandL(EOggPlay); // play it!
         }
 	}
@@ -997,7 +1015,6 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 #endif
 		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName));
 		aMenuPane->SetItemDimmed(EOggInfo   , (!iSongList->AnySongPlaying()) && (iAppView->GetSelectedIndex()<0 || !isSongList));
-		aMenuPane->SetItemDimmed(EOggShuffle, iAppView->GetNSongs()<1 || !isSongList);
 	}
 	
 	if (aMenuId==R_SKIN_MENU) {
@@ -1211,7 +1228,11 @@ COggPlayAppUi::ReadIniFile()
       TLex parse(line);
       parse.Val(iSettings.iRskPlay);
   };
-
+  iRandom = EFalse;
+  if (tf.Read(line) == KErrNone) {
+      TLex parse(line);
+      parse.Val(iRandom);
+	};
   } // version 2 onwards
 
 	in.Close();
@@ -1298,6 +1319,8 @@ COggPlayAppUi::WriteIniFile()
  	num.Num(iSettings.iRskPlay);
 	tf.Write(num);
 
+	num.Num(iRandom);
+	tf.Write(num);
 	//please increase iIniversion when adding stuff
 	
 	out.Close();
@@ -1435,7 +1458,7 @@ TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand /*aCommand*/, TFileNa
 void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
 	
 	if (iAppView->iOggFiles->CreateDbWithSingleFile(aFileName)) {
-		iAppView->SelectSong(0);
+		iAppView->SelectItem(0);
 		iIsRunningEmbedded = ETrue;
 	}
 	if (iDoorObserver) {
@@ -1474,6 +1497,7 @@ void COggSongList::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayb
 	iPlayingIdx = ENoFileSelected;
     iAppView = aAppView;
     iOggPlayback = aOggPlayback;
+    iNewFileList = EFalse;
 }
 
 
@@ -1491,6 +1515,7 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
 
     // Update the file list, according to what is displayed in the list box.
     iFileList.Reset();
+    iNewFileList = ETrue;
     
     iPlayingIdx = ENoFileSelected;
 
@@ -1498,7 +1523,7 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
         if (iAppView->HasAFileName(i))  
         {
             // We're dealing with a file, not the "back" button or something similar
-            iFileList.Append(iAppView->GetFileName(i));
+            iFileList.Append(iAppView->GetFileAbsoluteIndex(i));
             if (i == aPlaying)
                 iPlayingIdx = iFileList.Count()-1;
         }
@@ -1509,26 +1534,47 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
 void 
 COggSongList::SetPlaying(TInt aPlaying)
 {   
+    
+    iPlayingIdx = aPlaying;
     if (aPlaying != ENoFileSelected)
     {
         // Check that the file is still there (media hasn't been removed)
-        if( iOggPlayback->Info(iFileList[aPlaying], ETrue) == KErrOggFileNotFound )
+        if( iOggPlayback->Info(RetrieveFileName(iFileList[aPlaying]), ETrue) == KErrOggFileNotFound )
             iPlayingIdx = ENoFileSelected;
     }
     
-    iPlayingIdx = aPlaying;
+    if (iPlayingIdx != ENoFileSelected)
+    {
+        iAppView->SelectItemFromAbsoluteIndex(iFileList[iPlayingIdx]);
+    }
     iAppView->Update();
 }
 
 _LIT(KEmpty,"");
 
+const TDesC &
+COggSongList::RetrieveFileName(TInt anAbsoluteIndex)
+{
+    if (anAbsoluteIndex == ENoFileSelected) 
+        return KEmpty;
+    return (iAppView->iOggFiles->FindFromIndex(anAbsoluteIndex));
+}
+
+
+const TInt 
+COggSongList::GetPlayingAbsoluteIndex()
+{
+    if (iPlayingIdx != ENoFileSelected)
+        return ( iFileList[iPlayingIdx] );
+    return(ENoFileSelected);
+}
+
 const TDesC& 
 COggSongList::GetPlaying()
 {
-    if (iPlayingIdx != ENoFileSelected)
-        return (iFileList[iPlayingIdx]);
-
-    return (KEmpty);
+    if (iPlayingIdx == ENoFileSelected)
+        return KEmpty;
+    return(RetrieveFileName(iFileList[iPlayingIdx]));
 }
 
 const TBool 
@@ -1546,7 +1592,7 @@ COggSongList::IsSelectedFromListBoxCurrentlyPlaying()
     TInt idx = iAppView->GetSelectedIndex();
     if (iAppView->HasAFileName(idx))
     {
-        if ( GetPlaying() == iAppView->GetFileName(idx) )
+        if ( GetPlayingAbsoluteIndex() == iAppView->GetFileAbsoluteIndex(idx) )
         {
             return (ETrue);
         }
@@ -1579,6 +1625,7 @@ void COggNormalPlay::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPla
 	COggSongList::ConstructL(aAppView, aOggPlayback);
 }
 
+   
 const TDesC & COggNormalPlay::GetNextSong()
 {
 
@@ -1607,7 +1654,7 @@ const TDesC & COggNormalPlay::GetNextSong()
     {
         return (KEmpty);
     }
-    return iFileList[iPlayingIdx];
+    return RetrieveFileName( iFileList[iPlayingIdx] );
 }
 
 const TDesC & COggNormalPlay::GetPreviousSong()
@@ -1634,11 +1681,10 @@ const TDesC & COggNormalPlay::GetPreviousSong()
         // We are at the top of the playlist, stop here.
         SetPlaying(ENoFileSelected);
 	}
-    return iFileList[iPlayingIdx];
+    return RetrieveFileName(iFileList[iPlayingIdx]);
 }
 
 
-#if 0
 ////////////////////////////////////////////////////////////////
 //
 // COggRandomPlay class
@@ -1650,11 +1696,63 @@ COggRandomPlay::COggRandomPlay ()
 
 COggRandomPlay::~COggRandomPlay ()
 {
+    iRandomMemory.Reset();
 }
 
-void COggRandomPlay::ConstructL(COggPlayAppUi* theAppUi)
+void COggRandomPlay::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback)
 {
-	iAppUi = theAppUi;
+    COggSongList::ConstructL(aAppView, aOggPlayback);
+    // Initialize the random seed
+    TTime t;
+    t.HomeTime();
+    iSeed = t.DateTime().MicroSecond();
 }
 
-#endif
+
+
+
+const TDesC & COggRandomPlay::GetNextSong()
+{
+    int nSongs= iFileList.Count();
+    if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
+    {
+        SetPlaying(ENoFileSelected);
+        return(KEmpty);
+    }
+    
+    if (iNewFileList || ( (iRandomMemory.Count() == 0) && iRepeat) )
+    {
+        // Build a new list, if the playlist has changed, or if we have played all tunes and repeat is on
+        // Build internal 'not already played' list, at beginning list is full
+        iRandomMemory.Reset();
+        for (TInt i=0; i<iFileList.Count(); i++)
+        {
+            iRandomMemory.Append(i);
+        }
+    }
+    if (iNewFileList)
+    {
+        // Remove the file currently played from the list
+        iRandomMemory.Remove(iPlayingIdx);
+        iNewFileList=EFalse;
+    }
+    if ( iRandomMemory.Count() == 0)
+    {
+        SetPlaying(ENoFileSelected);
+        return(KEmpty);
+    }
+
+    TReal rnd = Math::FRand(iSeed);
+    TInt picked= (int)(rnd * ( iRandomMemory.Count() ) );
+  
+    TInt songIdx = iRandomMemory[picked];
+    iRandomMemory.Remove(picked);
+    SetPlaying(songIdx);
+    return RetrieveFileName( iFileList[songIdx] );
+}
+
+const TDesC & COggRandomPlay::GetPreviousSong()
+{
+    // Exactly same behaviour has GetNextSong()
+    return ( GetNextSong() );
+}

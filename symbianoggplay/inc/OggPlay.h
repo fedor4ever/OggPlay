@@ -21,6 +21,7 @@
 
 #include "OggOs.h"
 #include "OggPlayUid.h"
+#include <e32math.h> // For Random
 
 #if defined(SERIES60)
 #include <aknappui.h>
@@ -202,6 +203,7 @@ public:
   int iHotkey;
   int iVolume;            // [0...100]
   int iRepeat;            // 0=off; 1=on
+  TBool iRandom;          // 0=off; 1=on
   int iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
   TViews iViewBy;
   TTime iAlarmTime;       // the alarm has been set to this time
@@ -297,6 +299,7 @@ class COggSongList : public CBase
      virtual const TDesC & GetPreviousSong()=0;
      void  SetPlayingFromListBox(TInt aPlaying);
      const TDesC& GetPlaying();
+     const TInt GetPlayingAbsoluteIndex();
      const TBool AnySongPlaying();
      void  SetRepeat(TBool aRepeat);
      const TBool IsSelectedFromListBoxCurrentlyPlaying();
@@ -304,11 +307,13 @@ class COggSongList : public CBase
     protected:
         
      void  SetPlaying(TInt aPlaying);
+     const TDesC & RetrieveFileName(TInt anAbsoluteIndex);
      TInt iPlayingIdx;           // index of the file which is currently being played
-     RArray<TFileName> iFileList;
+     RArray<TInt> iFileList;
      COggPlayAppView* iAppView; 
      COggPlayback*    iOggPlayback;
      TBool iRepeat;
+     TBool iNewFileList;
 };
 
 class COggNormalPlay : public COggSongList
@@ -322,18 +327,18 @@ class COggNormalPlay : public COggSongList
     private:
 };
 
-#if 0
 class COggRandomPlay : public COggSongList
 {
     public:     
         void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+        virtual const TDesC & GetNextSong();  
+        virtual const TDesC & GetPreviousSong();
         ~COggRandomPlay(); 
-        TDesC & GetNextSong();
-    private:
         COggRandomPlay();
+    private:
         RArray<TInt> iRandomMemory;
+        TInt64 iSeed;
 };
-#endif
 
 #ifdef SERIES60
 class COggPlayDocument : public CEikDocument
