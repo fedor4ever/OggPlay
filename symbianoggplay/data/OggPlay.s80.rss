@@ -284,10 +284,6 @@ RESOURCE MENU_PANE r_file_menu
 {
   items= {
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
-      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
-                  flags=EEikMenuItemCheckBox;},
-      MENU_ITEM { command=EOggShuffle;  txt=ogg_normal_off;
-	              flags=EEikMenuItemCheckBox; },
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
       MENU_ITEM { txt=ogg_options_cascade;
                      cascade=r_options_menu; },
@@ -316,7 +312,17 @@ RESOURCE ARRAY options_multipage1
 {
    items = {
     DLG_LINE {
-             type = EEikCtChoiceList;
+              type = EEikCtCheckBox;
+              prompt = ogg_repeat2;
+              id = EOggSettingRepeatId;
+              },
+    DLG_LINE {
+              type = EEikCtCheckBox;
+              prompt = ogg_random_on ;
+              id = EOggSettingRandomId;
+              },
+    DLG_LINE {
+              type = EEikCtChoiceList;
               prompt = ogg_filescanmode;
               id = EOggSettingScanDir;
               control = CHOICELIST {
@@ -328,8 +334,10 @@ RESOURCE ARRAY options_multipage1
               prompt = ogg_autostart;
               id = EOggSettingAutoPlayId;
              }
+	              
     };
 }
+
 RESOURCE ARRAY options_multipage2
 {
    items = {
