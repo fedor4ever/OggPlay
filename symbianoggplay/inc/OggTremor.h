@@ -34,6 +34,7 @@
 // V0.5:  3 @ 4096*40
 // V0.6:  6 @ 4096*10
 // V0.9:  12 @ 4096*10
+#include "TremorDecoder.h"
 
 
 #ifdef SERIES60
@@ -236,15 +237,16 @@ typedef struct
   TInt iTimeWithoutFreqCalculationLim;
 #endif
 
-  // communication with the tremor/ogg codec:
+  // communication with the decoder:
   //-----------------------------------------
 
-  OggVorbis_File           iVf;
   FILE*                    iFile;
   TInt                     iFileOpen;
   TInt                     iEof;            // true after ov_read has encounted the eof
   TInt                     iBufCount;       // counts buffers sent to the audio stream
-  TInt                     iCurrentSection; // used in the call to ov_read
+ 
+
+  MDecoder*             iDecoder;
 
 };
 

@@ -22,7 +22,7 @@
 class MDecoder 
 {
 public:
-
+  virtual ~MDecoder() { };
   // Initialize Decoder settings
   virtual TInt Clear()=0;
   // Open file and gets ready to decode

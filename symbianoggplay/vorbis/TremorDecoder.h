@@ -19,18 +19,16 @@
 #ifndef TREMORDECODER_H
 #define TREMORDECODER_H
 
-#include <e32base.h>
-
 #include <stdio.h> //FIXMAD: this NULL redefinition thing. Help.
+#include <e32base.h>
 #include "Decoder.h"
 #include "ivorbisfile.h"
-
-#define INPUT_BUFFER_SIZE	(5*8192)
 
 
 class CTremorDecoder: public CBase, public MDecoder
 {
 public:
+  ~CTremorDecoder();
   TInt Clear();
   TInt Open(FILE* f);
   TInt OpenInfo(FILE* f);
@@ -56,11 +54,7 @@ private:
   TInt                     iCurrentSection; // used in the call to ov_read
   OggVorbis_File   iVf;
   vorbis_info *vi;
-
   FILE* iInputFp;
-
-  TDes* iTitle;
-
 };
 
 

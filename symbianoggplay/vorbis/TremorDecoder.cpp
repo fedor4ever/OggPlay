@@ -16,7 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <mad.h>
 #include <limits.h>
 #include <string.h>
 #include <utf.h>
@@ -25,12 +24,17 @@
 #include "OggLog.h"
 
 
+CTremorDecoder::~CTremorDecoder() 
+{
+}
 
-int CTremorDecoder::Clear() {
+int CTremorDecoder::Clear() 
+{
   return ov_clear(&iVf);
 }
 
-int CTremorDecoder::Open(FILE* f) {
+int CTremorDecoder::Open(FILE* f) 
+{
   Clear();
   int ret=ov_open(f, &iVf, NULL, 0);
   if(ret>=0) {
@@ -39,7 +43,8 @@ int CTremorDecoder::Open(FILE* f) {
   return ret;
 }
 
-int CTremorDecoder::OpenInfo(FILE* f) {
+int CTremorDecoder::OpenInfo(FILE* f) 
+{
   Clear();
   int ret=ov_test(f, &iVf, NULL, 0);
   if(ret>=0) {
@@ -48,16 +53,19 @@ int CTremorDecoder::OpenInfo(FILE* f) {
   return ret;
 }
 
-int CTremorDecoder::Close(FILE*) {
+int CTremorDecoder::Close(FILE*) 
+{
   return Clear();
 }
 
-int CTremorDecoder::Read(TDes8& aBuffer,int Pos) {
+int CTremorDecoder::Read(TDes8& aBuffer,int Pos) 
+{
   return ov_read( &iVf,(char *) &(aBuffer.Ptr()[Pos]),
         aBuffer.MaxLength()-Pos,&iCurrentSection);
 }
 
-void CTremorDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber) {
+void CTremorDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber) 
+{
   char** ptr=ov_comment(&iVf,-1)->user_comments;
   aArtist.SetLength(0);
   aTitle.SetLength(0);
@@ -76,7 +84,6 @@ void CTremorDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& 
     else if (buf.Find(_L("TRACKNUMBER="))==0) GetString(aTrackNumber,s+12);
     ++ptr;
   }
-  
 }
 
 void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)

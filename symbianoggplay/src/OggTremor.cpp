@@ -23,6 +23,7 @@
 #include "OggOs.h"
 #include "OggLog.h"
 #include "OggTremor.h"
+#include "TremorDecoder.h"
 
 #include <barsread.h>
 #include <eikbtpan.h>
@@ -169,12 +170,10 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) :
   iSettings(),
   iSentIdx(0),
   iStoppedFromEof(EFalse),
-  iVf(),
   iFile(0),
   iFileOpen(0),
   iEof(0),
-  iBufCount(0),
-  iCurrentSection(0)
+  iBufCount(0)
 {
     iSettings.Query();
     
@@ -221,9 +220,13 @@ void COggPlayback::ConstructL() {
       TCallBack( StopAudioStreamingCallBack,this )   );
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
+  //FIXMAD: Should have a ConstructL and a NewL and shouldn't be here anyway
+  iDecoder=new(ELeave)CTremorDecoder;
+
 }
 
 COggPlayback::~COggPlayback() {
+  delete iDecoder;
   delete  iStartAudioStreamingTimer;
   delete  iStopAudioStreamingTimer;
   delete iStream;
@@ -234,13 +237,8 @@ COggPlayback::~COggPlayback() {
 TInt COggPlayback::Open(const TDesC& aFileName)
 {
 
-  if (iState == EPlaying)
-  { 
-    Stop();
-  }
-
   if (iFileOpen) {
-    ov_clear(&iVf);
+    iDecoder->Close(iFile);
     fclose(iFile);
     iFileOpen= 0;
   }
@@ -266,8 +264,8 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   };
   iFileOpen= 1;
   
-  if(ov_open(iFile, &iVf, NULL, 0) < 0) {
-    ov_clear(&iVf);
+  if(iDecoder->Open(iFile) < 0) {
+    iDecoder->Close(iFile);
     fclose(iFile);
     iFileOpen= 0;
     //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
@@ -276,27 +274,27 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     return -102;
   }
 
-  ParseComments(ov_comment(&iVf,-1)->user_comments);
+  iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
 
   iFileName= aFileName;
+  iRate= iDecoder->Rate();
+  iChannels=iDecoder->Channels();
+  iTime=iDecoder->TimeTotal();
+  iBitRate=iDecoder->Bitrate();
 
 
-  vorbis_info *vi= ov_info(&iVf,-1);
+  //FIXMAD -- this is currently only used in file information dialog
+  //iFileSize= ov_raw_total(&iVf,-1);
 
-  iRate= vi->rate;
-  iChannels= vi->channels;
-  iFileSize= ov_raw_total(&iVf,-1);
-
-  TInt err= SetAudioCaps(vi->channels,vi->rate);
+  TInt err= SetAudioCaps(iDecoder->Channels(),iDecoder->Rate());
   if (err==KErrNone) {
     unsigned int hi(0);
-    ogg_int64_t bitrate= vi->bitrate_nominal;
-    iBitRate.Set(hi,bitrate);
+    iBitRate.Set(hi,iDecoder->Bitrate());
     iState= EOpen;
     return KErrNone;
   }
     
-  ov_clear(&iVf);
+  iDecoder->Close(iFile);
   fclose(iFile);
   iFileOpen=0;
 
@@ -507,25 +505,19 @@ void COggPlayback::SetVolume(TInt aVol)
 void COggPlayback::SetPosition(TInt64 aPos)
 {
   if (!iStream) return;
-  ogg_int64_t pos= aPos.GetTInt();
-  ov_time_seek( &iVf, pos);
+  iDecoder->Setposition(aPos);
 }
 
 TInt64 COggPlayback::Position()
 {
   if (!iStream) return TInt64(0);
-  ogg_int64_t pos= ov_time_tell(&iVf);
-  unsigned int hi(0);
-  return TInt64(hi,pos);
+  return iDecoder->Position();
 }
 
 TInt64 COggPlayback::Time()
 {
   if (iTime==0) {
-    ogg_int64_t pos(0);
-    pos= ov_time_total(&iVf,-1);
-    unsigned int hi(0);
-    iTime.Set(hi,pos);
+    iTime=iDecoder->TimeTotal();
   }
   return iTime;
 }
@@ -582,33 +574,25 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
     }
     return KErrOggFileNotFound;
   };
-  OggVorbis_File vf;
-  if(ov_test(f, &vf, NULL, 0) < 0) {
+
+  if(iDecoder->OpenInfo(f) < 0) {
+    iDecoder->Close(f);
     fclose(f);
     if (!silent) {
        iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_9);
     }
     return -102;
   }
-
-  ParseComments(ov_comment(&vf,-1)->user_comments);
+  iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
 
   iFileName= aFileName;
+  iRate= iDecoder->Rate();
+  iChannels=iDecoder->Channels();
+  iBitRate=iDecoder->Bitrate();
 
-  vorbis_info *vi= ov_info(&vf,-1);
-  iRate= vi->rate;
-  iChannels= vi->channels;
-
-  ogg_int64_t pos(0);
-  unsigned int hi(0);
-  iTime.Set(hi,pos);
-
-  pos= vi->bitrate_nominal;
-  iBitRate.Set(hi,pos);
-
-  ov_clear(&vf);
+  iDecoder->Close(f); 
   fclose(f);
- 
+
   return KErrNone;
 }
 
@@ -621,7 +605,6 @@ void COggPlayback::Play()
         iEof=0;
         iStoppedFromEof = EFalse;
         iBufCount= 0;
-        iCurrentSection= 0;
         break;
     default:
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
@@ -660,7 +643,7 @@ void COggPlayback::Stop()
   TRAPD( err, iStream->Stop() );
   iState= EClosed;
   if (iFileOpen) {
-    ov_clear(&iVf);
+    iDecoder->Close(iFile);
     fclose(iFile);
     iFileOpen= 0;
   }
@@ -686,18 +669,19 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         iLastFreqArrayIdx++;
         if (iLastFreqArrayIdx >= KFreqArrayLength)
             iLastFreqArrayIdx = 0;
-        ov_getFreqBin(&iVf, ETrue, iFreqArray[iLastFreqArrayIdx].FreqCoefs);
+//FIXMAD
+//        ov_getFreqBin(&iVf, ETrue, iFreqArray[iLastFreqArrayIdx].FreqCoefs);
 
         iFreqArray[iLastFreqArrayIdx].Time =  TInt64(iLatestPlayTime) ;
     }
     else
     {
-        ov_getFreqBin(&iVf, EFalse, NULL);
+//FIXMAD
+//        ov_getFreqBin(&iVf, EFalse, NULL);
     }
 #endif
-    TInt ret=ov_read( &iVf,(char *) &(aBuffer.Ptr()[len]),
-        aBuffer.MaxLength()-len
-        ,&iCurrentSection);
+    
+    TInt ret=iDecoder->Read(aBuffer,len); 
     if (ret >0)
     {
         aBuffer.SetLength(len + ret);

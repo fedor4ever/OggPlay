@@ -23,6 +23,10 @@ SOURCE OggFilesSearchDialogs.cpp
 SOURCE OggRateConvert.cpp
 IFDEF_S60( SOURCE OggUserHotkeys.cpp )
 
+//FIXMAD: should be part of the vorbis dll
+SOURCEPATH ..\vorbis
+SOURCE TremorDecoder.cpp
+
 RESOURCE ..\data\OggPlay.rss
 RESOURCE ..\data\OggPlay_caption.rss
 
