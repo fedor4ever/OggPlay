@@ -33,10 +33,9 @@ OggPlay 1 {
       Position 8 85 162 96
       Font LatinPlain12 20 0
     }
-    PlayButton {
+    Logo {
       Position 1 21 174 47
-      NormalIcon 41 42
-      NormalIcon 41 42
+      Bitmaps 41 1
     }
   }
 }

@@ -156,8 +156,6 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   ClearCanvases();
   ResetControls();
 
-  TRACEF(COggLog::VA(_L("COggPlayAppView::ReadSkin(%S)"), &aFileName ));
-
   iIconFileName= aFileName.Left(aFileName.Length()-4);
   iIconFileName.Append(_L(".mbm"));
   iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
@@ -269,7 +267,6 @@ COggPlayAppView::ClearCanvases()
 void
 COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 {
-  TRACELF("ReadCanvas");
   CFont* iFont= const_cast<CFont*>(iCoeEnv->NormalFont());
 
   iFocusControlsPresent=EFalse;

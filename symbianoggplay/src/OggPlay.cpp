@@ -51,7 +51,7 @@ const TInt KThreadPriority = EPriorityAbsoluteHigh;
 const TInt KThreadPriority = EPriorityAbsoluteBackground;
 #endif
 
-
+const TInt ENoFileSelected = -1;
 
 //
 // EXPORTed functions
@@ -132,7 +132,7 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 		TInt ret= iPhone->GetLineInfo(i,LInfo); 
 		if (ret!=KErrNone) 
 		{
-			TRACEF(COggLog::VA(_L("Line%d:Err%d"), i, ret ));
+			//TRACEF(COggLog::VA(_L("Line%d:Err%d"), i, ret ));
 			User::Leave(ret);
 		}
 		else
@@ -246,7 +246,7 @@ void
 COggPlayAppUi::ConstructL()
 {
 #if defined(SERIES60_SPLASH)
-	TRAPD( newerMind, ShowSplashL() );
+	ShowSplash();
 #endif
 	
 	BaseConstructL();
@@ -257,29 +257,26 @@ COggPlayAppUi::ConstructL()
 #endif
 	
 	TParsePtrC aP(Application()->AppFullName());
-	
-	_LIT(KiIniFileNameExtension,".ini");
+  _LIT(KiIniFileNameExtension,".ini");
 	const TUint KExtLength=4;
 	iIniFileName=HBufC::NewL(aP.Drive().Length()+aP.Path().Length()+aP.Name().Length()+KExtLength);
-#if defined(SERIES60)
-	iIniFileName->Des().Append(aP.Drive());
-#endif
-	iIniFileName->Des().Append(aP.Path());
-	iIniFileName->Des().Append(aP.Name());  
-	iIniFileName->Des().Append(KiIniFileNameExtension);
-	
-#if defined(__WINS__)
-	// The emulator doesn't like to write to the Z: drive,
-	// avoid that.
-	*iIniFileName = _L("C:\\oggplay.ini");
-	iDbFileName = _L("C:\\oggplay.db");
-#else
-	iDbFileName.Copy(Application()->AppFullName());
-	iDbFileName.SetLength(iDbFileName.Length() - 3);
-	iDbFileName.Append(_L("db"));
-#endif
+  iIniFileName->Des().Copy(Application()->AppFullName());
+  iIniFileName->Des().SetLength(iIniFileName->Length() - KExtLength);
+  iIniFileName->Des().Append( KiIniFileNameExtension );
+
+  iDbFileName.Copy(Application()->AppFullName());
+  iDbFileName.SetLength(iDbFileName.Length() - 3);
+  iDbFileName.Append(_L("db"));
+
 	iSkinFileDir.Copy(Application()->AppFullName());
 	iSkinFileDir.SetLength(iSkinFileDir.Length() - 11);
+
+#if defined(__WINS__)
+  // The emulator doesn't like to write to the Z: drive, avoid that.
+  *iIniFileName = _L("C:\\oggplay.ini");
+  iDbFileName = _L("C:\\oggplay.db");
+#endif
+
 	
 	iSkins= new CDesCArrayFlat(3);
 	FindSkins();
@@ -300,7 +297,7 @@ COggPlayAppUi::ConstructL()
 	iOggMsgEnv = new(ELeave) COggMsgEnv();
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
 	iOggPlayback->ConstructL();
-	TRACELF("Read ini");
+
 	ReadIniFile();
 	
 	iAppView=new(ELeave) COggPlayAppView;
@@ -471,17 +468,27 @@ COggPlayAppUi::NotifyPlayComplete()
 	
 	if (iCurrent+1==nSongs && iRepeat && (!iIsRunningEmbedded)) {
 		// We are at the end of the playlist, and "repeat" is enabled
-		if (iAppView->GetItemType(0)==6) SetCurrent(1); else SetCurrent(0);
-    iAppView->SelectSong(iCurrent);
+ 		if (iAppView->GetItemType(0)==6) 
+      SetCurrent(1);
+    else
+      SetCurrent(0);
+    if( iOggPlayback->Info(iCurrentSong, ETrue) != KErrOggFileNotFound )
+      iAppView->SelectSong(iCurrent);
+    else
+      SetCurrent(ENoFileSelected);
   } 
 	else if (iCurrent+1<nSongs) {
 		// We are in the middle of the playlist. Now play the next song.
-		SetCurrent(iCurrent+1);
-    iAppView->SelectSong(iCurrent);
+    // First check that current still exists (i.e. media still present)
+    SetCurrent(iCurrent+1);
+    if( iOggPlayback->Info(iCurrentSong, ETrue) != KErrOggFileNotFound )
+      iAppView->SelectSong(iCurrent);
+    else
+      SetCurrent(ENoFileSelected);
 	}
 	else {
 		// We are at the end of the playlist. Stop playing.
-		SetCurrent(-1);
+		SetCurrent(ENoFileSelected);
 		if (iIsRunningEmbedded) {
 			iIsRunningEmbedded = EFalse;
 		}
@@ -492,7 +499,7 @@ COggPlayAppUi::NotifyPlayComplete()
 		iOggPlayback->Play();
 		iAppView->SetTime(iOggPlayback->Time());
 		iAppView->Update();
-	} else SetCurrent(-1);
+	} else SetCurrent(ENoFileSelected);
 	
 }
 
@@ -717,7 +724,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		iAppView->ReadSkin(buf);
 		iAppView->Update();
 		iAppView->Invalidate();
-		TRACELF("EOggSkin OK");
 		break;
 					  }
 		
@@ -926,7 +932,6 @@ COggPlayAppUi::FindSkins()
 			
 			if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN")) {
 				iSkins->AppendL(p.NameAndExt());
-				TPtrC ptr = p.NameAndExt();
 				if (iSkins->Count()==10) break;
 			}
 		}
@@ -946,10 +951,10 @@ void
 COggPlayAppUi::ReadIniFile()
 {
 	RFile in;
-	if(in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
-		EFileRead|EFileStreamText) != KErrNone) {
-		//_LIT(KS,"unable to open ini-file, maybe doesn't exist");
-		//FIXFIXME - this breaks OGGLOG.WriteFormat(KS);
+  TInt err;
+	if( (err=in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
+		EFileRead|EFileStreamText)) != KErrNone) {
+		TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
 		return;
 	}
 	
@@ -1083,10 +1088,8 @@ COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 
 #if defined(SERIES60_SPLASH)
 void 
-COggPlayAppUi::ShowSplashL()
+COggPlayAppUi::ShowSplash()
 {
-#include <S60default.mbg>
-	
 	// This is a so-called pre Symbian OS v6.1 direct screen drawing rutine
 	// based on CFbsScreenDevice. The inherent problem with this method is that
 	// the window server is unaware of the direct screen access and is likely
@@ -1095,48 +1098,41 @@ COggPlayAppUi::ShowSplashL()
 	// http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
 	//   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
 	
-	iSplashActive = ETrue;
-	
-	RFbsSession::Connect();
-	CFbsScreenDevice *iDevice = NULL;
-	
-	TDisplayMode dispMode = CCoeEnv::Static()->ScreenDevice()->DisplayMode();
-	iDevice = CFbsScreenDevice::NewL(_L("scdv"),dispMode);
-	CleanupStack::PushL(iDevice);
-	
-	CFbsBitGc *iGc = NULL;
-	User::LeaveIfError( iDevice->CreateContext(iGc));
-	CleanupStack::PushL(iGc);
-	
-	iDevice->ChangeScreenDevice(NULL);
-	iDevice->SetAutoUpdate(EFalse);
-	
-	TFileName *appName = new (ELeave) TFileName(Application()->AppFullName());
-	CleanupStack::PushL(appName);
-	
-	TParsePtrC p(*appName);
-	TBuf<100> iMbmFileName(p.DriveAndPath());
-	iMbmFileName.Append( _L("s60default.mbm") );  // Magic string :-(
-	//TRACE(COggLog::VA(_L("%S"), &iMbmFileName ));
-	
-	CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
-	CleanupStack::PushL(iBitmap);
-	
-	iBitmap->Create( TSize(176,208), dispMode );
-	iGc->BitBlt(TPoint(0,0), iBitmap );
-	iBitmap->Reset();
-	User::LeaveIfError( iBitmap->Load( iMbmFileName,EMbmS60defaultFlipclosed,EFalse));
-	iGc->BitBlt(TPoint(0,60), iBitmap );
-	
-	// Just testing.....
-	User::LeaveIfError( iBitmap->Load( iMbmFileName,EMbmS60defaultOggplaylogo,EFalse));
-	iGc->BitBltMasked(TPoint(0,5), iBitmap, TRect(8,5,182,57), iBitmap, ETrue);
-	
-	iDevice->Update();
-	RFbsSession::Disconnect();
-	CleanupStack::PopAndDestroy(4);  // appName iBitmap iGc iDevice;
+  TRAPD( newerMind, 
+
+	  RFbsSession::Connect();
+
+    // Check if there is a splash mbm available, if not splash() will make a silent leave
+	  TFileName *appName = new (ELeave) TFileName(Application()->AppFullName());
+	  CleanupStack::PushL(appName);
+	  TParsePtrC p(*appName);
+    TBuf<100> iSplashMbmFileName(p.DriveAndPath());
+	  iSplashMbmFileName.Append( _L("s60splash.mbm") );  // Magic string :-(
+	  
+	  CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
+	  CleanupStack::PushL(iBitmap);
+	  User::LeaveIfError( iBitmap->Load( iSplashMbmFileName,0,EFalse));
+    
+    iSplashActive = ETrue;
+	  CFbsScreenDevice *iDevice = NULL;
+
+	  TDisplayMode dispMode = CCoeEnv::Static()->ScreenDevice()->DisplayMode();
+	  iDevice = CFbsScreenDevice::NewL(_L("scdv"),dispMode);
+	  CleanupStack::PushL(iDevice);
+	  
+	  CFbsBitGc *iGc = NULL;
+	  User::LeaveIfError( iDevice->CreateContext(iGc));
+	  CleanupStack::PushL(iGc);
+	  iGc->BitBlt(TPoint(0,0), iBitmap );
+
+	  iDevice->Update();
+	  CleanupStack::PopAndDestroy(4);  // appName iBitmap iGc iDevice;
+  );
+
+  RFbsSession::Disconnect();
 }
 #endif // #if defined(SERIES60_SPLASH)
+
 
 
 void

@@ -46,6 +46,8 @@ const TInt KBufferSize = 4096*10;
 const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
 
+const TInt KErrOggFileNotFound = -101;
+
 
 class MPlaybackObserver {
  public:

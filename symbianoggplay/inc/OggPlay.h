@@ -202,7 +202,7 @@ private:
   void SetThreadPriority();
   void FindSkins();
 #if defined(SERIES60_SPLASH)
-  void ShowSplashL();
+  void ShowSplash();
   TBool iSplashActive;
 #endif
 

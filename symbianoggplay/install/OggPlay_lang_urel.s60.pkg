@@ -14,6 +14,7 @@
 {"\epoc32\release\armi\urel\OggPlay.ren" "\epoc32\release\armi\urel\OggPlay.rfr" "\epoc32\release\armi\urel\OggPlay.rge" "\epoc32\release\armi\urel\OggPlay.rdu" "\epoc32\release\armi\urel\OggPlay.rit" "\epoc32\release\armi\urel\OggPlay.rsp" "\epoc32\release\armi\urel\OggPlay.rsw" "\epoc32\release\armi\urel\OggPlay.rtu" "\epoc32\release\armi\urel\OggPlay.rda" } -"!:\system\apps\OggPlay\OggPlay.rsc"
 "\epoc32\release\armi\urel\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
 "\epoc32\release\thumb\urel\RECOGG.MDL"-"E:\system\recogs\RECOGG.MDL"
+"\epoc32\release\armi\udeb\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
 "\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60classic.mbm"-"!:\system\apps\OggPlay\S60classic.mbm"
 "\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60classic.skn"-"!:\system\apps\OggPlay\S60classic.skn"
 "..\bitmaps\Skins\GreyZone\GreyZone.skn"-"!:\system\apps\oggplay\GreyZone.skn"

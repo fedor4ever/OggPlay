@@ -244,7 +244,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
 
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
-    return -101;
+    return KErrOggFileNotFound;
   };
   iFileOpen= 1;
   
@@ -492,7 +492,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
       CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_14);
       iEnv->OggErrorMsgL(buf,aFileName);
     }
-    return -101;
+    return KErrOggFileNotFound;
   };
   OggVorbis_File vf;
   if(ov_open(f, &vf, NULL, 0) < 0) {

@@ -153,6 +153,15 @@ SOURCE       1   repeatm.bmp
 SOURCE       c12 \symbian\oggplaylogo.bmp
 END
 
+#if defined SERIES60
+START BITMAP S60splash.mbm
+TARGETPATH   \system\apps\OggPlay
+HEADER
+SOURCEPATH   ..\bitmaps
+SOURCE       c12 s60splash.bmp
+END
+#endif
+
 AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c16 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
 epocstacksize 16000
 
