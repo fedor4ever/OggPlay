@@ -83,7 +83,7 @@ chSTR2(__LINE__) "):" #desc)
 
 // Use MDCT coeffs to generate the freq analyser
 // Not ready yet for prime time!
-//#define MDCT_FREQ_ANALYSER 
+#define MDCT_FREQ_ANALYSER 
 
 // OTHERS
 //

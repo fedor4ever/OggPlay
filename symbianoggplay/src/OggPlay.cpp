@@ -1213,6 +1213,8 @@ COggPlayAppUi::ReadIniFile()
   } // version 2 onwards
 
 	in.Close();
+
+  IFDEF_S60( iAnalyzerState = EDecay; )
 }
 
 void

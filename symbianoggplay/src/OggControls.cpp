@@ -30,6 +30,9 @@
 
 #include "int_fft.c"
 
+const TInt KLengthFFT = 512;
+
+
 TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
 {
   TInt pos = aFont->TextCount(aText, w);
@@ -1532,34 +1535,64 @@ COggAnalyzer::Style()
 void
 COggAnalyzer::Cycle()
 {
-  if (iStyle!=2) return;
-
-  iCycle++;
-
-  if (iCycle%10==0) {
-    iCycle= 0;
-    for (int i=0; i<iNumValues; i++) {
-      if (iPeaks[i]>0 || iPeaks[i]!=iValues[i]) {
-	if (iPeaks[i]!=iValues[i]) { 
-	  iPeaks[i]= iValues[i];
-	  iRedraw= ETrue;
-	} 
+  if( iStyle == EPeak ) {
+      iCycle++;
+      if (iCycle%10==0) {
+        iCycle= 0;
+        for (int i=0; i<iNumValues; i++) {
+          if (iPeaks[i]>0 || iPeaks[i]!=iValues[i]) {
+            if (iPeaks[i]!=iValues[i]) { 
+            iPeaks[i]= iValues[i];
+            iRedraw= ETrue;
+            }
+          }
+        }
+      }
+      else {
+        for (int i=0; i<iNumValues; i++) {
+          if (iValues[i]>iPeaks[i]) { 
+            iPeaks[i]= iValues[i];
+            iRedraw= ETrue;
+          } 
+        }
       }
     }
-  }
-  else {
+  else if( iStyle == EDecay ) {
     for (int i=0; i<iNumValues; i++) {
-      if (iValues[i]>iPeaks[i]) { 
-	iPeaks[i]= iValues[i];
-	iRedraw= ETrue;
-      } 
-    }
+      if (iValues[i] + KDecaySteplength > iPeaks[i]) { 
+        iPeaks[i]= iValues[i];
+        iRedraw= ETrue;
+      }
+      else {
+        if( (iPeaks[i] -= KDecaySteplength) < 0 )
+          iPeaks[i] = 0;
+      }
+    }    
   }
 }
+
+
+
 
 void
 COggAnalyzer::Draw(CBitmapContext& aBitmapContext)
 {
+  // Series 60 special mode
+  if (iStyle==EDecay) {
+    if (iBarIcon) {
+      TInt x= ix;
+      TSize s(iBarIcon->Bitmap()->SizeInPixels());
+      for (int i=0; i<iNumValues; i++) {
+        TInt val = iPeaks[i];
+        TRect rc(TPoint(0,ih-val), s);
+        aBitmapContext.BitBltMasked(TPoint(x,iy+ih-val),iBarIcon->Bitmap(), rc, iBarIcon->Mask(), ETrue);
+        x+= iDx;
+      }
+    }
+    return;
+  }
+
+  // UIQ rendering
   if (iBarIcon) {
     TInt x= ix;
     TSize s(iBarIcon->Bitmap()->SizeInPixels());
@@ -1579,7 +1612,7 @@ COggAnalyzer::Draw(CBitmapContext& aBitmapContext)
     }
   }
 
-  if (iStyle==2) {  
+  if (iStyle==EPeak) {
     aBitmapContext.SetBrushColor(KRgbDarkBlue);
     TRect p(TPoint(ix,iy),TSize(iDx-1,ih));
     for (int i=0; i<iNumValues; i++) {
@@ -1603,7 +1636,7 @@ void COggAnalyzer::RenderWaveform(short int *data)
   for (int i=0; i<512; i++) {
 #if!defined(SERIES60)
     iFFTRe[i]= data[0][i];
-#else //FIXME: untested !
+#else
     iFFTRe[i]= *data++;
 #endif
     iFFTIm[i]= 0;
@@ -1626,14 +1659,14 @@ void COggAnalyzer::RenderWaveformFromMDCT(const TInt32 * aFreqBins)
     for (j=0; j<16; j++)
     {
         TInt v = aFreqBins[j];
-        for(i=0; i<43; ++i)
+        for(i=0; i<KDCTAnalyzerDynamic; ++i)
         {
-            if( loud2[i] <= v)
+            if( loud2[i+12] <= v)
                 break;
         }
         /* i is [0 43] */
-        i = - i + 43 ; /* [43 .. 0 ] */
-        iValues[j]= (TInt)((float)(i*ih)/43.0);
+        i = - i + KDCTAnalyzerDynamic ; /* [43 .. 0 ] */
+        iValues[j]= (i*ih)/KDCTAnalyzerDynamic;
     }
 
   iRedraw= ETrue;

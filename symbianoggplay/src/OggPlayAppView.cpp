@@ -261,7 +261,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 
   iFocusControlsPresent=EFalse;
   bool stop(EFalse);
-  IFDEF_S60( iApp->iAnalyzerState = 0; )
 
   while (!stop) {
     stop= !p.ReadToken() || p.iToken==KEndToken;
@@ -435,7 +434,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       c= new(ELeave) COggAnalyzer();
       iAnalyzer[aCanvas]= (COggAnalyzer*)c;
       if (iAnalyzer[aCanvas]) iAnalyzer[aCanvas]->SetStyle(iApp->iAnalyzerState);
-      IFDEF_S60( if (iAnalyzer[aCanvas]) iApp->iAnalyzerState = 1; iAnalyzer[aCanvas]->SetStyle(0); )
     }
     else if (p.iToken==_L("Position")) {
       _LIT(KAL,"Adding Position");

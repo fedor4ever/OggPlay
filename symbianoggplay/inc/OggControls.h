@@ -47,6 +47,17 @@ class MOggControlObserver {
 };
 
 
+enum TAnalyzerModes {
+  EZero,
+  EOne,
+  EPeak,
+  EDecay    /** Peak hold, constant decay for S60 DCT analyzer (masks dropouts)   */
+  };
+
+const TInt KDCTAnalyzerDynamic = 50;
+const TInt KDecaySteplength = 3;
+
+
 _LIT(KBeginToken,"{");
 _LIT(KEndToken,"}");
 
