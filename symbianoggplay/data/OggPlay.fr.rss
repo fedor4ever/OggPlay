@@ -108,3 +108,12 @@
 #define ogg_shift                    "Shift"
 #define ogg_warnings                 "Avertissements"
 
+#define ogg_rsk_idle                 "Right Softkey / Idle "
+#define ogg_rsk_play                 "Right SK / Play mode"
+#define ogg_cba_back                 "Back"
+#define ogg_cba_clear                "Clear"
+#define ogg_cba_option               "Options"
+#define ogg_cba_exit                 "Exit"
+#define ogg_cba_stop                 "Stop"
+#define ogg_cba_pause                "Pause"
+#define ogg_cba_play                 "Play"

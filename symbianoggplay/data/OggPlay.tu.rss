@@ -26,7 +26,8 @@ CHARACTER_SET UTF8
 #define ogg_hotkey_flipopen "Kapak açýlýþý"
 #define ogg_skin_default "öntanýmlý"
 #define ogg_file_info "Dosya bilgisi..."
-#define ogg_repeat "Tekrarla"
+#define ogg_repeat_on         "Repeat is on"						// New
+#define ogg_repeat_off        "Repeat is off"						// New
 #define ogg_shuffle_playlist "Rastgele listele"
 #define ogg_find_files "Yeni dosyalar bul"
 #define ogg_skins "Kabuklar"
@@ -62,8 +63,13 @@ CHARACTER_SET UTF8
 #define ogg_text_error_19 "Giriþ hatasý "
 #define ogg_text_error_20 "Hata"
 #define ogg_text_error_21 "COggCanvas: Arkaplan resmini açarken hata."
-#define ogg_text_error_22 "Only the following sample rates are supported: "
-#define ogg_text_error_23 "Only streams with one channel are supported."
+// Not used anymore
+//#define ogg_text_error_22 "Only the following sample rates are supported: "
+//#define ogg_text_error_23 "Only streams with one channel are supported."
+#define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "
+#define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
+#define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
+#define ogg_text_error_27 "This warning message can be disabled, from the options menu."
 
 #define ogg_text_string_1 "Dosya listesi yenileniyor..."
 #define ogg_text_string_2 "Dosya veritabaný yazýlýyor..."
@@ -77,3 +83,38 @@ CHARACTER_SET UTF8
 #define ogg_text_string_10 "(altrehberler)"
 #define ogg_text_string_11 "(dosyalar)"
 #define ogg_text_string_12 "(karþýlýksýz)"
+
+// S60 Hotkey settings
+#define ogg_user_hotkey              "Hotkeys"
+#define ogg_format_text_fast_forward "Fast forward"
+#define ogg_format_text_rewind       "Rewind"
+#define ogg_format_text_page_up      "File list page up"
+#define ogg_format_text_page_down    "File list page down"
+
+#define ogg_settings                 "Settings"  // in the menu
+#define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
+#define ogg_filescanmode             "File scan mode"
+#define ogg_maneuvring_speed         "Auto Change Dir"
+#define ogg_autostart                "Autoplay on start"
+#define ogg_fullscan                 "Full Scan"
+#define ogg_mmcdir                   "E:\Ogg"
+#define ogg_normal                   "Normal"
+#define ogg_fast                     "Fast"
+#define ogg_on                       "On"
+#define ogg_off                      "Off"
+#define ogg_popup_on                 "Enabled"
+#define ogg_popup_off                "Disabled"
+#define ogg_back_dir                 "back"
+#define ogg_backspace                "Backspace"
+#define ogg_shift                    "Shift (no repeat)"
+#define ogg_warnings                 "Warnings"
+
+#define ogg_rsk_idle                 "Right Softkey / Idle "
+#define ogg_rsk_play                 "Right SK / Play mode"
+#define ogg_cba_back                 "Back"
+#define ogg_cba_clear                "Clear"
+#define ogg_cba_option               "Options"
+#define ogg_cba_exit                 "Exit"
+#define ogg_cba_stop                 "Stop"
+#define ogg_cba_pause                "Pause"
+#define ogg_cba_play                 "Play"

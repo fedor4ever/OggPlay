@@ -1293,15 +1293,24 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       if(   (c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown))
          || (!iFocusControlsPresent && (aKeyEvent.iScanCode==EOggLeft || aKeyEvent.iScanCode==EOggRight))
         ) {
-        if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggRight)  {
-          iApp->iVolume+= KStepVolume;
-        } else  if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
-          iApp->iVolume-= KStepVolume;
+        if(iApp->iOggPlayback->State()==CAbsPlayback::EPlaying) {
+          if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggRight)  {
+            iApp->iVolume+= KStepVolume;
+          } else  if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
+            iApp->iVolume-= KStepVolume;
+          }
+          if (iApp->iVolume>KMaxVolume) iApp->iVolume = KMaxVolume;
+          if (iApp->iVolume<0) iApp->iVolume = 0;
+          iApp->iOggPlayback->SetVolume(iApp->iVolume);
+		      UpdateVolume();
+        } else { // not playing, i.e. stopped or paused
+          if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
+            iApp->SelectPreviousView();
+          } else if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggRight) {
+            iApp->SelectNextView();
+          }
+
         }
-        if (iApp->iVolume>KMaxVolume) iApp->iVolume = KMaxVolume;
-        if (iApp->iVolume<0) iApp->iVolume = 0;
-        iApp->iOggPlayback->SetVolume(iApp->iVolume);
-		    UpdateVolume();
         return EKeyWasConsumed;
       } 
     }   

@@ -40,6 +40,12 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   case EOggSettingWarningsId:
     return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
       iData.iWarningsEnabled);
+  case EOggSettingRskIdle:
+    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
+      iData.iRskIdle);
+  case EOggSettingRskPlay:
+    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
+      iData.iRskPlay);
   default:
     break;
 		}

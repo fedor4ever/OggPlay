@@ -561,17 +561,40 @@ COggPlayAppUi::UpdateSeries60Softkeys()
   if( viewId.iViewUid != KOggPlayUidFOView )
     return;
 
-  if( iOggPlayback->State() == CAbsPlayback::EPaused ||
-			iOggPlayback->State() == CAbsPlayback::EPlaying )
-    {
-    Cba()->AddCommandSetToStackL(R_PLAY_CBA);
-    }
-  else
-    {
-    Cba()->AddCommandSetToStackL(R_IDLE_CBA);
-    }
+  if( /*iOggPlayback->State() == CAbsPlayback::EPaused ||*/
+    iOggPlayback->State() == CAbsPlayback::EPlaying ) {
+    SetSeries60Softkeys(iSettings.iRskPlay);
+  } else {
+    SetSeries60Softkeys(iSettings.iRskIdle);
+  }
   Cba()->DrawNow();
 }
+
+void
+COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
+    
+  switch(aSoftkey) {
+    case TOggplaySettings::ECbaStop:
+      Cba()->AddCommandSetToStackL(R_OPTION_STOP_CBA);
+      break;
+    case TOggplaySettings::ECbaExit:
+      Cba()->AddCommandSetToStackL(R_OPTION_EXIT_CBA);
+      break;
+    case TOggplaySettings::ECbaPause:
+      Cba()->AddCommandSetToStackL(R_OPTION_PAUSE_CBA);
+      break;
+    case TOggplaySettings::ECbaPlay:
+      Cba()->AddCommandSetToStackL(R_OPTION_PLAY_CBA);
+      break;
+    default:
+      //!FIXME
+      TInt a=5;
+      a++;
+      //OGGPANIC(_L("Invalid Softkey"),1319);
+      break;
+  }
+}
+
 #endif
 
 void
@@ -594,48 +617,17 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		
 	case EOggPlay: {
 		if (iViewBy==ETop) {
-			if (idx>=ETitle && idx<=EFileName) 
-			{
-				iViewHistoryStack.Append(idx);
-				HandleCommandL(EOggViewByTitle+idx);
-			}
-			break;
+			SelectNextView();
+      break;
 		}
 		if (iAppView->GetItemType(idx)==6) {
 			// the back item was selected: show the previous view
-			
-			TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
-			iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
-			
-			TLex parse(curFile);
-			TInt previousView;
-			parse.Val(previousView);
-			if (previousView==ETop) {
-				//iViewBy= ETop;
-				TBuf<16> dummy;
-				iAppView->FillView(ETop, ETop, dummy);
-			}
-			else 
-				HandleCommandL(EOggViewByTitle+previousView);
-#if defined(SERIES60)
-			// UIQ_?
-			// Select the entry which were left.
-			iAppView->SelectSong(previousListboxLine);
-#endif
+			SelectPreviousView();
 			break;
 		}
 		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) 
 		{
-			iViewHistoryStack.Append(idx);
-			
-			HBufC *aBuf;
-			aBuf = curFile.Alloc();
-			CleanupStack::PushL(aBuf);
-			iAppView->FillView(ETitle, iViewBy, *aBuf);
-			CleanupStack::PopAndDestroy();
-			
-			//iViewBy= ETitle;
-			if (iCurrentSong.Length()>0) SetCurrent(iCurrentSong);
+			SelectNextView();
 			break;
 		}
 		if (iViewBy==ETitle || iViewBy==EFileName) {
@@ -787,6 +779,16 @@ COggPlayAppUi::HandleCommandL(int aCommand)
  		HandleCommandL(EOggStop);
     break;
     }
+  case EUserPauseCBA : {
+ 		iOggPlayback->Pause();
+		iAppView->Update();
+    break;
+    }
+  case EUserPlayCBA : {
+ 		HandleCommandL(EOggPlay);
+		iAppView->Update();
+    break;
+    }
 
   case EOggUserHotkeys :
     ActivateOggViewL(KOggPlayUidUserView);
@@ -803,6 +805,60 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		break;
     }
   }
+}
+
+void
+COggPlayAppUi::SelectPreviousView()
+{
+  if(iViewHistoryStack.Count()==0) return;
+	const TDesC& curFile= iAppView->GetFileName(0);
+  TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
+  iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
+
+  TLex parse(curFile);
+  TInt previousView;
+  parse.Val(previousView);
+  if (previousView==ETop) {
+	  //iViewBy= ETop;
+	  TBuf<16> dummy;
+	  iAppView->FillView(ETop, ETop, dummy);
+  }
+  else 
+	  HandleCommandL(EOggViewByTitle+previousView);
+  #if defined(SERIES60)
+  // UIQ_?
+  // Select the entry which were left.
+  iAppView->SelectSong(previousListboxLine);
+  #endif
+  return;
+}
+
+void
+COggPlayAppUi::SelectNextView()
+{
+	int idx = iAppView->GetSelectedIndex();
+  if (iViewBy==ETop) {
+		  if (idx>=ETitle && idx<=EFileName){
+			  iViewHistoryStack.Append(idx);
+			  HandleCommandL(EOggViewByTitle+idx);
+		  }
+		  return;
+	}
+		
+  if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder)) return;
+
+	const TDesC& curFile= iAppView->GetFileName(idx);
+  iViewHistoryStack.Append(idx);
+
+  HBufC *aBuf;
+  aBuf = curFile.Alloc();
+  CleanupStack::PushL(aBuf);
+  iAppView->FillView(ETitle, iViewBy, *aBuf);
+  CleanupStack::PopAndDestroy();
+
+  //iViewBy= ETitle;
+  if (iCurrentSong.Length()>0) SetCurrent(iCurrentSong);
+  return;
 }
 
 void
@@ -1136,6 +1192,14 @@ COggPlayAppUi::ReadIniFile()
       TLex parse(line);
       parse.Val(iSettings.iWarningsEnabled);
   };
+  if (tf.Read(line) == KErrNone) {
+      TLex parse(line);
+      parse.Val(iSettings.iRskIdle);
+  };
+  if (tf.Read(line) == KErrNone) {
+      TLex parse(line);
+      parse.Val(iSettings.iRskPlay);
+  };
 
   } // version 2 onwards
 
@@ -1215,6 +1279,10 @@ COggPlayAppUi::WriteIniFile()
   	}
 
  	num.Num(iSettings.iWarningsEnabled);
+	tf.Write(num);
+ 	num.Num(iSettings.iRskIdle);
+	tf.Write(num);
+ 	num.Num(iSettings.iRskPlay);
 	tf.Write(num);
 
 	//please increase iIniversion when adding stuff

@@ -69,7 +69,7 @@ RESOURCE EIK_APP_INFO
 {
   menubar=r_oggplay_menubar;
   status_pane=r_no_status_pane;
-  cba=r_idle_cba;
+  cba=r_option_stop_cba;
 }
 
 RESOURCE STATUS_PANE_APP_MODEL r_no_status_pane
@@ -268,6 +268,20 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			setting_page_resource= r_oggplay_warnings_setting_page;
 			associated_resource=r_oggplay_popup_setting_binary_texts;
 			name = ogg_warnings;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingRskIdle;
+			setting_page_resource = r_oggplay_rsk_idle;
+			associated_resource = r_oggplay_rsk_idle_setting_item_list;
+			name = ogg_rsk_idle;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingRskPlay;
+			setting_page_resource = r_oggplay_rsk_play;
+			associated_resource = r_oggplay_rsk_play_setting_item_list;
+			name = ogg_rsk_play;
 			}
         };
     }
@@ -390,6 +404,79 @@ RESOURCE AVKON_SETTING_PAGE r_oggplay_warnings_setting_page
 	type=EAknCtPopupSettingList;
 	}
 
+// -------------------------------------------------------------------------
+// 
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_rsk_idle
+    {   
+    label = ogg_rsk_idle;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_rsk_idle_setting_item_list
+    {
+    setting_texts_resource = r_oggplay_rsk_idle_setting_page_list;
+    popped_up_texts_resource = r_oggplay_rsk_idle_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_rsk_idle_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; },
+		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_cba_play; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_rsk_idle_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_cba_exit; },
+		LBUF { txt = ogg_cba_stop; },
+		LBUF { txt = ogg_cba_pause; },
+		LBUF { txt = ogg_cba_play; }
+		};
+    }
+
+
+// -------------------------------------------------------------------------
+// 
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_rsk_play
+    {   
+    label = ogg_rsk_play;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_rsk_play_setting_item_list
+    {
+    setting_texts_resource = r_oggplay_rsk_play_setting_page_list;
+    popped_up_texts_resource = r_oggplay_rsk_play_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_rsk_play_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; }
+		// skipped: value = 3; text = ogg_cba_play;
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_rsk_play_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_cba_exit; },
+		LBUF { txt = ogg_cba_stop; },
+		LBUF { txt = ogg_cba_pause; }
+    };
+    }
+
+
 // CBA's (Softkey) definitions
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -409,7 +496,7 @@ RESOURCE CBA r_user_clear_back_cba
   };
 }  
 
-RESOURCE CBA r_idle_cba
+RESOURCE CBA r_option_exit_cba
 {
   buttons = { 
     CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
@@ -417,11 +504,26 @@ RESOURCE CBA r_idle_cba
   };
 }  
 
-RESOURCE CBA r_play_cba
+RESOURCE CBA r_option_stop_cba
 {
   buttons = { 
     CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
     CBA_BUTTON { id = EUserStopPlayingCBA; txt = ogg_cba_stop; }
+  };
+}  
+
+RESOURCE CBA r_option_pause_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
+    CBA_BUTTON { id = EUserPauseCBA; txt = ogg_cba_pause; }
+  };
+}  
+RESOURCE CBA r_option_play_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
+    CBA_BUTTON { id = EUserPlayCBA; txt = ogg_cba_play; }
   };
 }  
 

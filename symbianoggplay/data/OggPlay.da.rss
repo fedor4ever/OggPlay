@@ -24,13 +24,19 @@
 #define ogg_hotkey_flipopen "Flip åben"
 #define ogg_skin_default "standard"
 #define ogg_file_info "Fil info..."
-#define ogg_repeat "Repeat"
+#define ogg_repeat_on         "Repeat is on"						// New
+#define ogg_repeat_off        "Repeat is off"						// New
 #define ogg_shuffle_playlist "Shuffle playliste"
 #define ogg_find_files "Find nye filer"
 #define ogg_skins "Skins"
 #define ogg_options_cascade "Opsætninger..."
 #define ogg_about_label "Om OggPlay..."
 #define ogg_exit_label "Afslut"
+#define ogg_prev_song "Previous song"
+#define ogg_next_song "Next song"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
 
 #define ogg_filescan_title "Looking for ogg files"
 #define ogg_filescan_label1 "Directories scanned:"
@@ -56,8 +62,13 @@
 #define ogg_text_error_19 "Input fejl "
 #define ogg_text_error_20 "Fejl"
 #define ogg_text_error_21 "COggCanvas: Error opening background image."
-#define ogg_text_error_22 "Only the following sample rates are supported: "
-#define ogg_text_error_23 "Only streams with one channel are supported."
+// Not used anymore
+//#define ogg_text_error_22 "Only the following sample rates are supported: "
+//#define ogg_text_error_23 "Only streams with one channel are supported."
+#define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "
+#define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
+#define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
+#define ogg_text_error_27 "This warning message can be disabled, from the options menu."
 
 #define ogg_text_string_1 "Opdaterer filliste..."
 #define ogg_text_string_2 "Opdaterer fil database..."
@@ -97,9 +108,12 @@
 #define ogg_shift                    "Shift (ingen repeat)"
 #define ogg_warnings                 "Advarsler"
 
-// --- Added 2004-01-25 : Softkey labels
+#define ogg_rsk_idle                 "Right Softkey / Idle "
+#define ogg_rsk_play                 "Right SK / Play mode"
 #define ogg_cba_back                 "Tilbage"
 #define ogg_cba_clear                "Slet"
 #define ogg_cba_option               "Menu"
 #define ogg_cba_exit                 "Afslut"
 #define ogg_cba_stop                 "Stop"
+#define ogg_cba_pause                "Pause"
+#define ogg_cba_play                 "Play"

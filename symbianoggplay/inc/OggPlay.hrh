@@ -95,22 +95,26 @@ enum TOggplayDlgLineId // dialog line ids
 	EOggLabelAboutVersion6,
 	EwizradialDlg1Label
     };
-//!FIXME
+
 //Settings list
 enum TOggplaySettingId
 	{
 	EOggSettingScanDir,
 	EOggSettingManeuvringSpeed,
 	EOggSettingAutoPlayId,
-	EOggSettingWarningsId
+	EOggSettingWarningsId,
+  EOggSettingRskIdle,
+  EOggSettingRskPlay
 	};
 
 enum TOggplayMiscSeries60
-    {
-    EUserStopPlayingCBA = 30000,          // "Stop" softkey
-    EUserHotKeyCBABack,
-    EUserHotKeyCBAEmpty,
-	EOggUserHotkeys
-    };	
+  {
+  EUserStopPlayingCBA = 30000,          // "Stop" softkey
+  EUserHotKeyCBABack,
+  EUserHotKeyCBAEmpty,
+  EOggUserHotkeys,
+  EUserPauseCBA,
+  EUserPlayCBA
+  };	
 
 #endif      // OGGPLAY_HRH

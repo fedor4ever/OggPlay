@@ -109,7 +109,15 @@ public:
   TInt iAutoplay;
   TInt iManeuvringSpeed;
   TInt iWarningsEnabled;
-
+  enum TRsk {
+    ECbaExit,
+    ECbaStop,
+    ECbaPause,
+    ECbaPlay
+  };
+  TInt iRskIdle;
+  TInt iRskPlay;
+  
   enum THotkeys {   // COggUserHotkeys
     ENoHotkey,
     EFastForward,
@@ -219,11 +227,14 @@ public:
   void NextSong();
   void PreviousSong();
   void ShowFileInfo();
+  void SelectPreviousView();
+  void SelectNextView();
 
   void ActivateOggViewL();
   void ActivateOggViewL(const TUid aViewId);
 
   IFDEF_S60( void UpdateSeries60Softkeys(); )
+  IFDEF_S60( void SetSeries60Softkeys(TInt aSoftkey); )
 
   // from CQikAppUi:
   void HandleCommandL(int aCommand);
@@ -248,7 +259,6 @@ private:
 #if defined(SERIES60_SPLASH)
   void ShowSplash();
 #endif
-
 
   int iCapturedKeyHandle;
   HBufC* iIniFileName;
