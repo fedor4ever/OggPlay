@@ -32,6 +32,7 @@ extern int j_code(const char * buff,int count);
 
 CTremorDecoder::~CTremorDecoder() 
 {
+  ov_clear(&iVf);
 }
 
 int CTremorDecoder::Clear() 
