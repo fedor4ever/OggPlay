@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.5.0 of Oggplay for Series60.
+This is the Release Note for Release 1.5.1 of Oggplay for Series60.
 
 *******************************************************************
  This release is only experimental and hasn't been thoroughly tested.
@@ -7,7 +7,7 @@ This is the Release Note for Release 1.5.0 of Oggplay for Series60.
  beta test our new features.
  
  If you experiment problems with this version, please report them to
- our public forums, but mention you are using 1.5.0.
+ our public forums, but mention you are using 1.5.1.
 *******************************************************************
 
 
@@ -18,13 +18,20 @@ This is the Release Note for Release 1.5.0 of Oggplay for Series60.
 
 
 
-What's new in Release 1.5.0:
+What's new in Release 1.5.1:
 --------------------------
+Some bug fixes related to MP3 and AAC reading on the Nokia 7610:
+ + Forward/Rewind now functional
+ + Volume not going back to maximum level, when changing tune.
+Ogg files can now be played using "Nokia Music Player", in the very
+unlikely event that OggPlay UI is not preferred.
+
+General notes:
+--------------
 
 OggPlay nows plays MP3 and AAC in addition to Ogg file format, depending
 on the phone capabilities.
 See the ReadMeFirst.html to see which file formats your phone supports.
-
 
 This release will only work on Nokia 6600, Nokia 6630 and Nokia 7610.
 (And any future Series60 phones that will support MMF.)

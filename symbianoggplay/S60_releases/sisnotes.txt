@@ -1,4 +1,4 @@
-    Welcome to OggPlay 1.5.0
+    Welcome to OggPlay 1.5.1
 
 This release is only 
 experimental and hasn't been

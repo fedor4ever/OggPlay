@@ -80,6 +80,7 @@ CAbsPlayback(anObserver),
 iEnv(anEnv), 
 iPluginInfos(0)
 {
+    iVolume = KMaxVolume;
 }
 
 TInt COggPluginAdaptor::Info(const TDesC& aFileName, TBool /*silent*/)
@@ -142,6 +143,7 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
 #endif
         iState = EOpen;
         iTime = 5; // FIXME!
+        SetVolume(iVolume);
     }
     else
         iState = oldState;
@@ -204,6 +206,7 @@ void   COggPluginAdaptor::SetVolume(TInt aVol)
     {
     return;
     }
+    iVolume = aVol;
     TInt max = iPlayer->MaxVolume();
     TReal relative = ((TReal) aVol)/KMaxVolume;
     TInt vol = (TInt) (relative*max);
@@ -212,9 +215,14 @@ void   COggPluginAdaptor::SetVolume(TInt aVol)
 
 void   COggPluginAdaptor::SetPosition(TInt64 aPos)
 {
-    TRACEF(_L("COggPluginAdaptor::SetPosition"));
+    
+    TRACEF(COggLog::VA(_L("COggPluginAdaptor::SetPosition %i"), aPos ));
     if (iPlayer)
+    {
+        iPlayer->Pause(); // Must pause before changing position. Some MMF Plugins panics otherwise.
         iPlayer->SetPosition(aPos * 1000);
+        iPlayer->Play();
+    }
 }
 
 TInt64 COggPluginAdaptor::Position()

@@ -81,6 +81,7 @@ void COggPlayController::ConstructL()
     iAdvancedStreaming = new (ELeave) CAdvancedStreaming(*this);
     iAdvancedStreaming->ConstructL();
     
+    iFileLength = TTimeIntervalMicroSeconds(1E6);
     PRINT("COggPlayController::ConstructL() Out");
 }
 
@@ -109,6 +110,9 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
         User::Leave(KOggPlayPluginErrNotSupported);
     }
     OpenFileL(iFileName);
+    iDecoder->Clear();
+    iState = EStateNotOpened;
+
     PRINT("COggPlayController::AddDataSourceL Out");
 }
 
@@ -120,6 +124,7 @@ void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
     {
         User::Leave(KOggPlayPluginErrNotSupported);
     }
+     
     PRINT("COggPlayController::AddDataSinkL Out");
 }
 
@@ -139,6 +144,7 @@ void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& /*aPrio
     
     PRINT("COggPlayController::SetPrioritySettingsL");
     // Not implemented yet
+    
 }
 
 void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& /*aRampDuration*/)
@@ -205,6 +211,8 @@ void COggPlayController::PrimeL()
     PRINT("COggPlayController::PrimeL");
     // Not implemented yet
     iState = EStateOpen;
+    OpenFileL(iFileName);
+
 }
 
 void COggPlayController::PlayL()
@@ -243,13 +251,15 @@ void COggPlayController::StopL()
     PRINT("COggPlayController::StopL");
     if (iState != EStateNotOpened)
         iState = EStateOpen;
+    iDecoder->Clear();
+
 }
 
 TTimeIntervalMicroSeconds COggPlayController::PositionL() const
 {
   //  PRINT("COggPlayController::PositionL");
     
-    if(iDecoder)
+    if(iDecoder && (iState != EStateNotOpened) )
         return( TTimeIntervalMicroSeconds(iDecoder->Position( ) * 1000) );
     else
     return TTimeIntervalMicroSeconds(0);
@@ -267,11 +277,7 @@ TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
 {
     
    // PRINT("COggPlayController::DurationL");
-    
-    if (iDecoder) {
-        return (iDecoder->TimeTotal() * 1000);
-    }
-    return TTimeIntervalMicroSeconds(1E6);
+    return (iFileLength);
 }
 
 
@@ -335,13 +341,14 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
     
       // Parse tag information and put it in the provided buffers.
     iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
+    iFileLength = iDecoder->TimeTotal() * 1000;
 
 } 
 
 
 void COggPlayController::MapdSetVolumeL(TInt aVolume)
 {
-    PRINT("COggPlayController::SetVolumeL");
+    TRACEF(COggLog::VA(_L("COggPlayController::SetVolumeL %i"), aVolume ));
     iAdvancedStreaming->SetVolume(aVolume);
 }
 

@@ -4,7 +4,7 @@
 &EN,FR,GE,DU,IT,SP,SW,TU,DA
 ;
 ;Version string to be changed
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,50,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,51,1
 ;
 ; 0x101F7960 for S60 v2.0 and later
 (0x101F7960),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}

@@ -63,12 +63,12 @@ RESOURCE REGISTRY_INFO theInfo
 					version_no = 1;
 					display_name = "Ogg Tremor decoder Format";
 					default_data = "?";
-					opaque_data = "<s>OggPlay<i>0x101F5D07<e>.ogg<h>Ogg";
+					opaque_data = "<s>OggPlay<i>0x101F5D07<e>.ogg<h>OggS*vorbis<m>audio/wav";
                    // SUPPLIER = OggPlay
                    // MEDIA ID = uid for audio media type
                    // FILE EXTENSION = .ogg
                    // HEADER DATA = look for Ogg in header data. 
-                   // MIME TYPE = None currently, should there be????
+                   // MIME TYPE = audio/wav, to allow using it as ringtone
 					}
 				};
 			}

@@ -262,7 +262,7 @@ class COggPlayController :	public CPseudoMMFController,
         TBuf<KMaxStringLength>   iGenre;
         TBuf<KMaxStringLength>   iTitle;
         TBuf<KMaxStringLength>   iTrackNumber;
-
+        TTimeIntervalMicroSeconds iFileLength;
 
         CAdvancedStreaming *iAdvancedStreaming;
         MDecoder *iDecoder;
