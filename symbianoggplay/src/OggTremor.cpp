@@ -723,18 +723,9 @@ void COggPlayback::SendBuffer(TDes8& buf)
       ret = 4000;
       iLatestPlayTime += ret*iTimeBetweenTwoSamples;
       iFirstBuffers--;
-      if (iFirstBuffers == 0)
-      {
-	      iNextBufferMeasureTime = ETrue;
-      }
+  
   } else {
-      if (iNextBufferMeasureTime)
-      {
-          // This is to try to evaluate the time when streaming really start
-	      // Do not take into account the first buffer, to avoid the first buffer problem
-	      iNextBufferMeasureTime = EFalse;
-          iBufferMeasureTime = &buf;
-      } 
+    
      ret = iOggSampleRateConverter->FillBuffer( buf );
   }
 
@@ -817,13 +808,6 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
   if (iState != EPlaying) return;
 
-  if (iBufferMeasureTime == &aBuffer)
-  {
-      // Try to evaluate the time the audio stream has really started.
-    TTime now;
-    now.UniversalTime();
-    iFirstBufferTime= now.Int64();
-  }
   TInt b;
   for (b=0; b<KBuffers; b++) if (&aBuffer == iBuffer[b]) break;
 
