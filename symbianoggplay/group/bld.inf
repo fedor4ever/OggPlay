@@ -26,6 +26,9 @@ PRJ_EXPORTS
 // If there's no destination then the source file will be copied
 // to the same name in \epoc32\include
 ..\Inc\OggPlayUid.h
+// Plugin Header, OggPlay configuration
+..\Inc\OggOs.h
+..\Inc\OggPlayPlugin.h
 
 PRJ_MMPFILES
 // Specify the .mmp files required for building the important component

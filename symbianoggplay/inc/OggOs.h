@@ -58,20 +58,14 @@ chSTR2(__LINE__) "):" #desc)
 // Define the type of UIQ platform
 #define MOTOROLA
 //#define SONYERICSSON
-#else // SERIES60
-// Automatic platform target. Seen fail on windows systems.
-#if defined(__AVKON_ELAF__) || defined(__AVKON_APAC__)
-  #if !defined(UIQ)
-    #define SERIES60
 #endif
-  //#pragma chmsg(Building for SERIES60)
-#else
-  #if !defined(SERIES60)
-    #define UIQ
-  #endif
-  //#pragma chmsg(Building for UIQ)
-#endif
-#endif
+
+// When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
+// are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
+// use the phone built-in decoders.
+
+#define MMF_AVAILABLE
+
 
 // NEW CODE ENABLERS
 //

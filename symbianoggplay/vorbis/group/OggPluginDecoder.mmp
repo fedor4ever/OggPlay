@@ -16,10 +16,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+
+#include "..\..\inc\OggOs.h"  // MMF_AVAILABLE IS DEFINED IN THERE
+
 TARGET          OGGTREMORCONTROLLER.DLL
+#if defined MMF_AVAILABLE
 TARGETTYPE      ECOMIIC
 UID             0x10009D8D 0x101FF683
 TARGETPATH      \System\Libs\Plugins
+#else
+TARGETTYPE      DLL
+UID             0x101FD21D 0x101FD21D
+#endif
+
 
 SOURCEPATH    ..
 SOURCE        mdct.c block.c window.c \
@@ -29,21 +38,26 @@ SOURCE        mdct.c block.c window.c \
 		      sharedbook.c framing.c bitwise.c \
 	          vorbisfile.c
 
-SOURCE        OggTremorControllerFactory.cpp
-
 SOURCE        microsoftInternal.c
 
-RESOURCE	101FF683.RSS
 
-USERINCLUDE   .
+USERINCLUDE   ..
 SYSTEMINCLUDE	\epoc32\include
+SYSTEMINCLUDE   \epoc32\include\libc
+SOURCEPATH    ..\Plugin
+SOURCE        OggTremorController.cpp
+SOURCE        AdvancedStreaming.cpp OggHelperFcts.cpp OggRateConvert.cpp OggLog.cpp
+SOURCE        OggTremorControllerFactory.cpp
+
+#if defined MMF_AVAILABLE
 SYSTEMINCLUDE	\epoc32\include\ecom
 SYSTEMINCLUDE	\epoc32\include\mmf\common
 SYSTEMINCLUDE	\epoc32\include\mmf\server
-SYSTEMINCLUDE   \epoc32\include\libc
+LIBRARY	         mmfcontrollerframework.lib 
+RESOURCE    	101FF683.RSS
+#endif
 
-LIBRARY       euser.lib estlib.lib
-LIBRARY	      mmfcontrollerframework.lib
+LIBRARY       euser.lib estlib.lib charconv.lib MediaClientAudioStream.lib flogger.lib 
 
 MACRO         _LOW_ACCURACY_    //Not really needed, the full accuracy version 
                                 // also works ok.

@@ -1,0 +1,18 @@
+// Test functions
+
+
+TARGET        oggtremortest.exe
+TARGETTYPE    exe
+UID 0
+
+SOURCEPATH    .
+SOURCE        console.cpp oggtremortest.cpp
+
+USERINCLUDE   .
+USERINCLUDE   ..\..
+USERINCLUDE   ..\..\plugin
+SYSTEMINCLUDE \Epoc32\include
+SYSTEMINCLUDE \Epoc32\include\libc
+
+LIBRARY       euser.lib estlib.lib
+LIBRARY       MediaClientAudio.lib

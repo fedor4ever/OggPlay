@@ -18,36 +18,44 @@
 
 
 
-#ifndef CAMCCONTROLLER_H
-#define CAMCCONTROLLER_H
+#ifndef OGGTREMORCONTROLLER_H
+#define OGGTREMORCONTROLLER_H
 
 // INCLUDES
 #include <E32Base.h>
 #include <e32std.h>
-#include <ImplementationProxy.h>
+#include <OggOs.h>
 
+#ifdef MMF_AVAILABLE
+#include <ImplementationProxy.h>
 #include <mmfcontroller.h>
 #include <mmf\common\mmfstandardcustomcommands.h>
+#include <MmfAudioOutput.h>
+#include <MmfFile.h>
+#else
+#include "OggPlayPlugin.h"
+#endif
+
+#include "AdvancedStreaming.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "ivorbiscodec.h"
+#include "ivorbisfile.h"
 
 // FORWARD DECLARATIONS
 
 
 // CLASS DECLARATION
 
-class COggTremorController :	public CMMFController
-	{
-	public:
+#ifdef MMF_AVAILABLE
+class COggTremorController :	public CMMFController, public MAdvancedStreamingObserver
+#else
+class COggTremorController :	public CPseudoMMFController, public MAdvancedStreamingObserver
+#endif
 
-		/**
-        * Controller internal states
-        */
-		enum TOggTremorControllerState
-	    {
-			EStateOpen = 0,
-			EStateStopped,
-			EStatePrepared,
-			EStateRecording
-		};
+	{
 
 	public:	 // Constructors and destructor
 
@@ -70,6 +78,7 @@ class COggTremorController :	public CMMFController
 
 	public:	// Functions from base classes
 
+#ifdef MMF_AVAILABLE
 		/**
         * From CMMFController Add data source to controller.
         * @since
@@ -101,7 +110,35 @@ class COggTremorController :	public CMMFController
         * @return void
         */
 		void RemoveDataSinkL(MDataSink& aDataSink);
+        
+		/**
+        * From CMMFController Handle custom commands to controller.
+        * @since
+        * @param aMessage Message to controller.
+        * @return void
+        */
+		void CustomCommand(TMMFMessage& aMessage)
+			{aMessage.Complete(KErrNotSupported);};//default implementation
+        
+		/**
+        * From CMMFController Set priority settings.
+        * @since
+        * @param aPrioritySettings Wanted priority.
+        * @return void
+        */
+		void SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings);
 
+#else
+        void SetObserver(MMdaAudioPlayerCallback &anObserver);
+        // Non Leaving version of some of the MMF functions.
+        // These functions acts as the framework does, calling the observer
+        // instead of leaving.
+        
+        void Play();
+        void Pause();
+        void Stop();
+        void OpenFile(const TDesC& aFile);
+#endif
 		/**
         * From CMMFController Reset controller.
         * @since
@@ -166,22 +203,6 @@ class COggTremorController :	public CMMFController
         */
 		TTimeIntervalMicroSeconds DurationL() const;
 
-		/**
-        * From CMMFController Set camcorder priority settings.
-        * @since
-        * @param aPrioritySettings Wanted priority.
-        * @return void
-        */
-		void SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings);
-
-		/**
-        * From CMMFController Handle custom commands to controller.
-        * @since
-        * @param aMessage Message to controller.
-        * @return void
-        */
-		void CustomCommand(TMMFMessage& aMessage)
-			{aMessage.Complete(KErrNotSupported);};//default implementation
 
 		/**
         * From CMMFController Get number of metadata entries.
@@ -199,12 +220,64 @@ class COggTremorController :	public CMMFController
         */
 		CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex);
 
+        
+
+    private: // Internal Functions
+        void ParseComments(char** ptr);
+        void ClearComments();
+        void GetString(TBuf<256>& aBuf, const char* aStr);
+
+        TInt GetNewSamples(TDes8 &aBuffer) ; 
+        void NotifyPlayInterrupted(TInt aError) ;
+        void OpenFileL(const TDesC& aFile);
+
 	private: // Data
 
-		// Controller internal state
+		/**
+        * Controller internal states
+        */
+		enum TOggTremorControllerState
+	    {
+			EStateOpen = 0,
+			EStateStopped,
+			EStatePrepared,
+			EStatePlaying
+		};
+
 	    TOggTremorControllerState iState;
-		
+
+        // OggTremor stuff
+        TBuf<100> iFileName;
+        TBool iFileOpen;
+        FILE *iFile;
+        OggVorbis_File           iVf; 
+        TInt                     iCurrentSection; // used in the call to ov_read
+
+        
+        TBuf<256>                iTitle;
+        TBuf<256>                iAlbum;
+        TBuf<256>                iArtist;
+        TBuf<256>                iGenre;
+        TBuf<256>                iTrackNumber;
+        TInt64                   iTime;
+        TInt                     iRate;
+        TInt                     iChannels;
+        TInt                     iFileSize;
+        TInt64                   iBitRate;
+        TBool                    iEof;
+
+        CAdvancedStreaming *iAdvancedStreaming;
+#ifndef MMF_AVAILABLE
+        MMdaAudioPlayerCallback *iObserver;
+#endif
 	};
+
+    enum {
+        KOggPlayPluginErrNotReady = -200,
+        KOggPlayPluginErrNotSupported,
+        KOggPlayPluginErrFileNotFound,
+        KOggPlayPluginErrOpeningFile
+    };
 
 #endif    
             

@@ -18,8 +18,10 @@
 
 
 // INCLUDE FILES
-#include "ImplementationUIDs.hrh"
+#include <OggOs.h>
 #include "OggTremorController.h"
+#ifdef MMF_AVAILABLE
+#include "ImplementationUIDs.hrh"
 
 // CONSTANTS
 // -----------------------------------------------------------------------------
@@ -53,5 +55,22 @@ GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
 	{
 	return(KErrNone);
 	}
+#else
+
+// -----------------------------------------------------------------------------
+// E32Dll DLL Entry point
+// -----------------------------------------------------------------------------
+//
+GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
+	{
+	return(KErrNone);
+	}
+
+EXPORT_C COggTremorController* NewOggTremorControllerL()
+    {
+    return COggTremorController::NewL();
+    }
+
+#endif
 
 //  End of File
