@@ -1,50 +1,21 @@
 
-This is the Release Note for Release 1.0 of Oggplay for Series60.
+This is the Release Note for Release 1.0.1 of Oggplay for Series60.
 
-OggPlay is an open source Ogg vorbis audio player for smartphones.
+*******************************************************************
+ This release is only experimental and hasn't been thoroughly tested.
+ Please use the official release 1.0.0 , unless you are willing to
+ beta test our new features.
+ 
+ If you experiment problems with this version, please report them to
+ our public forums, but mention you are using 1.0.1.
+*******************************************************************
 
-Features:
----------
-+ Works on Siemens SX-1 and on Nokia models : "NGage, 7650, 3650 and 6600".
-+ Plays all .ogg files, regardless of sampling rate / bit rate.
-+ Random play, repeat, pause, fast-forward, rewind.
-+ Support for skins.
-+ File Recognizer support: Just click on an .ogg file in any filebrowser and
-  that file starts playing in Oggplay. 
-+ Displays File information.
-+ Frequency analyzer (Availability depends on skins)
-
-About OggVorbis:
-----------------
-Ogg Vorbis is an audio compression format similar to mp3.However the
-compressed files are approximately a factor two smaller than mp3 files.
-To be more precise an ogg file encoded with 64kbit/sec gives approximately the
-same level of audio quality as a 128kbit/sec mp3 file. In addition the ogg 
-format is a free format, i.e. nobody pays licence fees when recording or 
-playing music in this format. Free converters for the ogg vorbis format are 
-available widely for all platforms. More information and some sample files 
-here: http://www.vorbis.com/.
-
-What's new in Release 1.0:
+What's in Release 1.0.1:
 --------------------------
-Brand new look, navigation simplified.
-Now possible to play ANY ogg files, including on Nokia S60 phones,
-regardless of sample rate. 
-Full updated tranlations for English, French, German, Dutch, Italian, Spanish,
- Swedish,turkish, Danish.
-Options menu.
-Configurable short-cuts.
-Support for frequency analyzer skins.
-More than 5 time faster file discovery.
-Autoplay on start.
-Improved audio stability.
-Major bug fixes for the Nokia 6600.
-
-Known issues/bugs:
-------------------
-Spanish language have some texts which needs to be truncated.
-Italian language are only partly translated.
-Automatic resuming of playing can fail after system generated notification sounds.
+All the features of 1.0.0 plus:
+  + New shortcut option for next/previous song
+  + 'Dynamic' random play. No need to shuffle the playlist anymore.
+  + Quite a lot of internal changes. 
 
 Links:
 ------
