@@ -18,8 +18,8 @@
 
 
 
-#ifndef OGGTREMORCONTROLLER_H
-#define OGGTREMORCONTROLLER_H
+#ifndef OGGPLAYCONTROLLER_H
+#define OGGPLAYCONTROLLER_H
 
 // INCLUDES
 #include <E32Base.h>
@@ -36,13 +36,11 @@
 #include "OggPlayPlugin.h"
 #endif
 
+#include "OggPlayDecoder.h"
 #include "AdvancedStreaming.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "ivorbiscodec.h"
-#include "ivorbisfile.h"
 
 // FORWARD DECLARATIONS
 
@@ -50,9 +48,9 @@
 // CLASS DECLARATION
 
 #ifdef MMF_AVAILABLE
-class COggTremorController :	public CMMFController, public MAdvancedStreamingObserver
+class COggPlayController :	public CMMFController, public MAdvancedStreamingObserver
 #else
-class COggTremorController :	public CPseudoMMFController, public MAdvancedStreamingObserver
+class COggPlayController :	public CPseudoMMFController, public MAdvancedStreamingObserver
 #endif
 
 	{
@@ -62,15 +60,17 @@ class COggTremorController :	public CPseudoMMFController, public MAdvancedStream
         /**
         * Two-phased constructor.
         */
-		static COggTremorController* NewL();
+        // The decoder passed in the NewL is owned and will be destroyed by the controller
+		static COggPlayController* NewL(MDecoder *aDecoder);
 
         /**
         * Destructor.
         */
-		~COggTremorController();
+		~COggPlayController();
 
 	private:
 
+        COggPlayController(MDecoder *aDecoder);
 		/**
         * Symbian 2nd phase constructor.
         */
@@ -223,9 +223,6 @@ class COggTremorController :	public CPseudoMMFController, public MAdvancedStream
         
 
     private: // Internal Functions
-        void ParseComments(char** ptr);
-        void ClearComments();
-        void GetString(TBuf<256>& aBuf, const char* aStr);
 
         TInt GetNewSamples(TDes8 &aBuffer) ; 
         void NotifyPlayInterrupted(TInt aError) ;
@@ -236,7 +233,7 @@ class COggTremorController :	public CPseudoMMFController, public MAdvancedStream
 		/**
         * Controller internal states
         */
-		enum TOggTremorControllerState
+		enum TOggPlayControllerState
 	    {
 			EStateOpen = 0,
 			EStateStopped,
@@ -244,29 +241,16 @@ class COggTremorController :	public CPseudoMMFController, public MAdvancedStream
 			EStatePlaying
 		};
 
-	    TOggTremorControllerState iState;
+	    TOggPlayControllerState iState;
 
         // OggTremor stuff
         TBuf<100> iFileName;
         TBool iFileOpen;
         FILE *iFile;
-        OggVorbis_File           iVf; 
-        TInt                     iCurrentSection; // used in the call to ov_read
-
-        
-        TBuf<256>                iTitle;
-        TBuf<256>                iAlbum;
-        TBuf<256>                iArtist;
-        TBuf<256>                iGenre;
-        TBuf<256>                iTrackNumber;
-        TInt64                   iTime;
-        TInt                     iRate;
-        TInt                     iChannels;
-        TInt                     iFileSize;
-        TInt64                   iBitRate;
-        TBool                    iEof;
-
+        TBool iEof;
+       
         CAdvancedStreaming *iAdvancedStreaming;
+        MDecoder *iDecoder;
 #ifndef MMF_AVAILABLE
         MMdaAudioPlayerCallback *iObserver;
 #endif

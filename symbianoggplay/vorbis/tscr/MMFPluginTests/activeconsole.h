@@ -9,12 +9,19 @@
 // An abstract class which provides the facility to issue key requests. 
 //
 //////////////////////////////////////////////////////////////////////////////
+class MKeyPressObserver 
+{
+public:
+    virtual TInt ProcessKeyPress(TChar aChar) = 0;
+};
+
+
 
 class CActiveConsole : public CActive
     {
     public:
         // Construction
-        CActiveConsole(CConsoleBase* aConsole);
+        CActiveConsole(CConsoleBase* aConsole );
         void ConstructL();
         
         // Destruction
@@ -49,13 +56,12 @@ class CActiveConsole : public CActive
 class CEventHandler : public CActiveConsole
     {
     public:
-        CEventHandler(CConsoleBase* aConsole);
+        CEventHandler(CConsoleBase* aConsole, MKeyPressObserver* anObserver);
     private:
         void ProcessKeyPress(TChar aChar);
-
+        MKeyPressObserver* iObserver;
     };
 
-#define OUTFILE 0
 
 #endif
 

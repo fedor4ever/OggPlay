@@ -12,22 +12,24 @@
 #endif
 
 
-class CIvorbisTest: public CBase, public MMdaAudioPlayerCallback
+class CIvorbisTest: public CBase, public MMdaAudioPlayerCallback, public MKeyPressObserver 
     {
     public:
         
-        static CIvorbisTest * NewL();
+        static CIvorbisTest * NewL(CConsoleBase *aConsole);
         void OpenFileL(const TDesC8 &aFileName);
 
         // Destruction
         ~CIvorbisTest();
 
     private:
-      
+        TInt ProcessKeyPress(TChar aChar) ;
         void MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration);
         void MapcPlayComplete(TInt aError);
         
-        void ConstructL();
+        void ConstructL(CConsoleBase *aConsole);
+     
+        CConsoleBase *iConsole;
 #ifdef MMF_AVAILABLE
         CMdaAudioPlayerUtility *iPlayer;
 #else

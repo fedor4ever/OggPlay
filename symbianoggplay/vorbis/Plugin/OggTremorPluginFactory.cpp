@@ -19,11 +19,24 @@
 
 // INCLUDE FILES
 #include <OggOs.h>
-#include "OggTremorController.h"
+#include "OggPlayController.h"
 #ifdef MMF_AVAILABLE
 #include "ImplementationUIDs.hrh"
+#include "TremorDecoder.h"
 
-// CONSTANTS
+
+#ifdef MMF_AVAILABLE
+COggPlayController* NewOggTremorControllerL()
+#else
+EXPORT_C COggPlayController* NewOggTremorControllerL()
+#endif
+    {
+    CTremorDecoder * decoder = new (ELeave) CTremorDecoder;
+    return COggPlayController::NewL(decoder);
+    }
+
+
+
 // -----------------------------------------------------------------------------
 // ImplementationTable
 // Exported proxy for instantiation method resolution.
@@ -31,7 +44,7 @@
 //
 const TImplementationProxy ImplementationTable[] =
 	{
-		{{KOggTremorUidControllerImplementation}, COggTremorController::NewL}
+		{{KOggTremorUidControllerImplementation}, NewOggTremorControllerL}
 	};
 
 // -----------------------------------------------------------------------------
@@ -47,30 +60,17 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
 	return ImplementationTable;
 	}
 
-// -----------------------------------------------------------------------------
-// E32Dll DLL Entry point
-// -----------------------------------------------------------------------------
-//
-GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
-	{
-	return(KErrNone);
-	}
-#else
-
-// -----------------------------------------------------------------------------
-// E32Dll DLL Entry point
-// -----------------------------------------------------------------------------
-//
-GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
-	{
-	return(KErrNone);
-	}
-
-EXPORT_C COggTremorController* NewOggTremorControllerL()
-    {
-    return COggTremorController::NewL();
-    }
-
 #endif
+
+
+// -----------------------------------------------------------------------------
+// E32Dll DLL Entry point
+// -----------------------------------------------------------------------------
+//
+GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
+	{
+	return(KErrNone);
+	}
+
 
 //  End of File

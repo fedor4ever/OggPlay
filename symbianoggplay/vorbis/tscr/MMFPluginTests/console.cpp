@@ -35,19 +35,20 @@ LOCAL_C void mainL()
   
 
     CIvorbisTest * vorbisDecoder;
-    ////////////////////////////////////////////
-    // Test #1 :
-    // Decode ogg file and save it to a file.
-    //
-    ////////////////////////////////////////////
     
-    vorbisDecoder =  CIvorbisTest::NewL();
+    vorbisDecoder =  CIvorbisTest::NewL(console);
     CleanupStack::PushL( vorbisDecoder );
 
    
+    // KeyPress handler
+    CEventHandler * keypressHandler = new(ELeave) CEventHandler( console, vorbisDecoder );
+    CleanupStack::PushL( keypressHandler );
+    keypressHandler->ConstructL();
+    keypressHandler->RequestCharacter();
+
     CActiveScheduler::Start();
 
-    CleanupStack::PopAndDestroy();
+    CleanupStack::PopAndDestroy(2); // CIvorbisTest, keypressHandler
 
 	console->Printf(KTxtPressAnyKey);
 	console->Getch(); // get and ignore character
@@ -123,33 +124,33 @@ void  CActiveConsole::RunL()
         CActiveScheduler::Stop();
         }
     }
-#if 0
 
 void CActiveConsole::RequestCharacter()
     {
     // A request is issued to the CConsoleBase to accept a
     // character from the keyboard. 
     iConsole->Read(iStatus); 
-    iAction = EWaitForKey;
     SetActive();
+    iAction = EWaitForKey;
     }
 
 ///////////////
 // CEventHandler
 ///////////////
 
-CEventHandler::CEventHandler(CConsoleBase* aConsole)
+CEventHandler::CEventHandler(CConsoleBase* aConsole,MKeyPressObserver* anObserver)
 :CActiveConsole(aConsole)
     {
-    ConstructL();
+    iObserver = anObserver;
     };
 
 
 
-void CEventHandler::ProcessKeyPress(TChar /*aChar*/)
+void CEventHandler::ProcessKeyPress(TChar aChar)
     {
-   // RequestCharacter();
-    CActiveScheduler::Stop();
-
+    if ( iObserver->ProcessKeyPress(aChar) )
+        RequestCharacter(); // Wait for an other keypress
+    else
+        CActiveScheduler::Stop();  // Leave the test.
     }
-#endif
+

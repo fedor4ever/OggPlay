@@ -10,25 +10,45 @@
 #include <e32svr.h>
 #endif
 
+CIvorbisTest * CIvorbisTest::NewL(CConsoleBase *aConsole)
+    {
+    CIvorbisTest* self = new (ELeave) CIvorbisTest;
+    CleanupStack::PushL( self );
+    self->ConstructL (aConsole );
+    CleanupStack::Pop( self );
+    return self;
+    }
+
+TInt CIvorbisTest::ProcessKeyPress(TChar aChar) 
+{
+    switch(aChar)
+    {
+    case '1' :
+        iConsole->Printf(_L("Playing!"));
+        iPlayer->OpenFileL(_L("C:\\test.ogg"));
+        iPlayer->Play();
+        return(ETrue);
+        break;
+    case '2' :
+        iConsole->Printf(_L("Stopping!"));
+        iPlayer->Stop();
+        return(ETrue);
+        break;
+    default:
+        return(EFalse);
+    }
+}
+
 
 #ifdef MMF_AVAILABLE
 ////////////////////////////////////////////////////
 // Interface using the MMF
 ////////////////////////////////////////////////////
-CIvorbisTest * CIvorbisTest::NewL()
-    {
-    CIvorbisTest* self = new (ELeave) CIvorbisTest;
-    CleanupStack::PushL( self );
-    self->ConstructL ( );
-    CleanupStack::Pop( self );
-    return self;
-    }
 
-void CIvorbisTest::ConstructL()
+void CIvorbisTest::ConstructL(CConsoleBase *aConsole)
     {
-
-    iPlayer = CMdaAudioPlayerUtility::NewFilePlayerL(
-        _L("C:\\test.ogg"),
+    iConsole = aConsole;
+    iPlayer = CMdaAudioPlayerUtility::NewL(
         *this);
     RDebug::Print(_L("Leaving constructl"));
     }
@@ -40,14 +60,11 @@ CIvorbisTest::~CIvorbisTest()
 void CIvorbisTest::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
 {
     RDebug::Print(_L("MapcInitComplete"));
-    iPlayer->Play();
 }
 
 void CIvorbisTest::MapcPlayComplete(TInt aError)
 {
     RDebug::Print(_L("PlayComplete"));
-    
-    CActiveScheduler::Stop();
 }
 #else
 
@@ -56,17 +73,10 @@ void CIvorbisTest::MapcPlayComplete(TInt aError)
 // Interface when MMF is not available
 ////////////////////////////////////////////////////
 
-CIvorbisTest * CIvorbisTest::NewL()
-    {
-    CIvorbisTest* self = new (ELeave) CIvorbisTest;
-    CleanupStack::PushL( self );
-    self->ConstructL ( );
-    CleanupStack::Pop( self );
-    return self;
-    }
 
-void CIvorbisTest::ConstructL()
-{
+void CIvorbisTest::ConstructL(CConsoleBase *aConsole)
+    {
+    iConsole = aConsole;
     // Load the plugin.
     // Dynamically load the DLL
     const TUid KOggDecoderLibraryUid={0x101FD21D};
@@ -93,14 +103,12 @@ void CIvorbisTest::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds
 {
     
     RDebug::Print(_L("MapcInitComplete"));
-    iPlayer->Play();
     
 }
 
 void CIvorbisTest::MapcPlayComplete(TInt aError)
 {
     RDebug::Print(_L("PlayComplete"));
-    CActiveScheduler::Stop(); 
 }
 #endif
 
