@@ -624,6 +624,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 				   }
 		
 	case EOggShuffle: {
+     
 		HandleCommandL(EOggStop);
         // Toggle random
         delete(iSongList);
@@ -1566,13 +1567,11 @@ COggSongList::SetPlaying(TInt aPlaying)
     iAppView->Update();
 }
 
-_LIT(KEmpty,""); // Use KNullDesC :-)
-
 const TDesC &
 COggSongList::RetrieveFileName(TInt anAbsoluteIndex)
 {
     if (anAbsoluteIndex == ENoFileSelected) 
-        return KEmpty;
+        return KNullDesC;
     return (iAppView->iOggFiles->FindFromIndex(anAbsoluteIndex));
 }
 
@@ -1589,7 +1588,7 @@ const TDesC&
 COggSongList::GetPlaying()
 {
     if (iPlayingIdx == ENoFileSelected)
-        return KEmpty;
+        return KNullDesC;
     return(RetrieveFileName(iFileList[iPlayingIdx]));
 }
 
@@ -1649,7 +1648,7 @@ const TDesC & COggNormalPlay::GetNextSong()
     if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
     {
         SetPlaying(ENoFileSelected);
-        return(KEmpty);
+        return(KNullDesC);
     }
     
     if (iPlayingIdx+1<nSongs) {
@@ -1668,7 +1667,7 @@ const TDesC & COggNormalPlay::GetNextSong()
 	}
     if (iPlayingIdx == ENoFileSelected)
     {
-        return (KEmpty);
+        return (KNullDesC);
     }
     return RetrieveFileName( iFileList[iPlayingIdx] );
 }
@@ -1680,7 +1679,7 @@ const TDesC & COggNormalPlay::GetPreviousSong()
     if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
     {
         SetPlaying(ENoFileSelected);
-        return(KEmpty);
+        return(KNullDesC);
     }
 
     if (iPlayingIdx-1>=0) {
@@ -1734,7 +1733,7 @@ const TDesC & COggRandomPlay::GetNextSong()
     if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
     {
         SetPlaying(ENoFileSelected);
-        return(KEmpty);
+        return(KNullDesC);
     }
     
     if (iNewFileList || ( (iRandomMemory.Count() == 0) && iRepeat) )
@@ -1756,7 +1755,7 @@ const TDesC & COggRandomPlay::GetNextSong()
     if ( iRandomMemory.Count() == 0)
     {
         SetPlaying(ENoFileSelected);
-        return(KEmpty);
+        return(KNullDesC);
     }
 
     TReal rnd = Math::FRand(iSeed);

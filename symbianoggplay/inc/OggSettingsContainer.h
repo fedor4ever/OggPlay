@@ -29,13 +29,14 @@
 class COggplayDisplaySettingItemList : public CAknSettingItemList
 {
 public:
-  COggplayDisplaySettingItemList(TOggplaySettings& aData);
+  COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi);
   
 protected:
   virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
   
 private:
   TOggplaySettings& iData;
+  COggPlayAppUi& iAppUi;
 };
 #endif
 
@@ -74,6 +75,16 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
 #if defined(SERIES60)
         COggplayDisplaySettingItemList* iListBox;
 #endif
+    };
+
+class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 
+    {
+    public:  // Constructors and destructor
+        CGainSettingItem( TInt aIdentifier,  COggPlayAppUi& aAppUi);
+    private: // Functions from base classes
+        void EditItemL ( TBool aCalledFromMenu );
+    private: //data
+        COggPlayAppUi& iAppUi;
     };
 
 #endif

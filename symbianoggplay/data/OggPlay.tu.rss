@@ -126,3 +126,7 @@ CHARACTER_SET UTF8
 // New Tags, not yet translated:
 #define ogg_random_on                "Shuffle Play"
 #define ogg_random_off               "Normal Play"
+#define ogg_volume_boost             "Volume Boost"
+#define ogg_volume_boost_none        "No Extra Gain"
+#define ogg_volume_boost_6db         "6dB Gain"
+#define ogg_volume_boost_12db        "12dB Gain"

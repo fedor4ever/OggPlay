@@ -103,8 +103,9 @@ enum TOggplaySettingId
 	EOggSettingManeuvringSpeed,
 	EOggSettingAutoPlayId,
 	EOggSettingWarningsId,
-  EOggSettingRskIdle,
-  EOggSettingRskPlay
+    EOggSettingRskIdle,
+    EOggSettingRskPlay,
+    EOggSettingVolumeBoost
 	};
 
 enum TOggplayMiscSeries60

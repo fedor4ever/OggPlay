@@ -275,6 +275,13 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			setting_page_resource = r_oggplay_rsk_play;
 			associated_resource = r_oggplay_rsk_play_setting_item_list;
 			name = ogg_rsk_play;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingVolumeBoost;
+			setting_page_resource = r_oggplay_volume_boost;
+			associated_resource = r_oggplay_volume_boost_item_list;
+			name = ogg_volume_boost;
 			}
         };
     }
@@ -439,6 +446,39 @@ RESOURCE ARRAY r_oggplay_rsk_play_item_array
     };
     }
 
+// -------------------------------------------------------------------------
+// 
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_volume_boost
+    {   
+    label = ogg_volume_boost;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_volume_boost_item_list
+    {
+    setting_texts_resource = r_oggplay_volume_boost_setting_page_list;
+    popped_up_texts_resource = r_oggplay_volume_boost_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_volume_boost_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_volume_boost_none; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_volume_boost_6db; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_volume_boost_12db; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_volume_boost_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_volume_boost_none; },
+		LBUF { txt = ogg_volume_boost_6db; },
+		LBUF { txt = ogg_volume_boost_12db; }
+    };
+    }
 
 // CBA's (Softkey) definitions
 ///////////////////////////////////////////////////////////////////////////////

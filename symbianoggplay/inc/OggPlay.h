@@ -121,6 +121,7 @@ public:
   };
   TInt iRskIdle;
   TInt iRskPlay;
+  TInt iGainType;
   
   enum THotkeys {   // COggUserHotkeys
     ENoHotkey,

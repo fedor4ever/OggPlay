@@ -19,8 +19,8 @@
 #include "OggSettingsContainer.h"
 
 #if defined(SERIES60)
-COggplayDisplaySettingItemList::COggplayDisplaySettingItemList(TOggplaySettings& aData)
-: iData(aData)
+COggplayDisplaySettingItemList::COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi)
+: iData(aAppUi.iSettings), iAppUi(aAppUi)
 {
 }
 
@@ -47,6 +47,9 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   case EOggSettingRskPlay:
     return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
       iData.iRskPlay);
+  case EOggSettingVolumeBoost:
+    return new (ELeave) CGainSettingItem(aIdentifier, 
+      iAppUi);
   default:
     break;
 		}
@@ -63,7 +66,7 @@ void COggSettingsContainer::ConstructL(const TRect& aRect)
     SetRect(aRect);
     ActivateL();
     
-    iListBox = new (ELeave) COggplayDisplaySettingItemList(((COggPlayAppUi*)CEikonEnv::Static()->AppUi())->iSettings);
+    iListBox = new (ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
     iListBox->SetMopParent(this);
     iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_SETTING_ITEM_LIST);
 
@@ -135,4 +138,24 @@ TKeyResponse COggSettingsContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,TE
   }
   return response;
 }
+
+
+/////////////////////////////////////
+// 
+// Overload of the Gain setting, so that change will take place right away
+// 
+/////////////////////////////////////
+ 
+CGainSettingItem:: CGainSettingItem( TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknEnumeratedTextPopupSettingItem ( aIdentifier , aAppUi.iSettings.iGainType ), iAppUi(aAppUi)
+
+    {
+    }
+
+ 
+void  CGainSettingItem:: EditItemL ( TBool aCalledFromMenu )
+     {
+     CAknEnumeratedTextPopupSettingItem::EditItemL( aCalledFromMenu );
+     iAppUi.iOggPlayback->SetVolumeGain( (TGainType)InternalValue () ) ;
+     }
 

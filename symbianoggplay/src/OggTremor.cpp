@@ -96,6 +96,11 @@ void CAbsPlayback::ClearComments()
   iFileName.SetLength(0);
 }
 
+void CAbsPlayback::SetVolumeGain(TGainType /*aGain*/)
+{
+    /* Do nothing by default*/
+}
+
 TInt CAbsPlayback::Rate()
 { 
   return iRate;
@@ -887,6 +892,10 @@ TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
   return 0;
 }
 
+void COggPlayback::SetVolumeGain(TGainType aGain)
+{
+    iOggSampleRateConverter->SetVolumeGain(aGain);
+}
 
 TInt COggAudioCapabilityPoll::PollL()
     {

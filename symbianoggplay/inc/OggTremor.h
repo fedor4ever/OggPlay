@@ -121,7 +121,7 @@ class CAbsPlayback : public CBase {
 
   virtual void  ClearComments();
   virtual void  SetObserver(MPlaybackObserver* anObserver);
-
+  virtual void  SetVolumeGain(TGainType aGain);
  protected:
 
   TState                   iState;
@@ -179,6 +179,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual const void* GetDataChunk();
 #endif
   virtual TInt GetNewSamples(TDes8 &aBuffer);
+  virtual void SetVolumeGain(TGainType aGain);
 
  private:
 

@@ -75,6 +75,7 @@ void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBuff
         // It is a bit of mystery with for HBufC8 we need to divide by 2 the length.
         iIntermediateBuffer = HBufC8::NewL(4096);
     }
+    iGain = ENoGain;
 }
 
 COggSampleRateConverter::~COggSampleRateConverter()
@@ -83,6 +84,12 @@ COggSampleRateConverter::~COggSampleRateConverter()
     {
         delete iIntermediateBuffer;
         }
+}
+
+
+void COggSampleRateConverter::SetVolumeGain(TGainType aGain)
+{
+    iGain = aGain;
 }
 
 TInt COggSampleRateConverter::FillBuffer( TDes8 &aBuffer)
@@ -155,14 +162,30 @@ TInt COggSampleRateConverter::FillBuffer( TDes8 &aBuffer)
             if (remains  <4096)
                 InterBuffer.Set( (TUint8 *) InterBuffer.Ptr(), 0, remains );
             ret = iFillBufferProvider->GetNewSamples(InterBuffer);
+            if (ret <=0) break;
             MixChannels(InterBuffer, InterBuffer);
             ConvertRate(InterBuffer, aBuffer);
         }
         break;
     }
 
+    switch (iGain)
+    {
+    case ENoGain:
+        break;
+    case EStatic6dB:
+        {
+            ApplyGain(aBuffer,1);
+            break;
+        }
+    case EStatic12dB:   
+            ApplyGain(aBuffer,2);
+            break;
+        break;
+    }
+    // TRACEF(COggLog::VA(_L("FillBuf out") ));
+
     return (ret);
-    return 0;
 }
 
 void COggSampleRateConverter::ConvertRate( TDes8 &aInputBuffer, TDes8 &aOutputBuffer )
@@ -243,4 +266,57 @@ void COggSampleRateConverter::MixChannels( TDes8 &aInputBuffer, TDes8 &aOutputBu
         *SampleOutPtr++ = (TInt16) (Left + Right);
     }
     aOutputBuffer.SetLength(aInputBuffer.Length()>>1) ;
+}
+
+void COggSampleRateConverter::ApplyGain( TDes8 &aInputBuffer, TInt shiftValue )
+{
+    
+    TInt16 *ptr = (TInt16 *) aInputBuffer.Ptr();
+    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); /* Divided by 2
+                                              because of Int8 to Int16 cast */
+    if (length <= 0) return;
+    
+#ifdef __WINS__
+    
+    TInt max = 32767;
+    TInt min = -32768;
+    TInt tmp,i; 
+    for (i=0; i<length; i++)
+    {
+        tmp = *ptr;
+        tmp = tmp << shiftValue;
+        if (tmp >max) tmp = max;
+        if (tmp <min) tmp = min; 
+        *ptr++ = (TInt16) ((0xFFFF) & tmp);
+    }
+    
+#else
+    /* Compiler is lousy, better do it in assembly */
+    
+    asm (
+        
+        "ldr   r1, 3333f;"      /* r1 = Max value : 0x7FFF */
+        "ldr   r2, 3333f + 4;"  /* r2 = Min value : 0x8000 */
+        "mov   r3, %1;"         /* r3 = loop index */
+        "1:" /* Loop Begins here */
+        "ldrsh   r0, [%0];"
+        "mov   r0, r0, lsl %2;"
+        "cmp   r0 , r1 ;"
+        "movgt r0 , r1 ;"
+        "cmp   r0 , r2 ;"
+        "movlt r0 , r2 ;"
+        "strh   r0, [%0], #2 ;"
+        "subs   r3, r3, #1;"
+        "bne  1b;"
+        "b   2f;"
+        "3333:" /* Constant table */
+        ".align 0;"
+        ".word 32767;"
+        ".word -32768;"
+        "2:" /* End of the game */
+    :  /* no output registers */
+    : "r"(ptr), "r"(length), "r"(shiftValue) /* Input */
+    : "r0", "r1", "r2", "r3", "cc", "memory" /* Clobbered */
+        );
+#endif
 }
