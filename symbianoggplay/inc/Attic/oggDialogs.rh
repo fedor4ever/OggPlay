@@ -4,10 +4,6 @@
 
 STRUCT SCROLLABLERICHTEXT
 	{
-	WORD width=176;
+	WORD width  = 176;
 	WORD height = 100;
 	}
-
-
-
- 
