@@ -1,0 +1,5 @@
+This is S60_releases\sisnotes.txt and upon release Captain Claus could write something insightful in here like:
+Welcome to the most brilliant Oggplay - the best open-source media player for Ogg Vorbis for Series60 the world has ever seen (or that we know of).
+Or let's show the user a Changelog and the credits for translations and skin design (Fundaluka!) or whatever. I'm tired now.
+After this we could even display the GPL/LICENSE file. -- option FT,TE in .sisfile
+ 

@@ -456,6 +456,7 @@ class COggListBox : public COggControl
     
   void SetFontColor(TRgb aColor);
   void SetFontColorSelected(TRgb aColor);
+  void SetBarColorSelected(TRgb aColor);
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
 
 
@@ -491,6 +492,8 @@ class COggListBox : public COggControl
   TBool  iOwnedByControl;
   TRgb   iFontColor;
   TRgb   iFontColorSelected;
+  TBool  iUseBarSelected;
+  TRgb   iBarColorSelected;
   TInt   iTop;
   TInt   iSelected;
   TInt   iLineHeight;

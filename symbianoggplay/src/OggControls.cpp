@@ -1814,6 +1814,14 @@ COggListBox::SetFontColorSelected(TRgb aColor)
   iRedraw= ETrue;
 }
 
+void
+COggListBox::SetBarColorSelected(TRgb aColor)
+{
+  iBarColorSelected= aColor;
+	iUseBarSelected=ETrue;
+  iRedraw= ETrue;
+}
+
 CColumnListBoxData*
 COggListBox::GetColumnListBoxData()
 {
@@ -1973,9 +1981,19 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
     TPtrC p((*iText)[i]);
     x= ix;
 
-    if (i==iSelected)
-      aBitmapContext.SetPenColor(iFontColorSelected);
-    else
+    if (i==iSelected) {
+			if(iUseBarSelected) {
+				aBitmapContext.SetBrushColor(iBarColorSelected);
+				aBitmapContext.SetBrushStyle(CGraphicsContext::ESolidBrush);
+				aBitmapContext.SetPenColor(iBarColorSelected);
+				TRect lineRect(TPoint(x,y+iLineHeight/2-iFont->HeightInPixels()/2-iOffset%iLineHeight-(iLineHeight-iFont->HeightInPixels())/2), 
+					TSize(iw,iLineHeight));
+
+				aBitmapContext.DrawRect(lineRect);
+				aBitmapContext.SetBrushStyle(CGraphicsContext::ENullBrush);
+			}
+			aBitmapContext.SetPenColor(iFontColorSelected);
+    } else
       aBitmapContext.SetPenColor(iFontColor);
 
     for (TInt j=0; j<iData->LastColumn(); j++) {
@@ -1983,18 +2001,18 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
       len= p.Locate(KColumnListSeparator);
 
       if (iData->ColumnIsGraphics(j) && iData->IconArray()) {
-	TLex lex(p.Left(len));
-	if (lex.Val(idx)==KErrNone) {
-	  CGulIcon* icn= (*iData->IconArray())[idx];
-	  TSize s(icn->Bitmap()->SizeInPixels());
-	  TPoint pt(x+iData->ColumnWidthPixel(j)/2-s.iWidth/2,y+iLineHeight/2-s.iHeight/2-iOffset%iLineHeight);
-	  aBitmapContext.BitBltMasked(pt,icn->Bitmap(), TRect(TPoint(0,0),s), icn->Mask(), ETrue);
-	}
+				TLex lex(p.Left(len));
+				if (lex.Val(idx)==KErrNone) {
+					CGulIcon* icn= (*iData->IconArray())[idx];
+					TSize s(icn->Bitmap()->SizeInPixels());
+					TPoint pt(x+iData->ColumnWidthPixel(j)/2-s.iWidth/2,y+iLineHeight/2-s.iHeight/2-iOffset%iLineHeight);
+					aBitmapContext.BitBltMasked(pt,icn->Bitmap(), TRect(TPoint(0,0),s), icn->Mask(), ETrue);
+				}
       }
       else {
-	TRect lineRect(TPoint(x,y+iLineHeight/2-iFont->HeightInPixels()/2-iOffset%iLineHeight), 
-		       TSize(iData->ColumnWidthPixel(j),iLineHeight));
-	aBitmapContext.DrawText(p.Left(len), lineRect, iFont->AscentInPixels(), iData->ColumnAlignment(j));
+				TRect lineRect(TPoint(x,y+iLineHeight/2-iFont->HeightInPixels()/2-iOffset%iLineHeight), 
+				  TSize(iData->ColumnWidthPixel(j),iLineHeight-1));
+				aBitmapContext.DrawText(p.Left(len), lineRect, iFont->AscentInPixels(), iData->ColumnAlignment(j));
       }
 
       p.Set(p.Mid(len+1));
@@ -2067,6 +2085,12 @@ TBool COggListBox::ReadArguments(TOggParser& p)
     TRgb col(255,0,0);
     success= p.ReadColor(col);
     if (success) SetFontColorSelected(col);
+  }
+  if (success && p.iToken==_L("BarColorSelected")) {
+    p.Debug(_L("Setting selected bar color."));
+    TRgb col(255,0,0);
+    success= p.ReadColor(col);
+    if (success) SetBarColorSelected(col);
   }
   return success;
 }

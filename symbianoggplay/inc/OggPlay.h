@@ -238,8 +238,8 @@ public:
   void ActivateOggViewL();
   void ActivateOggViewL(const TUid aViewId);
 
-  IFDEF_S60( void UpdateSeries60Softkeys(); )
-  IFDEF_S60( void SetSeries60Softkeys(TInt aSoftkey); )
+  void UpdateSeries60Softkeys();
+  void SetSeries60Softkeys(TInt aSoftkey);
 
   // from CQikAppUi:
   void HandleCommandL(int aCommand);
