@@ -773,8 +773,8 @@ COggPlayAppView::HasAFileName(TInt idx)
 {
     // Returns true if a filename is associated with this item
 
-    TInt type = GetItemType(idx) ;
-    if ((type == 0) || (type == 5) || (type ==KPlayingItemType) || (type == KPausedItemType) )
+	COggListBox::TItemTypes type = GetItemType(idx) ;
+	if ((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type ==COggListBox::EPlaying) || (type == COggListBox::EPaused) )
         return(ETrue);
     return(EFalse);
 }
@@ -783,20 +783,9 @@ const TInt
 COggPlayAppView::GetFileAbsoluteIndex(TInt idx)
 {
     
-    TInt type = GetItemType(idx) ;
-    // the icons being used here:
-    // 0: title
-    // 1: album
-    // 2: artist
-    // 3: Genre
-    // 4: Folder
-    // 5: file
-	// 6: playlist
-    // 7: back
-    // 8: playing
-    // 9: paused
+    COggListBox::TItemTypes type = GetItemType(idx) ;
 
-  __ASSERT_ALWAYS ( ( (type == 0) || (type == 5) || (type ==KPlayingItemType) || (type == KPausedItemType)), 
+  __ASSERT_ALWAYS ( ( (type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type ==COggListBox::EPlaying) || (type == COggListBox::EPaused)),
       User::Panic(_L("GetFileAbsoluteIndex called with wrong argument"),0 ) );
 
   TInt index = GetValueFromTextLine(idx);
@@ -814,49 +803,27 @@ COggPlayAppView::GetFileName(TInt idx)
 
 
 
-const TInt
+const COggPlayAppUi::TViews
 COggPlayAppView::GetViewName(TInt idx)
 {
-    TInt type = GetItemType(idx) ;
-    // the icons being used here:
-    // 0: title
-    // 1: album
-    // 2: artist
-    // 3: Genre
-    // 4: Folder
-    // 5: file
-    // 6: playlist
-	// 7: back
-    // 8: playing
-    // 9: paused
+	COggListBox::TItemTypes type = GetItemType(idx);
 
-  __ASSERT_ALWAYS ( type == KBackItemType, 
+	__ASSERT_ALWAYS ( type == COggListBox::EBack, 
       User::Panic(_L("GetViewName called with wrong argument"),0 ) );
-  
-  return (GetValueFromTextLine(idx));
+
+  return (COggPlayAppUi::TViews) GetValueFromTextLine(idx);
 }
 
 void
 COggPlayAppView::GetFilterData(TInt idx, TDes & aData)
 {
-    TInt type = GetItemType(idx) ;
-    // the icons being used here:
-    // 0: title
-    // 1: album
-    // 2: artist
-    // 3: Genre
-    // 4: Folder
-    // 5: file
-	// 6: playlist
-    // 7: back
-    // 8: playing
-    // 9: paused
+	COggListBox::TItemTypes type = GetItemType(idx) ;
 
 #ifdef PLAYLIST_SUPPORT
-   __ASSERT_ALWAYS ( ( (type == 1) || (type == 2) || (type ==3) || (type == 4) || (type == KPlayListItemType) ), 
+	__ASSERT_ALWAYS ( ( (type == COggListBox::EAlbum) || (type == COggListBox::EArtist) || (type ==COggListBox::EGenre) || (type == COggListBox::ESubFolder) || (type == COggListBox::EPlayList) ), 
       User::Panic(_L("COggPlayAppView::GetFilterData called with wrong argument"),0 ) );
 #else
-   __ASSERT_ALWAYS ( ( (type == 1) || (type == 2) || (type ==3) || (type == 4) ), 
+   __ASSERT_ALWAYS ( ( (type == COggListBox::EAlbum) || (type == COggListBox::EArtist) || (type ==COggListBox::EGenre) || (type == COggListBox::ESubFolder) ), 
       User::Panic(_L("COggPlayAppView::GetFilterData called with wrong argument"),0 ) );
 #endif
     
@@ -875,23 +842,25 @@ COggPlayAppView::GetFilterData(TInt idx, TDes & aData)
     return ;
 }
 
-TInt
+COggListBox::TItemTypes
 COggPlayAppView::GetItemType(TInt idx)
 {
+  // TODO: Panic if we can't get the item type (returning COggListBox::ETitle isn't really the right thing to do)
   CDesCArray* arr= GetTextArray();
   if (!arr) 
-    return NULL;
+    return COggListBox::ETitle;
 
   TPtrC sel,msel;
   if(idx >= 0 && idx < arr->Count()) {
     sel.Set((*arr)[idx]);
     TextUtils::ColumnText(msel, 0, &sel);
     TLex parse(msel);
-    TInt atype;
+    TInt atype(COggListBox::ETitle);
     parse.Val(atype);
-    return atype;
+    return (COggListBox::TItemTypes) atype;
   }
-  return -1;
+
+  return COggListBox::ETitle;
 }
 
 void
@@ -1044,21 +1013,21 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     TInt dummy = -1;
     GetTextArray()->Reset();
     iEikonEnv->ReadResource(buf, R_OGG_STRING_6);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ETitle, buf, dummy);
+    TOggFiles::AppendLine(*GetTextArray(), COggListBox::ETitle, buf, dummy);
     iEikonEnv->ReadResource(buf, R_OGG_STRING_7);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EAlbum, buf, dummy);
+    TOggFiles::AppendLine(*GetTextArray(), COggListBox::EAlbum, buf, dummy);
     iEikonEnv->ReadResource(buf, R_OGG_STRING_8);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EArtist, buf, dummy);
+    TOggFiles::AppendLine(*GetTextArray(), COggListBox::EArtist, buf, dummy);
     iEikonEnv->ReadResource(buf, R_OGG_STRING_9);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EGenre, buf, dummy);
+    TOggFiles::AppendLine(*GetTextArray(), COggListBox::EGenre, buf, dummy);
     iEikonEnv->ReadResource(buf, R_OGG_STRING_10);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ESubFolder, buf, dummy);
+    TOggFiles::AppendLine(*GetTextArray(), COggListBox::ESubFolder, buf, dummy);
     iEikonEnv->ReadResource(buf, R_OGG_STRING_11);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EFileName, buf, dummy);
+    TOggFiles::AppendLine(*GetTextArray(), COggListBox::EFileName, buf, dummy);
 
 #ifdef PLAYLIST_SUPPORT
     iEikonEnv->ReadResource(buf, R_OGG_STRING_12);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EPlayList, buf, dummy);
+	TOggFiles::AppendLine(*GetTextArray(), COggListBox::EPlayList, buf, dummy);
 #endif
   }
   else if (thePreviousView==COggPlayAppUi::ETop) {
@@ -1076,7 +1045,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     default: break;
     }
 
-	back.Num(KBackItemType);
+	back.Num(COggListBox::EBack);
     back.Append(KColumnListSeparator);
 #if defined(UIQ)
     back.Append(_L(".."));
@@ -1104,7 +1073,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     }
 
 	if (aSelection.Length()>0) {
-      back.Num(KBackItemType);
+		back.Num(COggListBox::EBack);
       back.Append(KColumnListSeparator);
 #if defined(UIQ)
       back.Append(_L(".."));
@@ -1194,22 +1163,17 @@ COggPlayAppView::UpdateListbox()
     sel.Set((*txt)[i]);
     TBuf<512> buf(sel);
 
-    // the icons being used here:
+	// TO DO: Remove these hard coded numbers (they should be from COggListBox::TItemTypes)
+	// the icons being used here:
     // 0: title
     // 5: file
-    // 7: back
-    // 8: playing
-    // 9: paused
+    // 6: back
+    // 7: playing
+    // 8: paused
 
-#ifdef PLAYLIST_SUPPORT
-    if (buf[0]!=L'7') {
-        if ( GetFileAbsoluteIndex(i) == currSong ) {
-            if (paused) buf[0]='9'; else buf[0]='8'; 
-#else
     if (buf[0]!=L'6') {
         if ( GetFileAbsoluteIndex(i) == currSong ) {
             if (paused) buf[0]='8'; else buf[0]='7'; 
-#endif
       } 
       else {
 	      if (iApp->iViewBy==COggPlayAppUi::ETitle) buf[0]='0'; else buf[0]='5';
@@ -1247,7 +1211,7 @@ TBool
 COggPlayAppView::PlayDimmed()
 {
   return 
-    (GetSelectedIndex()<0 || GetItemType(GetSelectedIndex())==KBackItemType || 
+	  (GetSelectedIndex()<0 || GetItemType(GetSelectedIndex())==COggListBox::EBack || 
      iApp->iViewBy==COggPlayAppUi::EArtist || iApp->iViewBy==COggPlayAppUi::EAlbum || 
      iApp->iViewBy==COggPlayAppUi::EGenre || iApp->iViewBy==COggPlayAppUi::ESubFolder ||
      iApp->iViewBy==COggPlayAppUi::ETop) 

@@ -2117,6 +2117,11 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
       if (iData->ColumnIsGraphics(j) && iData->IconArray()) {
 				TLex lex(p.Left(len));
 				if (lex.Val(idx)==KErrNone) {
+				#ifdef PLAYLIST_SUPPORT
+					// Patch for V1 skins (they don't have a play list icon)
+					if (iData->IconArray()->Count() == idx)
+						idx = EFileName; // Use the file icon instead
+				#endif
 					CGulIcon* icn= (*iData->IconArray())[idx];
 					TSize s(icn->Bitmap()->SizeInPixels());
 					TPoint pt(x+iData->ColumnWidthPixel(j)/2-s.iWidth/2,y+iLineHeight/2-s.iHeight/2-iOffset%iLineHeight);

@@ -27,8 +27,6 @@
 #include "OggUserHotkeys.h"
 
 class CCoeControl;
-enum COggPlayAppUi::TViews;
-
 class COggPlayAppView : public CCoeControl,
 			public MCoeControlObserver,
 			public MCoeControlContext,
@@ -58,13 +56,13 @@ public:
 
   /* Functions to interract with the listbox */
   void        SelectItem(TInt idx);
-  TInt        GetItemType(TInt idx);
+  COggListBox::TItemTypes GetItemType(TInt idx);
   TInt        GetSelectedIndex();
   CDesCArray* GetTextArray();
   TBool HasAFileName(TInt idx);
   const TDesC & GetFileName(TInt idx);
   const TInt  GetFileAbsoluteIndex(TInt idx);
-  const TInt    GetViewName(TInt idx);
+  const COggPlayAppUi::TViews    GetViewName(TInt idx);
   void GetFilterData(TInt idx, TDes &aData);
   void SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex);
 

@@ -471,6 +471,12 @@ class COggScrollBar : public COggControl
 
 class COggListBox : public COggControl 
 {
+public:
+#ifdef PLAYLIST_SUPPORT
+  enum TItemTypes { ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EBack, EPlaying, EPaused, EPlayList};
+#else
+  enum TItemTypes { ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EBack, EPlaying, EPaused};
+#endif
 
  public:
 

@@ -87,18 +87,6 @@ _LIT(KAudioResourceFile, "Z:\\System\\Apps\\OggPlay\\OggPlay.mbm");
 _LIT(KQTimeResourceFile, "Z:\\System\\Apps\\QTime\\QTime.mbm");
 
 
-// TO DO: Items types should be an enum
-#ifdef PLAYLIST_SUPPORT
-const TInt KPlayListItemType = 6;
-const TInt KBackItemType = 7;
-const TInt KPlayingItemType = 8;
-const TInt KPausedItemType = 9;
-#else
-const TInt KBackItemType = 6;
-const TInt KPlayingItemType = 7;
-const TInt KPausedItemType = 8;
-#endif
-
 struct TKeyCodes
 {
   int code; 
