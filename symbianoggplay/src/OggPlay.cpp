@@ -111,7 +111,7 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 	iLineCallsReportedAtIdle = 0;
 #else
 	// Series 60 1.X reports 3 lines 0='Fax' 1='Data' and 2='VoiceLine1' 
-    // Series 60 2.0 reports 4 lines 0='Voice1' 1='Voice2' 2='Data' 3='Fax'
+        // Series 60 2.0 reports 4 lines 0='Voice1' 1='Voice2' 2='Data' 3='Fax'
 	// (and 'VoiceLine1' reports '1' in EnumerateCall() when in idle ?!?)
 
 
@@ -121,32 +121,32 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 	// should be expected ??? The voice line reports '1' ???
 	RPhone::TLineInfo LInfo;
 	for (TInt i=0; i<linesToTest; i++) 
-    {
-		TInt ret= iPhone->GetLineInfo(i,LInfo); 
-		if (ret!=KErrNone) 
-		{
-			//TRACEF(COggLog::VA(_L("Line%d:Err%d"), i, ret ));
-			User::Leave(ret);
-		}
-		else
-		{
-            // Test code, left here because this is likely to change between
-            // phone and it's nice to keep it in traces.
-			User::LeaveIfError( iLine->Open(*iPhone,LInfo.iName) );
-			TInt nCalls=-1;
-			iLine->EnumerateCall(nCalls);
-			iLine->Close();
-			TRACEF(COggLog::VA(_L("Line%d:%S=%d"), i, &LInfo.iName, nCalls ));
-            // End of test code
+	  {
+	    TInt ret= iPhone->GetLineInfo(i,LInfo); 
+	    if (ret!=KErrNone) 
+	      {
+		//TRACEF(COggLog::VA(_L("Line%d:Err%d"), i, ret ));
+		User::Leave(ret);
+	      }
+	    else
+	      {
+		// Test code, left here because this is likely to change between
+		// phone and it's nice to keep it in traces.
+		User::LeaveIfError( iLine->Open(*iPhone,LInfo.iName) );
+		TInt nCalls=-1;
+		iLine->EnumerateCall(nCalls);
+		iLine->Close();
+		TRACEF(COggLog::VA(_L("Line%d:%S=%d"), i, &LInfo.iName, nCalls ));
+		// End of test code
 
-            if (LInfo.iName.Match(_L("Voice*1")) != KErrNotFound)
-            {
+		if (LInfo.iName.Match(_L("Voice*1")) != KErrNotFound)
+		  {
                 
-                iLineToMonitor = i;
-                iLineCallsReportedAtIdle = nCalls;
-	     	}
-         }
-    }
+		    iLineToMonitor = i;
+		    iLineCallsReportedAtIdle = nCalls;
+		  }
+	      }
+	  }
 #endif
 #endif
 }
@@ -350,12 +350,21 @@ COggPlayAppUi::ConstructL()
 	RegisterViewL(*iSettingsView);
   iUserHotkeys=new(ELeave) COggUserHotkeysView(*iAppView);
 	RegisterViewL(*iUserHotkeys);
+#ifdef SERIES60_SPLASH_WINDOW_SERVER
+    iSplashView=new(ELeave) COggSplashView(*iAppView);
+    RegisterViewL(*iSplashView);
+#endif /*SERIES60_SPLASH_WINDOW_SERVER*/
 #endif
 
 	SetProcessPriority();
 	SetThreadPriority();
 	
+
+#if defined(SERIES60_SPLASH_WINDOW_SERVER)
+	ActivateOggViewL(KOggPlayUidSplashView);
+#else
 	ActivateOggViewL();
+#endif
 
 #if defined(SERIES60_SPLASH)
 	iEikonEnv->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNormal);
@@ -413,6 +422,12 @@ COggPlayAppUi::~COggPlayAppUi()
     DeregisterView(*iUserHotkeys);
     delete iUserHotkeys;
     }
+#ifdef SERIES60_SPLASH_WINDOW_SERVER
+  if (iSplashView) {
+    DeregisterView(*iSplashView);
+    delete iSplashView;
+  }
+#endif
 #endif
 
 #ifdef MONITOR_TELEPHONE_LINE
@@ -808,7 +823,7 @@ COggPlayAppUi::PlaySelect()
         if ( (iOggPlayback->State()==CAbsPlayback::EPaused) &&
              (iSongList->IsSelectedFromListBoxCurrentlyPlaying() ) )
         {
-            iOggPlayback->Play();
+            iOggPlayback->Resume();
             iAppView->Update();
             UpdateSeries60Softkeys();
             return;

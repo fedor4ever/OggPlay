@@ -366,6 +366,7 @@ void CAdvancedStreaming::MaoscPlayComplete(TInt aError)
   if ( aError == KErrCancel ) return;
   if ( aError != KErrNone) {
     NotifyPlayInterrupted(aError);
+    iState = EIdle;
   }
 }
 

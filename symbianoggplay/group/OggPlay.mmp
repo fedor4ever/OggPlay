@@ -32,6 +32,7 @@ SOURCE OggFilesSearchDialogs.cpp
 
 #if defined SERIES60
   SOURCE OggSettingsContainer.cpp
+  SOURCE OggSplashContainer.cpp
   SOURCE OggUserHotkeys.cpp
 #endif
 
@@ -120,14 +121,10 @@ SOURCE OggFilesSearchDialogs.cpp
 
 #if defined(PLUGIN_SYSTEM)
   SOURCE OggPluginAdaptor.cpp
-
-  SOURCEPATH ..\vorbis\plugin
-
   #ifndef MMF_AVAILABLE
     SOURCEPATH ..\plugin\src
     SOURCE PseudoMMFFcts.cpp
   #endif
-
 #endif /* PLUGIN_SYSTEM */
 
 /////////////////////////////////////////////////
@@ -196,10 +193,11 @@ LIBRARY mediaclientaudiostream.lib
 
 #ifndef PLUGIN_SYSTEM
 LIBRARY libvorbisidec.lib
+#endif
+
 #ifdef MMF_AVAILABLE
 LIBRARY MediaClientAudio.lib
 LIBRARY MMFControllerFramework.lib 
-#endif
 #endif
 
 /////////////////////////////////////////////////

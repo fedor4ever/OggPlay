@@ -1,1481 +1,571 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html xmlns:v="urn:schemas-microsoft-com:vml"
-xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns="http://www.w3.org/TR/REC-html40">
-
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 10">
-<meta name=Originator content="Microsoft Word 10">
-<link rel=File-List href="ReadMeFirst_files/filelist.xml">
-<title>OggPlay Installation Notes</title>
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>lemieux</o:Author>
-  <o:LastAuthor>Berthier Lemieux</o:LastAuthor>
-  <o:Revision>5</o:Revision>
-  <o:TotalTime>45</o:TotalTime>
-  <o:LastPrinted>1997-09-02T14:43:00Z</o:LastPrinted>
-  <o:Created>2004-06-06T03:45:00Z</o:Created>
-  <o:LastSaved>2004-06-06T04:16:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>231</o:Words>
-  <o:Characters>1877</o:Characters>
-  <o:Lines>15</o:Lines>
-  <o:Paragraphs>4</o:Paragraphs>
-  <o:CharactersWithSpaces>2104</o:CharactersWithSpaces>
-  <o:Version>10.2625</o:Version>
- </o:DocumentProperties>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:PrintFractionalCharacterWidth/>
-  <w:HideSpellingErrors/>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:HyphenationZone>17</w:HyphenationZone>
-  <w:DoNotHyphenateCaps/>
-  <w:DisplayHorizontalDrawingGridEvery>0</w:DisplayHorizontalDrawingGridEvery>
-  <w:DisplayVerticalDrawingGridEvery>0</w:DisplayVerticalDrawingGridEvery>
-  <w:UseMarginsForDrawingGridOrigin/>
-  <w:DoNotShadeFormData/>
-  <w:Compatibility>
-   <w:PrintColBlack/>
-   <w:ShowBreaksInFrames/>
-   <w:SuppressSpBfAfterPgBrk/>
-   <w:SwapBordersFacingPages/>
-   <w:ConvMailMergeEsc/>
-   <w:WW6BorderRules/>
-   <w:FootnoteLayoutLikeWW8/>
-   <w:ShapeLayoutLikeWW8/>
-   <w:AlignTablesRowByRow/>
-   <w:ForgetLastTabAlignment/>
-   <w:NoSpaceRaiseLower/>
-   <w:LayoutRawTableWidth/>
-   <w:LayoutTableRowsApart/>
-  </w:Compatibility>
-  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
- </w:WordDocument>
-</xml><![endif]-->
-<style>
-<!--
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-parent:"";
-	margin:0cm;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-h1
-	{mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:1;
-	mso-list:l0 level1 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-bidi-font-family:"Times New Roman";
-	text-transform:uppercase;
-	mso-font-kerning:0pt;
-	mso-bidi-font-weight:normal;}
-h2
-	{mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:2;
-	mso-list:l0 level2 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-font-weight:normal;}
-h3
-	{mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:3;
-	mso-list:l0 level3 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-bidi-font-family:"Times New Roman";
-	font-weight:normal;}
-h4
-	{mso-style-parent:"Heading 3";
-	mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:4;
-	mso-list:l0 level4 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-bidi-font-family:"Times New Roman";
-	font-weight:normal;}
-h5
-	{mso-style-parent:"Heading 3";
-	mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:5;
-	mso-list:l0 level5 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-bidi-font-family:"Times New Roman";
-	font-weight:normal;}
-h6
-	{mso-style-parent:"Heading 3";
-	mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:6;
-	mso-list:l0 level6 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-bidi-font-family:"Times New Roman";
-	font-weight:normal;}
-p.MsoHeading7, li.MsoHeading7, div.MsoHeading7
-	{mso-style-parent:"Heading 3";
-	mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:7;
-	mso-list:l0 level7 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoHeading8, li.MsoHeading8, div.MsoHeading8
-	{mso-style-parent:"Heading 3";
-	mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:8;
-	mso-list:l0 level8 lfo2;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoHeading9, li.MsoHeading9, div.MsoHeading9
-	{mso-style-parent:"Heading 3";
-	mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	text-indent:0cm;
-	mso-pagination:widow-orphan;
-	page-break-after:avoid;
-	mso-outline-level:9;
-	mso-list:l0 level9 lfo2;
-	tab-stops:list 18.0pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc1, li.MsoToc1, div.MsoToc1
-	{mso-style-next:Normal;
-	margin:0cm;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc2, li.MsoToc2, div.MsoToc2
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:11.9pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc3, li.MsoToc3, div.MsoToc3
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:24.1pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc4, li.MsoToc4, div.MsoToc4
-	{mso-style-parent:"TOC 3";
-	mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:24.1pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc5, li.MsoToc5, div.MsoToc5
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:44.0pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc6, li.MsoToc6, div.MsoToc6
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:55.0pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc7, li.MsoToc7, div.MsoToc7
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:66.0pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc8, li.MsoToc8, div.MsoToc8
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:77.0pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoToc9, li.MsoToc9, div.MsoToc9
-	{mso-style-next:Normal;
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:88.0pt;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:right dotted 496.05pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoHeader, li.MsoHeader, div.MsoHeader
-	{margin:0cm;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	tab-stops:center 207.65pt right 415.3pt;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.MsoFooter, li.MsoFooter, div.MsoFooter
-	{margin:0cm;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:7.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-a:link, span.MsoHyperlink
-	{color:blue;
-	text-decoration:underline;
-	text-underline:single;}
-a:visited, span.MsoHyperlinkFollowed
-	{color:blue;
-	text-decoration:underline;
-	text-underline:single;}
-p.11BodyText, li.11BodyText, div.11BodyText
-	{mso-style-name:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:64.9pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.00BodyText, li.00BodyText, div.00BodyText
-	{mso-style-name:"00 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.02BodyText, li.02BodyText, div.02BodyText
-	{mso-style-name:"02 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:129.85pt;
-	text-indent:-129.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.01BodyText, li.01BodyText, div.01BodyText
-	{mso-style-name:"01 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:64.9pt;
-	text-indent:-64.9pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.22BodyText, li.22BodyText, div.22BodyText
-	{mso-style-name:"22 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:129.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.12BodyText, li.12BodyText, div.12BodyText
-	{mso-style-name:"12 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:129.8pt;
-	text-indent:-64.9pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.23BodyText, li.23BodyText, div.23BodyText
-	{mso-style-name:"23 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:194.75pt;
-	text-indent:-64.9pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.33BodyText, li.33BodyText, div.33BodyText
-	{mso-style-name:"33 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:194.75pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.Bulletedo1, li.Bulletedo1, div.Bulletedo1
-	{mso-style-name:"Bulleted o 1";
-	mso-style-parent:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:82.75pt;
-	text-indent:-17.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.Bulleted-1, li.Bulleted-1, div.Bulleted-1
-	{mso-style-name:"Bulleted - 1";
-	mso-style-parent:"Bulleted o 1";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:82.75pt;
-	text-indent:-17.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.NumberedList0, li.NumberedList0, div.NumberedList0
-	{mso-style-name:"Numbered List 0";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:64.9pt;
-	text-indent:-64.9pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.NumberedList1, li.NumberedList1, div.NumberedList1
-	{mso-style-name:"Numbered List 1";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:82.75pt;
-	text-indent:-17.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.NumberedList2, li.NumberedList2, div.NumberedList2
-	{mso-style-name:"Numbered List 2";
-	mso-style-parent:"Numbered List 1";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:147.7pt;
-	text-indent:-17.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.11BodyTextThigh, li.11BodyTextThigh, div.11BodyTextThigh
-	{mso-style-name:"11 BodyText Thigh";
-	mso-style-parent:"11 BodyText";
-	mso-style-next:"11 BodyText";
-	margin:0cm;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.TitleText, li.TitleText, div.TitleText
-	{mso-style-name:"Title Text";
-	mso-style-parent:"00 BodyText";
-	mso-style-next:"11 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:0cm;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";
-	font-weight:bold;
-	mso-bidi-font-weight:normal;}
-p.DocumentTitle, li.DocumentTitle, div.DocumentTitle
-	{mso-style-name:"Document Title";
-	margin-top:140.0pt;
-	margin-right:0cm;
-	margin-bottom:0cm;
-	margin-left:0cm;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:18.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";
-	font-weight:bold;
-	mso-bidi-font-weight:normal;}
-p.Bulletedo2, li.Bulletedo2, div.Bulletedo2
-	{mso-style-name:"Bulleted o 2";
-	mso-style-parent:"22 BodyText";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:147.7pt;
-	text-indent:-17.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-p.Bulleted-2, li.Bulleted-2, div.Bulleted-2
-	{mso-style-name:"Bulleted - 2";
-	mso-style-parent:"Bulleted o 2";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:11.0pt;
-	margin-left:147.7pt;
-	text-indent:-17.85pt;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	mso-bidi-font-size:10.0pt;
-	font-family:Arial;
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
-@page Section1
-	{size:595.3pt 841.9pt;
-	margin:4.0cm 1.0cm 42.55pt 2.0cm;
-	mso-header-margin:1.0cm;
-	mso-footer-margin:1.0cm;
-	mso-paper-source:7;}
-div.Section1
-	{page:Section1;}
- /* List Definitions */
- @list l0
-	{mso-list-id:-5;
-	mso-list-template-ids:-1;}
-@list l0:level1
-	{mso-level-style-link:"Heading 1";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level2
-	{mso-level-style-link:"Heading 2";
-	mso-level-text:"%1\.%2";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level3
-	{mso-level-style-link:"Heading 3";
-	mso-level-text:"%1\.%2\.%3";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level4
-	{mso-level-style-link:"Heading 4";
-	mso-level-text:"%1\.%2\.%3\.%4";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level5
-	{mso-level-style-link:"Heading 5";
-	mso-level-text:"%1\.%2\.%3\.%4\.%5";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level6
-	{mso-level-style-link:"Heading 6";
-	mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level7
-	{mso-level-style-link:"Heading 7";
-	mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.%7";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level8
-	{mso-level-style-link:"Heading 8";
-	mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.%7\.%8";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-@list l0:level9
-	{mso-level-style-link:"Heading 9";
-	mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.%7\.%8\.%9";
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	mso-level-legacy:yes;
-	mso-level-legacy-indent:0cm;
-	mso-level-legacy-space:5.65pt;
-	margin-left:0cm;
-	text-indent:0cm;}
-ol
-	{margin-bottom:0cm;}
-ul
-	{margin-bottom:0cm;}
--->
-</style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-parent:"";
-	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
-	mso-para-margin:0cm;
-	mso-para-margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:10.0pt;
-	font-family:"Times New Roman";}
-</style>
-<![endif]-->
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="user.nokia.com">
+   <meta name="GENERATOR" content="Mozilla/4.75 [en]C-CCK-MCD {Nokia}  (Windows NT 5.0; U) [Netscape]">
+   <title>OggPlay for Series60</title>
 </head>
+<body>
 
-<body lang=FI link=blue vlink=blue style='tab-interval:65.2pt'>
+<center>
+<h1>
+OggPlay</h1></center>
 
-<div class=Section1>
+<center>
+<h1>
+For Series60 phones</h1></center>
 
-<h1 style='margin-left:0cm;text-indent:0cm'><![if !supportLists]><span
-lang=EN-US style='mso-fareast-font-family:Arial;mso-bidi-font-family:Arial;
-mso-ansi-language:EN-US'><span style='mso-list:Ignore'>1.<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
-lang=EN-US style='mso-ansi-language:EN-US'>Installation:<o:p></o:p></span></h1>
+<center>
+<h2>
+Supplementary Information</h2></center>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<p><br>This document contains the following topics:
+<ol>
+<ul>
+<li>
+<a href="#Versions">OggPlay Versions</a></li>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:36.0pt;margin-bottom:.0001pt'><span class=SpellE><span lang=EN-US
-style='mso-ansi-language:EN-US'>OggPlay</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> comes in two installation package. <b>Only one</b>
-of the two should be installed, depending on your phone capabilities.&nbsp; Use
-the following chart to find which package you should install to your phone:<o:p></o:p></span></p>
+<li>
+<a href="#File Format">File Format Supported</a></li>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<li>
+<a href="#Audio Format">Audio Format Supported</a></li>
+</ul>
+</ol>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
- style='margin-left:69.2pt;border-collapse:collapse;mso-padding-alt:0cm 0cm 0cm 0cm'>
- <tr style='mso-yfti-irow:0;height:16.0pt'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:16.0pt'>
-  <p class=MsoNormal><b>Phone Model<o:p></o:p></b></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;height:16.0pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal><b>Package to install<o:p></o:p></b></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia 3650<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlay.SIS">OggPlay.SIS</a><o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia 3660<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlay.SIS">OggPlay.SIS</a> <o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia 6600<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlayMMF.SIS">OggPlayMMF.SIS</a><o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia 7610<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlayMMF.SIS">OggPlayMMF.SIS</a><o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia 7650<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlay.SIS">OggPlay.SIS</a><o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:6'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia N-Gage<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlay.SIS">OggPlay.SIS</a> <o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:7'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Nokia N-Gage QD<o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlay.SIS">OggPlay.SIS</a><o:p></o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:8;mso-yfti-lastrow:yes'>
-  <td width=255 valign=top style='width:191.3pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'>Siemens SX-<u>1</u><o:p></o:p></span></p>
-  </td>
-  <td width=199 valign=top style='width:148.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal><span style='mso-bidi-font-size:11.0pt;mso-bidi-font-family:
-  Arial'><a href="OggPlay.SIS">OggPlay.SIS</a> <o:p></o:p></span></p>
-  </td>
- </tr>
-</table>
+<h3>
+<a NAME="Versions"></a>OggPlay Version</h3>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<blockquote>
+<div class="11BodyText">OggPlay is a music player for phones running on
+the Symbian Operating system. It was originally playing only .ogg file
+format, but some version now plays mp3 and other music formats in addition
+to .ogg files</div>
+</blockquote>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<blockquote>
+<div class="11BodyText">OggPlay comes in several flavors, depending on
+HW and Operating System version of the phone it is running on. This text
+concentrates on Series60 versions. Please consult
+<a href="http://symbianoggplay.sourceforge.net/">Oggplay
+webpage</a> for the other versions, new releases and much more details
+about OggPlay.</div>
 
-<h1 style='margin-left:0cm;text-indent:0cm'><![if !supportLists]><span
-lang=EN-US style='mso-fareast-font-family:Arial;mso-bidi-font-family:Arial;
-mso-ansi-language:EN-US'><span style='mso-list:Ignore'>2.<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
-lang=EN-US style='mso-ansi-language:EN-US'>File Format supported:<o:p></o:p></span></h1>
+<div class="11BodyText">For Series60 phones, two different versions of
+OggPlay co-exists. One version for phones supporting the MMF, the other
+one for phones that do not support it.</div>
 
-<p class=MsoNormal style='margin-left:65.2pt'><span lang=EN-US
-style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:36.0pt;margin-bottom:.0001pt'><span class=SpellE><span lang=EN-US
-style='mso-ansi-language:EN-US'>Oggplay</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> is able to use standard <span class=SpellE>Symbian</span>
-MMF <span class=SpellE>plugins</span>. These <span class=SpellE>plugins</span>
-can be either built-in your phone or installed afterward. Since <span
-class=SpellE>Oggplay</span> is able to both built-in and downloadable <span
-class=SpellE>plugins</span>, the file formats supported by <span class=SpellE>Oggplay</span>
-differs from phones to phones. This table shows the properties of each phone:<o:p></o:p></span></p>
+<p class="11BodyText" style="margin-left: 65.2pt;">Technical mambo-jambo:
+(skip to next paragraph if you’re not interested)
+<blockquote>
+<div class="11BodyText" style="margin-left: 90pt;">MMF (Multimedia Framework)
+is a feature of Symbian Operating System (SOS) that allows 3<sup>rd</sup>
+parties to use audio decoder plugins. With MMF, Oggplay can use the phone
+built-in audio decoders (MP3, AAC), as well as decoder installed by users.
+MMF is not supported Series 60 phones that are built on older SOS. Non-MMF
+version of Oggplay will work on MMF phones, but the opposite is not true.
+The user should carefully select which package to install on their phones,
+depending on their phone type.</div>
+</blockquote>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<div class="11BodyText">The table below shows which package you should
+install depending on your phone model. It is suggested, but not mandatory,
+to install the MMF Version, if your HW supports the MMF:</div>
 
-<div align=center>
+<br>&nbsp;
+<center><table BORDER COLS=3 >
+<tr>
+<td>
+<center>Phone Model</center>
+</td>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;mso-padding-alt:0cm 0cm 0cm 0cm'>
- <tr style='mso-yfti-irow:0'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal>Phone Model<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal>Ogg<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>Mp3,</p>
-  <p class=MsoNormal align=center style='text-align:center'>built-in plugin<o:p></o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>Mp3,</p>
-  <p class=MsoNormal align=center style='text-align:center'>Downloadable plugin<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>AAC,</p>
-  <p class=MsoNormal align=center style='text-align:center'>built-in plugin</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 3650<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 3660<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 6600<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 7610<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 7650<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>(1)<o:p></o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>(1)</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:6'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia N-Gage<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:7'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia N-Gage QD<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:8;mso-yfti-lastrow:yes'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Siemens SX-1<o:p></o:p></p>
-  </td>
-  <td width=76 valign=top style='width:57.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal>X<o:p></o:p></p>
-  </td>
-  <td width=104 valign=top style='width:77.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
-  <td width=113 valign=top style='width:3.0cm;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>X<o:p></o:p></p>
-  </td>
-  <td width=123 valign=top style='width:92.15pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
-  </td>
- </tr>
-</table>
+<td WIDTH="100">
+<center>OggPlay&nbsp;
+<br>MMF&nbsp;
+<br>Version</center>
+</td>
 
-</div>
+<td WIDTH="100">
+<center>OggPlay Non-MMF Version</center>
+</td>
+</tr>
 
-<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+<tr>
+<td>
+<center>Nokia 3650</center>
+</td>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><o:p>&nbsp;</o:p></p>
+<td>&nbsp;</td>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:36.0pt;margin-bottom:.0001pt'><span lang=EN-US style='mso-ansi-language:
-EN-US'><a href="http://www./???.???/">MP3 Downloadable <span class=SpellE>plugin</span>
-can be downloaded from here. It is also freeware.</a><o:p></o:p></span></p>
+<td>
+<center>X</center>
+</td>
+</tr>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:36.0pt;margin-bottom:.0001pt'><span lang=EN-US style='mso-ansi-language:
-EN-US'><o:p>&nbsp;</o:p></span></p>
+<tr>
+<td>
+<center>Nokia 3660</center>
+</td>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:54.0pt;margin-bottom:.0001pt;text-indent:-18.0pt'><span lang=EN-US
-style='mso-ansi-language:EN-US'>(1): This phone does have built-in MP3/AAC
-reader, but it doesn’t allow 3<sup>rd</sup> party developers to use it, thus <span
-class=SpellE>Oggplay</span> cannot use the built-in decoder.<o:p></o:p></span></p>
+<td>&nbsp;</td>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<td>
+<center>X</center>
+</td>
+</tr>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<tr>
+<td>
+<center>Nokia 6600</center>
+</td>
 
-<h1 style='margin-left:0cm;text-indent:0cm'><![if !supportLists]><span
-lang=EN-US style='mso-fareast-font-family:Arial;mso-bidi-font-family:Arial;
-mso-ansi-language:EN-US'><span style='mso-list:Ignore'>3.<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
-lang=EN-US style='mso-ansi-language:EN-US'>Audio Format supported:<o:p></o:p></span></h1>
+<td>
+<center>X</center>
+</td>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<td>
+<center>X</center>
+</td>
+</tr>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:36.0pt;margin-bottom:.0001pt'><span class=SpellE><span lang=EN-US
-style='mso-ansi-language:EN-US'>OggPlay</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> uses the highest audio quality provided by the
-phone. As a reference, CD sampling rate is 44100 Hz.<o:p></o:p></span></p>
+<tr>
+<td>
+<center>Nokia 6620</center>
+</td>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<td>
+<center>X</center>
+</td>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
- style='margin-left:59.4pt;border-collapse:collapse;mso-padding-alt:0cm 0cm 0cm 0cm'>
- <tr style='mso-yfti-irow:0'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal>Phone Model<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal>Highest Sampling Rate (Hz)<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color'>
-  <p class=MsoNormal>Stereo</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1;height:12.75pt'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;height:12.75pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 3650<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>16000<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>No</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 3660<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>16000<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>No</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 6600<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>16000<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>No</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 7610<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>44100<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>No</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia 7650<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>16000<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>No</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:6'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia N-Gage<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>16000 (1)<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>No (1)</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:7'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Nokia N-Gage QD<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>?<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>?</p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:8;mso-yfti-lastrow:yes'>
-  <td width=139 valign=top style='width:104.2pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
-  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
-  0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext'>
-  <p class=MsoNormal>Siemens SX-1<o:p></o:p></p>
-  </td>
-  <td width=115 valign=top style='width:86.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>44100<o:p></o:p></p>
-  </td>
-  <td width=65 valign=top style='width:48.7pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
-  padding:0cm 5.4pt 0cm 5.4pt;border-color:-moz-use-text-color windowtext windowtext -moz-use-text-color'>
-  <p class=MsoNormal align=center style='text-align:center'>Yes</p>
-  </td>
- </tr>
-</table>
+<td>
+<center>X</center>
+</td>
+</tr>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<tr>
+<td>
+<center>Nokia 7610</center>
+</td>
 
-<p class=00BodyText style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
-margin-left:36.0pt;margin-bottom:.0001pt'><span lang=EN-US style='mso-ansi-language:
-EN-US'>(1): The <span class=SpellE>buit</span>-in audio player of this phone
-support 44100Hz in Stereo, but it doesn’t allow 3<sup>rd</sup> party developers
-to use it, thus <span class=SpellE>Oggplay</span> is restricted to use 16000Hz
-in Mono.<o:p></o:p></span></p>
+<td>
+<center>X</center>
+</td>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<td>
+<center>X</center>
+</td>
+</tr>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<tr>
+<td>
+<center>Nokia 7650</center>
+</td>
 
-<p class=00BodyText style='margin-bottom:0cm;margin-bottom:.0001pt'><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<td>&nbsp;</td>
 
-</div>
+<td>
+<center>X</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia N-Gage</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>
+<center>X</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia N-Gage QD</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>
+<center>X</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Siemens SX-1</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>
+<center>X</center>
+</td>
+</tr>
+</table></center>
+</blockquote>
+
+<h3 class="11BodyText">
+<a NAME="File Format"></a>File Format Supported</h3>
+
+<blockquote>
+<div class="11BodyText">For phones running Symbian OS 7.0S and over, Oggplay
+is able to use standard Symbian MMF plugins. These plugins can be either
+built-in your phone or installed afterward. Since Oggplay is able to both
+built-in and downloadable plugins, the file formats supported by Oggplay
+differs from phones to phones. The version of Oggplay that runs on a Symbian
+OS older than 7.0S does not currently support plugins. This might change
+in future releases. Next table shows the properties of each phone:</div>
+
+<center><table BORDER COLS=4 >
+<tr>
+<td>
+<center>Phone Model</center>
+</td>
+
+<td WIDTH="100">
+<center>Ogg</center>
+</td>
+
+<td ALIGN=CENTER WIDTH="100">
+<center>MP3
+<br>Built-in Plugin</center>
+</td>
+
+<td WIDTH="100">
+<center>AAC Built-in Plugin</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 3650</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>&nbsp;&nbsp;</td>
+
+<td>&nbsp;&nbsp;</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 3660</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 6600</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 6620</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 7610</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 7650</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia N-Gage</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>
+<center>(1)</center>
+</td>
+
+<td>
+<center>(1)</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia N-Gage QD</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>
+<center>?</center>
+</td>
+
+<td>
+<center>?</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Siemens SX-1</center>
+</td>
+
+<td>
+<center>X</center>
+</td>
+
+<td>&nbsp;</td>
+
+<td>&nbsp;</td>
+</tr>
+</table></center>
+
+
+<p class="00BodyText" style="margin: 0cm 0cm 0.0001pt 54pt; text-indent: -18pt;">(1):
+This phone does have built-in MP3/AAC reader, but it doesn’t allow 3<sup>rd</sup>
+party developers to use it, thus Oggplay cannot use the built-in decoder
+<div class="00BodyText" style="margin: 0cm 0cm 0.0001pt 54pt; text-indent: -18pt;"></div>
+
+
+<p class="MsoNormal" style="margin-left: 36pt;">An MP3 Downloadable plugin
+is currently under development. Keep an eye on OggPlay webpage for release
+announcements!
+<div class="MsoNormal" style="margin-left: 36pt;"></div>&nbsp;
+</blockquote>
+
+<h3 class="MsoNormal" style="margin-left: 36pt;">
+<a NAME="Audio Format"></a>Audio Format supported</h3>
+
+<blockquote>
+<div class="MsoNormal" style="margin-left: 36pt;">OggPlay uses the highest
+audio quality provided by the phone. As a reference, CD sampling rate is
+44100 Hz.</div>
+
+<div class="MsoNormal" style="margin-left: 36pt;"></div>&nbsp;
+
+<div class="MsoNormal" style="margin-left: 36pt;"></div>&nbsp;
+
+<center><table BORDER COLS=3 >
+<tr>
+<td>
+<center>Phone Model</center>
+</td>
+
+<td WIDTH="100">
+<center>Highest Sampling Rate&nbsp;
+<br>(Hz)</center>
+</td>
+
+<td WIDTH="100">
+<center>Stereo</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 3650</center>
+</td>
+
+<td>
+<center>16000</center>
+</td>
+
+<td>
+<center>No</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 3660</center>
+</td>
+
+<td>
+<center>16000</center>
+</td>
+
+<td>
+<center>No</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 6600</center>
+</td>
+
+<td>
+<center>16000</center>
+</td>
+
+<td>
+<center>No</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 6620</center>
+</td>
+
+<td>
+<center>44100</center>
+</td>
+
+<td>
+<center>Yes</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 7610</center>
+</td>
+
+<td>
+<center>44100</center>
+</td>
+
+<td>
+<center>No</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia 7650</center>
+</td>
+
+<td>
+<center>16000</center>
+</td>
+
+<td>
+<center>No</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia N-Gage</center>
+</td>
+
+<td>
+<center>16000 (1)</center>
+</td>
+
+<td>
+<center>No (1)</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Nokia N-Gage QD</center>
+</td>
+
+<td>
+<center>?</center>
+</td>
+
+<td>
+<center>?</center>
+</td>
+</tr>
+
+<tr>
+<td>
+<center>Siemens SX-1</center>
+</td>
+
+<td>
+<center>44100</center>
+</td>
+
+<td>
+<center>Yes</center>
+</td>
+</tr>
+</table></center>
+
+<div class="00BodyText" style="margin: 0cm 0cm 0.0001pt 36pt;"></div>
+
+
+<p class="00BodyText" style="margin: 0cm 0cm 0.0001pt 36pt;">(1): The buit-in
+audio player of this phone support 44100Hz in Stereo, but it doesn’t allow
+3<sup>rd</sup> party developers to use it, thus Oggplay is restricted to
+use 16000Hz in Mono.</blockquote>
+
+<div class="00BodyText" style="margin: 0cm 0cm 0.0001pt 36pt;"></div>
+
+<blockquote>
+<div class="MsoNormal" style="margin-left: 36pt;"></div>&nbsp;
+
+<div class="MsoNormal" style="margin-left: 36pt;"></div>&nbsp;
+</blockquote>
 
 </body>
-
 </html>

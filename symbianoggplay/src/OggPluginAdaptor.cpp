@@ -159,9 +159,26 @@ void COggPluginAdaptor::Pause()
     iPlayer->Pause();
     iState = EPaused;
 }
+
+void COggPluginAdaptor::Resume()
+{
+    TRACEF(_L("COggPluginAdaptor::Resume()"));
+    TBool wasInterrupted = iInterrupted;  
+    if (wasInterrupted)
+        iPlayer->SetPosition(iLastPosition);
+    Play();
+    TInt time = TInt(iLastPosition.Int64().GetTInt() /1E6);
+    TInt hours = time/3600;
+    TInt min = (time%3600)/60;
+    TInt sec = (time%3600%60);
+    TRACEF(COggLog::VA(_L(" %i %i %i"),hours,min,sec));
+
+}
+
 void COggPluginAdaptor::Play()
 {
     TRACEF(_L("COggPluginAdaptor::Play() In"));
+    iInterrupted = EFalse;
     if (iState == EClosed)
         return;
     iPlayer->Play();
@@ -205,6 +222,8 @@ TInt64 COggPluginAdaptor::Position()
     TTimeIntervalMicroSeconds aPos(0);
     if (iPlayer)
        iPlayer->GetPosition(aPos);
+    if (aPos != TTimeIntervalMicroSeconds(0))
+        iLastPosition = aPos;
     return(aPos.Int64()/1000); // Dividing by 1000, to get millisecs from microsecs
 }
 
@@ -246,6 +265,13 @@ void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSe
 void COggPluginAdaptor::MapcPlayComplete(TInt aError)
 {
     TRACEF(COggLog::VA(_L("MapcPlayComplete %d"), aError ));
+    if (aError == KErrDied)
+    {
+        // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
+        iObserver->NotifyPlayInterrupted();
+        iInterrupted = ETrue;
+    }
+    else
     iObserver->NotifyPlayComplete();
 }
 

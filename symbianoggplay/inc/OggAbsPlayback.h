@@ -97,6 +97,7 @@ class CAbsPlayback : public CBase {
   virtual TInt   Open(const TDesC& aFileName) = 0;
 
   virtual void   Pause() = 0;
+  virtual void   Resume() = 0;
   virtual void   Play() = 0;
   virtual void   Stop() = 0;
 

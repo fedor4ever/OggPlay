@@ -566,6 +566,12 @@ void COggPlayback::Pause()
   TRAPD( err, iStream->Stop() );
 }
 
+void COggPlayback::Resume()
+{
+  //Resume is equivalent of Play() 
+  Play();
+}
+
 void COggPlayback::Stop()
 {
   if (iState == EClosed ) // FIXIT Was 'EPlaying' and panicked at exit in paused mode

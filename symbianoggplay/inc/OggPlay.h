@@ -68,6 +68,7 @@ const TUid KOggPlayUidFOView = { KOggPlayApplicationUidValue +1 };
 const TUid KOggPlayUidFCView = { KOggPlayApplicationUidValue +2 };
 const TUid KOggPlayUidSettingsView = { KOggPlayApplicationUidValue +3 };
 const TUid KOggPlayUidUserView = { KOggPlayApplicationUidValue+4 };
+const TUid KOggPlayUidSplashView = { KOggPlayApplicationUidValue+5 };
 
 
 //_LIT(KAudioResourceFile, "Z:\\System\\Apps\\Audio\\audio.mbm");
@@ -303,7 +304,10 @@ private:
 #if defined(SERIES60)
   COggSettingsView* iSettingsView;
   COggUserHotkeysView* iUserHotkeys;
+#ifdef SERIES60_SPLASH_WINDOW_SERVER
+  COggSplashView* iSplashView;
 #endif
+#endif /* SERIES60 */
   RArray<TInt> iViewHistoryStack;
   RArray<TInt> iRestoreStack;
   TInt iRestoreCurrent;

@@ -70,7 +70,8 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual TInt   Open(const TDesC& aFileName);
 
   virtual void   Pause();
-  virtual void   Play();
+  virtual void   Play(); 
+  virtual void   Resume();
   virtual void   Stop();
 
   virtual void   SetVolume(TInt aVol);

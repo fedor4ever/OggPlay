@@ -293,4 +293,47 @@ void COggUserHotkeysView::ViewDeactivated()
 
   }
 
+#ifdef SERIES60_SPLASH_WINDOW_SERVER
+////////////////////////////////////////////////////////////////
+//
+// class COggSplashView
+//
+////////////////////////////////////////////////////////////////
+
+COggSplashView::COggSplashView(COggPlayAppView& aOggViewCtl )
+: COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
+	{
+	}
+
+COggSplashView::~COggSplashView()
+	{
+	}
+
+
+TVwsViewId COggSplashView::ViewId() const
+	{
+	return TVwsViewId(KOggPlayUid, KOggPlayUidSplashView);
+	}
+
+
+void COggSplashView::ViewActivatedL(const TVwsViewId& aPrevViewId, 
+                                    TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+{
+    COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
+    iSplashContainer = new (ELeave) CSplashContainer();
+    iSplashContainer->SetMopParent(appUi);
+    iSplashContainer->ConstructL( appUi->ApplicationRect(), aPrevViewId );
+    appUi->AddToStackL(*this, iSplashContainer);
+}
+
+
+void COggSplashView::ViewDeactivated()
+{
+    CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+    appUi->RemoveFromStack(iSplashContainer);
+    delete iSplashContainer;
+    iSplashContainer = NULL;
+    
+}
+#endif /* SERIES60_SPLASH_WINDOW_SERVER */
 #endif

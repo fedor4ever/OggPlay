@@ -20,7 +20,7 @@ RESOURCE AIF_DATA
     num_icons=2;
     embeddability=KAppEmbeddable;
     newfile=KAppDoesNotSupportNewFile;
-#if defined(SERIES60_SPLASH)
+#if ( defined(SERIES60_SPLASH) || defined (SERIES60_SPLASH_WINDOW_SERVER) )
     launch=KAppLaunchInBackground;
 //	hidden=KAppIsHidden;
 #endif

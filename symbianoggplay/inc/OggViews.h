@@ -21,6 +21,10 @@
 
 #include <coecntrl.h>
 
+#if defined(SERIES60_SPLASH_WINDOW_SERVER)
+#include "OggSplashCOntainer.h"
+#endif
+
 class COggPlayAppView;
 class COggUserHotkeys;
 
@@ -110,5 +114,21 @@ class COggUserHotkeysView : public COggViewBase
     COggPlayAppView& iOggViewCtl;
 	};
 
+#ifdef SERIES60_SPLASH_WINDOW_SERVER
+class COggSplashView : public COggViewBase
+	{
+	public:
+		COggSplashView(COggPlayAppView& aOggViewCtl);
+		~COggSplashView();
+		virtual TVwsViewId ViewId() const;
+		virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+			const TDesC8& /*aCustomMessage*/);
+    void ViewDeactivated();
+
+  private:
+        COggPlayAppView& iOggViewCtl;
+        CSplashContainer *iSplashContainer;
+	};
+#endif /*SERIES60_SPLASH_WINDOW_SERVER*/
 #endif
 #endif

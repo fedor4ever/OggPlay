@@ -204,6 +204,7 @@ void COggPlayController::PrimeL()
     
     PRINT("COggPlayController::PrimeL");
     // Not implemented yet
+    iState = EStateOpen;
 }
 
 void COggPlayController::PlayL()
@@ -221,7 +222,7 @@ void COggPlayController::PlayL()
     }
     if (iState != EStatePlaying)
     { 
-    iDecoder->Setposition(0);
+       // iDecoder->Setposition(0);
         iState = EStatePlaying;
     iAdvancedStreaming->Play();
     }

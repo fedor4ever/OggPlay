@@ -44,6 +44,7 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   virtual TInt   Open(const TDesC& aFileName);
 
   virtual void   Pause();
+  virtual void   Resume();
   virtual void   Play();
   virtual void   Stop();
   virtual void   SetVolume(TInt aVol);
@@ -85,7 +86,8 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   RLibrary iMp3Library;
 #endif
 
- 
+  TTimeIntervalMicroSeconds iLastPosition;
+  TBool iInterrupted;
 };
 
 #endif

@@ -30,6 +30,7 @@ chSTR2(__LINE__) "):" #desc)
 #define chmsg(desc)
 #endif
 
+
 #define MULTI_LINGUAL_INSTALLER
 
 // DEBUGGING
@@ -40,8 +41,10 @@ chSTR2(__LINE__) "):" #desc)
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-//#define SERIES60
-#define UIQ
+#define SERIES60
+//#define UIQ
+// Enable this line to choose the OS OggPlay will run on.
+//#define OS70S
 
 //# Version String
 #if defined(SERIES60)
@@ -67,29 +70,39 @@ chSTR2(__LINE__) "):" #desc)
 //#define SONYERICSSON
 #endif
 
-// When defined, the decoder used are dynamically loaded plugins.
 
-//#define PLUGIN_SYSTEM
-// this is experimental at the moment.
-#ifdef PLUGIN_SYSTEM
+#ifdef OS70S
+
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
-
-//#define MMF_AVAILABLE
+#define PLUGIN_SYSTEM
+// This flag is only for SOS 7.0S and over, should never be set for older SOS
+#define MMF_AVAILABLE 
 
 #else
+// PLUGIN_SYSTEM on the SOS 6.1 is experimental at the moment. 
+//#define PLUGIN_SYSTEM 
 // support for legacy audio codec (-:
 // this is experimental at the moment.
-//#define MP3_SUPPORT
-#endif /* PLUGIN_SYSTEM */
+#define MP3_SUPPORT
+
+#endif /* OS70S */
 
 
 // NEW CODE ENABLERS
-//
+
 #if defined(SERIES60)
+#ifdef OS70S
+// The splash screen is using S60 window server
+// Much slower, but works with all phones.
+#define SERIES60_SPLASH_WINDOW_SERVER
+#else
+// The splash screen is using direct screen access. 
+// Much faster, but depends on phone refresh decision: Doesn't work with all phones.
 #define SERIES60_SPLASH
-#endif
+#endif /*OS70S*/
+#endif /*SERIES60*/
 
 // Force filling the buffer to at least 75% of their capacity before sending them to
 // the audio streaming device
@@ -108,7 +121,6 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 
 // Use MDCT coeffs to generate the freq analyser
-// Not ready yet for prime time!
 #define MDCT_FREQ_ANALYSER 
 
 // Some phones require direct TSY access for phone call notification
