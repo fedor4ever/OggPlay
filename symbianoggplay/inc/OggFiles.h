@@ -37,7 +37,8 @@ public:
   virtual ~TOggFile();
 
   static TOggFile* NewL();
-  static TOggFile* NewL( const TDesC& aTitle, 
+  static TOggFile* NewL( const TInt aAbsoluteIndex,
+       const TDesC& aTitle, 
 	   const TDesC& anAlbum,
 	   const TDesC& anArtist,
 	   const TDesC& aGenre,
@@ -63,11 +64,13 @@ public:
   HBufC* iShortName;
   HBufC* iTrackNumber;
   HBufC* iTrackTitle;
+  TInt iAbsoluteIndex;
 };
 
 class TOggKey : public TKeyArrayFix
 {
  public:
+
 
   TOggKey(TInt anOrder);
   virtual ~TOggKey();
@@ -81,6 +84,22 @@ class TOggKey : public TKeyArrayFix
   CArrayPtrFlat<TOggFile>* iFiles;
   TInt                     iOrder;
   TOggFile*                iSample;
+};
+
+class TOggKeyNumeric : public TKeyArrayFix
+{
+  public:
+  TOggKeyNumeric();
+
+  virtual ~TOggKeyNumeric();
+
+  void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
+
+  virtual TAny* At(TInt anIndex) const;
+
+ protected:
+  TInt iInteger;
+  CArrayPtrFlat<TOggFile>* iFiles;
 };
 
 class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
@@ -102,8 +121,12 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void FillSubFolders(CDesCArray& arr);
   void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
-  static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName);
-  static void AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TDesC& aFileName);
+  TDesC & FindFromIndex(TInt anIndex);
+
+  static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TInt anAbsoluteIndex);
+  static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& anInternalText);
+ 
+  static void AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TInt anAbsoluteIndex);
   
   TInt SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session);
   TInt SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session);
@@ -135,6 +158,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   TOggKey                  iOggKeySubFolders;
   TOggKey                  iOggKeyFileNames;
   TOggKey                  iOggKeyTrackTitle;
+  TOggKeyNumeric           iOggKeyAbsoluteIndex;
   TInt                     iVersion;
 
   // Following members are only valid during the directory search:

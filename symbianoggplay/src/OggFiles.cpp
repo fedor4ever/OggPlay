@@ -57,7 +57,8 @@ TOggFile* TOggFile::NewL()
   return self;
   }
 
-TOggFile* TOggFile::NewL(const TDesC& aTitle,
+TOggFile* TOggFile::NewL(const TInt aAbsoluteIndex,
+           const TDesC& aTitle,
 		   const TDesC& anAlbum,
 		   const TDesC& anArtist,
 		   const TDesC& aGenre,
@@ -71,7 +72,7 @@ TOggFile* TOggFile::NewL(const TDesC& aTitle,
 
   TBuf<128> buf;
   CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_12);
-
+  self->iAbsoluteIndex = aAbsoluteIndex;
   if (aTitle.Length()>0) self->SetText(self->iTitle, aTitle); else self->SetText(self->iTitle, aShortName);
   if (anAlbum.Length()>0) self->SetText(self->iAlbum, anAlbum); else self->SetText(self->iAlbum, buf);
   if (anArtist.Length()>0) self->SetText(self->iArtist, anArtist); else self->SetText(self->iArtist, buf);
@@ -214,6 +215,44 @@ TOggKey::At(TInt anIndex) const
 }
 
 
+
+////////////////////////////////////////////////////////////////
+//
+// TOggKeyNumeric
+//
+////////////////////////////////////////////////////////////////
+
+TOggKeyNumeric::TOggKeyNumeric() : 
+  TKeyArrayFix(_FOFF(TOggFile,iAbsoluteIndex),ECmpTInt),
+  iFiles(0)
+{
+  SetPtr(&iInteger); 
+}
+
+TOggKeyNumeric::~TOggKeyNumeric() 
+{
+}
+
+void
+TOggKeyNumeric::SetFiles(CArrayPtrFlat<TOggFile>* theFiles)
+{
+  iFiles= theFiles;
+}
+
+TAny*
+TOggKeyNumeric::At(TInt anIndex) const
+{
+  if (anIndex==KIndexPtr) 
+      return( (TUint8 *)iPtr + iKeyOffset );
+
+  if (anIndex>=0 && anIndex<iFiles->Count()) {
+       return &( (*iFiles)[anIndex]->iAbsoluteIndex );
+  }
+
+  return 0;
+}
+
+
 ////////////////////////////////////////////////////////////////
 //
 // TOggFiles
@@ -231,6 +270,7 @@ TOggFiles::TOggFiles(COggPlayback* anOggPlayback) :
   iOggKeySubFolders(COggPlayAppUi::ESubFolder),
   iOggKeyFileNames(COggPlayAppUi::EFileName),
   iOggKeyTrackTitle(COggPlayAppUi::ETrackTitle),
+  iOggKeyAbsoluteIndex(),
   iVersion(-1)
 {
   iFiles= new(ELeave) CArrayPtrFlat<TOggFile>(10);
@@ -241,6 +281,7 @@ TOggFiles::TOggFiles(COggPlayback* anOggPlayback) :
   iOggKeySubFolders.SetFiles(iFiles);
   iOggKeyFileNames.SetFiles(iFiles);
   iOggKeyTrackTitle.SetFiles(iFiles);
+  iOggKeyAbsoluteIndex.SetFiles(iFiles);
 }
 
 TOggFiles::~TOggFiles() {
@@ -397,7 +438,8 @@ void  TOggFiles::FileSearchStepL()
 
         if( err == KErrNone )
           {
-          TOggFile* o = TOggFile::NewL(iOggPlayback->Title(), 
+          TOggFile* o = TOggFile::NewL(iNbFilesFound,
+                        iOggPlayback->Title(), 
 				        iOggPlayback->Album(), 
 				        iOggPlayback->Artist(), 
 				        iOggPlayback->Genre(), 
@@ -550,7 +592,9 @@ void TOggFiles::AddFile(const TDesC& aFile){
 		}
 		if ( iOggPlayback->Info(aFile, EFalse) == KErrNone) {
 
-			TOggFile* o = TOggFile::NewL(iOggPlayback->Title(), 
+			TOggFile* o = TOggFile::NewL(
+                iFiles->Count(),
+                iOggPlayback->Title(), 
 				iOggPlayback->Album(), 
 				iOggPlayback->Artist(), 
 				iOggPlayback->Genre(), 
@@ -592,6 +636,7 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
       TRAPD( err, o->ReadL(tf,iVersion) );
       if( err )
         break;
+      o->iAbsoluteIndex = iFiles->Count();
       iFiles->AppendL(o);
       }
 
@@ -667,20 +712,33 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
 }
 
 void
-TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName)
+TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TInt anAbsoluteIndex)
 {
   HBufC* hbuf = HBufC::NewLC(1024);
   hbuf->Des().AppendNum((TInt) aType);
   hbuf->Des().Append(KColumnListSeparator);
   hbuf->Des().Append(aText);
   hbuf->Des().Append(KColumnListSeparator);
-  hbuf->Des().Append(aFileName);
+  hbuf->Des().AppendNum(anAbsoluteIndex);
   arr.AppendL(hbuf->Des());
   CleanupStack::PopAndDestroy();
 }
 
 void
-TOggFiles::AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TDesC& aFileName)
+TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& anInternalText)
+{
+  HBufC* hbuf = HBufC::NewLC(1024);
+  hbuf->Des().AppendNum((TInt) aType);
+  hbuf->Des().Append(KColumnListSeparator);
+  hbuf->Des().Append(aText);
+  hbuf->Des().Append(KColumnListSeparator);
+  hbuf->Des().Append(anInternalText);
+  arr.AppendL(hbuf->Des());
+  CleanupStack::PopAndDestroy();
+}
+
+void
+TOggFiles::AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TInt anAbsoluteIndex)
 {
   
   HBufC* hbuf = HBufC::NewLC(1024);
@@ -690,7 +748,7 @@ TOggFiles::AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, co
   hbuf->Des().Append(aDelim);
   hbuf->Des().Append(aArtist);
   hbuf->Des().Append(KColumnListSeparator);
-  hbuf->Des().Append(aFileName);
+  hbuf->Des().AppendNum(anAbsoluteIndex);
   arr.AppendL(hbuf->Des());
   CleanupStack::PopAndDestroy();
 }
@@ -704,6 +762,20 @@ TOggFiles::ClearFiles()
   iFiles->ResetAndDestroy();
 }
 
+
+TDesC & 
+TOggFiles::FindFromIndex(TInt anIndex)
+{
+    _LIT(Empty, "-");
+    TOggFile * o = TOggFile::NewL(anIndex, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty);
+    CleanupStack::PushL(o);
+    TInt foundIdx=-1;
+    iFiles->Find( (TOggFile * const &) *o, iOggKeyAbsoluteIndex, foundIdx );
+    CleanupStack::PopAndDestroy();
+    return *(*iFiles)[foundIdx]->iFileName;
+}
+
+
 void 
 TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum, 
 			   const TDesC& anArtist, const TDesC& aGenre, 
@@ -716,7 +788,7 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
     CEikonEnv::Static()->ReadResource(buf, R_OGG_BY);
     for (TInt i=0; i<iFiles->Count(); i++) {
       TOggFile& o= *(*iFiles)[i];
-      AppendTitleAndArtist(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), buf, o.iArtist->Des(),o.iFileName->Des());
+      AppendTitleAndArtist(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), buf, o.iArtist->Des(),o.iAbsoluteIndex);
     }
 
   } else {
@@ -728,7 +800,7 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
         (aGenre.Length()==0 || *o.iGenre==aGenre) &&
         (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
       if (select)
-        AppendLine(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), o.iFileName->Des());
+        AppendLine(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), o.iAbsoluteIndex);
     }
   }
 }
@@ -778,7 +850,7 @@ void TOggFiles::FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC
       (aGenre.Length()==0 || *o.iGenre==aGenre) &&
       (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
     if (select) 
-      AppendLine(arr, COggPlayAppUi::EFileName, *o.iShortName, *o.iFileName);
+      AppendLine(arr, COggPlayAppUi::EFileName, *o.iShortName, o.iAbsoluteIndex);
   }
 }
 

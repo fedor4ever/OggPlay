@@ -142,6 +142,7 @@ class COggFOView;
 
 class CEikColumnListBox;
 class CEikBitmapButton;
+class COggSongList;
 
 
 // COggActive
@@ -204,8 +205,6 @@ public:
   TTime iAlarmTime;       // the alarm has been set to this time
 
   // global status:
-  int iCurrent;           // index of the file which is currently being played
-  TBuf<512> iCurrentSong; // full path and filename of the current song
   int iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
   int iAlarmTriggered;    // did the alarm clock go off?
   int iAlarmActive;       // has an alarm time been set?
@@ -219,6 +218,8 @@ public:
   COggPlayback*    iOggPlayback;
   COggActive*      iActive;
   COggMsgEnv*      iOggMsgEnv;
+
+  COggSongList*    iSongList;
 
   // from MPlaybackObserver:
   virtual void NotifyPlayComplete();
@@ -251,14 +252,13 @@ public:
   void OpenFileL(const TDesC& aFileName);
   void WriteIniFile();
   void WriteIniFileOnNextPause();
+  void SetRepeat(TBool aRepeat);
 
 private: 
 
   void ReadIniFile();
   void SetHotKey();
   TBool IsAlarmTime();
-  void SetCurrent(int aCurrent);
-  void SetCurrent(const TDesC& aFileName);
   void SetProcessPriority();
   void SetThreadPriority();
   void FindSkins();
@@ -281,6 +281,55 @@ private:
   TInt iRestoreCurrent;
   COggUserHotkeysView* iUserHotkeys;
 };
+
+// COggSongList:
+// Base class defining the interface for managing the song list.
+//------------------------------------------------------
+
+
+class COggSongList : public CBase
+{
+    public:
+     virtual void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+     virtual TDesC & GetNextSong()=0;
+     void  SetPlayingFromListBox(TInt aPlaying);
+     const TDesC& GetPlaying();
+     const TBool AnySongPlaying();
+     void  SetRepeat(TBool aRepeat);
+     const TBool IsSelectedFromListBoxCurrentlyPlaying();
+     ~COggSongList();
+    protected:
+        
+     void  SetPlaying(TInt aPlaying);
+     TInt iPlayingIdx;           // index of the file which is currently being played
+     RArray<TFileName> iFileList;
+     COggPlayAppView* iAppView; 
+     COggPlayback*    iOggPlayback;
+     TBool iRepeat;
+};
+
+class COggNormalPlay : public COggSongList
+{
+    public:     
+        void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+        TDesC & GetNextSong();
+        ~COggNormalPlay();
+        COggNormalPlay();
+    private:
+};
+
+#if 0
+class COggRandomPlay : public COggSongList
+{
+    public:     
+        void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+        ~COggRandomPlay(); 
+        TDesC & GetNextSong();
+    private:
+        COggRandomPlay();
+        RArray<TInt> iRandomMemory;
+};
+#endif
 
 #ifdef SERIES60
 class COggPlayDocument : public CEikDocument

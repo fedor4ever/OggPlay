@@ -57,15 +57,21 @@ public:
   void SetTime(TInt64 aTime);
 
   // access/manipulation of the playlist:
+  // BERT : 2B removed/modified
   TInt        GetNSongs();
-  TDesC&      GetFileName(TInt idx);
-  TInt        GetItemType(TInt idx);
-  void        ShufflePlaylist();
   void        SelectSong(TInt idx);
-  TInt        GetSelectedIndex();
   /// Default argument will use GetSelectedIndex() as index
   TBool       isPlayableFile( TInt aIndex = -1 );
+  //////////////////////////
+  TInt        GetItemType(TInt idx);
+  void        ShufflePlaylist();
+  TInt        GetSelectedIndex();
   CDesCArray* GetTextArray();
+
+  TBool HasAFileName(TInt idx);
+  const TDesC&  GetFileName(TInt idx);
+  const TInt    GetViewName(TInt idx);
+  void GetFilterData(TInt idx, TDes &aData);
 
   void  SetAlarm();
   void  ClearAlarm();
@@ -112,7 +118,6 @@ public:
   virtual void AddControlToFocusList(COggControl* c);
 
   TInt                  iPosChanged;
-  TBuf<512>             iCurrentSong;
   TOggFiles*            iOggFiles;
   TCallBack*            iCallBack;
 
@@ -121,6 +126,8 @@ private:
   void  ReadCanvas(TInt aCanvas, TOggParser& p);
   void  ResetControls();
   void  ClearCanvases();
+
+  const TInt GetValueFromTextLine(TInt idx);
 
   /// COggCanvas[0..1], flip open and closed
   CArrayPtrFlat<CCoeControl>* iControls;
@@ -136,8 +143,7 @@ private:
   //TFileName  iBackgroundFileName;
   CDesCArray* iTextArray;
   TInt       iSelected; 
-  /// Data store for GetFileName()
-  TBuf<KMaxFileNameLength> iFileNameStore;
+
   TInt iUserInactivityTickCount;
   
   //keyboard focus handling: 

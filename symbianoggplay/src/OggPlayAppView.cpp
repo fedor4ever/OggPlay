@@ -657,23 +657,117 @@ COggPlayAppView::GetNSongs()
   return GetTextArray()->Count();
 }
 
-TDesC&
+_LIT(KEmpty,"");
+
+const TInt 
+COggPlayAppView::GetValueFromTextLine(TInt idx)
+{
+    // Fetch the numeric value from the line (the 2nd "argument")
+
+    CDesCArray* arr= GetTextArray();
+    
+    __ASSERT_ALWAYS ( arr, 
+      User::Panic(_L("COggPlayAppView::GetValue Array Not found"),0 ) );
+        
+    TPtrC sel,msel;
+    if(idx >= 0 && idx < arr->Count()) 
+    {
+        sel.Set((*arr)[idx]);
+        TextUtils::ColumnText(msel, 2, &sel );
+    }
+    TLex parse(msel);
+    TInt previousViewId;
+    parse.Val(previousViewId);
+    return (previousViewId);
+
+}
+TBool 
+COggPlayAppView::HasAFileName(TInt idx)
+{
+    // Returns true if a filename is associated with this item
+
+    TInt type = GetItemType(idx) ;
+    if ((type == 0) || (type == 5) || (type ==7) || (type == 8) )
+        return(ETrue);
+    return(EFalse);
+}
+
+const TDesC&
 COggPlayAppView::GetFileName(TInt idx)
 {
-  iFileNameStore.Zero();
+    
+    TInt type = GetItemType(idx) ;
+    // the icons being used here:
+    // 0: title
+    // 1: album
+    // 2: artist
+    // 3: Genre
+    // 4: Folder
+    // 5: file
+    // 6: back
+    // 7: playing
+    // 8: paused
+  __ASSERT_ALWAYS ( ( (type == 0) || (type == 5) || (type ==7) || (type == 8)), 
+      User::Panic(_L("GetFileName called with wrong argument"),0 ) );
 
-  CDesCArray* arr= GetTextArray();
-  if (!arr) 
-    return iFileNameStore;
+  TInt index = GetValueFromTextLine(idx);
+  if (index >=0)
+    return iOggFiles->FindFromIndex( index );
+  return KEmpty;
+}
 
-  TPtrC sel,msel;
-  if(idx >= 0 && idx < arr->Count()) 
+const TInt
+COggPlayAppView::GetViewName(TInt idx)
+{
+    TInt type = GetItemType(idx) ;
+    // the icons being used here:
+    // 0: title
+    // 1: album
+    // 2: artist
+    // 3: Genre
+    // 4: Folder
+    // 5: file
+    // 6: back
+    // 7: playing
+    // 8: paused
+
+  __ASSERT_ALWAYS ( type == 6, 
+      User::Panic(_L("GetViewName called with wrong argument"),0 ) );
+  
+  return (GetValueFromTextLine(idx));
+}
+
+void
+COggPlayAppView::GetFilterData(TInt idx, TDes & aData)
+{
+    TInt type = GetItemType(idx) ;
+    // the icons being used here:
+    // 0: title
+    // 1: album
+    // 2: artist
+    // 3: Genre
+    // 4: Folder
+    // 5: file
+    // 6: back
+    // 7: playing
+    // 8: paused
+
+   __ASSERT_ALWAYS ( ( (type == 1) || (type == 2) || (type ==3) || (type == 4) ), 
+      User::Panic(_L("COggPlayAppView::GetFilterData called with wrong argument"),0 ) );
+    
+    CDesCArray* arr= GetTextArray();
+
+    __ASSERT_ALWAYS ( arr, 
+      User::Panic(_L("COggPlayAppView::GetFilterData Array Not found"),0 ) );
+    
+    TPtrC sel,msel;
+    if(idx >= 0 && idx < arr->Count()) 
     {
-    sel.Set((*arr)[idx]);
-    TextUtils::ColumnText(msel, 2, &sel );
+        sel.Set((*arr)[idx]);
+        TextUtils::ColumnText(msel, 2, &sel );
     }
-  iFileNameStore = msel;
-  return iFileNameStore;
+    aData.Copy(msel);
+    return ;
 }
 
 TInt
@@ -699,7 +793,6 @@ void
 COggPlayAppView::SelectSong(TInt idx)
 {
   iSelected= idx;
-  iCurrentSong= GetFileName(idx);
   if (iListBox[iMode]) {
     iSelected = iListBox[iMode]->SetCurrentItemIndex(idx);
   }
@@ -726,7 +819,7 @@ COggPlayAppView::isPlayableFile( TInt aIndex )
 	  aIndex = GetSelectedIndex();
 
   TInt selType = GetItemType(aIndex);
-  TDesC& fileName = GetFileName(aIndex);
+  const TDesC& fileName = GetFileName(aIndex);
   //TRACEF(COggLog::VA(_L("isPlayable() Type=%d / filename='%S'"), selType, &fileName ));
 	
   if( fileName.Length() && (selType == COggPlayAppUi::ETitle || 
@@ -785,11 +878,11 @@ void
 COggPlayAppView::ToggleRepeat()
 {
   if (iApp->iRepeat) {
-    iApp->iRepeat=0; 
+    iApp->SetRepeat(EFalse); 
     if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Hide();
     if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(0);
   } else {
-    iApp->iRepeat=1;
+    iApp->SetRepeat(ETrue);
     if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Show();
     if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(1);
   }
@@ -892,7 +985,8 @@ COggPlayAppView::InitView()
 void
 COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TViews thePreviousView, const TDesC& aSelection)
 {
-  TBuf<32> buf, dummy;
+  TBuf<32> buf;
+  TInt dummy = -1;
 
   if (theNewView==COggPlayAppUi::ETop) {
     GetTextArray()->Reset();
@@ -998,6 +1092,10 @@ COggPlayAppView::UpdateListbox()
   }
 
   CDesCArray* txt= GetTextArray();
+  // BERT: Add a check if there is a song currently playing...
+  TBool paused = iApp->iOggPlayback->State()==CAbsPlayback::EPaused;
+  const TDesC& currSong = iApp->iSongList->GetPlaying();
+
   for (TInt i=0; i<txt->Count(); i++) {
     TPtrC sel;
     sel.Set((*txt)[i]);
@@ -1010,8 +1108,8 @@ COggPlayAppView::UpdateListbox()
     // 7: playing
     // 8: paused
     if (buf[0]!=L'6') {
-      if (GetFileName(i)==iApp->iCurrentSong && iApp->iCurrentSong.Length()>0) {
-        if (iApp->iOggPlayback->State()==CAbsPlayback::EPaused) buf[0]='8'; else buf[0]='7'; 
+        if (GetFileName(i)== currSong && currSong.Length()>0) {
+            if (paused) buf[0]='8'; else buf[0]='7'; 
       } 
       else {
 	      if (iApp->iViewBy==COggPlayAppUi::ETitle) buf[0]='0'; else buf[0]='5';
@@ -1343,16 +1441,13 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     if(!iFocusControlsPresent) {
 
 #ifdef NEW_LISTBOX_STYLE_FIXIT
-      if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
-        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) {
-        if( iApp->iCurrent == ENoFileSelected )
-          iApp->HandleCommandL(EOggPlay);
-        else if( iApp->iCurrent == index )
-          // Event on the current active file
-          iApp->HandleCommandL(EOggPauseResume);
-        else
-          // Event on another but the current active file
-          iApp->HandleCommandL(EOggPlay);
+       if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
+            iApp->iOggPlayback->State()==CAbsPlayback::EPaused) {
+            if (iApp->iSongList->IsSelectedFromListBoxCurrentlyPlaying())
+                // Event on the current active file
+                iApp->HandleCommandL(EOggPauseResume);
+            else
+                iApp->HandleCommandL(EOggPlay);
         }
       else
         // Event without any active files
