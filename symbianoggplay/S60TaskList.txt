@@ -45,27 +45,40 @@ not handled gracefully.
 ........................
 At least the SX1 can do this. Don't think there are any
 MMC hotswap Nokias yet ?
+........................
+No Nokia with MMC hotswap available. Even the little new one,
+the 6600 using Symbian 7.0s doesn't have hotswap.
 
 
 Issue #4 : Missing '.ogg' recognizer.                           State : To discussion
 ........................
 Any comments for or against ?
-
+........................
+Bert: For. User should somehow have the possibility to add the
+ track to the play list.
 
 Issue #5 : New maneuvring ??                                    State : To discussion
 Maneuvring does not conform to Series60, 
 volume should be navi right/left. 
 ........................
 Any comments for or against ?
+........................
+Bert: Would be nice, but the left-right is used to change of control.
+ We cannot use the up/down to change control, this is used in the file
+ list... We could rotate the volume bar 90 degrees. That way, it would
+ be more intuitive to press the up/down. Any better solutions?
 
 
 Issue#6. Skin support not working.                              State : Open
 Chrashes on manual skin loading.
 
 
-Issue #7. Ugly dialogs.                                         State : Open
+Issue #7. Ugly dialogs.                                         State : In work/Berthier
 Dialogs are very ugly, when not absolutely unreadable. 
-(The About Dialog for example).
+(The About Dialog for example)
+.........................
+The About window should be better now. ->Commited.
+Still some work for other dialogs.
 
 
 Issue #8. Error dialogs needs rework.                           State : In work/Berthier
@@ -89,6 +102,9 @@ Issue #11. Right softkey Back/Exit                              State : To discu
 When in the 'ogg file system' back should work
 as the '..' and in the 'top view' it could read Exit
 and only here give app exit ?
+.........................
+Bert. What if we use the softkey for changing control? That way we 
+   wouldn't have the problem of changing the volume using up/down ?
 
 
 Issue #12. Selection of (files) entry can fail                  State : Open
@@ -99,6 +115,9 @@ navi center. Nothing happens which is an error.
 Issue #13. Volume not preserved between sessions                State : Open
 Should be saved. Or recalled ?
 
+
+Issue #14. Localization (languages other than english)          State : Open
+           are not supported              
 
 
 
