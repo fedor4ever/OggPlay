@@ -448,7 +448,12 @@ TInt64 CMadDecoder::TimeTotal()
 //FIXMAD: ID3 Tag parsing not yet implemented - libmad comes with a library for this (libid3tag)  
 void CMadDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber) {
   //TRACEF(_L("CMadDecoder::ParseTags"));
-  
+  aArtist.SetLength(0);
+  aTitle.SetLength(0);
+  aAlbum.SetLength(0);
+  aGenre.SetLength(0);
+  aTrackNumber.SetLength(0);
+
 }
 
 void CMadDecoder::GetFrequencyBins(TInt32* aBins,TInt NumberOfBins)
