@@ -363,11 +363,8 @@ class COggRandomPlay : public COggSongList
         TInt64 iSeed;
 };
 
-//#ifdef SERIES60
+
 class COggPlayDocument : public CEikDocument
-//#else
-//class COggPlayDocument : public CQikDocument
-//#endif
 {
 public:
 #ifdef SERIES60
@@ -389,26 +386,8 @@ class COggPlayApplication : public CQikApplication
 {
 private: 
   // from CApaApplication
-  CApaDocument* CreateDocumentL() 
-  { 
-     RDebug::Print( _L("+CreateDocumentL") );
-
-     CApaDocument *p = new (ELeave)COggPlayDocument(*this);
-
-     RDebug::Print( _L("-CreateDocumentL") );
-     
-     return (p); //new (ELeave)COggPlayDocument(*this);
-  }
-  TUid AppDllUid() const 
-  {
-     RDebug::Print( _L("+AppDllUid") );
-
-     TUid id = { KOggPlayApplicationUidValue }; 
-
-     RDebug::Print( _L("-AppDllUid") );
-     
-     return id; 
-  }
+  CApaDocument* CreateDocumentL() { return new (ELeave)COggPlayDocument(*this); }
+  TUid AppDllUid() const { TUid id = { KOggPlayApplicationUidValue }; return id; }
 };
 
 

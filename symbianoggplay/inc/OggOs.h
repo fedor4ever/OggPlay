@@ -30,11 +30,6 @@ chSTR2(__LINE__) "):" #desc)
 #define chmsg(desc)
 #endif
 
-//# Version String
-#define KVersionMajor 0
-#define KVersionMinor 90
-#define KVersionString "0.90"
-
 #define MULTI_LINGUAL_INSTALLER
 
 // DEBUGGING
@@ -45,8 +40,20 @@ chSTR2(__LINE__) "):" #desc)
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-#define SERIES60
-//#define UIQ
+//#define SERIES60
+#define UIQ
+
+//# Version String
+#if defined(SERIES60)
+#define KVersionMajor 1
+#define KVersionMinor 50
+#define KVersionString "1.50"
+#endif
+#if defined(UIQ)
+#define KVersionMajor 1
+#define KVersionMinor 30
+#define KVersionString "1.30"
+#endif
 
 // There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
 #define DOS

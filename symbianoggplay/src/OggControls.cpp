@@ -2337,7 +2337,7 @@ void
 COggCanvas::AddControl(COggControl* c)
 {
   iControls.AppendL(c);
-  RDebug::Print(_L("Adding control - now %d"),iControls.Count());
+//  RDebug::Print(_L("Adding control - now %d"),iControls.Count());
 }
 
 void COggCanvas::ClearControls()

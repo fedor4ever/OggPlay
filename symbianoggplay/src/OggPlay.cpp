@@ -1481,12 +1481,15 @@ void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
 // COggPlayDocument class
 //
 ///////////////////////////////////////////////////////////////
+CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/)
+{
 #ifdef SERIES60
-CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/){
 	iAppUi->OpenFileL(aFilename);
+#endif
+
 	return NULL;
 }
-#endif
+
 
 CEikAppUi* COggPlayDocument::CreateAppUiL(){
     iAppUi = new (ELeave) COggPlayAppUi;
