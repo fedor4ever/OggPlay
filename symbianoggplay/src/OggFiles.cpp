@@ -789,10 +789,8 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
   arr.Reset();
 
   if (anAlbum.Length()>0) 
-	  iFiles->Sort(iOggKeyFileNames); 
+	  iFiles->Sort(iOggKeyTrackTitle); 
   else {
-	  iFiles->Sort(iOggKeyTitles);
-
 	  if (aSubFolder.Length()>0) 
 		  iFiles->Sort(iOggKeyFileNames); 
 	  else 
