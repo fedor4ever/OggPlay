@@ -1,73 +1,40 @@
 
+
 TARGET  OggPlay.app
+
 TARGETTYPE  app
+
 UID  0x100039CE 0x0BF72853 
-TARGETPATH \system\apps\OggPlay
 
-//MACRO SERIES60
-
+MACRO SERIES60
 SOURCEPATH ..\src
+
 SOURCE OggPlay.cpp
 SOURCE OggControls.cpp
 SOURCE OggDialogs.cpp
 SOURCE OggPlayAppView.cpp
 SOURCE OggViews.cpp
 SOURCE OggTremor.cpp
+SOURCE OggFiles.cpp
 
-//SOURCEPATH ..\vorbis
-//SOURCE block.c
-//SOURCE bitwise.c
-//SOURCE codebook.c
-//SOURCE floor0.c
-//SOURCE floor1.c
-//SOURCE framing.c
-//SOURCE info.c
-//SOURCE ivorbisfile.c
-//SOURCE mapping0.c
-//SOURCE mdct.c
-//SOURCE registry.c
-//SOURCE res012.c
-//SOURCE sharedbook.c
-//SOURCE synthesis.c
-//SOURCE window.c
 
 RESOURCE ..\data\OggPlay.rss
 RESOURCE ..\data\OggPlay_caption.rss
+
 LANG     SC
-
 USERINCLUDE . ..\inc ..\vorbis ..\data
+SYSTEMINCLUDE \Epoc32\include
+SYSTEMINCLUDE \Epoc32\include\libc
 
-//SYSTEMINCLUDE   . \epoc32\include
-//SYSTEMINCLUDE \Symbian\6.1\Series60\Epoc32\Include \Symbian\6.1\Series60\Epoc32\Include\libc
-SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
-
-LIBRARY         euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib fbscli.lib bitgdi.lib hal.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib mediaclientaudio.lib
+LIBRARY euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib fbscli.lib bitgdi.lib hal.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib mediaclientaudio.lib
 LIBRARY avkon.lib
 LIBRARY MediaClientImage.lib 
-// qikctl.lib qikdlg.lib qikutils.lib
-//LIBRARY euser.lib apparc.lib cone.lib eikcore.lib 
-//LIBRARY eikcoctl.lib avkon.lib
-//LIBRARY eikdlg.lib
+LIBRARY libvorbisidec.lib
 
-START WINS      
-// ?wins_specific_information
-END
+LIBRARY msvcrt.lib
 
-START MARM
-// ?marm_specific_information
-END
+AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c8 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
+epocstacksize 16000
 
-// Other possible keywords:
-/* 
-START BITMAP ?target
-TARGETPATH   ?emulated_path_on_target_machine
-HEADER
-SOURCEPATH   ?source_path
-SOURCE       ?color_depth ?source_bitmap_list
-END
-*/
-// DEFFILE ?filename
-
-//AIF OggPlay.aif ..\aif OggPlayaif.rss c8 context_pane_icon.bmp context_pane_icon_mask.bmp list_icon.bmp list_icon_mask.bmp
-
-AIF OggPlay.aif ..\aif OggPlayAif.rss c8 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
+// For Symbian 7.0 and over
+// OPTION MSVC /Gs16000 /FD
