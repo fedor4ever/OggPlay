@@ -118,6 +118,11 @@ Claus. Brilliant ! The 'Back' RSK will read 'Next' and in the list
 box the left navi key could have the same effect as '..' and 
 navi-right would double the center-click functionality. Or did I
 miss anything ? I'll look into making a demo..
+.............................
+Claus. Ohh no.. Then you have to exit the app through Options 
+menu only :-( This is not good. I'll do a serious attempt to engage
+my brain before I say anymore more regarding this subject...
+
 
 
 Issue #12. Selection of (files) entry can fail                  State : Open
