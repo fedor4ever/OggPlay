@@ -74,4 +74,10 @@ chSTR2(__LINE__) "):" #desc)
 // UIQ_?
 #define FORCE_FULL_BUFFERS
 
+// There is something wrong how Nokia audio streaming handles the
+// first buffers. They are somehow swallowed.
+// To avoid that problem, wait a short time before streaming, 
+// so that Application drawing have been done.
+#define DELAY_AUDIO_STREAMING_START
+
 #endif

@@ -208,9 +208,12 @@ void COggPlayback::ConstructL() {
     CleanupStack::Pop(buffer);
   }
 
+  iStartAudioStreamingTimer = new (ELeave) COggTimer(
+      TCallBack( StartAudioStreamingCallBack,this )   );
 }
 
 COggPlayback::~COggPlayback() {
+  delete  iStartAudioStreamingTimer;
   delete iStream;
   iBuffer.ResetAndDestroy();
 }
@@ -541,10 +544,18 @@ void COggPlayback::Play()
   iEof=0;
   iBufCount= 0;
   iCurrentSection= 0;
-  iFirstBuffers = 4;// There is something wrong how Nokia handles the
+  // There is something wrong how Nokia audio streaming handles the
                    // first buffers. They are somehow swallowed.
                    // To avoid that, send few (4) almost empty buffers
+  iFirstBuffers = 4; 
+#ifdef DELAY_AUDIO_STREAMING_START
+  //Also to avoid the first buffer problem, wait a short time before streaming, 
+  // so that Application drawing have been done. Processor should then
+  // be fully available for doing audio thingies.
+  iStartAudioStreamingTimer->Wait(0.1E6);
+#else
   for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
+#endif
 }
 
 void COggPlayback::Pause()
@@ -732,6 +743,14 @@ void COggPlayback::MaoscOpenComplete(TInt aError)
 }
 
 
+TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
+{
+  COggPlayback* self= (COggPlayback*) aPtr;
+  
+  for (TInt i=0; i<KBuffers; i++) 
+      self->SendBuffer(*(self->iBuffer[i]));
+  return 0;
+}
 
 
 TInt COggAudioCapabilityPoll::PollL()

@@ -26,6 +26,7 @@
 #include "stdio.h"
 #include "ivorbisfile.h"
 #include "OggMsgEnv.h"
+#include "OggHelperFcts.h"
 // V0.2:  3 @ 4096   
 // V0.3:  ?
 // V0.4:  6 @ 4096*10  (not sure?!)
@@ -188,9 +189,16 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TInt                     iSentIdx;
   TInt                     iMaxVolume;
   TInt                     iAudioCaps;
-  TInt                     iFirstBuffers;   // There is something wrong with Nokia
-                                           // first buffers. They are somehow swallowed.
-                                           // To avoid that, send few almost empty buffers 
+
+   // There is something wrong with Nokia Audio Streaming (NGage)
+   // First buffers are somehow swallowed.
+   // To avoid that, wait a short time before streaming, so that AppView
+   // draw have been done. Also send few empty (zeroed) buffers .
+
+  TInt                     iFirstBuffers;  
+  static TInt StartAudioStreamingCallBack(TAny* aPtr);
+  COggTimer *              iStartAudioStreamingTimer;
+
 
 
   // communication with the tremor/ogg codec:

@@ -15,6 +15,7 @@ SOURCE OggPlayAppView.cpp
 SOURCE OggViews.cpp
 SOURCE OggTremor.cpp
 SOURCE OggFiles.cpp
+SOURCE OggHelperFcts.cpp
 
 RESOURCE ..\data\OggPlay.rss
 RESOURCE ..\data\OggPlay_caption.rss
