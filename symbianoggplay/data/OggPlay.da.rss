@@ -71,3 +71,35 @@
 #define ogg_text_string_10 "(foldere)"
 #define ogg_text_string_11 "(filer)"
 #define ogg_text_string_12 "(ukendte)"
+
+// S60 Hotkey settings
+#define ogg_user_hotkey              "Genveje"
+#define ogg_format_text_fast_forward "Hurtig frem"
+#define ogg_format_text_rewind       "Hurtig tilb."
+#define ogg_format_text_page_up      "Fil liste scroll op"
+#define ogg_format_text_page_down    "Fil liste scroll ned"
+
+#define ogg_settings                 "Opsætning"  // in the menu
+#define ogg_settings_title           "Oggplay Opsætning" // on top of the settings screen
+#define ogg_filescanmode             "Søgestier"
+#define ogg_maneuvring_speed         "Passive skift"
+#define ogg_autostart                "Start automatisk"
+#define ogg_fullscan                 "Søg overalt"
+#define ogg_mmcdir                   "E:\Ogg"
+#define ogg_normal                   "Normal"
+#define ogg_fast                     "Hurtig"
+#define ogg_on                       "Til"
+#define ogg_off                      "Fra"
+#define ogg_popup_on                 "Til"
+#define ogg_popup_off                "Fra"
+#define ogg_back_dir                 "tilbage"
+#define ogg_backspace                "Slet"
+#define ogg_shift                    "Shift (ingen repeat)"
+#define ogg_warnings                 "Advarsler"
+
+// --- Added 2004-01-25 : Softkey labels
+#define ogg_cba_back                 "Tilbage"
+#define ogg_cba_clear                "Slet"
+#define ogg_cba_option               "Menu"
+#define ogg_cba_exit                 "Afslut"
+#define ogg_cba_stop                 "Stop"

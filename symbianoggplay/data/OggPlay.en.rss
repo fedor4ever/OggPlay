@@ -109,4 +109,9 @@
 #define ogg_shift                    "Shift (no repeat)"
 #define ogg_warnings                 "Warnings"
 
-
+// --- Added 2004-01-25 : Softkey labels
+#define ogg_cba_back                 "Back"
+#define ogg_cba_clear                "Clear"
+#define ogg_cba_option               "Options"
+#define ogg_cba_exit                 "Exit"
+#define ogg_cba_stop                 "Stop"

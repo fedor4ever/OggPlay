@@ -397,31 +397,31 @@ RESOURCE CBA r_user_empty_back_cba
 {
   buttons = { 
     CBA_BUTTON { id = EUserHotKeyCBAEmpty; txt = ""; },
-    CBA_BUTTON { id = EUserHotKeyCBABack; txt = text_softkey_back; }
+    CBA_BUTTON { id = EUserHotKeyCBABack; txt = ogg_cba_back; }
   };
 }  
 
 RESOURCE CBA r_user_clear_back_cba
 {
   buttons = { 
-    CBA_BUTTON { id = EUserHotKeyCBAEmpty; txt = text_softkey_clear; },
-    CBA_BUTTON { id = EUserHotKeyCBABack; txt = text_softkey_back; }
+    CBA_BUTTON { id = EUserHotKeyCBAEmpty; txt = ogg_cba_clear; },
+    CBA_BUTTON { id = EUserHotKeyCBABack; txt = ogg_cba_back; }
   };
 }  
 
 RESOURCE CBA r_idle_cba
 {
   buttons = { 
-    CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
-    CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_exit; }
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
+    CBA_BUTTON { id = EAknSoftkeyBack; txt = ogg_cba_exit; }
   };
 }  
 
 RESOURCE CBA r_play_cba
 {
   buttons = { 
-    CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
-    CBA_BUTTON { id = EUserStopPlayingCBA; txt = text_softkey_stop; }
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
+    CBA_BUTTON { id = EUserStopPlayingCBA; txt = ogg_cba_stop; }
   };
 }  
 
@@ -513,3 +513,4 @@ RESOURCE TBUF32 r_ogg_repeat_off   { buf=ogg_repeat_off; }			// New
 RESOURCE TBUF32 r_ogg_back_dir     { buf=ogg_back_dir; }			// Oggs listbox '..' string
 RESOURCE TBUF32 r_ogg_backspace    { buf=ogg_backspace; }
 RESOURCE TBUF32 r_ogg_shift        { buf=ogg_shift; }
+
