@@ -1,0 +1,100 @@
+OggPlay 1 {
+  FlipOpen {
+    Alarm {
+      Position 134 10 59 14
+    }
+    Clock {
+      Position 73 10 59 14
+    }
+    Title {
+      Position 6 26 196 16
+    }
+    Album {
+      Position 6 43 196 16
+    }
+    Artist {
+      Position 6 60 196 16
+    }
+    TrackNumber {
+      Position 6 10 30 16
+    }
+    PlayButton {
+      Position 41 230 30 20
+      NormalIcon 34 35
+      DimmedIcon 36 36
+    }
+    PauseButton {
+      Position 41 230 30 20
+      NormalIcon 37 38
+    }
+    StopButton {
+      Position 5 230 30 20
+      NormalIcon 31 32
+      DimmedIcon 33 33
+    }
+    AlarmIcon {
+      Position 185 10 20 16
+      Icon 39 40
+    }
+    ListBox {
+      Position 2 87 186 138
+    }
+    ScrollBar {
+      Position 189 174 16 32
+      Style 1
+      ScrollerSize 16
+      Step 5
+    }
+    Position {
+      Position 88 233 104 16
+      Style 2
+      KnobIcon 25 26
+    }
+  }
+  FlipClosed {
+    Clock {
+      Position 73 10 59 14
+    }
+    Alarm {
+      Position 134 10 59 14
+    }
+    Title {
+      Position 6 55 196 16
+    }
+    Album {
+      Position 6 75 196 16
+    }
+    Artist {
+      Position 6 95 196 16
+    }
+    TrackNumber {
+      Position 6 35 30 16
+    }
+    Genre {
+      Position 37 30 166 16
+    }
+    PlayingIcon {
+      Position 38 114 20 16
+      Icon 34 35
+    }
+    PausedIcon {
+      Position 38 114 20 16
+      Icon 16 17
+    }
+    Played {
+      Position 60 115 88 16
+    }
+    AlarmIcon {
+      Position 185 10 20 16
+      Icon 39 40
+    }
+    RepeatIcon {
+      Position 145 112 20 16
+      Icon 23 24
+    }
+    Volume {
+      Position 10 5 60 16
+      KnobIcon 20 21
+    }
+  }
+}

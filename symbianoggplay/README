@@ -4,27 +4,29 @@ This is the README file for OggPlay Source Code Distribution
 Introduction
 ............
 
-OggPlay is an Ogg Vorbis Audio Player for Smartphones and PDAs. It is
-developed by me, that is Leif H. Wilden. For questions and comments
-write to leifhendrik@netscape.net. It currently runs only on the
-SonyEriccson P800, but other platforms may be supported later. This is
-open source software under a GNU public licence, see the included text
-files LICENSE and GPL for more information. If you want to use this
-software or parts of it together with non-GPLed software, you must
-contact me! I may release parts of this software under other licences
-which are more appropriate for your purposes.
+OggPlay is an Ogg Vorbis Audio Player for Smartphones and PDAs.
+Version 1.0 was developed by Leif H. Wilden. Others contributed to the
+Series 60 port, language translations, and skin designing. See CREDITS
+for more info. For questions and comments please see the OggPlay
+homepage at www.geocities.com/p800tools, the source forge web-site at
+www.sourceforge.net/projects/symbianoggplay, or write to
+leifhendrik@netscape.net. This is open source software under a GNU
+public licence, see the included text files LICENSE and GPL for more
+information. If you want to use this software or parts of it together
+with non-GPLed software, you must contact me! I may release parts of
+this software under other licences which are more appropriate for your
+purposes.
 
 Included files in this distribution
 ...................................
 
-GPL              OggPlay.cpp     OggPlayAppView.cpp  bitmaps
-LICENSE          OggPlay.h       OggPlayAppView.h    int_fft.c
-OggControls.cpp  OggPlay.hrh     OggTremor.cpp       makefile
-OggControls.h    OggPlay.mbm     OggTremor.h         vorbis
-OggDialogs.cpp   OggPlay.mmp     OggViews.cpp
-OggDialogs.h     OggPlay.rss     OggViews.h
-OggPlay.aif      OggPlayAif.rss  README
+Directory structure:
 
-<bitmaps> is a subdirectory which contains the bitmaps for program
-icons and skins. <vorbis> is a subdirectory which contains the tremor
-integer based ogg vorbis decoding algorith from Xiph.org.
+src       contains all .cpp files
+inc       contains all .h files
+data      contains all .rss files (resources)
+group     stuff needed to compile with visual c++, code warrior etc.
+bitmaps   bitmaps for program icons, skins etc.
+vorbis    modified version of tremor integer based ogg vorbis decoding 
+          algorith from Xiph.org.
+install

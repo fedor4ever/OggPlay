@@ -1,0 +1,218 @@
+#include "OggPlay.header.rss"
+
+#define ogg_exit_label "Quitter"
+#define ogg_about_label "A propos d'OggPlay..."
+
+RESOURCE TBUF r_ogg_error_1 { buf="COggButton: Erreur de lecture de l'image de masque."; }
+RESOURCE TBUF r_ogg_error_2 { buf="COggCanvas: Erreur de conversion de l'image d'arrière-plan:"; }
+RESOURCE TBUF r_ogg_error_3 { buf="COggPlayAppUi: Impossible de régler la priorité du processus: Erreur de code"; }
+RESOURCE TBUF r_ogg_error_4 { buf="COggPlayAppUi: Impossible de trouver le processus!? Ooops."; }
+RESOURCE TBUF r_ogg_error_5 { buf="COggPlayAppUi: Impossible de régler la priorité du thread!? Ooops "; }
+RESOURCE TBUF r_ogg_error_6 { buf="COggPlayAppUi: Impossible de trouver le thread!? Ooops"; }
+RESOURCE TBUF r_ogg_error_7 { buf="TOggPlayback: Erreur durant l'ouverture du stream : erreur de code"; }
+RESOURCE TBUF r_ogg_error_8 { buf="TOggPlayback: Pas de nom de fichier spécifié!"; }
+RESOURCE TBUF r_ogg_error_9 { buf="Ce n'est pas un fichier Ogg Vorbis?!"; }
+RESOURCE TBUF r_ogg_error_10 { buf="Seuls les streams avec un ou deux canaux sont supportés."; }
+RESOURCE TBUF r_ogg_error_12 { buf="Format de fichier audio non supporté!"; }
+RESOURCE TBUF r_ogg_error_13 { buf="Seuls les taux de conversion suivants sont supportés: 11025,16000,22050,32000,44100,48000 Hz."; }
+RESOURCE TBUF r_ogg_error_14 { buf="Impossible d'ouvrir ce fichier"; }
+RESOURCE TBUF r_ogg_error_15 { buf="Aucun fichier n'est ouvert."; }
+RESOURCE TBUF r_ogg_error_16 { buf="Erreur de code "; }
+RESOURCE TBUF r_ogg_error_17 { buf="Erreur d'envoi du tampon"; }
+RESOURCE TBUF r_ogg_error_18 { buf="Erreur de copie du tampon"; }
+RESOURCE TBUF r_ogg_error_19 { buf="Erreur de données "; }
+RESOURCE TBUF r_ogg_error_20 { buf="Erreur"; }
+RESOURCE TBUF r_ogg_error_21 { buf="COggCanvas: Erreur d'ouverture de l'image d'arrière-plan."; }
+
+RESOURCE TBUF r_ogg_string_1 { buf="Mise à jour de la liste de fichiers..."; }
+RESOURCE TBUF r_ogg_string_2 { buf="Ecriture de la base de données des fichiers..."; }
+RESOURCE TBUF r_ogg_string_3 { buf="Alarme activée"; }
+RESOURCE TBUF r_ogg_string_4 { buf="Impossible de régler la priorité de procédé : erreur de code "; }
+RESOURCE TBUF r_ogg_string_5 { buf="Liste de lecture mélangée"; }
+RESOURCE TBUF r_ogg_string_6 { buf="(titres)"; }
+RESOURCE TBUF r_ogg_string_7 { buf="(albums)"; }
+RESOURCE TBUF r_ogg_string_8 { buf="(artistes)"; }
+RESOURCE TBUF r_ogg_string_9 { buf="(genres)"; }
+RESOURCE TBUF r_ogg_string_10 { buf="(sous-fichiers)"; }
+RESOURCE TBUF r_ogg_string_11 { buf="(fichiers)"; }
+RESOURCE TBUF r_ogg_string_12 { buf="(non-assignés)"; }
+
+#if !defined(SERIES60)
+RESOURCE DIALOG r_dialog_hotkey {
+  title   = "Options";
+  buttons = R_OGG_DIALOG_BUTTONS2;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+      type = EEikCtChoiceList;
+      prompt = "Touche de raccourci:";
+      id = EOggOptionsHotkey;
+      control = CHOICELIST { };
+    } ,
+    DLG_LINE {
+      type = EQikCtTimeEditor;
+      prompt = "Alarme:";
+      id = EOggOptionsAlarmTime;
+      control = QIK_TIME_EDITOR {
+        minTime = TIME { };
+        maxTime = TIME {
+          second = 59;
+          minute = 59;
+          hour = 23; };
+        flags = EQikTimeForce24HourFormat; 
+      };
+    } ,
+    DLG_LINE {
+      type = EEikCtCheckBox;
+      prompt = "Actif:";
+      id = EOggOptionsAlarmActive;
+    }
+  };
+}
+#endif
+
+RESOURCE DIALOG r_dialog_about {
+  title   = "Au sujet d'OggPlay";
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	id = EOggLabelAboutVersion;
+	control = LABEL 
+	{
+		txt="Version ???";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="(c) 2003 par Leif H. Wilden";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="voir www.geocities.com/p800tools pour plus d'infos";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="(c) codec Ogg/Vorbis par Xiph.org";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    }	
+  };
+}
+
+RESOURCE DIALOG r_dialog_info {
+  title   = "Propriétés du fichier";
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt = "Nom de fichier:";
+        id = EOggInfoDialog;
+	control = LABEL 
+	{
+		txt="";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+        id = EOggLabelFileName;
+	control = LABEL 
+	{
+		txt="inconnu";
+		horiz_align=EEikLabelAlignHLeft;
+	};	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Taille du fichier [byte]:";
+	id= EOggLabelFileSize;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Bitrate [kbit/s]:";
+	id = EOggLabelBitRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Rate [Hz]:";
+        id   = EOggLabelRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Cannaux:";
+	id = EOggLabelChannels;
+	control = LABEL
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    }
+  };
+}
+
+RESOURCE ARRAY r_hotkey_array {
+  items= {
+    LBUF { txt="Aucun"; },
+    LBUF { txt="Bouton Camera"; },
+    LBUF { txt="Bouton Navigateur"; },
+    LBUF { txt="Bouton marche-arrêt"; },
+    LBUF { txt="Ouverture Clapet"; }
+  };
+}
+
+RESOURCE MENU_PANE r_empty_menu {}
+
+RESOURCE MENU_PANE r_skin_menu 
+{
+  items= {
+//      MENU_ITEM { command=EOggSkinOne; txt="default"; }
+  };
+}
+
+RESOURCE MENU_PANE r_file_menu
+{
+  items= {
+      MENU_ITEM { command=EOggInfo;	txt="Info fichier..."; },
+      MENU_ITEM { command=EOggRepeat;	txt="Répéter";
+                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggShuffle;  txt="Mélanger liste de lecture"; },
+      MENU_ITEM { command=EOggViewRebuild;txt="Chercher fichiers"; },
+      MENU_ITEM { txt="Skins"; 
+                  cascade=r_skin_menu; },
+      MENU_ITEM { command=EOggOptions;	txt="Options...";
+                  flags=EEikMenuItemSeparatorAfter;},
+      MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
+      MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
+  };
+}
+

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *  Copyright (c) 2003 L. H. Wilden.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -88,13 +88,9 @@ static const struct {
 class COggPlayAppUi;
 class COggPlayAppView;
 class COggFOView;
-//class TOggPlayer;
 
 class CEikColumnListBox;
 class CEikBitmapButton;
-//FIXME
-//class CQikSlider;
-//class CQikTimeEditor;
 
 
 // COggActive
@@ -137,28 +133,22 @@ public:
   ~COggPlayAppUi();
 
   // the views supported by the listbox:
-  enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, ETop };
+  enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, ETop, ETrackTitle };
 
   // global settings stored in the ini file:
   int iHotkey;
   int iVolume;            // [0...100]
   int iRepeat;            // 0=off; 1=on
   int iAnalyzerState[2];  // 0= off; 1=on; 2= on with peaks
-  TViews    iViewBy;
-  /*
-  TBuf<256> iAlbum;       // currently selected album
-  TBuf<256> iArtist;      // currently selected artist
-  TBuf<256> iGenre;       // currently selected genre
-  TBuf<256> iSubFolder;   // currenlty selected subfolder
-  */
+  TViews iViewBy;
   TTime iAlarmTime;       // the alarm has been set to this time
 
   // global status:
-  int iCurrent;        // index of the file which is currently being played
+  int iCurrent;           // index of the file which is currently being played
   TBuf<512> iCurrentSong; // full path and filename of the current song
-  int iTryResume;      // after iTryResume seconds try resuming music (after sound device was stolen)
-  int iAlarmTriggered; // did the alarm clock go off?
-  int iAlarmActive;    // has an alarm time been set?
+  int iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
+  int iAlarmTriggered;    // did the alarm clock go off?
+  int iAlarmActive;       // has an alarm time been set?
   TBool iForeground;      // is the application currently in the foreground?
 
   TFileName iDbFileName;
@@ -185,7 +175,7 @@ public:
   void HandleForegroundEventL(TBool aForeground);
   void DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane);
 
-private: 
+private:
 
   void ReadIniFile();
   void WriteIniFile();
@@ -195,9 +185,13 @@ private:
   void SetCurrent(const TDesC& aFileName);
   void SetProcessPriority();
   void SetThreadPriority();
+  void FindSkins();
 
   int iCapturedKeyHandle;
   TFileName iIniFileName;
+  TFileName iSkinFileDir;
+  TInt iCurrentSkin;
+  CDesCArray* iSkins;
 
   COggFOView* iFOView;
   COggFCView* iFCView;

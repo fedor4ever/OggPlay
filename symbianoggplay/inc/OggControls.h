@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *  Copyright (c) 2003 L. H. Wilden.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 // Observe mouse pointer down/drag/up events for COggControls
 
 class COggControl;
+class COggCanvas;
 
 class MOggControlObserver {
 
@@ -38,6 +39,51 @@ class MOggControlObserver {
 
   virtual void OggPointerEvent(COggControl* /*c*/, const TPointerEvent& /*p*/) {}
   virtual void OggControlEvent(COggControl* /*c*/, TInt /*aEventType*/, TInt /*aValue*/) {}
+
+};
+
+
+_LIT(KBeginToken,"{");
+_LIT(KEndToken,"}");
+
+
+// TOggParser:
+// Read the skin defintion file
+// ----------------------------
+
+class TOggParser {
+
+ public:
+
+  enum TState { 
+    ESuccess, EFileNotFound, ENoOggSkin,
+    EUnknownVersion, EFlipOpenExpected,
+    ESyntaxError, EBeginExpected,
+    EEndExpected, EBitmapNotFound, EIntegerExpected };
+
+  TOggParser(const TFileName& aFileName);
+  ~TOggParser();
+
+  TBool ReadSkin(COggCanvas* fo, COggCanvas* fc);
+  void  ReportError();
+  void  Debug(const TDesC& txt, TInt level=0);
+
+  TBool ReadHeader();
+  TBool ReadTokens();
+
+  TBool ReadEOL();
+  TBool ReadToken();
+  TBool ReadToken(TInt& aValue);
+  CGulIcon* ReadIcon(const TFileName& aBitmapFile);
+
+  // protected:
+
+  TBool     iDebug;
+  FILE*     iFile;
+  TState    iState;
+  TInt      iLine;
+  TBuf<128> iToken;
+  TInt      iVersion;
 
 };
 
@@ -50,8 +96,9 @@ class COggControl {
 
  public:
 
-  COggControl(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggControl();
 
+  virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
   void         SetObserver(MOggControlObserver* obs);
 
   virtual void MakeVisible(TBool isVisible);
@@ -74,6 +121,7 @@ class COggControl {
   TInt   ih;
 
   virtual void  SetBitmapFile(const TFileName& aBitmapFile);
+  virtual TBool Read(TOggParser& p);
 
  protected:
 
@@ -82,11 +130,7 @@ class COggControl {
   virtual void Draw(CBitmapContext& aBitmapContext) = 0;
 
   // utility functions:
-  TBool ReadEOL(FILE* tf);
-  TBool ReadInt(FILE* tf, TInt& aValue);
-  TBool ReadString(FILE* tf, TDes& aString);
-  TBool ReadTokens(FILE* tf);
-  virtual TBool ReadArguments(FILE* tf, const TDesC& token);
+  virtual TBool ReadArguments(TOggParser& p);
 
   TBool  iRedraw;   // if true: something has changed with the control and the control needs to be redrawn
   TInt   iCycle;    // frame nmber of an animation etc. (1 cycle = 10ms)
@@ -109,7 +153,7 @@ class COggText : public COggControl {
 
  public:
 
-  COggText(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggText();
   virtual ~COggText();
 
   void SetText(const TDesC& aText);
@@ -142,7 +186,7 @@ class COggIcon : public COggControl {
 
  public:
 
-  COggIcon(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggIcon();
   virtual ~COggIcon();
 
   void SetIcon(CGulIcon* anIcon);
@@ -153,7 +197,7 @@ class COggIcon : public COggControl {
 
  protected:
 
-  virtual TBool ReadArguments(FILE* tf, const TDesC& token);
+  virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Cycle();
   virtual void Draw(CBitmapContext& aBitmapContext);
@@ -178,7 +222,7 @@ class COggButton : public COggControl {
 
  public:
 
-  COggButton(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggButton();
   virtual ~COggButton();
 
   void SetActiveMask(const TFileName& aFileName, TInt anIdx);
@@ -188,13 +232,12 @@ class COggButton : public COggControl {
 
  protected:
 
-  virtual TBool ReadArguments(FILE* tf, const TDesC& token);
+  virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
 
   void DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon);
-  CGulIcon* CreateIcon(FILE* tf);
 
   CFbsBitmap* iActiveMask;
   CGulIcon*   iNormalIcon;
@@ -217,7 +260,7 @@ class COggSlider : public COggControl {
 
  public:
 
-  COggSlider(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggSlider();
 
   void SetStyle(TInt aStyle);
   void SetKnobIcon(CGulIcon* anIcon);
@@ -227,6 +270,8 @@ class COggSlider : public COggControl {
   TInt CurrentValue();
 
  protected:
+
+  virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
@@ -252,12 +297,13 @@ class COggScrollBar : public COggControl
 
  public:
 
-  COggScrollBar(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggScrollBar();
 
   void SetStyle(TInt aStyle);
   void SetKnobIcon(CGulIcon* anIcon);
   void SetScrollerSize(TInt aSize);
   void SetPage(TInt aPage);
+  void SetStep(TInt aStep);
   void SetAssociatedControl(COggControl* aControl);
   void SetMaxValue(TInt aMaxValue);
   void SetValue(TInt aValue);
@@ -265,6 +311,8 @@ class COggScrollBar : public COggControl
   TInt CurrentValue();
 
  protected:
+
+  virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
@@ -280,6 +328,7 @@ class COggScrollBar : public COggControl
   TInt         iScrollerSize;
   TInt         iPos;
   TInt         iPage;
+  TInt         iStep;
   TBool        iIsMoving;
 };
 
@@ -294,11 +343,14 @@ class COggListBox : public COggControl
 
  public:
 
-  COggListBox(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggListBox();
   virtual ~COggListBox();
 
+  void SetText(CDesCArray* aText);
   void SetVertScrollBar(COggScrollBar* aScrollBar);
   void SetFont(CFont* aFont);
+  virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
+
 
   CColumnListBoxData* GetColumnListBoxData();
 
@@ -336,7 +388,7 @@ class COggListBox : public COggControl
   TInt   iOffset;
 
   CColumnListBoxData*  iData;
-  CDesCArrayFlat*      iText;
+  CDesCArray*          iText;
   COggScrollBar*       iScrollBar;
 };
 
@@ -350,9 +402,10 @@ class COggAnalyzer : public COggControl {
 
  public:
 
-  COggAnalyzer(TInt ax, TInt ay, TInt aw, TInt ah);
+  COggAnalyzer();
   virtual ~COggAnalyzer();
 
+  virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
   void SetBarIcon(CGulIcon* aBarIcon);
   void SetValue(TInt i, TInt theValue);
   void SetStyle(TInt aStyle);
@@ -362,6 +415,8 @@ class COggAnalyzer : public COggControl {
   TInt Style();
 
  protected:
+
+  virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Cycle();
   virtual void Draw(CBitmapContext& aBitmapContext);
@@ -406,7 +461,9 @@ class COggCanvas : public CCoeControl ,
   void AddControl(COggControl* c);
   void ClearControls();
 
-  void RegisterCallBack(TInt (*fnc)(TAny*));
+  //void RegisterCallBack(TInt (*fnc)(TAny*));
+
+  void Read(FILE* tf);
 
  protected:
 

@@ -1,3 +1,5 @@
+#include "OggPlay.header.rss"
+
 #define ogg_exit_label "Beenden"
 #define ogg_about_label "Über OggPlay..."
 
@@ -35,3 +37,178 @@ RESOURCE TBUF r_ogg_string_10 { buf="(Verzeichnisse)"; }
 RESOURCE TBUF r_ogg_string_11 { buf="(Dateien)"; }
 RESOURCE TBUF r_ogg_string_12 { buf="(nicht zugeordnet)"; }
 
+RESOURCE DIALOG r_dialog_hotkey {
+  title   = "Optionen";
+  buttons = R_EIK_BUTTONS_CANCEL_DONE;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+      type = EEikCtChoiceList;
+      prompt = "Schnellstart:";
+      id = EOggOptionsHotkey;
+      control = CHOICELIST { };
+    } ,
+    DLG_LINE {
+      type = EQikCtTimeEditor;
+      prompt = "Alarm:";
+      id = EOggOptionsAlarmTime;
+      control = QIK_TIME_EDITOR {
+        minTime = TIME { };
+        maxTime = TIME {
+          second = 59;
+          minute = 59;
+          hour = 23; };
+        flags = EQikTimeForce24HourFormat; 
+      };
+    } ,
+    DLG_LINE {
+      type = EEikCtCheckBox;
+      prompt = "Aktiv:";
+      id = EOggOptionsAlarmActive;
+    }
+  };
+}
+
+RESOURCE DIALOG r_dialog_about {
+  title   = "Über OggPlay";
+  buttons = R_EIK_BUTTONS_CONTINUE;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	id = EOggLabelAboutVersion;
+	control = LABEL 
+	{
+		txt="Version ???";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="(c) 2003 by Leif H. Wilden";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="see www.geocities.com/p800tools für mehr Infos";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="(c) Ogg/Vorbis codec by Xiph.org";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    }	
+  };
+}
+
+RESOURCE DIALOG r_dialog_info {
+  title   = "Dateieigenschaften";
+  buttons = R_EIK_BUTTONS_CONTINUE;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt = "Dateiname:";
+        id = EOggInfoDialog;
+	control = LABEL 
+	{
+		txt="";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+        id = EOggLabelFileName;
+	control = LABEL 
+	{
+		txt="unbekannt";
+		horiz_align=EEikLabelAlignHLeft;
+	};	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Dateigröße [byte]:";
+	id= EOggLabelFileSize;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Bitrate [kbit/s]:";
+	id = EOggLabelBitRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Frequenz [Hz]:";
+        id   = EOggLabelRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Kanäle:";
+	id = EOggLabelChannels;
+	control = LABEL
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    }
+  };
+}
+
+RESOURCE ARRAY r_hotkey_array {
+  items= {
+    LBUF { txt="Keiner"; },
+    LBUF { txt="Kameraknopf"; },
+    LBUF { txt="Browserknopf"; },
+    LBUF { txt="Betriebsschalter"; },
+    LBUF { txt="Flip öffnen"; }
+  };
+}
+
+RESOURCE MENU_PANE r_empty_menu {}
+
+RESOURCE MENU_PANE r_skin_menu 
+{
+  items= {
+//      MENU_ITEM { command=EOggSkinDefault; txt="default"; }
+  };
+}
+
+RESOURCE MENU_PANE r_file_menu
+{
+  items= {
+      MENU_ITEM { command=EOggInfo;	txt="Dateieigenschaften..."; },
+      MENU_ITEM { command=EOggRepeat;	txt="Wiederholen";
+                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggShuffle;  txt="Wiedergabeliste mischen"; },
+      MENU_ITEM { command=EOggViewRebuild;txt="Neue Dateien suchen"; },
+      MENU_ITEM { txt="Skins"; 
+                  cascade=r_skin_menu; },
+      MENU_ITEM { command=EOggOptions;	txt="Optionen...";
+                  flags=EEikMenuItemSeparatorAfter;},
+      MENU_ITEM { command=EOggAbout;	txt="Über OggPlay..."; },
+      MENU_ITEM { command=EEikCmdExit;	txt="Beenden"; }
+  };
+}

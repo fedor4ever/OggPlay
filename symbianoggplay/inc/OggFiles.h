@@ -43,7 +43,8 @@ class TOggFile
 	   const TDesC& aTrackNumber);
 
   void SetText(HBufC* & aBuffer, const TDesC& aText);
-  TBool Read(TFileText& tf);
+  void SetTrackTitle();
+  TBool Read(TFileText& tf, TInt aVersion);
   TBool Write(TFileText& tf);
 
   HBufC* iTitle;
@@ -54,6 +55,7 @@ class TOggFile
   HBufC* iSubFolder;
   HBufC* iShortName;
   HBufC* iTrackNumber;
+  HBufC* iTrackTitle;
 };
 
 class TOggKey : public TKeyArrayFix
@@ -105,6 +107,8 @@ class TOggFiles
   TOggKey                  iOggKeyGenres;
   TOggKey                  iOggKeySubFolders;
   TOggKey                  iOggKeyFileNames;
+  TOggKey                  iOggKeyTrackTitle;
+  TInt                     iVersion;
 
 };
 

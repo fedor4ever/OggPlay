@@ -1,3 +1,8 @@
+#include "OggPlay.header.rss"
+
+#define ogg_exit_label "Esci"
+#define ogg_about_label "Rigardo OggPlay..."
+
 RESOURCE TBUF r_ogg_error_1 { buf="COggButton: Errore nella lettura della maschera bitmap:"; } 
 RESOURCE TBUF r_ogg_error_2 { buf="COggCanvas: Errore nel convertire lo sfondo bitmap:"; } 
 RESOURCE TBUF r_ogg_error_3 { buf="COggPlayAppUi: Impossibile assegnare la priorità del processo: "; } 
@@ -189,6 +194,12 @@ RESOURCE ARRAY r_hotkey_array {
 
 RESOURCE MENU_PANE r_empty_menu {} 
 
+RESOURCE MENU_PANE r_skin_menu 
+{
+  items= {
+//      MENU_ITEM { command=EOggSkinDefault; txt="default"; }
+  };
+}
 
 RESOURCE MENU_PANE r_file_menu 
 { 
@@ -197,6 +208,8 @@ RESOURCE MENU_PANE r_file_menu
       MENU_ITEM { command=EOggRepeat;   txt="Ripeti";                  flags=EEikMenuItemCheckBox;}, 
       MENU_ITEM { command=EOggShuffle;  txt="Mischia la lista brani"; }, 
       MENU_ITEM { command=EOggViewRebuild;txt="Trova un nuovo file"; }, 
+      MENU_ITEM { txt="Skins"; 
+                  cascade=r_skin_menu; },
       MENU_ITEM { command=EOggOptions;  txt="Opzioni...";  flags=EEikMenuItemSeparatorAfter;}, 
       MENU_ITEM { command=EOggAbout;    txt="Rigardo OggPlay..."; }, 
       MENU_ITEM { command=EEikCmdExit;  txt="Esci"; } 

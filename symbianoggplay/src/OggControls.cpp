@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *  Copyright (c) 2003 L. H. Wilden.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,153 @@ TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
   return w;
 }
 
-_LIT(KEndToken,"END");
+/***********************************************************
+ *
+ * TOggParser
+ *
+ ***********************************************************/
+
+TOggParser::TOggParser(const TFileName& aFileName)
+{
+  iLine= 1;
+  iDebug= EFalse;
+  if ((iFile=wfopen((wchar_t*)aFileName.Ptr(),L"rb"))==NULL) {
+    iState= EFileNotFound;
+    return;
+  }
+  iState= ESuccess;
+}
+
+TOggParser::~TOggParser()
+{
+  fclose(iFile);
+}
+
+TBool
+TOggParser::ReadHeader()
+{
+  ReadToken();
+  if (iToken!=_L("OggPlay")) {
+    iState= ENoOggSkin;
+    return EFalse;
+  }
+  ReadToken(iVersion);
+  if (iVersion!=1) {
+    iState= EUnknownVersion;
+    return EFalse;
+  }
+  ReadToken();
+  if (iToken!=KBeginToken) {
+    iState= EBeginExpected;
+    return EFalse;
+  }
+  return ETrue;
+}
+
+TBool
+TOggParser::ReadEOL()
+{
+  if (feof(iFile)) return ETrue;
+  int c= fgetc(iFile);
+  if (c==EOF) return ETrue;
+  if (c==12) return ETrue;
+  if (c==13) {
+    c=fgetc(iFile);
+    if (c==10) return ETrue;
+    fseek(iFile,-1,SEEK_CUR);
+    return EFalse;
+  }
+  if (c==10) return ETrue;
+  fseek(iFile,-1,SEEK_CUR);
+  return EFalse;
+}
+
+TBool
+TOggParser::ReadToken()
+{
+  // Read next token. Skip any white space at the beginning.
+  // Read possible EOL characters if any.
+  iToken.SetLength(0);
+  int c;
+  TBool start(ETrue),stop(EFalse);
+  do {
+    c= fgetc(iFile);
+    if (start && c==32) continue;
+    start= EFalse;
+    stop= c==32 || c==EOF || c==13 || c==10 || c==12;
+    if (!stop) iToken.Append((unsigned char)c);
+  } while (!stop);
+  TBool eol= c!=32;
+  if (c==13) c= fgetc(iFile);
+  if (eol) iLine++;
+  return iToken.Length()>0;
+}
+
+TBool
+TOggParser::ReadToken(TInt& aValue)
+{
+  TBool success= ReadToken();
+  if (success) {
+    TLex parse(iToken);
+    success= parse.Val(aValue)==KErrNone;
+    if (!success) iState= EIntegerExpected;
+  }
+  return success;
+}
+
+CGulIcon*
+TOggParser::ReadIcon(const TFileName& aBitmapFile)
+{
+  TInt idxBitmap,idxMask;
+  Debug(aBitmapFile);
+  if (!ReadToken(idxBitmap)) return NULL;
+  if (!ReadToken(idxMask)) return NULL;
+  CGulIcon* result= CEikonEnv::Static()->CreateIconL(aBitmapFile, idxBitmap, idxMask);
+  if (!result) iState= EBitmapNotFound;
+  return result;
+}
+
+void
+TOggParser::ReportError()
+{
+  if (iState==ESuccess) return;
+  TBuf<128> buf;
+  buf.Append(_L("Line "));
+  buf.AppendNum(iLine);
+  buf.Append(_L(": "));
+  switch (iState) {
+  case EFileNotFound: buf.Append(_L("File not found.")); break;
+  case ENoOggSkin: buf.Append(_L("This is not an Ogg skin file!")); break;
+  case EUnknownVersion: buf.Append(_L("Unknown skin file version.")); break;
+  case EFlipOpenExpected: buf.Append(_L("FlipOpen statement expected.")); break;
+  case ESyntaxError: buf.Append(_L("Syntax error.")); break;
+  case EBeginExpected: buf.Append(_L("{ expected.")); break;
+  case EEndExpected: buf.Append(_L("} expected.")); break;
+  case EBitmapNotFound: buf.Append(_L("Bitmap not found.")); break;
+  case EIntegerExpected: buf.Append(_L("Integer number expected.")); break;
+  default: buf.Append(_L("Unknown error.")); break;
+  }
+  buf.Append(_L("Last token: <"));
+  buf.Append(iToken);
+  buf.Append(_L(">"));
+  //CCoeEnv::Static()->InfoWinL(_L("Error reading skin file"),buf);
+  User::InfoPrint(buf);
+}
+
+void TOggParser::Debug(const TDesC& txt, TInt level)
+{
+  if (level==0 && !iDebug) return;
+  TBuf<256> buf;
+  buf.Append(_L("Debug ("));
+  buf.AppendNum(iLine);
+  buf.Append(_L("): "));
+  buf.Append(txt);
+  buf.Append(_L(" Token:"));
+  buf.Append(iToken); 
+  User::InfoPrint(buf);
+  User::After(TTimeIntervalMicroSeconds32(1000000));
+}
+
 
 /***********************************************************
  *
@@ -42,17 +188,24 @@ _LIT(KEndToken,"END");
  *
  ***********************************************************/
 
-COggControl::COggControl(TInt ax, TInt ay, TInt aw, TInt ah) :
-  ix(ax),
-  iy(ay),
-  iw(aw),
-  ih(ah),
+COggControl::COggControl() :
+  ix(0),iy(0),iw(0),ih(0),
   iRedraw(ETrue),
   iCycle(0),
   iVisible(ETrue),
   iDimmed(EFalse),
   iObserver(0)
+{  
+}
+
+void
+COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
 {
+  ix= ax;
+  iy= ay;
+  iw= aw;
+  ih= ah;
+  iRedraw= ETrue;
 }
 
 void
@@ -134,68 +287,32 @@ COggControl::SetBitmapFile(const TFileName& aFileName)
 }
 
 TBool
-COggControl::ReadInt(FILE* tf, TInt& aValue)
+COggControl::Read(TOggParser& p)
 {
-  TBuf<16> buf;
-  if (fscanf(tf, "%d", aValue)!=1) return EFalse;
-  return ETrue;
-}
-
-TBool
-COggControl::ReadEOL(FILE* tf)
-{
-  if (feof(tf)) return ETrue;
-  int c= fgetc(tf);
-  if (c==EOF) return ETrue;
-  if (c==12) return ETrue;
-  if (c==13) {
-    c=fgetc(tf);
-    if (c==10) return ETrue;
-    fseek(tf,-1,SEEK_CUR);
+  p.ReadToken();
+  if (p.iToken!=KBeginToken) {
+    p.iState= TOggParser::EBeginExpected;
     return EFalse;
   }
-  if (c==10) return ETrue;
-  fseek(tf,-1,SEEK_CUR);
-  return EFalse;
+  while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { ReadArguments(p); }
+  if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) p.iState= TOggParser::EEndExpected;
+  return p.iState==TOggParser::ESuccess;
 }
 
 TBool
-COggControl::ReadString(FILE* tf, TDes& aString)
+COggControl::ReadArguments(TOggParser& p)
 {
-  aString.SetLength(0);
-  int c;
-  bool stop;
-  do {
-    c= fgetc(tf);
-    stop= c==EOF || c==(int)" " || c==13 || c==12;
-    if (!stop) aString.Append((unsigned char)c);
-  } while (!stop);
-  if (c==13) fseek(tf,-1,SEEK_CUR);
-  return ETrue;
-}
-
-TBool
-COggControl::ReadArguments(FILE* tf, const TDesC& token)
-{
-  if (token==_L("POSITION")) {
-    return 
-      ReadInt(tf, ix) &&
-      ReadInt(tf, iy) &&
-      ReadInt(tf, iw) &&
-      ReadInt(tf, ih);
+  if (p.iToken==_L("Position")) {
+    p.Debug(_L("Setting position."));
+    TInt ax, ay, aw, ah;
+    TBool success= 
+      p.ReadToken(ax) &&
+      p.ReadToken(ay) &&
+      p.ReadToken(aw) &&
+      p.ReadToken(ah);
+    if (success) SetPosition(ax, ay, aw, ah);
+    return success;
   }
-  return ETrue;
-}
-
-TBool
-COggControl::ReadTokens(FILE* tf)
-{
-  TBuf<32> token;
-  do {
-    if (!ReadString(tf, token)) return EFalse;
-    if (token!=KEndToken) ReadArguments(tf, token);
-    ReadEOL(tf);
-  } while (token!=KEndToken);
   return ETrue;
 }
 
@@ -206,8 +323,8 @@ COggControl::ReadTokens(FILE* tf)
  *
  ***********************************************************/
 
-COggText::COggText(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggText::COggText() :
+  COggControl(),
   iText(0),
   iFont(0),
   iTextWidth(0),
@@ -303,8 +420,8 @@ void COggText::PointerEvent(const TPointerEvent& p)
  *
  ***********************************************************/
 
-COggIcon::COggIcon(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggIcon::COggIcon() :
+  COggControl(),
   iIcon(0),
   iBlinkFrequency(5),
   iBlinking(EFalse)
@@ -381,11 +498,18 @@ void COggIcon::Draw(CBitmapContext& aBitmapContext)
 }
 
 TBool
-COggIcon::ReadArguments(FILE* tf, const TDesC& token)
+COggIcon::ReadArguments(TOggParser& p)
 {
-  TBool success= COggControl::ReadArguments(tf, token);
-  if (success && token==_L("BlinkFrequency"))
-    success= ReadInt(tf,iBlinkFrequency);
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("BlinkFrequency")) {
+    p.Debug(_L("Setting blink frequency."));
+    success= p.ReadToken(iBlinkFrequency);
+  }
+  if (success && p.iToken==_L("Icon")) {
+    p.Debug(_L("Setting icon."));
+    SetIcon(p.ReadIcon(iBitmapFile));
+    success= iIcon!=0;
+  }
   return success;
 }
 
@@ -395,8 +519,8 @@ COggIcon::ReadArguments(FILE* tf, const TDesC& token)
  *
  ***********************************************************/
 
-COggButton::COggButton(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggButton::COggButton() :
+  COggControl(),
   iActiveMask(0),
   iNormalIcon(0),
   iPressedIcon(0),
@@ -495,22 +619,22 @@ void COggButton::PointerEvent(const TPointerEvent& p)
   COggControl::PointerEvent(p);
 }
 
-CGulIcon*
-COggButton::CreateIcon(FILE* tf)
-{
-  TInt idxBitmap,idxMask;
-  if (!ReadInt(tf,idxBitmap)) return NULL;
-  if (!ReadInt(tf,idxMask)) return NULL;
-  return CEikonEnv::Static()->CreateIconL(iBitmapFile, idxBitmap, idxMask);
-}
-
 TBool
-COggButton::ReadArguments(FILE* tf, const TDesC& token)
+COggButton::ReadArguments(TOggParser& p)
 {
-  if (token==_L("NormalIcon")) SetNormalIcon(CreateIcon(tf));
-  else if (token==_L("PressedIcon")) SetPressedIcon(CreateIcon(tf));
-  else if (token==_L("DimmedIcon")) SetDimmedIcon(CreateIcon(tf));
-  return COggControl::ReadArguments(tf, token);
+  if (p.iToken==_L("NormalIcon")) {
+    p.Debug(_L("Setting normal icon."));
+    SetNormalIcon(p.ReadIcon(iBitmapFile));
+  }
+  else if (p.iToken==_L("PressedIcon")) {
+    p.Debug(_L("Setting pressed icon."));
+    SetPressedIcon(p.ReadIcon(iBitmapFile));
+  }
+  else if (p.iToken==_L("DimmedIcon")) {
+    p.Debug(_L("Setting dimmed icon."));
+    SetDimmedIcon(p.ReadIcon(iBitmapFile));
+  }
+  return COggControl::ReadArguments(p);
 }
 
 
@@ -520,8 +644,8 @@ COggButton::ReadArguments(FILE* tf, const TDesC& token)
  *
  ***********************************************************/
 
-COggSlider::COggSlider(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggSlider::COggSlider() :
+  COggControl(),
   iKnobIcon(0),
   iStyle(0),
   iValue(0),
@@ -645,6 +769,21 @@ void COggSlider::PointerEvent(const TPointerEvent& p)
   COggControl::PointerEvent(p);
 }
 
+TBool
+COggSlider::ReadArguments(TOggParser& p)
+{
+  if (p.iToken==_L("KnobIcon")) {
+    p.Debug(_L("Setting knob icon."));
+    SetKnobIcon(p.ReadIcon(iBitmapFile));
+  }
+  else if (p.iToken==_L("Style")) {
+    p.Debug(_L("Setting style."));
+    TInt aStyle(0);
+    if (p.ReadToken(aStyle)) SetStyle(aStyle);
+  }
+  return COggControl::ReadArguments(p);
+}
+
 
 /***********************************************************
  *
@@ -652,8 +791,8 @@ void COggSlider::PointerEvent(const TPointerEvent& p)
  *
  ***********************************************************/
 
-COggScrollBar::COggScrollBar(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggScrollBar::COggScrollBar() :
+  COggControl(),
   iStyle(0),
   iValue(0),
   iMaxValue(100),
@@ -662,6 +801,7 @@ COggScrollBar::COggScrollBar(TInt ax, TInt ay, TInt aw, TInt ah) :
   iScrollerSize(10),
   iPos(0),
   iPage(1),
+  iStep(1),
   iIsMoving(EFalse)
 {
 }
@@ -691,6 +831,12 @@ void
 COggScrollBar::SetPage(TInt aPage)
 {
   iPage= aPage;
+}
+
+void
+COggScrollBar::SetStep(TInt aStep)
+{
+  iStep= aStep;
 }
 
 void
@@ -727,9 +873,10 @@ void
 COggScrollBar::PointerEvent(const TPointerEvent& p)
 {
   COggControl::PointerEvent(p);
-  if (!iKnobIcon) return;
+  //if (!iKnobIcon) return;
 
-  TSize s(iKnobIcon->Bitmap()->SizeInPixels());
+  TSize s(0,0);
+  if (iKnobIcon) s= iKnobIcon->Bitmap()->SizeInPixels();
   TInt k,s1,s2;
   if (iStyle==0) {
     k= s.iWidth;
@@ -745,9 +892,9 @@ COggScrollBar::PointerEvent(const TPointerEvent& p)
 
   if (p.iType==TPointerEvent::EButton1Down) {
     if (s1<iScrollerSize) {
-      SetValue(iValue-1);
+      SetValue(iValue-iStep);
     } else if (s1>ih-iScrollerSize) {
-      SetValue(iValue+1);
+      SetValue(iValue+iStep);
     } else if (s2>=iPos && s2<=iPos+k) {
       iIsMoving= ETrue;
     } else if (s2<iPos) {
@@ -805,6 +952,34 @@ COggScrollBar::GetValueFromPos(TInt aPos)
   return 0;
 }
 
+TBool
+COggScrollBar::ReadArguments(TOggParser& p)
+{
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("ScrollerSize")) {
+    p.Debug(_L("Setting scroller size."));
+    success= p.ReadToken(iScrollerSize);
+  }
+  if (success && p.iToken==_L("Style")) {
+    p.Debug(_L("Setting style."));
+    success= p.ReadToken(iStyle);
+  }
+  if (success && p.iToken==_L("Page")) {
+    p.Debug(_L("Setting page."));
+    success= p.ReadToken(iPage);
+  }
+  if (success && p.iToken==_L("KnobIcon")) {
+    p.Debug(_L("Setting knob icon."));
+    SetKnobIcon(p.ReadIcon(iBitmapFile));
+    success= iKnobIcon!=0;
+  }
+  if (success && p.iToken==_L("Step")) {
+    p.Debug(_L("Setting step."));
+    success= p.ReadToken(iStep);
+  }
+  return success;
+}
+
 
 /***********************************************************
  *
@@ -812,8 +987,8 @@ COggScrollBar::GetValueFromPos(TInt aPos)
  *
  ***********************************************************/
 
-COggAnalyzer::COggAnalyzer(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggAnalyzer::COggAnalyzer() :
+  COggControl(),
   iBarIcon(0),
   iNumValues(16),
   iStyle(1)
@@ -828,6 +1003,13 @@ COggAnalyzer::~COggAnalyzer()
   if (iValues) { delete[] iValues; iValues= 0; }
   if (iPeaks) { delete[] iPeaks; iPeaks= 0; }
   if (iBarIcon) { delete iBarIcon; iBarIcon= 0; }
+}
+
+void
+COggAnalyzer::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
+{
+  COggControl::SetPosition(ax,ay,aw,ah);
+  iDx= (float)iw/iNumValues;
 }
 
 void
@@ -979,6 +1161,22 @@ void COggAnalyzer::PointerEvent(const TPointerEvent& p)
   }
 }
 
+TBool
+COggAnalyzer::ReadArguments(TOggParser& p)
+{
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("Style")) {
+    p.Debug(_L("Setting style."));
+    success= p.ReadToken(iStyle);
+  }
+  if (success && p.iToken==_L("BarIcon")) {
+    p.Debug(_L("Setting bar icon."));
+    SetBarIcon(p.ReadIcon(iBitmapFile));
+    success= iBarIcon!=0;
+  }
+  return success;
+}
+
 
 /***********************************************************
  *
@@ -986,32 +1184,48 @@ void COggAnalyzer::PointerEvent(const TPointerEvent& p)
  *
  ***********************************************************/
 
-COggListBox::COggListBox(TInt ax, TInt ay, TInt aw, TInt ah) :
-  COggControl(ax, ay, aw, ah),
+COggListBox::COggListBox() :
+  COggControl(),
   iFont(0),
   iTop(0),
   iSelected(-1),
   iScroll(0),
   iOffset(0),
+  iText(0),
   iScrollBar(0)
 {
-  iText= new CDesCArrayFlat(10);
+  //iText= new CDesCArrayFlat(10);
   iData= CColumnListBoxData::NewL();
   iLineHeight= 16;
-  iLinesVisible= ih/iLineHeight;
+  iLinesVisible= 1;
 }
 
 COggListBox::~COggListBox()
 {
+  /*
   if (iText) {
     ClearText();
     delete iText; 
     iText= 0;
   }
+  */
   if (iData) {
     delete iData;
     iData=0;
   }
+}
+
+void
+COggListBox::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
+{
+  COggControl::SetPosition(ax, ay, aw, ah);
+  iLinesVisible= ih/iLineHeight;
+}
+
+void
+COggListBox::SetText(CDesCArray* aText)
+{
+  iText= aText;
 }
 
 void
@@ -1280,8 +1494,6 @@ void COggCanvas::ConstructL(const TFileName& aFileName, TInt iIdx)
     iBackground= 0;
   }
 
-  //SetGloballyCapturing(EFalse);
-  //SetPointerCapture(EFalse);
   EnableDragEvents();
 
   DrawControl();

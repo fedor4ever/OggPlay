@@ -1,0 +1,64 @@
+/*
+ *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+NAME OGGP
+
+#include "OggOs.h"
+
+#include <eikon.rh>
+#include <uikon.rh>
+
+#include <eikon.rsg>
+#ifdef SERIES60
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+
+#define R_OGG_DIALOG_BUTTONS2 R_AVKON_SOFTKEYS_OK_CANCEL
+#define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OK_CANCEL
+
+#else
+#include <uikon.hrh> // EEikMenuTitleRightAlign
+#include <qikon.rh>
+#include <qikon.hrh>
+#include <qikctl.rsg>
+#define R_OGG_DIALOG_BUTTONS2 R_EIK_BUTTONS_CANCEL_DONE
+#define R_OGG_DIALOG_BUTTONS1 R_EIK_BUTTONS_CONTINUE
+#endif
+
+#include "OggPlay.hrh"
+
+RESOURCE RSS_SIGNATURE { }
+RESOURCE TBUF { buf=""; }
+
+RESOURCE EIK_APP_INFO
+{
+  menubar=r_oggplay_menubar;
+}
+
+RESOURCE MENU_BAR r_oggplay_menubar
+{
+  titles= { 
+    MENU_TITLE { menu_pane=r_file_menu; txt="OggPlay!"; },
+    MENU_TITLE { menu_pane=r_empty_menu;	
+                 txt="00:00 / 00:00";
+		 flags=EEikMenuTitleRightAlign; }
+  };
+}
+
+RESOURCE TBUF r_ogg_version { buf="OggPlay 0.95 (beta)"; }

@@ -35,7 +35,8 @@ TOggFile::TOggFile() :
   iFileName(0),
   iSubFolder(0),
   iShortName(0),
-  iTrackNumber(0)
+  iTrackNumber(0),
+  iTrackTitle(0)
 {
   SetText(iTitle,_L("-"));
   SetText(iAlbum,_L("-"));
@@ -45,6 +46,7 @@ TOggFile::TOggFile() :
   SetText(iSubFolder,_L("-"));
   SetText(iShortName,_L("-"));
   SetText(iTrackNumber,_L("-"));
+  SetText(iTrackTitle,_L("-"));
 }
 
 TOggFile::TOggFile(const TDesC& aTitle,
@@ -62,12 +64,13 @@ TOggFile::TOggFile(const TDesC& aTitle,
   iFileName(0),
   iSubFolder(0),
   iShortName(0),
-  iTrackNumber(0)
+  iTrackNumber(0),
+  iTrackTitle(0)
 {
   TBuf<128> buf;
   CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_12);
 
-  if (aTitle.Length()>0) SetText(iTitle, aTitle); else SetText(iTitle, buf);
+  if (aTitle.Length()>0) SetText(iTitle, aTitle); else SetText(iTitle, aShortName);
   if (anAlbum.Length()>0) SetText(iAlbum, anAlbum); else SetText(iAlbum, buf);
   if (anArtist.Length()>0) SetText(iArtist, anArtist); else SetText(iArtist, buf);
   if (aGenre.Length()>0) SetText(iGenre, aGenre); else SetText(iGenre,buf);
@@ -75,6 +78,22 @@ TOggFile::TOggFile(const TDesC& aTitle,
   SetText(iFileName, aFileName);
   SetText(iShortName, aShortName);
   if (aTrackNumber.Length()>0) SetText(iTrackNumber, aTrackNumber); else SetText(iTrackNumber, buf);
+
+  SetTrackTitle();
+}
+
+void
+TOggFile::SetTrackTitle() 
+{
+  TInt track(0);
+  TLex parse(*iTrackNumber);
+  parse.Val(track);
+  if (track>999) track=999;
+  TBuf<128> buf;
+  buf.NumFixedWidth(track,EDecimal,2);
+  buf.Append(_L(" "));
+  buf.Append(iTitle->Left(123));
+  SetText(iTrackTitle,buf);
 }
 
 TOggFile::~TOggFile()
@@ -87,6 +106,7 @@ TOggFile::~TOggFile()
   if (iFileName) delete iFileName;
   if (iShortName) delete iShortName;
   if (iTrackNumber) delete iTrackNumber;
+  if (iTrackTitle) delete iTrackTitle;
 }
 
 void
@@ -99,7 +119,7 @@ TOggFile::SetText(HBufC* & aBuffer, const TDesC& aText)
 }
 
 TBool
-TOggFile::Read(TFileText& tf)
+TOggFile::Read(TFileText& tf, TInt aVersion)
 {
   TBuf<128> aTitle, anAlbum, anArtist, aGenre, aSubFolder, aFileName, aShortName, aTrackNumber;
   bool success=
@@ -109,8 +129,9 @@ TOggFile::Read(TFileText& tf)
     tf.Read(aGenre)==KErrNone &&
     tf.Read(aSubFolder)==KErrNone &&
     tf.Read(aFileName)==KErrNone &&
-    tf.Read(aShortName)==KErrNone &&
-    tf.Read(aTrackNumber)==KErrNone;
+    tf.Read(aShortName)==KErrNone;
+  if (aVersion==1 && success)
+    success|= tf.Read(aTrackNumber)==KErrNone;
   if (success) {
     SetText(iTitle, aTitle);
     SetText(iAlbum, anAlbum);
@@ -120,6 +141,7 @@ TOggFile::Read(TFileText& tf)
     SetText(iFileName, aFileName);
     SetText(iShortName, aShortName);
     SetText(iTrackNumber, aTrackNumber);
+    SetTrackTitle();
   }
   return success;
 }
@@ -173,6 +195,7 @@ TOggKey::At(TInt anIndex) const
     case COggPlayAppUi::EGenre : return (*iFiles)[anIndex]->iGenre;
     case COggPlayAppUi::ESubFolder: return (*iFiles)[anIndex]->iSubFolder;
     case COggPlayAppUi::EFileName : return (*iFiles)[anIndex]->iShortName;
+    case COggPlayAppUi::ETrackTitle: return (*iFiles)[anIndex]->iTrackTitle;
     }
   }
 
@@ -195,7 +218,9 @@ TOggFiles::TOggFiles(TOggPlayback* anOggPlayback) :
   iOggKeyArtists(COggPlayAppUi::EArtist),
   iOggKeyGenres(COggPlayAppUi::EGenre),
   iOggKeySubFolders(COggPlayAppUi::ESubFolder),
-  iOggKeyFileNames(COggPlayAppUi::EFileName)
+  iOggKeyFileNames(COggPlayAppUi::EFileName),
+  iOggKeyTrackTitle(COggPlayAppUi::ETrackTitle),
+  iVersion(-1)
 {
   iFiles= new CArrayPtrFlat<TOggFile>(10);
   iOggKeyTitles.SetFiles(iFiles);
@@ -204,6 +229,7 @@ TOggFiles::TOggFiles(TOggPlayback* anOggPlayback) :
   iOggKeyGenres.SetFiles(iFiles);
   iOggKeySubFolders.SetFiles(iFiles);
   iOggKeyFileNames.SetFiles(iFiles);
+  iOggKeyTrackTitle.SetFiles(iFiles);
 }
 
 void TOggFiles::CreateDb()
@@ -295,18 +321,21 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
     
     // check file version:
     TBuf<512> line;
-    TInt iVersion= -1;
+    iVersion= -1;
     if(tf.Read(line)==KErrNone) {
       TLex parse(line);
       parse.Val(iVersion);
     };
     
-    if (iVersion==0) {  
-      TOggFile* o= new TOggFile;
-      while (tf.Read(line)==KErrNone) {
-	if (!o->Read(tf)) break;
-	iFiles->AppendL(o);
-      }
+    if (iVersion!=0 && iVersion!=1) {
+      in.Close();
+      return EFalse;
+    }
+
+    while (tf.Read(line)==KErrNone) {
+      TOggFile* o= new TOggFile();
+      if (!o->Read(tf,iVersion)) break;
+      iFiles->AppendL(o);
     }
 
     in.Close();
@@ -327,7 +356,7 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
     
     // write file version:
     TBuf<16> line;
-    line.Num(0);
+    line.Num(1);
     tf.Write(line);
      
     for (TInt i=0; i<iFiles->Count(); i++) {
@@ -370,7 +399,7 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
 			   const TFileName& aSubFolder)
 {
   arr.Reset();
-  iFiles->Sort(iOggKeyTitles);
+  if (anAlbum.Length()>0) iFiles->Sort(iOggKeyTrackTitle); else iFiles->Sort(iOggKeyTitles);
   for (TInt i=0; i<iFiles->Count(); i++) {
     TOggFile& o= *(*iFiles)[i];
     TBool select=

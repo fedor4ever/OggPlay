@@ -1,3 +1,5 @@
+#include "OggPlay.header.rss"
+
 #define ogg_exit_label "Exit"
 #define ogg_about_label "About OggPlay..."
 
@@ -189,6 +191,13 @@ RESOURCE ARRAY r_hotkey_array {
 
 RESOURCE MENU_PANE r_empty_menu {}
 
+RESOURCE MENU_PANE r_skin_menu 
+{
+  items= {
+      MENU_ITEM { command=EOggSkinOne; txt="default"; }
+  };
+}
+
 RESOURCE MENU_PANE r_file_menu
 {
   items= {
@@ -197,6 +206,8 @@ RESOURCE MENU_PANE r_file_menu
                   flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggShuffle;  txt="Shuffle playlist"; },
       MENU_ITEM { command=EOggViewRebuild;txt="Find new files"; },
+      MENU_ITEM { txt="Skins"; 
+                  cascade=r_skin_menu; },
       MENU_ITEM { command=EOggOptions;	txt="Options...";
                   flags=EEikMenuItemSeparatorAfter;},
       MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },

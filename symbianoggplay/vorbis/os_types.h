@@ -43,11 +43,6 @@
 #endif
 //#endif
 
-// Undefine NULL, to save some warnings
-#ifdef NULL 
-#undef NULL
-#endif
-
 #include <e32def.h>
 typedef TInt16 ogg_int16_t;
 typedef TInt32 ogg_int32_t;

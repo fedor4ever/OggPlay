@@ -77,6 +77,11 @@ public:
   void  Deactivated();
   void  ChangeLayout(TBool aSmall);
 
+  void  ReadSkin(const TFileName& aFileName);
+  void  ReadControls();
+
+  void SetupListBox(COggListBox* aListBox);
+
   static TInt CallBack(TAny* aPtr); // registered with iTimer (CPeriodic)
 
   // from MCoeControlObserver:
@@ -98,6 +103,8 @@ public:
 private:
 
   void  CreateDefaultSkin();
+  void  ReadCanvas(TInt aCanvas, TOggParser& p);
+  void  ResetControls();
 
   CArrayPtrFlat<CCoeControl>* iControls;
   COggPlayAppUi* iApp;
@@ -110,6 +117,8 @@ private:
   TTime      iMaxTime;
   TFileName  iIconFileName;
   TFileName  iBackgroundFileName;
+  CDesCArray* iTextArray;
+  TInt       iSelected; 
 
   TInt               iMode; // 0 = flip-open; 1= flip-closed
   COggCanvas*        iCanvas[2];
@@ -120,6 +129,8 @@ private:
   COggText*          iTitle[2];
   COggText*          iArtist[2];
   COggText*          iAlbum[2];
+  COggText*          iGenre[2];
+  COggText*          iTrackNumber[2];
   COggText*          iClock[2];
   COggText*          iAlarm[2];
   COggText*          iPlayed[2];

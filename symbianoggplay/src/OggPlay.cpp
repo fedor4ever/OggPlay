@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *  Copyright (c) 2003 L. H. Wilden.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -194,6 +194,13 @@ COggPlayAppUi::ConstructL()
   iDbFileName.SetLength(iDbFileName.Length() - 3);
   iDbFileName.Append(_L("db"));
 
+  iSkinFileDir.Copy(Application()->AppFullName());
+  iSkinFileDir.SetLength(iSkinFileDir.Length() - 11);
+
+  iSkins= new CDesCArrayFlat(3);
+  FindSkins();
+  iCurrentSkin= 0;
+
   iRepeat= 1;
   iCurrent= -1;
   iHotkey= 0;
@@ -212,6 +219,7 @@ COggPlayAppUi::ConstructL()
 
   iAppView=new(ELeave) COggPlayAppView;
   iAppView->ConstructL(this, ClientRect());
+  HandleCommandL(EOggSkinOne+iCurrentSkin);
 
   AddToStackL(iAppView); // Receiving Keyboard Events 
   iAppView->InitView();
@@ -260,6 +268,8 @@ COggPlayAppUi::~COggPlayAppUi()
   WriteIniFile();
   if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
   iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
+
+  delete iSkins;
 }
 
 void COggPlayAppUi::ActivateOggViewL()
@@ -510,6 +520,20 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     break;
   }
 
+  case EOggSkinOne:
+  case EOggSkinTwo:
+  case EOggSkinThree:
+  case EOggSkinFour:
+  case EOggSkinFive: {
+    iCurrentSkin= aCommand-EOggSkinOne;
+    TBuf<256> buf(iSkinFileDir);
+    buf.Append((*iSkins)[iCurrentSkin]);
+    iAppView->ReadSkin(buf);
+    iAppView->Update();
+    iAppView->Invalidate();
+    break;
+  }
+
   case EEikCmdExit: {
     Exit();
     break;
@@ -636,19 +660,58 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
     aMenuPane->SetItemDimmed(EOggShuffle, iAppView->GetNSongs()<1 || !isSongList);
   }
 
-  /*
-  if (aMenuId==R_VIEWBY_MENU) {
-    switch (iViewBy) {
-    case ETitle    : aMenuPane->SetItemButtonState(EOggViewByTitle, EEikMenuItemSymbolOn); break;
-    case EAlbum    : aMenuPane->SetItemButtonState(EOggViewByAlbum, EEikMenuItemSymbolOn); break;
-    case EArtist   : aMenuPane->SetItemButtonState(EOggViewByArtist, EEikMenuItemSymbolOn); break;
-    case EGenre    : aMenuPane->SetItemButtonState(EOggViewByGenre, EEikMenuItemSymbolOn); break;
-    case EFileName : aMenuPane->SetItemButtonState(EOggViewByFileName, EEikMenuItemSymbolOn); break;
-    case ESubFolder: aMenuPane->SetItemButtonState(EOggViewBySubFolder, EEikMenuItemSymbolOn); break;
-    default: break;
+  if (aMenuId==R_SKIN_MENU) {
+    for (TInt i=0; i<iSkins->Count(); i++) {
+      CEikMenuPaneItem::SData item;
+      item.iText.Copy((*iSkins)[i]);
+      item.iText.SetLength(item.iText.Length()-4);
+      item.iCommandId= EOggSkinOne+i;
+      item.iCascadeId= 0;
+      item.iFlags= 0;
+      aMenuPane->AddMenuItemL(item);
     }
   }
-  */
+}
+
+void
+COggPlayAppUi::FindSkins()
+{
+  iSkins->Reset();
+
+  RFs session;
+  User::LeaveIfError(session.Connect());
+
+  CDirScan* ds = CDirScan::NewL(session);
+  TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
+  if (err!=KErrNone) {
+    delete ds;
+    return;
+  }
+
+  CDir* c=0;
+  while (1==1) {
+
+    ds->NextL(c);
+    if (c==0) break;
+
+    for (TInt i=0; i<c->Count(); i++) {
+
+      const TEntry e= (*c)[i];
+
+      TBuf<512> fullname;
+      fullname.Append(ds->FullPath());
+      fullname.Append(e.iName);
+
+      TParse p;
+      p.Set(fullname,NULL,NULL);
+
+      if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN")) {
+	iSkins->AppendL(p.NameAndExt());
+	if (iSkins->Count()==5) break;
+      }
+    }
+  }
+
 }
 
 void
@@ -704,6 +767,14 @@ COggPlayAppUi::ReadIniFile()
     parse.Val(iAnalyzerState[1]);
   }
 
+  iCurrentSkin= 0;
+  if (tf.Read(line) == KErrNone) {
+    TLex parse(line);
+    parse.Val(iCurrentSkin);
+    if (iCurrentSkin<0) iCurrentSkin=0;
+    if (iCurrentSkin>=iSkins->Count()) iCurrentSkin= iSkins->Count()-1;
+  }
+
   //iViewBy= ETitle;
   //if (tf.Read(line) == KErrNone) {
   //TLex parse(line);
@@ -745,6 +816,9 @@ COggPlayAppUi::WriteIniFile()
   tf.Write(num);
 
   num.Num(iAnalyzerState[1]);
+  tf.Write(num);
+
+  num.Num(iCurrentSkin);
   tf.Write(num);
 
   //num.Num(iViewBy);
