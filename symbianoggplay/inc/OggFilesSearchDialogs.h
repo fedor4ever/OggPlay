@@ -58,7 +58,7 @@ class COggFilesSearchContainer : public CCoeControl
         TCoeInputCapabilities InputCapabilities() const; 
 
     private:
-        void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader);
+        void ConstructFromResourceL(TResourceReader& aReader);
 
     public:
          MOggFilesSearchBackgroundProcess *iBackgroundProcess;

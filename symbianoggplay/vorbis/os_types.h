@@ -41,8 +41,7 @@
 typedef TInt16 ogg_int16_t;
 typedef TInt32 ogg_int32_t;
 typedef TUint32 ogg_uint32_t;
-   
-#if (defined( __WINS__ )  && defined(__VC32__) )
+#if ( ( defined( __WINS__ )  && defined(__VC32__) ) || defined (__WINSCW__) )
    typedef __int64 ogg_int64_t;
 #define LITTLE_ENDIAN
 #define inline __inline

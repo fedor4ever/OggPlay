@@ -6,11 +6,33 @@ This shortly describes how to compile OggPlay on various platform.
  ***
 
  /////////////////////////////////////////
+  Modules
+ ///////////////////////////////////////// 
+ OggPlay comes in two modules. 
+ An application for OggPlay Application and a dll for the ogg vorbis decoder.
+ Because of the plugin nature of the decoder, the application and the decoder
+ are separate entities, and each must be compiled separately.
+ 
+ 
+ /////////////////////////////////////////
+  Non-MMF and MMF versions
+ ///////////////////////////////////////// 
+ 
+ OggPlay comes in two flavor, the Non-MMF and the MMF version. In the MMF version,
+ the ogg vorbis decoder is an MMF Plugin, that can be used by any application, 
+ like the built-in music player, for instance.
+ The MMF version requires OS support for MMF. This support is available from Symbian 7.0s.
+ 
+ Series60 SDK 2.0 or higher is required to compile the MMF version for Series 60.
+
+ /////////////////////////////////////////
   Compilation Flags
  ///////////////////////////////////////// 
 
- All compilation flags are in OggOs.h. Basically, only 5 flags should be 
- tampered with:
+ Compilation flags should be set before starting to do any compilation.
+ All compilation flags are in OggOs.h.
+ There are several flags in that file, but basically, only 5 flags should be 
+ modified, the others are ok as they are.
  
  #define SERIES60  : When set, compilation is done for S60
  #define UIQ       : When set, compilation is done for UIQ
@@ -21,11 +43,13 @@ This shortly describes how to compile OggPlay on various platform.
  #define SONYERICSSON  : When set, compilation is done for P800/P900
 
  /////////////////////////////////////////
- Compilation
+ Compilation for target device
  ///////////////////////////////////////// 
- To compile the code( this expects a valid Symbian Compilation environment):
  
- For pre-MMF version:
+ To compile the code for target ( this expects a valid Symbian Compilation environment):
+ 
+ For non-MMF version:
+ 
    Edit the file vorbis\group\bld.inf so that oggvorbis.mmp is used.
    cd \vorbis\group
    bldmake bldfiles 
@@ -36,7 +60,8 @@ This shortly describes how to compile OggPlay on various platform.
    abld build armi 
 
  For MMF version: 
-   Edit the file vorbis\group\bld.inf so that OggPluginDecoder.mpp is used.
+ 
+   Edit the file vorbis\group\bld.inf so that OggPluginDecoder.mmp is used.
    cd \group   
    bldmake bldfiles 
    abld build armi 
@@ -49,8 +74,6 @@ This shortly describes how to compile OggPlay on various platform.
  Note that the order is reversed in MMF case: the Application is built first, and the
  MMF plugin built afterward.
 
- The code will only compile for ARMI and WINS. Other platform are currently not 
- supported.
 
  /////////////////////////////////////////
  Moving to target
@@ -66,3 +89,53 @@ This shortly describes how to compile OggPlay on various platform.
   OggPlay.s60.pkg        : for S60 1.X version
   OggPlayMMF.s60.pkg     : for S60 2.X version
   OggPlay.uiq.pkg        : for UIQ (P800/P900) version
+  
+  
+ /////////////////////////////////////////
+ Using Microsoft Visual Studio 
+ ///////////////////////////////////////// 
+ 
+ Generate 2 Microsoft makefiles, in the typical Symbian way:
+ 
+  For non-MMF version:
+ 
+   Edit the file vorbis\group\bld.inf so that oggvorbis.mmp is used.
+   cd \vorbis\group
+   bldmake bldfiles 
+   abld makefile vc6
+
+   cd \vorbis\group
+   bldmake bldfiles 
+   abld makefile vc6
+   
+ For MMF version: 
+ 
+   Edit the file vorbis\group\bld.inf so that OggPluginDecoder.mmp is used.
+   cd \group   
+   bldmake bldfiles 
+   abld makefile vc6
+  
+   cd \vorbis\group
+   bldmake bldfiles 
+   abld makefile vc6
+   
+ 
+ /////////////////////////////////////////
+ Using Metrowerks CodeWarrior 
+ ///////////////////////////////////////// 
+  
+  First, export the required files:
+  
+   cd \group
+   bldmake bldfiles 
+   abld export
+
+
+ Then, from CodeWarrior, create the projects by importing the 2 following mmp files:
+ // For Non-MMF version
+    vorbis\group\OggVorbis.mmp   
+    group\Oggplay.mmp
+    
+ // For MMF version
+    vorbis\group\OggPluginDecoder.mmp   
+    group\Oggplay.mmp

@@ -30,6 +30,12 @@ PRJ_EXPORTS
 ..\Inc\OggOs.h
 ..\Plugin\Inc\OggPlayPlugin.h
 
+// Default skin
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
+
 PRJ_MMPFILES
 // Specify the .mmp files required for building the important component
 // releasables. Note that you should specify any .mmp files for test
