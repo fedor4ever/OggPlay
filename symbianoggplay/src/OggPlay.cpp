@@ -1122,160 +1122,129 @@ COggPlayAppUi::ReadIniFile()
 {
 	RFile in;
   TInt err;
-  TInt iIniversion=0;
-	if( (err=in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
-		EFileRead|EFileStreamText)) != KErrNone) {
+
+   // Open the file
+   if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
+   {
 		TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
 		return;
 	}
 	
 	TFileText tf;
 	tf.Set(in);
-	TBuf<128> line;
 
+   // Read in the fields
+   TInt ini_version = 0;
 
-	iHotkey= 0;
-	if(tf.Read(line) == KErrNone) {
-    TInt rval;
-		TLex parse(line);
-		parse.Val(rval);
-    if(rval==0xdb) { // our magic number ! (see writeini below)
-      // followed by version number
-	    if (tf.Read(line) == KErrNone) {
-		    parse=line;
-		    parse.Val(iIniversion);
-        TRACEF(COggLog::VA(_L("Inifile version %d"),iIniversion));
-    	};
-      // now read the real hotkey
-	    if (tf.Read(line) == KErrNone) {
-		    parse=line;
-		    parse.Val(rval);
-    	};
+   TInt val = (TInt) IniRead32( tf );
+   if ( val == 0xdb ) // Our magic number ! (see writeini below)
+   {
+      // Followed by version number
+      ini_version = (TInt) IniRead32( tf );
+      TRACEF(COggLog::VA(_L("Inifile version %d"), ini_version ));
+   }
+   else
+   {
+      // Not the magic number so this must be an old version
+      // Seek back to beginning of the file and start parsing from there
+      tf.Seek( ESeekStart );
     }
-    iHotkey=rval;
-	};
 	
-	iRepeat= 1;
-	if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-		parse.Val(iRepeat);
-	};
+   iHotkey = (int)   IniRead32( tf, 0, KMaxKeyCodes );
+   iRepeat = (TBool) IniRead32( tf, 1, 1 );
+   iVolume = (int)   IniRead32( tf, KMaxVolume, KMaxVolume );
 	
-	iVolume= KMaxVolume;
-	if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-		parse.Val(iVolume);
-		if (iVolume<0) iVolume= 0;
-		else if (iVolume>KMaxVolume) iVolume= KMaxVolume;
-	};
-	
-	iAlarmTime.Set(_L("20030101:120000.000000"));
-	if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-		TInt64 i64;
-		if (parse.Val(i64)==KErrNone) {
-			TTime t(i64);
+   TInt64 tmp64 = IniRead64( tf );
+   if ( val != 0 )
+   {
+      TTime t(tmp64);
 			iAlarmTime= t;
 		}
+
+   iAnalyzerState = (int)  IniRead32( tf, 0, 3 );
+   val            =        IniRead32( tf );  // For backward compatibility
+   iCurrentSkin   = (TInt) IniRead32( tf, 0, (iSkins->Count() - 1) );
+   
+   if ( ini_version >= 2 )
+   {
+      TInt restore_stack_count = (TInt) IniRead32( tf );      
+      for( TInt i = 0; i < restore_stack_count; i++ )
+      {
+         iRestoreStack.Append( (TInt) IniRead32( tf ) );
 	}
 	
-	iAnalyzerState= 0;
-	if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-		parse.Val(iAnalyzerState);
-	}
+      iRestoreCurrent            = (TInt) IniRead32( tf );
+      iSettings.iScanmode        = (TInt) IniRead32( tf );
+      iSettings.iAutoplay        = (TInt) IniRead32( tf );
+      iSettings.iManeuvringSpeed = (TInt) IniRead32( tf );
+      
+      // For backwards compatibility for number of hotkeys
+      TInt num_of_hotkeys = ( ini_version >= 5 ) ? TOggplaySettings::ENofHotkeys : TOggplaySettings::ENofHotkeysV4;
+      for ( TInt j = TOggplaySettings::KFirstHotkeyIndex; j < num_of_hotkeys; j++ ) 
+      {
+         iSettings.iUserHotkeys[j] = (TInt) IniRead32( tf );
+      }
+      
+      iSettings.iWarningsEnabled = (TInt)  IniRead32( tf );
+      iSettings.iRskIdle         = (TInt)  IniRead32( tf );
+      iSettings.iRskPlay         = (TInt)  IniRead32( tf );
+      iRandom                    = (TBool) IniRead32( tf, 0, 1 );
+
+   } // version 2 onwards
 	
-	if (tf.Read(line) == KErrNone) {
-		// for backward compatibility
-		// this line is not used anymore
-	}
+   in.Close();
 	
-	iCurrentSkin= 0;
-	if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-		parse.Val(iCurrentSkin);
-		if (iCurrentSkin<0) iCurrentSkin=0;
-		if (iCurrentSkin>=iSkins->Count()) iCurrentSkin= iSkins->Count()-1;
+   IFDEF_S60( iAnalyzerState = EDecay; )
 	}
 
-  if(iIniversion>=2) {
+TInt32 
+COggPlayAppUi::IniRead32( TFileText& aFile, TInt32 aDefault, TInt32 aMaxValue )
+{
+   TInt32   val = aDefault;
+   TBuf<128> line;
 
-    TInt iRestoreStackCount=0;
-  if (tf.Read(line) == KErrNone) {
+   if ( aFile.Read(line) == KErrNone )
+   {
 		TLex parse(line);
-		  parse.Val(iRestoreStackCount);      
+      if ( parse.Val(val) == KErrNone )
+      {
+         if ( val > aMaxValue ) val = aDefault;
 	  }
-
-    TInt iTemp;
-    for(TInt i=0;i<iRestoreStackCount;i++) {
-     if (tf.Read(line) == KErrNone) {
-		    TLex parse(line);
-		    parse.Val(iTemp);
-        iRestoreStack.Append(iTemp);
+      else
+      {
+         val = aDefault;
       }
     }
-	  if (tf.Read(line) == KErrNone) {
-		  TLex parse(line);
-		  parse.Val(iRestoreCurrent);
+
+   return ( val );
 	  }
   
-  if (tf.Read(line) == KErrNone) {
-		  TLex parse(line);
-		  parse.Val(iSettings.iScanmode);
-	  };
+TInt64 
+COggPlayAppUi::IniRead64( TFileText& aFile, TInt64 aDefault )
+{
+   TInt64   val = aDefault;
+   TBuf<128> line;
 
-  if (tf.Read(line) == KErrNone) {
+   if ( aFile.Read(line) == KErrNone )
+   {
 		TLex parse(line);
-		parse.Val(iSettings.iAutoplay);
-	};
-	
-  if (tf.Read(line) == KErrNone) {
-		TLex parse(line);
-		parse.Val(iSettings.iManeuvringSpeed);
-	};
-
-  // backwards compatibility for number of hotkeys
-  TInt NofHotkeys=(iIniversion>=5)?TOggplaySettings::ENofHotkeys:TOggplaySettings::ENofHotkeysV4;
-
-  for( TInt j=TOggplaySettings::KFirstHotkeyIndex; j<NofHotkeys; j++ ) 
+      if ( parse.Val(val) != KErrNone )
     {
-    if (tf.Read(line) == KErrNone) {
-		  TLex parse(line);
-      parse.Val(iSettings.iUserHotkeys[j]);
+         val = aDefault;
       }
   	}
 
-  if (tf.Read(line) == KErrNone) {
-      TLex parse(line);
-      parse.Val(iSettings.iWarningsEnabled);
-  };
-  if (tf.Read(line) == KErrNone) {
-      TLex parse(line);
-      parse.Val(iSettings.iRskIdle);
-  };
-  if (tf.Read(line) == KErrNone) {
-      TLex parse(line);
-      parse.Val(iSettings.iRskPlay);
-  };
-  iRandom = EFalse;
-  if (tf.Read(line) == KErrNone) {
-      TLex parse(line);
-      parse.Val(iRandom);
-	};
-  } // version 2 onwards
-
-	in.Close();
-
-  IFDEF_S60( iAnalyzerState = EDecay; )
+   return ( val );
 }
 
 void
 COggPlayAppUi::WriteIniFile()
 {
 	RFile out;
+
 	TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), iIniFileName ));
-	if(out.Replace(iCoeEnv->FsSession(), iIniFileName->Des(),
-		EFileWrite|EFileStreamText) != KErrNone) return;
+
+   if ( out.Replace( iCoeEnv->FsSession(), iIniFileName->Des(), EFileWrite | EFileStreamText) != KErrNone ) return;
   
   TRACEF(_L("Writing Inifile..."));
 
@@ -1290,6 +1259,7 @@ COggPlayAppUi::WriteIniFile()
   
   num.Num(magic);
   tf.Write(num);
+
   num.Num(iniversion);
   tf.Write(num);
 
@@ -1319,19 +1289,22 @@ COggPlayAppUi::WriteIniFile()
   num.Num(iViewHistoryStack.Count());
 	tf.Write(num);
   
-  for(TInt i=0;i<iViewHistoryStack.Count();i++) {
+   for ( TInt i = 0; i < iViewHistoryStack.Count(); i++ )
+   {
     num.Num(iViewHistoryStack[i]);
     TRACEF(COggLog::VA(_L("iViewHistoryStack[%d]= %d"),i,iViewHistoryStack[i]));
 	  tf.Write(num);
+   }
 
-  }
   num.Num(iAppView->GetSelectedIndex());
 	tf.Write(num);
 	
 	num.Num(iSettings.iScanmode);
 	tf.Write(num);
+
 	num.Num(iSettings.iAutoplay);
 	tf.Write(num);
+
  	num.Num(iSettings.iManeuvringSpeed);
 	tf.Write(num);
 
@@ -1343,14 +1316,17 @@ COggPlayAppUi::WriteIniFile()
 
  	num.Num(iSettings.iWarningsEnabled);
 	tf.Write(num);
+
  	num.Num(iSettings.iRskIdle);
 	tf.Write(num);
+
  	num.Num(iSettings.iRskPlay);
 	tf.Write(num);
 
 	num.Num(iRandom);
 	tf.Write(num);
-	//please increase iIniversion when adding stuff
+
+   // Please increase ini_version when adding stuff
 	
 	out.Close();
 }
@@ -1798,15 +1774,15 @@ const TDesC & COggRandomPlay::GetPreviousSong()
 CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
   iState(CAbsPlayback::EClosed),
   iObserver(anObserver),
-  iTitle(),
+  iBitRate(0),
+  iChannels(2),
+  iFileSize(0),
+  iRate(44100),
+  iTime(0),
   iAlbum(),
   iArtist(),
   iGenre(),
-  iTrackNumber(),
-  iTime(0),
-  iRate(44100),
-  iChannels(2),
-  iFileSize(0),
-  iBitRate(0)
+  iTitle(),
+  iTrackNumber()
 {
 }
