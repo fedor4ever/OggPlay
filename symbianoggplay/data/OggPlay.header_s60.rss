@@ -37,3 +37,4 @@ NAME OGGP
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf="Oggplay"; }
 
+#define ogg_txt_version "OggPlay 0.97 (beta)"

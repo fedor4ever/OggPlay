@@ -84,7 +84,15 @@ RESOURCE DIALOG r_dialog_about {
 		txt=ogg_vorbis_c;
 		horiz_align=EEikLabelAlignHCenter;
 	};
-    }	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt=ogg_translation;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    }
   };
 }
 
@@ -170,7 +178,7 @@ RESOURCE MENU_PANE r_empty_menu {}
 RESOURCE MENU_PANE r_skin_menu 
 {
   items= {
-      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
+//      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
   };
 }
 

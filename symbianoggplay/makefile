@@ -46,12 +46,13 @@ LIBS=	$(EPOCTRGREL)/euser.lib \
 	$(EPOCTRGREL)/etel.lib \
 	$(EPOCTRGREL)/charconv.lib \
 	$(EPOCTRGREL)/mediaclientaudio.lib \
-	$(EPOCTRGREL)/mediaclientimage.lib
+	$(EPOCTRGREL)/mediaclientimage.lib \
+	$(EPOCTRGREL)/flogger.lib
 
 NAME=OggPlay
-OBJECTS=src/OggPlay.o src/OggPlayAppView.o src/OggDialogs.o src/OggTremor.o src/OggViews.o src/OggControls.o src/OggFiles.o vorbis/window.o vorbis/synthesis.o vorbis/bitwise.o vorbis/block.o vorbis/sharedbook.o vorbis/registry.o vorbis/floor0.o vorbis/floor1.o vorbis/codebook.o vorbis/res012.o vorbis/mapping0.o vorbis/mdct.o vorbis/ivorbisfile.o vorbis/framing.o vorbis/info.o
+OBJECTS=src/OggPlay.o src/OggPlayAppView.o src/OggDialogs.o src/OggTremor.o src/OggViews.o src/OggControls.o src/OggFiles.o vorbis/window.o vorbis/synthesis.o vorbis/bitwise.o vorbis/block.o vorbis/sharedbook.o vorbis/registry.o vorbis/floor0.o vorbis/floor1.o vorbis/codebook.o vorbis/res012.o vorbis/mapping0.o vorbis/mdct.o vorbis/ivorbisfile.o vorbis/framing.o vorbis/info.o src/OggLog.o
 TARGET=$(NAME).app
-PKGVERS=0,95
+PKGVERS=0,97
 
 PKGFILES=$(NAME).app $(NAME).aif $(NAME).rsc $(NAME).mbm
 
@@ -64,10 +65,7 @@ CPPFLAGS += -D_P800 -D_EPOC32_70 -D_ARM_ASSEM_ -D_LOW_ACCURACY_
 
 all: $(PKGFILES) $(NAME).sis
 
-#rsc:$(NAME)_ge.rsc
-#$(NAME).en.rsc $(NAME).ge.rsc
-
-$(NAME).sis: $(NAME).app data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc $(NAME).pkg bitmaps/$(NAME).mbm
+$(NAME).sis: $(NAME).app data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc data/$(NAME).tu.rsc data/$(NAME).du.rsc data/$(NAME).sp.rsc data/$(NAME).sw.rsc $(NAME).pkg bitmaps/$(NAME).mbm
 
 $(TARGET):$(OBJECTS)
 
@@ -76,7 +74,7 @@ $(TARGET):$(OBJECTS)
 #	echo "mbmfile=rednote.mbm" > $(NAME).aifspec
 #	echo "ELangEnglish=$(NAME)" >> $(NAME).aifspec
 
-src/$(NAME).o: data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc $(NAME).h
+src/$(NAME).o: data/$(NAME).rsc data/$(NAME).ge.rsc data/$(NAME).fr.rsc data/$(NAME).it.rsc data/$(NAME).tu.rsc data/$(NAME).du.rsc data/$(NAME).sp.rsc data/$(NAME).sw.rsc $(NAME).h
 
 clean:
 	rm -f $(GENERATED) $(NAME).aifspec vorbis/*.o

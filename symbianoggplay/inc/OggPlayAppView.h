@@ -108,7 +108,6 @@ public:
 
 private:
 
-  void  CreateDefaultSkin();
   void  ReadCanvas(TInt aCanvas, TOggParser& p);
   void  ResetControls();
 
@@ -142,12 +141,16 @@ private:
   COggText*          iAlbum[2];
   COggText*          iGenre[2];
   COggText*          iTrackNumber[2];
+  COggText*          iFileName[2];
   COggText*          iClock[2];
   COggText*          iAlarm[2];
   COggText*          iPlayed[2];
 
+  COggDigits*        iPlayedDigits[2];
+  COggDigits*        iTotalDigits[2];
+
   COggIcon*          iAlarmIcon[2];
-  COggIcon*          iRepeat[2];
+  COggIcon*          iRepeatIcon[2];
   COggIcon*          iEye[2];
   COggIcon*          iPlaying[2];
   COggIcon*          iPaused[2];
@@ -157,14 +160,20 @@ private:
 
   COggButton*        iPlayButton[2];
   COggButton*        iPauseButton[2];
+  COggButton*        iPlayButton2[2];
+  COggButton*        iPauseButton2[2];
   COggButton*        iStopButton[2];
+  COggButton*        iNextSongButton[2];
+  COggButton*        iPrevSongButton[2];
+  COggButton*        iRepeatButton[2];
 
   COggAnalyzer*      iAnalyzer[2];
 
   COggListBox*       iListBox[2];
   COggScrollBar*     iScrollBar[2];
 
-  CFont*             iBoldFont;
+  COggAnimation*     iAnimation[2];
+  COggAnimation*     iLogo[2];
 
 };
 

@@ -68,10 +68,12 @@
 #
 # 39 alarm
 # 40 alarm mask
+#
+# 41 OggPlay Logo
 
 wine ~/p800/gcc/Tools/BMCONV.EXE OggPlay.mbm /c12title.bmp /1titlem.bmp /c12cdicon.bmp /1cdiconm.bmp /c12micicon.bmp /1miciconm.bmp /c12genre.bmp /1genrem.bmp /c12folder.bmp /1folderm.bmp /c12file.bmp /1filem.bmp /c12back.bmp /1backm.bmp /c12playing.bmp /1playingm.bmp /c12paused.bmp /1pausedm.bmp /c12flipclosed.bmp /c12flipopen_steel.bmp /c12volume.bmp /1volumem.bmp /1eyeclosed.bmp /c12repeat.bmp /1repeatm.bmp /c12slider.bmp /1sliderm.bmp /c12knob.bmp /1knobm.bmp /c12bar.bmp /1barm.bmp /c12stop.bmp /1stopm.bmp /1stop_dimmed.bmp /c12play.bmp /1playm.bmp /1play_dimmed.bmp /c12pause.bmp /1pausem.bmp /c12alarm.bmp /1alarmm.bmp
 
-wine ~/p800/gcc/Tools/BMCONV.EXE Symbian.mbm /c12title.bmp /1titlem.bmp /c12cdicon.bmp /1cdiconm.bmp /c12micicon.bmp /1miciconm.bmp /c12genre.bmp /1genrem.bmp /c12folder.bmp /1folderm.bmp /c12file.bmp /1filem.bmp /c12back.bmp /1backm.bmp /c12playing.bmp /1playingm.bmp /c12paused.bmp /1pausedm.bmp /c12symbian/flipclosed.bmp /c12symbian/flipopen.bmp /c12volume.bmp /1volumem.bmp /1eyeclosed.bmp /c12repeat.bmp /1repeatm.bmp /c12symbian/slider.bmp /1symbian/sliderm.bmp /c12knob.bmp /1knobm.bmp /c12bar.bmp /1barm.bmp /c12stop.bmp /1stopm.bmp /1stop_dimmed.bmp /c12play.bmp /1playm.bmp /1play_dimmed.bmp /c12pause.bmp /1pausem.bmp /c12alarm.bmp /1alarmm.bmp
+wine ~/p800/gcc/Tools/BMCONV.EXE Symbian.mbm /c12title.bmp /1titlem.bmp /c12cdicon.bmp /1cdiconm.bmp /c12micicon.bmp /1miciconm.bmp /c12genre.bmp /1genrem.bmp /c12folder.bmp /1folderm.bmp /c12file.bmp /1filem.bmp /c12back.bmp /1backm.bmp /c12playing.bmp /1playingm.bmp /c12paused.bmp /1pausedm.bmp /c12symbian/flipclosed.bmp /c12symbian/flipopen.bmp /c12volume.bmp /1volumem.bmp /1eyeclosed.bmp /c12repeat.bmp /1repeatm.bmp /c12symbian/slider.bmp /1symbian/sliderm.bmp /c12knob.bmp /1knobm.bmp /c12bar.bmp /1barm.bmp /c12stop.bmp /1stopm.bmp /1stop_dimmed.bmp /c12play.bmp /1playm.bmp /1play_dimmed.bmp /c12pause.bmp /1pausem.bmp /c12alarm.bmp /1alarmm.bmp /c12symbian/OggPlayLogo.bmp
 
 # mbm file used for creating the aif file:
 wine ~/p800/gcc/Tools/BMCONV.EXE OggPlayAif.mbm /c12cdicon.bmp /1cdiconm.bmp

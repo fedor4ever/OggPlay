@@ -49,15 +49,16 @@ TOggParser::TOggParser(const TFileName& aFileName)
 {
   iLine= 1;
   iDebug= ETrue;
+
   if ((iFile=wfopen((wchar_t*)aFileName.Ptr(),L"rb"))==NULL) {
     iState= EFileNotFound;
     _LIT(KS,"File not found");
-    OGGLOG.WriteFormat(KS);
+    //OGGLOG.WriteFormat(KS);
  
     return;
   }
   _LIT(KSS,"Reading file %s");
-  OGGLOG.WriteFormat(KSS,aFileName.Ptr());
+  //OGGLOG.WriteFormat(KSS,aFileName.Ptr());
 
   iState= ESuccess;
 }
@@ -152,6 +153,36 @@ TOggParser::ReadIcon(const TFileName& aBitmapFile)
   return result;
 }
 
+TBool
+TOggParser::ReadColor(TRgb& aColor)
+{
+  TInt red(0), green(0), blue(0);
+  TBool success= ReadToken(red) && ReadToken(green) && ReadToken(blue);
+  if (success) {
+    aColor.SetRed(red);
+    aColor.SetGreen(green);
+    aColor.SetBlue(blue);
+  }
+  return success;
+}
+
+CFont*
+TOggParser::ReadFont()
+{
+  if (!ReadToken()) return 0;
+  if (iToken.Length()>32) return 0;
+  TBuf<32> name(iToken);
+  TInt size(12);
+  if (!ReadToken(size)) return 0;
+  TInt style(0);
+  if (!ReadToken(style)) return 0;
+  CFont* result(0);
+  TFontSpec fs(name,size);
+  if (style==1) fs.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
+  CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(result,fs);
+  return result;
+}
+
 void
 TOggParser::ReportError()
 {
@@ -170,6 +201,7 @@ TOggParser::ReportError()
   case EEndExpected: buf.Append(_L("} expected.")); break;
   case EBitmapNotFound: buf.Append(_L("Bitmap not found.")); break;
   case EIntegerExpected: buf.Append(_L("Integer number expected.")); break;
+  case EOutOfRange: buf.Append(_L("Number is out of the valid range.")); break;
   default: buf.Append(_L("Unknown error.")); break;
   }
   buf.Append(_L("Last token: <"));
@@ -177,7 +209,7 @@ TOggParser::ReportError()
   buf.Append(_L(">"));
   //CCoeEnv::Static()->InfoWinL(_L("Error reading skin file"),buf);
   User::InfoPrint(buf);
-  OGGLOG.Write(buf);
+  //OGGLOG.Write(buf);
 
 }
 
@@ -191,7 +223,7 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
   buf.Append(txt);
   buf.Append(_L(" Token:"));
   buf.Append(iToken); 
-  OGGLOG.WriteFormat(buf);
+  //OGGLOG.WriteFormat(buf);
 
 //  User::InfoPrint(buf);
 //  User::After(TTimeIntervalMicroSeconds32(1000000));
@@ -231,9 +263,9 @@ COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
 }
 
 void
-COggControl::Redraw()
+COggControl::Redraw(TBool doRedraw)
 {
-  iRedraw= ETrue;
+  iRedraw= doRedraw;
 }
 
 void
@@ -263,7 +295,7 @@ COggControl::SetDimmed(TBool aDimmed)
 void
 COggControl::SetFocus(TBool aFocus)
 {
-  __ASSERT_DEBUG(iAcceptsFocus,OGGLOG.Write(_L("Assert: OggControl::SetFocus - asked to set focus, but should never accept it")));
+  //__ASSERT_DEBUG(iAcceptsFocus,OGGLOG.Write(_L("Assert: OggControl::SetFocus - asked to set focus, but should never accept it")));
   if (aFocus!=iFocus) {
     iFocus= aFocus;
     iRedraw= ETrue;
@@ -325,7 +357,7 @@ COggControl::SetFocusIcon(CGulIcon* anIcon)
 {
   _LIT(KS,"COggButton::SetFocusIcon");
   RDebug::Print(KS);
-  OGGLOG.Write(KS);
+  //OGGLOG.Write(KS);
   iAcceptsFocus=ETrue;
   if (iFocusIcon) delete iFocusIcon;
   iFocusIcon= anIcon;
@@ -335,10 +367,18 @@ COggControl::SetFocusIcon(CGulIcon* anIcon)
 void 
 COggControl::DrawFocus(CBitmapContext& aBitmapContext) {
   if(iFocus) {
-    __ASSERT_DEBUG(iAcceptsFocus,OGGPANIC(_L("Assert - Control has Focus but should never accept it !?"),3815));
-    __ASSERT_DEBUG(iVisible,OGGPANIC(_L("Assert - Control is not visible, but has focus"),3816));
+    //__ASSERT_DEBUG(iAcceptsFocus,OGGPANIC(_L("Assert - Control has Focus but should never accept it !?"),3815));
+    //__ASSERT_DEBUG(iVisible,OGGPANIC(_L("Assert - Control is not visible, but has focus"),3816));
     DrawCenteredIcon(aBitmapContext,iFocusIcon);
   }
+}
+
+void
+COggControl::DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon)
+{
+  TSize s(anIcon->Bitmap()->SizeInPixels());
+  TPoint p(ix+iw/2-s.iWidth/2,iy+ih/2-s.iHeight/2);
+  aBitmapContext.BitBltMasked(p,anIcon->Bitmap(), TRect(TPoint(0,0),s), anIcon->Mask(), ETrue);
 }
 
 TBool
@@ -347,8 +387,8 @@ COggControl::Read(TOggParser& p)
   p.ReadToken();
   if (p.iToken!=KBeginToken) {
     p.iState= TOggParser::EBeginExpected;
-  return EFalse;
-}
+    return EFalse;
+  }
   while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { ReadArguments(p); }
   if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) p.iState= TOggParser::EEndExpected;
   return p.iState==TOggParser::ESuccess;
@@ -371,11 +411,11 @@ COggControl::ReadArguments(TOggParser& p)
     p.Debug(_L("Setting focused icon."));
     CGulIcon* aIcon=p.ReadIcon(iBitmapFile);
     TSize aSize=aIcon->Bitmap()->SizeInPixels();
-    if(aSize.iHeight>ih) OGGLOG.WriteFormat(_L("Info: Bitmap height (%d) > control height (%d)"),aSize.iHeight,ih);
-    if(aSize.iWidth>iw) OGGLOG.WriteFormat(_L("Info: Bitmap width (%d)> control width (%d)"),aSize.iWidth,iw);
+    //if(aSize.iHeight>ih) OGGLOG.WriteFormat(_L("Info: Bitmap height (%d) > control height (%d)"),aSize.iHeight,ih);
+    //if(aSize.iWidth>iw) OGGLOG.WriteFormat(_L("Info: Bitmap width (%d)> control width (%d)"),aSize.iWidth,iw);
 
     SetFocusIcon(aIcon);
-    __ASSERT_ALWAYS(iObserver,OGGPANIC(_L("No observer set while trying to add control to focus list"),14));
+    //__ASSERT_ALWAYS(iObserver,OGGPANIC(_L("No observer set while trying to add control to focus list"),14));
     iObserver->AddControlToFocusList(this);
   }
   return ETrue;
@@ -392,6 +432,7 @@ COggText::COggText() :
   COggControl(),
   iText(0),
   iFont(0),
+  iFontColor(0,0,0),
   iTextWidth(0),
   iNeedsScrolling(EFalse),
   iHasScrolled(EFalse),
@@ -409,6 +450,13 @@ void
 COggText::SetFont(CFont* aFont)
 {
   iFont= aFont;
+  iRedraw= ETrue;
+}
+
+void
+COggText::SetFontColor(TRgb aColor)
+{
+  iFontColor= aColor;
   iRedraw= ETrue;
 }
 
@@ -458,7 +506,7 @@ void COggText::Draw(CBitmapContext& aBitmapContext)
   if (!iText) return;
 
   aBitmapContext.UseFont(iFont);
-  aBitmapContext.SetPenColor(KRgbBlack);
+  aBitmapContext.SetPenColor(iFontColor);
   aBitmapContext.SetPenSize(TSize(2,2));
 
   TInt offset= (iCycle - iScrollDelay)*iScrollSpeed;
@@ -476,6 +524,24 @@ void COggText::PointerEvent(const TPointerEvent& p)
 {
   COggControl::PointerEvent(p);
   if (p.iType==TPointerEvent::EButton1Down) ScrollNow();
+}
+
+TBool COggText::ReadArguments(TOggParser& p)
+{
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("Font")) {
+    p.Debug(_L("Setting font."));
+    CFont* aFont= p.ReadFont();
+    if (aFont) SetFont(aFont);
+    success= aFont!=0;
+  }
+  if (success && p.iToken==_L("FontColor")) {
+    p.Debug(_L("Setting font color."));
+    TRgb col(0,0,0);
+    success= p.ReadColor(col);
+    SetFontColor(col);
+  }
+  return success;
 }
 
 
@@ -578,6 +644,292 @@ COggIcon::ReadArguments(TOggParser& p)
   return success;
 }
 
+
+/***********************************************************
+ *
+ * COggAnimation
+ *
+ ***********************************************************/
+
+COggAnimation::COggAnimation() :
+  COggControl(),
+  iBitmaps(0),
+  iPause(100),
+  iFrequency(2),
+  iFirstBitmap(0),
+  iNumBitmaps(0),
+  iStyle(0)
+{
+}
+
+COggAnimation::~COggAnimation()
+{
+  ClearBitmaps();
+}
+
+void
+COggAnimation::ClearBitmaps() 
+{
+  if (iBitmaps) delete [] iBitmaps;
+  iNumBitmaps= 0;
+  iBitmaps= 0;
+}
+
+void
+COggAnimation::SetBitmaps(TInt aFirstBitmap, TInt aNumBitmaps)
+{
+  ClearBitmaps();
+  iFirstBitmap= aFirstBitmap;
+  iNumBitmaps= aNumBitmaps;
+  iBitmaps= new CFbsBitmap[iNumBitmaps];
+  for (TInt i=0; i<iNumBitmaps; i++)
+    iBitmaps[i].Load(iBitmapFile,aFirstBitmap+i);
+  iRedraw= ETrue;
+}
+
+void
+COggAnimation::Start()
+{
+  iCycle= 0;
+  iRedraw= ETrue;
+}
+
+void
+COggAnimation::Stop()
+{
+  if (iCycle!=-1) {
+    iCycle= -1;
+    iRedraw= ETrue;
+  }
+}
+
+void
+COggAnimation::SetPause(TInt aPause)
+{
+  if (iPause!=aPause) {
+    iPause= aPause;
+    iCycle= 0;
+    iRedraw= ETrue;
+  }
+}
+
+void
+COggAnimation::SetFrequency(TInt aFrequency)
+{
+  if (aFrequency!=iFrequency) {
+    iFrequency= aFrequency;
+    iCycle= 0;
+    iRedraw= ETrue;
+  }
+}
+
+void
+COggAnimation::SetStyle(TInt aStyle)
+{
+  if (iStyle!=aStyle) {
+    iStyle= aStyle;
+    iRedraw= ETrue;
+    iCycle= 0;
+  }
+}
+
+void COggAnimation::Cycle()
+{
+  if (iCycle<0) return;
+  if (!iVisible) return;
+
+  iCycle++;
+
+  if (iCycle<iPause) return;
+
+  TInt style= 1;
+  if (iStyle==1) style=2;
+
+  if (iCycle-iPause>=iNumBitmaps*iFrequency*style) iCycle= 0;
+  if (iCycle%iFrequency==0) iRedraw= ETrue;
+}
+
+void COggAnimation::Draw(CBitmapContext& aBitmapContext)
+{
+  if (!iBitmaps) return;
+  if (iFrequency<1) return;
+
+  TInt idx= 0;
+  if (iCycle>=0 && iCycle-iPause>=0) {
+    idx= ((iCycle-iPause)/iFrequency)%iNumBitmaps;
+    if (iStyle==1 && (iCycle-iPause)/iFrequency>=iNumBitmaps) idx= iNumBitmaps- idx -1;
+  }
+
+  CFbsBitmap& b= iBitmaps[idx];
+
+  aBitmapContext.BitBlt(TPoint(ix,iy),&b,TRect(TPoint(0,0),b.SizeInPixels()));
+}
+
+TBool
+COggAnimation::ReadArguments(TOggParser& p)
+{
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("Frequency")) {
+    p.Debug(_L("Setting frequency."));
+    TInt frequency;
+    success= p.ReadToken(frequency);
+    if (success) SetFrequency(frequency);
+  }
+  if (success && p.iToken==_L("Pause")) {
+    p.Debug(_L("Setting pause."));
+    TInt pause(100);
+    success= p.ReadToken(pause);
+    if (success) SetPause(pause);
+  }
+  if (success && p.iToken==_L("Bitmaps")) {
+    p.Debug(_L("Settings bitmaps."));
+    TInt first, num;
+    success= p.ReadToken(first) && p.ReadToken(num);
+    if (success) SetBitmaps(first,num);
+  }
+  if (success && p.iToken==_L("Style")) {
+    p.Debug(_L("Setting style."));
+    TInt s;
+    success= p.ReadToken(s);
+    if (success) SetStyle(s);
+  }
+  return success;
+}
+
+
+/***********************************************************
+ *
+ * COggDigits
+ *
+ ***********************************************************/
+
+COggDigits::COggDigits() :
+  COggControl(),
+  iText(0),
+  iBitmaps(0),
+  iMasks(0)
+{
+}
+
+COggDigits::~COggDigits()
+{
+  ClearBitmaps();
+  ClearMasks();
+}
+
+void
+COggDigits::ClearBitmaps() 
+{
+  if (iBitmaps) delete [] iBitmaps;
+  iBitmaps= 0;
+}
+
+void 
+COggDigits::ClearMasks()
+{
+  if (iMasks) delete [] iMasks;
+  iMasks= 0;
+}
+
+void
+COggDigits::SetBitmaps(TInt aFirstBitmap)
+{
+  ClearBitmaps();
+  iBitmaps= new CFbsBitmap[ENumDigits];
+  for (TInt i=0; i<ENumDigits; i++)
+    iBitmaps[i].Load(iBitmapFile,aFirstBitmap+i);
+  iRedraw= ETrue;
+}
+
+void
+COggDigits::SetMasks(TInt aFirstMask)
+{
+  ClearMasks();
+  iMasks= new CFbsBitmap[ENumDigits];
+  for (TInt i=0; i<ENumDigits; i++)
+    iMasks[i].Load(iBitmapFile,aFirstMask+i);
+  iRedraw= ETrue;
+}
+
+void
+COggDigits::SetText(const TDesC& aText)
+{
+  if (iText) delete iText;
+
+  iText = HBufC::NewLC(aText.Length());
+  CleanupStack::Pop();
+  iText->Des().Copy(aText);
+
+  iRedraw= ETrue;
+}
+
+void COggDigits::Draw(CBitmapContext& aBitmapContext)
+{
+  if (!iBitmaps) return;
+  if (!iText) return;
+
+  TInt x=0;
+  TBuf<1> zero(_L("0"));
+
+  for (TInt i=0; i<iText->Length(); i++) {
+
+    TBuf<1> c;
+    c.Append((*iText)[i]);
+
+    CFbsBitmap* b= 0;
+    CFbsBitmap* m= 0;
+    TInt idx=-1;
+
+    if (c>=_L("0") && c<=_L("9")) {
+      idx= c[0]-zero[0];
+    } else if (c==_L(":")) {
+      idx= EDigitColon;
+    } else if (c==_L("-")) {
+      idx= EDigitDash;
+    } else if (c==_L("/")) {
+      idx= EDigitSlash;
+    } else if (c==_L(".")) {
+      idx= EDigitDot;
+    }
+    if (idx>=0) b= &iBitmaps[idx];
+    if (iMasks) m= &iMasks[idx]; else m= &iBitmaps[idx];
+
+    if (!b || !m) continue;
+
+    aBitmapContext.BitBltMasked(TPoint(ix+x,iy),b,TRect(TPoint(0,0),b->SizeInPixels()),m,ETrue);
+    x+= b->SizeInPixels().iWidth;
+
+  }
+}
+
+TBool
+COggDigits::ReadArguments(TOggParser& p)
+{
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("Bitmaps")) {
+    p.Debug(_L("Settings bitmaps."));
+    TInt first,num;
+    success= p.ReadToken(first) && p.ReadToken(num);
+    if (success && num!=ENumDigits) {
+      success= EFalse;
+      p.iState= TOggParser::EOutOfRange;
+    }
+    if (success) SetBitmaps(first);
+  }
+  if (success && p.iToken==_L("Masks")) {
+    p.Debug(_L("Settings masks."));
+    TInt first,num;
+    success= p.ReadToken(first) && p.ReadToken(num);
+    if (success && num!=ENumDigits) {
+      success= EFalse;
+      p.iState= TOggParser::EOutOfRange;
+    }
+    if (success) SetBitmaps(first);
+  }
+  return success;
+}
+
+
 /***********************************************************
  *
  * COggButton
@@ -590,7 +942,8 @@ COggButton::COggButton() :
   iNormalIcon(0),
   iPressedIcon(0),
   iDimmedIcon(0),
-  iState(0)
+  iState(0),
+  iStyle(0)
 {
 }
 
@@ -643,11 +996,18 @@ COggButton::SetDimmedIcon(CGulIcon* anIcon)
 
 
 void
-COggControl::DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon)
+COggButton::SetStyle(TInt aStyle)
 {
-  TSize s(anIcon->Bitmap()->SizeInPixels());
-  TPoint p(ix+iw/2-s.iWidth/2,iy+ih/2-s.iHeight/2);
-  aBitmapContext.BitBltMasked(p,anIcon->Bitmap(), TRect(TPoint(0,0),s), anIcon->Mask(), ETrue);
+  iStyle= aStyle;
+}
+
+void
+COggButton::SetState(TInt aState)
+{
+  if (iState!=aState) {
+    iState= aState;
+    iRedraw= ETrue;
+  }
 }
 
 void 
@@ -675,12 +1035,16 @@ void COggButton::PointerEvent(const TPointerEvent& p)
   if (iDimmed || !iVisible) return;
 
   if (p.iType==TPointerEvent::EButton1Down) {
-    iState= 1;
+    if (iStyle==0) iState= 1; 
+    else {
+      if (iState==0) iState= 1; else iState= 0;
+    }
     iRedraw= ETrue;
+    if (iObserver) iObserver->OggControlEvent(this,0,0);
   }
 
   if (p.iType==TPointerEvent::EButton1Up) {
-    iState= 0;
+    if (iStyle==0) iState= 0;
     iRedraw= ETrue;
   }
 
@@ -691,20 +1055,32 @@ void COggButton::PointerEvent(const TPointerEvent& p)
 TBool
 COggButton::ReadArguments(TOggParser& p)
 {
+  TBool success= ETrue;
   if (p.iToken==_L("NormalIcon")) {
     p.Debug(_L("Setting normal icon."));
-    SetNormalIcon(p.ReadIcon(iBitmapFile));
+    CGulIcon* i= p.ReadIcon(iBitmapFile);
+    success= i!=0;
+    if (success) SetNormalIcon(i);
   }
   else if (p.iToken==_L("PressedIcon")) {
     p.Debug(_L("Setting pressed icon."));
-    SetPressedIcon(p.ReadIcon(iBitmapFile));
+    CGulIcon* i= p.ReadIcon(iBitmapFile);
+    success= i!=0;
+    if (success) SetPressedIcon(i);
   }
   else if (p.iToken==_L("DimmedIcon")) {
     p.Debug(_L("Setting dimmed icon."));
-    SetDimmedIcon(p.ReadIcon(iBitmapFile));
+    CGulIcon* i= p.ReadIcon(iBitmapFile);
+    success= i!=0;
+    if (success) SetDimmedIcon(i);
   }
-  
-  return COggControl::ReadArguments(p);
+  else if (p.iToken==_L("Style")) {
+    p.Debug(_L("Setting style."));
+    TInt s;
+    success= p.ReadToken(s);
+    if (success) SetStyle(s);
+  }
+  return success && COggControl::ReadArguments(p);
 }
 
 
@@ -845,16 +1221,20 @@ void COggSlider::PointerEvent(const TPointerEvent& p)
 TBool
 COggSlider::ReadArguments(TOggParser& p)
 {
+  TBool success= ETrue;
   if (p.iToken==_L("KnobIcon")) {
     p.Debug(_L("Setting knob icon."));
-    SetKnobIcon(p.ReadIcon(iBitmapFile));
+    CGulIcon* i= p.ReadIcon(iBitmapFile);
+    success= i!=0;
+    if (success) SetKnobIcon(i);
   }
   else if (p.iToken==_L("Style")) {
     p.Debug(_L("Setting style."));
     TInt aStyle(0);
-    if (p.ReadToken(aStyle)) SetStyle(aStyle);
+    success= p.ReadToken(aStyle);
+    if (success) SetStyle(aStyle);
   }
-  return COggControl::ReadArguments(p);
+  return success && COggControl::ReadArguments(p);
 }
 
 
@@ -1031,24 +1411,33 @@ COggScrollBar::ReadArguments(TOggParser& p)
   TBool success= COggControl::ReadArguments(p);
   if (success && p.iToken==_L("ScrollerSize")) {
     p.Debug(_L("Setting scroller size."));
-    success= p.ReadToken(iScrollerSize);
+    TInt i;
+    success= p.ReadToken(i);
+    if (success) SetScrollerSize(i);
   }
   if (success && p.iToken==_L("Style")) {
     p.Debug(_L("Setting style."));
-    success= p.ReadToken(iStyle);
+    TInt i;
+    success= p.ReadToken(i);
+    if (success) SetStyle(i);
   }
   if (success && p.iToken==_L("Page")) {
     p.Debug(_L("Setting page."));
-    success= p.ReadToken(iPage);
+    TInt i;
+    success= p.ReadToken(i);
+    if (success) SetPage(i);
   }
   if (success && p.iToken==_L("KnobIcon")) {
     p.Debug(_L("Setting knob icon."));
-    SetKnobIcon(p.ReadIcon(iBitmapFile));
-    success= iKnobIcon!=0;
+    CGulIcon* c= p.ReadIcon(iBitmapFile);
+    success= c!=0;
+    if (success) SetKnobIcon(c);
   }
   if (success && p.iToken==_L("Step")) {
     p.Debug(_L("Setting step."));
-    success= p.ReadToken(iStep);
+    TInt i;
+    success= p.ReadToken(i);
+    if (success) SetStep(i);
   }
   return success;
 }
@@ -1267,6 +1656,8 @@ COggAnalyzer::ReadArguments(TOggParser& p)
 COggListBox::COggListBox() :
   COggControl(),
   iFont(0),
+  iFontColor(0,0,0),
+  iFontColorSelected(255,0,0),
   iTop(0),
   iSelected(-1),
   iScroll(0),
@@ -1274,7 +1665,6 @@ COggListBox::COggListBox() :
   iText(0),
   iScrollBar(0)
 {
-  //iText= new CDesCArrayFlat(10);
   iData= CColumnListBoxData::NewL();
   iLineHeight= 16;
   iLinesVisible= 1;
@@ -1282,13 +1672,6 @@ COggListBox::COggListBox() :
 
 COggListBox::~COggListBox()
 {
-  /*
-  if (iText) {
-    ClearText();
-    delete iText; 
-    iText= 0;
-  }
-  */
   if (iData) {
     delete iData;
     iData=0;
@@ -1315,6 +1698,20 @@ COggListBox::SetFont(CFont* aFont)
   iRedraw= ETrue;
 }
 
+void
+COggListBox::SetFontColor(TRgb aColor)
+{
+  iFontColor= aColor;
+  iRedraw= ETrue;
+}
+
+void
+COggListBox::SetFontColorSelected(TRgb aColor)
+{
+  iFontColorSelected= aColor;
+  iRedraw= ETrue;
+}
+
 CColumnListBoxData*
 COggListBox::GetColumnListBoxData()
 {
@@ -1322,10 +1719,10 @@ COggListBox::GetColumnListBoxData()
 }
 
 void
-COggListBox::Redraw()
+COggListBox::Redraw(TBool doRedraw)
 {
   UpdateScrollBar();
-  COggControl::Redraw();
+  COggControl::Redraw(doRedraw);
 }
 
 void
@@ -1468,9 +1865,9 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
     x= ix;
 
     if (i==iSelected)
-      aBitmapContext.SetPenColor(KRgbRed);
+      aBitmapContext.SetPenColor(iFontColorSelected);
     else
-      aBitmapContext.SetPenColor(KRgbBlack);
+      aBitmapContext.SetPenColor(iFontColor);
 
     for (TInt j=0; j<iData->LastColumn(); j++) {
 
@@ -1541,6 +1938,30 @@ COggListBox::ControlEvent(TInt anEventType, TInt aValue)
   if (anEventType==0) SetTopIndex(aValue);
 }
 
+TBool COggListBox::ReadArguments(TOggParser& p)
+{
+  TBool success= COggControl::ReadArguments(p);
+  if (success && p.iToken==_L("Font")) {
+    p.Debug(_L("Setting font."));
+    CFont* aFont= p.ReadFont();
+    success= aFont!=0;
+    if (success) SetFont(aFont);
+  }
+  if (success && p.iToken==_L("FontColor")) {
+    p.Debug(_L("Setting font color."));
+    TRgb col(0,0,0);
+    success= p.ReadColor(col);
+    if (success) SetFontColor(col);
+  }
+  if (success && p.iToken==_L("FontColorSelected")) {
+    p.Debug(_L("Setting selected font color."));
+    TRgb col(255,0,0);
+    success= p.ReadColor(col);
+    if (success) SetFontColorSelected(col);
+  }
+  return success;
+}
+
 
 /***********************************************************
  *
@@ -1551,7 +1972,7 @@ COggListBox::ControlEvent(TInt anEventType, TInt aValue)
 COggCanvas::COggCanvas() :
   if2bm(0),
   iBackground(0),
-  iControls(1),
+  iControls(10),
   iGrabbed(0),
   iFocused(0)
 {

@@ -21,7 +21,7 @@
 #endif
 
 #include "OggOs.h"
-#include "Ogglog.h"
+#include "OggLog.h"
 #include "OggTremor.h"
 
 #include <barsread.h>
@@ -177,12 +177,12 @@ void COggPlayback::ConstructL() {
     iEnv->ReadResource(buf2, R_OGG_ERROR_20);
     buf1.AppendNum(err);
     iEnv->InfoWinL(buf2,buf1);
-    OGGLOG.Write(buf2);
-    OGGLOG.Write(buf1);
+    //OGGLOG.Write(buf2);
+    //OGGLOG.Write(buf1);
   }
 
   iMaxVolume=iStream->MaxVolume();
-  OGGLOG.WriteFormat(_L("Max volume is %d"),iMaxVolume);
+  //OGGLOG.WriteFormat(_L("Max volume is %d"),iMaxVolume);
   TDes8* buffer;
 
   for (TInt i=0; i<KBuffers; i++) {
@@ -212,7 +212,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   iTime= 0;
 
   if (aFileName.Length() == 0) {
-	  OGGLOG.Write(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
+    //OGGLOG.Write(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_8);
     return -100;
   }
@@ -223,7 +223,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 
   if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
     iFileOpen= 0;
-	  OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
+    //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_14);
     return -101;
   };
@@ -233,7 +233,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     ov_clear(&iVf);
     fclose(iFile);
     iFileOpen= 0;
-    OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
+    //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_9);
     return -102;
   }
@@ -267,10 +267,10 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   iEnv->ReadResource(tbuf, R_OGG_ERROR_20);
   buf.AppendNum(err);
   iEnv->InfoWinL(tbuf,buf);
-  OGGLOG.Write(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
-  OGGLOG.WriteFormat(_L("Maybe audio format not supported (%d channels, %l Hz)"),vi->channels,vi->rate);
-  OGGLOG.Write(tbuf);
-  OGGLOG.Write(buf);
+  //OGGLOG.Write(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
+  //OGGLOG.WriteFormat(_L("Maybe audio format not supported (%d channels, %l Hz)"),vi->channels,vi->rate);
+  //OGGLOG.Write(tbuf);
+  //OGGLOG.Write(buf);
   return err;
 }
 
@@ -325,7 +325,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   else if (theChannels==2) ac= TMdaAudioDataSettings::EChannelsStereo;
   else {
     iEnv->InfoWinL(R_OGG_ERROR_12,R_OGG_ERROR_10);
-    OGGLOG.Write(_L("Illegal number of channels"));
+    //OGGLOG.Write(_L("Illegal number of channels"));
     return -100;
   }
 

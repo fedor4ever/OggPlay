@@ -1,3 +1,6 @@
+// uncomment for UIQ/SERIES60:
+#include "OggPlay.header.rss"
+//#include "OggPlay.header_s60.rss"
 
 #define ogg_options_title "Optionen"
 #define ogg_hotkey "Schnellstart:"
@@ -8,6 +11,7 @@
 #define ogg_c_author "(c) 2003 by Leif H. Wilden"
 #define ogg_link_txt "see www.geocities.com/p800tools für mehr Infos"
 #define ogg_vorbis_c "(c) Ogg/Vorbis codec by Xiph.org"
+#define ogg_translation ""
 #define ogg_file_prop "Dateieigenschaften"
 #define ogg_filename_txt "Dateiname:"
 #define ogg_filename_unknown "unbekannt"
@@ -64,3 +68,6 @@
 #define ogg_text_string_11 "(Dateien)"
 #define ogg_text_string_12 "(nicht zugeordnet)"
 
+// uncomment:
+#include "OggPlay.common_uiq.rss"
+//#include "OggPlay.common_s60.rss"

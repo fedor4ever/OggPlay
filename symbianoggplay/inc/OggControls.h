@@ -63,7 +63,8 @@ class TOggParser {
     ESuccess, EFileNotFound, ENoOggSkin,
     EUnknownVersion, EFlipOpenExpected,
     ESyntaxError, EBeginExpected,
-    EEndExpected, EBitmapNotFound, EIntegerExpected };
+    EEndExpected, EBitmapNotFound, EIntegerExpected,
+    EOutOfRange};
 
   TOggParser(const TFileName& aFileName);
   ~TOggParser();
@@ -73,12 +74,12 @@ class TOggParser {
   void  Debug(const TDesC& txt, TInt level=0);
 
   TBool ReadHeader();
-  TBool ReadTokens();
-
   TBool ReadEOL();
   TBool ReadToken();
   TBool ReadToken(TInt& aValue);
   CGulIcon* ReadIcon(const TFileName& aBitmapFile);
+  TBool     ReadColor(TRgb& aColor);
+  CFont*    ReadFont();
 
   // protected:
 
@@ -116,7 +117,7 @@ class COggControl : public CBase {
   virtual void PointerEvent(const TPointerEvent& p);
   virtual void ControlEvent(TInt anEventType, TInt aValue);
 
-  virtual void Redraw();
+  virtual void Redraw(TBool doRedraw = ETrue);
   virtual void SetFocusIcon(CGulIcon* anIcon);
 
   TRect        Rect();
@@ -173,6 +174,7 @@ class COggText : public COggControl {
 
   void SetText(const TDesC& aText);
   void SetFont(CFont* aFont);
+  void SetFontColor(TRgb aColor);
   void ScrollNow();  // restart the text scrolling
 
  protected:
@@ -180,9 +182,11 @@ class COggText : public COggControl {
   virtual void Cycle();
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
+  virtual TBool ReadArguments(TOggParser& p);
 
   HBufC* iText;
   CFont* iFont;
+  TRgb   iFontColor;
 
   TInt   iTextWidth;
   TBool  iNeedsScrolling;
@@ -223,6 +227,75 @@ class COggIcon : public COggControl {
 };
 
 
+// COggAnimation
+// Display a sequence of bitmaps.
+//-------------------------------
+
+class COggAnimation : public COggControl {
+
+ public:
+
+  COggAnimation();
+  virtual ~COggAnimation();
+
+  void SetBitmaps(TInt aFirstBitmap, TInt aNumBitmaps);
+  void ClearBitmaps();
+  void Start();
+  void Stop();
+  void SetPause(TInt aPause);
+  void SetFrequency(TInt aFrequency);
+  void SetStyle(TInt aStyle);
+
+ protected:
+
+  virtual TBool ReadArguments(TOggParser& p);
+
+  virtual void Cycle();
+  virtual void Draw(CBitmapContext& aBitmapContext);
+
+  CFbsBitmap* iBitmaps;
+  TBool       iPause;
+  TInt        iFrequency;
+  TInt        iFirstBitmap;
+  TInt        iNumBitmaps;
+  TInt        iStyle;
+};
+
+
+// COggDigits
+// Display numbers with custom bitmaps.
+//-------------------------------------
+
+class COggDigits : public COggControl {
+
+ public:
+
+  enum Digits { EDigit0=0, EDigit1, EDigit2, EDitit3, EDigit4,
+		EDigit5, EDigit6, EDigit7, EDigit8, EDigit9,
+		EDigitColon, EDigitDash, EDigitSlash, EDigitDot,
+		ENumDigits };
+
+  COggDigits();
+  virtual ~COggDigits();
+
+  void SetText(const TDesC& aText);
+  void SetBitmaps(TInt aFirstBitmap);
+  void SetMasks(TInt aFirstMask);
+  void ClearBitmaps();
+  void ClearMasks();
+
+ protected:
+
+  virtual TBool ReadArguments(TOggParser& p);
+
+  virtual void Draw(CBitmapContext& aBitmapContext);
+
+  HBufC*      iText;
+  CFbsBitmap* iBitmaps;
+  CFbsBitmap* iMasks;
+};
+
+
 // COggButton:
 // A bitmapped button. Several bitmaps can be supplied (all optional):
 // - A monochrome mask defining active (black) and inactive regions (white)
@@ -244,7 +317,9 @@ class COggButton : public COggControl {
   void SetNormalIcon(CGulIcon* anIcon);
   void SetPressedIcon(CGulIcon* anIcon);
   void SetDimmedIcon(CGulIcon* anIcon);
-  
+  void SetStyle(TInt aStyle);
+  void SetState(TInt aState);
+
  protected:
 
   virtual TBool ReadArguments(TOggParser& p);
@@ -260,6 +335,7 @@ class COggButton : public COggControl {
   
 
   TInt        iState; // 0 = normal; 1= pressed
+  TInt        iStyle; // 0 = action button; 1 = two state button
 };
 
 
@@ -364,6 +440,8 @@ class COggListBox : public COggControl
   void SetText(CDesCArray* aText);
   void SetVertScrollBar(COggScrollBar* aScrollBar);
   void SetFont(CFont* aFont);
+  void SetFontColor(TRgb aColor);
+  void SetFontColorSelected(TRgb aColor);
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
 
 
@@ -380,7 +458,7 @@ class COggListBox : public COggControl
   void SetCurrentItemIndex(TInt idx);
   void SetTopIndex(TInt idx);
 
-  virtual void Redraw();
+  virtual void Redraw(TBool doRedraw = ETrue);
 
  protected:
 
@@ -388,6 +466,7 @@ class COggListBox : public COggControl
   virtual void Cycle();
   virtual void PointerEvent(const TPointerEvent& p);
   virtual void ControlEvent(TInt anEventType, TInt aValue);
+  virtual TBool ReadArguments(TOggParser& p);
 
   TInt GetColumnFromPos(TInt aPos);
   TInt GetLineFromPos(TInt aPos);
@@ -395,6 +474,8 @@ class COggListBox : public COggControl
   void UpdateScrollBar();
 
   CFont* iFont;
+  TRgb   iFontColor;
+  TRgb   iFontColorSelected;
   TInt   iTop;
   TInt   iSelected;
   TInt   iLineHeight;

@@ -44,14 +44,13 @@ COggPlayAppView::COggPlayAppView() :
   iActivateCount= 0;
   iPosChanged= -1;
   iApp= 0;
-  iBoldFont= 0;
   ResetControls();
 }
 
 COggPlayAppView::~COggPlayAppView()
 {
+  //if (iControls) { delete iControls; iControls= 0; }
   if (iControls) { iControls->Reset(); delete iControls; iControls= 0; }
-  if (iBoldFont) iCoeEnv->ScreenDevice()->ReleaseFont(iBoldFont);
   if (iTextArray) { delete iTextArray; iTextArray=0; }
   COggControl* c;
   iFocusControlsIter.SetToFirst();
@@ -70,14 +69,13 @@ COggPlayAppView::~COggPlayAppView()
     delete iCanvas[0];
   }
   delete iOggFiles;
-
 }
 
 void
 COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 {
   _LIT(KS,"Starting OggPlayAppView...");
-  OGGLOG.WriteFormat(KS);
+  //OGGLOG.WriteFormat(KS);
   iTextArray= new(ELeave) CDesCArrayFlat(10);
 
   iApp = aApp;
@@ -148,8 +146,8 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 void 
 COggPlayAppView::ReadSkin(const TFileName& aFileName)
 {
-  //iCanvas[0]->ClearControls();
-  //iCanvas[1]->ClearControls();
+  iCanvas[0]->ClearControls();
+  iCanvas[1]->ClearControls();
   ResetControls();
 
   iIconFileName= aFileName.Left(aFileName.Length()-4);
@@ -208,7 +206,7 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   iFocusControlsIter.SetToFirst();
   COggControl* c=iFocusControlsIter;
   if(c) c->SetFocus(ETrue);
-  OGGLOG.Write(_L("New skin installed."));
+  //OGGLOG.Write(_L("New skin installed."));
 }
 
 void 
@@ -217,23 +215,33 @@ COggPlayAppView::ResetControls() {
   iAlarm[0]= 0; iAlarm[1]= 0;
   iAlarmIcon[0]=0; iAlarmIcon[1]= 0;
   iPlayed[0]= 0; iPlayed[1]= 0;
+  iPlayedDigits[0]= 0; iPlayedDigits[1]= 0;
+  iTotalDigits[0]= 0; iTotalDigits[1]= 0;
   iPaused[0]= 0; iPaused[1]= 0;
   iPlaying[0]= 0; iPlaying[1]= 0;
   iPlayButton[0]= 0; iPlayButton[1]=0;
   iPauseButton[0]= 0; iPauseButton[1]= 0;
+  iPlayButton2[0]= 0; iPlayButton2[1]=0;
+  iPauseButton2[0]= 0; iPauseButton2[1]= 0;
   iStopButton[0]=0; iStopButton[1]= 0;
+  iNextSongButton[0]= 0; iNextSongButton[1]= 0;
+  iPrevSongButton[0]= 0; iPrevSongButton[1]= 0;
   iListBox[0]=0; iListBox[1]= 0;
   iTitle[0]=0; iTitle[1]= 0;
   iAlbum[0]=0; iAlbum[1]= 0;
   iArtist[0]=0; iArtist[1]= 0;
   iGenre[0]=0; iGenre[1]= 0;
   iTrackNumber[0]=0; iTrackNumber[1]= 0;
+  iFileName[0]=0; iFileName[1]= 0;
   iEye[0]= 0; iEye[1]= 0;
   iPosition[0]= 0; iPosition[1]= 0;
   iVolume[0]= 0; iVolume[1]= 0;
   iAnalyzer[0]= 0; iAnalyzer[1]= 0;
-  iRepeat[0]= 0; iRepeat[1]= 0;
+  iRepeatIcon[0]= 0; iRepeatIcon[1]= 0;
+  iRepeatButton[0]= 0; iRepeatButton[1]= 0;
   iScrollBar[0]= 0; iScrollBar[1]= 0;
+  iAnimation[0]= 0; iAnimation[1]= 0;
+  iLogo[0]= 0; iLogo[1]= 0;
 }
 
 void
@@ -303,6 +311,14 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       iTrackNumber[aCanvas]= (COggText*)c;
       iTrackNumber[aCanvas]->SetFont(iFont);
     }
+    else if (p.iToken==_L("FileName")) {
+      c= new COggText();
+      _LIT(KAL,"Adding FileName");
+          RDebug::Print(KAL);
+	  p.Debug(KAL);
+      iFileName[aCanvas]= (COggText*)c;
+      iFileName[aCanvas]->SetFont(iFont);
+    }
     else if (p.iToken==_L("Played")) { 
       _LIT(KAL,"Adding Played");
       RDebug::Print(KAL);
@@ -312,13 +328,19 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       iPlayed[aCanvas]->SetFont(iFont);
       iPlayed[aCanvas]->SetText(_L("00:00 / 00:00"));
     }
+    else if (p.iToken==_L("PlayedDigits")) {
+      c= new COggDigits;
+      iPlayedDigits[aCanvas]= (COggDigits*)c;
+    }
+    else if (p.iToken==_L("TotalDigits")) {
+      c= new COggDigits;
+      iTotalDigits[aCanvas]= (COggDigits*)c;
+    }
     else if (p.iToken==_L("StopButton")) { 
       c= new(ELeave) COggButton();
       _LIT(KAL,"Adding StopButton at 0x%x");
       RDebug::Print(KAL,c);
-      OGGLOG.WriteFormat(KAL,c);
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
+      //OGGLOG.WriteFormat(KAL,c);
       iStopButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PlayButton")) { 
@@ -326,8 +348,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       RDebug::Print(KAL);
       p.Debug(KAL);
       c= new(ELeave) COggButton();
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
       iPlayButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PauseButton")) { 
@@ -335,17 +355,30 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       RDebug::Print(KAL);
       p.Debug(KAL);
       c= new(ELeave) COggButton();
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
       iPauseButton[aCanvas]= (COggButton*)c;
       iPauseButton[aCanvas]->MakeVisible(EFalse);
+    }
+    else if (p.iToken==_L("PlayButton2")) { 
+      c= new COggButton();
+      iPlayButton2[aCanvas]= (COggButton*)c;
+    }
+    else if (p.iToken==_L("PauseButton2")) { 
+      c= new COggButton();
+      iPauseButton2[aCanvas]= (COggButton*)c;
+    }
+    else if (p.iToken==_L("NextSongButton")) { 
+      c= new COggButton();
+      iNextSongButton[aCanvas]= (COggButton*)c;
+    }
+    else if (p.iToken==_L("PrevSongButton")) { 
+      c= new COggButton();
+      iPrevSongButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PlayingIcon")) { 
       _LIT(KAL,"Adding PlayingIcon");
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
       c= new(ELeave) COggIcon();
-      c->SetBitmapFile(iIconFileName);
       iPlaying[aCanvas]= (COggIcon*)c;
     }
     else if (p.iToken==_L("PausedIcon")) { 
@@ -353,7 +386,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
       c= new(ELeave) COggIcon();
-      c->SetBitmapFile(iIconFileName);
       iPaused[aCanvas]= (COggIcon*)c;
       iPaused[aCanvas]->Hide();
     }
@@ -362,7 +394,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
       c= new(ELeave) COggIcon();
-      c->SetBitmapFile(iIconFileName);
       iAlarmIcon[aCanvas]= (COggIcon*)c;
       iAlarmIcon[aCanvas]->Hide();
     }
@@ -370,29 +401,31 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       _LIT(KAL,"Adding RepeadIcon");
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
-
       c= new(ELeave) COggIcon();
-      c->SetBitmapFile(iIconFileName);
-      iRepeat[aCanvas]= (COggIcon*)c;
-      iRepeat[aCanvas]->MakeVisible(iApp->iRepeat);
+      iRepeatIcon[aCanvas]= (COggIcon*)c;
+      iRepeatIcon[aCanvas]->MakeVisible(iApp->iRepeat);
+    }
+    else if (p.iToken==_L("RepeatButton")) { 
+      _LIT(KAL,"Adding RepeadButton");
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
+      c= new (ELeave) COggButton();
+      iRepeatButton[aCanvas]= (COggButton*)c;
+      iRepeatButton[aCanvas]->SetStyle(1);
     }
     else if (p.iToken==_L("Analyzer")) {
       _LIT(KAL,"Adding Analyzer");
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
-  	  c= new(ELeave) COggAnalyzer();
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
+      c= new(ELeave) COggAnalyzer();
       iAnalyzer[aCanvas]= (COggAnalyzer*)c;
+      if (iAnalyzer[aCanvas]) iAnalyzer[aCanvas]->SetStyle(iApp->iAnalyzerState);
     }
     else if (p.iToken==_L("Position")) {
       _LIT(KAL,"Adding Position");
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
-      
-  	  c= new(ELeave) COggSlider();
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
+      c= new(ELeave) COggSlider();
       iPosition[aCanvas]= (COggSlider*)c;
     }
     else if (p.iToken==_L("Volume")) {
@@ -400,8 +433,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
       c= new(ELeave) COggSlider();
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
       iVolume[aCanvas]= (COggSlider*)c;
     }
     else if (p.iToken==_L("ScrollBar")) {
@@ -409,7 +440,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    RDebug::Print(KAL);
 	    p.Debug(KAL);
       c= new(ELeave) COggScrollBar();
-      c->SetBitmapFile(iIconFileName);
       iScrollBar[aCanvas]= (COggScrollBar*)c;
       if (iListBox[aCanvas]) {
 	      iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
@@ -420,9 +450,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       c= new(ELeave) COggListBox();
       _LIT(KAL,"Adding Listbox at 0x%x");
       RDebug::Print(KAL,c);
-      OGGLOG.WriteFormat(KAL,c);
-      c->SetBitmapFile(iIconFileName);
-      c->SetObserver(this);
+      //OGGLOG.WriteFormat(KAL,c);
       iListBox[aCanvas]= (COggListBox*)c;
       SetupListBox(iListBox[aCanvas]);
       if (iScrollBar[aCanvas]) {
@@ -430,9 +458,18 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	      iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
       }
     }
+    else if (p.iToken==_L("Animation")) {
+      c= new(ELeave) COggAnimation();
+      iAnimation[aCanvas]= (COggAnimation*)c;
+    }
+    else if (p.iToken==_L("Logo")) {
+      c= new(ELeave) COggAnimation();
+      iLogo[aCanvas]= (COggAnimation*)c;
+    }
 
     if (c) {
-      //c->SetObserver(this);
+      c->SetObserver(this);
+      c->SetBitmapFile(iIconFileName);
       c->Read(p);
       iCanvas[aCanvas]->AddControl(c);
     }
@@ -440,214 +477,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 
   p.Debug(_L("Canvas read."));
 
-}
-
-void 
-COggPlayAppView::CreateDefaultSkin()
-{
-// 
-// SHOULD NEVER BE REACHED FOR S60, since we load our skin from file
-#if defined(SERIES60)
-	_LIT(KDefaultskin,"OggPlay: Default skin");
-	RDebug::Print(KDefaultskin);
-  OGGLOG.Write(KDefaultskin);
-	__ASSERT_DEBUG(0,User::Panic(_L("Oggplay"),987));
-#endif
-  // Create and set up the flip-closed mode canvas:
-  //-----------------------------------------------
-
-  CFont* iFont= const_cast<CFont*>(iCoeEnv->NormalFont());
-  //TFontSpec fs(_L("Courier"),14);
-  //fs.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
-  //iCoeEnv->ScreenDevice()->GetNearestFontInPixels(iBoldFont,fs);
-  
-  // setup text lines:
-
-  iTitle[1] = new COggText(); 
-  iTitle[1]->SetPosition(6,  55, Size().iWidth- 12, 16); 
-  iCanvas[1]->AddControl(iTitle[1]); 
-  iTitle[1]->SetFont(iFont);
-
-  iAlbum[1] = new COggText();
-  iAlbum[1]->SetPosition(6,  75, Size().iWidth- 12, 16); 
-  iCanvas[1]->AddControl(iAlbum[1]); 
-  iAlbum[1]->SetFont(iFont);
-
-  iArtist[1]= new COggText();
-  iArtist[1]->SetPosition(6,  95, Size().iWidth- 12, 16); 
-  iCanvas[1]->AddControl(iArtist[1]); 
-  iArtist[1]->SetFont(iFont);
-
-  iClock[1] = new COggText();
-  iClock[1]->SetPosition(134,  15, 59, 14); 
-  iCanvas[1]->AddControl(iClock[1]); 
-  iClock[1]->SetFont(iFont);
-
-  iAlarm[1] = new COggText();
-  iAlarm[1]->SetPosition(134,  30, 59, 14); 
-  iCanvas[1]->AddControl(iAlarm[1]); 
-  iAlarm[1]->SetFont(iFont);
-
-  iPlayed[1]= new COggText();
-  iPlayed[1]->SetPosition(60,  120, Size().iWidth-120, 16); 
-  iPlayed[1]->SetFont(iFont);
-  iPlayed[1]->SetText(_L("00:00 / 00:00"));
-  iCanvas[1]->AddControl(iPlayed[1]);
-
-  // setup icons:
-
-  iPlaying[1]= new COggIcon();
-  iPlaying[1]->SetPosition(38, 119, 20, 16); 
-  iPlaying[1]->SetIcon(iEikonEnv->CreateIconL(iIconFileName,34,35));
-  iCanvas[1]->AddControl(iPlaying[1]);
-
-  iPaused[1]= new COggIcon();
-  iPaused[1]->SetPosition(38, 119, 20, 16); 
-  iPaused[1]->SetIcon(iEikonEnv->CreateIconL(iIconFileName,16,17));
-  iPaused[1]->Hide(); 
-  iCanvas[1]->AddControl(iPaused[1]);
-
-  iAlarmIcon[1]= new COggIcon();
-  iAlarmIcon[1]->SetPosition(185, 30, 20, 16);
-  iAlarmIcon[1]->SetIcon(iEikonEnv->CreateIconL(iIconFileName,39,40));
-  iAlarmIcon[1]->Hide();
-  iCanvas[1]->AddControl(iAlarmIcon[1]);
-
-  // setup sliders:
-
-  iVolume[1]= new COggSlider();
-  iVolume[1]->SetPosition(74, 11, 60, 16);
-  iVolume[1]->SetKnobIcon(iEikonEnv->CreateIconL(iIconFileName,20,21));
-  iVolume[1]->SetObserver(this);
-  iCanvas[1]->AddControl(iVolume[1]);
-
-  // this is the eye of the fish (it blinks to the full hour):
-
-  iEye[1]= new COggIcon();
-  iEye[1]->SetPosition(41, 16, 16, 16);
-  iEye[1]->SetIcon(iEikonEnv->CreateIconL(iIconFileName,22,22));
-  iEye[1]->SetBlinkFrequency(2);
-  iEye[1]->Hide();
-  iCanvas[1]->AddControl(iEye[1]);
-
-  iRepeat[1]= new COggIcon();
-  iRepeat[1]->SetPosition(145, 117, 20, 16);
-  iRepeat[1]->SetIcon(iEikonEnv->CreateIconL(iIconFileName,23,24));
-  iRepeat[1]->MakeVisible(iApp->iRepeat);
-  iCanvas[1]->AddControl(iRepeat[1]);
-
-  // These controls appear just in flip-open mode for the default skin
-
-  const TInt y(Size().iHeight- 27);
-
-  iAnalyzer[1]= 0;
-  iPosition[1]= 0;
-  iPlayButton[1]= 0;
-  iPauseButton[1]= 0;
-  iStopButton[1]= 0;
-  iScrollBar[1]= 0;
-  iListBox[1]= 0;
-
-  // Create and set up the flip-open mode canvas:
-  //---------------------------------------------
-
-  iTitle[0] = new COggText();
-  iTitle[0]->SetPosition(6,  20, Size().iWidth- 12, 16); 
-  iCanvas[0]->AddControl(iTitle[0]); 
-  iTitle[0]->SetFont(iFont);
-
-  iAlbum[0] = new COggText();
-  iAlbum[0]->SetPosition(6,  36, Size().iWidth- 12, 16); 
-  iCanvas[0]->AddControl(iAlbum[0]); 
-  iAlbum[0]->SetFont(iFont);
-
-  iArtist[0]= new COggText();
-  iArtist[0]->SetPosition(6,  52, Size().iWidth- 12, 16); 
-  iCanvas[0]->AddControl(iArtist[0]); 
-  iArtist[0]->SetFont(iFont);
-
-  iClock[0] = new COggText();
-  iClock[0]->SetPosition(73, 3, 59, 14); 
-  iCanvas[0]->AddControl(iClock[0]); 
-  iClock[0]->SetFont(iFont);
-
-  iAlarm[0] = new COggText();
-  iAlarm[0]->SetPosition(134, 3, 59, 14); 
-  iCanvas[0]->AddControl(iAlarm[0]); 
-  iAlarm[0]->SetFont(iFont);
-
-  iPlayed[0]= 0;
-  iPlaying[0]= 0;
-  iPaused[0]= 0;
-
-  iAlarmIcon[0]= new COggIcon();
-  iAlarmIcon[0]->SetPosition(185, 3, 20, 16);
-  iAlarmIcon[0]->SetIcon(iEikonEnv->CreateIconL(iIconFileName,39,40));
-  iAlarmIcon[0]->Hide();
-  iCanvas[0]->AddControl(iAlarmIcon[0]);
-
-  iVolume[0]= new COggSlider();
-  iVolume[0]->SetPosition(36, 79, 60, 16);
-  iVolume[0]->SetKnobIcon(iEikonEnv->CreateIconL(iIconFileName,20,21));
-  iVolume[0]->SetObserver(this);
-  iCanvas[0]->AddControl(iVolume[0]);
-
-  // and some of them do not appear at all:
-
-  iEye[0]= 0; 
-  iRepeat[0]= 0;
-
-  // others appear only in flip-open mode:  
-  
-  iAnalyzer[0]= new COggAnalyzer();
-  iAnalyzer[0]->SetPosition(138, 70, 70, 30);
-  iAnalyzer[0]->SetBarIcon(iEikonEnv->CreateIconL(iIconFileName,29,30));
-  iAnalyzer[0]->SetObserver(this);
-  iCanvas[0]->AddControl(iAnalyzer[0]);
-
-  iPosition[0]= new COggSlider();
-  iPosition[0]->SetPosition(85, y+1, 110, 16);
-  iPosition[0]->SetStyle(2);
-  iPosition[0]->SetKnobIcon(iEikonEnv->CreateIconL(iIconFileName,25,26));
-  iPosition[0]->SetObserver(this);
-  iCanvas[0]->AddControl(iPosition[0]);
-
-  iStopButton[0]= new COggButton();
-  iStopButton[0]->SetPosition(11, y-1, 20, 20);
-  iStopButton[0]->SetNormalIcon(iEikonEnv->CreateIconL(iIconFileName, 31, 32));
-  iStopButton[0]->SetDimmedIcon(iEikonEnv->CreateIconL(iIconFileName, 33, 33));
-  iStopButton[0]->SetObserver(this);
-  iCanvas[0]->AddControl(iStopButton[0]);
-
-  iPlayButton[0]= new COggButton();
-  iPlayButton[0]->SetPosition(46, y, 20, 20);
-  iPlayButton[0]->SetNormalIcon(iEikonEnv->CreateIconL(iIconFileName, 34, 35));
-  iPlayButton[0]->SetDimmedIcon(iEikonEnv->CreateIconL(iIconFileName, 36, 36));
-  iPlayButton[0]->SetObserver(this);
-  iCanvas[0]->AddControl(iPlayButton[0]);
-
-  iPauseButton[0]= new COggButton();
-  iPauseButton[0]->SetPosition(46, y, 20, 20);
-  iPauseButton[0]->SetNormalIcon(iEikonEnv->CreateIconL(iIconFileName, 37, 38));
-  iPauseButton[0]->SetObserver(this);
-  iPauseButton[0]->MakeVisible(EFalse);
-  iCanvas[0]->AddControl(iPauseButton[0]);
-
-  iPauseButton[0]->SetObserver(this);
-
-  iScrollBar[0]= new COggScrollBar();
-  iScrollBar[0]->SetPosition(188, 113, 16, 96); 
-  iScrollBar[0]->SetKnobIcon(iEikonEnv->CreateIconL(iIconFileName,27,28));
-  iScrollBar[0]->SetStyle(1);
-
-  iListBox[0]= new COggListBox();
-  iListBox[0]->SetPosition(6, 116, 182, 96);
-  iListBox[0]->SetVertScrollBar(iScrollBar[0]);
-  SetupListBox(iListBox[0]);
-  iScrollBar[0]->SetAssociatedControl(iListBox[0]);
-
-  iCanvas[0]->AddControl(iListBox[0]);
-  iCanvas[0]->AddControl(iScrollBar[0]);
 }
 
 void COggPlayAppView::SetupListBox(COggListBox* aListBox)
@@ -697,17 +526,17 @@ void COggPlayAppView::SetupListBox(COggListBox* aListBox)
 void COggPlayAppView::SetNextFocus() {
   COggControl* c;
   c=iFocusControlsIter;
-  OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
-  __ASSERT_DEBUG(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
-  __ASSERT_DEBUG(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
+  //OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
+  //__ASSERT_DEBUG(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
+  //__ASSERT_DEBUG(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
   c->SetFocus(EFalse);
   do {
     iFocusControlsIter++;
     if(!iFocusControlsIter) iFocusControlsIter.SetToFirst();
     c=iFocusControlsIter;
   } while (!c->IsVisible() || c->IsDimmed());
-  OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
-  __ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
+  //OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
+  //__ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
   c->SetFocus(ETrue);
   Update();
 }
@@ -715,17 +544,17 @@ void COggPlayAppView::SetNextFocus() {
 void COggPlayAppView::SetPrevFocus() {
   COggControl* c;
   c=iFocusControlsIter;
-  OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
-  __ASSERT_ALWAYS(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
-  __ASSERT_ALWAYS(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
+  //OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
+  //__ASSERT_ALWAYS(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
+  //__ASSERT_ALWAYS(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
   c->SetFocus(EFalse);
   do {
     iFocusControlsIter--;
     if(!iFocusControlsIter) iFocusControlsIter.SetToLast();
     c=iFocusControlsIter;
   } while (!c->IsVisible() || c->IsDimmed());
-  OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
-  __ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
+  //OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
+  //__ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
   c->SetFocus(ETrue);
   Update();
 }
@@ -913,10 +742,12 @@ COggPlayAppView::ToggleRepeat()
 {
   if (iApp->iRepeat) {
     iApp->iRepeat=0; 
-    if (iRepeat[iMode]) iRepeat[iMode]->Hide();
+    if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Hide();
+    if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(0);
   } else {
     iApp->iRepeat=1;
-    if (iRepeat[iMode]) iRepeat[iMode]->Show();
+    if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Show();
+    if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(1);
   }
 }
 
@@ -965,8 +796,8 @@ COggPlayAppView::InitView()
   //iApp->iViewBy= COggPlayAppUi::ETop;
   FillView(COggPlayAppUi::ETop, COggPlayAppUi::ETop, dummy);
 
-  if (iAnalyzer[0]) iAnalyzer[0]->SetStyle(iApp->iAnalyzerState[0]);
-  if (iAnalyzer[1]) iAnalyzer[1]->SetStyle(iApp->iAnalyzerState[1]);
+  if (iAnalyzer[0]) iAnalyzer[0]->SetStyle(iApp->iAnalyzerState);
+  if (iAnalyzer[1]) iAnalyzer[1]->SetStyle(iApp->iAnalyzerState);
 }
 
 void
@@ -1051,7 +882,10 @@ COggPlayAppView::Update()
 void
 COggPlayAppView::UpdateAnalyzer()
 {
-  if (iAnalyzer[iMode]) iAnalyzer[iMode]->Clear();
+  if (iAnalyzer[iMode]) {
+    iAnalyzer[iMode]->Clear();
+    iAnalyzer[iMode]->SetStyle(iApp->iAnalyzerState);
+  }
 }
 
 void
@@ -1098,12 +932,23 @@ COggPlayAppView::UpdateControls()
      iApp->iOggPlayback->State()==CAbsPlayback::EClosed ||
      iApp->iOggPlayback->State()==CAbsPlayback::EFirstOpen);
 
+  TBool canPause=
+    (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+
+  TBool playDimmed= 
+    (GetSelectedIndex()<0 || GetItemType(GetSelectedIndex())==6 || 
+     iApp->iViewBy==COggPlayAppUi::EArtist || iApp->iViewBy==COggPlayAppUi::EAlbum || 
+     iApp->iViewBy==COggPlayAppUi::EGenre || iApp->iViewBy==COggPlayAppUi::ESubFolder ||
+     iApp->iViewBy==COggPlayAppUi::ETop) 
+    && !(iApp->iOggPlayback->State()==CAbsPlayback::EPaused);
+
   if (iPlayButton[iMode] && canPlay) 
-    iPlayButton[iMode]->SetDimmed((GetSelectedIndex()<0 || GetItemType(GetSelectedIndex())==6 || 
-				   iApp->iViewBy==COggPlayAppUi::EArtist || iApp->iViewBy==COggPlayAppUi::EAlbum || 
-				   iApp->iViewBy==COggPlayAppUi::EGenre || iApp->iViewBy==COggPlayAppUi::ESubFolder ||
-				   iApp->iViewBy==COggPlayAppUi::ETop) 
-				  && !(iApp->iOggPlayback->State()==CAbsPlayback::EPaused));
+    iPlayButton[iMode]->SetDimmed(playDimmed);
+
+  if (iPlayButton2[iMode])
+    iPlayButton2[iMode]->SetDimmed(!canPlay || playDimmed);
+  if (iPauseButton2[iMode])
+    iPauseButton2[iMode]->SetDimmed(!canPause);
 
   if (iPlayButton[iMode]) iPlayButton[iMode]->MakeVisible(canPlay);
   if (iPauseButton[iMode]) iPauseButton[iMode]->MakeVisible(!canPlay);
@@ -1112,7 +957,11 @@ COggPlayAppView::UpdateControls()
 		  iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
     
   if (iStopButton[iMode]) iStopButton[iMode]->SetDimmed( !canStop );
+
   if (iPosition[iMode]) iPosition[iMode]->SetDimmed( !canStop );
+ 
+  if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iRepeat);
+  if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iRepeat);
 }
 
 void
@@ -1144,6 +993,8 @@ COggPlayAppView::UpdateSongPosition()
     mb->DrawNow();
   } else {
     if (iPlayed[iMode]) iPlayed[iMode]->SetText(mbuf);
+    if (iPlayedDigits[iMode]) iPlayedDigits[iMode]->SetText(mbuf.Left(5));
+    if (iTotalDigits[iMode]) iTotalDigits[iMode]->SetText(mbuf.Right(5));
   }
 #else
   if (iPlayed[iMode]) iPlayed[iMode]->SetText(mbuf);
@@ -1215,6 +1066,9 @@ void COggPlayAppView::UpdatePlaying()
     else
       iPaused[iMode]->Hide();
   }
+
+  if (iLogo[iMode])
+    iLogo[iMode]->MakeVisible(iApp->iOggPlayback->FileName().Length()==0);
 }
 
 void 
@@ -1297,7 +1151,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 #if defined(SERIES60) // SERIES60-specific keyhandling 
   // - needs to be upfront since it might intercept EOggConfirm
   COggControl* c=iFocusControlsIter;
-  __ASSERT_DEBUG(c,OGGPANIC(_L("Need at least one control with focus !"),1321));
+  //__ASSERT_DEBUG(c,OGGPANIC(_L("Need at least one control with focus !"),1321));
   if (code==0 && aType==EEventKeyDown) { 
     if(aKeyEvent.iScanCode==EOggLeft) {
       _LIT(KS,"Key Left");
@@ -1428,6 +1282,18 @@ COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt /*aValue*
     }
     if (aEventType==2) iApp->HandleCommandL(EOggPlay); // an item was selected (by tipping on it)
   }
+
+  if (c==iPlayButton[iMode]) {
+    if (iApp->iOggPlayback->State()==CAbsPlayback::EPaused)
+      iApp->HandleCommandL(EOggPauseResume);
+    else
+      iApp->HandleCommandL(EOggPlay);
+  }
+  if (c==iPauseButton[iMode]) iApp->HandleCommandL(EOggPauseResume);
+  if (c==iStopButton[iMode]) iApp->HandleCommandL(EOggStop);
+  if (c==iNextSongButton[iMode]) iApp->NextSong();
+  if (c==iPrevSongButton[iMode]) iApp->PreviousSong();
+  if (c==iRepeatButton[iMode]) ToggleRepeat();
 }
 
 void 
@@ -1448,28 +1314,19 @@ COggPlayAppView::OggPointerEvent(COggControl* c, const TPointerEvent& p)
     iApp->iOggPlayback->SetVolume(iApp->iVolume);
   }
 
-  if (c==iPlayButton[iMode] && p.iType==TPointerEvent::EButton1Down) {
-    if (iApp->iOggPlayback->State()==CAbsPlayback::EPaused)
-      iApp->HandleCommandL(EOggPauseResume);
-    else
-      iApp->HandleCommandL(EOggPlay);
-  }
-  if (c==iPauseButton[iMode] && p.iType==TPointerEvent::EButton1Down) iApp->HandleCommandL(EOggPauseResume);
-  if (c==iStopButton[iMode] && p.iType==TPointerEvent::EButton1Down) iApp->HandleCommandL(EOggStop);
-
   if (c==iAnalyzer[iMode]) {
-    iApp->iAnalyzerState[iMode]= iAnalyzer[iMode]->Style();
+    iApp->iAnalyzerState= iAnalyzer[iMode]->Style();
   }
 }
 
 void COggPlayAppView::AddControlToFocusList(COggControl* c) {
   COggControl* currentitem = iFocusControlsIter; 
   if (currentitem) {
-    OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList adding 0x%x"),c);
+    //OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList adding 0x%x"),c);
     c->iDlink.Enque(&currentitem->iDlink);
     iFocusControlsIter.Set(*c);
   } else {
-    OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList - Setting up focus list adding 0x%x"),c);
+    //OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList - Setting up focus list adding 0x%x"),c);
     iFocusControlsHeader.AddFirst(*c);
     iFocusControlsIter.SetToFirst(); 
   }

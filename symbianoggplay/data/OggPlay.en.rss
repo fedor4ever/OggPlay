@@ -8,6 +8,7 @@
 #define ogg_c_author "(c) 2003 by Leif H. Wilden"
 #define ogg_link_txt "see www.geocities.com/p800tools for more info"
 #define ogg_vorbis_c "(c) Ogg/Vorbis codec by Xiph.org"
+#define ogg_translation ""
 #define ogg_file_prop "File properties"
 #define ogg_filename_txt "Filename:"
 #define ogg_filename_unknown "unknown"

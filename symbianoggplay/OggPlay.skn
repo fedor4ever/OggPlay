@@ -66,7 +66,8 @@ OggPlay 1 {
       Position 134 30 59 14
     }
     Title {
-      Position 6 55 196 16
+      Position 6 53 196 16
+      Font SwissA 14 1
     }
     Album {
       Position 6 75 196 16

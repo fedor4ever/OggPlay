@@ -23,12 +23,12 @@ _LIT(KLogFolder,"Oggplay");
 _LIT(KLogFileName,"Oggplay.log");
 
 COggLog* COggLog::InstanceL() {
-  COggLog* iInstance =(COggLog*) Dll::Tls();
+  COggLog* iInstance =(COggLog*) 0; //Dll::Tls();
 
 	if(iInstance==0) {
 		iInstance=new(ELeave) COggLog;
 		iInstance->ConstructL();
-    Dll::SetTls(iInstance);
+		//Dll::SetTls(iInstance);
 	}
 	return iInstance;
 }
@@ -51,7 +51,7 @@ COggLog::COggLog() {
 
 COggLog::~COggLog() {
 
-  Dll::SetTls(0);
+  //Dll::SetTls(0);
 	
 }
 

@@ -122,7 +122,7 @@ TOggFile::SetText(HBufC* & aBuffer, const TDesC& aText)
 TBool
 TOggFile::Read(TFileText& tf, TInt aVersion)
 {
-  TBuf<128> aTitle, anAlbum, anArtist, aGenre, aSubFolder, aFileName, aShortName, aTrackNumber;
+  TBuf<256> aTitle, anAlbum, anArtist, aGenre, aSubFolder, aFileName, aShortName, aTrackNumber;
   bool success=
     tf.Read(aTitle)==KErrNone &&
     tf.Read(anAlbum)==KErrNone &&
@@ -132,7 +132,7 @@ TOggFile::Read(TFileText& tf, TInt aVersion)
     tf.Read(aFileName)==KErrNone &&
     tf.Read(aShortName)==KErrNone;
   if (aVersion==1 && success)
-    success|= (tf.Read(aTrackNumber)==KErrNone);
+    success&= (tf.Read(aTrackNumber)==KErrNone);
   if (success) {
     SetText(iTitle, aTitle);
     SetText(iAlbum, anAlbum);
@@ -265,12 +265,12 @@ void TOggFiles::CreateDb(RFs& session)
 void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
 {
   _LIT(KS,"Scanning directory %s for oggfiles");
-  OGGLOG.WriteFormat(KS,aDir.Ptr());
+  //OGGLOG.WriteFormat(KS,aDir.Ptr());
 
   // Check if the drive is available (i.e. memory stick is inserted)
   if (!EikFileUtils::FolderExists(aDir)) {
     _LIT(KS,"Folder %s doesn't exist");
-    OGGLOG.WriteFormat(KS,aDir.Ptr());
+    //OGGLOG.WriteFormat(KS,aDir.Ptr());
     return;
   }
  
@@ -278,7 +278,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
   TRAPD(err,ds->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) {
     _LIT(KS,"Unable to setup scan directory %s for oggfiles");
-    OGGLOG.WriteFormat(KS,aDir.Ptr());
+    //OGGLOG.WriteFormat(KS,aDir.Ptr());
     delete ds; ds=0;
     return;
   }
@@ -289,7 +289,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
     TRAPD(err,ds->NextL(c));
     if (err!=KErrNone) {
       _LIT(KS,"Unable to scan directory %s for oggfiles");
-      OGGLOG.WriteFormat(KS,aDir.Ptr());
+      //OGGLOG.WriteFormat(KS,aDir.Ptr());
       delete ds; ds=0;
       return;
     }
@@ -374,6 +374,8 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
 {
   CEikonEnv::Static()->BusyMsgL(R_OGG_STRING_2);
   RFile out;
+
+  TBuf<64> buf;
   TInt err= out.Replace(session, aFileName, EFileWrite|EFileStreamText);
   if (err==KErrNone) {
 
@@ -385,20 +387,34 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
     line.Num(1);
     tf.Write(line);
      
-    for (TInt i=0; i<iFiles->Count(); i++) {
-      line.Num(i);
-      tf.Write(line);
-      if (!(*iFiles)[i]->Write(tf)) break;
+    if (err==KErrNone) {
+
+      for (TInt i=0; i<iFiles->Count(); i++) {
+	line.Num(i);
+	tf.Write(line);
+	if (!(*iFiles)[i]->Write(tf)) break;
+      }
     }
     
+    if (err!=KErrNone) {
+      buf.Append(_L("Error at write: "));
+      buf.AppendNum(err);
+      User::InfoPrint(buf);
+      User::After(TTimeIntervalMicroSeconds32(1000000));
+    }
+
     out.Close();
+    CEikonEnv::Static()->BusyMsgCancel();
   } else {
-    TBuf<16> buf;
-    buf.Num(err);
+    CEikonEnv::Static()->BusyMsgCancel();
+    buf.SetLength(0);
+    buf.Append(_L("Error at open: "));
+    buf.AppendNum(err);
     User::InfoPrint(buf);
-    OGGLOG.WriteFormat(_L("Error %d in WriteDB"),err);
+    User::After(TTimeIntervalMicroSeconds32(1000000));
+    //OGGLOG.WriteFormat(_L("Error %d in WriteDB"),err);
   }
-  CEikonEnv::Static()->BusyMsgCancel();
+  
 }
 
 void

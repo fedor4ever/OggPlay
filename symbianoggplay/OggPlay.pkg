@@ -1,11 +1,11 @@
-&EN,GE,IT,FR
-#{"OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,95,0
-(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID"}
-(0x101F617B),2,0,0,{"UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID"}
+&EN,GE,IT,FR,TU,DU,SP,SW
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,97,0
+(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID"}
+(0x101F617B),2,0,0,{"UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID","UIQ20ProductID"}
 "OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
-{"OggPlay.rsc" "OggPlay.ge.rsc" "OggPlay.it.rsc" "OggPlay.fr.rsc"}-"!:\system\apps\OggPlay\OggPlay.rsc"
+{"data/OggPlay.rsc" "data/OggPlay.ge.rsc" "data/OggPlay.it.rsc" "data/OggPlay.fr.rsc" "data/OggPlay.tu.rsc" "data/OggPlay.du.rsc" "data/OggPlay.sp.rsc" "data/OggPlay.sw.rsc"}-"!:\system\apps\OggPlay\OggPlay.rsc"
 "OggPlay.mbm"-"!:\system\apps\OggPlay\OggPlay.mbm"
 "OggPlay.skn"-"!:\system\apps\OggPlay\OggPlay.skn"
 "Symbian.skn"-"!:\system\apps\OggPlay\Symbian.skn"
-"Symbian.mbm"-"!:\system\apps\OggPlay\Symbian.mbm"
+"bitmaps/Symbian.mbm"-"!:\system\apps\OggPlay\Symbian.mbm"

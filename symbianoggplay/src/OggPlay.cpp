@@ -197,7 +197,7 @@ COggPlayAppUi::ConstructL()
   BaseConstructL();
 
   _LIT(KS,"Starting OggPlay ...");
-  OGGLOG.WriteFormat(KS);
+  //OGGLOG.WriteFormat(KS);
 
   const TFileName aAppFilename=Application()->AppFullName();
   TParsePtrC aP(aAppFilename);
@@ -229,8 +229,7 @@ COggPlayAppUi::ConstructL()
   iAlarmActive= 0;
   iAlarmTime.Set(_L("20030101:120000.000000"));
   iViewBy= ETitle;
-  iAnalyzerState[0]= 0;
-  iAnalyzerState[1]= 0;
+  iAnalyzerState= 0;
   iOggPlayback= new(ELeave) COggPlayback(iEikonEnv, this);
   iOggPlayback->ConstructL();
   ReadIniFile();
@@ -291,7 +290,7 @@ COggPlayAppUi::~COggPlayAppUi()
 
   delete iIniFileName;
   delete iSkins;
-  OGGLOG.Close();
+  //OGGLOG.Close();
   delete COggLog::InstanceL();
   CloseSTDLIB();
 }
@@ -548,7 +547,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EOggSkinTwo:
   case EOggSkinThree:
   case EOggSkinFour:
-  case EOggSkinFive: {
+  case EOggSkinFive:
+  case EOggSkinSix:
+  case EOggSkinSeven:
+  case EOggSkinEight:
+  case EOggSkinNine:
+  case EOggSkinTen: {
     iCurrentSkin= aCommand-EOggSkinOne;
     TBuf<256> buf(iSkinFileDir);
     buf.Append((*iSkins)[iCurrentSkin]);
@@ -712,7 +716,7 @@ COggPlayAppUi::FindSkins()
   TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) {
 	_LIT(KS,"Error in FindSkins-SetScanDataL");
-	OGGLOG.WriteFormat(KS);
+	//OGGLOG.WriteFormat(KS);
 
     delete ds;
     return;
@@ -739,9 +743,9 @@ COggPlayAppUi::FindSkins()
       if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN")) {
 		iSkins->AppendL(p.NameAndExt());
 		_LIT(KS,"Adding skin %s");
-		OGGLOG.WriteFormat(KS,p.NameAndExt().Ptr());
+		//OGGLOG.WriteFormat(KS,p.NameAndExt().Ptr());
 		RDebug::Print(KS,p.NameAndExt().Ptr());
-		if (iSkins->Count()==5) break;
+		if (iSkins->Count()==10) break;
       }
     }
    delete c; c=NULL;
@@ -750,7 +754,7 @@ COggPlayAppUi::FindSkins()
   delete ds;
 
 	_LIT(KS,"Found %d skin(s)");
-	OGGLOG.WriteFormat(KS,iSkins->Count());
+	//OGGLOG.WriteFormat(KS,iSkins->Count());
 
 }
 
@@ -799,16 +803,15 @@ COggPlayAppUi::ReadIniFile()
     }
   }
 
-  iAnalyzerState[0]= 0;
+  iAnalyzerState= 0;
   if (tf.Read(line) == KErrNone) {
     TLex parse(line);
-    parse.Val(iAnalyzerState[0]);
+    parse.Val(iAnalyzerState);
   }
 
-  iAnalyzerState[1]= 0;
   if (tf.Read(line) == KErrNone) {
-    TLex parse(line);
-    parse.Val(iAnalyzerState[1]);
+    // for backward compatibility
+    // this line is not used anymore
   }
 
   iCurrentSkin= 0;
@@ -856,10 +859,11 @@ COggPlayAppUi::WriteIniFile()
   num.Num(iAlarmTime.Int64());
   tf.Write(num);
 
-  num.Num(iAnalyzerState[0]);
+  num.Num(iAnalyzerState);
   tf.Write(num);
 
-  num.Num(iAnalyzerState[1]);
+  // for backward compatibility:
+  num.Num(iAnalyzerState);
   tf.Write(num);
 
   num.Num(iCurrentSkin);

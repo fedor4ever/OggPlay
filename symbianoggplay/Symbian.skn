@@ -50,8 +50,16 @@ OggPlay 1 {
       Style 2
       KnobIcon 25 26
     }
+    Logo {
+      Position 9 20 190 56
+      Bitmaps 41 1
+    }
   }
   FlipClosed {
+    Logo {
+      Position 9 40 190 62
+      Bitmaps 41 1
+    }
     Clock {
       Position 73 10 59 14
     }
@@ -59,7 +67,9 @@ OggPlay 1 {
       Position 134 10 59 14
     }
     Title {
-      Position 6 55 196 16
+      Position 6 52 196 16
+      Font SwissA 16 1
+      FontColor 0 0 127
     }
     Album {
       Position 6 75 196 16
@@ -74,22 +84,23 @@ OggPlay 1 {
       Position 37 30 166 16
     }
     PlayingIcon {
-      Position 38 114 20 16
+      Position 33 115 20 16
       Icon 34 35
     }
     PausedIcon {
-      Position 38 114 20 16
+      Position 33 115 20 16
       Icon 16 17
     }
     Played {
-      Position 60 115 88 16
+      Position 58 113 92 16
+      Font Symbol 16 0
     }
     AlarmIcon {
       Position 185 10 20 16
       Icon 39 40
     }
     RepeatIcon {
-      Position 145 112 20 16
+      Position 150 112 20 16
       Icon 23 24
     }
     Volume {
