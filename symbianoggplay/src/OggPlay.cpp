@@ -51,8 +51,6 @@ const TInt KThreadPriority = EPriorityAbsoluteHigh;
 const TInt KThreadPriority = EPriorityAbsoluteBackground;
 #endif
 
-const TInt ENoFileSelected = -1;
-
 //
 // EXPORTed functions
 //

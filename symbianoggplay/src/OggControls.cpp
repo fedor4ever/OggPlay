@@ -1485,6 +1485,7 @@ COggAnalyzer::COggAnalyzer() :
   iValues= new TInt[iNumValues];
   iPeaks= new TInt[iNumValues];
   iDx= (TInt)((float)iw/iNumValues);
+  Clear();
 }
 
 COggAnalyzer::~COggAnalyzer()
@@ -1559,13 +1560,15 @@ COggAnalyzer::Cycle()
     }
   else if( iStyle == EDecay ) {
     for (int i=0; i<iNumValues; i++) {
-      if (iValues[i] + KDecaySteplength > iPeaks[i]) { 
+      if (iValues[i] && iValues[i] + KDecaySteplength > iPeaks[i]) { 
         iPeaks[i]= iValues[i];
         iRedraw= ETrue;
       }
       else {
-        if( (iPeaks[i] -= KDecaySteplength) < 0 )
+        if( iPeaks[i] && (iPeaks[i] -= KDecaySteplength) < 0 ) {
           iPeaks[i] = 0;
+          iRedraw= ETrue;
+          }
       }
     }    
   }
@@ -1695,7 +1698,7 @@ void COggAnalyzer::RenderFrequencies(short int data[256])
 void COggAnalyzer::Clear()
 {
   for (int i=0; i<iNumValues; i++) {
-    if (iValues[i]!=0) {
+    if ( iValues[i] || iPeaks[i] ) {
       iValues[i]= 0;
       iPeaks[i]= 0;
       iRedraw= ETrue;

@@ -835,6 +835,9 @@ COggPlayAppView::CallBack(TAny* aPtr)
 void
 COggPlayAppView::ListBoxNavigationTimerTick( TBool aRestart )
   {
+#ifdef NEW_LISTBOX_STYLE_FIXIT
+  return;
+#endif
   if( aRestart )
     {
     // User moved cursor, (re)install timeout counter
@@ -1326,10 +1329,28 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 
   if(code == EOggConfirm) {
     if(!iFocusControlsPresent) {
+
+#ifdef NEW_LISTBOX_STYLE_FIXIT
+      if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
+        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) {
+        if( iApp->iCurrent == ENoFileSelected )
+          iApp->HandleCommandL(EOggPlay);
+        else if( iApp->iCurrent == index )
+          // Event on the current active file
+          iApp->HandleCommandL(EOggPauseResume);
+        else
+          // Event on another but the current active file
+          iApp->HandleCommandL(EOggPlay);
+        }
+      else
+        // Event without any active files
+        iApp->HandleCommandL(EOggPlay);
+#else
       if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
 	        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
            iApp->HandleCommandL(EOggPauseResume);
       else iApp->HandleCommandL(EOggPlay);
+#endif
 
     } else if(c==iPlayButton[iMode]) { 
       // manually move focus to pause button

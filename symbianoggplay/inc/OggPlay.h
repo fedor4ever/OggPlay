@@ -30,6 +30,7 @@
 
 const TInt KFullScreenWidth = 176;
 const TInt KFullScreenHeight = 188;
+const TInt ENoFileSelected = -1;
 
 #else
 #include <qikappui.h>

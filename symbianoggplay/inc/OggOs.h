@@ -85,6 +85,9 @@ chSTR2(__LINE__) "):" #desc)
 // Not ready yet for prime time!
 #define MDCT_FREQ_ANALYSER 
 
+// Testing new listbox maneuvring. 
+//#define NEW_LISTBOX_STYLE_FIXIT 
+
 // OTHERS
 //
 #if defined SERIES60    // Alternative to #ifdef/#endif around Series 60 code
