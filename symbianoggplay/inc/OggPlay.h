@@ -291,7 +291,8 @@ class COggSongList : public CBase
 {
     public:
      virtual void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
-     virtual TDesC & GetNextSong()=0;
+     virtual const TDesC & GetNextSong()=0;    
+     virtual const TDesC & GetPreviousSong()=0;
      void  SetPlayingFromListBox(TInt aPlaying);
      const TDesC& GetPlaying();
      const TBool AnySongPlaying();
@@ -312,7 +313,8 @@ class COggNormalPlay : public COggSongList
 {
     public:     
         void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
-        TDesC & GetNextSong();
+        const TDesC & GetNextSong();  
+        const TDesC & GetPreviousSong();
         ~COggNormalPlay();
         COggNormalPlay();
     private:

@@ -950,31 +950,33 @@ COggPlayAppUi::NextSong()
 void
 COggPlayAppUi::PreviousSong()
 {
-	if (iViewBy==ETop) {
-		HandleCommandL(EOggPlay); // select the current category
-		HandleCommandL(EOggPlay); // select the 1st song in that category
-		iAppView->SelectSong(iAppView->GetNSongs()-1); // select the last song in that category
-		HandleCommandL(EOggPlay); // play it!
-	} else if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) {
-		HandleCommandL(EOggPlay); // select the 1st song in the current category
-		iAppView->SelectSong(iAppView->GetNSongs()-1); // select the last song in that category
-		HandleCommandL(EOggPlay); // play it!
-	}
-	else {
-    /* BERT----------- DO SOMETHING HERE
-		if (iCurrent<0) {
-			// if no song is playing, start playing the selected song if possible
-			if (iAppView->GetItemType(iAppView->GetSelectedIndex())!=6) HandleCommandL(EOggPlay);
-			return;
-		} else {
-			// if a song is playing, find and play the previous song if possible
-			if (iCurrent-1>=0) {
-				iAppView->SelectSong(iCurrent-1);
-				if (iAppView->GetItemType(iCurrent-1)==6) HandleCommandL(EOggStop);
-				else HandleCommandL(EOggPlay);
-			} else HandleCommandL(EOggStop);
-		}
-        */
+	
+      if ( iSongList->AnySongPlaying() ) 
+    {
+        // if a song is currently playing, find and play the previous song
+        const TDesC &songName = iSongList->GetPreviousSong();
+        if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
+            iOggPlayback->Play();
+            iAppView->SetTime(iOggPlayback->Time());
+            UpdateSeries60Softkeys();
+            iAppView->Update();
+        } else {
+            iSongList->SetPlayingFromListBox(ENoFileSelected);
+            HandleCommandL(EOggStop);
+        }
+    }
+    else
+    {
+        if (iViewBy==ETop) {
+            HandleCommandL(EOggPlay); // select the current category
+            HandleCommandL(EOggPlay); // select the 1st song in that category
+            iAppView->SelectSong(iAppView->GetNSongs()-1); // select the last song in that category
+            HandleCommandL(EOggPlay); // play it!
+        } else if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) {
+            HandleCommandL(EOggPlay); // select the 1st song in the current category
+            iAppView->SelectSong(iAppView->GetNSongs()-1); // select the last song in that category
+            HandleCommandL(EOggPlay); // play it!
+        }
 	}
 }
 
@@ -1493,9 +1495,9 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
     iPlayingIdx = ENoFileSelected;
 
     for (TInt i=0; i<iAppView->GetTextArray()->Count(); i++) {
-        if (iAppView->GetItemType(i)!=6)  
+        if (iAppView->HasAFileName(i))  
         {
-            // We're dealing with a file, not the "back" button
+            // We're dealing with a file, not the "back" button or something similar
             iFileList.Append(iAppView->GetFileName(i));
             if (i == aPlaying)
                 iPlayingIdx = iFileList.Count()-1;
@@ -1518,12 +1520,14 @@ COggSongList::SetPlaying(TInt aPlaying)
     iAppView->Update();
 }
 
+_LIT(KEmpty,"");
+
 const TDesC& 
 COggSongList::GetPlaying()
 {
     if (iPlayingIdx != ENoFileSelected)
         return (iFileList[iPlayingIdx]);
-    _LIT(KEmpty,"");
+
     return (KEmpty);
 }
 
@@ -1575,24 +1579,60 @@ void COggNormalPlay::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPla
 	COggSongList::ConstructL(aAppView, aOggPlayback);
 }
 
-TDesC & COggNormalPlay::GetNextSong()
+const TDesC & COggNormalPlay::GetNextSong()
 {
+
     int nSongs= iFileList.Count();
+    if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
+    {
+        SetPlaying(ENoFileSelected);
+        return(KEmpty);
+    }
     
-  
     if (iPlayingIdx+1<nSongs) {
         // We are in the middle of the playlist. Now play the next song.
-        // First check that current still exists (i.e. media still present)
         SetPlaying(iPlayingIdx+1);
     }
-	else {
-		// We are at the end of the playlist. Repeat if requested to.
+	else if (iRepeat)
+    {
+		// We are at the end of the playlist, repeat it 
 		SetPlaying(0);
-            /* BERT----------- DO SOMETHING HERE with the repeat and the runningEmbedded
-		if (iIsRunningEmbedded) {
-			iIsRunningEmbedded = EFalse;
-            
-		} */
+    }
+    else 
+    {
+        // We are at the end of the playlist, stop here.
+        SetPlaying(ENoFileSelected);
+	}
+    if (iPlayingIdx == ENoFileSelected)
+    {
+        return (KEmpty);
+    }
+    return iFileList[iPlayingIdx];
+}
+
+const TDesC & COggNormalPlay::GetPreviousSong()
+{
+    
+    int nSongs= iFileList.Count();
+    if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
+    {
+        SetPlaying(ENoFileSelected);
+        return(KEmpty);
+    }
+
+    if (iPlayingIdx-1>=0) {
+        // We are in the middle of the playlist. Now play the previous song.
+        SetPlaying(iPlayingIdx-1);
+    }
+	else if (iRepeat)
+    {
+		// We are at the top of the playlist, repeat it 
+		SetPlaying(nSongs-1);
+    }
+    else 
+    {
+        // We are at the top of the playlist, stop here.
+        SetPlaying(ENoFileSelected);
 	}
     return iFileList[iPlayingIdx];
 }

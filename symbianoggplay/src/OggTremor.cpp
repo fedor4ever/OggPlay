@@ -229,6 +229,11 @@ COggPlayback::~COggPlayback() {
 TInt COggPlayback::Open(const TDesC& aFileName)
 {
 
+  if (iState == EPlaying)
+  { 
+    Stop();
+  }
+
   if (iFileOpen) {
     ov_clear(&iVf);
     fclose(iFile);
@@ -643,6 +648,10 @@ void COggPlayback::Pause()
 
 void COggPlayback::Stop()
 {
+  if (iState != EPlaying)
+  { 
+    return;
+  }
   TRAPD( err, iStream->Stop() );
   iState= EClosed;
   if (iFileOpen) {
@@ -654,16 +663,6 @@ void COggPlayback::Stop()
   iTime= 0;
   iEof= 0;
   iStoppedFromEof = EFalse;
-
-  /*
-  // wait until all buffers are played (or 0.5 sec max):
-  int n=0;
-  iPlayComplete= 0;
-  while (n<5 && !iPlayComplete) {
-    User::After(TTimeIntervalMicroSeconds32(100000));
-    n++;
-  }
-  */
 
   if (iObserver) iObserver->NotifyUpdate();
 }
