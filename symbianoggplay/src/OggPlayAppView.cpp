@@ -1045,7 +1045,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     default: break;
     }
 
-	back.Num(COggListBox::EBack);
+	back.Num((TInt) COggListBox::EBack);
     back.Append(KColumnListSeparator);
 #if defined(UIQ)
     back.Append(_L(".."));
@@ -1073,7 +1073,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     }
 
 	if (aSelection.Length()>0) {
-		back.Num(COggListBox::EBack);
+		back.Num((TInt) COggListBox::EBack);
       back.Append(KColumnListSeparator);
 #if defined(UIQ)
       back.Append(_L(".."));
