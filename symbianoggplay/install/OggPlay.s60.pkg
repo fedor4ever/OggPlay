@@ -8,6 +8,8 @@
 ; 0x101F6F88 for S60 v0.9 and later
 (0x101F6F88),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
 ;
+; Display Release notes
+;
 "..\S60_releases\sisnotes.txt" - "",FT,TC
 ;
 "\epoc32\release\armi\urel\libvorbisidec.dll"-"!:\system\libs\libvorbisidec.dll"
@@ -21,3 +23,6 @@
 "..\bitmaps\Skins\FullSteel\FullSteel.mbm"-"!:\system\apps\oggplay\FullSteel.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+; we try to be nice and uninstall our configuration files
+""-"!:\system\apps\OggPlay\oggplay.ini",FN
+""-"!:\system\apps\OggPlay\oggplay.db",FN

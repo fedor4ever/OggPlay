@@ -36,7 +36,7 @@ RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf=""; }
 
 //# Version string
-#define ogg_txt_version "OggPlay 0.97 (beta)"
+#define ogg_txt_version "OggPlay 1.00"
 
 
 RESOURCE EIK_APP_INFO
