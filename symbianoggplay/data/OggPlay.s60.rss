@@ -607,7 +607,6 @@ RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
 RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
 
-
 RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view title
 RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title
 RESOURCE TBUF32 r_ogg_repeat_on    { buf=ogg_repeat_on; }			// New
