@@ -358,6 +358,60 @@ void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
   iOggPlayback->ClearComments();
   }
 
+TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
+
+	TParse p;
+	p.Set(aFile,NULL,NULL);
+	
+	if (p.Ext()==_L(".ogg") || p.Ext()==_L(".OGG")) {
+		
+		ClearFiles();
+#if defined(SERIES60)  
+		AddFile(aFile);
+#endif
+		if (iFiles->Count()) {
+			return ETrue;
+		}
+	}
+	return EFalse;
+}
+
+void TOggFiles::AddFile(const TDesC& aFile){
+	_LIT(KS,"adding File %s to oggfiles");
+	//OGGLOG.WriteFormat(KS,aFile.Ptr());
+	
+	
+	TParse p;
+	p.Set(aFile,NULL,NULL);
+	
+	if (p.Ext()==_L(".ogg") || p.Ext()==_L(".OGG")) {
+		
+		TBuf<512> fullname;
+		fullname.Append(aFile);
+
+		TBuf<256> shortname;
+		shortname.Append(p.Name());
+
+		TBuf<256> path(p.DriveAndPath());
+		if (path.Length()>1 && path[path.Length()-1]==L'\\'){
+			path.Delete(path.Length()-1,1); // get rid of trailing back slash
+		}
+		if ( iOggPlayback->Info(aFile, EFalse) == KErrNone) {
+
+			TOggFile* o = TOggFile::NewL(iOggPlayback->Title(), 
+				iOggPlayback->Album(), 
+				iOggPlayback->Artist(), 
+				iOggPlayback->Genre(), 
+				path,
+				fullname,
+				shortname,
+				iOggPlayback->TrackNumber());
+			
+			TRAPD(Err, iFiles->AppendL(o));
+		} 	
+	}
+	iOggPlayback->ClearComments();
+}
 
 TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 {

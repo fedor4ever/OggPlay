@@ -88,6 +88,7 @@ class TOggFiles : public CBase
   virtual ~TOggFiles();
 
   void  CreateDb(RFs& session);
+  TBool  CreateDbWithSingleFile(const TDesC& aFile);
   TBool ReadDb(const TFileName& aFileName, RFs& session);
   void  WriteDb(const TFileName& aFileName, RFs& session);
 
@@ -103,6 +104,7 @@ class TOggFiles : public CBase
  protected:
 
   void AddDirectory(const TDesC& aDir, RFs& session);
+  void AddFile(const TDesC& aFile);
   void ClearFiles();
 
   CArrayPtrFlat<TOggFile>* iFiles; 

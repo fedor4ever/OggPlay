@@ -18,12 +18,17 @@ RESOURCE AIF_DATA
     {
     app_uid=0x0BF72853;
     num_icons=2;
-    embeddability=KAppNotEmbeddable;
+    embeddability=KAppEmbeddable;
     newfile=KAppDoesNotSupportNewFile;
 #if defined(SERIES60_SPLASH)
     launch=KAppLaunchInBackground;
 #endif
-    datatype_list={DATATYPE{ priority=EDataTypePriorityNormal; type="application/ogg";}};
+    datatype_list={DATATYPE{ 
+		priority=EDataTypePriorityNormal; 
+		type="application/ogg";
     }
+	};
+}
+	
 
 // End of File

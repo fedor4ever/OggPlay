@@ -129,6 +129,13 @@ COggActive::CallBack(TAny* aPtr)
 {
   COggActive* self= (COggActive*)aPtr;
 
+	if (self->iAppUi->iIsRunningEmbedded) {
+		self->iAppUi->iIsRunningEmbedded = EFalse;
+		self->iAppUi->NextSong();
+		
+	}
+#if !defined(SERIES60)
+
   self->iAppUi->NotifyUpdate();
 
   if( self->iLine )
@@ -165,18 +172,19 @@ COggActive::CallBack(TAny* aPtr)
         return 1;
         }
       }
-    }
+#else
+	self->iTimer->Cancel();
+#endif
+
   return 1;
 }
 
 void
 COggActive::IssueRequest()
 {
-//#if !defined(SERIES60) 
   iTimer= CPeriodic::New(CActive::EPriorityStandard);
   iCallBack= new (ELeave) TCallBack(COggActive::CallBack,this);
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(1000000),*iCallBack);
-//#endif
 }
 
 COggActive::~COggActive()
@@ -198,12 +206,18 @@ COggActive::~COggActive()
   }
 #if defined(SERIES60)
   // UIQ_?
-  if(iTimer) 
-    {
-    delete iCallBack;
-    iTimer->Cancel();
-    delete iTimer;
-    }
+  if (iTimer) {
+	  if (iTimer->IsActive()) {
+		  iTimer->Cancel();
+	  }
+	  delete iTimer;
+	  iTimer = NULL;
+  }
+  if (iCallBack) {
+	  delete iCallBack;
+	  iCallBack = NULL;
+  }
+
 #endif
 }
 
@@ -282,6 +296,7 @@ COggPlayAppUi::ConstructL()
   iAppView->InitView();
 
   SetHotKey();
+  iIsRunningEmbedded = EFalse;
 
   TRAPD(phoneErr, iActive= new(ELeave) COggActive(this));
   if( phoneErr != KErrNone )
@@ -1079,5 +1094,34 @@ COggPlayAppUi::SetThreadPriority()
   }
 #endif
 }
+TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand /*aCommand*/, TFileName& /*aDocumentName*/,const TDesC8& /*aTail*/)
+{
+    return ETrue;
+}
 
 
+void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
+
+	if (iAppView->iOggFiles->CreateDbWithSingleFile(aFileName)) {
+		iAppView->SelectSong(0);
+		iIsRunningEmbedded = ETrue;
+	}
+}
+
+////////////////////////////////////////////////////////////////
+//
+// COggPlayDocument class
+//
+///////////////////////////////////////////////////////////////
+#ifdef SERIES60
+CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/){
+	TBuf<255> test(aFilename);
+	iAppUi->OpenFileL(aFilename);
+	return NULL;
+}
+#endif
+
+CEikAppUi* COggPlayDocument::CreateAppUiL(){
+    iAppUi = new (ELeave) COggPlayAppUi;
+    return iAppUi;	
+}

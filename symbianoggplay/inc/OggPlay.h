@@ -152,6 +152,7 @@ public:
   int iAlarmActive;       // has an alarm time been set?
 
   TBool iForeground;      // is the application currently in the foreground?
+  TBool iIsRunningEmbedded;
 
   TFileName iDbFileName;
   
@@ -176,6 +177,9 @@ public:
   void HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent);
   void HandleForegroundEventL(TBool aForeground);
   void DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane);
+  TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName,const TDesC8& aTail);
+
+  void OpenFileL(const TDesC& aFileName);
 
 private: 
 
@@ -213,11 +217,14 @@ class COggPlayDocument : public CQikDocument
 public:
 #ifdef SERIES60
   COggPlayDocument(CAknApplication& aApp) : CEikDocument(aApp) {}
+
+  CFileStore*  OpenFileL(TBool aDoOpen ,const TDesC& aFilename, RFs& aFs);
+
 #else
   COggPlayDocument(CQikApplication& aApp) : CQikDocument(aApp) {}
 #endif
   
-  CEikAppUi* CreateAppUiL() { return new(ELeave) COggPlayAppUi; }
+  CEikAppUi* CreateAppUiL() ;
 };
 
 #ifdef SERIES60
