@@ -88,12 +88,12 @@ CHARACTER_SET UTF8
 #define ogg_user_hotkey              "Kısayollar"
 #define ogg_format_text_fast_forward "İleri"
 #define ogg_format_text_rewind       "Geri al"
-#define ogg_format_text_page_up      "Dosya listesi yukarı sayfa"
-#define ogg_format_text_page_down    "Dosya listesi aşağı sayfa"
+#define ogg_format_text_page_up      "Dosya listesi yukarı"
+#define ogg_format_text_page_down    "Dosya listesi aşağı"
 
 #define ogg_settings                 "Ayarlar"  // in the menu
 #define ogg_settings_title           "Oggplay Ayarları" // on top of the settings screen
-#define ogg_filescanmode             "Dosya tarama modu"
+#define ogg_filescanmode             "Dosya arama modu"
 //#define ogg_maneuvring_speed         "Klasörü otomatik değiştir"
 #define ogg_autostart                "Açılışta çal"
 #define ogg_fullscan                 "Tam Tarama"
@@ -106,15 +106,15 @@ CHARACTER_SET UTF8
 #define ogg_popup_off                "Etkisiz"
 #define ogg_back_dir                 "Geri"
 #define ogg_backspace                "Backspace tuşu"
-#define ogg_shift                    "Shift tuşu (tekrarlama yok)"
+#define ogg_shift                    "Shift (tekrarsız)"
 #define ogg_warnings                 "İkazlar"
 #define ogg_by                       " " // The preposition 'by' comes after in Turkish; hence, it is better not to display anything _before_ the nouns...
 
-#define ogg_rsk_idle                 "Sağ SoftKey / Boş "
-#define ogg_rsk_play                 "Sağ SK / Çalma modu"
+#define ogg_rsk_idle                 "Sağ SoftKey/Boş "
+#define ogg_rsk_play                 "Sağ SK/Çalma modu"
 #define ogg_cba_back                 "Geri"
 #define ogg_cba_clear                "Sil"
-#define ogg_cba_option               "Seçenekler"
+#define ogg_cba_option               "Seçenek"
 #define ogg_cba_exit                 "Çık"
 #define ogg_cba_stop                 "Dur"
 #define ogg_cba_pause                "Duraklat"
