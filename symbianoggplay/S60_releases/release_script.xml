@@ -10,9 +10,11 @@
   <property name="oggplayfulldir" location="${epocroot}\${oggplaydir}"/>
 
   <target name="CreateZIP" depends="CreateSIS">
-       <zip destfile="${oggplayfulldir}/release.zip"
-       basedir="${oggplayfulldir}\install"
-       includes="oggplay_s60.SIS,recognizer.SIS" />
+       <zip destfile="${oggplayfulldir}/S60_releases/release.zip">
+         <fileset dir="${oggplayfulldir}\install\" includes="oggplay_s60.SIS"/>
+         <fileset dir="${oggplayfulldir}\install\" includes="ogg_recognizer.SIS"/>
+         <fileset dir="${oggplayfulldir}\s60_releases\" includes="readme.txt"/>
+       </zip>
   </target>
 
   <target name="CreateSIS" depends="OggPlay,skins,recognizer">
@@ -21,7 +23,7 @@
         <arg line="oggplay_lang_urel.s60.pkg oggplay_s60.SIS"/>	
      </exec> 
      <exec dir="x:\${oggplaydir}\install" executable="makesis.exe" failonerror="true">
-        <arg line="recognizer.s60.pkg recognizer.SIS"/>	
+        <arg line="recognizer.s60.pkg ogg_recognizer.SIS"/>	
      </exec> 
   </target>
 

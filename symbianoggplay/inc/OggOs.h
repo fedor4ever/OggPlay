@@ -65,7 +65,7 @@ chSTR2(__LINE__) "):" #desc)
 // NEW CODE ENABLERS
 //
 #if defined(SERIES60)
-//#define SERIES60_SPLASH
+#define SERIES60_SPLASH
 #endif
 
 // Force filling the buffer to at least 75% of their capacity before sending them to
