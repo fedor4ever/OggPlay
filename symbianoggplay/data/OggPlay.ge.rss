@@ -1,7 +1,3 @@
-// uncomment for UIQ/SERIES60:
-#include "OggPlay.header.rss"
-//#include "OggPlay.header_s60.rss"
-
 #define ogg_options_title "Optionen"
 #define ogg_hotkey "Schnellstart:"
 #define ogg_alarm "Alarm:"
@@ -75,6 +71,3 @@
 #define ogg_text_string_11 "(Dateien)"
 #define ogg_text_string_12 "(nicht zugeordnet)"
 
-// uncomment:
-#include "OggPlay.common_uiq.rss"
-//#include "OggPlay.common_s60.rss"

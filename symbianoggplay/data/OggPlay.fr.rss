@@ -1,6 +1,3 @@
-// uncomment for UIQ/SERIES60:
-#include "OggPlay.header.rss"
-//#include "OggPlay.header_s60.rss"
 
 #define ogg_options_title "Options"
 #define ogg_hotkey "Touche de raccourci:"
@@ -74,6 +71,3 @@
 #define ogg_text_string_11 "(fichiers)"
 #define ogg_text_string_12 "(non-assignés)"
 
-// uncomment:
-#include "OggPlay.common_uiq.rss"
-//#include "OggPlay.common_s60.rss"

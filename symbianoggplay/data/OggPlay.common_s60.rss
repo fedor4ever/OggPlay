@@ -1,6 +1,29 @@
 
 #include "oggdialogs.rh"
 
+// Languages : EN/SC FR GE DU IT SP SW TU DA
+
+#if defined(LANGUAGE_EN) | defined(LANGUAGE_SC)
+#include "OggPlay.en.rss"
+#elif defined(LANGUAGE_FR)
+#include "OggPlay.fr.rss"
+#elif defined(LANGUAGE_GE)
+#include "OggPlay.ge.rss"
+#elif defined(LANGUAGE_DU)
+#include "OggPlay.du.rss"
+#elif defined(LANGUAGE_IT)
+#include "OggPlay.it.rss"
+#elif defined(LANGUAGE_SP)
+#include "OggPlay.sp.rss"
+#elif defined(LANGUAGE_SW)
+#include "OggPlay.sw.rss"
+#elif defined(LANGUAGE_TU)
+#include "OggPlay.tu.rss"
+#elif defined(LANGUAGE_DA)
+#include "OggPlay.da.rss"
+#endif
+
+
 RESOURCE EIK_APP_INFO
 {
   menubar=r_oggplay_menubar;
