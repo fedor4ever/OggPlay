@@ -1442,6 +1442,13 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     // 48..57 == "0"..."9"
     // 172 jog dial press
     // 179    == OK
+
+    // this is what's being sent when closing through taskswitcher
+    // couldn't find any documentation on this.
+    if(code==EStdKeyNumLock) {
+      iApp->HandleCommandL(EEikCmdExit);
+      return EKeyWasConsumed;
+    }
   }
 
 
