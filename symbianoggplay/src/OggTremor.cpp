@@ -37,6 +37,7 @@
 #include <eikon.hrh>
 #include <eikon.rsg>
 #include <charconv.h>
+#include <hal.h>
 
 #include <utf.h>
 
@@ -123,7 +124,8 @@ void COggPlayback::ConstructL() {
       TCallBack( StopAudioStreamingCallBack,this )   );
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
-
+  // Read the device uid
+  HAL::Get(HALData::EMachineUid, iMachineUid);
 }
 
 COggPlayback::~COggPlayback() {
@@ -551,7 +553,9 @@ void COggPlayback::Play()
   // There is something wrong how Nokia audio streaming handles the
                    // first buffers. They are somehow swallowed.
                    // To avoid that, send few (4) almost empty buffers
-  iFirstBuffers = 4; 
+  if (iMachineUid != EMachineUid_SendoX) // Sendo X doesn't need this fix. 
+      iFirstBuffers = 4; 
+
 #ifdef DELAY_AUDIO_STREAMING_START
   //Also to avoid the first buffer problem, wait a short time before streaming, 
   // so that Application drawing have been done. Processor should then

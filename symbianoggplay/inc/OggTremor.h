@@ -155,6 +155,8 @@ typedef struct
 
   MDecoder*             iDecoder;
 
+  // Machine uid (for identifying the phone model)
+  TInt iMachineUid;
 };
 
 

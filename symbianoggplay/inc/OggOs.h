@@ -44,7 +44,7 @@ chSTR2(__LINE__) "):" #desc)
 #define SERIES60
 //#define UIQ
 // Enable this line to choose the OS OggPlay will run on.
-#define OS70S
+// #define OS70S
 
 //# Version String
 #if defined(SERIES60)
@@ -144,5 +144,9 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 
 #define NUMBER_OF_SEARCHED_EXTENSIONS 4 // OGG,MP3, AAC, MP4
+
+// Phone UIDs
+// Used for determining the phone type (currently only used for the Sendo X)
+#define EMachineUid_SendoX 0x101FA031
 
 #endif
