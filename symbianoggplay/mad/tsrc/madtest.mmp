@@ -1,0 +1,48 @@
+// Test functions
+
+
+TARGET        madtest.exe
+TARGETTYPE    exe
+UID 0
+
+SOURCEPATH    .
+SOURCE console.cpp 
+SOURCE madtest.cpp
+
+SOURCEPATH    ..\src
+SOURCE bstdfile.c
+SOURCE CMadDecoder.cpp
+//SOURCE dllentry.cpp     
+
+//SOURCEPATH ..\..\src
+//SOURCE OggLog.cpp
+
+SOURCEPATH    ..\libmad
+SOURCE bit.c
+SOURCE decoder.c
+SOURCE fixed.c
+SOURCE frame.c
+SOURCE huffman.c
+SOURCE layer12.c
+SOURCE layer3.c
+//SOURCE minimad.c
+SOURCE stream.c
+SOURCE synth.c
+SOURCE timer.c
+SOURCE version.c
+
+MACRO HAVE_CONFIG_H
+MACRO FPM_ARM // don't be confused by this...
+MACRO SYMBIAN_STACKFIX
+
+USERINCLUDE   . ..\inc ..\..\inc
+SYSTEMINCLUDE \Epoc32\include
+SYSTEMINCLUDE \Epoc32\include\libc
+SYSTEMINCLUDE ..\libmad
+
+LIBRARY       euser.lib estlib.lib
+LIBRARY       mediaclientaudiostream.lib flogger.lib 
+
+//LIBRARY apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib 
+//LIBRARY fbscli.lib bitgdi.lib eikctl.lib  etel.lib charconv.lib 
+//LIBRARY estor.lib

@@ -92,6 +92,9 @@ chSTR2(__LINE__) "):" #desc)
 // Not ready yet for prime time!
 #define MDCT_FREQ_ANALYSER 
 
+// support for legacy audio codec (-:
+// this is extremely experimental at the moment.
+#undef MP3_SUPPORT
 
 // OTHERS
 //

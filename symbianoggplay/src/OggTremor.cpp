@@ -24,6 +24,9 @@
 #include "OggLog.h"
 #include "OggTremor.h"
 #include "TremorDecoder.h"
+#ifdef MP3_SUPPORT
+#include "MadDecoder.h"
+#endif
 
 #include <barsread.h>
 #include <eikbtpan.h>
@@ -220,8 +223,13 @@ void COggPlayback::ConstructL() {
       TCallBack( StopAudioStreamingCallBack,this )   );
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
-  //FIXMAD: Should have a ConstructL and a NewL and shouldn't be here anyway
+  //FIXMAD: For now either mp3 OR ogg is supported. Changing this shouldn't be difficult
+  // by moving this into the open and info members.
+#ifdef MP3_SUPPORT
+  iDecoder=new(ELeave)CMadDecoder;
+#else
   iDecoder=new(ELeave)CTremorDecoder;
+#endif
 
 }
 

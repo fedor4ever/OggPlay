@@ -27,6 +27,34 @@ IFDEF_S60( SOURCE OggUserHotkeys.cpp )
 SOURCEPATH ..\vorbis
 SOURCE TremorDecoder.cpp
 
+#if defined MP3_SUPPORT
+//FIXMAD: MAD should of course have its own dll.
+SOURCEPATH    ..\mad\src
+SOURCE bstdfile.c
+SOURCE MadDecoder.cpp
+//SOURCE dllentry.cpp     
+
+SOURCEPATH    ..\mad\libmad
+SOURCE bit.c
+SOURCE decoder.c
+SOURCE fixed.c
+SOURCE frame.c
+SOURCE huffman.c
+SOURCE layer12.c
+SOURCE layer3.c
+SOURCE stream.c
+SOURCE synth.c
+SOURCE timer.c
+SOURCE version.c
+
+MACRO HAVE_CONFIG_H
+MACRO SYMBIAN_STACKFIX
+MACRO FPM_ARM
+
+#endif
+
+SOURCEPATH ..\src
+
 RESOURCE ..\data\OggPlay.rss
 RESOURCE ..\data\OggPlay_caption.rss
 
@@ -37,7 +65,7 @@ LANG SC
 #endif
 
 
-USERINCLUDE . ..\inc ..\vorbis ..\data
+USERINCLUDE . ..\inc ..\vorbis ..\data ..\mad\libmad ..\mad\inc
 
 SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 

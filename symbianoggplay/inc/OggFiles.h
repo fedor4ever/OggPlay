@@ -149,6 +149,8 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void AddDirectoryStop();
   void ClearFiles();
 
+  TBool isSupportedAudioFile(TParsePtrC& p);
+
   CArrayPtrFlat<TOggFile>* iFiles; 
   COggPlayback*            iOggPlayback;
   TOggKey                  iOggKeyTitles;

@@ -424,7 +424,7 @@ void  TOggFiles::FileSearchStepL()
 
       TParsePtrC p( fullname->Des() );
 
-      if (p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0 ) 
+      if (isSupportedAudioFile(p)) 
         {
     	  TBuf<256> shortname;
 	      shortname.Append(e.iName);
@@ -555,10 +555,8 @@ TInt TOggFiles::SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt 
 
 TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
 
-	TParse p;
-	p.Set(aFile,NULL,NULL);
-	
-	if (p.Ext()==_L(".ogg") || p.Ext()==_L(".OGG")) {
+  TParsePtrC p(aFile);	
+	if (isSupportedAudioFile(p)) {
 		
 		ClearFiles();
 #if defined(SERIES60)  
@@ -575,11 +573,9 @@ void TOggFiles::AddFile(const TDesC& aFile){
 	//_LIT(KS,"adding File %s to oggfiles");
 	//OGGLOG.WriteFormat(KS,aFile.Ptr());
 	
-	
-	TParse p;
-	p.Set(aFile,NULL,NULL);
-	
-	if (p.Ext()==_L(".ogg") || p.Ext()==_L(".OGG")) {
+	TParsePtrC p(aFile);
+
+	if (isSupportedAudioFile(p)) {
 		
 		TBuf<512> fullname;
 		fullname.Append(aFile);
@@ -888,4 +884,15 @@ void TOggFiles::FillGenres(CDesCArray& arr, const TDesC& anAlbum,
       }
     }
   }
+}
+
+TBool TOggFiles::isSupportedAudioFile(TParsePtrC& p)
+{
+
+  TBool result;
+  result=(p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0);  
+#ifdef MP3_SUPPORT
+  result=(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0);
+#endif
+  return result;
 }

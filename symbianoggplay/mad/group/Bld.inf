@@ -1,0 +1,13 @@
+// BLD.INF
+// Component description file
+
+PRJ_PLATFORMS 
+WINS WINSCW ARMI
+
+PRJ_MMPFILES
+mad.mmp
+
+PRJ_EXPORTS
+
+// API Headers
+..\libmad\mad.h
