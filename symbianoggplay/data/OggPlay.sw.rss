@@ -42,6 +42,10 @@
 #define ogg_filescan_label1 "Kataloger genomsökta:"
 #define ogg_filescan_label2 "Antal funna .ogg-filer:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Antal funna .m3u-filer:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Fel vid läsning av maskbild."
 #define ogg_text_error_2 "COggCanvas: Fel vid konvertering av bakgrundsbild: "
 #define ogg_text_error_3 "COggPlayAppUi: Kan inte ställa processprioritet: Felkod "

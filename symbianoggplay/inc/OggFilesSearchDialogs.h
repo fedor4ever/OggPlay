@@ -19,7 +19,12 @@ public: // interface
     virtual void  FileSearchProcessFinished() { }
     virtual void  FileSearchDialogDismissedL(TInt /*aButtonId*/) { }
     virtual TInt  FileSearchCycleError(TInt aError) { return aError; }
+
+#ifdef PLAYLIST_SUPPORT
+	virtual void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists) = 0;
+#else
     virtual void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles) = 0;
+#endif
 };
 
 

@@ -39,11 +39,12 @@ private :
 
 public:
   ~TOggPlayList();
-  static TOggPlayList* NewL(const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
+  static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
 
   HBufC* iFileName;
   HBufC* iSubFolder;
   HBufC* iShortName;
+  TInt iAbsoluteIndex;
 };
 
 
@@ -56,7 +57,7 @@ public:
   virtual ~TOggFile();
 
   static TOggFile* NewL();
-  static TOggFile* NewL( const TInt aAbsoluteIndex,
+  static TOggFile* NewL(TInt aAbsoluteIndex,
        const TDesC& aTitle, 
 	   const TDesC& anAlbum,
 	   const TDesC& anArtist,
@@ -161,7 +162,12 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
      void  FileSearchProcessFinished();
      void  FileSearchDialogDismissedL(TInt /*aButtonId*/);
      TInt  FileSearchCycleError(TInt aError);
-     void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles);
+
+#ifdef PLAYLIST_SUPPORT
+	 void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists);
+#else
+	 void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles);
+#endif
 
  protected:
 
@@ -203,6 +209,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   RFs     * iDirScanSession;
   TInt      iNbDirScanned;
   TInt      iNbFilesFound;
+  TInt      iNbPlayListsFound;
   TInt      iCurrentIndexInDirectory;
   TInt      iCurrentDriveIndex;
   CDir    * iDirectory;

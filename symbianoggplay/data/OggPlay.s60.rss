@@ -139,10 +139,18 @@ RESOURCE DIALOG r_dialog_files_search {
 	id =    EOggScrollableTextDialog;
 	control = FILESEARCHCONTROL
 	{
+#ifdef PLAYLIST_SUPPORT
+	height= 120;
+#else
 	height= 90;
+#endif
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
     filesFoundStr =ogg_filescan_label2;
+
+#ifdef PLAYLIST_SUPPORT
+    playlistsFoundStr =ogg_filescan_label3;
+#endif
 	};
     }	
   };

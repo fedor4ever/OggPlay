@@ -43,6 +43,10 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "mappen doorzocht:"
 #define ogg_filescan_label2 "Nummers van .ogg gevonden:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Nummers van .m3u gevonden:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Leesfout bij masker tekening."
 #define ogg_text_error_2 "COggCanvas: Fout bij converteren van achtergrondtekening: "
 #define ogg_text_error_3 "COggPlayAppUi: Kan proces prioriteit niet instellen: Foutcode "

@@ -40,6 +40,10 @@
 #define ogg_filescan_label1 "Directories scanned:"
 #define ogg_filescan_label2 "Number of .ogg found:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Number of .m3u found:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Errore nella lettura della maschera bitmap:" 
 #define ogg_text_error_2 "COggCanvas: Errore nel convertire lo sfondo bitmap:" 
 #define ogg_text_error_3 "COggPlayAppUi: Impossibile assegnare la priorità del processo: " 

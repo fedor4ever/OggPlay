@@ -40,6 +40,9 @@
 #define ogg_filescan_label1 "Verzeichnisse durchsucht:"
 #define ogg_filescan_label2 "Anzahl gefundener Oggfiles:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Anzahl gefundener Playlistfiles:"
+#endif
 
 #define ogg_text_error_1 "COggButton: Fehler beim lesen der Maske."
 #define ogg_text_error_2 "COggCanvas: Fehler beim konvertieren des Hintergrundbildes: "

@@ -43,6 +43,10 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "Direktorier gennemsøgt:"
 #define ogg_filescan_label2 "Antal .Ogg filer fundet:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Antal .M3u filer fundet:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Error reading mask bitmap."
 #define ogg_text_error_2 "COggCanvas: Error converting background bitmap: "
 #define ogg_text_error_3 "COggPlayAppUi: Cannot set process priority: Err code "

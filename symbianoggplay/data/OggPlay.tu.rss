@@ -43,6 +43,10 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "Taranan klasörler:"
 #define ogg_filescan_label2 "Bulunan .ogg dosyaları:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Bulunan .m3u dosyaları:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Bit haritası okunurken hata."
 #define ogg_text_error_2 "COggCanvas: Arkaplanı değiştirirken hata: "
 #define ogg_text_error_3 "COggPlayAppUi: Süreç önceliği değiştirilemiyor: Hata kodu "

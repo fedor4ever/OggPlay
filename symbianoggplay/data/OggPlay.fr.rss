@@ -42,6 +42,10 @@
 #define ogg_filescan_label1 "Répertoires visités:"
 #define ogg_filescan_label2 "Fichiers trouvés:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Playlists trouvés:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Erreur de lecture de l'image de masque."
 #define ogg_text_error_2 "COggCanvas: Erreur de conversion de l'image d'arrière-plan:"
 #define ogg_text_error_3 "COggPlayAppUi: Impossible de régler la priorité du processus: Erreur de code"

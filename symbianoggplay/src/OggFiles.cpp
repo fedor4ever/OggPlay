@@ -29,7 +29,7 @@ TOggPlayList::TOggPlayList()
 {
 }
 
-TOggPlayList* TOggPlayList::NewL(const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName)
+TOggPlayList* TOggPlayList::NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName)
   {
   TOggPlayList* self = new (ELeave) TOggPlayList();
   CleanupStack::PushL(self);
@@ -43,6 +43,7 @@ TOggPlayList* TOggPlayList::NewL(const TDesC& aSubFolder, const TDesC& aFileName
   self->iShortName =  HBufC::NewL(aShortName.Length());
   *(self->iShortName) = aShortName;
 
+  self->iAbsoluteIndex = aAbsoluteIndex;
   CleanupStack::Pop(self);
   return self;
   }
@@ -82,7 +83,7 @@ TOggFile* TOggFile::NewL()
   return self;
   }
 
-TOggFile* TOggFile::NewL(const TInt aAbsoluteIndex,
+TOggFile* TOggFile::NewL(TInt aAbsoluteIndex,
            const TDesC& aTitle,
 		   const TDesC& anAlbum,
 		   const TDesC& anArtist,
@@ -397,6 +398,7 @@ TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
         iDirScanDir = const_cast < TDesC *> (&aDir);
         iNbDirScanned = 0;
         iNbFilesFound = 0;
+        iNbPlayListsFound = 0;
         iCurrentIndexInDirectory = 0;
         iCurrentDriveIndex = 0;
         iDirectory=NULL;
@@ -546,10 +548,10 @@ TBool TOggFiles::AddNextFileL()
         if (iPath.Length()>1 && iPath[iPath.Length()-1]==L'\\')
             iPath.SetLength(iPath.Length()-1); // get rid of trailing back slash
             
-        TOggPlayList* o = TOggPlayList::NewL(iPath, iFullname, shortname);
+		TOggPlayList* o = TOggPlayList::NewL(iNbPlayListsFound, iPath, iFullname, shortname);
         iPlayLists->AppendL(o);
         
-		// iNbFilesFound++;
+		iNbPlayListsFound++;
 		iCurrentIndexInDirectory++;
 		fileFound = ETrue;
 	}
@@ -574,11 +576,21 @@ TInt  TOggFiles::FileSearchCycleError(TInt aError)
 {// Not used
     return(aError);
 };
+
+#ifdef PLAYLIST_SUPPORT
+void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists)
+{
+    aNbDir = iNbDirScanned;
+    aNbFiles = iNbFilesFound;
+    aNbPlayLists = iNbPlayListsFound;
+};
+#else
 void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles)
 {
     aNbDir = iNbDirScanned;
     aNbFiles = iNbFilesFound;
 };
+#endif
 
 TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session)
 {
@@ -1065,6 +1077,10 @@ void TOggFiles::FillPlayList(CDesCArray& arr, const TDesC& aPlayListFile)
 	if (o)
 		AppendLine(arr, COggListBox::EFileName, *(o->iShortName), o->iAbsoluteIndex);
   }
+
+  delete buf;
+  file.Close();
+  fs.Close();
 }
 #endif
 

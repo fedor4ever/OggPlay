@@ -42,6 +42,10 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "Carpetas miradas:"
 #define ogg_filescan_label2 "Número de ficheros OGG encontrados:"
 
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Número de ficheros M3U encontrados:"
+#endif
+
 #define ogg_text_error_1 "COggButton: Error leyendo la imagen de máscara"
 #define ogg_text_error_2 "COggCanvas: Error convirtiendo la imagen de fondo: "
 #define ogg_text_error_3 "COggPlayAppUi: No se puede establecer la prioridad del proceso: Cód. error "

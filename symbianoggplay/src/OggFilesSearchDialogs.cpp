@@ -58,6 +58,16 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinBold12,fs2);
 
     
+#ifdef PLAYLIST_SUPPORT
+	iLabels = new(ELeave)CArrayPtrFlat<CEikLabel>(7);
+    
+    TPtrC text[] = { aReader.ReadTPtrC(),  aReader.ReadTPtrC(),  aReader.ReadTPtrC(), aReader.ReadTPtrC(), _L("0"), _L("0"),_L("0") };
+    const CFont* fonts[] = {iFontLatinBold12, iFontLatinPlain, iFontLatinPlain,iFontLatinPlain, iFontLatinBold12,iFontLatinBold12,iFontLatinBold12};
+	const TInt  PosValues [][4] = { {10, 2, 156, 16}, {2, 25, 140, 16}, {2,45,140,16}, {2,65,140,16}, {145,25,20,16}, {145,45,20,16}, {145,65,20,16} };
+	const TInt Colors[][3] = { {0,0,255}, {0,0,0}, {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0} };
+    const TGulAlignmentValue Align[] = { EHCenterVCenter,EHRightVTop,EHRightVTop,EHRightVTop,EHLeftVTop,EHLeftVTop,EHLeftVTop };
+    for (TInt i=0; i<7; i++)
+#else
     iLabels = new(ELeave)CArrayPtrFlat<CEikLabel>(5);
     
     TPtrC text[] = { aReader.ReadTPtrC(),  aReader.ReadTPtrC(),  aReader.ReadTPtrC(), _L("0"), _L("0") };
@@ -66,6 +76,7 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     const TInt Colors[][3] = { {0,0,255}, {0,0,0}, {0,0,0},{0,0,0},{0,0,0} };
     const TGulAlignmentValue Align[] = { EHCenterVCenter,EHRightVTop,EHRightVTop,EHLeftVTop,EHLeftVTop };
     for (TInt i=0; i<5; i++)
+#endif
     {
         CEikLabel * c = new(ELeave) CEikLabel();
   
@@ -112,7 +123,11 @@ COggFilesSearchContainer* COggFilesSearchContainer::NewL(
 
 TInt COggFilesSearchContainer::CountComponentControls() const
     {
+#ifdef PLAYLIST_SUPPORT
+    return 7;
+#else
     return 5;
+#endif
     }
 
 
@@ -128,8 +143,13 @@ void COggFilesSearchContainer::Draw(const TRect& aRect) const
     gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
     gc.DrawRect(aRect);
 
+#ifdef PLAYLIST_SUPPORT
+	gc.BitBltMasked(TPoint(iFishPosition,90),ifish1,
+        TRect(0,0, 42, 28), ifishmask, ETrue);
+#else
     gc.BitBltMasked(TPoint(iFishPosition,60),ifish1,
         TRect(0,0, 42, 28), ifishmask, ETrue);
+#endif
 
     }
 
@@ -173,7 +193,22 @@ TCoeInputCapabilities COggFilesSearchContainer::InputCapabilities() const
 
 void COggFilesSearchContainer::UpdateControl()
 {
-    
+#ifdef PLAYLIST_SUPPORT    
+    TInt aNbDir, aNbFiles, aNbPlayLists;
+    iBackgroundProcess->FileSearchGetCurrentStatus(aNbDir, aNbFiles, aNbPlayLists);
+
+	TBuf<10> number;
+    number.AppendNum(aNbDir);
+    (*iLabels)[4]->SetTextL(number); 
+
+	TBuf<10> number2;
+    number2.AppendNum(aNbFiles);
+    (*iLabels)[5]->SetTextL(number2); 
+
+	TBuf<10> number3;
+    number3.AppendNum(aNbPlayLists);
+    (*iLabels)[6]->SetTextL(number3);
+#else
     TInt aNbDir, aNbFiles;
     iBackgroundProcess->FileSearchGetCurrentStatus(aNbDir,aNbFiles);
     TBuf<10> number;
@@ -182,11 +217,12 @@ void COggFilesSearchContainer::UpdateControl()
      TBuf<10> number2;
     number2.AppendNum(aNbFiles);
     (*iLabels)[4]->SetTextL(number2); 
+#endif
 
     DrawNow();
     iFishPosition = iFishPosition - 5;
     if (iFishPosition <5)
-        iFishPosition = 100;
+        iFishPosition = 120;
 }
 
 
