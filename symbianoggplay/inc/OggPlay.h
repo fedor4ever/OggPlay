@@ -155,6 +155,7 @@ class COggSongList;
 // A utility class monitoring the telephone line
 //----------------------------------------------
 
+#ifdef MONITOR_TELEPHONE_LINE
 class COggActive : public CBase
 {
  public:
@@ -180,7 +181,7 @@ class COggActive : public CBase
   TInt           iLineToMonitor;
   COggPlayAppUi* iAppUi;
 };
-
+#endif
 
 #ifdef SERIES60
 class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver
@@ -223,7 +224,11 @@ public:
   
   COggPlayAppView* iAppView;
   COggPlayback*    iOggPlayback;
+
+#ifdef MONITOR_TELEPHONE_LINE
   COggActive*      iActive;
+#endif
+
   COggMsgEnv*      iOggMsgEnv;
 
   COggSongList*    iSongList;

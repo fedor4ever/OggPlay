@@ -6,8 +6,13 @@
 #ifdef SERIES60
 #include <aknappui.h>
 #include <avkon.rsg>
-#include <eikapp.h>
 #endif
+
+#ifdef UIQ
+#include <eikappui.h>
+#endif
+
+#include <eikapp.h>
 
 
 COggFilesSearchDialog::COggFilesSearchDialog(MOggFilesSearchBackgroundProcess *aBackgroundProcess)

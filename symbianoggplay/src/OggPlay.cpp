@@ -71,6 +71,7 @@ E32Dll(TDllReason)
 //
 ///////////////////////////////////////////////////////////////
 
+#ifdef MONITOR_TELEPHONE_LINE
 COggActive::COggActive():iServer(0),iPhone(0),iLine(0),iRequestStatusChange(),iTimer(0),iCallBack(0),  iInterrupted(0)
 {
 }
@@ -244,7 +245,7 @@ COggActive::~COggActive()
 	}
 #endif
 }
-
+#endif // MONITOR_TELEPHONE_LINE
 
 ////////////////////////////////////////////////////////////////
 //
@@ -326,9 +327,11 @@ COggPlayAppUi::ConstructL()
 	SetHotKey();
 	iIsRunningEmbedded = EFalse;
 	
+#ifdef MONITOR_TELEPHONE_LINE
 	iActive= new (ELeave) COggActive();
 	iActive->ConstructL(this);
 	iActive->IssueRequest();
+#endif
 	
 	if (iAppView->IsFlipOpen()) {
 		// Create and activate the view
@@ -415,7 +418,10 @@ COggPlayAppUi::~COggPlayAppUi()
     }
 #endif
 
+#ifdef MONITOR_TELEPHONE_LINE
 	if (iActive) { delete iActive; iActive=0; }
+#endif
+
 	if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
 	iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
 	
@@ -869,10 +875,13 @@ void
 COggPlayAppUi::SelectPreviousView()
 {
   if(iViewHistoryStack.Count()==0) return;
+
+#if defined(SERIES60)
   TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
+#endif
+
   iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
 
-  
   const TInt previousView= iAppView->GetViewName(0);
   if (previousView==ETop) {
 	  //iViewBy= ETop;
@@ -881,11 +890,13 @@ COggPlayAppUi::SelectPreviousView()
   }
   else 
 	  HandleCommandL(EOggViewByTitle+previousView);
+
   #if defined(SERIES60)
   // UIQ_?
   // Select the entry which were left.
   iAppView->SelectItem(previousListboxLine);
   #endif
+
   return;
 }
 

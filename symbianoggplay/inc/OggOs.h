@@ -45,13 +45,20 @@ chSTR2(__LINE__) "):" #desc)
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-#define SERIES60
+//#define SERIES60
+#define UIQ
+
 // There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
 #define DOS
 
 // Switches at least the splash bitmap
 #define UNSTABLE_RELEASE
 
+#if defined(UIQ)
+// Define the type of UIQ platform
+#define MOTOROLA
+//#define SONYERICSSON
+#else // SERIES60
 // Automatic platform target. Seen fail on windows systems.
 #if defined(__AVKON_ELAF__) || defined(__AVKON_APAC__)
   #if !defined(UIQ)
@@ -64,7 +71,7 @@ chSTR2(__LINE__) "):" #desc)
   #endif
   //#pragma chmsg(Building for UIQ)
 #endif
-
+#endif
 
 // NEW CODE ENABLERS
 //
@@ -92,9 +99,10 @@ chSTR2(__LINE__) "):" #desc)
 // Not ready yet for prime time!
 #define MDCT_FREQ_ANALYSER 
 
-// support for legacy audio codec (-:
-// this is extremely experimental at the moment.
-#undef MP3_SUPPORT
+// Some phones require direct TSY access for phone call notification
+#if !defined(MOTOROLA)
+#define MONITOR_TELEPHONE_LINE 
+#endif
 
 // OTHERS
 //

@@ -18,45 +18,23 @@ SOURCE OggViews.cpp
 SOURCE OggTremor.cpp
 SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
+#if defined SERIES60
 SOURCE OggSettingsContainer.cpp
+#endif
 SOURCE OggFilesSearchDialogs.cpp
 SOURCE OggRateConvert.cpp
-IFDEF_S60( SOURCE OggUserHotkeys.cpp )
+#if defined SERIES60
+SOURCE OggUserHotkeys.cpp
+#endif
 
 //FIXMAD: should be part of the vorbis dll
 SOURCEPATH ..\vorbis
 SOURCE TremorDecoder.cpp
 
-#if defined MP3_SUPPORT
-//FIXMAD: MAD should of course have its own dll.
-SOURCEPATH    ..\mad\src
-SOURCE bstdfile.c
-SOURCE MadDecoder.cpp
-//SOURCE dllentry.cpp     
-
-SOURCEPATH    ..\mad\libmad
-SOURCE bit.c
-SOURCE decoder.c
-SOURCE fixed.c
-SOURCE frame.c
-SOURCE huffman.c
-SOURCE layer12.c
-SOURCE layer3.c
-SOURCE stream.c
-SOURCE synth.c
-SOURCE timer.c
-SOURCE version.c
-
-MACRO HAVE_CONFIG_H
-MACRO SYMBIAN_STACKFIX
-MACRO FPM_ARM
-
-#endif
-
-SOURCEPATH ..\src
-
 RESOURCE ..\data\OggPlay.rss
+#if defined SERIES60
 RESOURCE ..\data\OggPlay_caption.rss
+#endif
 
 #if defined MULTI_LINGUAL_INSTALLER
 LANG SC EN FR GE DU IT SP SW TU DA
@@ -65,18 +43,45 @@ LANG SC
 #endif
 
 
-USERINCLUDE . ..\inc ..\vorbis ..\data ..\mad\libmad ..\mad\inc
+USERINCLUDE . ..\inc ..\vorbis ..\data
 
 SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 
-LIBRARY euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib 
-LIBRARY fbscli.lib bitgdi.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib 
-LIBRARY avkon.lib flogger.lib 
+LIBRARY euser.lib 
+LIBRARY apparc.lib
+LIBRARY cone.lib
+LIBRARY efsrv.lib
+LIBRARY eikcore.lib
+LIBRARY eikdlg.lib
+LIBRARY eikcoctl.lib
+LIBRARY eikctl.lib
+LIBRARY gdi.lib
+LIBRARY ws32.lib 
+LIBRARY bafl.lib
+LIBRARY fbscli.lib
+LIBRARY bitgdi.lib
+LIBRARY apgrfx.lib
+LIBRARY egul.lib 
+LIBRARY estlib.lib
+#ifdef MONITOR_TELEPHONE_LINE
+LIBRARY etel.lib
+#endif 
+LIBRARY charconv.lib
+#if defined SERIES60
+LIBRARY avkon.lib
+#endif
+LIBRARY qikctl.lib
+LIBRARY flogger.lib 
+LIBRARY libvorbisidec.lib
+LIBRARY mediaclientaudiostream.lib
+#if defined SERIES60
 LIBRARY MediaClientImage.lib 
-LIBRARY libvorbisidec.lib gdi.lib
-LIBRARY etext.lib form.lib // For CScrollableRichTextControl
+LIBRARY etext.lib
+LIBRARY form.lib
+LIBRARY estor.lib
+#endif
+LIBRARY hal.lib
 //LIBRARY msvcrt.lib
-LIBRARY estor.lib hal.lib
 
 
 START WINS      
