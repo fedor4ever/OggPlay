@@ -289,7 +289,7 @@ void COggPlayback::Play()
    switch (iState)
    {
    case EOpen:  
-      iEof            = 0;
+      iEof = EFalse;
       // Intentionally fall-thru
       
    case EPaused:
@@ -331,7 +331,7 @@ void COggPlayback::Stop()
       ClearComments();
 
       iTime = 0;
-      iEof  = 0;
+      iEof  = EFalse;
       
       if (iObserver)
       {
@@ -481,20 +481,60 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
       iMaxVolume = iStream->GetMaxVolume();
       break;
 
+   case EMAudioFBCallbackStateDecodeCompleteBufferListEmpty:
+      // Occurs mostly when all data has been played
+
+      // Check if all data has been played
+      if ( iEof )
+      {
+         TInt j;
+         for ( j = 0; j < KMotoBuffers; j++ )
+         {
+            if ( iBufferFlag[ j ] == EBufferInUse ) break;
+         }
+
+         if ( j >= KMotoBuffers )
+         {
+            // All data has been played, so stop
+            iStream->Stop();
+            iState = EClosed;
+            if (iFileOpen)
+            {
+               iDecoder->Close(iFile);
+               fclose(iFile);
+               iFileOpen = EFalse;
+            }
+
+            ClearComments();
+            iTime = 0;
+         }
+      }
+      break;
+
+   case EMAudioFBCallbackStateDecodeCompleteStopped:
+      // Occurs after stop has been called
+      if ( iEof )  // Make sure this is a completed case not a user stop
+      {
+         if ( iObserver ) iObserver->NotifyPlayComplete();
+         iEof = EFalse;
+      }
+      break;
+
    case EMAudioFBCallbackStateDecodeError:
       switch( aError )
       {
-      case EMAudioFBCallbackErrorBufferFull:
-      case EMAudioFBCallbackErrorForcedStop:
-      case EMAudioFBCallbackErrorForcedClose:
       case EMAudioFBCallbackErrorPriorityRejection:
       case EMAudioFBCallbackErrorResourceRejection:
       case EMAudioFBCallbackErrorAlertModeRejection:
+      case EMAudioFBCallbackErrorBufferFull:
+      case EMAudioFBCallbackErrorForcedStop:
+      case EMAudioFBCallbackErrorForcedClose:
       case EMAudioFBCallbackErrorUnknown:
-         // Setup the API to be deleted outside of the OnEvent() callback
+         // Setup the API to be deleted outside of the callback
          iDelete = iStream;
          iStream = NULL;
          iState  = EClosed;
+         iObserver->NotifyPlayInterrupted();
          break;
 
       default:
@@ -528,20 +568,6 @@ void COggPlayback::OnEvent
                if ( !iEof && (iState == EPlaying) )
                {
                   TRAPD( err, SendBufferL( i ) );
-               }
-               else
-               {
-                  // Check for no outstanding data condition
-                  if ( iEof )
-                  {
-                     TInt j;
-                     for ( j = 0; j < KMotoBuffers; j++ )
-                     {
-                        if ( iBufferFlag[ j ] == EBufferInUse ) break;
-                     }
-
-                     if ( j >= KMotoBuffers ) Stop();
-                  }
                }
                break;
             }
@@ -585,8 +611,8 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer )
       }
 #endif
       
-      TInt cnt = iDecoder->Read( aBuffer, len ); 
-      
+      cnt = iDecoder->Read( aBuffer, len );
+
       if ( cnt > 0 )
       {
          aBuffer.SetLength( len + cnt );
