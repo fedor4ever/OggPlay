@@ -1156,15 +1156,15 @@ COggPlayAppUi::FindSkins()
 void
 COggPlayAppUi::ReadIniFile()
 {
-	RFile in;
-  TInt err;
-
-   // Open the file
-   if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
-   {
-		TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
-		return;
-	}
+    RFile in;
+    TInt err;
+    
+    // Open the file
+    if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
+    {
+        TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
+        return;
+    }
 	
 	TFileText tf;
 	tf.Set(in);
@@ -1228,6 +1228,22 @@ COggPlayAppUi::ReadIniFile()
 
    } // version 2 onwards
 	
+    TInt nbController = IniRead32(tf) ;
+    TBuf<10> extension;
+    TInt32 uid;
+    for ( TInt j=0; j<nbController; j++ )
+    {
+        if ( tf.Read(extension) != KErrNone)
+            extension = KNullDesC;
+        uid = IniRead32(tf);
+        TUid aUid;
+        aUid.iUid = uid;
+        TRAPD(newermind,
+        iOggPlayback->GetPluginListL(extension).SelectPluginL(aUid); )
+        
+        TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid, newermind));
+    }
+
    in.Close();
 	
    IFDEF_S60( iAnalyzerState = EDecay; )
@@ -1276,28 +1292,28 @@ COggPlayAppUi::IniRead64( TFileText& aFile, TInt64 aDefault )
 void
 COggPlayAppUi::WriteIniFile()
 {
-	RFile out;
-
-	TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), iIniFileName ));
-
-   if ( out.Replace( iCoeEnv->FsSession(), iIniFileName->Des(), EFileWrite | EFileStreamText) != KErrNone ) return;
-  
-  TRACEF(_L("Writing Inifile..."));
-
-	TFileText tf;
-	tf.Set(out);
-	
-	TBuf<64> num;
-
-  // this should do the trick for forward compatibility:
-  TInt magic=0xdb;
-  TInt iniversion=5;
-  
-  num.Num(magic);
-  tf.Write(num);
-
-  num.Num(iniversion);
-  tf.Write(num);
+    RFile out;
+    
+    TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), iIniFileName ));
+    
+    if ( out.Replace( iCoeEnv->FsSession(), iIniFileName->Des(), EFileWrite | EFileStreamText) != KErrNone ) return;
+    
+    TRACEF(_L("Writing Inifile..."));
+    TInt j;
+    TFileText tf;
+    tf.Set(out);
+    
+    TBuf<64> num;
+    
+    // this should do the trick for forward compatibility:
+    TInt magic=0xdb;
+    TInt iniversion=6;
+    
+    num.Num(magic);
+    tf.Write(num);
+    
+    num.Num(iniversion);
+    tf.Write(num);
 
 	num.Num(iHotkey);
 	tf.Write(num);
@@ -1321,18 +1337,18 @@ COggPlayAppUi::WriteIniFile()
 	num.Num(iCurrentSkin);
 	tf.Write(num);
 	
- // from iniversion 2 onwards:
-  num.Num(iViewHistoryStack.Count());
-	tf.Write(num);
-  
-   for ( TInt i = 0; i < iViewHistoryStack.Count(); i++ )
-   {
-    num.Num(iViewHistoryStack[i]);
-    TRACEF(COggLog::VA(_L("iViewHistoryStack[%d]= %d"),i,iViewHistoryStack[i]));
-	  tf.Write(num);
-   }
-
-  num.Num(iAppView->GetSelectedIndex());
+    // from iniversion 2 onwards:
+    num.Num(iViewHistoryStack.Count());
+    tf.Write(num);
+    
+    for ( TInt i = 0; i < iViewHistoryStack.Count(); i++ )
+    {
+        num.Num(iViewHistoryStack[i]);
+        TRACEF(COggLog::VA(_L("iViewHistoryStack[%d]= %d"),i,iViewHistoryStack[i]));
+        tf.Write(num);
+    }
+    
+    num.Num(iAppView->GetSelectedIndex());
 	tf.Write(num);
 	
 	num.Num(iSettings.iScanmode);
@@ -1343,25 +1359,46 @@ COggPlayAppUi::WriteIniFile()
 
  	num.Num(iSettings.iManeuvringSpeed);
 	tf.Write(num);
-
-  for( TInt j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
+    
+    for( j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
     {
-    num.Num(iSettings.iUserHotkeys[j]);
-	  tf.Write(num);
-  	}
+        num.Num(iSettings.iUserHotkeys[j]);
+        tf.Write(num);
+    }
+    
+    num.Num(iSettings.iWarningsEnabled);
+    tf.Write(num);
+    
+    num.Num(iSettings.iRskIdle);
+    tf.Write(num);
+    
+    num.Num(iSettings.iRskPlay);
+    tf.Write(num);
+    
+    num.Num(iRandom);
+    tf.Write(num);
+#ifdef PLUGIN_SYSTEM
+    CDesCArrayFlat * supportedExtensionList = iOggPlayback->SupportedExtensions();
+    TRAPD(Err,
+    {
+        CleanupStack::PushL(supportedExtensionList);
+        
+        num.Num(supportedExtensionList->Count());
+        tf.Write(num);
+        for ( j=0; j<supportedExtensionList->Count(); j++ )
+        {
+            tf.Write( (*supportedExtensionList)[j] );
+            CPluginInfo & selected = iOggPlayback->GetPluginListL( (*supportedExtensionList)[j] ).GetSelectedPluginInfo();
+            
+            num.Num((TInt)selected.iControllerUid.iUid) ;
+            tf.Write(num);
+        }
+        
+        CleanupStack::PopAndDestroy(1);
+    } ) // End of TRAP
 
- 	num.Num(iSettings.iWarningsEnabled);
-	tf.Write(num);
-
- 	num.Num(iSettings.iRskIdle);
-	tf.Write(num);
-
- 	num.Num(iSettings.iRskPlay);
-	tf.Write(num);
-
-	num.Num(iRandom);
-	tf.Write(num);
-
+#endif
+    
    // Please increase ini_version when adding stuff
 	
 	out.Close();

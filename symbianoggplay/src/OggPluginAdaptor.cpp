@@ -119,7 +119,7 @@ CArrayPtrFlat <CPluginInfo> & CExtensionSupportedPluginList::GetPluginInfoList()
     return(*iListPluginInfos);
 }
 
-void CExtensionSupportedPluginList::SelectPlugin(TUid aSelectedUid)
+void CExtensionSupportedPluginList::SelectPluginL(TUid aSelectedUid)
 { 
     TBool found = EFalse;
     for(TInt i =0; i<iListPluginInfos->Count(); i++)
@@ -130,7 +130,7 @@ void CExtensionSupportedPluginList::SelectPlugin(TUid aSelectedUid)
             found = ETrue;
         }
     }
-    __ASSERT_ALWAYS ( found, User::Panic(_L("CExtensionSupportedPluginList Internal Mismatch "),100));
+    if ( !found ) User::Leave(KErrNotFound);
     
 }
 ////////////////////////////////////////////////////////////////
@@ -412,7 +412,7 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
 void COggPluginAdaptor::ConstructL()
 {
     
-    iExtensionSupportedPluginList = new (ELeave) CArrayPtrFlat <CExtensionSupportedPluginList> (3);
+    iExtensionSupportedPluginList = new (ELeave) CArrayPtrFlat <CExtensionSupportedPluginList> (4);
 
     // iPluginInfos will be updated, if required plugin has been found
     SearchPluginsL(_L("ogg"));
@@ -424,14 +424,18 @@ void COggPluginAdaptor::ConstructL()
 
 CDesCArrayFlat * COggPluginAdaptor::SupportedExtensions()
 {
-    CDesCArrayFlat * extensions;
-    extensions = new (ELeave) CDesCArrayFlat (3);
-    CleanupStack::PushL(extensions);
-    for (TInt i=0; i<iExtensionSupportedPluginList->Count(); i++)
+    CDesCArrayFlat * extensions = NULL;
+    TRAPD(err,
     {
-        extensions->AppendL((*iExtensionSupportedPluginList)[i]->GetExtension());
+        extensions = new (ELeave) CDesCArrayFlat (3);
+        CleanupStack::PushL(extensions);
+        for (TInt i=0; i<iExtensionSupportedPluginList->Count(); i++)
+        {
+           extensions->AppendL((*iExtensionSupportedPluginList)[i]->GetExtension());
+        }
+        CleanupStack::Pop();
     }
-    CleanupStack::Pop();
+    ) // END OF TRAP
     return(extensions);
 }
 

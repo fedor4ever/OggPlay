@@ -8,7 +8,7 @@ This is the Release Note for Release 1.6.0 of Oggplay for Series60.
 
 OggPlay is a music player for phones running on the Symbian Operating system. 
 It was originally playing only .ogg file format, but some of the latest versions 
-now plays MP3 and AAC in addition to OGG files
+now plays MP3, AAC, MP4, M4A in addition to OGG files
 
 See the ReadMeFirst.html to see which file formats your phone supports.
 
@@ -24,9 +24,14 @@ History
 
 What's new in Release 1.6.0:
 --------------------------
+Support for MP4 format.
+Support for M4A format, aka, the iTunes(TM) format. This format is exactly same as mp4, 
+but in order to use it, you´ll have to rename the file extension from m4a to mp4.
+
 Capability to choose which plugin will be used. Note that the plugin that you choose might
 not be fully compatible with OggPlay (OvController, for example).
 
+A little bunch of bug fixes.
 
 What's new in Release 1.5.1:
 --------------------------

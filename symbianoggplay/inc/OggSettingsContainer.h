@@ -100,12 +100,9 @@ public:
   COggplayCodecSelectionSettingItemList(COggPlayAppUi& aAppUi);
   
 protected:
-  virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
-  virtual void EditItemL  ( TInt aIndex, TBool aCalledFromMenu );
- 
+  virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId); 
 
 private:
-  TOggplaySettings& iData;
   COggPlayAppUi& iAppUi;
   TInt iSelectedIndexes[NUMBER_OF_SEARCHED_EXTENSIONS]; // These indexes will be translated to UIDs when the
                                                         // Setting list will be dismissed
@@ -124,6 +121,7 @@ class CCodecSelectionSettingItem : public CAknEnumeratedTextPopupSettingItem
         void EditItemL ( TBool aCalledFromMenu );
     public : // New Functions
         TInt32 GetSelectedUid();
+        void StoreL();
     private: //data
         CExtensionSupportedPluginList *iPluginList;
         CAbsPlayback & iPlayback;

@@ -75,7 +75,7 @@ class CExtensionSupportedPluginList: public CBase
         void AddPluginL(const CMMFFormatImplementationInformation &aFormatInfo,
             const TUid aControllerUid);
         const TDesC & GetExtension();
-        void SelectPlugin(TUid aUid);
+        void SelectPluginL(TUid aUid);
         CArrayPtrFlat <CPluginInfo> & GetPluginInfoList();
         CPluginInfo & GetSelectedPluginInfo();
 

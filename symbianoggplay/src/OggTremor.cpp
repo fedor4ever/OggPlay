@@ -166,6 +166,7 @@ void COggPlayback::SetDecoderL(const TDesC& aFileName)
 TInt COggPlayback::Open(const TDesC& aFileName)
 {
 
+  TRACEF(COggLog::VA(_L("OPEN") ));
   if (iFileOpen) {
     iDecoder->Close(iFile);
     fclose(iFile);
@@ -530,6 +531,8 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 
 void COggPlayback::Play() 
 {
+
+    TRACEF(COggLog::VA(_L("PLAY %i "), iState ));
     switch(iState) {
     case EPaused:
         break;
@@ -561,6 +564,7 @@ void COggPlayback::Play()
 
 void COggPlayback::Pause()
 {
+  TRACEF(COggLog::VA(_L("PAUSE") ));
   if (iState != EPlaying) return;
   iState= EPaused;
   TRAPD( err, iStream->Stop() );
@@ -574,6 +578,8 @@ void COggPlayback::Resume()
 
 void COggPlayback::Stop()
 {
+    
+  TRACEF(COggLog::VA(_L("STOP") ));
   if (iState == EClosed ) // FIXIT Was 'EPlaying' and panicked at exit in paused mode
   { 
     return;
@@ -687,6 +693,8 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
   // KErrDied       -13  (interrupted by higher priority)
   // KErrInUse      -14
 
+    
+  TRACEF(COggLog::VA(_L("MaoscPlayComplete:%d"), aError ));
   if (iState==EPaused || iState==EClosed) return;
 
   if (aError == KErrUnderflow) 
@@ -726,6 +734,9 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
   // KErrInUse      -14  (the sound device was stolen from us)
   // KErrAbort      -39  (stream was stopped before this buffer was copied)
 
+    
+  if (aError != KErrNone)
+    { TRACEF(COggLog::VA(_L("MaoscBufferCopied:%d"), aError )); }
   if (aError == KErrCancel) aError= KErrNone;
 
   if (aError == KErrAbort ||
@@ -762,6 +773,8 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
 void COggPlayback::MaoscOpenComplete(TInt aError) 
 { 
+    
+  TRACEF(COggLog::VA(_L("MaoscOpenComplete:%d"), aError ));
   iMaxVolume=iStream->MaxVolume();
   if (aError != KErrNone) {
 

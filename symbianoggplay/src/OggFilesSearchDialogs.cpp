@@ -56,7 +56,7 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     
     TPtrC text[] = { aReader.ReadTPtrC(),  aReader.ReadTPtrC(),  aReader.ReadTPtrC(), _L("0"), _L("0") };
     const CFont* fonts[] = {iFontLatinBold12, iFontLatinPlain, iFontLatinPlain,iFontLatinBold12,iFontLatinBold12};
-    const TInt  PosValues [][4] = { {10, 2, 156, 16}, {2, 25, 140, 16}, {2,45,140,16}, {145,25,20,16}, {145,45,20,16} };
+    const TInt  PosValues [][4] = { {10, 2, 156, 16}, {2, 25, 140, 16}, {2,45,140,16}, {145,25,20,16}, {145,45,40,16} };
     const TInt Colors[][3] = { {0,0,255}, {0,0,0}, {0,0,0},{0,0,0},{0,0,0} };
     const TGulAlignmentValue Align[] = { EHCenterVCenter,EHRightVTop,EHRightVTop,EHLeftVTop,EHLeftVTop };
     for (TInt i=0; i<5; i++)

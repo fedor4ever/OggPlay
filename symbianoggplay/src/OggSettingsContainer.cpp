@@ -189,7 +189,7 @@ void  CGainSettingItem:: EditItemL ( TBool aCalledFromMenu )
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 COggplayCodecSelectionSettingItemList::COggplayCodecSelectionSettingItemList(COggPlayAppUi& aAppUi)
-: iData(aAppUi.iSettings), iAppUi(aAppUi)
+:  iAppUi(aAppUi)
 {
 }
 
@@ -225,13 +225,7 @@ CAknSettingItem* COggplayCodecSelectionSettingItemList::CreateSettingItemL(TInt 
     return item;
 }
 
-void COggplayCodecSelectionSettingItemList::EditItemL  ( TInt aIndex, TBool aCalledFromMenu )
-{
-    CAknSettingItemList::EditItemL(aIndex, aCalledFromMenu);
 
-    // When coming back from the edit, convert the value from index to UID
-    iData.iControllerUid[aIndex] = iCodecSelectionSettingItemArray[aIndex]->GetSelectedUid();   
-}
 
 CCodecSelectionSettingItem::CCodecSelectionSettingItem(TInt aResourceId, TInt &aValue, 
                                                        CAbsPlayback * aPlayback,
@@ -297,18 +291,17 @@ void  CCodecSelectionSettingItem::EditItemL ( TBool aCalledFromMenu )
     }
 }
 
-TInt32 CCodecSelectionSettingItem::GetSelectedUid()
+void  CCodecSelectionSettingItem::StoreL()
 {
 
     if (iPluginList)
     {
         CArrayPtrFlat <CPluginInfo> & list = iPluginList->GetPluginInfoList();
         TUid selectedUid = list[InternalValue()]->iControllerUid;
-        iPluginList->SelectPlugin(selectedUid);
-        return(selectedUid.iUid);
+        TRAPD(err, iPluginList->SelectPluginL(selectedUid);)
+        __ASSERT_ALWAYS(err==KErrNone, User::Panic(_L("Internal UID mismatch"), 999));
+        return;
     }
-    else
-        return NULL;
 }
 
 
