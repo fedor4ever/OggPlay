@@ -18,23 +18,29 @@ SOURCE OggFiles.cpp
 
 RESOURCE ..\data\OggPlay.rss
 RESOURCE ..\data\OggPlay_caption.rss
-LANG     SC
+
+#include "..\inc\OggOs.h"
+
+#if defined MULTI_LINGUAL_INSTALLER
+LANG SC EN FR GE DU IT SP SW TU DA
+#else
+LANG SC
+#endif
+
 
 USERINCLUDE . ..\inc ..\vorbis ..\data
 
-//SYSTEMINCLUDE \Symbian\6.1\Series60\Epoc32\Include \Symbian\6.1\Series60\Epoc32\Include\libc
 SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 
-LIBRARY euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib fbscli.lib bitgdi.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib 
+LIBRARY euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib 
+LIBRARY fbscli.lib bitgdi.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib 
 LIBRARY avkon.lib flogger.lib 
 LIBRARY MediaClientImage.lib 
 LIBRARY libvorbisidec.lib gdi.lib
-// qikctl.lib qikdlg.lib qikutils.lib
-//LIBRARY euser.lib apparc.lib cone.lib eikcore.lib 
-//LIBRARY eikcoctl.lib avkon.lib
-//LIBRARY eikdlg.lib
-
 LIBRARY etext.lib form.lib // For CScrollableRichTextControl
+//LIBRARY msvcrt.lib
+
+
 START WINS      
 // ?wins_specific_information
 END
@@ -43,7 +49,6 @@ START MARM
 // ?marm_specific_information
 END
 
-//LIBRARY msvcrt.lib
 
 START BITMAP S60default.mbm
 TARGETPATH   \system\apps\OggPlay
@@ -92,16 +97,10 @@ SOURCE       1   pausem.bmp
 SOURCE       c12 pausefocus.bmp
 SOURCE       c12 repeat.bmp
 SOURCE       1   repeatm.bmp
-//SOURCE       1   eyeclosed.bmp
-//SOURCE       c12 knob.bmp
-//SOURCE       1   knobm.bmp
-//SOURCE       c12 alarm.bmp
-//SOURCE       1   alarmm.bmp
-//SOURCE       c12 bar.bmp
-//SOURCE       1   barm.bmp
+SOURCE       c12 \symbian\oggplaylogo.bmp
 END
 
-AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c8 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
+AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c16 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
 epocstacksize 16000
 
 // For Symbian 7.0 and over
