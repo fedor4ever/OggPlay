@@ -1,5 +1,5 @@
-﻿// uncomment for UIQ/SERIES60:
-
+CHARACTER_SET UTF8
+ 
 #define ogg_options_title "Opties"
 #define ogg_hotkey "Sneltoets:"
 #define ogg_alarm "Alarm:"
