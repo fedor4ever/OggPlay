@@ -28,7 +28,13 @@
 #ifdef SERIES60
 #include <aknkeys.h>
 #include <aknkeylock.h>
-#else
+#endif
+#ifdef SERIES80
+#include <eikenv.h>
+#define KFullScreenWidth 640
+#define KFullScreenHeight 200
+#endif
+#ifdef UIQ
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 #endif
 #include <stdlib.h>
@@ -1434,7 +1440,7 @@ TKeyResponse
 COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
 
-#if defined(SERIES60)
+#if defined(SERIES60) || defined(SERIES80)
 
   enum EOggKeys {
     EOggConfirm=EKeyDevice3
@@ -1540,6 +1546,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       else iApp->HandleCommandL(EOggPlay);
     return EKeyWasConsumed;
   } 
+  #if defined(SERIES60)
   // S60 User Hotkeys
   switch(COggUserHotkeys::Hotkey(aKeyEvent,aType,&iApp->iSettings)) {
     case TOggplaySettings::EFastForward : {
@@ -1599,6 +1606,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     default :
       break;
     }
+#endif
 
   if (code>0) {
     if (aKeyEvent.iScanCode==EStdKeyDeviceD) { iApp->NextSong(); return EKeyWasConsumed; }           // jog dial up

@@ -32,6 +32,10 @@
 #include "OggUserHotkeys.h"
 #endif
 
+#if defined(SERIES80)
+#include <eikenv.h>
+#endif
+
 enum
 {
   EScreenModeFlipOpen = 0,

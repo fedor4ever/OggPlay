@@ -7,6 +7,10 @@
 #include <aknappui.h>
 #include <avkon.rsg>
 #endif
+#ifdef SERIES80
+#include <eikenv.h>
+#include <eikappui.h>
+#endif
 
 #ifdef UIQ
 #include <eikappui.h>

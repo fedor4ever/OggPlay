@@ -204,7 +204,8 @@ LIBRARY MMFControllerFramework.lib
 //  Build the AIF & MBM files
 //
 
-#if defined SERIES60
+#if ((defined SERIES60) || (defined SERIES80) )
+
 START BITMAP S60default.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER

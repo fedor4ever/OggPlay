@@ -22,7 +22,13 @@
 #include <aknkeys.h>	// EStdQuartzKeyConfirm etc.
 #include <akndialog.h>   // for about
 _LIT(KTsyName,"phonetsy.tsy");
-#else
+#endif
+
+#ifdef SERIES80
+#include <eikEnv.h>
+#endif
+
+#ifdef UIQ
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 _LIT(KTsyName,"erigsm.tsy");
 #endif
@@ -202,9 +208,11 @@ COggActive::CallBack(TAny* aPtr)
 void
 COggActive::IssueRequest()
 {
+#if defined(SERIES60) || defined(SERIES80)
 	iTimer= CPeriodic::New(CActive::EPriorityStandard);
 	iCallBack= new (ELeave) TCallBack(COggActive::CallBack,this);
 	iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(1000000),*iCallBack);
+#endif
 }
 
 COggActive::~COggActive()
@@ -224,7 +232,7 @@ COggActive::~COggActive()
 		delete iServer; 
 		iServer= NULL;
 	}
-#if defined(SERIES60)
+#if defined(SERIES60) || defined(SERIES80)
 	// UIQ_?
 	if (iTimer) {
 		iTimer->Cancel();
@@ -625,7 +633,9 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		TBuf<128> buf;
 		iEikonEnv->ReadResource(buf, R_OGG_VERSION);
 		d->SetVersion(buf);
+#ifdef SERIES80 // To be removed when functionality has been implemented
 		d->ExecuteLD(R_DIALOG_ABOUT);
+#endif		
 		break;
 	}
 
@@ -676,13 +686,14 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 					 }
 		
 	case EOggOptions: {
-#if !defined(SERIES60)
+
+#ifdef UIQ
 		CHotkeyDialog *hk = new CHotkeyDialog(&iHotkey, &iAlarmActive, &iAlarmTime);
 		if (hk->ExecuteLD(R_DIALOG_HOTKEY)==EEikBidOk) {
 			SetHotKey();
 			iAppView->SetAlarm();
 		}
-#else
+#elif defined(SERIES60)
     ActivateOggViewL(KOggPlayUidSettingsView);
 //    ActivateLocalViewL(KOggPlayUidSettingsView);
 #endif
@@ -975,7 +986,9 @@ COggPlayAppUi::ShowFileInfo()
 	d->SetTime(iOggPlayback->Time().GetTInt());
 	d->SetBitRate(iOggPlayback->BitRate()/1000);
 	if ( ! iSongList->AnySongPlaying() ) iOggPlayback->ClearComments();
+#ifdef SERIES80 // To be removed when functionality has been implemented
 	d->ExecuteLD(R_DIALOG_INFO);
+#endif
 }
 
 
@@ -1090,8 +1103,8 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 			aMenuPane->AddMenuItemL(item);
 		}
 	}
-	
-#if !defined(SERIES60)
+
+#ifdef UIQ
 	if (aMenuId==R_POPUP_MENU) {
 		if (iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
 		aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());

@@ -7,6 +7,8 @@
 
 #if defined(UIQ)
 #include "OggPlay.uiq.rss"
+#elif defined(SERIES80)
+#include "OggPlay.s80.rss"
 #else
 #include "OggPlay.s60.rss"
 #endif

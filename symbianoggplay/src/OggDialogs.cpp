@@ -23,6 +23,9 @@
 #if defined(SERIES60)
 #include <e32base.h>
 #include <eikenv.h>
+#elif defined(SERIES80)
+#include <eikchlst.h>
+#include <eikchkbx.h>
 #else
 #include <eikchlst.h>
 #include <eikchkbx.h>
@@ -45,7 +48,7 @@ CHotkeyDialog::CHotkeyDialog(int *aHotKeyIndex, int* anAlarmActive, TTime* anAla
 TBool
 CHotkeyDialog::OkToExitL(int /* aButtonId */)
 {
-#if !defined(SERIES60)
+#if !( defined(SERIES60) || defined(SERIES80) )
   CEikChoiceList *cl = (CEikChoiceList*)Control(EOggOptionsHotkey);
   CEikCheckBox* cb= (CEikCheckBox*)Control(EOggOptionsAlarmActive);
   CQikTimeEditor* ct= (CQikTimeEditor*)Control(EOggOptionsAlarmTime);
@@ -60,7 +63,7 @@ CHotkeyDialog::OkToExitL(int /* aButtonId */)
 void
 CHotkeyDialog::PreLayoutDynInitL()
 {
-#if !defined(SERIES60)
+#if !( defined(SERIES60) || defined(SERIES80) )
   CEikChoiceList *cl = (CEikChoiceList*)Control(EOggOptionsHotkey);
   CEikCheckBox* cb= (CEikCheckBox*)Control(EOggOptionsAlarmActive);
   CQikTimeEditor* ct= (CQikTimeEditor*)Control(EOggOptionsAlarmTime);

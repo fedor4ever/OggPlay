@@ -32,6 +32,10 @@
 const TInt KFullScreenWidth = 176;
 const TInt KFullScreenHeight = 188;
 
+#elif defined(SERIES80)
+#include <eikappui.h>
+#include <eikapp.h>
+#include <eikdoc.h>
 #else
 #include <qikappui.h>
 #include <qikapplication.h>
@@ -198,6 +202,8 @@ class COggActive : public CBase
 
 #ifdef SERIES60
 class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver
+#elif defined(SERIES80)
+class COggPlayAppUi : public CEikAppUi, public MPlaybackObserver
 #else
 class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver
 #endif
@@ -388,6 +394,8 @@ public:
 
 #ifdef SERIES60
 class COggPlayApplication : public CAknApplication
+#elif defined(SERIES80)
+class COggPlayApplication : public CEikApplication
 #else
 class COggPlayApplication : public CQikApplication
 #endif

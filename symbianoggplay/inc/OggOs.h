@@ -42,6 +42,7 @@ chSTR2(__LINE__) "):" #desc)
 //
 // Enable this line to enforce the platform target.
 #define SERIES60
+//#define SERIES80
 //#define UIQ
 // Enable this line to choose the OS OggPlay will run on.
 #define OS70S
@@ -56,6 +57,11 @@ chSTR2(__LINE__) "):" #desc)
 #define KVersionMajor 1
 #define KVersionMinor 30
 #define KVersionString "1.30"
+#endif
+#if defined(SERIES80)
+#define KVersionMajor 1
+#define KVersionMinor 63
+#define KVersionString "1.63"
 #endif
 
 // There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
