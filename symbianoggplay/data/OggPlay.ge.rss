@@ -1,0 +1,37 @@
+#define ogg_exit_label "Beenden"
+#define ogg_about_label "Über OggPlay..."
+
+RESOURCE TBUF r_ogg_error_1 { buf="COggButton: Fehler beim lesen der Maske."; }
+RESOURCE TBUF r_ogg_error_2 { buf="COggCanvas: Fehler beim konvertieren des Hintergrundbildes: "; }
+RESOURCE TBUF r_ogg_error_3 { buf="COggPlayAppUi: Kann Prozesspriorität nicht setzten: Fehler "; }
+RESOURCE TBUF r_ogg_error_4 { buf="COggPlayAppUi: Kann Prozess nicht finden?? Auwaia."; }
+RESOURCE TBUF r_ogg_error_5 { buf="COggPlayAppUi: Kann Threadpriorität nicht setzten: Fehler "; }
+RESOURCE TBUF r_ogg_error_6 { buf="COggPlayAppUi: Kann Thread nicht finden?? Auwaia."; }
+RESOURCE TBUF r_ogg_error_7 { buf="TOggPlayback: Fehler beim Öffnen des Audiostreams. Fehler "; }
+RESOURCE TBUF r_ogg_error_8 { buf="TOggPlayback: Kein Dateiname angegeben."; }
+RESOURCE TBUF r_ogg_error_9 { buf="Das ist keine Ogg vorbis Datei?!"; }
+RESOURCE TBUF r_ogg_error_10 { buf="Nur Streams mit ein oder zwei Kanälen werden unterstützt."; }
+RESOURCE TBUF r_ogg_error_12 { buf="Nicht unterstzütztes Audioformat."; }
+RESOURCE TBUF r_ogg_error_13 { buf="Nur die folgenden Samplingfrequenzen werden unterstützt: 11025,16000,22050,32000,44100,48000 Hz."; }
+RESOURCE TBUF r_ogg_error_14 { buf="Kann diese Datei nicht öffnen."; }
+RESOURCE TBUF r_ogg_error_15 { buf="Keine Datei ist geöffnet."; }
+RESOURCE TBUF r_ogg_error_16 { buf="Fehlernummer "; }
+RESOURCE TBUF r_ogg_error_17 { buf="Fehler beim Senden eines Puffers"; }
+RESOURCE TBUF r_ogg_error_18 { buf="Fehler beim Kopieren eines Puffers"; }
+RESOURCE TBUF r_ogg_error_19 { buf="Fehler beim Einlesen "; }
+RESOURCE TBUF r_ogg_error_20 { buf="Fehler"; }
+RESOURCE TBUF r_ogg_error_21 { buf="COggCanvas: Fehler beim Öffnen des Hintergrundbildes."; }
+
+RESOURCE TBUF r_ogg_string_1 { buf="Aktualisiere Liste der Dateien..."; }
+RESOURCE TBUF r_ogg_string_2 { buf="Schreibe Dateidatenbank..."; }
+RESOURCE TBUF r_ogg_string_3 { buf="Alarm ausgelöst"; }
+RESOURCE TBUF r_ogg_string_4 { buf="Kann die Prozesspriorität nicht setzen: Fehler "; }
+RESOURCE TBUF r_ogg_string_5 { buf="Wiedergabeliste gemischt"; }
+RESOURCE TBUF r_ogg_string_6 { buf="(Titel)"; }
+RESOURCE TBUF r_ogg_string_7 { buf="(Alben)"; }
+RESOURCE TBUF r_ogg_string_8 { buf="(Künstler)"; }
+RESOURCE TBUF r_ogg_string_9 { buf="(Genres)"; }
+RESOURCE TBUF r_ogg_string_10 { buf="(Verzeichnisse)"; }
+RESOURCE TBUF r_ogg_string_11 { buf="(Dateien)"; }
+RESOURCE TBUF r_ogg_string_12 { buf="(nicht zugeordnet)"; }
+

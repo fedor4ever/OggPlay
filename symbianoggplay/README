@@ -1,0 +1,30 @@
+This is the README file for OggPlay Source Code Distribution
+------------------------------------------------------------
+
+Introduction
+............
+
+OggPlay is an Ogg Vorbis Audio Player for Smartphones and PDAs. It is
+developed by me, that is Leif H. Wilden. For questions and comments
+write to leifhendrik@netscape.net. It currently runs only on the
+SonyEriccson P800, but other platforms may be supported later. This is
+open source software under a GNU public licence, see the included text
+files LICENSE and GPL for more information. If you want to use this
+software or parts of it together with non-GPLed software, you must
+contact me! I may release parts of this software under other licences
+which are more appropriate for your purposes.
+
+Included files in this distribution
+...................................
+
+GPL              OggPlay.cpp     OggPlayAppView.cpp  bitmaps
+LICENSE          OggPlay.h       OggPlayAppView.h    int_fft.c
+OggControls.cpp  OggPlay.hrh     OggTremor.cpp       makefile
+OggControls.h    OggPlay.mbm     OggTremor.h         vorbis
+OggDialogs.cpp   OggPlay.mmp     OggViews.cpp
+OggDialogs.h     OggPlay.rss     OggViews.h
+OggPlay.aif      OggPlayAif.rss  README
+
+<bitmaps> is a subdirectory which contains the bitmaps for program
+icons and skins. <vorbis> is a subdirectory which contains the tremor
+integer based ogg vorbis decoding algorith from Xiph.org.

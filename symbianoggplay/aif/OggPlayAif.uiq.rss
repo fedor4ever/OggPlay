@@ -1,0 +1,40 @@
+#include </local/symbian_sdk_7.0/include/aiftool.rh>
+
+RESOURCE AIF_DATA
+{
+	app_uid=0x1000A661;
+	caption_list=
+	{ 
+		CAPTION { code=ELangEnglish; caption="OggPlay"; }
+	};
+	num_icons=1;
+	embeddability=KAppNotEmbeddable;
+	newfile=KAppDoesNotSupportNewFile;
+	datatype_list=
+	{
+		DATATYPE { priority=EDataTypePriorityNormal; type="application/ogg"; }
+	};
+
+	view_list =
+	{
+		VIEW_DATA
+		{
+			view_uid = 0x1000A662;
+			screen_mode = 0;
+			caption_list =
+			{
+				CAPTION { code= ELangEnglish; caption="FO view"; }
+			};
+		},
+		VIEW_DATA
+		{
+			view_uid = 0x1000A663;
+			screen_mode = 1;
+			caption_list =
+			{
+				CAPTION { code= ELangEnglish; caption="FC view"; }
+			};
+		}
+	};
+}
+

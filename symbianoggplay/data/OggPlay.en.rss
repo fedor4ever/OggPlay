@@ -1,0 +1,205 @@
+#define ogg_exit_label "Exit"
+#define ogg_about_label "About OggPlay..."
+
+RESOURCE TBUF r_ogg_error_1 { buf="COggButton: Error reading mask bitmap."; }
+RESOURCE TBUF r_ogg_error_2 { buf="COggCanvas: Error converting background bitmap: "; }
+RESOURCE TBUF r_ogg_error_3 { buf="COggPlayAppUi: Cannot set process priority: Err code "; }
+RESOURCE TBUF r_ogg_error_4 { buf="COggPlayAppUi: Cannot find process?? Ooops."; }
+RESOURCE TBUF r_ogg_error_5 { buf="COggPlayAppUi: Cannot set thread priority: Err code "; }
+RESOURCE TBUF r_ogg_error_6 { buf="COggPlayAppUi: Cannot find thread?? Ooops."; }
+RESOURCE TBUF r_ogg_error_7 { buf="TOggPlayback: Error during stream open. Err code "; }
+RESOURCE TBUF r_ogg_error_8 { buf="TOggPlayback: No filename specified."; }
+RESOURCE TBUF r_ogg_error_9 { buf="This is not an ogg vorbis file?!"; }
+RESOURCE TBUF r_ogg_error_10 { buf="Only streams with one or two channels are supported."; }
+RESOURCE TBUF r_ogg_error_12 { buf="Unsupported audio format."; }
+RESOURCE TBUF r_ogg_error_13 { buf="Only the following sample rates are supported: 11025,16000,22050,32000,44100,48000 Hz."; }
+RESOURCE TBUF r_ogg_error_14 { buf="Cannot open this file"; }
+RESOURCE TBUF r_ogg_error_15 { buf="No file is open."; }
+RESOURCE TBUF r_ogg_error_16 { buf="Error code "; }
+RESOURCE TBUF r_ogg_error_17 { buf="Error sending buffer"; }
+RESOURCE TBUF r_ogg_error_18 { buf="Error copying buffer"; }
+RESOURCE TBUF r_ogg_error_19 { buf="Input error "; }
+RESOURCE TBUF r_ogg_error_20 { buf="Error"; }
+RESOURCE TBUF r_ogg_error_21 { buf="COggCanvas: Error opening background image."; }
+
+RESOURCE TBUF r_ogg_string_1 { buf="Updating list of files..."; }
+RESOURCE TBUF r_ogg_string_2 { buf="Writing file database..."; }
+RESOURCE TBUF r_ogg_string_3 { buf="Alarm triggered"; }
+RESOURCE TBUF r_ogg_string_4 { buf="Cannot set process priority: Err code "; }
+RESOURCE TBUF r_ogg_string_5 { buf="Playlist shuffled"; }
+RESOURCE TBUF r_ogg_string_6 { buf="(titles)"; }
+RESOURCE TBUF r_ogg_string_7 { buf="(albums)"; }
+RESOURCE TBUF r_ogg_string_8 { buf="(artists)"; }
+RESOURCE TBUF r_ogg_string_9 { buf="(genres)"; }
+RESOURCE TBUF r_ogg_string_10 { buf="(subfolders)"; }
+RESOURCE TBUF r_ogg_string_11 { buf="(files)"; }
+RESOURCE TBUF r_ogg_string_12 { buf="(unassigned)"; }
+
+#if !defined(SERIES60)
+RESOURCE DIALOG r_dialog_hotkey {
+  title   = "Options";
+  buttons = R_OGG_DIALOG_BUTTONS2;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+      type = EEikCtChoiceList;
+      prompt = "Hotkey:";
+      id = EOggOptionsHotkey;
+      control = CHOICELIST { };
+    } ,
+    DLG_LINE {
+      type = EQikCtTimeEditor;
+      prompt = "Alarm:";
+      id = EOggOptionsAlarmTime;
+      control = QIK_TIME_EDITOR {
+        minTime = TIME { };
+        maxTime = TIME {
+          second = 59;
+          minute = 59;
+          hour = 23; };
+        flags = EQikTimeForce24HourFormat; 
+      };
+    } ,
+    DLG_LINE {
+      type = EEikCtCheckBox;
+      prompt = "Active:";
+      id = EOggOptionsAlarmActive;
+    }
+  };
+}
+#endif
+
+RESOURCE DIALOG r_dialog_about {
+  title   = "About OggPlay";
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	id = EOggLabelAboutVersion;
+	control = LABEL 
+	{
+		txt="Version ???";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="(c) 2003 by Leif H. Wilden";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="see www.geocities.com/p800tools for more info";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt="(c) Ogg/Vorbis codec by Xiph.org";
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    }	
+  };
+}
+
+RESOURCE DIALOG r_dialog_info {
+  title   = "File properties";
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt = "Filename:";
+        id = EOggInfoDialog;
+	control = LABEL 
+	{
+		txt="";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+        id = EOggLabelFileName;
+	control = LABEL 
+	{
+		txt="unknown";
+		horiz_align=EEikLabelAlignHLeft;
+	};	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Filesize [byte]:";
+	id= EOggLabelFileSize;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Bitrate [kbit/s]:";
+	id = EOggLabelBitRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Rate [Hz]:";
+        id   = EOggLabelRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= "Channels:";
+	id = EOggLabelChannels;
+	control = LABEL
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    }
+  };
+}
+
+RESOURCE ARRAY r_hotkey_array {
+  items= {
+    LBUF { txt="None"; },
+    LBUF { txt="Camera button"; },
+    LBUF { txt="Browser button"; },
+    LBUF { txt="Power button"; },
+    LBUF { txt="Flip open"; }
+  };
+}
+
+RESOURCE MENU_PANE r_empty_menu {}
+
+RESOURCE MENU_PANE r_file_menu
+{
+  items= {
+      MENU_ITEM { command=EOggInfo;	txt="File info..."; },
+      MENU_ITEM { command=EOggRepeat;	txt="Repeat";
+                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggShuffle;  txt="Shuffle playlist"; },
+      MENU_ITEM { command=EOggViewRebuild;txt="Find new files"; },
+      MENU_ITEM { command=EOggOptions;	txt="Options...";
+                  flags=EEikMenuItemSeparatorAfter;},
+      MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
+      MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
+  };
+}

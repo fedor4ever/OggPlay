@@ -1,0 +1,18 @@
+include epoc.general
+
+CFLAGS = -D__DLL__ $(CFLAGS)
+EX = $(EPOCTRGREL)/edll.lib
+LDFLAGS = -s -e _E32Dll -u _E32Dll --dll
+
+%.def1: $(OBJECTS)
+	@echo Building $@
+	$(DT) -m arm_interwork --output-def $*.def1 $(OBJECTS)
+	perl -pi -e 's,\n,\r\n, ; s/ ;.*/ NONAME/' $*.def1
+
+%.bas: %.def1
+	@echo Building $@
+	$(LD) $(LDFLAGS) --base-file $*.bas -o $*.ex1 $(EX) $(OBJECTS) $(LIBS)
+
+%.exp: %.bas
+	@echo Building $@
+	$(DT) -m arm_interwork --def $*.def1 --dllname "$*[$(U3)].APP" --output-exp $*.exp --base-file $*.bas

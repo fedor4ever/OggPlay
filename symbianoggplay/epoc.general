@@ -1,0 +1,73 @@
+CC = arm-epoc-pe-gcc 
+CPP = arm-epoc-pe-cpp
+CCC = arm-epoc-pe-g++
+LD = arm-epoc-pe-ld
+DT = arm-epoc-pe-dlltool
+PT = petran
+RC = rcomp
+GA = genaif
+AT = perl $(EPOC)/Tools/epocaif.pl
+PKGVERS = 1,0
+
+EPOCTRGREL = $(EPOC)/Release/armi/urel
+
+CPPFLAGS = -Iinc -Idata -I$(EPOC)/include -DLANGUAGE_SC
+CFLAGS   = -Iinc -Idata $(CFLAGS)
+
+%.o: %.c
+	@echo CCing $*.c to $*.o
+	$(CC) $(CFLAGS) -c $*.c -o $*.o
+
+%.o: %.cpp
+	$(CCC) $(CFLAGS) -c $*.cpp -o $*.o
+
+%.o: %.cc
+	$(CCC) $(CFLAGS) -c $*.cc -o $*.o
+
+%.ex2: %.exp
+	@echo Building $@
+	@$(LD) $(LDFLAGS) -o $*.ex2 $*.exp $(EX) $(OBJECTS) $(LIBS)
+
+%.exe: %.ex2
+	@echo Building $@
+	@$(PT) $*.ex2 $*.exe -nocall -uid1 0x$(U1) -uid2 0x$(U2) -uid3 0x$(U3)
+
+%.app: %.ex2
+	@echo Building $@
+	@$(PT) $*.ex2 $*.app -nocall -uid1 0x$(U1) -uid2 0x$(U2) -uid3 0x$(U3)
+
+%.aif: %.aifspec
+	$(GA) -u 0x$(U3) $*.aifspec $*.aif
+#	$(AT) -t . -I . -I$(EPOC)/include $*Aif.rss -m$*.mbm -o$*.aif
+
+# Resource staff
+%.rpp: %.rss
+	$(CPP) $(CPPFLAGS) < $*.rss | perl -pe 's,\r,,; s,\n,\r\n,' > $*.rpp
+
+%.rsc: %.rpp
+	rm -f $*.rsc $*.rs~
+	$(RC) -u -o$*.rsc -h$*.rs~ -i$*.rss -s$*.rpp
+	cp $*.rs~ $*.rsg; 
+
+# Package stuff
+
+%.pkg: $(PKGFILES)
+	@echo '&EN' > $*.pkg
+	@echo '#{"'$*'"},(0x'$(U3)'),$(PKGVERS),0' >> $*.pkg
+	@echo '(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID"}'>>$*.pkg
+	@echo '(0x101F617B),2,0,0,{"UIQ20ProductID"}'>>$*.pkg
+	@for i in $(PKGFILES); do \
+		echo '"'$$i'"-"!:\system\apps\'$*'\'$$i'"' >> $*.pkg; \
+	done
+
+%.sis: %.pkg $(PKGFILES)
+	cp aif/$*.aif data/$*.rsc bitmaps/$*.mbm .
+	makesis $*.pkg $*.sis
+
+
+.SUFFIXES: .app .c .cpp .cc .o .bas .exe .ex2 .exp .rpp .rsc .def1 .sis .pkg
+#.PRECIOUS: %.exp %.ex2 %.def1 %.bas %.map %.rpp %.pkg
+.PRECIOUS:  %.pkg
+GENERATED = *.app *.o *.ex? *.opx *.def? *.bas *.map *.Lib *.rpp *.rs[cg~] *.sis 
+# *.pkg
+# *.aif

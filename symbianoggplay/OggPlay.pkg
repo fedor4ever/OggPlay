@@ -1,0 +1,8 @@
+&EN
+#{"OggPlay"},(0x1000A661),0,91,0
+(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID"}
+(0x101F617B),2,0,0,{"UIQ20ProductID"}
+"OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
+"OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
+"OggPlay.rsc"-"!:\system\apps\OggPlay\OggPlay.rsc"
+"OggPlay.mbm"-"!:\system\apps\OggPlay\OggPlay.mbm"
