@@ -1,0 +1,8 @@
+TestFiles.txt
+
+
+bass_overdrive.ogg
+------------------------------------------------------------------------
+Heavy bass problem on SX1
+https://sourceforge.net/forum/forum.php?thread_id=1193263&forum_id=294909
+Status : Nothing done but adding the file here. /Bjerre
