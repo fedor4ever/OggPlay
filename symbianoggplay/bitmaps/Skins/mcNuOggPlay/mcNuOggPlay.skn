@@ -9,6 +9,9 @@ OggPlay 1 {
       Position 9 172 158 16
       Font LatinPlain12 1000 0
       FontColor 255 255 255
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
     }
     Volume {
       Position 128 151 39 8
@@ -21,7 +24,7 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     ScrollBar {
-      Position 172 0 4 142
+      Position 172 0 4 162
       KnobIcon 41 42
       Style 1
       ScrollerSize 20

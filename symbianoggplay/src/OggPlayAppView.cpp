@@ -1189,8 +1189,18 @@ void COggPlayAppView::UpdatePlaying()
         #endif
         }
       
-    else
+    else if(!iArtist[iMode]) { // smelly code ahead
+      _LIT(KSeparator," - ");
+      TInt length=KSeparator().Length()+iApp->iOggPlayback->Title().Length()+iApp->iOggPlayback->Artist().Length();
+      HBufC* iText = HBufC::NewL(length);
+      iText->Des().Copy(iApp->iOggPlayback->Artist());
+      iText->Des().Append(KSeparator);
+      iText->Des().Append(iApp->iOggPlayback->Title());
+      iTitle[iMode]->SetText(*iText);
+      free(iText);
+    } else {
       iTitle[iMode]->SetText(iApp->iOggPlayback->Title());
+    }
   }
   if (iAlbum[iMode]) iAlbum[iMode]->SetText(iApp->iOggPlayback->Album());
   if (iArtist[iMode]) iArtist[iMode]->SetText(iApp->iOggPlayback->Artist());

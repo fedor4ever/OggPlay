@@ -33,5 +33,13 @@ OggPlay 1 {
       Position 1 17 172 43
       Bitmaps 41 1
     }
+    ScrollBar {
+      Position 171 75 4 105
+      KnobIcon 26 27
+      Style 1
+      ScrollerSize 16
+      Step 5
+    }  
+    
   }
 }

@@ -449,7 +449,7 @@ COggText::COggText() :
   iNeedsScrolling(EFalse),
   iHasScrolled(EFalse),
   iScrollDelay(30),
-  iScrollSpeed(2)
+  iScrollStep(2)
 {
 }
 
@@ -475,6 +475,21 @@ COggText::SetFontColor(TRgb aColor)
 {
   iFontColor= aColor;
   iRedraw= ETrue;
+}
+
+void
+COggText::SetScrollStyle(TInt aScrollStyle) {
+  iScrollStyle=aScrollStyle;
+}
+
+void
+COggText::SetScrollDelay(TInt aScrollDelay) {
+  iScrollDelay=aScrollDelay;
+}
+
+void
+COggText::SetScrollStep(TInt aScrollStep) {
+  iScrollStep=aScrollStep;
 }
 
 void
@@ -507,19 +522,97 @@ COggText::ScrollNow()
 void COggText::Cycle()
 {
   if (!iNeedsScrolling) return;
-  if (iHasScrolled) return;
+  switch(iScrollStyle)
+  {
+  case EOnce:
+    CycleOnce();
+    break;
+  case EEndless:
+    CycleOff();
+    break;
+  case ETilBorder:
+    CycleBorder();
+    break;
+  case EBackAndForth:
+    CycleBackAndForth();
+    break;
+  default:
+    CycleOff();
+    break;
+  }
 
+
+}
+
+void COggText::CycleOnce(void)
+{
+  if (iHasScrolled) return;
+  CycleOff();
+
+}
+
+void COggText::CycleOff(void)
+{
   iCycle++;
+
+  iDrawOffset= (iCycle - iScrollDelay)*iScrollStep;
+  if (iDrawOffset<0) iDrawOffset= 0;
 
   if (iCycle<iScrollDelay) return;
 
   iRedraw= ETrue;
   
-  if ((iCycle-iScrollDelay)*iScrollSpeed>iTextWidth) {
+  if ((iCycle-iScrollDelay)*iScrollStep>iTextWidth) {
     iHasScrolled= ETrue;
-    iCycle= 0;
+    iCycle=0;
+    iDrawOffset=0;
   }
+
 }
+
+void COggText::CycleBorder(void)
+{
+  iCycle++;
+
+  iDrawOffset= (iCycle - iScrollDelay)*iScrollStep;
+  if (iDrawOffset<0) iDrawOffset= 0;
+
+  if (iCycle<iScrollDelay) return;
+
+  iRedraw= ETrue;
+  
+  if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth) {
+    iCycle=0;
+  }
+
+}
+
+void COggText::CycleBackAndForth(void)
+{
+  if(iScrollBackward) iCycle--;
+    else iCycle++;
+
+  if(iCycle<0){
+    iScrollBackward=EFalse;
+  }
+
+  iDrawOffset= (iCycle - iScrollDelay)*iScrollStep;
+  if (iDrawOffset<0) {
+    iDrawOffset= 0;
+  }
+  if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth) {
+    iDrawOffset=iTextWidth-iw;    
+  }
+
+  iRedraw= ETrue;
+  
+  if ((iw+(iCycle-iScrollDelay)*iScrollStep)>(iTextWidth+iScrollDelay*iScrollStep)) {
+    iScrollBackward=ETrue;
+    
+  }
+
+}
+
 
 void COggText::Draw(CBitmapContext& aBitmapContext)
 {
@@ -529,9 +622,7 @@ void COggText::Draw(CBitmapContext& aBitmapContext)
   aBitmapContext.SetPenColor(iFontColor);
   aBitmapContext.SetPenSize(TSize(2,2));
 
-  TInt offset= (iCycle - iScrollDelay)*iScrollSpeed;
-  if (offset<0) offset= 0;
-  TRect	lineRect(TPoint(ix-offset,iy), TSize(iw+offset,ih));
+  TRect	lineRect(TPoint(ix-iDrawOffset,iy), TSize(iw+iDrawOffset,ih));
   TPtrC	p(*iText);
 
   CGraphicsContext::TTextAlign a= CGraphicsContext::ECenter;
@@ -560,6 +651,22 @@ TBool COggText::ReadArguments(TOggParser& p)
     TRgb col(0,0,0);
     success= p.ReadColor(col);
     SetFontColor(col);
+  }
+  if (success && p.iToken==_L("Style")) {
+    p.Debug(_L("Setting text style."));
+    TInt s;
+    success= p.ReadToken(s);
+    if (success) SetScrollStyle(s);
+  }
+  if (success && p.iToken==_L("ScrollStep")) {
+    TInt s;
+    success= p.ReadToken(s);
+    if (success) SetScrollStep(s);
+  }
+  if (success && p.iToken==_L("ScrollDelay")) {
+    TInt s;
+    success= p.ReadToken(s);
+    if (success) SetScrollDelay(s);
   }
   return success;
 }

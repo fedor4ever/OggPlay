@@ -188,6 +188,17 @@ class COggText : public COggControl {
   void SetFontColor(TRgb aColor);
   void ScrollNow();  // restart the text scrolling
 
+  enum ScrollStyle {
+    EOnce=0,
+    EEndless,
+    ETilBorder,
+    EBackAndForth, // not implemented
+    ERoundabout // not implemented
+  };
+  void SetScrollStyle(TInt aStyle);
+  void SetScrollDelay(TInt aDelay);
+  void SetScrollStep(TInt aStep);
+
  protected:
 
   virtual void Cycle();
@@ -204,7 +215,22 @@ class COggText : public COggControl {
   TBool  iNeedsScrolling;
   TBool  iHasScrolled;
   TInt   iScrollDelay;
-  TInt   iScrollSpeed;
+  TInt   iScrollStep;
+  TInt   iScrollStyle;
+  TInt   iDrawOffset;
+  TInt   iScrollBackward;
+ 
+ private:
+   // scroll to the left off the textarea and repeat
+   void CycleOff(void);
+   // ... don't repeat
+   void CycleOnce(void);
+   // only scroll until the right text border touches the textarea and repeat
+   void CycleBorder(void);
+   // ... and repeat by scrolling to the right
+   void CycleBackAndForth(void);
+
+
 };
 
 
