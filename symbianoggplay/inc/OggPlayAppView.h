@@ -57,11 +57,13 @@ public:
 
   // access/manipulation of the playlist:
   TInt        GetNSongs();
-  TPtrC       GetFileName(TInt idx);
+  TDesC&      GetFileName(TInt idx);
   TInt        GetItemType(TInt idx);
   void        ShufflePlaylist();
   void        SelectSong(TInt idx);
   TInt        GetSelectedIndex();
+  /// Default argument will use GetSelectedIndex() as index
+  TBool       isPlayableFile( TInt aIndex = -1 );
   CDesCArray* GetTextArray();
 
   void  SetAlarm();
@@ -92,6 +94,8 @@ public:
   TBool PlayDimmed();
 
   static TInt CallBack(TAny* aPtr); // registered with iTimer (CPeriodic)
+  void ListBoxNavigationTimerTick();
+
 
   // from MCoeControlObserver:
   void         HandleControlEventL(CCoeControl* aControl, TCoeEvent aEventType);
@@ -131,6 +135,9 @@ private:
   //TFileName  iBackgroundFileName;
   CDesCArray* iTextArray;
   TInt       iSelected; 
+  /// Data store for GetFileName()
+  TBuf<KMaxFileNameLength> iFileNameStore;
+  TInt iUserInactivityTickCount;
   
   //keyboard focus handling: 
   // do we do keyboard focus handling ?

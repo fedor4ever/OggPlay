@@ -284,7 +284,9 @@ COggPlayAppUi::ConstructL()
 	iSkins= new CDesCArrayFlat(3);
 	FindSkins();
 	iCurrentSkin= 0;
-	
+
+//    iViewStack = new (ELeave) RArray<TInt>();
+
 	iRepeat= 1;
 	iCurrent= -1;
 	iHotkey= 0;
@@ -360,6 +362,7 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iIniFileName;
 	delete iSkins;
 	delete iOggMsgEnv ;
+    iViewHistoryStack.Close();
 	COggLog::Exit();  
 	
 	CloseSTDLIB();
@@ -513,39 +516,56 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	
 	int idx = iAppView->GetSelectedIndex();
 	const TDesC& curFile= iAppView->GetFileName(idx);
+    //TRACE(COggLog::VA(_L("Index=%d, curFile='%S'"), idx, &curFile ));    // FIXIT
 	
 	switch (aCommand) {
 		
 	case EOggPlay: {
 		if (iViewBy==ETop) {
-			TInt i= iAppView->GetSelectedIndex();
-			if (i>=ETitle && i<=EFileName) HandleCommandL(EOggViewByTitle+i);
-			break;
-		}
-		if (iAppView->GetItemType(idx)==6) {
+      if (idx>=ETitle && idx<=EFileName) 
+        {
+        iViewHistoryStack.Append(idx);
+        HandleCommandL(EOggViewByTitle+idx);
+        }
+        break;
+      }
+		  if (iAppView->GetItemType(idx)==6) {
 			// the back item was selected: show the previous view
-			TLex parse(curFile);
-			TInt previousView;
-			parse.Val(previousView);
-			if (previousView==ETop) {
-				//iViewBy= ETop;
-				TBuf<16> dummy;
-				iAppView->FillView(ETop, ETop, dummy);
-			}
-			else HandleCommandL(EOggViewByTitle+previousView);
+
+        TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
+        iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
+
+        TLex parse(curFile);
+			  TInt previousView;
+			  parse.Val(previousView);
+			  if (previousView==ETop) {
+				  //iViewBy= ETop;
+				  TBuf<16> dummy;
+				  iAppView->FillView(ETop, ETop, dummy);
+			  }
+			else 
+        HandleCommandL(EOggViewByTitle+previousView);
+#if defined(SERIES60)
+      // UIQ_?
+      // Select the entry which were left.
+      iAppView->SelectSong(previousListboxLine);
+#endif
 			break;
 		}
-		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) {
-   
+		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) 
+      {
+      iViewHistoryStack.Append(idx);
+
       HBufC *aBuf;
       aBuf = curFile.Alloc();
       CleanupStack::PushL(aBuf);
       iAppView->FillView(ETitle, iViewBy, *aBuf);
       CleanupStack::PopAndDestroy();
+
 			//iViewBy= ETitle;
 			if (iCurrentSong.Length()>0) SetCurrent(iCurrentSong);
-			break;
-		}
+      break;
+      }
 		if (iViewBy==ETitle || iViewBy==EFileName) {
 			if (curFile.Length()>0) {
 				if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
@@ -789,8 +809,21 @@ COggPlayAppUi::PreviousSong()
 void
 COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 {
-	if (aMenuId==R_FILE_MENU) {
-		if (iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
+	if (aMenuId==R_FILE_MENU) 
+        {
+        // "Repeat" on/off entry, UIQ uses check box, Series 60 uses variable argument string.
+#if defined(UIQ)
+        if (iRepeat) 
+            aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
+#else
+        // Temporary hack. The literals should be localized.
+        TBuf<50> buf;
+        iEikonEnv->ReadResource(buf, R_OGG_REPEAT);
+        if (iRepeat) 
+            aMenuPane->SetItemTextL( EOggRepeat, COggLog::VA( buf, &_L(" on")) );
+        else
+            aMenuPane->SetItemTextL( EOggRepeat, COggLog::VA( buf, &_L(" off")) );
+#endif
 		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName));
 		aMenuPane->SetItemDimmed(EOggInfo   , iCurrentSong.Length()==0 && (iAppView->GetSelectedIndex()<0 || !isSongList));
 		aMenuPane->SetItemDimmed(EOggShuffle, iAppView->GetNSongs()<1 || !isSongList);
@@ -856,7 +889,6 @@ COggPlayAppUi::FindSkins()
 			if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN")) {
 				iSkins->AppendL(p.NameAndExt());
 				TPtrC ptr = p.NameAndExt();
-				TRACE(COggLog::VA(_L("Adding skin %S"), &ptr ));
 				if (iSkins->Count()==10) break;
 			}
 		}
@@ -876,7 +908,6 @@ void
 COggPlayAppUi::ReadIniFile()
 {
 	RFile in;
-	TRACE(COggLog::VA(_L("COggPlayAppUi::ReadIniFile() %S"), iIniFileName ));
 	if(in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
 		EFileRead|EFileStreamText) != KErrNone) {
 		//_LIT(KS,"unable to open ini-file, maybe doesn't exist");

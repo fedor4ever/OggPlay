@@ -190,6 +190,8 @@ RESOURCE MENU_PANE r_file_menu
   };
 }
 
+RESOURCE TBUF r_ogg_repeat { buf=ogg_repeat; }	/** Should support '%S' field for on/off indicator strings */ 
+
 RESOURCE TBUF r_ogg_error_1 { buf=ogg_text_error_1; }
 RESOURCE TBUF r_ogg_error_2 { buf=ogg_text_error_2; }
 RESOURCE TBUF r_ogg_error_3 { buf=ogg_text_error_3; }

@@ -455,7 +455,7 @@ class COggListBox : public COggControl
 
   void ScrollBy(TInt nLines);
   TInt CurrentItemIndex();
-  void SetCurrentItemIndex(TInt idx);
+  TInt SetCurrentItemIndex(TInt idx);
   void SetTopIndex(TInt idx);
 
   virtual void Redraw(TBool doRedraw = ETrue);

@@ -33,6 +33,19 @@
 #include <stdlib.h>
 #include "OggTremor.h"
 
+
+const TInt KCallBackPeriod = 75000;  /** Time (usecs) between canvas Refresh() for graphics updating */
+const TInt KUserInactivityTimeoutMSec = 600;
+const TInt KUserInactivityTimeoutTicks = KUserInactivityTimeoutMSec * 1000 / KCallBackPeriod;
+
+
+#if defined(UIQ)
+_LIT(KDirectoryBackString, "..");
+#else
+_LIT(KDirectoryBackString, "(Back)");
+#endif
+
+
 COggPlayAppView::COggPlayAppView() :
   CCoeControl(),
   MCoeControlObserver(),
@@ -62,11 +75,9 @@ COggPlayAppView::~COggPlayAppView()
   delete iCallBack;
 
   if(iCanvas[1]) {
-  //  iCanvas[1]->ClearControls();
     delete iCanvas[1];
   }
   if(iCanvas[0]) {
-   // iCanvas[0]->ClearControls();
     delete iCanvas[0];
   }
 
@@ -128,13 +139,13 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 
   iCanvas[0]->SetFocus(ETrue);
 
-  // start the canvas refresh timer (20 ms):
+  // start the canvas refresh timer (KCallBackPeriod):
   iTimer= CPeriodic::NewL(CActive::EPriorityStandard);
   //FIXME: check whether iCallback can be on the stack:
   //TCallBack* iCallBack= new TCallBack(COggPlayAppView::CallBack,this);
   iCallBack= new TCallBack(COggPlayAppView::CallBack,this);
   //FIXME: only start timer once all initialization has been done
-  iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(75000),*iCallBack);
+  iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(KCallBackPeriod),*iCallBack);
 
   ActivateL();
 }
@@ -203,7 +214,6 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   iFocusControlsIter.SetToFirst();
   COggControl* c=iFocusControlsIter;
   if(c) c->SetFocus(ETrue);
-  TRACELF("ReadSkin ok");
   //OGGLOG.Write(_L("New skin installed."));
 }
 
@@ -657,18 +667,23 @@ COggPlayAppView::GetNSongs()
   return GetTextArray()->Count();
 }
 
-TPtrC
+TDesC&
 COggPlayAppView::GetFileName(TInt idx)
 {
+  iFileNameStore.Zero();
+
   CDesCArray* arr= GetTextArray();
-  if (!arr) return 0;
+  if (!arr) 
+    return iFileNameStore;
 
   TPtrC sel,msel;
-  if(idx >= 0 && idx < arr->Count()) {
+  if(idx >= 0 && idx < arr->Count()) 
+    {
     sel.Set((*arr)[idx]);
-    TextUtils::ColumnText(msel, 2, &sel);
-  }
-  return msel;
+    TextUtils::ColumnText(msel, 2, &sel );
+    }
+  iFileNameStore = msel;
+  return iFileNameStore;
 }
 
 TInt
@@ -694,9 +709,9 @@ void
 COggPlayAppView::SelectSong(TInt idx)
 {
   iSelected= idx;
-    iCurrentSong= GetFileName(idx);
+  iCurrentSong= GetFileName(idx);
   if (iListBox[iMode]) {
-    iListBox[iMode]->SetCurrentItemIndex(idx);
+    iSelected = iListBox[iMode]->SetCurrentItemIndex(idx);
     UpdateControls();
   }
 }
@@ -712,6 +727,27 @@ COggPlayAppView::GetSelectedIndex()
   return -1;
   */
 }
+
+TBool
+COggPlayAppView::isPlayableFile( TInt aIndex )
+  {
+  // This is very unlikely the smartest implementation of this utility ?.
+  // Feel free to make more clever.
+  if( aIndex < 0 )
+	  aIndex = GetSelectedIndex();
+
+  TInt selType = GetItemType(aIndex);
+  TDesC& fileName = GetFileName(aIndex);
+  TRACEF(COggLog::VA(_L("isPlayable() Type=%d / filename='%S'"), selType, &fileName ));
+	
+  if( fileName.Length() && (selType == COggPlayAppUi::ETitle || 
+                            selType == COggPlayAppUi::ETrackTitle ||
+                            selType == COggPlayAppUi::EFileName ))
+    return ETrue;
+  else
+    return EFalse;
+  }
+
 
 CDesCArray*
 COggPlayAppView::GetTextArray()
@@ -791,10 +827,29 @@ COggPlayAppView::CallBack(TAny* aPtr)
       self->iPosition[self->iMode]->SetValue(self->iApp->iOggPlayback->Position().GetTInt());
     
     self->iCanvas[self->iMode]->Refresh();
+
+#if defined(SERIES60)
+    self->ListBoxNavigationTimerTick();
+#endif
   }
 
   return 1;
 }
+
+void
+COggPlayAppView::ListBoxNavigationTimerTick()
+  {
+  if( iUserInactivityTickCount <= 0 )
+    return;
+
+  if( --iUserInactivityTickCount == 0 )
+    {
+    // Fire navi-center event on non-ogg files only, and only when playing.
+    if( !isPlayableFile() && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying )
+      iApp->HandleCommandL(EOggPlay);
+    }
+  }
+
 
 void
 COggPlayAppView::Invalidate()
@@ -854,7 +909,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     TBuf<256> back;
     back.Num(6);
     back.Append(KColumnListSeparator);
-    back.Append(_L(".."));
+    back.Append(KDirectoryBackString);
     back.Append(KColumnListSeparator);
     back.AppendNum((TInt)thePreviousView);
     GetTextArray()->InsertL(0,back);
@@ -874,7 +929,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
       TBuf<256> back;
       back.Num(6);
       back.Append(KColumnListSeparator);
-      back.Append(_L(".."));
+      back.Append(KDirectoryBackString);
       back.Append(KColumnListSeparator);
       back.AppendNum((TInt)thePreviousView);
       GetTextArray()->InsertL(0,back);
@@ -1177,6 +1232,7 @@ COggPlayAppView::HandleControlEventL(CCoeControl* /*aControl*/, TCoeEvent /*aEve
 {
 }
 
+
 TKeyResponse
 COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
@@ -1196,6 +1252,8 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   TInt code     = aKeyEvent.iCode;
 //  TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
 //  TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
+
+  iUserInactivityTickCount = KUserInactivityTimeoutTicks;
 
   COggControl* c=iFocusControlsIter;
   

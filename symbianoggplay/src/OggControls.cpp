@@ -1787,7 +1787,7 @@ COggListBox::CurrentItemIndex()
   return iSelected;
 }
 
-void 
+TInt 
 COggListBox::SetCurrentItemIndex(TInt idx)
 {
   if (idx<0) idx=-1;
@@ -1799,6 +1799,7 @@ COggListBox::SetCurrentItemIndex(TInt idx)
     else if (idx>=iTop+iLinesVisible) SetTopIndex(idx-iLinesVisible+1);
     if (iObserver) iObserver->OggControlEvent(this,1,idx);
   }
+  return idx;
 }
 
 void

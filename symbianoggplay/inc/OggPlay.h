@@ -68,6 +68,9 @@ const TUid KOggPlayUidFCView = { UID3 +2 };
 _LIT(KAudioResourceFile, "Z:\\System\\Apps\\OggPlay\\OggPlay.mbm");
 _LIT(KQTimeResourceFile, "Z:\\System\\Apps\\QTime\\QTime.mbm");
 
+const TInt KMaxFileNameLength = 0x200;
+
+
 static const struct {
   int code; 
   int mask;
@@ -210,6 +213,7 @@ private:
   COggFOView* iFOView;
   COggFCView* iFCView;
   COggMsgEnv* iOggMsgEnv;
+  RArray<TInt> iViewHistoryStack;
 };
 
 #ifdef SERIES60
