@@ -229,7 +229,8 @@ class COggPlayController :	public CMMFController,
             EStateOpen,
 			EStatePlaying,
             EStatePaused,
-            EStateDestroying
+            EStateDestroying,
+            EStateInterrupted
 		};
 
 	    TOggPlayControllerState iState;
@@ -253,6 +254,8 @@ class COggPlayController :	public CMMFController,
         CMMFBuffer * iSinkBuffer;
         TBool iOwnSinkBuffer;
         COggSource * iOggSource;
+        TMMFPrioritySettings iMMFPrioritySettings;
+
 	};
 
     enum {

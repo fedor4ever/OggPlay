@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.6.0 of Oggplay for Series60.
+This is the Release Note for Release 1.6.1 of Oggplay for Series60.
 
 ******************************************************************************
 **** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
@@ -14,13 +14,22 @@ See the ReadMeFirst.html to see which file formats your phone supports.
 
 This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610.
 (And any future Series60 phones that will support MMF.)
-
-The Symbian MMF Ogg Plugin example "OvController" conflicts with this SW.
-If you have installed the example, please make sure it is not choosen as the
-use codec for ogg files. (Menu->Options->Codecs)            
+         
 
 History
 --------------------------------------------------------------------------------------------
+
+
+What's new in Release 1.6.1:
+--------------------------
+Ogg files can now be reliably used as ringing tone. 
+Support for bluetooth headset.
+
+This adress a feature of previous versions where ogg files could be set as ringing tone,
+but they were simply not ringing when call was received. This has been fixed. And as expected,
+when using ogg as ringing tone, vibration will work, if enabled. 
+Proper functionality of ringing tones has been verified on 2 different firmware versions of 6600, 
+and on one 7610.
 
 
 What's new in Release 1.6.0:

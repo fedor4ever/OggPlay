@@ -134,6 +134,7 @@ void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
     iAudioOutput = static_cast<CMMFAudioOutput*>(&aDataSink);
     iAudioOutput->SinkThreadLogon(*this);
 
+    iAudioOutput->SetSinkPrioritySettings(iMMFPrioritySettings);
     PRINT("COggPlayController::AddDataSinkL Out");
 }
 
@@ -154,12 +155,14 @@ void COggPlayController::RemoveDataSinkL(MDataSink&  aDataSink)
 
 }
 
-void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& /*aPrioritySettings*/)
+void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings)
 {
     
     PRINT("COggPlayController::SetPrioritySettingsL");
     // Not implemented yet
-    
+    iMMFPrioritySettings = aPrioritySettings;
+    if (iAudioOutput)
+        iAudioOutput->SetSinkPrioritySettings(aPrioritySettings);
 }
 
 void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& /*aRampDuration*/)
@@ -207,9 +210,16 @@ void COggPlayController::MapcGetLoadingProgressL(TInt& /*aPercentageComplete*/)
 TInt COggPlayController::SendEventToClient(const TMMFEvent& aEvent)
     {
     PRINT("COggPlayController::SendEventToClient");
-    return DoSendEventToClient(aEvent);
-    }
 
+    TRACEF(COggLog::VA(_L("Event %i %i"), aEvent.iEventType,aEvent.iErrorCode ));
+    TMMFEvent myEvent = aEvent;
+    if  (myEvent.iErrorCode == KErrUnderflow)
+     myEvent.iErrorCode = KErrNone; // Client expect KErrNone when playing as completed correctly
+
+    if (aEvent.iErrorCode == KErrDied)
+        iState = EStateInterrupted;
+    return DoSendEventToClient( myEvent );
+    }
 
 void COggPlayController::ResetL()
 {
@@ -224,9 +234,16 @@ void COggPlayController::PrimeL()
 {
     
     PRINT("COggPlayController::PrimeL");
-    if (iState==EStatePrimed)
-        return; // Nothing to do
-    if ((iAudioOutput==NULL)||(iState!=EStateNotOpened)) 
+    if (iState == EStatePrimed) 
+          return; // Nothing to do
+    
+    if (iState == EStateInterrupted) 
+    {
+        iDecoder->Clear();
+        iState = EStateNotOpened;
+    }
+
+    if ( (iAudioOutput==NULL) || (iState!=EStateNotOpened) )
         User::Leave(KErrNotReady);
   
     iState = EStateOpen;
@@ -250,6 +267,8 @@ void COggPlayController::PrimeL()
     
     iState=EStatePrimed;
 
+
+    PRINT("COggPlayController::PrimeL Out");
 
 }
 
@@ -525,7 +544,11 @@ void COggSource::FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId 
         {
         //BufferEmptiedL(aBuffer);
         CMMFDataBuffer* db = static_cast<CMMFDataBuffer*>(aBuffer);
-        iOggSampleRateConverter->FillBuffer(db->Data());
+        if (iOggSampleRateConverter->FillBuffer(db->Data()) == KErrCompletion)
+        {
+            PRINT("COggSource::FillBufferL LastBuffer");
+            db->SetLastBuffer(ETrue);
+        }
         SetSink(aConsumer);
         aConsumer->BufferFilledL(db);
         }
@@ -538,7 +561,11 @@ void COggSource::BufferEmptiedL(CMMFBuffer* aBuffer)
     if ( (aBuffer->Type()==KUidMmfDescriptorBuffer) || (aBuffer->Type()==KUidMmfTransferBuffer))
     {    
         CMMFDataBuffer* db = static_cast<CMMFDataBuffer*>(aBuffer);
-        iOggSampleRateConverter->FillBuffer(db->Data());
+        if (iOggSampleRateConverter->FillBuffer(db->Data()) == KErrCompletion)
+        {
+            PRINT("COggSource::BufferEmptiedL Last Buffer");
+            db->SetLastBuffer(ETrue);
+        }
         iSink->EmptyBufferL(db, this, TMediaId(KUidMediaTypeAudio));
     }
     else User::Leave(KErrNotSupported);
