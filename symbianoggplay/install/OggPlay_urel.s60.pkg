@@ -1,0 +1,11 @@
+&EN
+#{"OggPlay"},(0x1000A661),0,96,0
+(0x101F6F88),0,0,0,{"Series60ProductID"}
+"\epoc32\release\armi\urel\libvorbisidec.dll"-"!:\system\libs\libvorbisidec.dll"
+"\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
+"\epoc32\release\armi\urel\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
+"\epoc32\release\armi\urel\OggPlay.rsc"-"!:\system\apps\OggPlay\OggPlay.rsc"
+"\epoc32\release\armi\urel\OggPlay_caption.rsc"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
+"\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60default.mbm"-"!:\system\apps\OggPlay\S60default.mbm"
+"\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60default.skn"-"!:\system\apps\OggPlay\S60default.skn"
+"..\LICENSE"-"!:\Logs\OggPlay\dummy.txt"
