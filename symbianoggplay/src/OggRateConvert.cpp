@@ -57,9 +57,7 @@ void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBuff
     if (iRateConvertionNeeded)
     {
         __ASSERT_ALWAYS(iSamplingRateFactor>1, User::Panic(_L("Sampling rate factor should be >1"), 0));
-#if defined(SERIES60)
         iDtb = static_cast<TUint32> (iSamplingRateFactor*(1<<15) + 0.5);    /* Fixed-point representation */
-#endif
         iTime = 0;
         iValidX1 = EFalse;
         ix1 = 0;
