@@ -62,11 +62,11 @@
 CAbsPlayback::CAbsPlayback( MPlaybackObserver* anObserver )
 : iState(CAbsPlayback::EClosed)
 , iObserver(anObserver)
-, iBitRate(0)
+, iTime(0)
+, iRate(44100)
 , iChannels(2)
 , iFileSize(0)
-, iRate(44100)
-, iTime(0)
+, iBitRate(0)
 , iAlbum()
 , iArtist()
 , iFileName()
@@ -163,7 +163,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
    }
 
    SetDecoderL( aFileName );
-   if ( iDecoder->OpenInfo(f) < 0 )
+   if ( iDecoder->OpenInfo(f,myname) < 0 )
    {
       iDecoder->Close(f);
       fclose(f);
@@ -231,7 +231,7 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    
    SetDecoderL(aFileName);
 
-   if ( iDecoder->Open(iFile) < 0 )
+   if ( iDecoder->Open(iFile,myname) < 0 )
    {
       iDecoder->Close(iFile);
       fclose(iFile);
@@ -250,6 +250,7 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    iChannels = iDecoder->Channels();
    iTime     = iDecoder->TimeTotal();
    iBitRate  = iDecoder->Bitrate();
+   iFileSize = iDecoder->FileSize();
       
    TInt err = SetAudioCaps( iDecoder->Channels(), iDecoder->Rate() );
    if ( err == KErrNone ) 
