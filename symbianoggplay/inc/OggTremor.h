@@ -35,6 +35,9 @@
 const TInt KBuffers= 12;
 const TInt KBufferSize = 4096*10;
 
+const TInt KMaxVolume = 100;
+const TInt KStepVolume = 10;
+
 class MPlaybackObserver {
  public:
   virtual void NotifyPlayComplete() = 0;
@@ -175,6 +178,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TDes8*                   iSent[KBuffers];
   TInt                     iSentIdx;
   TInt                     iMaxVolume;
+  TInt                     iAudioCaps;
 
   // communication with the tremor/ogg codec:
   //-----------------------------------------
@@ -188,4 +192,24 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
 };
 
+
+
+class COggAudioCapabilityPoll : public MMdaAudioOutputStreamCallback
+    {
+    public:
+        ~COggAudioCapabilityPoll();
+        COggAudioCapabilityPoll();
+        TInt PollL();
+    private:
+        // these are abstract methods in MMdaAudioOutputStreamCallback:
+        virtual void MaoscPlayComplete(TInt aError);
+        virtual void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
+        virtual void MaoscOpenComplete(TInt aError);
+        
+    private:
+        CMdaAudioOutputStream* iStream;
+        TMdaAudioDataSettings    iSettings;
+        TInt iCaps;
+        TInt iRate;
+    };
 #endif

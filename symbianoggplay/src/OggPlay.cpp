@@ -223,7 +223,7 @@ COggPlayAppUi::ConstructL()
   iRepeat= 1;
   iCurrent= -1;
   iHotkey= 0;
-  iVolume= 100;
+  iVolume= KMaxVolume;
   iTryResume= 0;
   iAlarmTriggered= 0;
   iAlarmActive= 0;
@@ -714,12 +714,14 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
     }
   }
 
+#if defined(SERIES60)
   if (aMenuId==R_POPUP_MENU) {
     if (iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
     aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());
     aMenuPane->SetItemDimmed(EOggPlay, !iAppView->CanPlay());
     aMenuPane->SetItemDimmed(EOggPauseResume, !iAppView->CanPause());
   }
+#endif
 }
 
 void
@@ -803,12 +805,12 @@ COggPlayAppUi::ReadIniFile()
     parse.Val(iRepeat);
   };
 
-  iVolume= 100;
+  iVolume= KMaxVolume;
   if (tf.Read(line) == KErrNone) {
     TLex parse(line);
     parse.Val(iVolume);
     if (iVolume<0) iVolume= 0;
-    else if (iVolume>100) iVolume= 100;
+    else if (iVolume>KMaxVolume) iVolume= KMaxVolume;
   };
 
   iAlarmTime.Set(_L("20030101:120000.000000"));

@@ -160,13 +160,19 @@ COggPlayback::COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
   iBufCount(0),
   iCurrentSection(0)
 {
-  iSettings.iChannels  = TMdaAudioDataSettings::EChannelsStereo;
-  iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate44100Hz;
-  iSettings.iMaxVolume = 100;
-  iSettings.iVolume    = 100;
+    iSettings.Query();
+    
+    // These basic rates should be supported by all Symbian OS
+    // Higher quality might not be supported.
+    iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
+    iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
+    iSettings.iVolume = 0;
 };
 
 void COggPlayback::ConstructL() {
+
+  COggAudioCapabilityPoll pollingAudio;
+  iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
 
   iStream  = CMdaAudioOutputStream::NewL(*this);
   
@@ -180,8 +186,7 @@ void COggPlayback::ConstructL() {
     //OGGLOG.Write(buf2);
     //OGGLOG.Write(buf1);
   }
-
-  iMaxVolume=iStream->MaxVolume();
+  iMaxVolume = 1; // This will be updated when stream is opened.
   //OGGLOG.WriteFormat(_L("Max volume is %d"),iMaxVolume);
   TDes8* buffer;
 
@@ -341,6 +346,14 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
     return -101;
   }
 
+  if ( !(rt & iAudioCaps) )
+   {
+    // Rate not supported by this phone.
+    // The infoWinL doesn't work yet
+    // iEnv->InfoWinL(R_OGG_ERROR_12, R_OGG_ERROR_13);
+    return -101;
+   }
+
   TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
 
   return error;
@@ -348,8 +361,8 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 
 TInt COggPlayback::Volume()
 {
-  if (!iStream) return 100;
-  TInt vol=100;
+  if (!iStream) return KMaxVolume;
+  TInt vol=KMaxVolume;
   TRAPD( err, vol=iStream->Volume() );
   return vol;
 }
@@ -357,9 +370,13 @@ TInt COggPlayback::Volume()
 void COggPlayback::SetVolume(TInt aVol)
 {
   if (!iStream) return;
-  if (aVol>100) aVol= 100;
+  if (aVol>KMaxVolume) aVol= KMaxVolume;
   else if(aVol<0) aVol= 0;
-  TRAPD( err, iStream->SetVolume(aVol) );
+
+  TInt volume = (TInt) (((TReal) aVol)/KMaxVolume * iMaxVolume);
+  if (volume > iMaxVolume)
+      volume = iMaxVolume;
+  TRAPD( err, iStream->SetVolume(volume); )
 }
 
 void COggPlayback::SetPosition(TInt64 aPos)
@@ -600,6 +617,7 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
 void COggPlayback::MaoscOpenComplete(TInt aError) 
 { 
+  iMaxVolume=iStream->MaxVolume();
   if (aError != KErrNone) {
 
     TBuf<32> buf;
@@ -619,3 +637,78 @@ void COggPlayback::MaoscOpenComplete(TInt aError)
     iStream->SetPriority(EMdaPriorityMax, EMdaPriorityPreferenceTimeAndQuality);
   }
 }
+
+
+COggAudioCapabilityPoll::COggAudioCapabilityPoll()
+    {
+    }
+
+COggAudioCapabilityPoll::~COggAudioCapabilityPoll()
+    {
+    delete iStream;
+    }
+
+
+TInt COggAudioCapabilityPoll::PollL()
+    {
+    iCaps=0;
+    
+    for (TInt i=0; i<7; i++)
+        {
+        switch(i)
+            {
+            case 0:
+                iRate=TMdaAudioDataSettings::ESampleRate8000Hz;
+                break;
+            case 1:
+                iRate= TMdaAudioDataSettings::ESampleRate11025Hz;
+                break;
+            case 2:
+                iRate= TMdaAudioDataSettings::ESampleRate16000Hz;
+                break;
+            case 3:
+                iRate= TMdaAudioDataSettings::ESampleRate22050Hz;
+                break;
+            case 4:
+                iRate= TMdaAudioDataSettings::ESampleRate32000Hz;
+                break;
+            case 5:
+                iRate= TMdaAudioDataSettings::ESampleRate44100Hz;
+                break;
+            case 6:
+                iRate= TMdaAudioDataSettings::ESampleRate48000Hz;
+                break;
+            }
+        iSettings.Query();
+        
+        iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
+        iSettings.iSampleRate= iRate;
+        iSettings.iVolume = 0;
+        
+        iStream  = CMdaAudioOutputStream::NewL(*this);
+        iStream->Open(&iSettings);
+        CActiveScheduler::Start();
+        delete iStream; // This is rude...
+        iStream = NULL;
+        
+        }
+    return iCaps;
+    }
+
+void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError) 
+    {
+    if (aError==KErrNone) 
+        {
+        // Mode supported.
+        iCaps |= iRate;
+        }
+    CActiveScheduler::Stop();
+    }
+
+void COggAudioCapabilityPoll::MaoscPlayComplete(TInt /*aError*/)
+    {
+    }
+
+void COggAudioCapabilityPoll::MaoscBufferCopied(TInt /*aError*/, const TDesC8& /*aBuffer*/)
+    {
+    }

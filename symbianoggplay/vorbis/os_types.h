@@ -59,6 +59,8 @@ typedef TUint32 ogg_uint32_t;
 #define BIG_ENDIAN
 #define _ARM_ASSEM_ 1
 
+#define alloca __builtin_alloca
+
 #elif defined( _WIN32 )
 
 #  ifndef __GNUC__

@@ -31,6 +31,7 @@
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 #endif
 #include <stdlib.h>
+#include "OggTremor.h"
 
 COggPlayAppView::COggPlayAppView() :
   CCoeControl(),
@@ -1192,14 +1193,22 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
           return EKeyWasConsumed;
         } 
       } else if(c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown)) {
-        if (aKeyEvent.iScanCode==EOggUp && iApp->iVolume<100) {
+        if (aKeyEvent.iScanCode==EOggUp)  {
           _LIT(KS,"Volume key up");
           RDebug::Print(KS);
-          iApp->iVolume+= 5;
-        } else  if (aKeyEvent.iScanCode==EOggDown && iApp->iVolume>0) {
+          iApp->iVolume+= KStepVolume;
+        } else  if (aKeyEvent.iScanCode==EOggDown ) {
           _LIT(KS,"Volume key down");
           RDebug::Print(KS);
-          iApp->iVolume-= 5;
+          iApp->iVolume-= KStepVolume;
+        }
+        if (iApp->iVolume>KMaxVolume)
+            {
+            iApp->iVolume = KMaxVolume;
+            }
+        if (iApp->iVolume<0)
+            {
+            iApp->iVolume = 0;
         }
         iApp->iOggPlayback->SetVolume(iApp->iVolume);
 		    UpdateVolume();
@@ -1239,10 +1248,12 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     else if (aKeyEvent.iScanCode==174) { iApp->HandleCommandL(EOggStop); return EKeyWasConsumed; }   // "C" key
     //else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
     else if (aKeyEvent.iScanCode==173) { 
+#if defined(SERIES60)
       iApp->LaunchPopupMenuL(R_POPUP_MENU,TPoint(100,100),EPopupTargetTopLeft);
       //Invalidate();
       //Update();
       return EKeyWasConsumed; 
+#endif
     } else if (aKeyEvent.iScanCode==133) { // "*"
       if (iTitle[iMode]) iTitle[iMode]->ScrollNow();
       if (iAlbum[iMode]) iAlbum[iMode]->ScrollNow();

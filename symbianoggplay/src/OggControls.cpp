@@ -177,7 +177,7 @@ TOggParser::ReadFont()
   if (!ReadToken(size)) return 0;
   TInt style(0);
   if (!ReadToken(style)) return 0;
-  CFont* result(0);
+  CFont* result = NULL;
   TFontSpec fs(name,size);
   if (style==1) fs.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
   CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(result,fs);

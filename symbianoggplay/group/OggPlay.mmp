@@ -27,7 +27,7 @@ SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 LIBRARY euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib fbscli.lib bitgdi.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib 
 LIBRARY avkon.lib flogger.lib 
 LIBRARY MediaClientImage.lib 
-LIBRARY libvorbisidec.lib 
+LIBRARY libvorbisidec.lib gdi.lib
 // qikctl.lib qikdlg.lib qikutils.lib
 //LIBRARY euser.lib apparc.lib cone.lib eikcore.lib 
 //LIBRARY eikcoctl.lib avkon.lib
