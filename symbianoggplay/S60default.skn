@@ -1,16 +1,19 @@
 OggPlay 1 {
   FlipOpen {
-    Title {
-      Position 6 20 196 16
+    Played {
+      Position 5 4 166 16
     }
-    Album {
-      Position 6 36 196 16
+    Title {
+      Position 2 20 174 16
+      Font ELatinPlain12 20 0
     }
     Artist {
-      Position 6 52 196 16
+      Position 1 34 174 16
+      Font ELatinPlain12 20 0
     }
-    TrackNumber {
-      Position 10 3 30 16
+    Album {
+      Position 1 49 174 16
+      Font ELatinPlain12 20 0
     }
     ListBox {
       Position 6 64 162 80
