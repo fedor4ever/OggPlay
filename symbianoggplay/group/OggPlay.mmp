@@ -25,7 +25,7 @@ USERINCLUDE . ..\inc ..\vorbis ..\data
 SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 
 LIBRARY euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib ws32.lib bafl.lib apgrfx.lib egul.lib fbscli.lib bitgdi.lib eikctl.lib  mediaclientaudiostream.lib estlib.lib etel.lib charconv.lib 
-LIBRARY avkon.lib flogger.lib
+LIBRARY avkon.lib flogger.lib 
 LIBRARY MediaClientImage.lib 
 LIBRARY libvorbisidec.lib 
 // qikctl.lib qikdlg.lib qikutils.lib
@@ -67,27 +67,36 @@ SOURCE       c12 paused.bmp
 SOURCE       1   pausedm.bmp
 SOURCE       c12 flipclosed.bmp
 SOURCE       c12 flipopen_steel_s60.bmp
+SOURCE       c12 listboxfocus.bmp
+SOURCE       c12 listboxfocusm.bmp
 SOURCE       c12 volume.bmp
 SOURCE       1   volumem.bmp
-SOURCE       1   eyeclosed.bmp
-SOURCE       c12 repeat.bmp
-SOURCE       1   repeatm.bmp
+SOURCE       c12 volumefocus.bmp
+SOURCE       1   volumefocusm.bmp
 SOURCE       c12 slider.bmp
 SOURCE       1   sliderm.bmp
-SOURCE       c12 knob.bmp
-SOURCE       1   knobm.bmp
-SOURCE       c12 bar.bmp
-SOURCE       1   barm.bmp
+SOURCE       c12 sliderfocus.bmp
+SOURCE       1   sliderfocusm.bmp
 SOURCE       c12 stop.bmp
 SOURCE       1   stopm.bmp
 SOURCE       1   stop_dimmed.bmp
+SOURCE       c12 stopfocus.bmp
 SOURCE       c12 play.bmp
 SOURCE       1   playm.bmp
 SOURCE       1   play_dimmed.bmp
-SOURCE       c12 play.bmp
-SOURCE       1   playm.bmp
-SOURCE       c12 alarm.bmp
-SOURCE       1   alarmm.bmp
+SOURCE       c12 playfocus.bmp
+SOURCE       c12 pause.bmp
+SOURCE       1   pausem.bmp
+SOURCE       c12 pausefocus.bmp
+SOURCE       c12 repeat.bmp
+SOURCE       1   repeatm.bmp
+//SOURCE       1   eyeclosed.bmp
+//SOURCE       c12 knob.bmp
+//SOURCE       1   knobm.bmp
+//SOURCE       c12 alarm.bmp
+//SOURCE       1   alarmm.bmp
+//SOURCE       c12 bar.bmp
+//SOURCE       1   barm.bmp
 END
 
 AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c8 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
