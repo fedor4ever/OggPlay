@@ -21,8 +21,6 @@
 "\epoc32\data\z\system\apps\Oggplay\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\GreyZone\GreyZone.skn"-"!:\system\apps\oggplay\GreyZone.skn"
 "..\bitmaps\Skins\GreyZone\GreyZone.mbm"-"!:\system\apps\oggplay\GreyZone.mbm"
-"..\bitmaps\Skins\FullSteel\FullSteel.skn"-"!:\system\apps\oggplay\FullSteel.skn"
-"..\bitmaps\Skins\FullSteel\FullSteel.mbm"-"!:\system\apps\oggplay\FullSteel.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
 ; we try to be nice and uninstall our configuration files
