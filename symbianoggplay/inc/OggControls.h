@@ -603,7 +603,7 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
   virtual ~COggCanvas();
   void LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
 
-  void Refresh();
+  void Refresh(TBool aCycleControls = ETrue);
   void Invalidate();
 
   void DrawControl();  // redraw the off screen bitmap

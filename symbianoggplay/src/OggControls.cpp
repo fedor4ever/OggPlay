@@ -2308,28 +2308,50 @@ void COggCanvas::MiuoConvertComplete(TInt aError)
 
 
 void
-COggCanvas::Refresh()
+COggCanvas::Refresh(TBool aCycleControls)
 {
-  CycleControls();
-#if defined(UIQ)
-  for (int i=0; i<iControls.Count(); i++) 
+  if (aCycleControls)
+      CycleControls();
+
+  TBool redrawRequired = EFalse;
+  TInt i;
+  for (i=0; i<iControls.Count(); i++) 
+  {
     if (iControls[i]->iRedraw)
-      Window().Invalidate(iControls[i]->Rect());
-#else
-  // Less finesse for Series 60 or the window server (?) can get confused..
-  for (int i=0; i<iControls.Count(); i++) 
-    if (iControls[i]->iRedraw) {
-      Window().Invalidate();
-      return;
-      }
-#endif
+	{
+		redrawRequired = ETrue;
+		break;
+    }
+  }
+
+  if (redrawRequired)
+  {
+    DrawControl(*iBitmapContext, *iBitmapDevice);
+
+	Window().Invalidate();
+	ActivateGc();
+	Window().BeginRedraw();
+
+	CWindowGc& gc=SystemGc();
+	for (i=0; i<iControls.Count(); i++)
+	{
+		if (iControls[i]->iRedraw)
+		{
+		TRect rect = iControls[i]->Rect();
+		gc.BitBlt(rect.iTl, iBitmap, rect);
+
+		iControls[i]->iRedraw = EFalse;
+		}
+	}
+	Window().EndRedraw();
+	DeactivateGc();
+  }
 }
 
 void
 COggCanvas::Invalidate()
 {
-  DrawControl();
-  Window().Invalidate();
+  DrawNow();
 }
 
 COggControl*
@@ -2411,14 +2433,11 @@ void COggCanvas::Draw(const TRect& aRect) const
   CWindowGc& gc=SystemGc();
   
   if (iBitmap) {
-    DrawControl(*iBitmapContext, *iBitmapDevice);
     gc.BitBlt(aRect.iTl, iBitmap, TRect(aRect.iTl - Position(), aRect.Size()));
   } else {
     CWsScreenDevice* screenDevice = iCoeEnv->ScreenDevice();
     DrawControl(gc, *screenDevice);
   }
-
-  for (int i=0; i<iControls.Count(); i++) iControls[i]->iRedraw= EFalse;
 }
 
 void COggCanvas::DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& /*aBitmapDevice*/) const

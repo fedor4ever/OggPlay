@@ -794,6 +794,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		iAppView->iOggFiles->WriteDbL(iDbFileName, iCoeEnv->FsSession());
 		TBuf<16> dummy;
 		iAppView->FillView(ETop, ETop, dummy);
+		iAppView->Invalidate();
 		break;
 						  }
 		

@@ -869,6 +869,7 @@ COggPlayAppView::SelectItem(TInt idx)
   iSelected= idx;
   if (iListBox[iMode]) {
     iSelected = iListBox[iMode]->SetCurrentItemIndex(idx);
+    iCanvas[iMode]->Refresh(EFalse);
   }
 }
 
@@ -1120,7 +1121,6 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
           SelectItem(1);
       }
   }
-  Invalidate();
 }
 
 void
@@ -1548,11 +1548,19 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     case TOggplaySettings::EFastForward : {
       TInt64 pos=iApp->iOggPlayback->Position()+=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
-      return EKeyWasConsumed;
+
+	  iPosition[iMode]->SetValue(pos.GetTInt());
+	  UpdateSongPosition();
+	  iCanvas[iMode]->Refresh(EFalse);
+	  return EKeyWasConsumed;
       }
     case TOggplaySettings::ERewind : {
       TInt64 pos=iApp->iOggPlayback->Position()-=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
+
+	  iPosition[iMode]->SetValue(pos.GetTInt());
+	  UpdateSongPosition();
+	  iCanvas[iMode]->Refresh(EFalse);
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageDown : {
