@@ -250,6 +250,7 @@ public:
 
   void OpenFileL(const TDesC& aFileName);
   void WriteIniFile();
+  void WriteIniFileOnNextPause();
 
 private: 
 
@@ -265,6 +266,7 @@ private:
   void ShowSplash();
 #endif
 
+	TBool iWriteIniOnNextPause;
   int iCapturedKeyHandle;
   HBufC* iIniFileName;
   TFileName iSkinFileDir;

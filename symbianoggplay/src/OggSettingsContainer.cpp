@@ -78,7 +78,7 @@ COggSettingsContainer::~COggSettingsContainer()
     if (iListBox)
 	    {
       TRAPD(ignore, iListBox->StoreSettingsL());
-      ((COggPlayAppUi*)CEikonEnv::Static()->AppUi())->WriteIniFile();
+      ((COggPlayAppUi*)CEikonEnv::Static()->AppUi())->WriteIniFileOnNextPause();
       delete iListBox;
 	    }
     }

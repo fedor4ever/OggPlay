@@ -290,6 +290,7 @@ COggPlayAppUi::ConstructL()
 	iViewBy= ETop;
 	iAnalyzerState= 0;
   iIsStartup=ETrue;
+	iWriteIniOnNextPause=EFalse;
     iSettings.iWarningsEnabled = ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
@@ -837,6 +838,10 @@ COggPlayAppUi::PauseResume()
     iOggPlayback->Pause();
     iAppView->Update();
     UpdateSeries60Softkeys();
+		if(iWriteIniOnNextPause) {
+			iWriteIniOnNextPause=EFalse;
+			WriteIniFile();
+		}
   }	else { 
     PlaySelect();
   }
@@ -1340,6 +1345,12 @@ COggPlayAppUi::WriteIniFile()
 	//please increase iIniversion when adding stuff
 	
 	out.Close();
+}
+
+void
+COggPlayAppUi::WriteIniFileOnNextPause()
+{
+	iWriteIniOnNextPause=ETrue;
 }
 
 void 
