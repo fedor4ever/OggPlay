@@ -1,3 +1,4 @@
+CHARACTER_SET UTF8 
 
 #define ogg_options_title "Opsætninger"
 #define ogg_hotkey "Genvej:"
@@ -24,8 +25,8 @@
 #define ogg_hotkey_flipopen "Flip åben"
 #define ogg_skin_default "standard"
 #define ogg_file_info "Fil info..."
-#define ogg_repeat_on         "Repeat aktiv"						// New
-#define ogg_repeat_off        "Repeat slået fra"					// New
+#define ogg_repeat_on         "Repeat er aktiv"						// New
+#define ogg_repeat_off        "Repeat er slået fra"					// New
 #define ogg_shuffle_playlist "Shuffle playliste"
 #define ogg_find_files "Find nye filer"
 #define ogg_skins "Skins"
@@ -85,10 +86,10 @@
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Genveje"
-#define ogg_format_text_fast_forward "Hurtig frem"
-#define ogg_format_text_rewind       "Hurtig tilb."
-#define ogg_format_text_page_up      "Fil liste scroll op"
-#define ogg_format_text_page_down    "Fil liste scroll ned"
+#define ogg_format_text_fast_forward "Spol frem"
+#define ogg_format_text_rewind       "Spol tilbage"
+#define ogg_format_text_page_up      "Fil liste side op"
+#define ogg_format_text_page_down    "Fil liste side ned"
 
 #define ogg_settings                 "Opsætning"  // in the menu
 #define ogg_settings_title           "Oggplay Opsætning" // on top of the settings screen
@@ -106,8 +107,8 @@
 #define ogg_warnings                 "Advarsler"
 #define ogg_by                       " af "
 
-#define ogg_rsk_idle                 "Højre Softkey / Idle"
-#define ogg_rsk_play                 "Højre Softkey / Play"
+#define ogg_rsk_idle                 "Højre tast / Stoppet"
+#define ogg_rsk_play                 "Højre tast / Spiller"
 #define ogg_cba_back                 "Tilbage"
 #define ogg_cba_clear                "Slet"
 #define ogg_cba_option               "Menu"
