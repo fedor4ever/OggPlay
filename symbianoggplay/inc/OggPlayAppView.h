@@ -104,6 +104,7 @@ public:
   TInt       iPosChanged;
   TBuf<512>  iCurrentSong;
   TOggFiles* iOggFiles;
+  TCallBack* iCallBack;
 
 private:
 

@@ -41,7 +41,7 @@ public:
   
 protected:
   COggLog();
-  ConstructL();
+  void ConstructL();
 
 };
 

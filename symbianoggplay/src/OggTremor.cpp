@@ -21,6 +21,7 @@
 #endif
 
 #include "OggOs.h"
+#include "Ogglog.h"
 #include "OggTremor.h"
 
 #include <barsread.h>
@@ -49,12 +50,12 @@
 #include <OggPlay.rsg>
 ////////////////////////////////////////////////////////////////
 //
-// TAbsPlayback
+// CAbsPlayback
 //
 ////////////////////////////////////////////////////////////////
 
-TAbsPlayback::TAbsPlayback() :
-  iState(TAbsPlayback::EClosed),
+CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
+  iState(CAbsPlayback::EClosed),
   iTitle(),
   iAlbum(),
   iArtist(),
@@ -64,17 +65,18 @@ TAbsPlayback::TAbsPlayback() :
   iRate(44100),
   iChannels(2),
   iFileSize(0),
-  iBitRate(0)
+  iBitRate(0),
+  iObserver(anObserver)
 {
 }
 
 void
-TAbsPlayback::SetObserver(MPlaybackObserver* anObserver)
+CAbsPlayback::SetObserver(MPlaybackObserver* anObserver)
 {
   iObserver= anObserver;
 }
 
-void TAbsPlayback::ClearComments()
+void CAbsPlayback::ClearComments()
 {
   iArtist.SetLength(0);
   iTitle.SetLength(0);
@@ -84,57 +86,57 @@ void TAbsPlayback::ClearComments()
   iFileName.SetLength(0);
 }
 
-TInt TAbsPlayback::Rate()
+TInt CAbsPlayback::Rate()
 { 
   return iRate;
 }
 
-TInt TAbsPlayback::Channels()
+TInt CAbsPlayback::Channels()
 {
   return iChannels;
 }
 
-TInt TAbsPlayback::FileSize()
+TInt CAbsPlayback::FileSize()
 {
   return iFileSize;
 }
 
-TInt TAbsPlayback::BitRate()
+TInt CAbsPlayback::BitRate()
 {
   return iBitRate.GetTInt();
 }
 
-const TFileName& TAbsPlayback::FileName()
+const TFileName& CAbsPlayback::FileName()
 {
   return iFileName;
 }
 
-const TDesC& TAbsPlayback::Artist()
+const TDesC& CAbsPlayback::Artist()
 {
   return iArtist;
 }
 
-const TDesC& TAbsPlayback::Album()
+const TDesC& CAbsPlayback::Album()
 {
   return iAlbum;
 }
 
-const TDesC& TAbsPlayback::Title()
+const TDesC& CAbsPlayback::Title()
 {
   return iTitle;
 }
 
-const TDesC& TAbsPlayback::Genre()
+const TDesC& CAbsPlayback::Genre()
 {
   return iGenre;
 }
 
-const TDesC& TAbsPlayback::TrackNumber()
+const TDesC& CAbsPlayback::TrackNumber()
 {
   return iTrackNumber;
 }
 
-TAbsPlayback::TState TAbsPlayback::State()
+CAbsPlayback::TState CAbsPlayback::State()
 {
   return iState;
 }
@@ -142,12 +144,12 @@ TAbsPlayback::TState TAbsPlayback::State()
 
 ////////////////////////////////////////////////////////////////
 //
-// TOggPlayback
+// COggPlayback
 //
 ////////////////////////////////////////////////////////////////
 
-TOggPlayback::TOggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) : 
-  TAbsPlayback(),
+COggPlayback::COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) : 
+  CAbsPlayback(anObserver),
   iEnv(anEnv),
   iSettings(),
   iSentIdx(0),
@@ -158,11 +160,13 @@ TOggPlayback::TOggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
   iBufCount(0),
   iCurrentSection(0)
 {
-  SetObserver(anObserver);
   iSettings.iChannels  = TMdaAudioDataSettings::EChannelsStereo;
   iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate44100Hz;
   iSettings.iMaxVolume = 100;
   iSettings.iVolume    = 100;
+};
+
+void COggPlayback::ConstructL() {
 
   iStream  = CMdaAudioOutputStream::NewL(*this);
   
@@ -173,8 +177,12 @@ TOggPlayback::TOggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
     iEnv->ReadResource(buf2, R_OGG_ERROR_20);
     buf1.AppendNum(err);
     iEnv->InfoWinL(buf2,buf1);
+    OGGLOG.Write(buf2);
+    OGGLOG.Write(buf1);
   }
 
+  iMaxVolume=iStream->MaxVolume();
+  OGGLOG.WriteFormat(_L("Max volume is %d"),iMaxVolume);
   TDes8* buffer;
 
   for (TInt i=0; i<KBuffers; i++) {
@@ -184,9 +192,15 @@ TOggPlayback::TOggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
     User::LeaveIfError(iBuffer.Append(buffer));
     CleanupStack::Pop(buffer);
   }
+
 }
 
-TInt TOggPlayback::Open(const TDesC& aFileName)
+COggPlayback::~COggPlayback() {
+  delete iStream;
+  iBuffer.ResetAndDestroy();
+}
+
+TInt COggPlayback::Open(const TDesC& aFileName)
 {
 
   if (iFileOpen) {
@@ -198,7 +212,7 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
   iTime= 0;
 
   if (aFileName.Length() == 0) {
-	RDebug::Print(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
+	  OGGLOG.Write(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_8);
     return -100;
   }
@@ -209,7 +223,7 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
 
   if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
     iFileOpen= 0;
-	RDebug::Print(_L("Oggplay: File open returns 0 (Error20 Error14)"));
+	  OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_14);
     return -101;
   };
@@ -219,7 +233,7 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
     ov_clear(&iVf);
     fclose(iFile);
     iFileOpen= 0;
-    RDebug::Print(_L("Oggplay: ov_open not successful (Error20 Error9)"));
+    OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_9);
     return -102;
   }
@@ -243,7 +257,6 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
     iState= EOpen;
     return KErrNone;
   }
-  RDebug::Print(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
     
   ov_clear(&iVf);
   fclose(iFile);
@@ -254,11 +267,14 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
   iEnv->ReadResource(tbuf, R_OGG_ERROR_20);
   buf.AppendNum(err);
   iEnv->InfoWinL(tbuf,buf);
-
+  OGGLOG.Write(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
+  OGGLOG.WriteFormat(_L("Maybe audio format not supported (%d channels, %l Hz)"),vi->channels,vi->rate);
+  OGGLOG.Write(tbuf);
+  OGGLOG.Write(buf);
   return err;
 }
 
-void TOggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
+void COggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
 {
   // according to ogg vorbis specifications, the text should be UTF8 encoded
   TPtrC8 p((const unsigned char *)aStr);
@@ -283,7 +299,7 @@ void TOggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
 #endif
 }
 
-void TOggPlayback::ParseComments(char** ptr)
+void COggPlayback::ParseComments(char** ptr)
 {
   ClearComments();
   while (*ptr) {
@@ -300,7 +316,7 @@ void TOggPlayback::ParseComments(char** ptr)
   }
 }
 
-TInt TOggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
+TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 {
   TMdaAudioDataSettings::TAudioCaps ac;
   TMdaAudioDataSettings::TAudioCaps rt;
@@ -309,6 +325,7 @@ TInt TOggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   else if (theChannels==2) ac= TMdaAudioDataSettings::EChannelsStereo;
   else {
     iEnv->InfoWinL(R_OGG_ERROR_12,R_OGG_ERROR_10);
+    OGGLOG.Write(_L("Illegal number of channels"));
     return -100;
   }
 
@@ -329,7 +346,7 @@ TInt TOggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   return error;
 }
 
-TInt TOggPlayback::Volume()
+TInt COggPlayback::Volume()
 {
   if (!iStream) return 100;
   TInt vol=100;
@@ -337,7 +354,7 @@ TInt TOggPlayback::Volume()
   return vol;
 }
 
-void TOggPlayback::SetVolume(TInt aVol)
+void COggPlayback::SetVolume(TInt aVol)
 {
   if (!iStream) return;
   if (aVol>100) aVol= 100;
@@ -345,14 +362,14 @@ void TOggPlayback::SetVolume(TInt aVol)
   TRAPD( err, iStream->SetVolume(aVol) );
 }
 
-void TOggPlayback::SetPosition(TInt64 aPos)
+void COggPlayback::SetPosition(TInt64 aPos)
 {
   if (!iStream) return;
   ogg_int64_t pos= aPos.GetTInt();
   ov_time_seek( &iVf, pos);
 }
 
-TInt64 TOggPlayback::Position()
+TInt64 COggPlayback::Position()
 {
   if (!iStream) return TInt64(0);
   ogg_int64_t pos= ov_time_tell(&iVf);
@@ -360,7 +377,7 @@ TInt64 TOggPlayback::Position()
   return TInt64(hi,pos);
 }
 
-TInt64 TOggPlayback::Time()
+TInt64 COggPlayback::Time()
 {
   if (iTime==0) {
     ogg_int64_t pos(0);
@@ -371,13 +388,13 @@ TInt64 TOggPlayback::Time()
   return iTime;
 }
 
-const void* TOggPlayback::GetDataChunk()
+const void* COggPlayback::GetDataChunk()
 {
   TInt idx= iSentIdx;
   return iSent[idx]->Ptr();
 }
 
-TInt TOggPlayback::Info(const TDesC& aFileName, TBool silent)
+TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 {
   if (aFileName.Length()==0) return -100;
 
@@ -425,7 +442,7 @@ TInt TOggPlayback::Info(const TDesC& aFileName, TBool silent)
   return KErrNone;
 }
 
-void TOggPlayback::Play() 
+void COggPlayback::Play() 
 {
   if (iState == EPaused) {
     iState= EPlaying;
@@ -447,14 +464,14 @@ void TOggPlayback::Play()
   for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
 }
 
-void TOggPlayback::Pause()
+void COggPlayback::Pause()
 {
   if (iState != EPlaying) return;
   iState= EPaused;
   TRAPD( err, iStream->Stop() );
 }
 
-void TOggPlayback::Stop()
+void COggPlayback::Stop()
 {
   TRAPD( err, iStream->Stop() );
   iState= EClosed;
@@ -480,7 +497,7 @@ void TOggPlayback::Stop()
   if (iObserver) iObserver->NotifyUpdate();
 }
 
-void TOggPlayback::SendBuffer(TDes8& buf)
+void COggPlayback::SendBuffer(TDes8& buf)
 {
   if (iEof) return;
   if (iState==EPaused) return;
@@ -513,7 +530,7 @@ void TOggPlayback::SendBuffer(TDes8& buf)
   }
 }
 
-void TOggPlayback::MaoscPlayComplete(TInt aError)
+void COggPlayback::MaoscPlayComplete(TInt aError)
 {
   // Error codes:
   // KErrCancel      -3
@@ -548,7 +565,7 @@ void TOggPlayback::MaoscPlayComplete(TInt aError)
   }
 }
 
-void TOggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
+void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 {
   // Error codes:
   // KErrCancel      -3  (not sure when this happens, but ignore for now)
@@ -581,7 +598,7 @@ void TOggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
   }
 }
 
-void TOggPlayback::MaoscOpenComplete(TInt aError) 
+void COggPlayback::MaoscOpenComplete(TInt aError) 
 { 
   if (aError != KErrNone) {
 

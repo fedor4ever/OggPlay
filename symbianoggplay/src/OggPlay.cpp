@@ -33,6 +33,7 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <apgwgnam.h>	// CApaWindowGroupName
 #include <eikmenup.h>	// CEikMenuPane
 #include <barsread.h>
+#include <reent.h>
 
 #include "OggControls.h"
 #include "OggTremor.h"
@@ -132,7 +133,7 @@ COggActive::CallBack(TAny* aPtr)
   if (isRinging && !self->iInterrupted) {
 
     // the phone is ringing or someone is making a call, pause the music if any
-    if (self->iAppUi->iOggPlayback->State()==TOggPlayback::EPlaying) {
+    if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying) {
       self->iInterrupted= 1;
       self->iAppUi->HandleCommandL(EOggPauseResume);
       return 1;
@@ -145,7 +146,7 @@ COggActive::CallBack(TAny* aPtr)
     if (isIdle) {
       // okay, the phone is idle again, let's continue with the music
       self->iInterrupted= 0;
-      if (self->iAppUi->iOggPlayback->State()==TOggPlayback::EPaused)
+      if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
 	self->iAppUi->HandleCommandL(EOggPauseResume);
       return 1;
     }
@@ -203,7 +204,7 @@ COggPlayAppUi::ConstructL()
   
   _LIT(KiIniFileNameExtension,".ini");
   const TUint KExtLength=4;
-  iIniFileName=HBufC::NewLC(aP.Path().Length()+aP.Name().Length()+KExtLength);
+  iIniFileName=HBufC::NewL(aP.Path().Length()+aP.Name().Length()+KExtLength);
   iIniFileName->Des().Copy(aP.Path());
   iIniFileName->Des().Append(aP.Name());  
   iIniFileName->Des().Append(KiIniFileNameExtension);
@@ -230,8 +231,8 @@ COggPlayAppUi::ConstructL()
   iViewBy= ETitle;
   iAnalyzerState[0]= 0;
   iAnalyzerState[1]= 0;
-
-  iOggPlayback= new TOggPlayback(iEikonEnv, this);
+  iOggPlayback= new(ELeave) COggPlayback(iEikonEnv, this);
+  iOggPlayback->ConstructL();
   ReadIniFile();
 
   iAppView=new(ELeave) COggPlayAppView;
@@ -266,7 +267,6 @@ COggPlayAppUi::ConstructL()
   SetThreadPriority();
 
   ActivateOggViewL();
-  CleanupStack::Pop(1); // iIniFileName
 }
 
 
@@ -274,6 +274,7 @@ COggPlayAppUi::~COggPlayAppUi()
 {
   if(iAppView) RemoveFromStack(iAppView);
 
+  delete iAppView;
   if (iFOView) {
     DeregisterView(*iFOView);
     delete iFOView;
@@ -290,9 +291,9 @@ COggPlayAppUi::~COggPlayAppUi()
 
   delete iIniFileName;
   delete iSkins;
-  delete iOggPlayback;
   OGGLOG.Close();
   delete COggLog::InstanceL();
+  CloseSTDLIB();
 }
 
 void COggPlayAppUi::ActivateOggViewL()
@@ -340,18 +341,18 @@ COggPlayAppUi::NotifyUpdate()
   }
 
   // Try to resume after sound device was stolen
-  if (iTryResume>0 && iOggPlayback->State()==TOggPlayback::EPaused) {
-    if (iOggPlayback->State()!=TOggPlayback::EPaused) iTryResume= 0;
+  if (iTryResume>0 && iOggPlayback->State()==CAbsPlayback::EPaused) {
+    if (iOggPlayback->State()!=CAbsPlayback::EPaused) iTryResume= 0;
     else {
       iTryResume--;
-      if (iTryResume==0 && iOggPlayback->State()==TOggPlayback::EPaused) HandleCommandL(EOggPauseResume);
+      if (iTryResume==0 && iOggPlayback->State()==CAbsPlayback::EPaused) HandleCommandL(EOggPauseResume);
     }
   }
 
   iAppView->UpdateClock();
 
-  if (iOggPlayback->State()!=TOggPlayback::EPlaying &&
-      iOggPlayback->State()!=TOggPlayback::EPaused) return; 
+  if (iOggPlayback->State()!=CAbsPlayback::EPlaying &&
+      iOggPlayback->State()!=CAbsPlayback::EPaused) return; 
 
   iAppView->UpdateSongPosition();
 }
@@ -462,11 +463,11 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     }
     if (iViewBy==ETitle || iViewBy==EFileName) {
       if (curFile.Length()>0) {
-	      if (iOggPlayback->State()==TOggPlayback::EPlaying ||
-	          iOggPlayback->State()==TOggPlayback::EPaused) iOggPlayback->Stop();
+	      if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
+	          iOggPlayback->State()==CAbsPlayback::EPaused) iOggPlayback->Stop();
 	      if (iOggPlayback->Open(curFile)==KErrNone) {
 	        iOggPlayback->SetVolume(iVolume);
-	          if (iOggPlayback->State()!=TOggPlayback::EPlaying) {
+	          if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
 	            iAppView->SetTime(iOggPlayback->Time());
 	            iOggPlayback->Play();
 	          }
@@ -478,8 +479,8 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   }
     
   case EOggStop: {
-    if (iOggPlayback->State()==TOggPlayback::EPlaying ||
-    	iOggPlayback->State()==TOggPlayback::EPaused) {
+    if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
+    	iOggPlayback->State()==CAbsPlayback::EPaused) {
       iOggPlayback->Stop();
       SetCurrent(-1);
     }
@@ -487,8 +488,8 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   }
 
   case EOggPauseResume: {
-    if (iOggPlayback->State()==TOggPlayback::EPlaying) iOggPlayback->Pause();
-    else if (iOggPlayback->State()==TOggPlayback::EPaused) iOggPlayback->Play();
+    if (iOggPlayback->State()==CAbsPlayback::EPlaying) iOggPlayback->Pause();
+    else if (iOggPlayback->State()==CAbsPlayback::EPaused) iOggPlayback->Play();
     iAppView->Update();
     break;
   }
@@ -536,7 +537,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 
   case EOggViewRebuild: {
     HandleCommandL(EOggStop);
-    iAppView->iOggFiles->CreateDb();
+    iAppView->iOggFiles->CreateDb(iCoeEnv->FsSession());
     iAppView->iOggFiles->WriteDb(iDbFileName, iCoeEnv->FsSession());
     TBuf<16> dummy;
     iAppView->FillView(ETop, ETop, dummy);
@@ -707,7 +708,7 @@ COggPlayAppUi::FindSkins()
   RFs session;
   User::LeaveIfError(session.Connect());
 
-  CDirScan* ds = CDirScan::NewL(session);
+  CDirScan* ds = CDirScan::NewLC(iCoeEnv->FsSession());
   TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) {
 	_LIT(KS,"Error in FindSkins-SetScanDataL");
@@ -716,8 +717,9 @@ COggPlayAppUi::FindSkins()
     delete ds;
     return;
   }
-
+  CleanupStack::Pop(ds);
   CDir* c=0;
+
   while (1==1) {
 
     ds->NextL(c);
@@ -742,7 +744,11 @@ COggPlayAppUi::FindSkins()
 		if (iSkins->Count()==5) break;
       }
     }
+   delete c; c=NULL;
   }
+  
+  delete ds;
+
 	_LIT(KS,"Found %d skin(s)");
 	OGGLOG.WriteFormat(KS,iSkins->Count());
 
@@ -754,8 +760,8 @@ COggPlayAppUi::ReadIniFile()
   RFile in;
   if(in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
 	     EFileRead|EFileStreamText) != KErrNone) {
-	  _LIT(KS,"unable to open ini-file %s, maybe doesn't exist");
-	  OGGLOG.WriteFormat(KS,iIniFileName->Des());
+	  _LIT(KS,"unable to open ini-file, maybe doesn't exist");
+	  //FIXFIXME - this breaks OGGLOG.WriteFormat(KS);
 	  return;
   }
 

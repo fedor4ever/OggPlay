@@ -24,14 +24,14 @@
 
 #include "OggPlay.h"
 
-class TOggPlayback;
+class COggPlayback;
 
-class TOggFile
+class TOggFile : public CBase
 {
  public:
 
   TOggFile();
-  ~TOggFile();
+  virtual ~TOggFile();
 
   TOggFile(const TDesC& aTitle, 
 	   const TDesC& anAlbum,
@@ -63,6 +63,7 @@ class TOggKey : public TKeyArrayFix
  public:
 
   TOggKey(TInt anOrder);
+  virtual ~TOggKey();
 
   void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
 
@@ -75,13 +76,14 @@ class TOggKey : public TKeyArrayFix
   TOggFile*                iSample;
 };
 
-class TOggFiles
+class TOggFiles : public CBase
 {
  public:
 
-  TOggFiles(TOggPlayback* anOggPlayback);
+  TOggFiles(COggPlayback* anOggPlayback);
+  virtual ~TOggFiles();
 
-  void  CreateDb();
+  void  CreateDb(RFs& session);
   TBool ReadDb(const TFileName& aFileName, RFs& session);
   void  WriteDb(const TFileName& aFileName, RFs& session);
 
@@ -96,11 +98,11 @@ class TOggFiles
 
  protected:
 
-  void AddDirectory(const TDesC& aDir);
+  void AddDirectory(const TDesC& aDir, RFs& session);
   void ClearFiles();
 
   CArrayPtrFlat<TOggFile>* iFiles; 
-  TOggPlayback*            iOggPlayback;
+  COggPlayback*            iOggPlayback;
   TOggKey                  iOggKeyTitles;
   TOggKey                  iOggKeyAlbums;
   TOggKey                  iOggKeyArtists;

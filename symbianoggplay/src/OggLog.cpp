@@ -55,7 +55,7 @@ COggLog::~COggLog() {
 	
 }
 
-COggLog::ConstructL() {
+void COggLog::ConstructL() {
 	TInt ret=iLog.Connect();
 	if (ret==KErrNone)	{
 		iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);

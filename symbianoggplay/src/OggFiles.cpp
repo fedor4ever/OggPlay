@@ -173,8 +173,13 @@ TOggKey::TOggKey(TInt anOrder) :
   iFiles(0),
   iOrder(anOrder)
 {
-  iSample= new TOggFile();
+  iSample= new(ELeave) TOggFile();
   SetPtr(iSample);
+}
+
+TOggKey::~TOggKey() 
+{
+    delete iSample;
 }
 
 void
@@ -211,7 +216,7 @@ TOggKey::At(TInt anIndex) const
 ////////////////////////////////////////////////////////////////
 
 
-TOggFiles::TOggFiles(TOggPlayback* anOggPlayback) :
+TOggFiles::TOggFiles(COggPlayback* anOggPlayback) :
   iFiles(0),
   iOggPlayback(anOggPlayback),
   iOggKeyTitles(COggPlayAppUi::ETitle),
@@ -223,7 +228,7 @@ TOggFiles::TOggFiles(TOggPlayback* anOggPlayback) :
   iOggKeyTrackTitle(COggPlayAppUi::ETrackTitle),
   iVersion(-1)
 {
-  iFiles= new CArrayPtrFlat<TOggFile>(10);
+  iFiles= new(ELeave) CArrayPtrFlat<TOggFile>(10);
   iOggKeyTitles.SetFiles(iFiles);
   iOggKeyAlbums.SetFiles(iFiles);
   iOggKeyArtists.SetFiles(iFiles);
@@ -233,31 +238,34 @@ TOggFiles::TOggFiles(TOggPlayback* anOggPlayback) :
   iOggKeyTrackTitle.SetFiles(iFiles);
 }
 
-void TOggFiles::CreateDb()
+TOggFiles::~TOggFiles() {
+  iFiles->ResetAndDestroy();
+  delete iFiles;
+  }
+
+void TOggFiles::CreateDb(RFs& session)
 {
   TBuf<256> buf;
   CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_1);
   CEikonEnv::Static()->BusyMsgL(buf);
   ClearFiles();
-  AddDirectory(_L("D:\\Media files\\audio\\"));
-  AddDirectory(_L("C:\\documents\\Media files\\audio\\"));
-  AddDirectory(_L("D:\\Media files\\other\\"));
-  AddDirectory(_L("C:\\documents\\Media files\\other\\"));
-  AddDirectory(_L("D:\\Media files\\document\\"));
-  AddDirectory(_L("C:\\documents\\Media files\\document\\"));
+  AddDirectory(_L("D:\\Media files\\audio\\"),session);
+  AddDirectory(_L("C:\\documents\\Media files\\audio\\"),session);
+  AddDirectory(_L("D:\\Media files\\other\\"),session);
+  AddDirectory(_L("C:\\documents\\Media files\\other\\"),session);
+  AddDirectory(_L("D:\\Media files\\document\\"),session);
+  AddDirectory(_L("C:\\documents\\Media files\\document\\"),session);
 #if defined(SERIES60)  
-  AddDirectory(_L("C:\\Oggs\\"));
-  AddDirectory(_L("D:\\Oggs\\"));
+  AddDirectory(_L("C:\\Oggs\\"),session);
+  AddDirectory(_L("E:\\Oggs\\"),session);
 #endif
   CEikonEnv::Static()->BusyMsgCancel();
 }
 
-void TOggFiles::AddDirectory(const TDesC& aDir)
+void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
 {
   _LIT(KS,"Scanning directory %s for oggfiles");
   OGGLOG.WriteFormat(KS,aDir.Ptr());
-  RFs session;
-  User::LeaveIfError(session.Connect());
 
   // Check if the drive is available (i.e. memory stick is inserted)
   if (!EikFileUtils::FolderExists(aDir)) {
@@ -271,7 +279,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
   if (err!=KErrNone) {
     _LIT(KS,"Unable to setup scan directory %s for oggfiles");
     OGGLOG.WriteFormat(KS,aDir.Ptr());
-    delete ds;
+    delete ds; ds=0;
     return;
   }
 
@@ -282,7 +290,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
     if (err!=KErrNone) {
       _LIT(KS,"Unable to scan directory %s for oggfiles");
       OGGLOG.WriteFormat(KS,aDir.Ptr());
-      delete ds;
+      delete ds; ds=0;
       return;
     }
 	  if (c==0) break;
@@ -310,7 +318,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
 
 	iOggPlayback->Info(fullname, EFalse);	
 
-	TOggFile* o= new TOggFile(iOggPlayback->Title(), 
+	TOggFile* o= new(ELeave) TOggFile(iOggPlayback->Title(), 
 				  iOggPlayback->Album(), 
 				  iOggPlayback->Artist(), 
 				  iOggPlayback->Genre(), 
@@ -323,9 +331,9 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
 
       }
     }
-    delete c;
+    delete c; c=0;
   }
-  delete ds;
+  delete ds; c=0;
   iOggPlayback->ClearComments();
 }
 
@@ -351,7 +359,7 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
     }
 
       while (tf.Read(line)==KErrNone) {
-      TOggFile* o= new TOggFile();
+      TOggFile* o= new(ELeave) TOggFile();
       if (!o->Read(tf,iVersion)) break;
 	iFiles->AppendL(o);
       }
@@ -388,6 +396,7 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
     TBuf<16> buf;
     buf.Num(err);
     User::InfoPrint(buf);
+    OGGLOG.WriteFormat(_L("Error %d in WriteDB"),err);
   }
   CEikonEnv::Static()->BusyMsgCancel();
 }

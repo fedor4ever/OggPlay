@@ -88,7 +88,6 @@ class TOggParser {
   TInt      iLine;
   TBuf<128> iToken;
   TInt      iVersion;
-  RFileLogger ilog;
 
 };
 
@@ -97,7 +96,7 @@ class TOggParser {
 // Abstract base type for objects displayed on a COggCanvas
 // --------------------------------------------------------
 
-class COggControl {
+class COggControl : public CBase {
 
  public:
 
@@ -277,7 +276,7 @@ class COggSlider : public COggControl {
  public:
 
   COggSlider();
-
+  virtual ~COggSlider();
   void SetStyle(TInt aStyle);
   void SetKnobIcon(CGulIcon* anIcon);
   void SetValue(TInt aValue);  

@@ -155,7 +155,7 @@ public:
   TFileName iDbFileName;
   
   COggPlayAppView* iAppView;
-  TOggPlayback*    iOggPlayback;
+  COggPlayback*    iOggPlayback;
   COggActive*      iActive;
 
   // from MPlaybackObserver:

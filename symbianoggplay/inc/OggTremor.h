@@ -42,12 +42,13 @@ class MPlaybackObserver {
   virtual void NotifyPlayInterrupted() = 0;
 };
 
-// TPlayback:
+
+// CAbsPlayback:
 // An abstract base class defining the interface for streaming audio data,
 // reading the meta data (tags) and file properties etc.
 //------------------------------------------------------
 
-class TAbsPlayback {
+class CAbsPlayback : public CBase {
 
  public:
 
@@ -59,7 +60,7 @@ class TAbsPlayback {
     EPaused
   };
 
-  TAbsPlayback();
+  CAbsPlayback(MPlaybackObserver* anObserver=0);
 
   // Here is a bunch of abstract methods which need to implemented for
   // each audio format:
@@ -122,17 +123,19 @@ class TAbsPlayback {
 };
 
 
-// TOggPlayback:
+// COggPlayback:
 // An implementation of TAbsPlayback for the Ogg/Vorbis format:
 //-------------------------------------------------------------
 
-class TOggPlayback : public MMdaAudioOutputStreamCallback, 
-		     public TAbsPlayback
+class COggPlayback : public MMdaAudioOutputStreamCallback, 
+		     public CAbsPlayback
 {
   
  public:
   
-  TOggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver=0);
+  COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver=0);
+  virtual ~COggPlayback();
+  void ConstructL();
 
   virtual TInt   Info(const TDesC& aFileName, TBool silent= EFalse);
   virtual TInt   Open(const TDesC& aFileName);
@@ -171,6 +174,7 @@ class TOggPlayback : public MMdaAudioOutputStreamCallback,
   RPointerArray<TDes8>     iBuffer;
   TDes8*                   iSent[KBuffers];
   TInt                     iSentIdx;
+  TInt                     iMaxVolume;
 
   // communication with the tremor/ogg codec:
   //-----------------------------------------

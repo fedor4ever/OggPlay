@@ -25,6 +25,7 @@
 #include <eikenv.h>
 #include <math.h>
 #include <flogger.h>
+#include <reent.h>
 
 #include "int_fft.c"
 
@@ -48,33 +49,23 @@ TOggParser::TOggParser(const TFileName& aFileName)
 {
   iLine= 1;
   iDebug= ETrue;
-  TInt ret=ilog.Connect();
-  if(ret != KErrNone) {
-	  RDebug::Print(_L("Can't connect to file logger"));
-  }
-  _LIT(KLogFolder,"Oggplay");
-  _LIT(KLogFileName,"Parser.log");
-  ilog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
-  ilog.SetDateAndTime(EFalse,ETrue);
-  _LIT(KS,"TOggParser start");
-  ilog.WriteFormat(KS);
   if ((iFile=wfopen((wchar_t*)aFileName.Ptr(),L"rb"))==NULL) {
     iState= EFileNotFound;
     _LIT(KS,"File not found");
-    ilog.WriteFormat(KS);
+    OGGLOG.WriteFormat(KS);
  
     return;
   }
   _LIT(KSS,"Reading file %s");
-  ilog.WriteFormat(KSS,aFileName.Ptr());
+  OGGLOG.WriteFormat(KSS,aFileName.Ptr());
 
   iState= ESuccess;
 }
 
 TOggParser::~TOggParser()
 {
-  ilog.Close();
   fclose(iFile);
+  CloseSTDLIB(); // see Symbian KB FAQ-0577
 }
 
 TBool
@@ -200,7 +191,6 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
   buf.Append(txt);
   buf.Append(_L(" Token:"));
   buf.Append(iToken); 
-  ilog.WriteFormat(buf);
   OGGLOG.WriteFormat(buf);
 
 //  User::InfoPrint(buf);
@@ -227,8 +217,6 @@ COggControl::COggControl() :
 
 COggControl::~COggControl()
 {
-  //FIXFIXME, check whether:
-  OGGLOG.Write(_L("CoggControl::~COggControl is called"));
   if (iFocusIcon) { delete iFocusIcon; iFocusIcon= 0; }
 }
   
@@ -608,10 +596,7 @@ COggButton::COggButton() :
 
 COggButton::~COggButton()
 {
-  //FIXFIXME: check
-  OGGLOG.Write(_L("CoggButton::~COggButton is called"));
-
-  if (iActiveMask) { delete iActiveMask; iActiveMask= 0; }
+  if (iActiveMask) { iActiveMask->Reset(); delete iActiveMask; iActiveMask= 0; }
   if (iNormalIcon) { delete iNormalIcon; iNormalIcon= 0; }
   if (iPressedIcon) { delete iPressedIcon; iPressedIcon= 0; }
   if (iDimmedIcon) { delete iDimmedIcon; iDimmedIcon= 0; }
@@ -620,7 +605,7 @@ COggButton::~COggButton()
 void
 COggButton::SetActiveMask(const TFileName& aFileName, TInt anIdx)
 {
-  iActiveMask = new CFbsBitmap;
+  iActiveMask = new(ELeave) CFbsBitmap;
   int err= iActiveMask->Load(aFileName,anIdx);
   if (err!=KErrNone) {
     TBuf<256> buf;
@@ -740,6 +725,9 @@ COggSlider::COggSlider() :
 {
 }
 
+COggSlider::~COggSlider() {
+    delete iKnobIcon;
+}
 void
 COggSlider::SetKnobIcon(CGulIcon* anIcon)
 {
@@ -1506,7 +1494,7 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
       p.Set(p.Mid(len+1));
       x+= iData->ColumnWidthPixel(j);
 	  
-	  //FIXFIXME: On S60, ColumnHorizontalGap returns 1080049501 !!?
+	  //FIXME: On S60, ColumnHorizontalGap returns 1080049501 !!?
 #if !defined(SERIES60)
 	  x+= iData->ColumnHorizontalGap(j);
 #else
@@ -1572,12 +1560,22 @@ COggCanvas::COggCanvas() :
 COggCanvas::~COggCanvas()
 {
   DestroyBitmap();
+  if(iBackground) {
+    iBackground->Reset();
+    delete iBackground;
+  }
+  if(if2bm) {
+    if2bm->Close();
+    delete if2bm;
+  }
+
+  
 }
 
 void COggCanvas::ConstructL(const TFileName& aFileName, TInt iIdx)
 {
-  if2bm = CMdaImageFileToBitmapUtility::NewL(*this);
-  iBackground = new CFbsBitmap;
+//  if2bm = CMdaImageFileToBitmapUtility::NewL(*this);
+  iBackground = new(ELeave) CFbsBitmap;
 
   //if2bm->OpenL(aFileName,new TMdaBmpClipFormat());
   //CEikEnv::CreateBitmapL()
@@ -1657,8 +1655,7 @@ COggCanvas::AddControl(COggControl* c)
 
 void COggCanvas::ClearControls()
 {
-  for (TInt i=0; i<iControls.Count(); i++) delete iControls[i];
-  iControls.Reset();
+  iControls.ResetAndDestroy();
 }
 
 void COggCanvas::DrawControl()
@@ -1700,8 +1697,11 @@ void COggCanvas::DestroyBitmap()
   iBitmapContext = NULL;
   delete iBitmapDevice;
   iBitmapDevice = NULL;
-  delete iBitmap;
-  iBitmap = NULL;
+  if(iBitmap) {
+    iBitmap->Reset();
+    delete iBitmap;
+    iBitmap = NULL;
+  }
 }
 
 void COggCanvas::CreateBitmapL(const TSize& aSize)
