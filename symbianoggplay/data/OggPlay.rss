@@ -2,16 +2,8 @@
 #include "..\inc\OggOs.h"
 
 #if defined(UIQ)
-#include "OggPlay.header.rss"
+#include "OggPlay.uiq.rss"
 #else
-#include "OggPlay.header_s60.rss"
-#endif
-
-//#include "OggPlay.en.rss"
-
-#if defined(UIQ)
-#include "OggPlay.common_uiq.rss"
-#else
-#include "OggPlay.common_s60.rss"
+#include "OggPlay.s60.rss"
 #endif
 

@@ -17,19 +17,22 @@
  */
 
 #include "OggOs.h"
-#include "OggDialogs.h"
-
-#include "OggPlay.hrh"
-#include <OggPlay.rsg>
 
 #include <eiklabel.h>
+
 #if defined(SERIES60)
+#include <e32base.h>
 #include <eikenv.h>
 #else
 #include <eikchlst.h>
 #include <eikchkbx.h>
 #include <qiktimeeditor.h>
 #endif
+
+#include "OggDialogs.h"
+#include "OggPlay.hrh"
+#include <OggPlay.rsg>
+
 
 CHotkeyDialog::CHotkeyDialog(int *aHotKeyIndex, int* anAlarmActive, TTime* anAlarmTime)
 {

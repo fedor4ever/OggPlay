@@ -596,6 +596,11 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 					  if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
 						  iAppView->SetTime(iOggPlayback->Time());
 						  iOggPlayback->Play();
+#ifdef SERIES60
+              Cba()->AddCommandSetToStackL(R_PLAY_CBA);
+              Cba()->DrawNow();
+#endif
+
 					  }
 					  SetCurrent(idx);
 				  } else SetCurrent(-1);
@@ -606,6 +611,11 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 				   }
 		
 	case EOggStop: {
+#ifdef SERIES60
+    Cba()->AddCommandSetToStackL(R_IDLE_CBA);
+    Cba()->DrawNow();
+#endif
+
 		if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
 			iOggPlayback->State()==CAbsPlayback::EPaused) {
 			iOggPlayback->Stop();
@@ -716,7 +726,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		iAppView->Update();
 		iAppView->Invalidate();
 		break;
-					  }
+	  }
 		
 #if defined(SERIES60)
   case EAknSoftkeyBack: {
@@ -724,13 +734,16 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     Exit();
     break;
   }
+  case EUserStopPlayingCBA : {
+ 		HandleCommandL(EOggStop);
+    break;
+    }
 #endif
 	case EEikCmdExit: {
 		Exit();
 		break;
-					  }
-		
-        }
+    }
+  }
 }
 
 void

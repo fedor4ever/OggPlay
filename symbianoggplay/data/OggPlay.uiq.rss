@@ -37,6 +37,7 @@ RESOURCE TBUF { buf=""; }
 
 #define ogg_txt_version "OggPlay 0.97 (beta)"
 
+
 RESOURCE EIK_APP_INFO
 {
   menubar=r_oggplay_menubar;

@@ -16,23 +16,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/*  Series 60 resource file
+ */
+ 
 NAME OGGP
 
 #include <eikon.rh>
 #include <uikon.rh>
-
 #include <eikon.rsg>
-
 #include <uikon.hrh> // EEikMenuTitleRightAlign
+
 #include <avkon.rsg>
 #include <avkon.rh>
 #include <avkon.mbg>
-
-//#define R_OGG_DIALOG_BUTTONS2 R_AVKON_SOFTKEYS_OK_CANCEL
-#define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OPTIONS_BACK 
+#include <avkon.hrh>
+#include <avkon.loc>
 
 #include "OggPlay.hrh"
 #include "oggdialogs.rh"
+
+#define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OPTIONS_BACK 
 
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf="Oggplay"; }
@@ -41,7 +44,7 @@ RESOURCE TBUF { buf="Oggplay"; }
 
 // Languages : EN/SC FR GE DU IT SP SW TU DA
 
-#if defined(LANGUAGE_EN) | defined(LANGUAGE_SC)
+#if defined(LANGUAGE_EN) || defined(LANGUAGE_SC)
 #include "OggPlay.en.rss"
 #elif defined(LANGUAGE_FR)
 #include "OggPlay.fr.rss"
@@ -65,8 +68,8 @@ RESOURCE TBUF { buf="Oggplay"; }
 RESOURCE EIK_APP_INFO
 {
   menubar=r_oggplay_menubar;
-  hotkeys=r_oggplay_hotkeys;
-  cba=R_AVKON_SOFTKEYS_OPTIONS_BACK;
+  //hotkeys=r_oggplay_hotkeys;
+  cba=r_idle_cba;
 }
 
 RESOURCE HOTKEYS r_oggplay_hotkeys
@@ -96,7 +99,7 @@ RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
 
 
 RESOURCE DIALOG r_dialog_about {
-  buttons =  R_AVKON_SOFTKEYS_BACK; 
+  buttons =  R_AVKON_SOFTKEYS_CANCEL; 
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -124,6 +127,26 @@ RESOURCE DIALOG r_dialog_infowin {
     }	
   };
 }
+
+
+RESOURCE DIALOG r_dialog_files_search {
+  buttons =  R_AVKON_SOFTKEYS_CANCEL; 
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type =  EOggFileSearchControl;
+	id =    EOggScrollableTextDialog;
+	control = FILESEARCHCONTROL
+	{
+	height= 90;
+	title = ogg_filescan_title;
+    dirScannedStr =ogg_filescan_label1;
+    filesFoundStr =ogg_filescan_label2;
+	};
+    }	
+  };
+}
+
 
 RESOURCE DIALOG r_dialog_info {
   title   = ogg_file_prop;
@@ -211,6 +234,39 @@ RESOURCE MENU_PANE r_skin_menu
   };
 }
 
+RESOURCE CBA r_user_hotkeys_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EUserHotKeyCBAEmpty; txt = ""; },
+    CBA_BUTTON { id = EUserHotKeyCBABack; txt = text_softkey_back; }
+  };
+}  
+
+RESOURCE CBA r_idle_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+    CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_exit; }
+  };
+}  
+
+RESOURCE CBA r_play_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+    CBA_BUTTON { id = EUserStopPlayingCBA; txt = text_softkey_stop; }
+  };
+}  
+
+RESOURCE ARRAY r_user_hotkey_items
+{
+  items = {
+    LBUF { txt = ogg_format_text_fast_forward; },
+	LBUF { txt = ogg_format_text_fast_rewind; },
+	LBUF { txt = ogg_hotkey_none; }
+  };
+}
+
 RESOURCE MENU_PANE r_file_menu
 {
   items= {
@@ -221,8 +277,8 @@ RESOURCE MENU_PANE r_file_menu
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
       MENU_ITEM { txt=ogg_skins; 
                   cascade=r_skin_menu; },
-      MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
-                  flags=EEikMenuItemSeparatorAfter;},
+   /*   MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
+                  flags=EEikMenuItemSeparatorAfter;},*/
       MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
       MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
   };

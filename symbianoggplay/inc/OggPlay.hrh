@@ -96,5 +96,11 @@ enum TOggplayDlgLineId // dialog line ids
 	EwizradialDlg1Label
     };
 
+enum TOggplayMiscSeries60
+    {
+    EUserStopPlayingCBA = 30000,          // "Stop" softkey
+    EUserHotKeyCBABack,
+    EUserHotKeyCBAEmpty
+    };	
 
 #endif      // OGGPLAY_HRH
