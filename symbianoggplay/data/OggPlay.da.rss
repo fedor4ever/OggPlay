@@ -82,7 +82,13 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(genrer)"
 #define ogg_text_string_10 "(foldere)"
 #define ogg_text_string_11 "(filer)"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(ukendte)"
+#else
 #define ogg_text_string_12 "(ukendte)"
+#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Genveje"

@@ -79,7 +79,13 @@
 #define ogg_text_string_9 "(genere)" 
 #define ogg_text_string_10 "(cartella)" 
 #define ogg_text_string_11 "(file)" 
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(non assegnato)" 
+#else
 #define ogg_text_string_12 "(non assegnato)" 
+#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"
