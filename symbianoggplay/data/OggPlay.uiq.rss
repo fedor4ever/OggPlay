@@ -1,0 +1,298 @@
+/*
+ *  Copyright (c) 2003 L. H. Wilden.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+NAME OGGP
+
+#include <eikon.rh>
+#include <uikon.rh>
+
+#include <eikon.rsg>
+
+#include <uikon.hrh> // EEikMenuTitleRightAlign
+#include <qikon.rh>
+#include <qikon.hrh>
+#include <qikctl.rsg>
+#define R_OGG_DIALOG_BUTTONS2 R_EIK_BUTTONS_CANCEL_DONE
+#define R_OGG_DIALOG_BUTTONS1 R_EIK_BUTTONS_CONTINUE
+
+#include "OggPlay.hrh"
+
+RESOURCE RSS_SIGNATURE { }
+RESOURCE TBUF { buf=""; }
+
+#define ogg_txt_version "OggPlay 0.97 (beta)"
+
+RESOURCE EIK_APP_INFO
+{
+  menubar=r_oggplay_menubar;
+}
+
+RESOURCE MENU_BAR r_oggplay_menubar
+{
+  titles= { 
+    MENU_TITLE { menu_pane=r_file_menu; txt="OggPlay!"; },
+    MENU_TITLE { menu_pane=r_empty_menu;	
+                 txt="00:00 / 00:00";
+		 flags=EEikMenuTitleRightAlign; }
+  };
+}
+
+RESOURCE TBUF r_ogg_version { buf=ogg_txt_version; }
+
+RESOURCE DIALOG r_dialog_hotkey {
+  title   = ogg_options_title;
+  buttons = R_OGG_DIALOG_BUTTONS2;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+      type = EEikCtChoiceList;
+      prompt = ogg_hotkey;
+      id = EOggOptionsHotkey;
+      control = CHOICELIST { };
+    } ,
+    DLG_LINE {
+      type = EQikCtTimeEditor;
+      prompt = ogg_alarm;
+      id = EOggOptionsAlarmTime;
+      control = QIK_TIME_EDITOR {
+        minTime = TIME { };
+        maxTime = TIME {
+          second = 59;
+          minute = 59;
+          hour = 23; };
+        flags = EQikTimeForce24HourFormat; 
+      };
+    } ,
+    DLG_LINE {
+      type = EEikCtCheckBox;
+      prompt = ogg_active;
+      id = EOggOptionsAlarmActive;
+    }
+  };
+}
+
+RESOURCE DIALOG r_dialog_about {
+  title   = ogg_about_oggplay;
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	id = EOggLabelAboutVersion;
+	control = LABEL 
+	{
+		txt=ogg_version_txt;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt=ogg_c_author;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt=ogg_link_txt;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt=ogg_vorbis_c;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt=ogg_port;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
+		txt=ogg_translation;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    }
+  };
+}
+
+RESOURCE DIALOG r_dialog_info {
+  title   = ogg_file_prop;
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt = ogg_filename_txt;
+        id = EOggInfoDialog;
+	control = LABEL 
+	{
+		txt="";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+        id = EOggLabelFileName;
+	control = LABEL 
+	{
+		txt=ogg_filename_unknown;
+		horiz_align=EEikLabelAlignHLeft;
+	};	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_filesize;
+	id= EOggLabelFileSize;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_bitrate;
+	id = EOggLabelBitRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_rate_hz;
+        id   = EOggLabelRate;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_channels;
+	id = EOggLabelChannels;
+	control = LABEL
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    }
+  };
+}
+
+RESOURCE ARRAY r_hotkey_array {
+  items= {
+    LBUF { txt=ogg_hotkey_none; },
+    LBUF { txt=ogg_hotkey_camera; },
+    LBUF { txt=ogg_hotkey_browser; },
+    LBUF { txt=ogg_hotkey_power; },
+    LBUF { txt=ogg_hotkey_flipopen; }
+  };
+}
+
+RESOURCE MENU_PANE r_empty_menu {}
+
+RESOURCE MENU_PANE r_skin_menu 
+{
+  items= {
+//      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
+  };
+}
+
+RESOURCE MENU_PANE r_file_menu
+{
+  items= {
+      MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
+      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
+                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
+      MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
+      MENU_ITEM { txt=ogg_skins; 
+                  cascade=r_skin_menu; },
+      MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
+                  flags=EEikMenuItemSeparatorAfter;},
+      MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
+      MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
+  };
+}
+
+RESOURCE MENU_PANE r_popup_menu
+{
+  items= {
+      MENU_ITEM { command=EOggNextSong;	txt=ogg_next_song; },
+      MENU_ITEM { command=EOggPrevSong; txt=ogg_prev_song; },
+      MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
+      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
+                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggPlay; txt=ogg_play; },
+      MENU_ITEM { command=EOggPauseResume; txt=ogg_pause; },
+      MENU_ITEM { command=EOggStop;	txt=ogg_stop; }
+  };
+}
+
+RESOURCE TBUF r_ogg_error_1 { buf=ogg_text_error_1; }
+RESOURCE TBUF r_ogg_error_2 { buf=ogg_text_error_2; }
+RESOURCE TBUF r_ogg_error_3 { buf=ogg_text_error_3; }
+RESOURCE TBUF r_ogg_error_4 { buf=ogg_text_error_4; }
+RESOURCE TBUF r_ogg_error_5 { buf=ogg_text_error_5; }
+RESOURCE TBUF r_ogg_error_6 { buf=ogg_text_error_6; }
+RESOURCE TBUF r_ogg_error_7 { buf=ogg_text_error_7; }
+RESOURCE TBUF r_ogg_error_8 { buf=ogg_text_error_8; }
+RESOURCE TBUF r_ogg_error_9 { buf=ogg_text_error_9; }
+RESOURCE TBUF r_ogg_error_10 { buf=ogg_text_error_10; }
+RESOURCE TBUF r_ogg_error_12 { buf=ogg_text_error_12; }
+//RESOURCE TBUF r_ogg_error_13 { buf=ogg_text_error_13; }
+RESOURCE TBUF r_ogg_error_14 { buf=ogg_text_error_14; }
+RESOURCE TBUF r_ogg_error_15 { buf=ogg_text_error_15; }
+RESOURCE TBUF r_ogg_error_16 { buf=ogg_text_error_16; }
+RESOURCE TBUF r_ogg_error_17 { buf=ogg_text_error_17; }
+RESOURCE TBUF r_ogg_error_18 { buf=ogg_text_error_18; }
+RESOURCE TBUF r_ogg_error_19 { buf=ogg_text_error_19; }
+RESOURCE TBUF r_ogg_error_20 { buf=ogg_text_error_20; }
+RESOURCE TBUF r_ogg_error_21 { buf=ogg_text_error_21; }
+RESOURCE TBUF r_ogg_error_22 { buf=ogg_text_error_22; }
+RESOURCE TBUF r_ogg_error_23 { buf=ogg_text_error_23; }
+
+RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
+RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }
+RESOURCE TBUF r_ogg_string_3 { buf=ogg_text_string_3; }
+RESOURCE TBUF r_ogg_string_4 { buf=ogg_text_string_4; }
+RESOURCE TBUF r_ogg_string_5 { buf=ogg_text_string_5; }
+RESOURCE TBUF r_ogg_string_6 { buf=ogg_text_string_6; }
+RESOURCE TBUF r_ogg_string_7 { buf=ogg_text_string_7; }
+RESOURCE TBUF r_ogg_string_8 { buf=ogg_text_string_8; }
+RESOURCE TBUF r_ogg_string_9 { buf=ogg_text_string_9; }
+RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
+RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
+RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
+
