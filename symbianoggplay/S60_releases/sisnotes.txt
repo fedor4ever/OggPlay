@@ -1,25 +1,11 @@
-    Welcome to OggPlay 1.0
+    Welcome to OggPlay 1.0.1
 
-Welcome to the Series 60
-version of OggPlay, the open
-source media player for Ogg
-Vorbis files on Symbian,
-released under the GPL by
-Leif H. Wilden.
+This release is only 
+experimental and hasn't been
+thoroughly tested.
+Please use the official 
+release 1.0.0 , unless you 
+are willing to beta test our
+new features.
 
-Special thanks goes to the
-patient translators and to
-Martin Cohen for the
-artwork. And Leif :-)
-
-We hope that you will enjoy
-using OggPlay as much as we
-enjoyed making it work on 
-Series 60. 
-Please find contact info in
-the options menu of OggPlay.
-
-     The Series 60 team
-      Berthier Lemieux,   
-       Pascal Wolff &
-        Claus Bjerre
+Enjoy!

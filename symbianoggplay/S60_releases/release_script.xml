@@ -13,11 +13,11 @@
        <zip destfile="${oggplayfulldir}/S60_releases/release.zip">
          <fileset dir="${oggplayfulldir}\install\" includes="oggplay_s60.SIS"/>
          <fileset dir="${oggplayfulldir}\install\" includes="ogg_recognizer.SIS"/>
-         <fileset dir="${oggplayfulldir}\s60_releases\" includes="readme.txt"/>
+         <fileset dir="${oggplayfulldir}\s60_releases\" includes="release_note.txt"/>
        </zip>
   </target>
 
-  <target name="CreateSIS" depends="OggPlay,skins,recognizer">
+  <target name="CreateSIS" depends="OggPlay,recognizer">
      <exec executable="subst" >  <arg line="x: ${epocroot}"/>  </exec> 
      <exec dir="x:\${oggplaydir}\install" executable="makesis.exe" failonerror="true">
         <arg line="oggplay.s60.pkg oggplay_s60.SIS"/>	

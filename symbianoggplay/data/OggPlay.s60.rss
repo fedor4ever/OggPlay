@@ -40,7 +40,7 @@ NAME OGGP
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf="Oggplay"; }
 //# Version string
-#define ogg_txt_version "OggPlay 1.00"
+#define ogg_txt_version "OggPlay 1.01"
 
 // Languages : EN/SC FR GE DU IT SP SW TU DA
 
