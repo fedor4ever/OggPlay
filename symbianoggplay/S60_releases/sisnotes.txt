@@ -1,6 +1,6 @@
     Welcome to OggPlay 1.0
 
- ***** RC 1 - 040323 *****
+ *** RC 2 - 20040403 ***
 
 Welcome to the Series 60
 version of OggPlay, the open
