@@ -20,6 +20,13 @@ OggPlay 1 {
       Style 0
       KnobIcon 26 27
     }
+    ScrollBar {
+      Position 172 0 4 142
+      KnobIcon 41 42
+      Style 1
+      ScrollerSize 20
+      Step 1
+    }
     ListBox {
       Position 0 2 172 138
       Font LatinPlain12 20 0
