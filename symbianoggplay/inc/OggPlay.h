@@ -26,7 +26,7 @@
 #include <aknapp.h>
 #include <eikdoc.h>
 #include <stdio.h>
-const TInt UID3=0x0BF72853; // FIXME!!
+const TInt UID3=0x101FF67D;
 
 const TInt KFullScreenWidth = 176;
 const TInt KFullScreenHeight = 188;

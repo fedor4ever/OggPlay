@@ -1,0 +1,16 @@
+OggPlay UID pool
+
+ UID                Use
+
+0x1000A661          OggPlay SIS. Really registered?
+0x101FD21D          Tremor DLL
+0x101FF67C          Recognizer
+0x101FF67D          OggPlay Application
+0x101FF67E          FullSteel skin
+0x101FF67F          GreyZone skin
+0x101FF680          Unused
+0x101FF681          Unused
+0x101FF682          Unused
+0x101FF683          Unused
+0x101FF684          Unused
+0x101FF685          Unused

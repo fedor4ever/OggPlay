@@ -24,14 +24,14 @@
 
 #if defined(__GCC32__) || defined(__VC32__)
   #include <e32std.h>
-  static const TInt KOggPlayApplicationUidValue = 0x0BF72853;
-  static const TInt KOggPlayRecognizerUidValue  = 0x101F1234;
+  static const TInt KOggPlayApplicationUidValue = 0x101FF67D;
+  static const TInt KOggPlayRecognizerUidValue  = 0x101FF67C;
   // Not sure this is correct mime.
   #define KOggMimeType "application/ogg"
 #else
   // For .AIF file inclusion
-  #define KOggPlayApplicationUidValue 0x0BF72853
-  #define KOggPlayRecognizerUidValue  0x101F1234
+  #define KOggPlayApplicationUidValue 0x101FF67D
+  #define KOggPlayRecognizerUidValue  0x101FF67C
 #endif
 
 #endif
