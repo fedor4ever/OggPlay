@@ -26,7 +26,26 @@
 #include "OggFilesSearchDialogs.h"
 #include <eikdialg.h>
 
+const TInt KTFileTextBufferMaxSize = 0x100;
+const TInt KMaxFileLength = 0x200;
+const TInt KDiskWriteBufferSize = 20000;
+const TInt KNofOggDescriptors = 9;         /** Nof descriptor fields in an internal ogg store */
+
 class COggPlayback;
+class TOggPlayList : public CBase
+{
+private :
+  TOggPlayList();
+
+public:
+  ~TOggPlayList();
+  static TOggPlayList* NewL(const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
+
+  HBufC* iFileName;
+  HBufC* iSubFolder;
+  HBufC* iShortName;
+};
+
 
 class TOggFile : public CBase
 {
@@ -121,7 +140,11 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void FillSubFolders(CDesCArray& arr);
   void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
+  void FillPlayLists(CDesCArray& arr);
+  void FillPlayList(CDesCArray& arr, const TDesC& aSelection);
+
   TDesC & FindFromIndex(TInt anIndex);
+  TOggFile* FindFromFileNameL(TFileName& aFileName);
 
   static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TInt anAbsoluteIndex);
   static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& anInternalText);
@@ -149,13 +172,18 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void AddDirectoryStop();
   void ClearFiles();
 
-  TBool isSupportedAudioFile(TParsePtrC& p);
+  TBool IsSupportedAudioFile(TParsePtrC& p);
+  TBool IsPlayListFile(TParsePtrC& p);
+
+  TBool NextDirectory();
+  TBool AddNextFileL();
   
 #ifdef PLUGIN_SYSTEM
   CDesCArrayFlat * iSupportedExtensionList;
 #endif
 
   CArrayPtrFlat<TOggFile>* iFiles; 
+  CArrayPtrFlat<TOggPlayList>* iPlayLists; 
   CAbsPlayback*            iOggPlayback;
   TOggKey                  iOggKeyTitles;
   TOggKey                  iOggKeyAlbums;
@@ -163,6 +191,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   TOggKey                  iOggKeyGenres;
   TOggKey                  iOggKeySubFolders;
   TOggKey                  iOggKeyFileNames;
+  // TOggKey                  iOggKeyPlayList;
   TOggKey                  iOggKeyTrackTitle;
   TOggKeyNumeric           iOggKeyAbsoluteIndex;
   TInt                     iVersion;
@@ -179,6 +208,8 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   CDir    * iDirectory;
   CDesC16ArrayFlat * iPathArray;
 
+  TBuf<KMaxFileLength> iFullname;
+  TBuf<KMaxFileLength> iPath;
 };
 
 #endif

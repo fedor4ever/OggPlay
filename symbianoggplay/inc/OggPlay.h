@@ -86,8 +86,18 @@ const TUid KOggPlayUidCodecSelectionView = { KOggPlayApplicationUidValue+6 };
 _LIT(KAudioResourceFile, "Z:\\System\\Apps\\OggPlay\\OggPlay.mbm");
 _LIT(KQTimeResourceFile, "Z:\\System\\Apps\\QTime\\QTime.mbm");
 
-const TInt KMaxFileNameLength = 0x200;
 
+// TO DO: Items types should be an enum
+#ifdef PLAYLIST_SUPPORT
+const TInt KPlayListItemType = 6;
+const TInt KBackItemType = 7;
+const TInt KPlayingItemType = 8;
+const TInt KPausedItemType = 9;
+#else
+const TInt KBackItemType = 6;
+const TInt KPlayingItemType = 7;
+const TInt KPausedItemType = 8;
+#endif
 
 struct TKeyCodes
 {
@@ -228,7 +238,11 @@ public:
   ~COggPlayAppUi();
 
   // the views supported by the listbox:
+#ifdef PLAYLIST_SUPPORT
+  enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EPlayList, ETop, ETrackTitle };
+#else
   enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, ETop, ETrackTitle };
+#endif
 
   // global settings stored in the ini file:
   TOggplaySettings iSettings;

@@ -155,4 +155,8 @@ chSTR2(__LINE__) "):" #desc)
 // Used for determining the phone type (currently only used for the Sendo X)
 #define EMachineUid_SendoX 0x101FA031
 
+
+// Playlist support
+#define PLAYLIST_SUPPORT
+
 #endif

@@ -771,6 +771,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	case EOggViewByGenre:
 	case EOggViewBySubFolder:
 	case EOggViewByFileName:
+	case EOggViewByPlayList:
         {
 			TBuf<16> dummy;
 			//iViewBy= aCommand-EOggViewByTitle;
@@ -884,13 +885,17 @@ COggPlayAppUi::PlaySelect()
     return;
 	}
 
-	if (iAppView->GetItemType(idx)==6) {
+	if (iAppView->GetItemType(idx)==KBackItemType) {
 		// the back item was selected: show the previous view
 		SelectPreviousView();
 		return;
 	}
 
+#ifdef PLAYLIST_SUPPORT
+	if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy == EPlayList) 
+#else
 	if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) 
+#endif
 	{
 		SelectNextView();
 		return;
@@ -997,14 +1002,22 @@ COggPlayAppUi::SelectNextView()
 {
   int idx = iAppView->GetSelectedIndex();
   if (iViewBy==ETop) {
-		  if (idx>=ETitle && idx<=EFileName){
+#ifdef PLAYLIST_SUPPORT
+	  if (idx>=ETitle && idx<=EPlayList){
+#else
+	  if (idx>=ETitle && idx<=EFileName){
+#endif
 			  iViewHistoryStack.Append(idx);
 			  HandleCommandL(EOggViewByTitle+idx);
 		  }
 		  return;
 	}
 		
+#ifdef PLAYLIST_SUPPORT
+  if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==EPlayList)) return;
+#else
   if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder)) return;
+#endif
 
     iViewHistoryStack.Append(idx);
 
@@ -1014,8 +1027,6 @@ COggPlayAppUi::SelectNextView()
     iAppView->GetFilterData(idx, tmp);
     iAppView->FillView(ETitle, iViewBy, filter->Des());
     CleanupStack::PopAndDestroy();
-
-  return;
 }
 
 void
@@ -1025,7 +1036,7 @@ COggPlayAppUi::ShowFileInfo()
 	if ((!songPlaying) && iAppView->GetSelectedIndex()<0) return;
 	if (!songPlaying) {
 		// no song is playing, show info for selected song if possible
-		if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) return;
+		if (iAppView->GetItemType(iAppView->GetSelectedIndex())==KBackItemType) return;
 		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==ETop) return;
 		if (iOggPlayback->Info( iAppView->GetFileName(iAppView->GetSelectedIndex()))!=KErrNone)
             return;
@@ -1078,7 +1089,7 @@ COggPlayAppUi::NextSong()
             HandleCommandL(EOggPlay); // play it!
         } else {
             // if no song is playing, play the currently selected song
-            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) iAppView->SelectItem(1);
+            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==KBackItemType) iAppView->SelectItem(1);
             HandleCommandL(EOggPlay); // play it!
         } 
 	}
@@ -1116,7 +1127,7 @@ COggPlayAppUi::PreviousSong()
             HandleCommandL(EOggPlay); // play it!
         } else {
             // if no song is playing, play the currently selected song
-            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==6) iAppView->SelectItem(1);
+            if (iAppView->GetItemType(iAppView->GetSelectedIndex())==KBackItemType) iAppView->SelectItem(1);
             HandleCommandL(EOggPlay); // play it!
         }
 	}

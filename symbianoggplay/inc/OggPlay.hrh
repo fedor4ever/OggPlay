@@ -38,6 +38,7 @@ enum {
   EOggViewByGenre,
   EOggViewBySubFolder,
   EOggViewByFileName,
+  EOggViewByPlayList,
   EOggViewRebuild,
 
   EOggSkinOne,
