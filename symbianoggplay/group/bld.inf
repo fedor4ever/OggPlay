@@ -1,11 +1,15 @@
 /*
 * ============================================================================
 *  Name     : bld.inf
+
 *  Part of  : OggPlay
+
 *  Created  : 19.07.2003 by 
 *  Description:
 *	 This file provides the information required for building the
+
 *    whole of a OggPlay.
+
 *  Version  :
 *  Copyright: 
 * ============================================================================
@@ -21,10 +25,7 @@ PRJ_EXPORTS
 // copy will be used to copy the source file to its destination
 // If there's no destination then the source file will be copied
 // to the same name in \epoc32\include
-// Example: 
-/*
-\agnmodel\inc\AGMCOMON.H
-*/
+..\S60default.skn \Epoc32\Release\wins\udeb\z\system\apps\OGGPLAY\S60default.skn
 
 PRJ_MMPFILES
 // Specify the .mmp files required for building the important component
@@ -43,9 +44,8 @@ PRJ_MMPFILES
 #endif
 */
 
-//\Symbian\6.1\Series60\OggPlay\group\OggPlay.mmp
-//\OggPlay\group\OggPlay.mmp
 OggPlay.mmp
+
 PRJ_TESTMMPFILES
 // specify the .mmp files required for building any test programs here
 //
