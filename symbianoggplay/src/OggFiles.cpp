@@ -134,11 +134,13 @@ TOggFile::SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer)
   User::LeaveIfError( aTf.Read(buf) );
 
   if (aBuffer) 
-    aBuffer= aBuffer->ReAllocL(buf.Length());  
-  else
-    aBuffer= HBufC::NewL(buf.Length());  
+  {
+      delete(aBuffer);
+      aBuffer =NULL;
+  }
+  
+  aBuffer= buf.AllocL();  
     
-  *aBuffer = buf;
 }
 
 void

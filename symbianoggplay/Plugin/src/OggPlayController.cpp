@@ -249,7 +249,7 @@ TTimeIntervalMicroSeconds COggPlayController::PositionL() const
   //  PRINT("COggPlayController::PositionL");
     
     if(iDecoder)
-        return( TTimeIntervalMicroSeconds(iDecoder->Position( )) );
+        return( TTimeIntervalMicroSeconds(iDecoder->Position( ) * 1000) );
     else
     return TTimeIntervalMicroSeconds(0);
 }
@@ -259,7 +259,7 @@ void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition
     
     PRINT("COggPlayController::SetPositionL");
    
-    if(iDecoder) iDecoder->Setposition( aPosition.Int64() );
+    if(iDecoder) iDecoder->Setposition( aPosition.Int64() / 1000.0);
 }
 
 TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
@@ -268,7 +268,7 @@ TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
    // PRINT("COggPlayController::DurationL");
     
     if (iDecoder) {
-        return (iDecoder->TimeTotal());
+        return (iDecoder->TimeTotal() * 1000);
     }
     return TTimeIntervalMicroSeconds(1E6);
 }
@@ -287,23 +287,23 @@ CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
     switch(aIndex)
     {
     case 0:
-        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginTitle"), iTitle));
+        return (CMMFMetaDataEntry::NewL(_L("title"), iTitle));
         break;
         
     case 1:
-        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginAlbum"), iAlbum));
+        return (CMMFMetaDataEntry::NewL(_L("album"), iAlbum));
         break;
         
     case 2:
-        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginArtist"), iArtist));
+        return (CMMFMetaDataEntry::NewL(_L("artist"), iArtist));
         break;
         
     case 3:
-        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginGenre"), iGenre));
+        return (CMMFMetaDataEntry::NewL(_L("genre"), iGenre));
         break;
         
     case 4:
-        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginTrackNumber"),  iTrackNumber));
+        return (CMMFMetaDataEntry::NewL(_L("albumtrack"),  iTrackNumber));
         break;
     }
     return NULL;
