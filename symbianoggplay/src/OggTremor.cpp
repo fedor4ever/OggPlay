@@ -686,16 +686,13 @@ TInt COggAudioCapabilityPoll::PollL()
             }
         iSettings.Query();
         
-        TRACEF(COggLog::VA(_L("Probing %d start"), i ));
         iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
         iSettings.iSampleRate= iRate;
         iSettings.iVolume = 0;
         
         iStream  = CMdaAudioOutputStream::NewL(*this);
-        TRACELF("Opening stream..");
         iStream->Open(&iSettings);
         CActiveScheduler::Start();
-        TRACEF(COggLog::VA(_L("Probing end") ));
         delete iStream; // This is rude...
         iStream = NULL;
         
@@ -711,7 +708,7 @@ void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError)
         // Mode supported.
         iCaps |= iRate;
         }
-    TRACEF(COggLog::VA(_L("Result = %d"), aError ));
+    TRACEF(COggLog::VA(_L("SampleRa:%d"), aError ));
     CActiveScheduler::Stop();
     }
 

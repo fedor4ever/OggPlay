@@ -108,8 +108,7 @@ class COggActive
   void IssueRequest();
   static TInt CallBack(TAny* aPtr);
 
- protected:
-
+ private:
   RTelServer*    iServer;
   RPhone*        iPhone;
   RLine*         iLine;
@@ -122,6 +121,7 @@ class COggActive
   int iInterrupted;
   COggPlayAppUi* iAppUi;
 };
+
 #ifdef SERIES60
 class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver
 #else
@@ -188,6 +188,10 @@ private:
   void SetProcessPriority();
   void SetThreadPriority();
   void FindSkins();
+#if defined(SERIES60_SPLASH)
+  void ShowSplashL();
+#endif
+
 
   int iCapturedKeyHandle;
   HBufC* iIniFileName;

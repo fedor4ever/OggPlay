@@ -16,72 +16,76 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "OggOs.h"
 #include "OggFiles.h"
 
 #include "OggTremor.h"
 #include "OggLog.h"
 
 #include <eikfutil.h>
+
+const TInt KTFileTextBufferMaxSize = 0x100;
+const TInt KMaxFileLength = 0x200;
+
 ////////////////////////////////////////////////////////////////
 //
 // TOggFile
 //
 ////////////////////////////////////////////////////////////////
 
-TOggFile::TOggFile() :
-  iTitle(0),
-  iAlbum(0),
-  iArtist(0),
-  iGenre(0),
-  iFileName(0),
-  iSubFolder(0),
-  iShortName(0),
-  iTrackNumber(0),
-  iTrackTitle(0)
-{
-  SetText(iTitle,_L("-"));
-  SetText(iAlbum,_L("-"));
-  SetText(iArtist,_L("-"));
-  SetText(iGenre,_L("-"));
-  SetText(iFileName,_L("-"));
-  SetText(iSubFolder,_L("-"));
-  SetText(iShortName,_L("-"));
-  SetText(iTrackNumber,_L("-"));
-  SetText(iTrackTitle,_L("-"));
-}
+TOggFile::TOggFile()
+  {
+  }
 
-TOggFile::TOggFile(const TDesC& aTitle,
+TOggFile* TOggFile::NewL()
+  {
+  TOggFile* self = new (ELeave) TOggFile();
+  CleanupStack::PushL(self);
+  self->SetText(self->iTitle,_L("-"));
+  self->SetText(self->iAlbum,_L("-"));
+  self->SetText(self->iArtist,_L("-"));
+  self->SetText(self->iGenre,_L("-"));
+  self->SetText(self->iFileName,_L("-"));
+  self->SetText(self->iSubFolder,_L("-"));
+  self->SetText(self->iShortName,_L("-"));
+  self->SetText(self->iTrackNumber,_L("-"));
+  self->SetText(self->iTrackTitle,_L("-"));
+  CleanupStack::Pop(); // self
+  //TRACE(COggLog::VA(_L("TOggFile::NewL() 0x%X"), self ));
+  return self;
+  }
+
+TOggFile* TOggFile::NewL(const TDesC& aTitle,
 		   const TDesC& anAlbum,
 		   const TDesC& anArtist,
 		   const TDesC& aGenre,
 		   const TDesC& aSubFolder,
 		   const TDesC& aFileName,
 		   const TDesC& aShortName,
-		   const TDesC& aTrackNumber) :
-  iTitle(0),
-  iAlbum(0),
-  iArtist(0),
-  iGenre(0),
-  iFileName(0),
-  iSubFolder(0),
-  iShortName(0),
-  iTrackNumber(0),
-  iTrackTitle(0)
-{
+		   const TDesC& aTrackNumber)
+  {
+  TOggFile* self = new (ELeave) TOggFile();
+  CleanupStack::PushL(self);
+
   TBuf<128> buf;
   CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_12);
 
-  if (aTitle.Length()>0) SetText(iTitle, aTitle); else SetText(iTitle, aShortName);
-  if (anAlbum.Length()>0) SetText(iAlbum, anAlbum); else SetText(iAlbum, buf);
-  if (anArtist.Length()>0) SetText(iArtist, anArtist); else SetText(iArtist, buf);
-  if (aGenre.Length()>0) SetText(iGenre, aGenre); else SetText(iGenre,buf);
-  if (aSubFolder.Length()>0) SetText(iSubFolder, aSubFolder); else SetText(iSubFolder,buf);
-  SetText(iFileName, aFileName);
-  SetText(iShortName, aShortName);
-  if (aTrackNumber.Length()>0) SetText(iTrackNumber, aTrackNumber); else SetText(iTrackNumber, buf);
+  if (aTitle.Length()>0) self->SetText(self->iTitle, aTitle); else self->SetText(self->iTitle, aShortName);
+  if (anAlbum.Length()>0) self->SetText(self->iAlbum, anAlbum); else self->SetText(self->iAlbum, buf);
+  if (anArtist.Length()>0) self->SetText(self->iArtist, anArtist); else self->SetText(self->iArtist, buf);
+  if (aGenre.Length()>0) self->SetText(self->iGenre, aGenre); else self->SetText(self->iGenre,buf);
+  if (aSubFolder.Length()>0) self->SetText(self->iSubFolder, aSubFolder); else self->SetText(self->iSubFolder,buf);
+  self->SetText(self->iFileName, aFileName);
+  self->SetText(self->iShortName, aShortName);
+  if (aTrackNumber.Length()>0) self->SetText(self->iTrackNumber, aTrackNumber); else self->SetText(self->iTrackNumber, buf);
 
-  SetTrackTitle();
-}
+  self->SetTrackTitle();
+  CleanupStack::Pop(); // self
+  //TRACE(COggLog::VA(_L("TOggFile::NewL(...) 0x%X"), self ));
+  return self;
+  }
+
+
 
 void
 TOggFile::SetTrackTitle() 
@@ -99,6 +103,7 @@ TOggFile::SetTrackTitle()
 
 TOggFile::~TOggFile()
 {
+  //TRACE(COggLog::VA(_L("TOggFile::~TOggFile() 0x%X"), this ));
   if (iTitle) delete iTitle;
   if (iAlbum) delete iAlbum;
   if (iArtist) delete iArtist;
@@ -119,33 +124,35 @@ TOggFile::SetText(HBufC* & aBuffer, const TDesC& aText)
   *aBuffer= aText;
 }
 
-TBool
-TOggFile::Read(TFileText& tf, TInt aVersion)
+void
+TOggFile::SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer)
 {
-  TBuf<256> aTitle, anAlbum, anArtist, aGenre, aSubFolder, aFileName, aShortName, aTrackNumber;
-  bool success=
-    tf.Read(aTitle)==KErrNone &&
-    tf.Read(anAlbum)==KErrNone &&
-    tf.Read(anArtist)==KErrNone &&
-    tf.Read(aGenre)==KErrNone &&
-    tf.Read(aSubFolder)==KErrNone &&
-    tf.Read(aFileName)==KErrNone &&
-    tf.Read(aShortName)==KErrNone;
-  if (aVersion==1 && success)
-    success&= (tf.Read(aTrackNumber)==KErrNone);
-  if (success) {
-    SetText(iTitle, aTitle);
-    SetText(iAlbum, anAlbum);
-    SetText(iArtist, anArtist);
-    SetText(iGenre, aGenre);
-    SetText(iSubFolder, aSubFolder);
-    SetText(iFileName, aFileName);
-    SetText(iShortName, aShortName);
-    SetText(iTrackNumber, aTrackNumber);
-    SetTrackTitle();
-  }
-  return success;
+  TBuf<KTFileTextBufferMaxSize> buf;
+  User::LeaveIfError( aTf.Read(buf) );
+
+  if (aBuffer) 
+    aBuffer= aBuffer->ReAllocL(buf.Length());  
+  else
+    aBuffer= HBufC::NewL(buf.Length());  
+    
+  *aBuffer = buf;
 }
+
+void
+TOggFile::ReadL(TFileText& tf, TInt aVersion)
+{
+  SetTextFromFileL( tf, iTitle );
+  SetTextFromFileL( tf, iAlbum );
+  SetTextFromFileL( tf, iArtist );
+  SetTextFromFileL( tf, iGenre );
+  SetTextFromFileL( tf, iSubFolder );
+  SetTextFromFileL( tf, iFileName );
+  SetTextFromFileL( tf, iShortName );
+  if( aVersion == 1 )
+    SetTextFromFileL( tf, iTrackNumber );
+  SetTrackTitle();
+}    
+
 
 TBool
 TOggFile::Write(TFileText& tf)
@@ -173,7 +180,7 @@ TOggKey::TOggKey(TInt anOrder) :
   iFiles(0),
   iOrder(anOrder)
 {
-  iSample= new(ELeave) TOggFile();
+  iSample= TOggFile::NewL();
   SetPtr(iSample);
 }
 
@@ -263,79 +270,94 @@ void TOggFiles::CreateDb(RFs& session)
 }
 
 void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
-{
-  _LIT(KS,"Scanning directory %s for oggfiles");
-  //OGGLOG.WriteFormat(KS,aDir.Ptr());
+  {
+  TRACE(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir ));
 
   // Check if the drive is available (i.e. memory stick is inserted)
-  if (!EikFileUtils::FolderExists(aDir)) {
-    _LIT(KS,"Folder %s doesn't exist");
-    //OGGLOG.WriteFormat(KS,aDir.Ptr());
+#if defined(UIQ)
+  if (!EikFileUtils::FolderExists(aDir)) 
+#else
+  // UIQ_? Have had some problems with FolderExists in the WIN emulator (?)
+  if (!EikFileUtils::PathExists(aDir)) 
+#endif
+    {
+    TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
     return;
-  }
+    }
  
   CDirScan* ds = CDirScan::NewL(session);
   TRAPD(err,ds->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
-  if (err!=KErrNone) {
-    _LIT(KS,"Unable to setup scan directory %s for oggfiles");
-    //OGGLOG.WriteFormat(KS,aDir.Ptr());
+  if (err!=KErrNone) 
+    {
+    TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aDir ));
     delete ds; ds=0;
     return;
-  }
+    }
 
   CDir* c=0;
-  while (1==1) {
-
+  for(;;) 
+    {
     TRAPD(err,ds->NextL(c));
-    if (err!=KErrNone) {
-      _LIT(KS,"Unable to scan directory %s for oggfiles");
-      //OGGLOG.WriteFormat(KS,aDir.Ptr());
+    if (err!=KErrNone) 
+      {
+      TRACEF(COggLog::VA(_L("Unable to scan directory %S for oggfiles"), &aDir ));
       delete ds; ds=0;
       return;
-    }
+      }
+
 	  if (c==0) break;
 
-    for (TInt i=0; i<c->Count(); i++) {
+    HBufC* fullname = HBufC::NewLC(KMaxFileLength);
+    HBufC* path = HBufC::NewLC(KMaxFileLength);
 
+    for (TInt i=0; i<c->Count(); i++) 
+      {
       const TEntry e= (*c)[i];
 
-      TBuf<512> fullname;
-      fullname.Append(ds->FullPath());
-      fullname.Append(e.iName);
+      fullname->Des().Copy(ds->FullPath());
+      fullname->Des().Append(e.iName);
 
-      TParse p;
-      p.Set(fullname,NULL,NULL);
+      TParsePtrC p( fullname->Des() );
 
-      if (p.Ext()==_L(".ogg") || p.Ext()==_L(".OGG")) {
-	
-	TBuf<256> shortname;
-	shortname.Append(e.iName);
-	shortname.Delete(shortname.Length()-4,4); // get rid of the .ogg extension
+      if (p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0 ) 
+        {
+    	  TBuf<256> shortname;
+	      shortname.Append(e.iName);
+	      shortname.Delete(shortname.Length()-4,4); // get rid of the .ogg extension
+        path->Des().Copy(ds->AbbreviatedPath());
 
-	TBuf<256> path(ds->AbbreviatedPath());
-	if (path.Length()>1 && path[path.Length()-1]==L'\\')
-	  path.Delete(path.Length()-1,1); // get rid of trailing back slash
+	      if (path->Des().Length()>1 && path->Des()[path->Des().Length()-1]==L'\\')
+	        path->Des().SetLength( path->Des().Length()-1); // get rid of trailing back slash
 
-	iOggPlayback->Info(fullname, EFalse);	
+        //TRACE(COggLog::VA(_L("Processing %S"), &fullname ));
+	      TInt err = iOggPlayback->Info(*fullname, ETrue);
 
-	TOggFile* o= new(ELeave) TOggFile(iOggPlayback->Title(), 
-				  iOggPlayback->Album(), 
-				  iOggPlayback->Artist(), 
-				  iOggPlayback->Genre(), 
-				  path,
-				  fullname,
-				  shortname,
-				  iOggPlayback->TrackNumber());
-	
-	iFiles->AppendL(o);
-
+        if( err == KErrNone )
+          {
+          TOggFile* o = TOggFile::NewL(iOggPlayback->Title(), 
+				        iOggPlayback->Album(), 
+				        iOggPlayback->Artist(), 
+				        iOggPlayback->Genre(), 
+				        *path,
+				        *fullname,
+				        shortname,
+				        iOggPlayback->TrackNumber());
+	      
+	        iFiles->AppendL(o);
+          }
+        else
+          {
+          TRACEF(COggLog::VA(_L("Failed with code %d"), err ));
+          }
+        }
       }
-    }
     delete c; c=0;
-  }
+    CleanupStack::PopAndDestroy(2); // fullname + path
+    }
   delete ds; c=0;
   iOggPlayback->ClearComments();
-}
+  }
+
 
 TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 {
@@ -346,7 +368,7 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
     tf.Set(in);
     
     // check file version:
-    TBuf<512> line;
+    TBuf<KTFileTextBufferMaxSize> line;
     iVersion= -1;
     if(tf.Read(line)==KErrNone) {
       TLex parse(line);
@@ -358,10 +380,13 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
       return EFalse;
     }
 
-      while (tf.Read(line)==KErrNone) {
-      TOggFile* o= new(ELeave) TOggFile();
-      if (!o->Read(tf,iVersion)) break;
-	iFiles->AppendL(o);
+    while (tf.Read(line)==KErrNone) 
+      {
+      TOggFile* o = TOggFile::NewL();
+      TRAPD( err, o->ReadL(tf,iVersion) );
+      if( err )
+        break;
+      iFiles->AppendL(o);
       }
 
     in.Close();
@@ -418,28 +443,31 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
 }
 
 void
-TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TBuf<512>& aFileName)
+TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName)
 {
-  TBuf<1024> buf;
-  buf.AppendNum(aType);
-  buf.Append(KColumnListSeparator);
-  buf.Append(aText);
-  buf.Append(KColumnListSeparator);
-  buf.Append(aFileName);
-  arr.AppendL(buf);
+  HBufC* hbuf = HBufC::NewLC(1024);
+  hbuf->Des().AppendNum((TInt) aType);
+  hbuf->Des().Append(KColumnListSeparator);
+  hbuf->Des().Append(aText);
+  hbuf->Des().Append(KColumnListSeparator);
+  hbuf->Des().Append(aFileName);
+  arr.AppendL(hbuf->Des());
+  CleanupStack::PopAndDestroy();
 }
 
 void
 TOggFiles::ClearFiles()
 {
   //for (TInt i=0; i<iFiles->Count(); i++) delete (*iFiles)[i];
-  iFiles->Reset();
+  //iFiles->Reset();
+
+  iFiles->ResetAndDestroy();
 }
 
 void 
 TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum, 
 			   const TDesC& anArtist, const TDesC& aGenre, 
-			   const TFileName& aSubFolder)
+			   const TDesC& aSubFolder)
 {
   arr.Reset();
   if (anAlbum.Length()>0) iFiles->Sort(iOggKeyTrackTitle); else iFiles->Sort(iOggKeyTitles);

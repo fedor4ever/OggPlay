@@ -19,6 +19,7 @@
 #include "OggOs.h"
 #include "OggLog.h"
 #include "OggControls.h"
+#include "OggMsgEnv.h"
 
 #include <OggPlay.rsg>
 
@@ -146,7 +147,7 @@ CGulIcon*
 TOggParser::ReadIcon(const TFileName& aBitmapFile)
 {
   TInt idxBitmap,idxMask;
-  Debug(aBitmapFile);
+  //Debug(aBitmapFile);
   if (!ReadToken(idxBitmap)) return NULL;
   if (!ReadToken(idxMask)) return NULL;
   CGulIcon* result= CEikonEnv::Static()->CreateIconL(aBitmapFile, idxBitmap, idxMask);
@@ -181,6 +182,11 @@ TOggParser::ReadFont()
   TFontSpec fs(name,size);
   if (style==1) fs.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
   CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(result,fs);
+  #if defined(SERIES60)
+    // UIQ_?
+    // Prevent WINS emulator panic
+    CCoeEnv::Static()->ScreenDevice()->ReleaseFont(result);
+  #endif
   return result;
 }
 
@@ -224,6 +230,7 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
   buf.Append(txt);
   buf.Append(_L(" Token:"));
   buf.Append(iToken); 
+  //TRACEF(COggLog::VA(_L("%S"), &buf ));
   //OGGLOG.WriteFormat(buf);
 
 //  User::InfoPrint(buf);
@@ -246,6 +253,7 @@ COggControl::COggControl() :
   iAcceptsFocus(EFalse),
   iObserver(0)
 {
+  //TRACE(COggLog::VA(_L("COggControl::COggControl() 0x%X"), this ));
 }
 
 COggControl::~COggControl()
@@ -390,8 +398,11 @@ COggControl::Read(TOggParser& p)
     p.iState= TOggParser::EBeginExpected;
     return EFalse;
   }
-  while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { ReadArguments(p); }
-  if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) p.iState= TOggParser::EEndExpected;
+  while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { 
+    ReadArguments(p); 
+    }
+  if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) 
+    p.iState= TOggParser::EEndExpected;
   return p.iState==TOggParser::ESuccess;
 }
 
@@ -464,10 +475,13 @@ COggText::SetFontColor(TRgb aColor)
 void
 COggText::SetText(const TDesC& aText)
 {
-  if (iText) delete iText;
+  if (iText) 
+    {
+    delete iText;
+    iText = NULL;
+    }
 
-  iText = HBufC::NewLC(aText.Length());
-  CleanupStack::Pop();
+  iText = HBufC::NewL(aText.Length());
   iText->Des().Copy(aText);
 
   iTextWidth= GetTextWidth(aText, iFont, iw);
@@ -1971,7 +1985,7 @@ TBool COggListBox::ReadArguments(TOggParser& p)
  ***********************************************************/
 
 COggCanvas::COggCanvas() :
-  if2bm(0),
+//  if2bm(0),
   iBackground(0),
   iControls(10),
   iGrabbed(0),
@@ -1986,16 +2000,19 @@ COggCanvas::~COggCanvas()
     iBackground->Reset();
     delete iBackground;
   }
-  if(if2bm) {
-    if2bm->Close();
-    delete if2bm;
-  }
-
-  
+//  if(if2bm) {
+//  if2bm->Close();
+//delete if2bm;  }
 }
 
-void COggCanvas::ConstructL(const TFileName& aFileName, TInt iIdx)
+void COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
 {
+  if(iBackground) 
+    {
+    iBackground->Reset();
+    delete iBackground;
+    }
+
 //  if2bm = CMdaImageFileToBitmapUtility::NewL(*this);
   iBackground = new(ELeave) CFbsBitmap;
 
@@ -2007,9 +2024,15 @@ void COggCanvas::ConstructL(const TFileName& aFileName, TInt iIdx)
     TBuf<256> buf;
     CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_21);
     buf.AppendNum(err);
+#if defined(UIQ)
     User::InfoPrint(buf);
+#else
+    // UIQ_?
+    COggMsgEnv::OggErrorMsgL( buf, _L(" ") );
+#endif
     delete iBackground;
     iBackground= 0;
+    User::Leave(err);
   }
 
   EnableDragEvents();
@@ -2017,6 +2040,8 @@ void COggCanvas::ConstructL(const TFileName& aFileName, TInt iIdx)
   DrawControl();
 }
 
+
+/*
 void COggCanvas::MiuoOpenComplete(TInt aError)
 {
   if (aError==KErrNone) if2bm->ConvertL(*iBackground);
@@ -2041,10 +2066,9 @@ void COggCanvas::MiuoConvertComplete(TInt aError)
     iBackground= 0;
   }
 }
+*/
+//void COggCanvas::MiuoCreateComplete(TInt /*aError*/) { }
 
-void COggCanvas::MiuoCreateComplete(TInt /*aError*/)
-{
-}
 
 void
 COggCanvas::Refresh()
@@ -2078,6 +2102,7 @@ COggCanvas::AddControl(COggControl* c)
 void COggCanvas::ClearControls()
 {
   iControls.ResetAndDestroy();
+ 
 }
 
 void COggCanvas::DrawControl()

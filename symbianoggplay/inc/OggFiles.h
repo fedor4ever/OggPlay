@@ -28,12 +28,14 @@ class COggPlayback;
 
 class TOggFile : public CBase
 {
- public:
-
+private :
   TOggFile();
+
+public:
   virtual ~TOggFile();
 
-  TOggFile(const TDesC& aTitle, 
+  static TOggFile* NewL();
+  static TOggFile* NewL( const TDesC& aTitle, 
 	   const TDesC& anAlbum,
 	   const TDesC& anArtist,
 	   const TDesC& aGenre,
@@ -44,7 +46,9 @@ class TOggFile : public CBase
 
   void SetText(HBufC* & aBuffer, const TDesC& aText);
   void SetTrackTitle();
-  TBool Read(TFileText& tf, TInt aVersion);
+  void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
+
+  void ReadL(TFileText& tf, TInt aVersion);
   TBool Write(TFileText& tf);
 
   HBufC* iTitle;
@@ -87,14 +91,14 @@ class TOggFiles : public CBase
   TBool ReadDb(const TFileName& aFileName, RFs& session);
   void  WriteDb(const TFileName& aFileName, RFs& session);
 
-  void FillTitles(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
+  void FillTitles(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TDesC& aSubFolder);
   void FillAlbums(CDesCArray& arr, const TDesC& anArtist, const TFileName& aSubFolder);
   void FillArtists(CDesCArray& arr, const TFileName& aSubFolder);
   void FillGenres(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TFileName& aSubFolder);
   void FillSubFolders(CDesCArray& arr);
   void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
-  static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TBuf<512>& aFileName);
+  static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName);
 
  protected:
 

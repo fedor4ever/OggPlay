@@ -19,6 +19,9 @@
 
 #ifndef OGGMSGENV_H
 #define OGGMSGENV_H
+
+const TInt KMaxNoteLength = 50;
+
 class COggMsgEnv : public CBase
 {
 public:
@@ -27,8 +30,8 @@ public:
     COggMsgEnv();
 
     // Error Msg
-    void OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine) const;
-    void OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId=0) const;
+    static void OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine);// const;
+    static void OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId=0);// const;
 private:
 };
 

@@ -541,15 +541,14 @@ class COggAnalyzer : public COggControl {
 // and which uses an off-screen bitmap for double buffering
 //----------------------------------------------------------
 
-class COggCanvas : public CCoeControl ,
-		   public MMdaImageUtilObserver
+class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
 {
 
  public:
 
   COggCanvas();
   virtual ~COggCanvas();
-  void ConstructL(const TFileName& aFileName, TInt iIdx);
+  void LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
 
   void Refresh();
   void Invalidate();
@@ -568,9 +567,9 @@ class COggCanvas : public CCoeControl ,
  protected:
 
   // from MMdaImageUtilObserver:
-  virtual void MiuoOpenComplete(TInt aError);
-  virtual void MiuoConvertComplete(TInt aError);
-  virtual void MiuoCreateComplete(TInt aError);
+//  virtual void MiuoOpenComplete(TInt aError);
+//  virtual void MiuoConvertComplete(TInt aError);
+//  virtual void MiuoCreateComplete(TInt aError);
 
   // from CCoeControl:
   virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent);
@@ -586,7 +585,7 @@ class COggCanvas : public CCoeControl ,
 
 protected:
 
-  CMdaImageFileToBitmapUtility* if2bm;
+  //CMdaImageFileToBitmapUtility* if2bm;
 
   CFbsBitGc*         iBitmapContext;
   CFbsBitmap*	     iBitmap;

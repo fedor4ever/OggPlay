@@ -36,16 +36,17 @@ chSTR2(__LINE__) "):" #desc)
 #define KVersionMinor 96
 #define KVersionString "0.96"
 
+#define MULTI_LINGUAL_INSTALLER
 
 // DEBUGGING
 //
-//#define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
+#define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
 
 
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-//#define SERIES60
+#define SERIES60
 
 // Automatic platform target. Seen fail on windows systems.
 #if defined(__AVKON_ELAF__) || defined(__AVKON_APAC__)

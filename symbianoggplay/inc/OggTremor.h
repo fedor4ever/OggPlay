@@ -39,6 +39,7 @@ const TInt KBufferSize = 4096*10;
 const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
 
+
 class MPlaybackObserver {
  public:
   virtual void NotifyPlayComplete() = 0;

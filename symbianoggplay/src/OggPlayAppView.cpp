@@ -53,22 +53,22 @@ COggPlayAppView::~COggPlayAppView()
   //if (iControls) { delete iControls; iControls= 0; }
   if (iControls) { iControls->Reset(); delete iControls; iControls= 0; }
   if (iTextArray) { delete iTextArray; iTextArray=0; }
-  COggControl* c;
-  iFocusControlsIter.SetToFirst();
-  while ((c = iFocusControlsIter++) != NULL) {
-    c->iDlink.Deque();
-  };
+
+  ClearCanvases();
+
   if(iTimer) iTimer->Cancel();
   delete iTimer;
   delete iCallBack;
+
   if(iCanvas[1]) {
-    iCanvas[1]->ClearControls();
+  //  iCanvas[1]->ClearControls();
     delete iCanvas[1];
   }
   if(iCanvas[0]) {
-    iCanvas[0]->ClearControls();
+   // iCanvas[0]->ClearControls();
     delete iCanvas[0];
   }
+
   delete iOggFiles;
 }
 
@@ -84,10 +84,6 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   SetRect(aRect);
 
   SetComponentsToInheritVisibility(EFalse);
-#if defined(SERIES60)
-  CEikStatusPane* sp = iEikonEnv->AppUiFactory()->StatusPane();
-  sp->MakeVisible(EFalse);
-#endif
   iOggFiles= new TOggFiles(iApp->iOggPlayback);
  
   iControls = new(ELeave)CArrayPtrFlat<CCoeControl>(10);
@@ -99,9 +95,9 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   //iSkinFileDir.Copy(iApp->Application()->AppFullName());
   //iSkinFileDir.SetLength(iSkinFileDir.Length()-);
 
-  iBackgroundFileName.Copy(iApp->Application()->AppFullName());
-  iBackgroundFileName.SetLength(iBackgroundFileName.Length() - 3);
-  iBackgroundFileName.Append(_L("bmp"));
+  //iBackgroundFileName.Copy(iApp->Application()->AppFullName());
+  //iBackgroundFileName.SetLength(iBackgroundFileName.Length() - 3);
+  //iBackgroundFileName.Append(_L("bmp"));
 
   // construct the two canvases for flip-open and closed mode:
   //----------------------------------------------------------
@@ -147,14 +143,15 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 void 
 COggPlayAppView::ReadSkin(const TFileName& aFileName)
 {
-  iCanvas[0]->ClearControls();
-  iCanvas[1]->ClearControls();
+  ClearCanvases();
   ResetControls();
+
+  TRACEF(COggLog::VA(_L("COggPlayAppView::ReadSkin(%S)"), &aFileName ));
 
   iIconFileName= aFileName.Left(aFileName.Length()-4);
   iIconFileName.Append(_L(".mbm"));
-  iCanvas[0]->ConstructL(iIconFileName, 19);
-  iCanvas[1]->ConstructL(iIconFileName, 18);
+  iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
+  iCanvas[1]->LoadBackgroundBitmapL(iIconFileName, 18);
 
   TOggParser p(aFileName);
   if (p.iState!=TOggParser::ESuccess) {
@@ -207,6 +204,7 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   iFocusControlsIter.SetToFirst();
   COggControl* c=iFocusControlsIter;
   if(c) c->SetFocus(ETrue);
+  TRACELF("ReadSkin ok");
   //OGGLOG.Write(_L("New skin installed."));
 }
 
@@ -246,8 +244,23 @@ COggPlayAppView::ResetControls() {
 }
 
 void
+COggPlayAppView::ClearCanvases()
+  {
+  COggControl* oggControl;
+  iFocusControlsIter.SetToFirst();
+  while ((oggControl = iFocusControlsIter++) != NULL) {
+    oggControl->iDlink.Deque();
+    };
+
+  iCanvas[0]->ClearControls();
+  iCanvas[1]->ClearControls();
+  }
+
+
+void
 COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 {
+  TRACELF("ReadCanvas");
   CFont* iFont= const_cast<CFont*>(iCoeEnv->NormalFont());
 
   bool stop(EFalse);
@@ -327,7 +340,9 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       c= new(ELeave) COggText();
       iPlayed[aCanvas]= (COggText*)c;
       iPlayed[aCanvas]->SetFont(iFont);
+#if defined(UIQ)
       iPlayed[aCanvas]->SetText(_L("00:00 / 00:00"));
+#endif
     }
     else if (p.iToken==_L("PlayedDigits")) {
       c= new COggDigits;
@@ -642,7 +657,7 @@ COggPlayAppView::GetNSongs()
   return GetTextArray()->Count();
 }
 
-TBuf<512>
+TPtrC
 COggPlayAppView::GetFileName(TInt idx)
 {
   CDesCArray* arr= GetTextArray();
@@ -652,7 +667,6 @@ COggPlayAppView::GetFileName(TInt idx)
   if(idx >= 0 && idx < arr->Count()) {
     sel.Set((*arr)[idx]);
     TextUtils::ColumnText(msel, 2, &sel);
-    return msel;
   }
   return msel;
 }
@@ -661,7 +675,8 @@ TInt
 COggPlayAppView::GetItemType(TInt idx)
 {
   CDesCArray* arr= GetTextArray();
-  if (!arr) return 0;
+  if (!arr) 
+    return NULL;
 
   TPtrC sel,msel;
   if(idx >= 0 && idx < arr->Count()) {
@@ -727,9 +742,12 @@ COggPlayAppView::ShufflePlaylist()
   if (iListBox[iMode]) iListBox[iMode]->Redraw();
   SelectSong(0);
   Invalidate();
-  TBuf<128> buf;
-  iEikonEnv->ReadResource(buf, R_OGG_STRING_5);
-  if (!IsFlipOpen()) User::InfoPrint(buf);
+  if (!IsFlipOpen()) 
+    {
+    TBuf<128> buf;
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_5);
+    User::InfoPrint(buf);
+    }
 }
 
 void
@@ -787,6 +805,7 @@ COggPlayAppView::Invalidate()
 void
 COggPlayAppView::InitView()
 {
+  TRACELF("InitView");
   // fill the list box with some initial content:
   if (!iOggFiles->ReadDb(iApp->iDbFileName,iCoeEnv->FsSession())) {
     iOggFiles->CreateDb(iCoeEnv->FsSession());
@@ -804,21 +823,22 @@ COggPlayAppView::InitView()
 void
 COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TViews thePreviousView, const TDesC& aSelection)
 {
+  TBuf<32> buf, dummy;
+
   if (theNewView==COggPlayAppUi::ETop) {
     GetTextArray()->Reset();
-    TBuf<32> dummy, btitles, balbums, bartists, bgenres, bsubfolders, bfiles;
-    iEikonEnv->ReadResource(btitles, R_OGG_STRING_6);
-    iEikonEnv->ReadResource(balbums, R_OGG_STRING_7);
-    iEikonEnv->ReadResource(bartists, R_OGG_STRING_8);
-    iEikonEnv->ReadResource(bgenres, R_OGG_STRING_9);
-    iEikonEnv->ReadResource(bsubfolders, R_OGG_STRING_10);
-    iEikonEnv->ReadResource(bfiles, R_OGG_STRING_11);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ETitle, btitles, dummy);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EAlbum, balbums, dummy);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EArtist, bartists, dummy);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EGenre, bgenres, dummy);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ESubFolder, bsubfolders, dummy);
-    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EFileName, bfiles, dummy);
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_6);
+    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ETitle, buf, dummy);
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_7);
+    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EAlbum, buf, dummy);
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_8);
+    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EArtist, buf, dummy);
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_9);
+    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EGenre, buf, dummy);
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_10);
+    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::ESubFolder, buf, dummy);
+    iEikonEnv->ReadResource(buf, R_OGG_STRING_11);
+    TOggFiles::AppendLine(*GetTextArray(), COggPlayAppUi::EFileName, buf, dummy);
   }
   else if (thePreviousView==COggPlayAppUi::ETop) {
     TBuf<16> dummy;
@@ -984,6 +1004,20 @@ COggPlayAppView::UpdateSongPosition()
 {
   if (!iApp->iForeground) return;
 
+#if defined(SERIES60)
+  // Only show "Played" time component when not stopped, i.e. only show 
+  // when artist, title etc is displayed.
+  if( iPlayed[iMode] )
+    {
+    TBool playedControlIsVisible = (iApp->iOggPlayback->State() != CAbsPlayback::EClosed) &&
+                                   (iApp->iOggPlayback->State() != CAbsPlayback::EFirstOpen);
+    iPlayed[iMode]->MakeVisible( playedControlIsVisible );
+    if( !playedControlIsVisible )
+      return;
+    }
+#endif
+
+
   // Update the song position displayed in the menubar (flip open) 
   // or in the TOggCanvas (flip closed):
   //------------------------------------
@@ -1062,8 +1096,17 @@ COggPlayAppView::UpdateVolume()
 void COggPlayAppView::UpdatePlaying()
 {
   if (iTitle[iMode]) {
-    if (iApp->iOggPlayback->Title().Length()==0) 
-      iTitle[iMode]->SetText(iApp->iOggPlayback->FileName());
+    if (iApp->iOggPlayback->Title().Length()==0)
+        {
+        #if defined(UIQ)
+            iTitle[iMode]->SetText(iApp->iOggPlayback->FileName());
+        #else
+            // Series 60 : Show only the filename. (space consideration)
+            TParsePtrC p(iApp->iOggPlayback->FileName());
+            iTitle[iMode]->SetText( p.NameAndExt() );
+        #endif
+        }
+      
     else
       iTitle[iMode]->SetText(iApp->iOggPlayback->Title());
   }
@@ -1356,6 +1399,7 @@ void COggPlayAppView::AddControlToFocusList(COggControl* c) {
     c->iDlink.Enque(&currentitem->iDlink);
     iFocusControlsIter.Set(*c);
   } else {
+    TRACEL("COggPlayAppView::AddControlToFocusList, iFocusControlsHeader.AddFirst");
     //OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList - Setting up focus list adding 0x%x"),c);
     iFocusControlsHeader.AddFirst(*c);
     iFocusControlsIter.SetToFirst(); 

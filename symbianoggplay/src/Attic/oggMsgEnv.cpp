@@ -31,14 +31,14 @@ COggMsgEnv::~COggMsgEnv()
 }
 
 #ifdef SERIES60
-void COggMsgEnv::OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine) const
+void COggMsgEnv::OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine)// const
 {
     COggInfoWinDialog *d = new COggInfoWinDialog();
     d->SetInfoWinL(aFirstLine,aSecondLine);
     d->ExecuteLD(R_DIALOG_INFOWIN);
 }
 
-void COggMsgEnv::OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId) const
+void COggMsgEnv::OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId)// const
 {
     TBuf<256> buf1,buf2;
     CEikonEnv::Static()->ReadResource(buf1, aFirstLineId);
@@ -47,11 +47,11 @@ void COggMsgEnv::OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId) const
 }
 #else
 
-void COggMsgEnv::OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId) const
+void COggMsgEnv::OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId)// const
 {
     CEikonEnv::Static()->InfoWinL(aFirstLineId, aSecondLineId);
 }
-void COggMsgEnv :: OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine) const
+void COggMsgEnv::OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine)// const
 {
     CEikonEnv::Static()->InfoWinL(aFirstLine, aSecondLine);
 }

@@ -57,7 +57,7 @@ public:
 
   // access/manipulation of the playlist:
   TInt        GetNSongs();
-  TBuf<512>   GetFileName(TInt idx);
+  TPtrC       GetFileName(TInt idx);
   TInt        GetItemType(TInt idx);
   void        ShufflePlaylist();
   void        SelectSong(TInt idx);
@@ -115,7 +115,9 @@ private:
 
   void  ReadCanvas(TInt aCanvas, TOggParser& p);
   void  ResetControls();
+  void  ClearCanvases();
 
+  /// COggCanvas[0..1], flip open and closed
   CArrayPtrFlat<CCoeControl>* iControls;
   COggPlayAppUi* iApp;
 
@@ -126,7 +128,7 @@ private:
   TTime      iMinTime;
   TTime      iMaxTime;
   TFileName  iIconFileName;
-  TFileName  iBackgroundFileName;
+  //TFileName  iBackgroundFileName;
   CDesCArray* iTextArray;
   TInt       iSelected; 
   
