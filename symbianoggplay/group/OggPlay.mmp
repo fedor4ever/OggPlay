@@ -6,7 +6,6 @@ TARGETTYPE  app
 UID  0x100039CE 0x1000A661
 TARGETPATH \system\apps\Oggplay
 
-
 SOURCEPATH ..\src
 SOURCE OggLog.cpp
 SOURCE OggPlay.cpp
