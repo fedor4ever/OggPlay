@@ -192,7 +192,7 @@ class COggText : public COggControl {
     EOnce=0,
     EEndless,
     ETilBorder,
-    EBackAndForth, // not implemented
+    EBackAndForth, 
     ERoundabout // not implemented
   };
   void SetScrollStyle(TInt aStyle);

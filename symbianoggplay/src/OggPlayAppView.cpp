@@ -482,6 +482,9 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     else if (p.iToken==_L("Logo")) {
       c= new(ELeave) COggAnimation();
       iLogo[aCanvas]= (COggAnimation*)c;
+    } 
+    else if(p.iToken==_L("HotKeys")||p.iToken==_L("Hotkeys")) {
+      SetHotkeysFromSkin(p);
     }
 
     if (c) {
@@ -493,6 +496,85 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
   }
 
   p.Debug(_L("Canvas read."));
+
+}
+
+TBool COggPlayAppView::SetHotkeysFromSkin(TOggParser& p) {
+  p.ReadToken();
+  if (p.iToken!=KBeginToken) {
+    p.iState= TOggParser::EBeginExpected;
+    return EFalse;
+  }
+  while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { 
+    ReadHotkeyArgument(p); 
+    }
+  if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) 
+    p.iState= TOggParser::EEndExpected;
+  return p.iState==TOggParser::ESuccess;
+
+
+}
+
+TBool COggPlayAppView::ReadHotkeyArgument(TOggParser& p) {
+  TInt numkey;
+  if (p.iToken==_L("FastForward")) {
+    p.Debug(_L("Setting FastForward."));
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EFastForward]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EFastForward]=ETrue;
+    }
+  } else if(p.iToken==_L("Rewind")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::ERewind]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::ERewind]=ETrue;
+    }
+  } else if(p.iToken==_L("PageUp")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPageUp]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPageUp]=ETrue;
+    }
+  } else if(p.iToken==_L("PageDown")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPageDown]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPageDown]=ETrue;
+    }
+  } else if(p.iToken==_L("NextSong")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::ENextSong]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::ENextSong]=ETrue;
+    }
+  } else if(p.iToken==_L("PreviousSong")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPreviousSong]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPreviousSong]=ETrue;
+    }
+  } else if(p.iToken==_L("PauseResume")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPauseResume]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPauseResume]=ETrue;
+    }
+
+  } else if(p.iToken==_L("Play")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPlay]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPlay]=ETrue;
+    }
+
+  } else if(p.iToken==_L("Pause")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPause]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPause]=ETrue;
+    }
+  } else if(p.iToken==_L("Stop")) {
+    if (p.ReadToken(numkey)) {
+      iApp->iSettings.iUserHotkeys[TOggplaySettings::EStop]='0'+numkey;
+      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EStop]=ETrue;
+    }
+
+  }
+
+
+  return ETrue;
 
 }
 
@@ -1481,14 +1563,30 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         SelectItem(index - iListBox[iMode]->NofVisibleLines() + 1);
       return EKeyWasConsumed;
       }
-	case TOggplaySettings::ENextSong : {
-		iApp->NextSong();
-		return EKeyWasConsumed;
-		}
-	case TOggplaySettings::EPreviousSong : {
-		iApp->PreviousSong();
-		return EKeyWasConsumed;
-		}
+    case TOggplaySettings::ENextSong : {
+	    iApp->NextSong();
+	    return EKeyWasConsumed;
+	    }
+    case TOggplaySettings::EPreviousSong : {
+	    iApp->PreviousSong();
+	    return EKeyWasConsumed;
+	    }
+    case TOggplaySettings::EPauseResume : {
+	    iApp->PauseResume();
+	    return EKeyWasConsumed;
+	    }
+    case TOggplaySettings::EPlay : {
+	    iApp->HandleCommandL(EOggPlay);
+	    return EKeyWasConsumed;
+	    }
+    case TOggplaySettings::EPause : {
+	    iApp->HandleCommandL(EUserPauseCBA); // well..
+	    return EKeyWasConsumed;
+	    }
+    case TOggplaySettings::EStop : {
+      iApp->HandleCommandL(EOggStop);		
+      return EKeyWasConsumed;
+	    }
     case TOggplaySettings::EKeylock : {
       if( aKeyEvent.iRepeats > 0 )
         {

@@ -132,11 +132,16 @@ public:
     ENextSong,
     EPreviousSong,
     EKeylock,
-    ENofHotkeys,
+    EPauseResume,
+    EPlay,
+    EPause,
+    EStop,
+    ENofHotkeys, 
     KFirstHotkeyIndex = EFastForward
     };
 
   TInt iUserHotkeys[ENofHotkeys];
+  TBool iLockedHotkeys[ENofHotkeys];
 	};
 
 // Forward declarations:

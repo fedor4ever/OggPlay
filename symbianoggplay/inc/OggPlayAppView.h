@@ -84,6 +84,8 @@ public:
 
   void  ReadSkin(const TFileName& aFileName);
   void  ReadControls();
+  TBool SetHotkeysFromSkin(TOggParser& p);
+  TBool ReadHotkeyArgument(TOggParser& p);
 
   void SetupListBox(COggListBox* aListBox);
 

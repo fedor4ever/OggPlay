@@ -551,7 +551,11 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_format_text_page_down; },
 	LBUF { txt = ogg_format_text_next_song; },
 	LBUF { txt = ogg_format_text_prev_song; },
-	LBUF { txt = ogg_format_text_keylock; }
+	LBUF { txt = ogg_format_text_keylock; },
+	LBUF { txt = ogg_format_text_playpause; },
+	LBUF { txt = ogg_play; },
+	LBUF { txt = ogg_pause; },
+	LBUF { txt = ogg_stop; }
   };
 }
 
