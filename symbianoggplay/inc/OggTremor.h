@@ -19,9 +19,7 @@
 #ifndef _OggTremor_h
 #define _OggTremor_h
 
-#include "mdaaudiooutputstream.h"
 #include "e32des8.h"
-#include "mda/common/audio.h"
 #include "eikenv.h"
 #include "stdio.h"
 #include "ivorbisfile.h"
@@ -52,7 +50,12 @@ const TInt KErrOggFileNotFound = -101;
 const TInt KFreqArrayLength = 100; // Length of the memory of the previous freqs bin
 const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making same changes
                                    // to vorbis library !
-class MPlaybackObserver {
+
+//
+// MPlaybackObserver class
+//------------------------------------------------------
+class MPlaybackObserver 
+{
  public:
   virtual void NotifyPlayComplete() = 0;
   virtual void NotifyUpdate() = 0;
@@ -81,6 +84,7 @@ class CAbsPlayback : public CBase {
 
   // Here is a bunch of abstract methods which need to implemented for
   // each audio format:
+  ////////////////////////////////////////////////////////////////
 
   // Open a file and retrieve information (meta data, file size etc.) without playing it:
   virtual TInt   Info(const TDesC& aFileName, TBool silent= EFalse) = 0;
@@ -105,46 +109,63 @@ class CAbsPlayback : public CBase {
   virtual const void* GetDataChunk() = 0;
 #endif
 
+   // Implemented Helpers 
+   ////////////////////////////////////////////////////////////////
 
-  // The following functions have a simple default implementation:
+   virtual TState State()                 { return ( iState );             };
+   
+   // Information about the playback file 
+   virtual TInt   BitRate()               { return ( iBitRate.GetTInt() ); };
+   virtual TInt   Channels()              { return ( iChannels );          };
+   virtual TInt   FileSize()              { return ( iFileSize );          };
+   virtual TInt   Rate()                  { return ( iRate );              };
 
-  virtual TState State();
-  virtual TInt   Rate();
-  virtual TInt   Channels();
-  virtual TInt   FileSize();
-  virtual TInt   BitRate();
-  virtual const TFileName& FileName();
-  virtual const TDesC& Artist();
-  virtual const TDesC& Title();
-  virtual const TDesC& Album();
-  virtual const TDesC& Genre();
-  virtual const TDesC& TrackNumber();
+   virtual const TDesC&     Album()       { return ( iAlbum );             };
+   virtual const TDesC&     Artist()      { return ( iArtist );            };
+   virtual const TFileName& FileName()    { return ( iFileName );          };
+   virtual const TDesC&     Genre()       { return ( iGenre );             };
+   virtual const TDesC&     Title()       { return ( iTitle );             };
+   virtual const TDesC&     TrackNumber() { return ( iTrackNumber );       };
 
-  virtual void  ClearComments();
-  virtual void  SetObserver(MPlaybackObserver* anObserver);
-  virtual void  SetVolumeGain(TGainType aGain);
+   virtual void   ClearComments()         { iArtist.SetLength(0);          \
+                                            iTitle.SetLength(0);           \
+                                            iAlbum.SetLength(0);           \
+                                            iGenre.SetLength(0);           \
+                                            iTrackNumber.SetLength(0);     \
+                                            iFileName.SetLength(0);        };
+   virtual void   SetObserver( MPlaybackObserver* anObserver )             \
+                                          { iObserver = anObserver;        };
+   virtual void   SetVolumeGain(TGainType aGain)
+                                          { /* No nothing by default */    };
+                                          
  protected:
 
-  TState                   iState;
-  MPlaybackObserver*       iObserver;
+   TState                   iState;
+   MPlaybackObserver*       iObserver;
 
-  // file properties and tag information:
-  //-------------------------------------
-
-  TBuf<256>                iTitle;
-  TBuf<256>                iAlbum;
-  TBuf<256>                iArtist;
-  TBuf<256>                iGenre;
-  TBuf<256>                iTrackNumber;
-  TInt64                   iTime;
-  TInt                     iRate;
-  TInt                     iChannels;
-  TInt                     iFileSize;
-  TInt64                   iBitRate;
-  TFileName                iFileName;
+   // File properties and tag information   
+   //-------------------------------------
+   TInt64                   iBitRate;
+   TInt                     iChannels;
+   TInt                     iFileSize;
+   TInt                     iRate;
+   TInt64                   iTime;
   
+   enum { KMaxStringLength = 256 };
+   TBuf<KMaxStringLength>   iAlbum;
+   TBuf<KMaxStringLength>   iArtist;
+   TFileName                iFileName;
+   TBuf<KMaxStringLength>   iGenre;
+   TBuf<KMaxStringLength>   iTitle;
+   TBuf<KMaxStringLength>   iTrackNumber;
 };
 
+#if defined(MOTOROLA)
+#include "OggTremor_Motorola.h"
+#else
+
+#include "mdaaudiooutputstream.h"
+#include "mda/common/audio.h"
 
 // COggPlayback:
 // An implementation of TAbsPlayback for the Ogg/Vorbis format:
@@ -269,4 +290,7 @@ class COggAudioCapabilityPoll : public CBase, public MMdaAudioOutputStreamCallba
         TInt iCaps;
         TInt iRate;
     };
-#endif
+    
+#endif // !MOTOROLA
+
+#endif // _OggTremor_h

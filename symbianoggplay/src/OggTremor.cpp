@@ -84,83 +84,6 @@ CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
 {
 }
 
-void
-CAbsPlayback::SetObserver(MPlaybackObserver* anObserver)
-{
-  iObserver= anObserver;
-}
-
-void CAbsPlayback::ClearComments()
-{
-  iArtist.SetLength(0);
-  iTitle.SetLength(0);
-  iAlbum.SetLength(0);
-  iGenre.SetLength(0);
-  iTrackNumber.SetLength(0);
-  iFileName.SetLength(0);
-}
-
-void CAbsPlayback::SetVolumeGain(TGainType /*aGain*/)
-{
-    /* Do nothing by default*/
-}
-
-TInt CAbsPlayback::Rate()
-{ 
-  return iRate;
-}
-
-TInt CAbsPlayback::Channels()
-{
-  return iChannels;
-}
-
-TInt CAbsPlayback::FileSize()
-{
-  return iFileSize;
-}
-
-TInt CAbsPlayback::BitRate()
-{
-  return iBitRate.GetTInt();
-}
-
-const TFileName& CAbsPlayback::FileName()
-{
-  return iFileName;
-}
-
-const TDesC& CAbsPlayback::Artist()
-{
-  return iArtist;
-}
-
-const TDesC& CAbsPlayback::Album()
-{
-  return iAlbum;
-}
-
-const TDesC& CAbsPlayback::Title()
-{
-  return iTitle;
-}
-
-const TDesC& CAbsPlayback::Genre()
-{
-  return iGenre;
-}
-
-const TDesC& CAbsPlayback::TrackNumber()
-{
-  return iTrackNumber;
-}
-
-CAbsPlayback::TState CAbsPlayback::State()
-{
-  return iState;
-}
-
-
 ////////////////////////////////////////////////////////////////
 //
 // COggPlayback
@@ -249,9 +172,13 @@ void COggPlayback::SetDecoderL(const TDesC& aFileName)
 
   if(p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0) {
       iDecoder=new(ELeave)CTremorDecoder;
-  } else if(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0) {
+  } 
+#if defined(MP3_SUPPORT)
+  else if(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0) {
     iDecoder=new(ELeave)CMadDecoder;
-  } else {
+  }
+#endif
+  else {
     _LIT(KPanic,"Panic:");
     _LIT(KNotSupported,"File type not supported");
     iEnv->OggErrorMsgL(KPanic,KNotSupported);

@@ -15,7 +15,11 @@ SOURCE OggDialogs.cpp
 SOURCE OggMsgEnv.cpp
 SOURCE OggPlayAppView.cpp
 SOURCE OggViews.cpp
+#if defined(MOTOROLA)
+SOURCE OggTremor_Motorola.cpp
+#else
 SOURCE OggTremor.cpp
+#endif
 SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
 #if defined SERIES60
@@ -112,7 +116,9 @@ LIBRARY estor.lib
 #endif
 LIBRARY hal.lib
 //LIBRARY msvcrt.lib
-
+#if defined(MOTOROLA)
+LIBRARY maudiofb.lib
+#endif
 
 START WINS      
 // ?wins_specific_information
