@@ -938,18 +938,25 @@ COggPlayAppUi::PauseResume()
 {
     
   TRACEF(_L("PauseResume"));
-  if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
+  if (iOggPlayback->State()==CAbsPlayback::EPlaying)
+  {
     iOggPlayback->Pause();
     iAppView->Update();
     UpdateSoftkeys();
-		if(iWriteIniOnNextPause) {
-			iWriteIniOnNextPause=EFalse;
-			WriteIniFile();
-		}
-  }	else { 
-    PlaySelect();
+	if(iWriteIniOnNextPause)
+	{
+		iWriteIniOnNextPause=EFalse;
+		WriteIniFile();
+	}
   }
-  return;
+  else if  (iOggPlayback->State()==CAbsPlayback::EPaused)
+  {
+	  iOggPlayback->Resume();
+	  iAppView->Update();
+      UpdateSoftkeys();
+  }
+  else
+    PlaySelect();
 }
 
 void

@@ -1,0 +1,160 @@
+
+#define ogg_options_title "Опции"
+#define ogg_hotkey "Клавиша:"
+#define ogg_alarm "Alarm:"
+#define ogg_active "Активно:"
+#define ogg_about_oggplay "Об OggPlay"
+#define ogg_version_txt "Версия ???"
+#define ogg_c_author "(c) 2003 by Leif H. Wilden"
+#define ogg_link_txt "смотрите www.geocities.com/p800tools для информации"
+#define ogg_vorbis_c "(c) Ogg/Vorbis codec by Xiph.org"
+#define ogg_translation "Шамиль Рандуев"
+#define ogg_port "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff"
+#define ogg_file_prop "Свойства файда"
+#define ogg_filename_txt "Имя файла:"
+#define ogg_filename_unknown "неизвестно"
+#define ogg_filesize "Размер файла [byte]:"
+#define ogg_bitrate "Bitrate [kbit/s]:"
+#define ogg_rate_hz "Rate [Hz]:"
+#define ogg_channels "Каналы:"
+#define ogg_hotkey_none "Ничего"
+#define ogg_hotkey_camera "Кнопка камеры"
+#define ogg_hotkey_browser "Кнока браузера"
+#define ogg_hotkey_power "Кнопка питания"
+#define ogg_hotkey_flipopen "Открыт flip"
+#define ogg_skin_default "default"
+#define ogg_file_info "Информация по файлу..."
+#define ogg_repeat_on         "Повтор включен"                  // New
+#define ogg_repeat_off        "Повтор выключен"                  // New
+#define ogg_shuffle_playlist "Перемешать список"
+#define ogg_repeat "Повтор - %S"
+#define ogg_repeat2 "Повтор"
+#define ogg_find_files "Найти новые файлы"
+#define ogg_skins "Скины"
+#define ogg_options_cascade "Опции..." 
+#define ogg_about_label "Об OggPlay..."
+#define ogg_exit_label "Выход"
+#define ogg_prev_song "Предыдущая песня"
+#define ogg_next_song "Следующая песня"
+#define ogg_stop "Стоп"
+#define ogg_play "Игра"
+#define ogg_pause "Пауза"
+
+#define ogg_filescan_title "Ищем ogg файлы"
+#define ogg_filescan_label1 "Сканировано директорий:"
+#define ogg_filescan_label2 "Количество файлов .ogg:"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Количество файлов .m3u:"
+#endif
+
+#define ogg_text_error_1 "COggButton: Ошибка чтения картинки маски."
+#define ogg_text_error_2 "COggCanvas: Ошибка конвертации картинки фона: "
+#define ogg_text_error_3 "COggPlayAppUi: Невозможно установить приоритет процесса: Ошибка "
+#define ogg_text_error_4 "COggPlayAppUi: Невозможно найти процесс?? Йопт."
+#define ogg_text_error_5 "COggPlayAppUi: Невозможно установить приоритет нити: Ошибка "
+#define ogg_text_error_6 "COggPlayAppUi: Невозможно найти нить?? Йопт."
+#define ogg_text_error_7 "TOggPlayback: Ошибка открытия потока. Ошибка "
+#define ogg_text_error_8 "TOggPlayback: Не указан файл."
+#define ogg_text_error_9 "Это не ogg vorbis файл?!"
+#define ogg_text_error_10 "Поддерживаются только потоки с одним или двумя каналами."
+#define ogg_text_error_12 "Неподдерживаемый аудио формат."
+// This is not used anymore
+//#define ogg_text_error_13 "Only the following sample rates are supported: 11025,16000,22050,32000,44100,48000 Hz."
+//
+#define ogg_text_error_14 "Невозможно открыть этот файл"
+#define ogg_text_error_15 "Ничего не открыто."
+#define ogg_text_error_16 "Код ошибки "
+#define ogg_text_error_17 "Ошибка отправки буфера"
+#define ogg_text_error_18 "Ошибка копирования буфера"
+#define ogg_text_error_19 "Ошибка ввода "
+#define ogg_text_error_20 "Ошибка"
+#define ogg_text_error_21 "COggCanvas: Ошибка открытия картинки фона."
+// Not used anymore
+//#define ogg_text_error_22 "Only the following sample rates are supported: "
+//#define ogg_text_error_23 "Only streams with one channel are supported."
+#define ogg_text_error_24 "Этот ogg файл был закодирован с sampling rate = %i Hz. К сожалению ваш телефон поддерживает только проигрывание файлов со следующими sampling rates: %S. "
+#define ogg_text_error_25 "Этот ogg файл содержит 2 аудио канала (стерео), к сожалению ваш телефон поддерживает только моно воспроизведение. "
+#define ogg_text_error_26 "Oggplay произведет необходимую конверсию чтобы проиграть этот ogg файл. Тем не менее, если вас волнует размер ваших ogg файлов, пожалуйста перекодируйте их в sampling rate поддерживаемый вашим телефоном. Это значительно уменьшит размер файлов без потери качества воспроизведения."
+#define ogg_text_error_27 "Это предупреждение можно отключить из меню Опции."
+#define ogg_text_string_1 "Обновляем список файлов..."
+#define ogg_text_string_2 "Пишем файл базы ..."
+#define ogg_text_string_3 "Alarm сработал"
+#define ogg_text_string_4 "Невозможно установить приоритет процесса: Ошибка "
+#define ogg_text_string_5 "Список перемешан"
+#define ogg_text_string_6 "(названия)"
+#define ogg_text_string_7 "(альбомы)"
+#define ogg_text_string_8 "(артисты)"
+#define ogg_text_string_9 "(жанры)"
+#define ogg_text_string_10 "(директории)"
+#define ogg_text_string_11 "(файлы)"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(плэйлисты)"
+#define ogg_text_string_13 "(неопределенные)"
+#else
+#define ogg_text_string_12 "(неопределенные)"
+#endif
+
+// S60 Hotkey settings
+#define ogg_user_hotkey              "Клавиши"
+#define ogg_format_text_fast_forward "Промотать"
+#define ogg_format_text_rewind       "Отмотать"
+#define ogg_format_text_page_up      "Подняться на страницу в списке"
+#define ogg_format_text_page_down    "Опуститься на страницу в списке"
+#define ogg_format_text_next_song    ogg_next_song
+#define ogg_format_text_prev_song    ogg_prev_song
+#define ogg_format_text_keylock      "Блокировка"          // NEW 2004-04-24
+#define ogg_format_text_playpause    "Пауза / Игра"     // NEW 2004-05-08
+
+
+#define ogg_settings                 "Настройки"  // in the menu
+#define ogg_settings_title           "Настройки Oggplay" // on top of the settings screen
+#define ogg_filescanmode             "Режим сканирования файлов"
+//#define ogg_maneuvring_speed         "Auto Change Dir"  // DELETE
+#define ogg_autostart                "Автопроигрование при запуске"
+#define ogg_fullscan                 "Полный скан"
+#define ogg_mmcdir                   "E:\Ogg"
+//#define ogg_normal                   "Normal"         // DELETE
+//#define ogg_fast                     "Fast"           // DELETE
+#define ogg_on                       "Да"
+#define ogg_off                      "Нет"
+#define ogg_popup_on                 "Включено"
+#define ogg_popup_off                "Выключено"
+#define ogg_back_dir                 "назад"
+#define ogg_backspace                "Backspace"
+#define ogg_shift                    "Shift (no repeat)"
+#define ogg_warnings                 "Предупреждения"
+#define ogg_by                       " by "
+
+#define ogg_rsk_idle                 "Правая кнопка / Отдых "
+#define ogg_rsk_play                 "Правая кнопка / Режим игры"
+#define ogg_cba_back                 "Назад"
+#define ogg_cba_clear                "Очистить"
+#define ogg_cba_option               "Опции"
+#define ogg_cba_exit                 "Выход"
+#define ogg_cba_stop                 "Стоп"
+#define ogg_cba_pause                "Пауза"
+#define ogg_cba_play                 "Игра"
+
+#define ogg_random_on                "Случайное проигрывание"
+#define ogg_random_off               "Обычное проигрывание"
+#define ogg_volume_boost             "Повышенная громкость"
+#define ogg_volume_boost_none        "Отключена"
+#define ogg_volume_boost_6db         "+6dB"
+#define ogg_volume_boost_12db        "+12dB"
+
+#define ogg_codec_selection          "Кодеки"
+#define ogg_no_plugin_found          "Плагины не найдены"
+#define ogg_codec_ogg                "OGG"
+#define ogg_codec_mp3                "MP3"
+#define ogg_codec_aac                "AAC"
+#define ogg_codec_mp4                "MP4"
+
+#define ogg_codec_info_name          "Название"
+#define ogg_codec_info_supplier      "Поставшик"
+#define ogg_codec_info_version       "Версия"
+#define ogg_codec_info_UID           "UID"
+
+
+
