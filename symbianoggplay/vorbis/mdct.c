@@ -32,8 +32,11 @@
 
  ********************************************************************/
 
+#include <e32def.h>
+#include <stdlib.h>
 #include "ivorbiscodec.h"
 #include "os.h"
+#include "codebook.h"
 #include "misc.h"
 #include "mdct.h"
 #include "mdct_lookup.h"

@@ -15,17 +15,19 @@
 
  ********************************************************************/
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "ogg.h"
+#include "codebook.h"
 #include "ivorbiscodec.h"
 #include "mdct.h"
 #include "codec_internal.h"
-#include "codebook.h"
 #include "window.h"
 #include "registry.h"
+
 #include "misc.h"
 
 /* simplistic, wasteful way of doing this (unique lookup for each
@@ -100,10 +102,10 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
     int floornum=info->floorsubmap[i];
     int resnum=info->residuesubmap[i];
 
-    look->floor_func[i]=_floor_P[ci->floor_type[floornum]];
+    look->floor_func[i]=(vorbis_func_floor *) _floor_P[ci->floor_type[floornum]];
     look->floor_look[i]=look->floor_func[i]->
       look(vd,vm,ci->floor_param[floornum]);
-    look->residue_func[i]=_residue_P[ci->residue_type[resnum]];
+    look->residue_func[i]=(vorbis_func_residue *)_residue_P[ci->residue_type[resnum]];
     look->residue_look[i]=look->residue_func[i]->
       look(vd,vm,ci->residue_param[resnum]);
     

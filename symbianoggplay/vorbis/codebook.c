@@ -15,6 +15,7 @@
 
  ********************************************************************/
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

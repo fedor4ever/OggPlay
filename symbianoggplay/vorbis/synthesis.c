@@ -16,13 +16,16 @@
 
  ********************************************************************/
 
+#include <e32def.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codec_internal.h"
 #include "registry.h"
 #include "misc.h"
 #include "os.h"
+#include "block.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op,int decodep){
   vorbis_dsp_state     *vd=vb->vd;

@@ -15,8 +15,10 @@
  last mod: $Id$
 
  ********************************************************************/
-#pragma warning( disable : 4244 ) //possible loss of data
+
 #pragma warning( disable : 4127 ) // while(1)
+#pragma warning( disable : 4706 ) // Assignment within conditional expression
+#include <e32def.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -25,7 +27,7 @@
 
 #include "ivorbiscodec.h"
 #include "ivorbisfile.h"
-
+#include "codebook.h"
 #include "os.h"
 #include "misc.h"
 
@@ -63,7 +65,7 @@
 static long _get_data(OggVorbis_File *vf){
   errno=0;
   if(vf->datasource){
-    char *buffer=ogg_sync_bufferin(vf->oy,CHUNKSIZE);
+    unsigned char *buffer=ogg_sync_bufferin(vf->oy,CHUNKSIZE);
     long bytes=(vf->callbacks.read_func)(buffer,1,CHUNKSIZE,vf->datasource);
     if(bytes>0)ogg_sync_wrote(vf->oy,bytes);
     if(bytes==0 && errno)return(-1);
@@ -436,7 +438,7 @@ static int _open_seekable2(OggVorbis_File *vf){
   /* We get the offset for the last page of the physical bitstream.
      Most OggVorbis files will contain a single logical bitstream */
   end=_get_prev_page(vf,&og);
-  if(end<0)return(end);
+  if(end<0)return( (int) end);
 
   /* more than one logical bitstream? */
   tempserialno=ogg_page_serialno(&og);
@@ -573,7 +575,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	ret=0;
 	goto cleanup;
       }
-      if((ret=_get_next_page(vf,&og,-1))<0){
+      if((ret=(int)_get_next_page(vf,&og,-1))<0){
 	ret=OV_EOF; /* eof. leave unitialized */
 	goto cleanup;
       }
@@ -660,7 +662,10 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
    fseek64 */
 static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
   if(f==NULL)return(-1);
-  return fseek(f,off,whence);
+  if (off >0x7FFFFFFF)
+      // Overflow.
+      return(-1);
+  return fseek(f, (long) off,whence);
 }
 
 static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
@@ -680,7 +685,7 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
      previously read data (as we may be reading from a non-seekable
      stream) */
   if(initial){
-    char *buffer=ogg_sync_bufferin(vf->oy,ibytes);
+    unsigned char *buffer=ogg_sync_bufferin(vf->oy,ibytes);
     memcpy(buffer,initial,ibytes);
     ogg_sync_wrote(vf->oy,ibytes);
   }
@@ -835,11 +840,11 @@ EXPORT_C long ov_bitrate(OggVorbis_File *vf,int i){
      * gcc 3.x on x86 miscompiled this at optimisation level 2 and above,
      * so this is slightly transformed to make it work.
      */
-    return(bits*1000/ov_time_total(vf,-1));
+    return( (long) (bits*1000/ov_time_total(vf,-1)) );
   }else{
     if(vf->seekable){
       /* return the actual bitrate */
-      return((vf->offsets[i+1]-vf->dataoffsets[i])*8000/ov_time_total(vf,i));
+      return( (long) ((vf->offsets[i+1]-vf->dataoffsets[i])*8000/ov_time_total(vf,i)));
     }else{
       /* return nominal if set */
       if(vf->vi[i].bitrate_nominal>0){
@@ -867,7 +872,7 @@ EXPORT_C long ov_bitrate_instant(OggVorbis_File *vf){
   long ret;
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   if(vf->samptrack==0)return(OV_FALSE);
-  ret=vf->bittrack/vf->samptrack*vf->vi[link].rate;
+  ret=(long) (vf->bittrack/vf->samptrack*vf->vi[link].rate);
   vf->bittrack=0;
   vf->samptrack=0;
   return(ret);
@@ -989,7 +994,7 @@ EXPORT_C int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int lastblock=0;
     int accblock=0;
     int thisblock;
-    int eosflag;
+    int eosflag = 0;
 
     work_os=ogg_stream_create(vf->current_serialno); /* get the memory ready */
     while(1){
@@ -1371,7 +1376,7 @@ EXPORT_C int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     ogg_int64_t target=pos-vf->pcm_offset;
     long samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
 
-    if(samples>target)samples=target;
+    if(samples>target)samples= (long) target;
     vorbis_synthesis_read(&vf->vd,samples);
     vf->pcm_offset+=samples;
     
@@ -1547,8 +1552,8 @@ EXPORT_C vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
 EXPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int bytes_req,int *bitstream){
   int i,j;
 
-  ogg_int32_t **pcm;
-  long samples;
+  ogg_int32_t **pcm = NULL;
+  long samples=0;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
 
@@ -1587,7 +1592,7 @@ EXPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int bytes_req,int *bitstre
       ogg_int32_t *src=pcm[i];
       short *dest=((short *)buffer)+i;
       for(j=0;j<samples;j++) {
-        *dest=CLIP_TO_15(src[j]>>9);
+        *dest= (short) CLIP_TO_15(src[j]>>9);
         dest+=channels;
       }
     }

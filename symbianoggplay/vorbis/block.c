@@ -15,6 +15,7 @@
 
  ********************************************************************/
 
+#include <e32def.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +26,7 @@
 #include "window.h"
 #include "registry.h"
 #include "misc.h"
+#include "block.h"
 
 static int ilog(unsigned int v){
   int ret=0;
@@ -259,6 +261,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   codec_setup_info *ci=(codec_setup_info *)vi->codec_setup;
   private_state *b=v->backend_state;
   int i,j;
+  ogg_int64_t tmp64;
 
   if(v->pcm_current>v->pcm_returned  && v->pcm_returned!=-1)return(OV_EINVAL);
 
@@ -379,6 +382,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   }
     
   if(v->granulepos==-1){
+      
     if(vb->granulepos!=-1){ /* only set if we have a position to set to */
       
       v->granulepos=vb->granulepos;
@@ -387,17 +391,22 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       if(b->sample_count>v->granulepos){
 	/* corner case; if this is both the first and last audio page,
 	   then spec says the end is cut, not beginning */
-	if(vb->eofflag){
+      tmp64 = b->sample_count-v->granulepos ;
+      if ( tmp64 > 0x7FFFFFFF ) {
+          // Overflow.
+          return ( OV_EFAULT );
+      }
+      if(vb->eofflag){
 	  /* trim the end */
 	  /* no preceeding granulepos; assume we started at zero (we'd
 	     have to in a short single-page stream) */
 	  /* granulepos could be -1 due to a seek, but that would result
 	     in a long coun`t, not short count */
 	  
-	  v->pcm_current-=(b->sample_count-v->granulepos);
+	  v->pcm_current-=(int)tmp64;
 	}else{
 	  /* trim the beginning */
-	  v->pcm_returned+=(b->sample_count-v->granulepos);
+	  v->pcm_returned+=(int) tmp64;
 	  if(v->pcm_returned>v->pcm_current)
 	    v->pcm_returned=v->pcm_current;
 	}
@@ -410,8 +419,14 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     if(vb->granulepos!=-1 && v->granulepos!=vb->granulepos){
       
       if(v->granulepos>vb->granulepos){
-	long extra=v->granulepos-vb->granulepos;
-	
+
+	int extra;
+    if ( v->granulepos-vb->granulepos > 0x7FFFFFFF ) {
+        // Overflow.
+        return ( OV_EFAULT );
+        }
+    extra = (int)(v->granulepos-vb->granulepos);
+
 	if(extra)
 	  if(vb->eofflag){
 	    /* partial last frame.  Strip the extra samples off */

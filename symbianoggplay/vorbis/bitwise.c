@@ -18,6 +18,7 @@
 /* We're 'LSb' endian; if we write a word but read individual bits,
    then we'll read the lsb first */
 
+#include <e32def.h>
 #include <string.h>
 #include <stdlib.h>
 #include "ogg.h"
@@ -81,7 +82,7 @@ void oggpack_readinit(oggpack_buffer *b,ogg_reference *r){
 /* Read in bits without advancing the bitptr; bits <= 32 */
 long oggpack_look(oggpack_buffer *b,int bits){
   unsigned long m=mask[bits];
-  unsigned long ret;
+  unsigned long ret=0;
 
   bits+=b->headbit;
 
@@ -175,7 +176,7 @@ int oggpack_eop(oggpack_buffer *b){
 /* bits <= 32 */
 long oggpack_read(oggpack_buffer *b,int bits){
   unsigned long m=mask[bits];
-  ogg_uint32_t ret;
+  ogg_uint32_t ret=0;
 
   bits+=b->headbit;
 

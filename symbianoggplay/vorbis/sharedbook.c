@@ -15,14 +15,15 @@
 
  ********************************************************************/
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include "ogg.h"
 #include "os.h"
+#include "codebook.h"
 #include "misc.h"
 #include "ivorbiscodec.h"
-#include "codebook.h"
 
 /**** pack/unpack helpers ******************************************/
 int _ilog(unsigned int v){
@@ -150,7 +151,7 @@ long _book_maptype1_quantvals(const static_codebook *b){
   int bits=_ilog(b->entries);
   int vals=b->entries>>((bits-1)*(b->dim-1)/b->dim);
 
-  while(1){
+  for(;;){ //while(1)
     long acc=1;
     long acc1=1;
     int i;
@@ -211,7 +212,7 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 	  int indexdiv=1;
 	  for(k=0;k<b->dim;k++){
 	    int index= (j/indexdiv)%quantvals;
-	    int point;
+	    ogg_int32_t point;
 	    int val=VFLOAT_MULTI(delta,delpoint,
 				 abs(b->quantlist[index]),&point);
 
@@ -245,7 +246,7 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 	  int         lastpoint=0;
 
 	  for(k=0;k<b->dim;k++){
-	    int point;
+	    ogg_int32_t point;
 	    int val=VFLOAT_MULTI(delta,delpoint,
 				 abs(b->quantlist[j*b->dim+k]),&point);
 
@@ -384,9 +385,13 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       c->dec_index[sortindex[n++]]=i;
  
   c->dec_codelengths=(char *)_ogg_malloc(n*sizeof(*c->dec_codelengths));
-  for(n=0,i=0;i<s->entries;i++)
-    if(s->lengthlist[i]>0)
-      c->dec_codelengths[sortindex[n++]]=s->lengthlist[i];
+  for(n=0,i=0;i<s->entries;i++) 
+    if(s->lengthlist[i]>0)  {
+      if (s->lengthlist[i] >127)
+            // Overflow
+            return (OV_EFAULT);
+      c->dec_codelengths[sortindex[n++]]=(char)s->lengthlist[i]; 
+    }
 
   c->dec_firsttablen=_ilog(c->used_entries)-4; /* this is magic */
   if(c->dec_firsttablen<5)c->dec_firsttablen=5;

@@ -15,6 +15,7 @@
 
  ********************************************************************/
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -24,6 +25,7 @@
 #include "registry.h"
 #include "codebook.h"
 #include "misc.h"
+#include "block.h"
 
 #define floor1_rangedB 140 /* floor 1 fixed at -140dB to 0dB range */
 
@@ -125,9 +127,13 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
                               vorbis_info_floor *in){
 
   int *sortpointer[VIF_POSIT+2];
+
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)in;
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)_ogg_calloc(1,sizeof(*look));
   int i,j,n=0;
+
+  vd = NULL; //vd is not used by this function !
+  mi = NULL; //mi is not used by this function !
 
   look->vi=info;
   look->n=info->postlist[1];

@@ -18,6 +18,7 @@
 /* general handling of the header and the vorbis_info structure (and
    substructures) */
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -33,7 +34,7 @@
 /* helpers */
 static void _v_readstring(oggpack_buffer *o,char *buf,int bytes){
   while(bytes--){
-    *buf++=oggpack_read(o,8);
+    *buf++=(char)oggpack_read(o,8); 
   }
 }
 

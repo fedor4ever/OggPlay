@@ -32,23 +32,17 @@
 #define _ogg_realloc realloc
 #define _ogg_free    free
 
-//#if defined( __WINS__ )  && defined(__VC32__)
-//#define chSTR(x)           #x
-//#define chSTR2(x)        chSTR(x)
-//#define chmsg(desc) message(__FILE__ "("\
-//    chSTR2(__LINE__) "):" #desc)
-//#else
+
 #ifndef chmsg
 #define chmsg(desc)
 #endif
-//#endif
 
 #include <e32def.h>
 typedef TInt16 ogg_int16_t;
 typedef TInt32 ogg_int32_t;
 typedef TUint32 ogg_uint32_t;
    
-#if defined( __WINS__ )  && defined(__VC32__)
+#if (defined( __WINS__ )  && defined(__VC32__) )
    typedef __int64 ogg_int64_t;
 #define LITTLE_ENDIAN
 #define inline __inline
@@ -79,6 +73,7 @@ typedef TUint32 ogg_uint32_t;
    #pragma chmsg(_win32 defined, __GNUC__ as well ??)
    /* Cygwin */
    #include <_G_config.h>
+
    typedef _G_int64_t ogg_int64_t;
    typedef _G_int32_t ogg_int32_t;
    typedef _G_uint32_t ogg_uint32_t;

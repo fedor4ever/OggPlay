@@ -14,7 +14,9 @@
  function: floor backend 0 implementation
 
  ********************************************************************/
+#pragma warning( disable : 4706 ) // Assignment within conditional expression
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -25,6 +27,8 @@
 #include "codebook.h"
 #include "misc.h"
 #include "os.h"
+#include "block.h"
+
 
 #define LSP_FRACBITS 14
 
@@ -138,14 +142,18 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 			 ogg_int32_t amp,
 			 ogg_int32_t ampoffset,
 			 ogg_int32_t *icos){
-
+ 
+  /* ln is not used */
   /* 0 <= m < 256 */
 
   /* set up for using all int later */
   int i;
   int ampoffseti=ampoffset*4096;
   int ampi=amp;
+
   ogg_int32_t *ilsp=(ogg_int32_t *)alloca(m*sizeof(*ilsp));
+  
+  ln = 0; // ln is not used, set it to shut up warnings.
   /* lsp is in 8.24, range 0 to PI; coslook wants it in .16 0 to 1*/
   for(i=0;i<m;i++){
 #ifndef _LOW_ACCURACY_
@@ -165,10 +173,10 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 
   i=0;
   while(i<n){
-    int j,k=map[i];
+    int k=map[i];
     ogg_uint32_t pi=46341; /* 2**-.5 in 0.16 */
     ogg_uint32_t qi=46341;
-    ogg_int32_t qexp=0,shift;
+    ogg_int32_t qexp=0;
     ogg_int32_t wi=icos[k];
 
 #ifdef _V_LSP_MATH_ASM
@@ -196,7 +204,8 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
       lsp_norm_asm(&qi,&qexp);
 
 #else
-
+    int j=map[i];
+    ogg_int32_t shift;
     qi*=labs(ilsp[0]-wi);
     pi*=labs(ilsp[1]-wi);
 
@@ -343,7 +352,6 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
 static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
                               vorbis_info_floor *i){
   int j;
-  ogg_int32_t scale; 
   vorbis_info        *vi=vd->vi;
   codec_setup_info   *ci=(codec_setup_info *)vi->codec_setup;
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
@@ -411,9 +419,12 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
 
 static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
 			   void *memo,ogg_int32_t *out){
+    // vb is not used by this function !
+
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   
+  vb = NULL; // vb is not used by this function !
   if(memo){
     ogg_int32_t *lsp=(ogg_int32_t *)memo;
     ogg_int32_t amp=lsp[look->m];

@@ -21,9 +21,11 @@
 
 #pragma warning( disable : 4514 ) // unreferenced inline function has been removed
 
+#include <e32def.h>
 #include <stdlib.h>
 #include <string.h>
 #include "ogg.h"
+#include "codebook.h"
 #include "misc.h"
 
 
@@ -384,7 +386,7 @@ static void oggbyte_set4(oggbyte_buffer *b,ogg_uint32_t val,int pos){
   _positionB(b,pos);
   for(i=0;i<4;i++){
     _positionF(b,pos);
-    b->ptr[pos-b->pos]=val;
+    b->ptr[pos-b->pos]=(unsigned char) (val & 0xFF) ;
     val>>=8;
     ++pos;
   }
@@ -791,7 +793,7 @@ int ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og){
      buffer.  If it doesn't verify, we look for the next potential
      frame */
 
-  while(1){
+    for (;;){ //while(1)
     long ret=ogg_sync_pageseek(oy,og);
     if(ret>0){
       /* have a page */
