@@ -5,7 +5,11 @@ PRJ_PLATFORMS
 WINS WINSCW ARMI
 
 PRJ_MMPFILES
+// This is for the non-MMF friendly plugin
 oggvorbis.mmp
+// This is for the MMF friendly plugin
+// Not yet functional !
+//oggtremordecoder.mpp
 
 PRJ_EXPORTS
 
