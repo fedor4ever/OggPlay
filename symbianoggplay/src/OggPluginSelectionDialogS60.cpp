@@ -177,8 +177,15 @@ void COggplayCodecSelectionSettingItemList::ProcessCommandL (TInt /*aCommandId*/
                pluginInfo = infoList->At(index);
          
 	      if (pluginInfo)
-	    	iPluginSupportedList->SelectPluginL(selectedExtension, pluginInfo->iControllerUid);
-	      else
+	      {
+	         iPluginSupportedList->SelectPluginL(selectedExtension, pluginInfo->iControllerUid);
+	         // Show the info about the plugin
+	 	     CCodecInfoList * infoScreen = new (ELeave) CCodecInfoList(*pluginInfo);
+             COggPlayAppUi * appUi=(COggPlayAppUi *)CEikonEnv::Static()->AppUi();
+             infoScreen->ConstructL(appUi->ClientRect()); //This is in fact an ExecuteLD
+             delete infoScreen;	
+	      }
+	       else
 	 	    iPluginSupportedList->SelectPluginL(selectedExtension, TUid::Null());
 	 		
 	 	  RefreshListboxModel();
@@ -210,8 +217,6 @@ TKeyResponse COggplayCodecSelectionSettingItemList::OfferKeyEventL(
   }
 
 
-
-#if 0
 
 /////////////////////////////////////
 // 
@@ -346,7 +351,6 @@ TKeyResponse CCodecInfoList::OfferKeyEventL(
   return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
   
-#endif
 
 #endif /* MMF_AVAILABLE */
 

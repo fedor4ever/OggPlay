@@ -66,7 +66,7 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   virtual void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
  private:
       // New Functions
-  void SearchPluginsL(const TDesC &aName);
+  void SearchPluginsL(const TDesC &aName, TBool isEnabled);
   void OpenL(const TDesC& aFileName);
   void ConstructAPlayerL(const TDesC &aFileName);
   void ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes & aDestinationBuffer);

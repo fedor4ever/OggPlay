@@ -58,10 +58,6 @@ private:
 
   
   };
-  
-  
-#if 0
-
 
 
 /* A list, showing the info about the choosen codec */
@@ -90,7 +86,6 @@ private:
   CEikButtonGroupContainer *iCba;
 
   };
-#endif /*0*/
   
 #endif /* SERIES60 && MMF_AVAILABLE */
 

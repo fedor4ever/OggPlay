@@ -108,8 +108,6 @@ void CPluginSupportedList::AddPluginL(
 
     // Add the plugin to the existing list
     TExtensionList * list = iPlugins->At(index);
-    if (list->selectedPlugin == NULL)
-       list->selectedPlugin = info;
     list->listPluginInfos->AppendL(info);
     
     CleanupStack::Pop(info);
@@ -526,10 +524,13 @@ void COggPluginAdaptor::ConstructL()
 {
 	iPluginSupportedList.ConstructL();
     // iPluginInfos will be updated, if required plugin has been found
-    SearchPluginsL(_L("ogg"));
-    SearchPluginsL(_L("mp3"));
-    SearchPluginsL(_L("aac"));
-    SearchPluginsL(_L("mp4"));
+    SearchPluginsL(_L("ogg"), ETrue);
+    SearchPluginsL(_L("mp3"), ETrue);
+    SearchPluginsL(_L("aac"), ETrue);
+    SearchPluginsL(_L("mp4"), ETrue);
+    SearchPluginsL(_L("m4a"), ETrue);
+    SearchPluginsL(_L("mid"), EFalse); // Disabled by default
+    SearchPluginsL(_L("amr"), EFalse); // Disabled by default
 }
 
 
@@ -560,7 +561,7 @@ void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
         *this);
 }
 
-void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
+void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension, TBool isEnabled)
 {
   
 	iPluginSupportedList.AddExtension(anExtension); // Add this extension to the selected list
@@ -614,6 +615,12 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
         iPluginSupportedList.AddPluginL(anExtension,
             *formatArray[i],
             controllers[ii]->Uid() );
+            
+        if (isEnabled)
+        {
+           // This will be overruled by the .ini file, if the file exist.
+        	iPluginSupportedList.SelectPluginL(anExtension,controllers[ii]->Uid() );
+        }
     }
     
     CleanupStack::PopAndDestroy(3); /* cSelect, fSelect, controllers */
