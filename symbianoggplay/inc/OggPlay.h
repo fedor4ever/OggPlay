@@ -158,7 +158,7 @@ public:
   int iAlarmActive;       // has an alarm time been set?
 
   TBool iForeground;      // is the application currently in the foreground?
-  TBool iIsRunningEmbedded;
+  TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
 
   TFileName iDbFileName;
   

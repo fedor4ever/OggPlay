@@ -284,9 +284,9 @@ COggPlayAppUi::ConstructL()
 	iSkins= new CDesCArrayFlat(3);
 	FindSkins();
 	iCurrentSkin= 0;
-
-//    iViewStack = new (ELeave) RArray<TInt>();
-
+	
+	//    iViewStack = new (ELeave) RArray<TInt>();
+	
 	iRepeat= 1;
 	iCurrent= -1;
 	iHotkey= 0;
@@ -433,18 +433,8 @@ COggPlayAppUi::NotifyUpdate()
 void
 COggPlayAppUi::NotifyPlayInterrupted()
 {
-	if (iDoorObserver ) {
-		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
-	}
-	else{
-		if (iIsRunningEmbedded) {
-			iIsRunningEmbedded = EFalse;
-		}
-		else{
-			HandleCommandL(EOggPauseResume);
-			iTryResume= 2;
-		}
-	}
+		HandleCommandL(EOggPauseResume);
+		iTryResume= 2;
 }
 
 void
@@ -463,7 +453,7 @@ COggPlayAppUi::NotifyPlayComplete()
 	
 	int nSongs= iAppView->GetNSongs();
 	
-	if (iCurrent+1==nSongs && iRepeat) {
+	if (iCurrent+1==nSongs && iRepeat && (!iIsRunningEmbedded)) {
 		// We are at the end of the playlist, and "repeat" is enabled
 		if (iAppView->GetItemType(0)==6) SetCurrent(1); else SetCurrent(0);
 	} 
@@ -474,6 +464,9 @@ COggPlayAppUi::NotifyPlayComplete()
 	else {
 		// We are at the end of the playlist. Stop playing.
 		SetCurrent(-1);
+		if (iIsRunningEmbedded) {
+			iIsRunningEmbedded = EFalse;
+		}
 		return;
 	}
 	
@@ -522,50 +515,50 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		
 	case EOggPlay: {
 		if (iViewBy==ETop) {
-      if (idx>=ETitle && idx<=EFileName) 
-        {
-        iViewHistoryStack.Append(idx);
-        HandleCommandL(EOggViewByTitle+idx);
-        }
-        break;
-      }
-		  if (iAppView->GetItemType(idx)==6) {
+			if (idx>=ETitle && idx<=EFileName) 
+			{
+				iViewHistoryStack.Append(idx);
+				HandleCommandL(EOggViewByTitle+idx);
+			}
+			break;
+		}
+		if (iAppView->GetItemType(idx)==6) {
 			// the back item was selected: show the previous view
-
-        TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
-        iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
-
-        TLex parse(curFile);
-			  TInt previousView;
-			  parse.Val(previousView);
-			  if (previousView==ETop) {
-				  //iViewBy= ETop;
-				  TBuf<16> dummy;
-				  iAppView->FillView(ETop, ETop, dummy);
-			  }
+			
+			TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
+			iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
+			
+			TLex parse(curFile);
+			TInt previousView;
+			parse.Val(previousView);
+			if (previousView==ETop) {
+				//iViewBy= ETop;
+				TBuf<16> dummy;
+				iAppView->FillView(ETop, ETop, dummy);
+			}
 			else 
-        HandleCommandL(EOggViewByTitle+previousView);
+				HandleCommandL(EOggViewByTitle+previousView);
 #if defined(SERIES60)
-      // UIQ_?
-      // Select the entry which were left.
-      iAppView->SelectSong(previousListboxLine);
+			// UIQ_?
+			// Select the entry which were left.
+			iAppView->SelectSong(previousListboxLine);
 #endif
 			break;
 		}
 		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) 
-      {
-      iViewHistoryStack.Append(idx);
-
-      HBufC *aBuf;
-      aBuf = curFile.Alloc();
-      CleanupStack::PushL(aBuf);
-      iAppView->FillView(ETitle, iViewBy, *aBuf);
-      CleanupStack::PopAndDestroy();
-
+		{
+			iViewHistoryStack.Append(idx);
+			
+			HBufC *aBuf;
+			aBuf = curFile.Alloc();
+			CleanupStack::PushL(aBuf);
+			iAppView->FillView(ETitle, iViewBy, *aBuf);
+			CleanupStack::PopAndDestroy();
+			
 			//iViewBy= ETitle;
 			if (iCurrentSong.Length()>0) SetCurrent(iCurrentSong);
-      break;
-      }
+			break;
+		}
 		if (iViewBy==ETitle || iViewBy==EFileName) {
 			if (curFile.Length()>0) {
 				if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
@@ -810,7 +803,7 @@ void
 COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 {
 	if (aMenuId==R_FILE_MENU) 
-        {
+	{
         // "Repeat" on/off entry, UIQ uses check box, Series 60 uses variable argument string.
 #if defined(UIQ)
         if (iRepeat) 
@@ -1168,6 +1161,10 @@ void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
 		iAppView->SelectSong(0);
 		iIsRunningEmbedded = ETrue;
 	}
+	if (iDoorObserver) {
+		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////
