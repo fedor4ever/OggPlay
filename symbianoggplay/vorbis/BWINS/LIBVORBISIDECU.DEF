@@ -1,0 +1,31 @@
+EXPORTS
+	_alldiv @ 1 NONAME
+	_allmul @ 2 NONAME
+	_alloca_probe @ 3 NONAME
+	_allshl @ 4 NONAME
+	ov_bitrate @ 5 NONAME
+	ov_bitrate_instant @ 6 NONAME
+	ov_clear @ 7 NONAME
+	ov_comment @ 8 NONAME
+	ov_info @ 9 NONAME
+	ov_open @ 10 NONAME
+	ov_open_callbacks @ 11 NONAME
+	ov_pcm_seek @ 12 NONAME
+	ov_pcm_seek_page @ 13 NONAME
+	ov_pcm_tell @ 14 NONAME
+	ov_pcm_total @ 15 NONAME
+	ov_raw_seek @ 16 NONAME
+	ov_raw_tell @ 17 NONAME
+	ov_raw_total @ 18 NONAME
+	ov_read @ 19 NONAME
+	ov_seekable @ 20 NONAME
+	ov_serialnumber @ 21 NONAME
+	ov_streams @ 22 NONAME
+	ov_test @ 23 NONAME
+	ov_test_callbacks @ 24 NONAME
+	ov_test_open @ 25 NONAME
+	ov_time_seek @ 26 NONAME
+	ov_time_seek_page @ 27 NONAME
+	ov_time_tell @ 28 NONAME
+	ov_time_total @ 29 NONAME
+

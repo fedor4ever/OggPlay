@@ -21,3 +21,6 @@ SYSTEMINCLUDE \Epoc32\include
 SYSTEMINCLUDE \Epoc32\include\libc
 
 LIBRARY       euser.lib estlib.lib
+
+MACRO         _LOW_ACCURACY_    //Not really needed, the full accuracy version 
+                                // also works ok.
