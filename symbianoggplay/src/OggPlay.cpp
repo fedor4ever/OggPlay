@@ -291,7 +291,7 @@ COggPlayAppUi::~COggPlayAppUi()
   delete iIniFileName;
   delete iSkins;
   //OGGLOG.Close();
-  delete COggLog::InstanceL();
+  //delete COggLog::InstanceL();
   CloseSTDLIB();
 }
 
@@ -575,6 +575,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 
 #if defined(SERIES60)
   case EAknSoftkeyBack:
+            HandleCommandL(EOggStop);
 #endif
   case EEikCmdExit: {
             Exit();
@@ -744,7 +745,7 @@ COggPlayAppUi::FindSkins()
   CleanupStack::Pop(ds);
   CDir* c=0;
 
-  while (1==1) {
+  for(;;) {
 
     ds->NextL(c);
     if (c==0) break;
@@ -772,6 +773,7 @@ COggPlayAppUi::FindSkins()
   }
   
   delete ds;
+  session.Close();
 
 	_LIT(KS,"Found %d skin(s)");
 	//OGGLOG.WriteFormat(KS,iSkins->Count());
