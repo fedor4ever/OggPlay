@@ -191,25 +191,29 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         TInt err = iPlayer->GetNumberOfMetaDataEntries(nbMetaData);
         if (err)
           nbMetaData = 0;
+        HBufC *metadataValue = HBufC::NewL(128);
+        CleanupStack::PushL(metadataValue);
         for (TInt i=0; i< nbMetaData; i++)
         {
             aMetaData = iPlayer->GetMetaDataEntryL(i);
+            ParseMetaDataValueL(*aMetaData,(TDes &) metadataValue->Des());
             TRACEF(COggLog::VA(_L("MetaData %S : %S"), &aMetaData->Name(), &aMetaData->Value() ));
             if ( aMetaData->Name()  == _L("title") )
-                iTitle = aMetaData->Value();
+                iTitle = *metadataValue;
             if ( aMetaData->Name()  == _L("album") )
-                iAlbum = aMetaData->Value();
+                iAlbum = *metadataValue;
             if ( aMetaData->Name()  == _L("artist") )
-                iArtist = aMetaData->Value();
+                iArtist = *metadataValue;
             if ( aMetaData->Name()  == _L("genre") )
-                iGenre = aMetaData->Value();
+                iGenre = *metadataValue;
             if ( aMetaData->Name()  == _L("albumtrack") )
-                iTrackNumber = aMetaData->Value();
+                iTrackNumber = *metadataValue;
             // If it is not an OggPlay Plugin, there should be some handling here to guess
             // title, trackname, ...
             delete(aMetaData);
         }
         
+        CleanupStack::PopAndDestroy(metadataValue);
 #if 0
         // Currently the MMF Plugin doesn't give access to these.
         // This could be added in the future as a custom command. 
@@ -228,6 +232,34 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
     else
         iState = oldState;
 }
+
+void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &aDestinationBuffer )
+{
+ // Try to remove all TABs, CR and LF
+ // having those around is screwing up the SW. 
+ 
+  HBufC * tempBuf = aMetaData.Value().AllocL();
+  CleanupStack::PushL(tempBuf);
+  tempBuf->Des().Zero();
+  TLex parse(aMetaData.Value() );
+  TBool first=ETrue;
+  while (1)
+  {
+ 	TPtrC16 token = parse.NextToken();
+  	if (token.Length() <=0 )
+  	   break;
+  	if (!first)
+   		tempBuf->Des().Append(_L(" "));
+    tempBuf->Des().Append(token); 
+  	first = EFalse;
+
+  }
+  // Crop to the final buffer
+  aDestinationBuffer = tempBuf->Left(aDestinationBuffer.MaxLength());
+  CleanupStack::PopAndDestroy(tempBuf);
+  TRACEF(COggLog::VA(_L("COggPluginAdaptor::ParseMetaDataValueL !%S!"),&aDestinationBuffer));
+}
+
 
 TInt COggPluginAdaptor::Open(const TDesC& aFileName)
 {

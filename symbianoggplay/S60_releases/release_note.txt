@@ -1,8 +1,9 @@
 
-This is the Release Note for Release 1.6.3 of Oggplay for Series60.
+This is the Release Note for Release 1.6.4 of Oggplay for Series60.
 
 ******************************************************************************
-**** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
+**** This release will NOT work on Nokia 7650, Nokia 3650, Nokia NGage,   ****
+**** Nokia NGage QD, Siemens SX-1 , Sendo X                               ****
 ****                                                                      ****
 ******************************************************************************
 
@@ -13,12 +14,16 @@ later on. MP3, AAC, MP4, M4A plugins are supported.
 
 See the ReadMeFirst.html to see which file formats your phone supports.
 
-This release will only work on Nokia 6600, 6620, 6630 and Nokia 7610.
-(And any future Series60 phones that will support MMF.)
+This release will only work on phones that supports MMF framework.
          
 
 History
 --------------------------------------------------------------------------------------------
+
+What's new in Release 1.6.4:
+--------------------------
+Winamp playlist support.
+Few bugs squashed.
 
 What's new in Release 1.6.3:
 --------------------------
