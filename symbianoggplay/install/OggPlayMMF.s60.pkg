@@ -1,0 +1,28 @@
+;
+; Series 60 multilingual installer - ARMI urel
+;
+&EN,FR,GE,DU,IT,SP,SW,TU,DA
+;
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,0,1
+;
+; 0x101F7960 for S60 v2.0 and later
+(0x101F7960),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
+;
+; Display Release notes
+;
+"..\S60_releases\sisnotes.txt" - "",FT,TC
+
+"\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
+"\epoc32\release\armi\urel\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
+{"\epoc32\release\armi\urel\OggPlay.ren" "\epoc32\release\armi\urel\OggPlay.rfr" "\epoc32\release\armi\urel\OggPlay.rge" "\epoc32\release\armi\urel\OggPlay.rdu" "\epoc32\release\armi\urel\OggPlay.rit" "\epoc32\release\armi\urel\OggPlay.rsp" "\epoc32\release\armi\urel\OggPlay.rsw" "\epoc32\release\armi\urel\OggPlay.rtu" "\epoc32\release\armi\urel\OggPlay.rda" } -"!:\system\apps\OggPlay\OggPlay.rsc"
+"\epoc32\release\armi\urel\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
+"\epoc32\release\armi\urel\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\epoc32\release\armi\urel\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
+"..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
+"..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+; we try to be nice and uninstall our configuration files
+""-"!:\system\apps\OggPlay\oggplay.ini",FN
+""-"!:\system\apps\OggPlay\oggplay.db",FN
+
+"\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
+"\epoc32\release\armi\urel\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"

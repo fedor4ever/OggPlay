@@ -21,7 +21,7 @@
 
 #include <e32base.h>
 #include <stdio.h>
-#include "Decoder.h"
+#include "OggPlayDecoder.h"
 #include "ivorbisfile.h"
 
 

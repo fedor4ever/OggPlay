@@ -26,7 +26,7 @@
 //#include "ltag.h"
 #include <stdio.h> 
 #include "bstdfile.h"
-#include "Decoder.h"
+#include "OggPlayDecoder.h"
 
 #define INPUT_BUFFER_SIZE	(5*8192)
 
