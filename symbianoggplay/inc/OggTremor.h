@@ -19,6 +19,12 @@
 #ifndef _OggTremor_h
 #define _OggTremor_h
 
+#ifdef SERIES60
+#include <PhCltTypes.h>
+#include <RPhCltIhf.h>
+#include <RPhCltServer.h>
+#endif
+
 #include "mdaaudiooutputstream.h"
 #include "e32des8.h"
 #include "mda/common/audio.h"
@@ -189,6 +195,11 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TInt                     iEof;            // true after ov_read has encounted the eof
   TInt                     iBufCount;       // counts buffers sent to the audio stream
   TInt                     iCurrentSection; // used in the call to ov_read
+
+#ifdef SERIES60
+  RPhCltIhf iIhfClient;		// IHF control
+  RPhCltServer iPhCltServer;	// Phone server
+#endif
 
 };
 

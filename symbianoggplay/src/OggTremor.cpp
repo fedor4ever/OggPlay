@@ -171,6 +171,16 @@ COggPlayback::COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
 
 void COggPlayback::ConstructL() {
 
+#ifdef SERIES60
+  // connect to the IHF client & phone server
+  OGGLOG.Write(_L("Connecting to IHF..."));
+  User::LeaveIfError(iPhCltServer.Connect());
+  User::LeaveIfError(iIhfClient.Open( iPhCltServer ));
+  iIhfClient.SetIhfMode(EFalse, EFalse);
+  OGGLOG.Write(_L("IHF disabled..."));
+
+#endif
+
   COggAudioCapabilityPoll pollingAudio;
   iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
 
@@ -188,6 +198,10 @@ void COggPlayback::ConstructL() {
   }
   iMaxVolume = 1; // This will be updated when stream is opened.
   //OGGLOG.WriteFormat(_L("Max volume is %d"),iMaxVolume);
+  //if((iMaxVolume==-1)||(iMaxVolume==10)) {
+  //  OGGLOG.WriteFormat(_L("Setting max. volume to %d"),iMaxVolume);
+  //  iMaxVolume=100;
+  //}
   TDes8* buffer;
 
   for (TInt i=0; i<KBuffers; i++) {
@@ -203,6 +217,10 @@ void COggPlayback::ConstructL() {
 COggPlayback::~COggPlayback() {
   delete iStream;
   iBuffer.ResetAndDestroy();
+#ifdef SERIES60  
+  iIhfClient.Close();
+	iPhCltServer.Close();
+#endif
 }
 
 TInt COggPlayback::Open(const TDesC& aFileName)
