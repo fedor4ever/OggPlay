@@ -1,0 +1,158 @@
+
+#define ogg_options_title "Opcoes"
+#define ogg_hotkey "Atalho:"
+#define ogg_alarm "Alarme:"
+#define ogg_active "Activo:"
+#define ogg_about_oggplay "Acerca OggPlay"
+#define ogg_version_txt "Versao ???"
+#define ogg_c_author "(c) 2003 by Leif H. Wilden"
+#define ogg_link_txt "see www.geocities.com/p800tools for more info"
+#define ogg_vorbis_c "(c) Ogg/Vorbis codec by Xiph.org"
+#define ogg_translation "Traducao por LordNins"
+#define ogg_port "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff"
+#define ogg_file_prop "Propriedades do Ficheiro"
+#define ogg_filename_txt "Nome:"
+#define ogg_filename_unknown "desconhecido"
+#define ogg_filesize "Tamanho [byte]:"
+#define ogg_bitrate "Bitrate [kbit/s]:"
+#define ogg_rate_hz "Frequencia [Hz]:"
+#define ogg_channels "Canais:"
+#define ogg_hotkey_none "Nenhum"
+#define ogg_hotkey_camera "Camera"
+#define ogg_hotkey_browser "Explorador"
+#define ogg_hotkey_power "Ligar/Desligar"
+#define ogg_hotkey_flipopen "Tab aberta"
+#define ogg_skin_default "pre-definido"
+#define ogg_file_info "Info do Ficheiro..."
+#define ogg_repeat_on         "Repetir Ligado"						// New
+#define ogg_repeat_off        "Repetir Desligado"						// New
+#define ogg_shuffle_playlist "Playlist Aleat¢ria"
+#define ogg_repeat "Repetir - %S"
+#define ogg_repeat2 "Repetir"
+#define ogg_find_files "Procurar Ficheiros novos"
+#define ogg_skins "Skins"
+#define ogg_options_cascade "Opcoes..." 
+#define ogg_about_label "Acerca de OggPlay..."
+#define ogg_exit_label "Exit"
+#define ogg_prev_song "Anterior"
+#define ogg_next_song "Seguinte"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pausa"
+
+#define ogg_filescan_title "Procurando Ficheiros Ogg"
+#define ogg_filescan_label1 "Directorias pesquisadas:"
+#define ogg_filescan_label2 "Numero de .ogg encontrados:"
+
+#define ogg_text_error_1 "COggButton: Error reading mask bitmap."
+#define ogg_text_error_2 "COggCanvas: Error converting background bitmap: "
+#define ogg_text_error_3 "COggPlayAppUi: Cannot set process priority: Err code "
+#define ogg_text_error_4 "COggPlayAppUi: Cannot find process?? Ooops."
+#define ogg_text_error_5 "COggPlayAppUi: Cannot set thread priority: Err code "
+#define ogg_text_error_6 "COggPlayAppUi: Cannot find thread?? Ooops."
+#define ogg_text_error_7 "TOggPlayback: Erro durante a abertura. Err code "
+#define ogg_text_error_8 "TOggPlayback: Nenhum ficheiro especificado."
+#define ogg_text_error_9 "Nao e um ficheiro Ogg?!"
+#define ogg_text_error_10 "Apenas musicas com um ou dois canais suportadas."
+#define ogg_text_error_12 "Ficheiro Nao suportado."
+// This is not used anymore
+//#define ogg_text_error_13 "Frequencias suportadas: 11025,16000,22050,32000,44100,48000 Hz."
+//
+#define ogg_text_error_14 "Nao pode abrir o ficheiro"
+#define ogg_text_error_15 "Nenhum ficheiro aberto."
+#define ogg_text_error_16 "Error code "
+#define ogg_text_error_17 "Erro a enviar buffer"
+#define ogg_text_error_18 "Erro a copiar buffer"
+#define ogg_text_error_19 "Erro de leitura"
+#define ogg_text_error_20 "Erro"
+#define ogg_text_error_21 "COggCanvas: Erro na abertura da imagem de fundo."
+// Not used anymore
+//#define ogg_text_error_22 "Frequencias suportadas: "
+//#define ogg_text_error_23 "Apenas musicas com um ou dois canais suportadas."
+#define ogg_text_error_24 "Ficheiro codificado com uma frequencia = %i Hz. Infelizmente o telefone s¢ suporta as frequencias: %S. "
+#define ogg_text_error_25 "Ficheiro com 2 faixas de audio (stereo), infelizmente o telefone s¢ suporta um canal (mono). "
+#define ogg_text_error_26 "Oggplay vai converter o ficheiro de modo a q seja reproduzido. Se tiver preocupado com o tamanho dos ogg?s converta-os para frequencies suportadas pelo telefone. Isto ira reduzir o tamanho dos ficheiros, sem interferir com a qualidade de reproducao."
+#define ogg_text_error_27 "Esta Mensagem de Aviso pode ser desativada no menu Opcoes."
+#define ogg_text_string_1 "Actualizando Lista..."
+#define ogg_text_string_2 "Escrevendo Base de dados..."
+#define ogg_text_string_3 "Alarme Activo"
+#define ogg_text_string_4 "Nao pode ajustar a Prioridade : Err code "
+#define ogg_text_string_5 "Playlist aleat¢ria"
+#define ogg_text_string_6 "(Nome)"
+#define ogg_text_string_7 "(Albums)"
+#define ogg_text_string_8 "(Artistas)"
+#define ogg_text_string_9 "(Generos)"
+#define ogg_text_string_10 "(sub-pastas)"
+#define ogg_text_string_11 "(ficheiros)"
+#define ogg_text_string_12 "(nao atribuido)"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(nao atribuido)"
+#else
+#define ogg_text_string_12 "(nao atribuido)"
+#endif
+
+// S60 Hotkey settings
+#define ogg_user_hotkey              "Atalhos"
+#define ogg_format_text_fast_forward "Avanco Rapido"
+#define ogg_format_text_rewind       "Rebobina"
+#define ogg_format_text_page_up      "Lista pagina acima"
+#define ogg_format_text_page_down    "Lista pagina pra baixo"
+#define ogg_format_text_next_song	 ogg_next_song
+#define ogg_format_text_prev_song	 ogg_prev_song
+#define ogg_format_text_keylock      "Bloquear"          // NEW 2004-04-24
+#define ogg_format_text_playpause	 "Pausa / Play"     // NEW 2004-05-08
+
+
+#define ogg_settings                 "Definicoes"  // in the menu
+#define ogg_settings_title           "Definicoes Oggplay" // on top of the settings screen
+#define ogg_filescanmode             "Modo de Pesquisa"
+//#define ogg_maneuvring_speed         "Auto Mudanca Dir"  // DELETE
+#define ogg_autostart                "Autoplay no Inicio"
+#define ogg_fullscan                 "Pesquisa Completa"
+#define ogg_mmcdir                   "E:\Ogg"
+//#define ogg_normal                   "Normal"         // DELETE
+//#define ogg_fast                     "Rapido"           // DELETE
+#define ogg_on                       "On"
+#define ogg_off                      "Off"
+#define ogg_popup_on                 "Permitido"
+#define ogg_popup_off                "Negado"
+#define ogg_back_dir                 "Atras"
+#define ogg_backspace                "Retrocesso"
+#define ogg_shift                    "Shift (nao repetir)"
+#define ogg_warnings                 "Avisos"
+#define ogg_by                       " por "
+
+#define ogg_rsk_idle                 "Tecla Direita / Idle "
+#define ogg_rsk_play                 "Tecla Direita / Modo Play "
+#define ogg_cba_back                 "Atras"
+#define ogg_cba_clear                "Limpa"
+#define ogg_cba_option               "Opcoes"
+#define ogg_cba_exit                 "Sair"
+#define ogg_cba_stop                 "Stop"
+#define ogg_cba_pause                "Pausa"
+#define ogg_cba_play                 "Play"
+
+#define ogg_random_on                "Modo Aleatorio"
+#define ogg_random_off               "Modo Normal"
+#define ogg_volume_boost             "Amento de Volume"
+#define ogg_volume_boost_none        "Sem Ganho"
+#define ogg_volume_boost_6db         "Ganho de 6dB"
+#define ogg_volume_boost_12db        "Ganho de 12dB"
+
+#define ogg_codec_selection          "Codecs"
+#define ogg_no_plugin_found          "Nenhum Plugin"
+#define ogg_codec_ogg                "OGG"
+#define ogg_codec_mp3                "MP3"
+#define ogg_codec_aac                "AAC"
+#define ogg_codec_mp4                "MP4"
+
+#define ogg_codec_info_name          "Nome"
+#define ogg_codec_info_supplier      "Distribuidor"
+#define ogg_codec_info_version       "Versao"
+#define ogg_codec_info_UID           "UID"
+
+
+
+
