@@ -22,15 +22,13 @@
 _LIT(KLogFolder,"Oggplay");
 _LIT(KLogFileName,"Oggplay.log");
 
-
-COggLog* COggLog::iInstance=0;
-
 COggLog* COggLog::InstanceL() {
-	
+  COggLog* iInstance =(COggLog*) Dll::Tls();
+
 	if(iInstance==0) {
 		iInstance=new(ELeave) COggLog;
 		iInstance->ConstructL();
-		
+    Dll::SetTls(iInstance);
 	}
 	return iInstance;
 }
@@ -51,6 +49,12 @@ COggLog::COggLog() {
 	
 }
 
+COggLog::~COggLog() {
+
+  Dll::SetTls(0);
+	
+}
+
 COggLog::ConstructL() {
 	TInt ret=iLog.Connect();
 	if (ret==KErrNone)	{
@@ -59,8 +63,13 @@ COggLog::ConstructL() {
 		_LIT(KS,"OggLog started...");
 		iLog.WriteFormat(KS);
 	} else {
-		
+    User::Panic(_L("OggLog"),11);	
 	}
 
-	
+}
+
+void COggLog::Panic(const TDesC& msg,TInt aReason) {
+  iLog.Write(_L("** Fatal: **"));
+  iLog.Write(msg);
+  User::Panic(_L("OggPlay"),aReason);	
 }
