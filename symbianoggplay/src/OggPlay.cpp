@@ -152,11 +152,8 @@ COggActive::CallBack(TAny* aPtr)
 {
 	COggActive* self= (COggActive*)aPtr;
 	
-	if ( self->iAppUi->iIsRunningEmbedded || 
-      (self->iAppUi->iSettings.iAutoplay && self->iAppUi->iIsStartup) 
-      && self->iAppUi->iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
-		 self->iAppUi->iIsStartup=EFalse;
-     self->iAppUi->NextSong();
+  if(self->iAppUi->iIsStartup) {
+    self->iAppUi->PostConstructL();
 	}
 	
 	self->iAppUi->NotifyUpdate();
@@ -295,7 +292,7 @@ COggPlayAppUi::ConstructL()
 	iAlarmTriggered= 0;
 	iAlarmActive= 0;
 	iAlarmTime.Set(_L("20030101:120000.000000"));
-	iViewBy= ETitle;
+	iViewBy= ETop;
 	iAnalyzerState= 0;
   iIsStartup=ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv();
@@ -347,9 +344,29 @@ COggPlayAppUi::ConstructL()
 	ActivateOggViewL();
 }
 
+void COggPlayAppUi::PostConstructL()
+{
+
+  if(iSettings.iAutoplay) {
+    for(TInt i=0;i<iRestoreStack.Count();i++) {
+      TRACEF(COggLog::VA(_L("Setting istack[%d]:%d"), i,iRestoreStack[i]));
+      iAppView->SelectSong(iRestoreStack[i]);
+      HandleCommandL(EOggPlay);
+    }
+    iAppView->SelectSong(iRestoreCurrent);
+  }
+
+  if ( iIsRunningEmbedded || (iSettings.iAutoplay && iIsStartup) 
+      && iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
+     NextSong();
+	}
+  iIsStartup=EFalse;
+
+}
 
 COggPlayAppUi::~COggPlayAppUi()
 {
+	WriteIniFile();
 	if(iAppView) RemoveFromStack(iAppView);
 	
 	delete iAppView;
@@ -372,7 +389,6 @@ COggPlayAppUi::~COggPlayAppUi()
     }
 
 	if (iActive) { delete iActive; iActive=0; }
-	WriteIniFile();
 	if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
 	iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
 	
@@ -380,6 +396,7 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iSkins;
 	delete iOggMsgEnv ;
   iViewHistoryStack.Close();
+  iRestoreStack.Close();
 	COggLog::Exit();  
 	
 	CloseSTDLIB();
@@ -989,6 +1006,7 @@ COggPlayAppUi::ReadIniFile()
 {
 	RFile in;
   TInt err;
+  TInt iIniversion=0;
 	if( (err=in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
 		EFileRead|EFileStreamText)) != KErrNone) {
 		TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
@@ -998,11 +1016,27 @@ COggPlayAppUi::ReadIniFile()
 	TFileText tf;
 	tf.Set(in);
 	TBuf<128> line;
-	
+
+
 	iHotkey= 0;
 	if(tf.Read(line) == KErrNone) {
+    TInt rval;
 		TLex parse(line);
-		parse.Val(iHotkey);
+		parse.Val(rval);
+    if(rval==0xdb) { // our magic number ! (see writeini below)
+      // followed by version number
+	    if (tf.Read(line) == KErrNone) {
+		    parse=line;
+		    parse.Val(iIniversion);
+        TRACEF(COggLog::VA(_L("Inifile version %d"),iIniversion));
+    	};
+      // now read the real hotkey
+	    if (tf.Read(line) == KErrNone) {
+		    parse=line;
+		    parse.Val(rval);
+    	};
+    }
+    iHotkey=rval;
 	};
 	
 	iRepeat= 1;
@@ -1048,10 +1082,31 @@ COggPlayAppUi::ReadIniFile()
 		if (iCurrentSkin>=iSkins->Count()) iCurrentSkin= iSkins->Count()-1;
 	}
 
+  if(iIniversion>=2) {
+
+    TInt iRestoreStackCount=0;
   if (tf.Read(line) == KErrNone) {
 		TLex parse(line);
-		parse.Val(iSettings.iScanmode);
-	};
+		  parse.Val(iRestoreStackCount);      
+	  }
+
+    TInt iTemp;
+    for(TInt i=0;i<iRestoreStackCount;i++) {
+     if (tf.Read(line) == KErrNone) {
+		    TLex parse(line);
+		    parse.Val(iTemp);
+        iRestoreStack.Append(iTemp);
+      }
+    }
+	  if (tf.Read(line) == KErrNone) {
+		  TLex parse(line);
+		  parse.Val(iRestoreCurrent);
+	  }
+  
+  if (tf.Read(line) == KErrNone) {
+		  TLex parse(line);
+		  parse.Val(iSettings.iScanmode);
+	  };
 
   if (tf.Read(line) == KErrNone) {
 		TLex parse(line);
@@ -1073,18 +1128,8 @@ COggPlayAppUi::ReadIniFile()
     parse.Val(iSettings.iUserHotkeys[TOggplaySettings::ERewind]);
 	};
 
+  } // version 2 onwards
 
-	//iViewBy= ETitle;
-	//if (tf.Read(line) == KErrNone) {
-	//TLex parse(line);
-	//parse.Val(iViewBy);
-	//}
-	
-	//tf.Read(iAlbum);
-	//tf.Read(iArtist);
-	//tf.Read(iGenre);
-	//tf.Read(iSubFolder);
-	
 	in.Close();
 }
 
@@ -1095,20 +1140,32 @@ COggPlayAppUi::WriteIniFile()
 	TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), iIniFileName ));
 	if(out.Replace(iCoeEnv->FsSession(), iIniFileName->Des(),
 		EFileWrite|EFileStreamText) != KErrNone) return;
-	
+  
+  TRACEF(_L("Writing Inifile..."));
+
 	TFileText tf;
 	tf.Set(out);
 	
 	TBuf<64> num;
+
+  // this should do the trick for forward compatibility:
+  TInt magic=0xdb;
+  TInt iniversion=2;
+  
+  num.Num(magic);
+  tf.Write(num);
+  num.Num(iniversion);
+  tf.Write(num);
+
 	num.Num(iHotkey);
 	tf.Write(num);
 	
 	num.Num(iRepeat);
 	tf.Write(num);
-	
+
 	num.Num(iVolume);
 	tf.Write(num);
-	
+
 	num.Num(iAlarmTime.Int64());
 	tf.Write(num);
 	
@@ -1122,6 +1179,19 @@ COggPlayAppUi::WriteIniFile()
 	num.Num(iCurrentSkin);
 	tf.Write(num);
 	
+ // from iniversion 2 onwards:
+  num.Num(iViewHistoryStack.Count());
+	tf.Write(num);
+  
+  for(TInt i=0;i<iViewHistoryStack.Count();i++) {
+    num.Num(iViewHistoryStack[i]);
+    TRACEF(COggLog::VA(_L("iViewHistoryStack[%d]= %d"),i,iViewHistoryStack[i]));
+	  tf.Write(num);
+
+  }
+  num.Num(iAppView->GetSelectedIndex());
+	tf.Write(num);
+	
 	num.Num(iSettings.iScanmode);
 	tf.Write(num);
 	num.Num(iSettings.iAutoplay);
@@ -1133,13 +1203,8 @@ COggPlayAppUi::WriteIniFile()
   num.Num(iSettings.iUserHotkeys[TOggplaySettings::ERewind]);
 	tf.Write(num);
 
-  //num.Num(iViewBy);
-	//tf.Write(num);
-	
-	//tf.Write(iAlbum);
-	//tf.Write(iArtist);
-	//tf.Write(iGenre);
-	//tf.Write(iSubFolder);
+  	
+	//please increase iIniversion when adding stuff
 	
 	out.Close();
 }

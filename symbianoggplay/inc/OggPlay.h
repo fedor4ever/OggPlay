@@ -170,6 +170,7 @@ class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver
 public:
 
   void ConstructL();
+  void PostConstructL();
   ~COggPlayAppUi();
 
   // the views supported by the listbox:
@@ -256,6 +257,8 @@ private:
   COggFCView* iFCView;
   COggSettingsView* iSettingsView;
   RArray<TInt> iViewHistoryStack;
+  RArray<TInt> iRestoreStack;
+  TInt iRestoreCurrent;
   COggUserHotkeysView* iUserHotkeys;
 };
 
