@@ -792,9 +792,24 @@ TInt COggAudioCapabilityPoll::PollL()
         iStream  = CMdaAudioOutputStream::NewL(*this);
         iStream->Open(&iSettings);
         CActiveScheduler::Start();
+
         if (iCaps & iRate){
-            oneSupportedRate = iRate;
+            // We need to make sure, Nokia 6600 for example won't tell in the
+            // Open() that the requested rate is not supported.
+            TRAPD(err,iStream->SetAudioPropertiesL(iRate,iSettings.iChannels););
+            TRACEF(COggLog::VA(_L("SampleRate Supported:%d"), err ));
+            if (err == KErrNone)
+            {
+                // Rate is *really* supported. Remember it.
+                oneSupportedRate = iRate;
+            }
+            else
+            {
+                // Rate is not supported.
+                iCaps &= ~iRate;
+            }
         }
+
         delete iStream; // This is rude...
         iStream = NULL;
         
@@ -810,6 +825,15 @@ TInt COggAudioCapabilityPoll::PollL()
     iRate = TMdaAudioDataSettings::EChannelsStereo;
     CActiveScheduler::Start();
     
+    // We need to make sure, Nokia 6600 for example won't tell in the
+    // Open() that the requested rate is not supported.
+    TRAPD(err,iStream->SetAudioPropertiesL(iSettings.iSampleRate,iSettings.iChannels););
+    TRACEF(COggLog::VA(_L("Stereo Supported:%d"), err ));
+    if (err != KErrNone)
+    {
+        // Rate is not supported.
+        iCaps &= ~iRate;
+    }
     delete iStream; // This is rude...
     iStream = NULL;
     return iCaps;
