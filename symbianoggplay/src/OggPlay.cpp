@@ -44,6 +44,7 @@
 #include <OggPlay.rsg>
 
 
+
 #if defined(UIQ)
 const TInt KThreadPriority = EPriorityAbsoluteHigh;
 #else
@@ -74,53 +75,75 @@ E32Dll(TDllReason)
 //
 ///////////////////////////////////////////////////////////////
 
-COggActive::COggActive(COggPlayAppUi* theAppUi) :
-  iServer(0),
-  iPhone(0),
-  iLine(0),
-  iLineStatus(RCall::EStatusUnknown),
-  iRequestStatusChange(),
-  iTimer(0),
-  iCallBack(0),
-  iInterrupted(0),
-  iAppUi(theAppUi)
+////////////////////////////////////////////////////////////////
+//
+// COggActive class
+//
+///////////////////////////////////////////////////////////////
+
+COggActive::COggActive()
 {
+}
+
+
+void COggActive::ConstructL(COggPlayAppUi* theAppUi)
+{
+  iAppUi = theAppUi;
 
 #if !defined(__WINS__)  
   // The destructor panics in emulator
   iServer= new (ELeave) RTelServer;
-  int ret= iServer->Connect();
-  if (ret!=KErrNone) return;
+  User::LeaveIfError( iServer->Connect() );
+  User::LeaveIfError( iServer->LoadPhoneModule(KTsyName) );
 
-  ret=iServer->LoadPhoneModule(KTsyName);
-  if (ret!=KErrNone) return;
-
-  int nPhones;
-  ret=iServer->EnumeratePhones(nPhones);
-  if (ret!=KErrNone) return;
+  TInt nPhones;
+  User::LeaveIfError( iServer->EnumeratePhones(nPhones) );
 
   RTelServer::TPhoneInfo PInfo;
-  ret= iServer->GetPhoneInfo(0,PInfo);
-  if (ret!=KErrNone) return;
+  User::LeaveIfError( iServer->GetPhoneInfo(0,PInfo) );
 
   iPhone= new (ELeave) RPhone;
-  ret= iPhone->Open(*iServer,PInfo.iName);
-  if (ret!=KErrNone) return;
+  User::LeaveIfError( iPhone->Open(*iServer,PInfo.iName) );
 
-  int nLines;
-  ret= iPhone->EnumerateLines(nLines);
-  if (ret!=KErrNone) return;
+  TInt nofLines;
+  User::LeaveIfError( iPhone->EnumerateLines(nofLines) );
 
-  RPhone::TLineInfo LInfo;
-  for (int i=0; i<1; i++) {
-    //paw: get KErrAccessDenied here
-    ret= iPhone->GetLineInfo(i,LInfo); 
-    if (ret!=KErrNone) {
-      TRACEF(COggLog::VA(_L("RPhone %d"), ret ));
-      return;
-      }
-  }
   iLine= new (ELeave) RLine;
+
+#if defined(UIQ)
+  TInt linesToTest = 1;
+  iLineToMonitor = 0;
+  iLineCallsReportedAtIdle = 0;
+#else
+  // Series 60 reports 3 lines 0='Fax' 1='Data' and 2='VoiceLine1' 
+  // (and 'VoiceLine1' reports '1' in EnumerateCall() when in idle ?!?)
+  // Should probably use the name instead of the magic number in iLineToMonitor..
+  TInt linesToTest = nofLines;
+  iLineToMonitor = 2;     // i.e. 'VoiceLine1' only
+  iLineCallsReportedAtIdle = 1;
+#endif
+
+  // Test code
+  // S60: Why is 'iLineCallsReportedAtIdle' not '0' at idle as 
+  // should be expected ??? The voice line reports '1' ???
+  RPhone::TLineInfo LInfo;
+  for (TInt i=0; i<linesToTest; i++) 
+    {
+    TInt ret= iPhone->GetLineInfo(i,LInfo); 
+    if (ret!=KErrNone) 
+      {
+      TRACEF(COggLog::VA(_L("Line%d:Err%d"), i, ret ));
+      User::Leave(ret);
+      }
+    else
+      {
+      User::LeaveIfError( iLine->Open(*iPhone,LInfo.iName) );
+      TInt nCalls=-1;
+      iLine->EnumerateCall(nCalls);
+      iLine->Close();
+      TRACEF(COggLog::VA(_L("Line%d:%S=%d"), i, &LInfo.iName, nCalls ));
+      }
+    }
 #endif
 }
 
@@ -132,52 +155,48 @@ COggActive::CallBack(TAny* aPtr)
 	if (self->iAppUi->iIsRunningEmbedded) {
 		self->iAppUi->iIsRunningEmbedded = EFalse;
 		self->iAppUi->NextSong();
-		
-	}
-#if !defined(SERIES60)
+  	}
 
   self->iAppUi->NotifyUpdate();
 
   if( self->iLine )
     {
     RPhone::TLineInfo LInfo;
-    self->iPhone->GetLineInfo(0,LInfo);
+
+    self->iPhone->GetLineInfo(self->iLineToMonitor,LInfo);
     self->iLine->Open(*self->iPhone,LInfo.iName);
-    int nCalls=-1;
+    TInt nCalls=0;
     self->iLine->EnumerateCall(nCalls);
     self->iLine->Close();
+ 
+    TBool isRinging = nCalls > self->iLineCallsReportedAtIdle;
+    TBool isIdle    = nCalls == self->iLineCallsReportedAtIdle;
 
-    bool isRinging= nCalls>0;
-    bool isIdle   = nCalls==0;
-
-    if (isRinging && !self->iInterrupted) {
+    if (isRinging && !self->iInterrupted) 
+      {
       // the phone is ringing or someone is making a call, pause the music if any
       if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying) {
         TRACELF("GSM is active");
-        self->iInterrupted= 1;
+        self->iInterrupted= ETrue;
         self->iAppUi->HandleCommandL(EOggPauseResume);
-        return 1;
+        }
       }
-
-    }
-
-    if (self->iInterrupted) {
+    else if (self->iInterrupted) 
+      {
       // our music was interrupted by a phone call, now what
       if (isIdle) {
         TRACELF("GSM is idle");
         // okay, the phone is idle again, let's continue with the music
-        self->iInterrupted= 0;
+        self->iInterrupted= EFalse;
         if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
 	        self->iAppUi->HandleCommandL(EOggPauseResume);
         return 1;
         }
       }
-#else
-	self->iTimer->Cancel();
-#endif
-
+    }
   return 1;
 }
+
 
 void
 COggActive::IssueRequest()
@@ -192,24 +211,22 @@ COggActive::~COggActive()
   if (iLine) { 
     iLine->Close();
     delete iLine; 
-    iLine= 0;
+    iLine= NULL;
   }
   if (iPhone) { 
     iPhone->Close();
     delete iPhone; 
-    iPhone= 0; 
+    iPhone= NULL; 
   }
   if (iServer) { 
     iServer->Close();
     delete iServer; 
-    iServer= 0;
+    iServer= NULL;
   }
 #if defined(SERIES60)
   // UIQ_?
   if (iTimer) {
-	  if (iTimer->IsActive()) {
-		  iTimer->Cancel();
-	  }
+	  iTimer->Cancel();
 	  delete iTimer;
 	  iTimer = NULL;
   }
@@ -217,7 +234,6 @@ COggActive::~COggActive()
 	  delete iCallBack;
 	  iCallBack = NULL;
   }
-
 #endif
 }
 
@@ -298,12 +314,8 @@ COggPlayAppUi::ConstructL()
   SetHotKey();
   iIsRunningEmbedded = EFalse;
 
-  TRAPD(phoneErr, iActive= new(ELeave) COggActive(this));
-  if( phoneErr != KErrNone )
-    {
-    TRACEF(COggLog::VA(_L("::COggActive, Leave %d"), phoneErr ));
-    }
-
+  iActive= new (ELeave) COggActive();
+  iActive->ConstructL(this);
   iActive->IssueRequest();
 
   if (iAppView->IsFlipOpen()) {
@@ -974,8 +986,11 @@ void
 COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
 #if defined(SERIES60_SPLASH)
-  if( iEikonEnv->RootWin().OrdinalPosition() != 0 )
+  if( iSplashActive )
+    {
+    iSplashActive = EFalse;
     iEikonEnv->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNormal);
+    }
 #endif
 
   CEikAppUi::HandleForegroundEventL(aForeground);
@@ -989,10 +1004,16 @@ COggPlayAppUi::ShowSplashL()
   {
   #include <S60default.mbg>
 
+  // This is a so-called pre Symbian OS v6.1 direct screen drawing rutine
+  // based on CFbsScreenDevice. The inherent problem with this method is that
+  // the window server is unaware of the direct screen access and is likely
+  // to 'refresh' whatever invalidated regions it might think it manages....
+
   // http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
   //   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
 
-  TRACELF("COggPlayAppUi::ShowSplashL()");
+  iSplashActive = ETrue;
+
   RFbsSession::Connect();
   CFbsScreenDevice *iDevice = NULL;
   
@@ -1009,24 +1030,20 @@ COggPlayAppUi::ShowSplashL()
   
   TFileName *appName = new (ELeave) TFileName(Application()->AppFullName());
   CleanupStack::PushL(appName);
-  TParse *parser = new (ELeave) TParse();
-  CleanupStack::PushL(parser);
-  User::LeaveIfError(parser->Set(*appName, NULL, NULL));
-  TBuf<100> iMbmFileName(parser->DriveAndPath());
-  CleanupStack::PopAndDestroy(2); // appName + parser
-  iMbmFileName.Append( _L("s60default.mbm") );
-  TRACE(COggLog::VA(_L("%S"), &iMbmFileName ));
+
+  TParsePtrC p(*appName);
+  TBuf<100> iMbmFileName(p.DriveAndPath());
+  iMbmFileName.Append( _L("s60default.mbm") );  // Magic string :-(
+  //TRACE(COggLog::VA(_L("%S"), &iMbmFileName ));
   
   CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
   CleanupStack::PushL(iBitmap);
 
   iBitmap->Create( TSize(176,208), dispMode );
   iGc->BitBlt(TPoint(0,0), iBitmap );
-  iDevice->Update();
   iBitmap->Reset();
   User::LeaveIfError( iBitmap->Load( iMbmFileName,EMbmS60defaultFlipclosed,EFalse));
   iGc->BitBlt(TPoint(0,60), iBitmap );
-  iDevice->Update();
 
   // Just testing.....
   User::LeaveIfError( iBitmap->Load( iMbmFileName,EMbmS60defaultOggplaylogo,EFalse));
@@ -1034,7 +1051,7 @@ COggPlayAppUi::ShowSplashL()
 
   iDevice->Update();
   RFbsSession::Disconnect();
-  CleanupStack::PopAndDestroy(3);  // iBitmap iGc iDevice;
+  CleanupStack::PopAndDestroy(4);  // appName iBitmap iGc iDevice;
   }
 #endif // #if defined(SERIES60_SPLASH)
 
@@ -1115,7 +1132,6 @@ void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
 ///////////////////////////////////////////////////////////////
 #ifdef SERIES60
 CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/){
-	TBuf<255> test(aFilename);
 	iAppUi->OpenFileL(aFilename);
 	return NULL;
 }
