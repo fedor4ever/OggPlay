@@ -1,0 +1,68 @@
+This shortly describes how to compile OggPlay on various platform.
+
+ *** 
+ Note that the P800/P900 version has not been maintained lately. Risk that 
+ it is not compiling anymore is high !
+ ***
+
+ /////////////////////////////////////////
+  Compilation Flags
+ ///////////////////////////////////////// 
+
+ All compilation flags are in OggOs.h. Basically, only 5 flags should be 
+ tampered with:
+ 
+ #define SERIES60  : When set, compilation is done for S60
+ #define UIQ       : When set, compilation is done for UIQ
+
+ #define OS70S     : When set, MMF is used.
+
+ #define MOTOROLA      : When set, compilation for Motorola UIQ (A92X)
+ #define SONYERICSSON  : When set, compilation is done for P800/P900
+
+ /////////////////////////////////////////
+ Compilation
+ ///////////////////////////////////////// 
+ To compile the code( this expects a valid Symbian Compilation environment):
+ 
+ For pre-MMF version:
+   Edit the file vorbis\group\bld.inf so that oggvorbis.mmp is used.
+   cd \vorbis\group
+   bldmake bldfiles 
+   abld build armi 
+
+   cd \group   
+   bldmake bldfiles 
+   abld build armi 
+
+ For MMF version: 
+   Edit the file vorbis\group\bld.inf so that OggPluginDecoder.mpp is used.
+   cd \group   
+   bldmake bldfiles 
+   abld build armi 
+  
+   cd \vorbis\group
+   bldmake bldfiles 
+   abld build armi 
+
+
+ Note that the order is reversed in MMF case: the Application is built first, and the
+ MMF plugin built afterward.
+
+ The code will only compile for ARMI and WINS. Other platform are currently not 
+ supported.
+
+ /////////////////////////////////////////
+ Moving to target
+ ///////////////////////////////////////// 
+
+ Create a SIS file that can be sent to the target.
+
+ cd \install
+ makesis XXX
+
+ Where XXX is
+  OggPlay.a920.pkg       : for A920 version
+  OggPlay.s60.pkg        : for S60 1.X version
+  OggPlayMMF.s60.pkg     : for S60 2.X version
+  OggPlay.uiq.pkg        : for UIQ (P800/P900) version
