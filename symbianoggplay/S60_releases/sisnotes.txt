@@ -1,15 +1,14 @@
     Welcome to OggPlay 1.5.1
 
-This release is only 
-experimental and hasn't been
-thoroughly tested.
-Please use the official 
-release 1.0.1 , unless you 
-are willing to beta test our
-new features.
+Welcome to the Series 60
+version of OggPlay, the open
+source media player on Symbian,
+released under the GPL by 
+Leif H. Wilden.
 
 New for this release:
-Possibility to play Ogg, MP3 
-and AAC files.
+Possibility to play OGG, MP3 
+and AAC files, depending on 
+HW capabilities.
 
 Enjoy!

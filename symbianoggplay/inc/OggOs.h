@@ -62,7 +62,7 @@ chSTR2(__LINE__) "):" #desc)
 #define DOS
 
 // Switches at least the splash bitmap
-#define UNSTABLE_RELEASE
+//#define UNSTABLE_RELEASE
 
 #if defined(UIQ)
 // Define the type of UIQ platform

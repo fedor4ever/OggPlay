@@ -1,45 +1,54 @@
 
 This is the Release Note for Release 1.5.1 of Oggplay for Series60.
 
-*******************************************************************
- This release is only experimental and hasn't been thoroughly tested.
- Please use the official release 1.0.1 , unless you are willing to
- beta test our new features.
- 
- If you experiment problems with this version, please report them to
- our public forums, but mention you are using 1.5.1.
-*******************************************************************
-
-
 ******************************************************************************
 **** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
 ****                                                                      ****
 ******************************************************************************
 
+OggPlay is a music player for phones running on the Symbian Operating system. 
+It was originally playing only .ogg file format, but some of the latest versions 
+now plays MP3 and AAC in addition to OGG files
 
+See the ReadMeFirst.html to see which file formats your phone supports.
+
+This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610.
+(And any future Series60 phones that will support MMF.)
+
+The Symbian MMF Ogg Plugin example "OvController" conflicts with this SW.
+If you have installed the example, please remove it before using this release.             
+
+History
+--------------------------------------------------------------------------------------------
 
 What's new in Release 1.5.1:
 --------------------------
 Some bug fixes related to MP3 and AAC reading on the Nokia 7610:
  + Forward/Rewind now functional
  + Volume not going back to maximum level, when changing tune.
+
 Ogg files can now be played using "Nokia Music Player", in the very
 unlikely event that OggPlay UI is not preferred.
 
-General notes:
---------------
+What's new in Release 1.5.0:
+--------------------------
 
 OggPlay nows plays MP3 and AAC in addition to Ogg file format, depending
 on the phone capabilities.
-See the ReadMeFirst.html to see which file formats your phone supports.
 
-This release will only work on Nokia 6600, Nokia 6630 and Nokia 7610.
-(And any future Series60 phones that will support MMF.)
+
+What's missing:
+---------------
+Some features present in 1.0.0 have been dropped, since quite a lot of work is required to
+make them work in a MMF plugin. They will be reintroduced in future releases.
+These features are:
+  - Amplification (6, 12 db)
+  - Frequency analyzer
 
 
 
 Links:
-------
+---------------------------------------------------------------------------------------------
 For more information about Oggplay, please see the webpage at
 http://symbianoggplay.sourceforge.net/
 
