@@ -26,10 +26,10 @@ NAME OGGP
 #include "OggPlay.hrh"
 
 RESOURCE RSS_SIGNATURE { }
-RESOURCE TBUF16 { buf=""; }
+RESOURCE TBUF { buf=""; }
 
 //# Version string
-#define ogg_txt_version "OggPlay 1.11"
+#define ogg_txt_version "OggPlay 1.30"
 
 // Languages : EN/SC FR GE DU IT SP SW TU DA
 #if defined(LANGUAGE_EN) || defined(LANGUAGE_SC)
