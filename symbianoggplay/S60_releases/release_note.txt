@@ -1,3 +1,4 @@
+
 This is the Release Note for Release 1.0 of Oggplay for Series60.
 
 OggPlay is an open source Ogg vorbis audio player for smartphones.
@@ -26,7 +27,6 @@ here: http://www.vorbis.com/.
 
 What's new in Release 1.0:
 --------------------------
-
 Brand new look, navigation simplified.
 Now possible to play ANY ogg files, including on Nokia S60 phones,
 regardless of sample rate. 
@@ -40,10 +40,14 @@ Autoplay on start.
 Improved audio stability.
 Major bug fixes for the Nokia 6600.
 
+Known issues/bugs:
+------------------
+Spanish language have some texts which needs to be truncated.
+Italian language are only partly translated.
+Automatic resuming of playing can fail after system generated notification sounds.
 
 Links:
 ------
-
 For more information about Oggplay, please see the webpage at
 http://www.geocities.com/p800tools/
 
