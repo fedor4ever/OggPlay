@@ -779,7 +779,9 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
 			   const TDesC& aSubFolder)
 {
   arr.Reset();
-  if (anAlbum.Length()>0) iFiles->Sort(iOggKeyTrackTitle); else iFiles->Sort(iOggKeyTitles);
+  if (anAlbum.Length()>0) iFiles->Sort(iOggKeyFileName); else iFiles->Sort(iOggKeyTitles);
+  if (aSubFolder.Length()>0) iFiles->Sort(iOggKeyFileName); else iFiles->Sort(iOggKeyTitles);
+
   if( anAlbum.Length()==0 && anArtist.Length()==0  && aGenre.Length()==0  && aSubFolder.Length()==0 ) {
     TBuf<10> buf;
     CEikonEnv::Static()->ReadResource(buf, R_OGG_BY);
