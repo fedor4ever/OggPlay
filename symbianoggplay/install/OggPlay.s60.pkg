@@ -1,12 +1,15 @@
 ;
 ; Series 60 multilingual installer - ARMI urel
 ;
-&EN,FR,GE,DU,IT,SP,SW,TU,DA,PO
+&EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,0,1
+#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+   "OggPlay" },(0x1000A661),1,0,1
 ;
 ; 0x101F6F88 for S60 v0.9 and later
-(0x101F6F88),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
+(0x101F6F88),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
+                     "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", 
+                     "Series60ProductID", "Series60ProductID", "Series60ProductID" }
 ;
 ; Display Release notes
 ;
@@ -24,7 +27,8 @@
   "\epoc32\release\armi\urel\OggPlay.rsw" 
   "\epoc32\release\armi\urel\OggPlay.rtu" 
   "\epoc32\release\armi\urel\OggPlay.rda"
-  "\epoc32\release\armi\urel\OggPlay.rpo"} -"!:\system\apps\OggPlay\OggPlay.rsc"
+  "\epoc32\release\armi\urel\OggPlay.rpo"
+  "\epoc32\release\armi\urel\OggPlay.rru" } -"!:\system\apps\OggPlay\OggPlay.rsc"
 "\epoc32\release\armi\urel\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
 "\epoc32\release\armi\urel\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
 "\epoc32\release\armi\urel\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"

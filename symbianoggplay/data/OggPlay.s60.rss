@@ -44,7 +44,7 @@ RESOURCE TBUF { buf="Oggplay"; }
 //# Version string
 //#define ogg_txt_version "OggPlay 1.6.3"
 
-// Languages : EN/SC FR GE DU IT SP SW TU DA PO
+// Languages : EN/SC FR GE DU IT SP SW TU DA PO RU
 
 #if defined(LANGUAGE_EN) || defined(LANGUAGE_SC)
 #include "OggPlay.en.rss"
@@ -66,6 +66,8 @@ RESOURCE TBUF { buf="Oggplay"; }
 #include "OggPlay.da.rss"
 #elif defined(LANGUAGE_PO)
 #include "OggPlay.po.rss"
+#elif defined(LANGUAGE_RU)
+#include "OggPlay.ru.rss"
 #endif
 
 

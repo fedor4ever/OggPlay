@@ -708,7 +708,7 @@ void TOggFiles::ScanNextPlayList()
 
 	// Parse the playlist, ignoring any errors.
 	TRAPD(err, (*iPlayLists)[iCurrentIndexInDirectory]->ScanPlayListL(*iDirScanSession, this));
-	iCurrentIndexInDirectory++
+	iCurrentIndexInDirectory++;
 }
 
 TBool TOggFiles::PlayListScanIsProcessDone() const
