@@ -19,7 +19,7 @@
 #ifndef __OggOs_h
 #define __OggOs_h
 
-
+#undef chmsg // Not particularily clever, but hides useless warning msg.
 #if defined( __WINS__ )  && defined(__VC32__)
 #define chSTR(x)           #x
 #define chSTR2(x)        chSTR(x)
