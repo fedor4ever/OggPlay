@@ -122,7 +122,7 @@ chSTR2(__LINE__) "):" #desc)
 // so that Application drawing have been done.
 #define DELAY_AUDIO_STREAMING_START
 
-#if defined(SERIES60)
+#if defined(SERIES60) || defined(SERIES80)
 #define SEARCH_OGGS_FROM_ROOT
 #endif
 

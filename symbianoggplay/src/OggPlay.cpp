@@ -633,7 +633,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		TBuf<128> buf;
 		iEikonEnv->ReadResource(buf, R_OGG_VERSION);
 		d->SetVersion(buf);
-#ifdef SERIES80 // To be removed when functionality has been implemented
+#ifndef SERIES80 // To be removed when functionality has been implemented
 		d->ExecuteLD(R_DIALOG_ABOUT);
 #endif		
 		break;
@@ -986,7 +986,7 @@ COggPlayAppUi::ShowFileInfo()
 	d->SetTime(iOggPlayback->Time().GetTInt());
 	d->SetBitRate(iOggPlayback->BitRate()/1000);
 	if ( ! iSongList->AnySongPlaying() ) iOggPlayback->ClearComments();
-#ifdef SERIES80 // To be removed when functionality has been implemented
+#ifndef SERIES80 // To be removed when functionality has been implemented
 	d->ExecuteLD(R_DIALOG_INFO);
 #endif
 }

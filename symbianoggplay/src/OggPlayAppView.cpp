@@ -31,8 +31,6 @@
 #endif
 #ifdef SERIES80
 #include <eikenv.h>
-#define KFullScreenWidth 640
-#define KFullScreenHeight 200
 #endif
 #ifdef UIQ
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
@@ -112,8 +110,12 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[0]->SetContainerWindowL(*this);
   iCanvas[0]->SetControlContext(this);
   iCanvas[0]->SetObserver(this);
+#ifdef SERIES80
+  TPoint pBM(0,0);
+#else
   TPoint pBM(Position());
   pBM.iY= 0;
+#endif
   iCanvas[0]->SetExtent(pBM,TSize(KFullScreenWidth,KFullScreenHeight));
 
   // flip-closed mode:

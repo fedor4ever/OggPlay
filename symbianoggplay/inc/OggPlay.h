@@ -36,6 +36,10 @@ const TInt KFullScreenHeight = 188;
 #include <eikappui.h>
 #include <eikapp.h>
 #include <eikdoc.h>
+
+#define KFullScreenWidth 640
+#define KFullScreenHeight 200
+
 #else
 #include <qikappui.h>
 #include <qikapplication.h>
