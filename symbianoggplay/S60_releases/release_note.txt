@@ -1,22 +1,35 @@
 
-This is the Release Note for Release 1.0.1 of Oggplay for Series60.
+This is the Release Note for Release 1.5.0 of Oggplay for Series60.
 
 *******************************************************************
  This release is only experimental and hasn't been thoroughly tested.
- Please use the official release 1.0.0 , unless you are willing to
+ Please use the official release 1.0.1 , unless you are willing to
  beta test our new features.
  
  If you experiment problems with this version, please report them to
- our public forums, but mention you are using 1.0.1.
+ our public forums, but mention you are using 1.5.0.
 *******************************************************************
 
-What's in Release 1.0.1:
+
+******************************************************************************
+**** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
+****                                                                      ****
+******************************************************************************
+
+
+
+What's new in Release 1.5.0:
 --------------------------
-All the features of 1.0.0 plus:
-  + New shortcut option for next/previous song
-  + 'Dynamic' random play. No need to shuffle the playlist anymore.
-  + Quite a lot of internal changes. 
-  + New shortcut option for engaging keylock
+
+OggPlay nows plays MP3 and AAC in addition to Ogg file format, depending
+on the phone capabilities.
+See the ReadMeFirst.html to see which file formats your phone supports.
+
+
+This release will only work on Nokia 6600, Nokia 6630 and Nokia 7610.
+(And any future Series60 phones that will support MMF.)
+
+
 
 Links:
 ------

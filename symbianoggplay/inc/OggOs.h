@@ -44,7 +44,7 @@ chSTR2(__LINE__) "):" #desc)
 #define SERIES60
 //#define UIQ
 // Enable this line to choose the OS OggPlay will run on.
-//#define OS70S
+#define OS70S
 
 //# Version String
 #if defined(SERIES60)

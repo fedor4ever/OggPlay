@@ -1,11 +1,15 @@
-    Welcome to OggPlay 1.0.1
+    Welcome to OggPlay 1.5.0
 
 This release is only 
 experimental and hasn't been
 thoroughly tested.
 Please use the official 
-release 1.0.0 , unless you 
+release 1.0.1 , unless you 
 are willing to beta test our
 new features.
+
+New for this release:
+Possibility to play Ogg, MP3 
+and AAC files.
 
 Enjoy!
