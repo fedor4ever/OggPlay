@@ -209,10 +209,15 @@ COggPlayAppUi::ConstructL()
   iIniFileName->Des().Append(aP.Name());  
   iIniFileName->Des().Append(KiIniFileNameExtension);
 
+#if defined(__WINS__)
+  // The emulator doesn't like to write to the Z: drive,
+  // avoid that.
+  iDbFileName = _L("C:\\oggplay.db");
+#else
   iDbFileName.Copy(Application()->AppFullName());
   iDbFileName.SetLength(iDbFileName.Length() - 3);
   iDbFileName.Append(_L("db"));
-
+#endif
   iSkinFileDir.Copy(Application()->AppFullName());
   iSkinFileDir.SetLength(iSkinFileDir.Length() - 11);
 
@@ -715,7 +720,7 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
     }
   }
 
-#if defined(SERIES60)
+#if !defined(SERIES60)
   if (aMenuId==R_POPUP_MENU) {
     if (iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
     aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());

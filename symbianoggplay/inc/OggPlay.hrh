@@ -85,6 +85,8 @@ enum TOggplayDlgLineId // dialog line ids
 	EOggLabelAboutVersion2,
 	EOggLabelAboutVersion3,
 	EOggLabelAboutVersion4,
+	EOggLabelAboutVersion5,
+	EOggLabelAboutVersion6,
 	EwizradialDlg1Label
     };
 
