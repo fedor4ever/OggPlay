@@ -304,8 +304,8 @@ class COggDigits : public COggControl {
   virtual void Draw(CBitmapContext& aBitmapContext);
 
   HBufC*      iText;
-  CFbsBitmap* iBitmaps;
-  CFbsBitmap* iMasks;
+  CArrayPtrFlat<CFbsBitmap> iBitmaps;   
+  CArrayPtrFlat<CFbsBitmap> iMasks;
 };
 
 

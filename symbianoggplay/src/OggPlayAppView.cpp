@@ -1127,6 +1127,8 @@ COggPlayAppView::UpdateSongPosition()
   }
 #else
   if (iPlayed[iMode]) iPlayed[iMode]->SetText(mbuf);
+  if (iPlayedDigits[iMode]) iPlayedDigits[iMode]->SetText(mbuf.Left(5));
+  if (iTotalDigits[iMode]) iTotalDigits[iMode]->SetText(mbuf.Right(5));
 #endif
   SetTime(iApp->iOggPlayback->Time());
 

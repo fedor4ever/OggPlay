@@ -833,8 +833,8 @@ COggAnimation::ReadArguments(TOggParser& p)
 COggDigits::COggDigits() :
   COggControl(),
   iText(0),
-  iBitmaps(0),
-  iMasks(0)
+  iBitmaps(ENumDigits),
+  iMasks(ENumDigits)
 {
 }
 
@@ -842,29 +842,32 @@ COggDigits::~COggDigits()
 {
   ClearBitmaps();
   ClearMasks();
+  if (iText)
+      delete iText;
 }
 
 void
 COggDigits::ClearBitmaps() 
 {
-  if (iBitmaps) delete [] iBitmaps;
-  iBitmaps= 0;
+  iBitmaps.ResetAndDestroy();
 }
 
 void 
 COggDigits::ClearMasks()
 {
-  if (iMasks) delete [] iMasks;
-  iMasks= 0;
+  
+  iMasks.ResetAndDestroy();
 }
 
 void
 COggDigits::SetBitmaps(TInt aFirstBitmap)
 {
   ClearBitmaps();
-  iBitmaps= new CFbsBitmap[ENumDigits];
   for (TInt i=0; i<ENumDigits; i++)
-    iBitmaps[i].Load(iBitmapFile,aFirstBitmap+i);
+  {    
+    iBitmaps.AppendL( new (ELeave) CFbsBitmap) ;
+    iBitmaps[i]->Load(iBitmapFile,aFirstBitmap+i);
+  }
   iRedraw= ETrue;
 }
 
@@ -872,9 +875,12 @@ void
 COggDigits::SetMasks(TInt aFirstMask)
 {
   ClearMasks();
-  iMasks= new CFbsBitmap[ENumDigits];
   for (TInt i=0; i<ENumDigits; i++)
-    iMasks[i].Load(iBitmapFile,aFirstMask+i);
+  {
+    iMasks.AppendL( new (ELeave) CFbsBitmap) ;
+    iMasks[i]->Load(iBitmapFile,aFirstMask+i);
+  }
+
   iRedraw= ETrue;
 }
 
@@ -892,7 +898,7 @@ COggDigits::SetText(const TDesC& aText)
 
 void COggDigits::Draw(CBitmapContext& aBitmapContext)
 {
-  if (!iBitmaps) return;
+  if (iBitmaps.Length() == 0) return;
   if (!iText) return;
 
   TInt x=0;
@@ -918,8 +924,8 @@ void COggDigits::Draw(CBitmapContext& aBitmapContext)
     } else if (c==_L(".")) {
       idx= EDigitDot;
     }
-    if (idx>=0) b= &iBitmaps[idx];
-    if (iMasks) m= &iMasks[idx]; else m= &iBitmaps[idx];
+    if (idx>=0) b= iBitmaps[idx];
+    if (iMasks.Length() >0 ) m= iMasks[idx]; else m= iBitmaps[idx];
 
     if (!b || !m) continue;
 
@@ -935,7 +941,7 @@ COggDigits::ReadArguments(TOggParser& p)
   TBool success= COggControl::ReadArguments(p);
   if (success && p.iToken==_L("Bitmaps")) {
     p.Debug(_L("Settings bitmaps."));
-    TInt first,num;
+    TInt first,num=0;
     success= p.ReadToken(first) && p.ReadToken(num);
     if (success && num!=ENumDigits) {
       success= EFalse;
@@ -945,7 +951,7 @@ COggDigits::ReadArguments(TOggParser& p)
   }
   if (success && p.iToken==_L("Masks")) {
     p.Debug(_L("Settings masks."));
-    TInt first,num;
+    TInt first,num=0;
     success= p.ReadToken(first) && p.ReadToken(num);
     if (success && num!=ENumDigits) {
       success= EFalse;
