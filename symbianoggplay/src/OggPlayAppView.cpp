@@ -1278,7 +1278,7 @@ COggPlayAppView::UpdateSongPosition()
   TInt mintot= sectot/60;
   sectot-= mintot*60;
   mbuf.Format(_L("%02d:%02d / %02d:%02d"), min, sec, mintot, sectot);
-#if !defined(SERIES60)
+#if defined(UIQ)
   if (IsFlipOpen()) {
     CEikMenuBar* mb = iEikonEnv->AppUiFactory()->MenuBar();
     if (!mb) return;

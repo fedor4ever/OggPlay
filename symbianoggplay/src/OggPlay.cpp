@@ -570,10 +570,10 @@ COggPlayAppUi::SetHotKey()
 }
 
 void
-COggPlayAppUi::UpdateSeries60Softkeys(TBool aForce)
+COggPlayAppUi::UpdateSoftkeys(TBool aForce)
 {
-  IFDEF_S60( 
 
+#if defined(SERIES60) || defined(SERIES80) 
   // Return if somebody else than main view has taken focus, 
   // except if we override this check.
   // Others must control the CBA themselves
@@ -581,15 +581,63 @@ COggPlayAppUi::UpdateSeries60Softkeys(TBool aForce)
   GetActiveViewId(viewId);
   if( !aForce && viewId.iViewUid != KOggPlayUidFOView ) 
     return;
-
+  
+#ifdef SERIES60
   if(iOggPlayback->State() == CAbsPlayback::EPlaying) {
-    SetSeries60Softkeys(iSettings.iRskPlay);
+    SetSeries60Softkeys(iSettings.iRskPlay[0]);
   } else {
-    SetSeries60Softkeys(iSettings.iRskIdle);
+    SetSeries60Softkeys(iSettings.iRskIdle[0]);
   }
+#else
+  if(iOggPlayback->State() == CAbsPlayback::EPlaying) {
+    SetSeries80Softkeys(iSettings.iRskPlay);
+  } else {
+    SetSeries80Softkeys(iSettings.iRskIdle);
+  }
+#endif
   Cba()->DrawNow();
 
-  )
+#endif //S60||S80
+}
+
+void
+COggPlayAppUi::SetSeries80Softkeys(TInt * aSoftkey) {
+#ifdef SERIES80
+  TBuf<50> buf;
+  TInt action;
+  for (TInt i=0; i<4; i++)
+  {
+  	switch(aSoftkey[i])
+  	{
+	    case TOggplaySettings::ECbaStop:
+	      iEikonEnv->ReadResource(buf, R_OGG_CBA_STOP);
+	      action = EUserStopPlayingCBA;
+	      break;
+	    case TOggplaySettings::ECbaExit:
+	      iEikonEnv->ReadResource(buf, R_OGG_CBA_EXIT);
+	      action = EEikCmdExit;
+	      break;
+	    case TOggplaySettings::ECbaPause:
+	      iEikonEnv->ReadResource(buf, R_OGG_CBA_PAUSE);
+	      action = EUserPauseCBA;
+	      break;
+	    case TOggplaySettings::ECbaPlay:
+	      iEikonEnv->ReadResource(buf, R_OGG_CBA_PLAY);
+	      action = EUserPlayCBA;
+	      break;
+	    case TOggplaySettings::ECbaBack:
+	      iEikonEnv->ReadResource(buf, R_OGG_CBA_BACK);
+	      action = EUserBackCBA;
+	      break;
+	    default:
+	      buf = KNullDesC;
+	      action = EEikCmdCanceled;
+	      break;
+  	}
+    Cba()->SetCommandL(i,action, buf); // Ca, ca marche
+  }
+
+#endif
 }
 
 void
@@ -775,11 +823,15 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	  }
 		
 #if defined(SERIES60)
-  case EAknSoftkeyBack: {
-		HandleCommandL(EOggStop);
+  case EAknSoftkeyBack:
+  {
+	HandleCommandL(EOggStop);
     Exit();
     break;
   }
+ #endif
+ 
+#if defined(SERIES60) || defined(SERIES80)
   case EUserStopPlayingCBA : {
  		HandleCommandL(EOggStop);
     break;
@@ -787,7 +839,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EUserPauseCBA : {
  		iOggPlayback->Pause(); // does NOT call UpdateS60Softkeys
 		iAppView->Update();
-    UpdateSeries60Softkeys();
+    UpdateSoftkeys();
 
     break;
     }
@@ -851,13 +903,13 @@ COggPlayAppUi::PlaySelect()
         {
             iOggPlayback->Resume();
             iAppView->Update();
-            UpdateSeries60Softkeys();
+            UpdateSoftkeys();
             return;
         }
 
         if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
             iOggPlayback->Pause();
-            UpdateSeries60Softkeys();
+            UpdateSoftkeys();
         }
         
         iSongList->SetPlayingFromListBox(idx);
@@ -868,10 +920,10 @@ COggPlayAppUi::PlaySelect()
                 iOggPlayback->Play();
                 iAppView->Update();
             }
-            UpdateSeries60Softkeys();
+            UpdateSoftkeys();
         } else {
             iSongList->SetPlayingFromListBox(ENoFileSelected);
-            UpdateSeries60Softkeys();
+            UpdateSoftkeys();
         }
         
     }
@@ -886,7 +938,7 @@ COggPlayAppUi::PauseResume()
   if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
     iOggPlayback->Pause();
     iAppView->Update();
-    UpdateSeries60Softkeys();
+    UpdateSoftkeys();
 		if(iWriteIniOnNextPause) {
 			iWriteIniOnNextPause=EFalse;
 			WriteIniFile();
@@ -903,7 +955,7 @@ COggPlayAppUi::Stop()
   if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
       iOggPlayback->State()==CAbsPlayback::EPaused) {
     iOggPlayback->Stop();
-    UpdateSeries60Softkeys();
+    UpdateSoftkeys();
     iSongList->SetPlayingFromListBox(ENoFileSelected); // calls iAppview->Update
   }
   return;
@@ -1009,7 +1061,7 @@ COggPlayAppUi::NextSong()
         if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
             iOggPlayback->Play();
             iAppView->SetTime(iOggPlayback->Time());
-            UpdateSeries60Softkeys();
+            UpdateSoftkeys();
             iAppView->Update();
         } else {
             iSongList->SetPlayingFromListBox(ENoFileSelected);
@@ -1046,7 +1098,7 @@ COggPlayAppUi::PreviousSong()
         if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
             iOggPlayback->Play();
             iAppView->SetTime(iOggPlayback->Time());
-            UpdateSeries60Softkeys();
+            UpdateSoftkeys();
             iAppView->Update();
         } else {
             iSongList->SetPlayingFromListBox(ENoFileSelected);
@@ -1172,6 +1224,17 @@ COggPlayAppUi::ReadIniFile()
     RFile in;
     TInt err;
     
+#ifdef SERIES80
+      iSettings.iRskIdle[0]      = TOggplaySettings::ECbaPlay;
+      iSettings.iRskPlay[0]      = TOggplaySettings::ECbaPause ;
+      iSettings.iRskIdle[1]      = TOggplaySettings::ECbaStop ;
+      iSettings.iRskPlay[1]      = TOggplaySettings::ECbaStop ;
+      iSettings.iRskIdle[2]      = TOggplaySettings::ECbaNone ;
+      iSettings.iRskPlay[2]      = TOggplaySettings::ECbaNone ;
+      iSettings.iRskIdle[3]      = TOggplaySettings::ECbaExit ;
+      iSettings.iRskPlay[3]      = TOggplaySettings::ECbaExit ;
+#endif
+ 
     // Open the file
     if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
     {
@@ -1235,8 +1298,16 @@ COggPlayAppUi::ReadIniFile()
       }
       
       iSettings.iWarningsEnabled = (TInt)  IniRead32( tf );
-      iSettings.iRskIdle         = (TInt)  IniRead32( tf );
-      iSettings.iRskPlay         = (TInt)  IniRead32( tf );
+      iSettings.iRskIdle[0]      = (TInt)  IniRead32( tf );
+      iSettings.iRskPlay[0]      = (TInt)  IniRead32( tf );
+#ifdef SERIES80
+      iSettings.iRskIdle[1]      = (TInt)  IniRead32( tf );
+      iSettings.iRskPlay[1]      = (TInt)  IniRead32( tf );
+      iSettings.iRskIdle[2]      = (TInt)  IniRead32( tf );
+      iSettings.iRskPlay[2]      = (TInt)  IniRead32( tf );
+      iSettings.iRskIdle[3]      = (TInt)  IniRead32( tf );
+      iSettings.iRskPlay[3]      = (TInt)  IniRead32( tf );
+ #endif
       iRandom                    = (TBool) IniRead32( tf, 0, 1 );
 
    } // version 2 onwards
@@ -1384,11 +1455,14 @@ COggPlayAppUi::WriteIniFile()
     num.Num(iSettings.iWarningsEnabled);
     tf.Write(num);
     
-    num.Num(iSettings.iRskIdle);
-    tf.Write(num);
+    for( j=0; j<KNofSoftkeys; j++ ) 
+    {
+        num.Num(iSettings.iRskIdle[j]);
+        tf.Write(num);
     
-    num.Num(iSettings.iRskPlay);
-    tf.Write(num);
+        num.Num(iSettings.iRskPlay[j]);
+        tf.Write(num);
+    }
     
     num.Num(iRandom);
     tf.Write(num);

@@ -33,9 +33,11 @@ const TInt KFullScreenWidth = 176;
 const TInt KFullScreenHeight = 188;
 
 #elif defined(SERIES80)
+#include <eikenv.h> 
 #include <eikappui.h>
 #include <eikapp.h>
 #include <eikdoc.h>
+#include <eikbtgpc.h> 
 
 #define KFullScreenWidth 640
 #define KFullScreenHeight 200
@@ -113,6 +115,12 @@ _LIT(KMmcSearchDir,"E:\\Ogg\\");
 
 // global settings - these are set through the settings view
 
+#ifdef SERIES80
+ const TInt KNofSoftkeys = 4;
+#else
+ const TInt KNofSoftkeys = 1;
+#endif
+ 
 class TOggplaySettings
 	{
 public:
@@ -131,10 +139,11 @@ public:
     ECbaStop,
     ECbaPause,
     ECbaPlay,
-    ECbaBack
+    ECbaBack,
+    ECbaNone
   };
-  TInt iRskIdle;
-  TInt iRskPlay;
+  TInt iRskIdle[KNofSoftkeys];
+  TInt iRskPlay[KNofSoftkeys];
   TInt iGainType;
   
   enum THotkeys {   // COggUserHotkeys
@@ -274,7 +283,9 @@ public:
   void ActivateOggViewL();
   void ActivateOggViewL(const TUid aViewId);
 
-  void UpdateSeries60Softkeys(TBool aForce=EFalse);
+  void UpdateSoftkeys(TBool aForce=EFalse);
+  
+  void SetSeries80Softkeys(TInt * aSoftkey);
   void SetSeries60Softkeys(TInt aSoftkey);
 
   // from CQikAppUi:
@@ -288,6 +299,10 @@ public:
   void WriteIniFile();
   void WriteIniFileOnNextPause();
   void SetRepeat(TBool aRepeat);
+#ifdef SERIES80
+  CEikButtonGroupContainer * Cba()  
+  { return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 
+#endif
 
 private: 
 

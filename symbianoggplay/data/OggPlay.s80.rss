@@ -756,6 +756,14 @@ RESOURCE TBUF r_ogg_codec_mp3        { buf=ogg_codec_mp3; }
 RESOURCE TBUF r_ogg_codec_aac        { buf=ogg_codec_aac; }
 RESOURCE TBUF r_ogg_codec_mp4        { buf=ogg_codec_mp4; }
 
+
+RESOURCE TBUF R_OGG_CBA_EXIT {buf=ogg_cba_exit;}
+RESOURCE TBUF R_OGG_CBA_STOP {buf=ogg_cba_stop;}
+RESOURCE TBUF R_OGG_CBA_PAUSE {buf=ogg_cba_pause;}
+RESOURCE TBUF R_OGG_CBA_PLAY {buf=ogg_cba_play;}
+RESOURCE TBUF R_OGG_CBA_BACK {buf=ogg_cba_back;}
+
+		
 /* Stuff from the example */
 
 RESOURCE EIK_APP_INFO

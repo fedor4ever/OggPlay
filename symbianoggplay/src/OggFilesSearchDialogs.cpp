@@ -10,6 +10,8 @@
 #ifdef SERIES80
 #include <eikenv.h>
 #include <eikappui.h>
+#include <eikbtgpc.h>
+#include <eikcore.rsg>
 #endif
 
 #ifdef UIQ
@@ -167,9 +169,14 @@ void COggFilesSearchContainer::UpdateControl()
      TBuf<10> number2;
     number2.AppendNum(aNbFiles);
     (*iLabels)[4]->SetTextL(number2); 
-#ifdef SERIES60
+#ifdef SERIES60 
     if (  iBackgroundProcess->FileSearchIsProcessDone()) {
         iCba->SetCommandSetL(  R_AVKON_SOFTKEYS_OK_EMPTY );
+        iCba->DrawNow();
+    }
+#elif defined SERIES80
+    if (  iBackgroundProcess->FileSearchIsProcessDone()) {
+        iCba->SetCommandSetL(  R_EIK_BUTTONS_CONTINUE );
         iCba->DrawNow();
     }
 #endif

@@ -25,7 +25,7 @@
 #include "OggHelperFcts.h"
 #include <OggOs.h> // For SERIES60 definition
 
-#ifdef SERIES60
+#if defined(SERIES60) || defined(SERIES80)
 const TInt KBuffers= 2;
 const TInt KBufferSize = 4096;
 #else

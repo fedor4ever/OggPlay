@@ -28,6 +28,7 @@
 #include <ImplementationProxy.h>
 #include <mmfcontroller.h>
 #include <mmf\common\mmfstandardcustomcommands.h>
+#include <mmf\server\mmfformat.h>
 #include <MmfAudioOutput.h>
 #include <MmfFile.h>
 #include "Plugin\MMFOggPlayStreaming.h"
