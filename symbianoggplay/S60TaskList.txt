@@ -1,0 +1,77 @@
+
+
+OggPlay - S60TaskList.txt
+--------------------------------------------------------------
+List of outstanding issues on the Series60 port of OggPlay.
+--------------------------------------------------------------
+Feel free to go wild. The content is more important than the style.
+
+
+
+Issue #1 : Crashes on 44.1/stereo                               State : In work/Claus
+Crashes can happen when playing 44.1kHz stereo due to overall 
+system load. (GSM call activity, MP3 started in parallel etc.)
+........................
+Looking at thread/proc priorities and such. Also the audio
+priority should be decreased from the current 100.
+
+
+Issue #2 : App flickers at start up                             State : In work/Claus
+App flickers at start up. (Avkon status pane)
+Would it be possible to let OggPlay start in a more cool way 
+regarding graphics ?
+........................
+I'll make a fast go for evaluation
+
+
+Issue #3 : Ejecting a MMC                                       State : Open
+Ejecting a MMC hosting a playing ogg file is 
+not handled gracefully.
+........................
+At least the SX1 can do this. Don't think there are any
+MMC hotswap Nokias yet ?
+
+
+Issue #4 : Missing '.ogg' recognizer.                           State : To discussion
+........................
+Any comments for or against ?
+
+
+Issue #5 : New maneuvring ??                                    State : To discussion
+Maneuvring does not conform to Series60, 
+volume should be navi right/left. 
+........................
+Any comments for or against ?
+
+
+Issue#6. Skin support not working.                              State : Open
+Chrashes on manual skin loading.
+
+
+Issue #7. Ugly dialogs.                                         State : Open
+Dialogs are very ugly, when not absolutely unreadable. 
+(The About Dialog for example).
+
+
+Issue #8. Error dialogs needs rework.                           State : In work/Berthier
+Errors are not handled properly yet. Error msg is unreadable, 
+and after dismissing the dialog, a new dialog is opened with a 
+message like "Error: -101".
+
+
+Issue #9. Buffer underflow handling.                            State : In work/Berthier
+Nokia phones (NGage At least) have a firmwave bug: if you 
+play a stream at 16000kHz, but for some reasons there is buffer 
+underflow, the play rate will fall to 8000kHz. Very annoying. 
+Bug was aknowledged by Nokia. The only thing we can do is buffer 
+a little bit more so that buffer underflow doesn't happens too often.
+
+
+Issue #10. The Options menu doesn't work at all.		State : Open
+
+
+
+
+
+
+
