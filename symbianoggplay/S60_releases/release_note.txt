@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.6.2 of Oggplay for Series60.
+This is the Release Note for Release 1.6.3 of Oggplay for Series60.
 
 ******************************************************************************
 **** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
@@ -13,13 +13,17 @@ later on. MP3, AAC, MP4, M4A plugins are supported.
 
 See the ReadMeFirst.html to see which file formats your phone supports.
 
-This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610.
+This release will only work on Nokia 6600, 6620, 6630 and Nokia 7610.
 (And any future Series60 phones that will support MMF.)
          
 
 History
 --------------------------------------------------------------------------------------------
 
+What's new in Release 1.6.3:
+--------------------------
+Fix for the too long filename crahsing the MMFController.
+Somehow faster file scan.
 
 What's new in Release 1.6.2:
 --------------------------

@@ -83,7 +83,10 @@ void COggPlayController::ConstructL()
 
     iState = EStateNotOpened;
      
-    iFileLength = TTimeIntervalMicroSeconds(1E6);
+    iFileLength = TTimeIntervalMicroSeconds(5*60*1E6); // We do not want to look at file duration when
+                                                       //discovering the file: it takes too long
+                                                       // If DurationL is asked before we actually have the information,
+                                                       // pretend length is 5 minutes.
     
     iOggSource = new (ELeave) COggSource( *this);
 
@@ -170,7 +173,7 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
     
     TRACEF(COggLog::VA(_L("iFileName %S "),&iFileName ));
     // Open the file here, in order to get the tags.
-    OpenFileL(iFileName);
+    OpenFileL(iFileName,ETrue);
     // Save the tags.
     
   iDecoder->Clear(); // Close the file. This is required for the ringing tone stuff.
@@ -304,7 +307,7 @@ void COggPlayController::PrimeL()
         User::Leave(KErrNotReady);
   
     iState = EStateOpen;
-    OpenFileL(iFileName);
+    OpenFileL(iFileName,EFalse);
 
     // Do our own rate conversion, some firmware do it very badly.
     
@@ -497,7 +500,7 @@ CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
     return NULL;
 }
 
-void COggPlayController::OpenFileL(const TDesC& aFile)
+void COggPlayController::OpenFileL(const TDesC& aFile, TBool aOpenForInfo)
 {
     
     // add a zero terminator
@@ -511,7 +514,16 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
         User::Leave(KOggPlayPluginErrFileNotFound);
     };
     iState= EStateOpen;
-    if( iDecoder->Open(iFile) < 0) {
+    TInt ret=0;
+    if (aOpenForInfo)
+    {
+        ret = iDecoder->OpenInfo(iFile) ;
+    }
+    else
+    {
+        ret = iDecoder->Open(iFile) ;
+    }
+    if( ret < 0) {
         iDecoder->Clear();
         fclose(iFile);
         iState= EStateNotOpened;
@@ -528,7 +540,8 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
     }
 
     TRACEF(COggLog::VA(_L("Tags: %S %S %S %S"), &iTitle, &iArtist, &iAlbum, &iGenre ));
-    iFileLength = iDecoder->TimeTotal() * 1000;
+    if (!aOpenForInfo)
+         iFileLength = iDecoder->TimeTotal() * 1000;
 
 } 
 

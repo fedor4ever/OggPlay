@@ -212,7 +212,7 @@ class COggPlayController :	public CMMFController,
 
     private: // Internal Functions
 
-        void OpenFileL(const TDesC& aFile);
+        void OpenFileL(const TDesC& aFile, TBool aOpenForInfo);
 
 	private: // Data
 
@@ -233,7 +233,7 @@ class COggPlayController :	public CMMFController,
 	    TOggPlayControllerState iState;
 
         // OggTremor stuff
-        TBuf<100> iFileName;
+        TFileName iFileName;
         FILE *iFile;
         
         enum { KMaxStringLength = 256 };
