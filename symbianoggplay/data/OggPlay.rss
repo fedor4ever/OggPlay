@@ -1,1 +1,11 @@
+// uncomment for UIQ/SERIES60:
+//#include "OggPlay.header.rss"
+#include "OggPlay.header_s60.rss"
+
+#define ogg_txt_version "OggPlay 0.95 (beta)"
 #include "OggPlay.en.rss"
+
+// uncomment:
+//#include "OggPlay.common_uiq.rss"
+#include "OggPlay.common_s60.rss"
+

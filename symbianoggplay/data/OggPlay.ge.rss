@@ -1,214 +1,66 @@
-#include "OggPlay.header.rss"
 
-#define ogg_exit_label "Beenden"
+#define ogg_options_title "Optionen"
+#define ogg_hotkey "Schnellstart:"
+#define ogg_alarm "Alarm:"
+#define ogg_active "Activ:"
+#define ogg_about_oggplay "Über OggPlay"
+#define ogg_version_txt "Version ???"
+#define ogg_c_author "(c) 2003 by Leif H. Wilden"
+#define ogg_link_txt "see www.geocities.com/p800tools für mehr Infos"
+#define ogg_vorbis_c "(c) Ogg/Vorbis codec by Xiph.org"
+#define ogg_file_prop "Dateieigenschaften"
+#define ogg_filename_txt "Dateiname:"
+#define ogg_filename_unknown "unbekannt"
+#define ogg_filesize "Dateigröße [byte]:"
+#define ogg_bitrate "Bitrate [kbit/s]:"
+#define ogg_rate_hz "Frequenz [Hz]:"
+#define ogg_channels "Kanäle:"
+#define ogg_hotkey_none "Keiner"
+#define ogg_hotkey_camera "Kameraknopf"
+#define ogg_hotkey_browser "Browserknopf"
+#define ogg_hotkey_power "Betriebsschalter"
+#define ogg_hotkey_flipopen "Flip öffnen"
+#define ogg_skin_default "default"
+#define ogg_file_info "Dateieigenschaften..."
+#define ogg_repeat "Wiederholen"
+#define ogg_shuffle_playlist "Wiedergabeliste mischen"
+#define ogg_find_files "Neue Dateien suchen"
+#define ogg_skins "Skins"
+#define ogg_options_cascade "Optionen..."
 #define ogg_about_label "Über OggPlay..."
+#define ogg_exit_label "Beenden"
 
-RESOURCE TBUF r_ogg_error_1 { buf="COggButton: Fehler beim lesen der Maske."; }
-RESOURCE TBUF r_ogg_error_2 { buf="COggCanvas: Fehler beim konvertieren des Hintergrundbildes: "; }
-RESOURCE TBUF r_ogg_error_3 { buf="COggPlayAppUi: Kann Prozesspriorität nicht setzten: Fehler "; }
-RESOURCE TBUF r_ogg_error_4 { buf="COggPlayAppUi: Kann Prozess nicht finden?? Auwaia."; }
-RESOURCE TBUF r_ogg_error_5 { buf="COggPlayAppUi: Kann Threadpriorität nicht setzten: Fehler "; }
-RESOURCE TBUF r_ogg_error_6 { buf="COggPlayAppUi: Kann Thread nicht finden?? Auwaia."; }
-RESOURCE TBUF r_ogg_error_7 { buf="TOggPlayback: Fehler beim Öffnen des Audiostreams. Fehler "; }
-RESOURCE TBUF r_ogg_error_8 { buf="TOggPlayback: Kein Dateiname angegeben."; }
-RESOURCE TBUF r_ogg_error_9 { buf="Das ist keine Ogg vorbis Datei?!"; }
-RESOURCE TBUF r_ogg_error_10 { buf="Nur Streams mit ein oder zwei Kanälen werden unterstützt."; }
-RESOURCE TBUF r_ogg_error_12 { buf="Nicht unterstzütztes Audioformat."; }
-RESOURCE TBUF r_ogg_error_13 { buf="Nur die folgenden Samplingfrequenzen werden unterstützt: 11025,16000,22050,32000,44100,48000 Hz."; }
-RESOURCE TBUF r_ogg_error_14 { buf="Kann diese Datei nicht öffnen."; }
-RESOURCE TBUF r_ogg_error_15 { buf="Keine Datei ist geöffnet."; }
-RESOURCE TBUF r_ogg_error_16 { buf="Fehlernummer "; }
-RESOURCE TBUF r_ogg_error_17 { buf="Fehler beim Senden eines Puffers"; }
-RESOURCE TBUF r_ogg_error_18 { buf="Fehler beim Kopieren eines Puffers"; }
-RESOURCE TBUF r_ogg_error_19 { buf="Fehler beim Einlesen "; }
-RESOURCE TBUF r_ogg_error_20 { buf="Fehler"; }
-RESOURCE TBUF r_ogg_error_21 { buf="COggCanvas: Fehler beim Öffnen des Hintergrundbildes."; }
+#define ogg_text_error_1 "COggButton: Fehler beim lesen der Maske."
+#define ogg_text_error_2 "COggCanvas: Fehler beim konvertieren des Hintergrundbildes: "
+#define ogg_text_error_3 "COggPlayAppUi: Kann Prozesspriorität nicht setzten: Fehler "
+#define ogg_text_error_4 "COggPlayAppUi: Kann Prozess nicht finden?? Auwaia."
+#define ogg_text_error_5 "COggPlayAppUi: Kann Threadpriorität nicht setzten: Fehler "
+#define ogg_text_error_6 "COggPlayAppUi: Kann Thread nicht finden?? Auwaia."
+#define ogg_text_error_7 "TOggPlayback: Fehler beim Öffnen des Audiostreams. Fehler "
+#define ogg_text_error_8 "TOggPlayback: Kein Dateiname angegeben."
+#define ogg_text_error_9 "Das ist keine Ogg vorbis Datei?!"
+#define ogg_text_error_10 "Nur Streams mit ein oder zwei Kanälen werden unterstützt."
+#define ogg_text_error_12 "Nicht unterstzütztes Audioformat."
+#define ogg_text_error_13 "Nur die folgenden Samplingfrequenzen werden unterstützt: 11025,16000,22050,32000,44100,48000 Hz."
+#define ogg_text_error_14 "Kann diese Datei nicht öffnen."
+#define ogg_text_error_15 "Keine Datei ist geöffnet."
+#define ogg_text_error_16 "Fehlernummer "
+#define ogg_text_error_17 "Fehler beim Senden eines Puffers"
+#define ogg_text_error_18 "Fehler beim Kopieren eines Puffers"
+#define ogg_text_error_19 "Fehler beim Einlesen "
+#define ogg_text_error_20 "Fehler"
+#define ogg_text_error_21 "COggCanvas: Fehler beim Öffnen des Hintergrundbildes."
 
-RESOURCE TBUF r_ogg_string_1 { buf="Aktualisiere Liste der Dateien..."; }
-RESOURCE TBUF r_ogg_string_2 { buf="Schreibe Dateidatenbank..."; }
-RESOURCE TBUF r_ogg_string_3 { buf="Alarm ausgelöst"; }
-RESOURCE TBUF r_ogg_string_4 { buf="Kann die Prozesspriorität nicht setzen: Fehler "; }
-RESOURCE TBUF r_ogg_string_5 { buf="Wiedergabeliste gemischt"; }
-RESOURCE TBUF r_ogg_string_6 { buf="(Titel)"; }
-RESOURCE TBUF r_ogg_string_7 { buf="(Alben)"; }
-RESOURCE TBUF r_ogg_string_8 { buf="(Künstler)"; }
-RESOURCE TBUF r_ogg_string_9 { buf="(Genres)"; }
-RESOURCE TBUF r_ogg_string_10 { buf="(Verzeichnisse)"; }
-RESOURCE TBUF r_ogg_string_11 { buf="(Dateien)"; }
-RESOURCE TBUF r_ogg_string_12 { buf="(nicht zugeordnet)"; }
+#define ogg_text_string_1 "Aktualisiere Liste der Dateien..."
+#define ogg_text_string_2 "Schreibe Dateidatenbank..."
+#define ogg_text_string_3 "Alarm ausgelöst"
+#define ogg_text_string_4 "Kann die Prozesspriorität nicht setzen: Fehler "
+#define ogg_text_string_5 "Wiedergabeliste gemischt"
+#define ogg_text_string_6 "(Titel)"
+#define ogg_text_string_7 "(Alben)"
+#define ogg_text_string_8 "(Künstler)"
+#define ogg_text_string_9 "(Genres)"
+#define ogg_text_string_10 "(Verzeichnisse)"
+#define ogg_text_string_11 "(Dateien)"
+#define ogg_text_string_12 "(nicht zugeordnet)"
 
-RESOURCE DIALOG r_dialog_hotkey {
-  title   = "Optionen";
-  buttons = R_EIK_BUTTONS_CANCEL_DONE;
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-      type = EEikCtChoiceList;
-      prompt = "Schnellstart:";
-      id = EOggOptionsHotkey;
-      control = CHOICELIST { };
-    } ,
-    DLG_LINE {
-      type = EQikCtTimeEditor;
-      prompt = "Alarm:";
-      id = EOggOptionsAlarmTime;
-      control = QIK_TIME_EDITOR {
-        minTime = TIME { };
-        maxTime = TIME {
-          second = 59;
-          minute = 59;
-          hour = 23; };
-        flags = EQikTimeForce24HourFormat; 
-      };
-    } ,
-    DLG_LINE {
-      type = EEikCtCheckBox;
-      prompt = "Aktiv:";
-      id = EOggOptionsAlarmActive;
-    }
-  };
-}
-
-RESOURCE DIALOG r_dialog_about {
-  title   = "Über OggPlay";
-  buttons = R_EIK_BUTTONS_CONTINUE;
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion;
-	control = LABEL 
-	{
-		txt="Version ???";
-		horiz_align=EEikLabelAlignHCenter;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	control = LABEL 
-	{
-		txt="(c) 2003 by Leif H. Wilden";
-		horiz_align=EEikLabelAlignHCenter;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	control = LABEL 
-	{
-		txt="see www.geocities.com/p800tools für mehr Infos";
-		horiz_align=EEikLabelAlignHCenter;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	control = LABEL 
-	{
-		txt="(c) Ogg/Vorbis codec by Xiph.org";
-		horiz_align=EEikLabelAlignHCenter;
-	};
-    }	
-  };
-}
-
-RESOURCE DIALOG r_dialog_info {
-  title   = "Dateieigenschaften";
-  buttons = R_EIK_BUTTONS_CONTINUE;
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt = "Dateiname:";
-        id = EOggInfoDialog;
-	control = LABEL 
-	{
-		txt="";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-        id = EOggLabelFileName;
-	control = LABEL 
-	{
-		txt="unbekannt";
-		horiz_align=EEikLabelAlignHLeft;
-	};	
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= "Dateigröße [byte]:";
-	id= EOggLabelFileSize;
-	control = LABEL 
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= "Bitrate [kbit/s]:";
-	id = EOggLabelBitRate;
-	control = LABEL 
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= "Frequenz [Hz]:";
-        id   = EOggLabelRate;
-	control = LABEL 
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= "Kanäle:";
-	id = EOggLabelChannels;
-	control = LABEL
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    }
-  };
-}
-
-RESOURCE ARRAY r_hotkey_array {
-  items= {
-    LBUF { txt="Keiner"; },
-    LBUF { txt="Kameraknopf"; },
-    LBUF { txt="Browserknopf"; },
-    LBUF { txt="Betriebsschalter"; },
-    LBUF { txt="Flip öffnen"; }
-  };
-}
-
-RESOURCE MENU_PANE r_empty_menu {}
-
-RESOURCE MENU_PANE r_skin_menu 
-{
-  items= {
-//      MENU_ITEM { command=EOggSkinDefault; txt="default"; }
-  };
-}
-
-RESOURCE MENU_PANE r_file_menu
-{
-  items= {
-      MENU_ITEM { command=EOggInfo;	txt="Dateieigenschaften..."; },
-      MENU_ITEM { command=EOggRepeat;	txt="Wiederholen";
-                  flags=EEikMenuItemCheckBox;},
-      MENU_ITEM { command=EOggShuffle;  txt="Wiedergabeliste mischen"; },
-      MENU_ITEM { command=EOggViewRebuild;txt="Neue Dateien suchen"; },
-      MENU_ITEM { txt="Skins"; 
-                  cascade=r_skin_menu; },
-      MENU_ITEM { command=EOggOptions;	txt="Optionen...";
-                  flags=EEikMenuItemSeparatorAfter;},
-      MENU_ITEM { command=EOggAbout;	txt="Über OggPlay..."; },
-      MENU_ITEM { command=EEikCmdExit;	txt="Beenden"; }
-  };
-}

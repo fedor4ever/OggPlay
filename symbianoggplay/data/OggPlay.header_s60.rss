@@ -24,18 +24,16 @@ NAME OGGP
 #include <eikon.rsg>
 
 #include <uikon.hrh> // EEikMenuTitleRightAlign
-#include <qikon.rh>
-#include <qikon.hrh>
-#include <qikctl.rsg>
-#define R_OGG_DIALOG_BUTTONS2 R_EIK_BUTTONS_CANCEL_DONE
-#define R_OGG_DIALOG_BUTTONS1 R_EIK_BUTTONS_CONTINUE
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+
+#define R_OGG_DIALOG_BUTTONS2 R_AVKON_SOFTKEYS_OK_CANCEL
+#define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OPTIONS_BACK 
+
 
 #include "OggPlay.hrh"
 
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf="Oggplay"; }
-
-
-
-
 
