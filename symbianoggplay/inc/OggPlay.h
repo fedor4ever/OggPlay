@@ -19,14 +19,14 @@
 #ifndef __OggPlay_h
 #define __OggPlay_h
 
-#include "OggOs.h"  
+#include "OggOs.h"
+#include "OggPlayUid.h"
 
 #if defined(SERIES60)
 #include <aknappui.h>
 #include <aknapp.h>
 #include <eikdoc.h>
 #include <stdio.h>
-const TInt UID3=0x101FF67D;
 
 const TInt KFullScreenWidth = 176;
 const TInt KFullScreenHeight = 188;
@@ -59,11 +59,11 @@ const TInt KFullScreenHeight = 320;
 
 const TUid KOggPlayUid1 = { 0x1000007a };
 const TUid KOggPlayUid2 = { 0x100039ce };
-const TUid KOggPlayUid  = { UID3 }; //0x1000A661;
+const TUid KOggPlayUid  = { KOggPlayApplicationUidValue }; //0x1000A661;
 
-const TUid KOggPlayUidFOView = { UID3 +1 };
-const TUid KOggPlayUidFCView = { UID3 +2 };
-const TUid KOggPlayUidSettingsView = { UID3 +3 };
+const TUid KOggPlayUidFOView = { KOggPlayApplicationUidValue +1 };
+const TUid KOggPlayUidFCView = { KOggPlayApplicationUidValue +2 };
+const TUid KOggPlayUidSettingsView = { KOggPlayApplicationUidValue +3 };
 
 
 //_LIT(KAudioResourceFile, "Z:\\System\\Apps\\Audio\\audio.mbm");
@@ -248,7 +248,7 @@ class COggPlayApplication : public CQikApplication
 private: 
   // from CApaApplication
   CApaDocument* CreateDocumentL() { return new (ELeave)COggPlayDocument(*this); }
-  TUid AppDllUid() const { TUid id = { UID3 }; return id; }
+  TUid AppDllUid() const { TUid id = { KOggPlayApplicationUidValue }; return id; }
 };
 
 

@@ -3,7 +3,7 @@
 
 // Languages : EN/SC FR GE DU IT SP SW TU DA
 
-#if defined(LANGUAGE_EN) | defined(LANGUAGE_SC)
+#if defined(LANGUAGE_EN) || defined(LANGUAGE_SC)
 #include "OggPlay.en.rss"
 #elif defined(LANGUAGE_FR)
 #include "OggPlay.fr.rss"
