@@ -77,9 +77,16 @@ COggPlayback::COggPlayback( COggMsgEnv* anEnv, MPlaybackObserver* anObserver )
 , iFile( NULL )
 , iFileOpen( EFalse )
 , iEof( EFalse )
+, iDecoding( EFalse )
 , iDecoder( NULL )
 {
-};
+   for ( TInt j = 0; j < KMotoBuffers; j++ )
+   {
+      iBufferFlag[ j ] = EBufferFree;
+   }
+
+   iObserverAO = NULL;
+}
 
 // ~COggPlayback
 ////////////////////////////////////////////////////////////////
@@ -96,6 +103,7 @@ COggPlayback::~COggPlayback( void )
    if ( iStream  ) delete iStream;
    if ( iDelete  ) delete iDelete;
    iBuffer.ResetAndDestroy();
+   if ( iObserverAO ) delete iObserverAO;
    if ( iOggSampleRateConverter ) delete iOggSampleRateConverter;
 }
 
@@ -104,7 +112,9 @@ COggPlayback::~COggPlayback( void )
 
 void COggPlayback::ConstructL( void )
 {
+#ifdef _DEBUG
    RDebug::Print( _L("COggPlayback::ConstructL") );
+#endif
 
    CreateStreamApi();
 
@@ -120,6 +130,7 @@ void COggPlayback::ConstructL( void )
       CleanupStack::Pop( buffer );
    }
 
+   iObserverAO = new (ELeave) CObserverCallback( this );
    iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 }
 
@@ -190,9 +201,22 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 
 TInt COggPlayback::Open( const TDesC& aFileName )
 {
-   if ( !iStream ) CreateStreamApi();
+#ifdef _DEBUG
+   RDebug::Print( _L("Open:%S"), &aFileName );
+#endif
 
-   if ( iState == EPlaying ) Stop();
+   TBool just_created_api = EFalse;
+
+   if ( iStream && iDecoding )
+   {
+      ResetStreamApi();
+   }
+
+   if ( !iStream )
+   {
+      CreateStreamApi();
+      just_created_api = ETrue;
+   }
    
    if ( iFileOpen ) 
    {
@@ -205,7 +229,6 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    
    if ( aFileName.Length() == 0 )
    {
-      //OGGLOG.Write(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
       iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_8);
       return -100;
    }
@@ -217,11 +240,7 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    if ( ( iFile = wfopen( (wchar_t*) myname.Ptr(), L"rb" ) ) == NULL ) 
    {
       iFileOpen = EFalse;
-
-      //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
-      TRACE(COggLog::VA(_L("COggPlayback::Open(%S). Failed"), &aFileName ));
       iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
-
       return KErrOggFileNotFound;
    }
    
@@ -234,8 +253,6 @@ TInt COggPlayback::Open( const TDesC& aFileName )
       iDecoder->Close(iFile);
       fclose(iFile);
       iFileOpen = EFalse;
-      
-      //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
       iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
 
       return -102;
@@ -255,7 +272,8 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    {
       unsigned int hi(0);
       iBitRate.Set(hi,iDecoder->Bitrate());
-      iState = EOpen;
+
+      if ( !just_created_api ) iState = EOpen;
    }
    else
    {
@@ -272,7 +290,11 @@ TInt COggPlayback::Open( const TDesC& aFileName )
 
 void COggPlayback::Pause()
 {
-   if (iState == EPlaying)
+#ifdef _DEBUG
+   RDebug::Print( _L("Pause:%d"), iState );
+#endif
+
+   if (iState == EPlaying && !iPlayWhenOpened )
    {
       iState = EPaused;
    }
@@ -283,6 +305,10 @@ void COggPlayback::Pause()
 
 void COggPlayback::Play() 
 {
+#ifdef _DEBUG
+   RDebug::Print( _L("Play:%d"), iState );
+#endif
+
    TInt err;
 
    switch (iState)
@@ -300,13 +326,18 @@ void COggPlayback::Play()
 
             if ( iEof ) break;
          }
+         if ( !iDecoding )
+         {
          TRAP( err, iStream->DecodeL() );
+            if ( err == KErrNone ) iDecoding = ETrue;
+         }
       }
       break;
       
    case EClosed:
       if ( iStream )
       {
+         iState = EPlaying;
          iPlayWhenOpened = ETrue;
          break;
       }
@@ -314,7 +345,9 @@ void COggPlayback::Play()
 
    default:
       iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
+#ifdef _DEBUG
       RDebug::Print(_L("Oggplay: Tremor - State not Open"));
+#endif
       break;
    }
 }
@@ -324,7 +357,11 @@ void COggPlayback::Play()
 
 void COggPlayback::Stop()
 {
-   if (iState == EPlaying)
+#ifdef _DEBUG
+   RDebug::Print( _L("Stop:%d"), iState );
+#endif
+
+   if ( (iState == EPlaying && !iPlayWhenOpened) || iState == EPaused)
    { 
       iStream->Stop();
       iState = EClosed;
@@ -333,6 +370,11 @@ void COggPlayback::Stop()
          iDecoder->Close(iFile);
          fclose(iFile);
          iFileOpen = EFalse;
+      }
+
+      for (TInt i = 0; i < KMotoBuffers; i++)
+      {
+         iBufferFlag[i] = EBufferFree;
       }
 
       ClearComments();
@@ -479,14 +521,22 @@ const void* COggPlayback::GetDataChunk()
 
 void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
 {
-   RDebug::Print( _L("OnEvent/%d/%d"), aState, aError );
+#ifdef _DEBUG
+   RDebug::Print( _L("OnEvent:%d:%d"), aState, aError );
+#endif
 
    switch ( aState )
    {
    case EMAudioFBCallbackStateReady:
       iState = EOpen;
       iMaxVolume = iStream->GetMaxVolume();
-      if ( iPlayWhenOpened ) Play();
+      if ( iPlayWhenOpened )
+      {
+         iPlayWhenOpened = EFalse;
+         iStream->SetPCMChannel( iApiStereo );
+         iStream->SetPCMSampleRate( (TMSampleRate) iApiRate );
+         Play();
+      }
       break;
 
    case EMAudioFBCallbackStateDecodeCompleteBufferListEmpty:
@@ -520,10 +570,12 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
       break;
 
    case EMAudioFBCallbackStateDecodeCompleteStopped:
+      iDecoding = EFalse;
+
       // Occurs after stop has been called
       if ( iEof )  // Make sure this is a completed case not a user stop
       {
-         if ( iObserver ) iObserver->NotifyPlayComplete();
+         if ( iObserverAO ) iObserverAO->NotifyPlayComplete();
          iEof = EFalse;
       }
       break;
@@ -542,7 +594,7 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
          iDelete = iStream;
          iStream = NULL;
          iState  = EClosed;
-         iObserver->NotifyPlayInterrupted();
+         if ( iObserverAO ) iObserverAO->NotifyPlayInterrupted();
          break;
 
       default:
@@ -564,6 +616,10 @@ void COggPlayback::OnEvent
 , TDes8*                 aBuffer
 )
 {
+#ifdef _DEBUG
+   RDebug::Print( _L("OnEvent2:%d:%d"), aState, aError );
+#endif
+
    switch( aState )
    {
    case EMAudioFBCallbackStateDecodeBufferDecoded:
@@ -573,7 +629,7 @@ void COggPlayback::OnEvent
             if ( aBuffer == iBuffer[i] )
             {
                iBufferFlag[i] = EBufferFree;
-               if ( !iEof && (iState == EPlaying) )
+               if ( !iEof && (iState == EPlaying && !iPlayWhenOpened) )
                {
                   TRAPD( err, SendBufferL( i ) );
                }
@@ -628,7 +684,6 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer )
 #ifdef MDCT_FREQ_ANALYSER
          iLatestPlayTime += ( cnt * iTimeBetweenTwoSamples );
          iTimeWithoutFreqCalculation += cnt;
-         //TRACEF(COggLog::VA(_L("U:%d %f "), cnt, iLatestPlayTime ));
 #endif      
       }
       else
@@ -648,9 +703,15 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer )
 
 void COggPlayback::CreateStreamApi( void )
 {
-   RDebug::Print( _L("COggPlayback::CreateStreamApi") );
+#ifdef _DEBUG
+   RDebug::Print( _L("COggPlayback::CreateStreamApi:%d"), iState );
+#endif
 
-   if ( iDelete ) delete iDelete;
+   if ( iDelete )
+   {
+      delete iDelete;
+      iDelete = NULL;
+   }
    
    if ( !iStream )
    {
@@ -719,12 +780,46 @@ void COggPlayback::ParseComments(char** ptr)
    }
 }
 
+
+// ResetStreamApi
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::ResetStreamApi( void )
+{
+#ifdef _DEBUG
+   RDebug::Print( _L("ResetStreamApi:%d"), iState );
+#endif
+
+   if ( iStream )
+   {
+      delete iStream;
+      iStream = NULL;
+   }
+
+   if ( iDelete )
+   {
+      delete iDelete;
+      iDelete = NULL;
+   }
+
+   iDecoding = EFalse;
+   iState    = EClosed;
+   for (TInt i = 0; i < KMotoBuffers; i++)
+   {
+      iBufferFlag[i] = EBufferFree;
+   }
+}
+
 // SendBufferL
 ////////////////////////////////////////////////////////////////
 
 void COggPlayback::SendBufferL( TInt aIndex )
 {
-   if ( !iEof && (iState == EPlaying) )
+#ifdef _DEBUG
+   RDebug::Print( _L("SendBufferL:%d"), aIndex );
+#endif
+
+   if ( !iEof && (iState == EPlaying) && (!iPlayWhenOpened) && (iBufferFlag[aIndex] == EBufferFree) )
    {   
       iBuffer[ aIndex ]->SetLength( 0 );
       
@@ -754,10 +849,10 @@ void COggPlayback::SendBufferL( TInt aIndex )
 
 TInt COggPlayback::SetAudioCaps(TInt aChannels, TInt aRate)
 {
-   TBool stereo = ( aChannels > 1 ) ? EFalse : ETrue;
-   iStream->SetPCMChannel( stereo );
+   iApiStereo = ( aChannels > 1 ) ? EFalse : ETrue;
+   iStream->SetPCMChannel( iApiStereo );
 
-   TInt rate = 16000; // The default
+   iApiRate = 16000; // The default
    switch( aRate )
    {
    case 8000:
@@ -769,21 +864,21 @@ TInt COggPlayback::SetAudioCaps(TInt aChannels, TInt aRate)
    case 32000:
    case 44100:
    case 48000:
-      rate = aRate;
+      iApiRate = aRate;
       break;
 
    default:
       break;
    };
-   iStream->SetPCMSampleRate( (TMSampleRate) rate );
+   iStream->SetPCMSampleRate( (TMSampleRate) iApiRate );
 
    iOggSampleRateConverter->Init( this
                                 , KMotoBuffers
                                 , (TInt) (0.75 * KMotoBuffers)
                                 , aRate
-                                , rate
+                                , iApiRate
                                 , aChannels
-                                , ( stereo ) ? 2 : 1
+                                , ( iApiStereo ) ? 2 : 1
                                 );
 
    return ( KErrNone );
@@ -820,3 +915,104 @@ void COggPlayback::SetDecoderL( const TDesC& aFileName )
   }
 }
 
+////////////////////////////////////////////////////////////////
+//
+// CObserverCallback
+//
+////////////////////////////////////////////////////////////////
+
+// CObserverCallback
+////////////////////////////////////////////////////////////////
+
+COggPlayback::CObserverCallback::CObserverCallback( COggPlayback *aParent )
+: CActive( EPriorityHigh ), iParent( aParent )
+{
+   CActiveScheduler::Add(this);
+   for ( TInt i = 0; i < KMaxIndex; i++ ) iCBType[i] = ECBNone;
+}
+
+// NotifyPlayComplete
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::CObserverCallback::NotifyPlayComplete( void )
+{
+   DoIt( ECBComplete );
+}
+
+// NotifyUpdate
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::CObserverCallback::NotifyUpdate( void )
+{
+   DoIt( ECBUpdate );
+}
+
+// NotifyPlayInterrupted
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::CObserverCallback::NotifyPlayInterrupted( void )
+{
+   DoIt( ECBInterrupted );
+}
+
+// DoIt - kick off the AO
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::CObserverCallback::DoIt( TInt aCBType )
+{
+   for ( TInt i = 0; i < KMaxIndex; i++ )
+   {
+      if ( iCBType[i] == ECBNone )
+      {
+         iCBType[i] = aCBType;
+         if ( !IsActive() )
+         {
+            iStatus = KErrNone;
+            SetActive();
+            TRequestStatus *status = &iStatus;
+            User::RequestComplete( status, KErrNone );
+         }
+         break;
+      }
+   }
+}
+
+// RunL
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::CObserverCallback::RunL( void )
+{
+   if ( iParent && iParent->iObserver )
+   {
+      TInt i = 0;
+      for ( ; i < KMaxIndex; i++ )
+      {
+         switch ( iCBType[i] )
+         {
+         case ECBComplete:
+            iParent->iObserver->NotifyPlayComplete();
+            break;
+
+         case ECBUpdate:
+            iParent->iObserver->NotifyUpdate();
+            break;
+
+         case ECBInterrupted:
+            iParent->iObserver->NotifyPlayInterrupted();
+            break;
+
+         default:
+            break;
+         }
+         iCBType[i] = ECBNone;
+      }
+   }
+}
+
+// DoCancel
+////////////////////////////////////////////////////////////////
+
+void COggPlayback::CObserverCallback::DoCancel( void )
+{
+}
+   

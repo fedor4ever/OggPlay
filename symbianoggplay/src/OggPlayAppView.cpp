@@ -1639,6 +1639,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 
 #else // UIQ keyhandling
 
+#if !defined( MOTOROLA )
 
 
 
@@ -1728,6 +1729,99 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   }  
 
   return EKeyWasNotConsumed;
+
+#else  // defined MOTOROLA
+  
+   enum EOggKeys 
+   { EOggConfirm = EQuartzKeyConfirm,
+     EOggUp      = EQuartzKeyFourWayUp,
+     EOggDown    = EQuartzKeyFourWayDown,
+     EOggLeft    = EQuartzKeyFourWayLeft,
+     EOggRight   = EQuartzKeyFourWayRight,
+     EOggButton1 = EKeyApplicationA,
+     EOggButton2 = EKeyApplicationB
+   };
+  
+   TKeyResponse resp = EKeyWasNotConsumed;
+   TInt code         = aKeyEvent.iCode;
+   TInt modifiers    = aKeyEvent.iModifiers & EAllStdModifiers;
+   TInt iHotkey      = ((COggPlayAppUi *) iEikonEnv->EikAppUi())->iHotkey;
+
+   if ( aType == EEventKey )
+   {
+      if ( iHotkey && 
+           code      == keycodes[iHotkey-1].code && 
+           modifiers == keycodes[iHotkey-1].mask )
+      {
+         iApp->ActivateOggViewL();
+         resp = EKeyWasConsumed;
+      }
+      else
+      {
+         switch ( code )
+         {
+         case EOggConfirm:
+            if ( iApp->iOggPlayback->State() == CAbsPlayback::EPlaying ||
+                 iApp->iOggPlayback->State() == CAbsPlayback::EPaused )
+            {
+               iApp->HandleCommandL(EOggStop);
+            }
+            else
+            {
+               iApp->HandleCommandL(EOggPlay);
+            }
+            resp = EKeyWasConsumed;
+            break;
+
+         case EOggUp:
+            if ( iApp->iOggPlayback->State() != CAbsPlayback::EPlaying &&
+                 iApp->iOggPlayback->State() != CAbsPlayback::EPaused )
+            {
+               iApp->HandleCommandL(EOggPlay);
+            }
+            resp = EKeyWasConsumed;
+            break;
+
+         case EOggDown:
+            if ( iApp->iOggPlayback->State() == CAbsPlayback::EPlaying ||
+                 iApp->iOggPlayback->State() == CAbsPlayback::EPaused )
+            {
+               iApp->HandleCommandL(EOggStop);
+            }
+            resp = EKeyWasConsumed;
+            break;
+
+         case EOggLeft:
+            iApp->PreviousSong();
+            resp = EKeyWasConsumed;
+            break;
+
+         case EOggRight:
+            iApp->NextSong();
+            resp = EKeyWasConsumed;
+            break;
+
+         case EOggButton1:
+            if (iTitle[iMode]) iTitle[iMode]->ScrollNow();
+            if (iAlbum[iMode]) iAlbum[iMode]->ScrollNow();
+            if (iArtist[iMode]) iArtist[iMode]->ScrollNow();
+            if (iGenre[iMode]) iGenre[iMode]->ScrollNow();
+            resp = EKeyWasConsumed;
+            break;
+
+         case EOggButton2:
+            iApp->LaunchPopupMenuL(R_POPUP_MENU,TPoint(100,100),EPopupTargetTopLeft);
+            resp = EKeyWasConsumed;
+            break;
+
+         default:
+            break;
+         }
+      }
+   }
+   return ( resp );
+
+#endif
 
 #endif  // UIQ keyhandling
 }

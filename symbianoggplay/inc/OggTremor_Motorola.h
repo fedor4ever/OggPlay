@@ -72,6 +72,7 @@ private:
    void CreateStreamApi( void );
    void GetString( TBuf<256>& aBuf, const char* aStr );
    void ParseComments( char** ptr );
+   void ResetStreamApi( void );
    void SendBufferL( TInt aIndex );
    TInt SetAudioCaps( TInt aChannels, TInt aRate );
    void SetDecoderL( const TDesC& aFileName );
@@ -95,7 +96,35 @@ private:
    FILE*                    iFile;
    TBool                    iFileOpen;
    TBool                    iEof;            // true after ov_read has encounted the eof
+   TBool                    iDecoding;
    MDecoder*                iDecoder;
+
+   TInt                     iApiRate;
+   TInt                     iApiStereo;
+
+   class CObserverCallback : public CActive
+   {
+   public:
+      CObserverCallback( COggPlayback *aParent );
+
+      void NotifyPlayComplete( void );
+      void NotifyUpdate( void );
+      void NotifyPlayInterrupted( void );
+
+   private:
+      void DoIt( TInt aCBType );
+      void RunL( void );
+      void DoCancel( void );
+
+      enum { KMaxIndex = 5 };
+      enum { ECBNone, ECBComplete, ECBUpdate, ECBInterrupted };
+      TInt iCBType[KMaxIndex];
+
+      COggPlayback *iParent;
+   };
+   
+   friend CObserverCallback;
+   CObserverCallback *iObserverAO;
 
 #ifdef MDCT_FREQ_ANALYSER
    TReal  iLatestPlayTime;
