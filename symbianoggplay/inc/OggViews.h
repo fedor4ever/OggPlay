@@ -116,6 +116,25 @@ class COggUserHotkeysView : public COggViewBase
     COggPlayAppView& iOggViewCtl;
 	};
 
+#ifdef PLUGIN_SYSTEM
+class COggplayCodecSelectionSettingItemList;
+class COggPluginSettingsView : public COggViewBase
+	{
+	public:
+		COggPluginSettingsView(COggPlayAppView& aOggViewCtl);
+		~COggPluginSettingsView();
+		virtual TVwsViewId ViewId() const;
+		virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
+			const TDesC8& /*aCustomMessage*/);
+    void ViewDeactivated();
+
+  private:
+	COggplayCodecSelectionSettingItemList* iCodecSelection;
+    COggPlayAppView& iOggViewCtl;
+	};
+	
+#endif
+	
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
 class COggSplashView : public COggViewBase
 	{

@@ -265,7 +265,7 @@ COggAboutDialog::PreLayoutDynInitL()
   
   pos = iRichText->CharPosOfParagraph(len,3); // get start of 3rd para
   CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_3);
-  _LIT(KAdress, "www.geocities.com/p800tools") ;
+  _LIT(KAdress, "http://symbianoggplay.sourceforge.net") ;
   TInt pos2 = pos + buf.Find(KAdress); // Beginning of the www adress
   iRichText->InsertL(pos,buf);
   

@@ -71,68 +71,146 @@ CPluginInfo::~CPluginInfo()
 
 ////////////////////////////////////////////////////////////////
 //
-// CExtensionSupportedPluginList
+// CPluginSupportedList
 //
 ////////////////////////////////////////////////////////////////
 
-CExtensionSupportedPluginList::CExtensionSupportedPluginList(const TDesC& anExtension) : 
-iExtension(anExtension),
-iSelectedPlugin(NULL)
+CPluginSupportedList::CPluginSupportedList()
 {}
 
-void CExtensionSupportedPluginList::ConstructL()
+void CPluginSupportedList::ConstructL()
 {
-     iListPluginInfos = new(ELeave) CArrayPtrFlat<CPluginInfo>(3);
+     iPlugins = new(ELeave) CArrayPtrFlat <TExtensionList>(3);
 }
 
-CExtensionSupportedPluginList::~CExtensionSupportedPluginList()
+CPluginSupportedList::~CPluginSupportedList()
 {
-    iListPluginInfos->ResetAndDestroy();
-    delete(iListPluginInfos);
+	for (TInt i=0; i<iPlugins->Count();i++)
+	{
+	  iPlugins->At(i)->listPluginInfos->ResetAndDestroy();
+	  delete(iPlugins->At(i)->listPluginInfos);
+	}
+    iPlugins->ResetAndDestroy();
+    delete(iPlugins);
 }
 
-void CExtensionSupportedPluginList::AddPluginL(
+void CPluginSupportedList::AddPluginL(
+		   const TDesC &anExtension,
            const CMMFFormatImplementationInformation &aFormatInfo,
            const TUid aControllerUid)
 {
 
-    CPluginInfo* info = CPluginInfo::NewL(iExtension, aFormatInfo, aControllerUid);
-        
-    iListPluginInfos->AppendL(info);
-    iSelectedPlugin = info; // To be removed when UI/OggPlay takes care of selecting the plugins
-                            // at the initialization
+    CPluginInfo* info = CPluginInfo::NewL(anExtension, aFormatInfo, aControllerUid);
+    CleanupStack::PushL(info);
+    
+    AddExtension(anExtension);
+    TInt index = FindListL(anExtension);
+
+    // Add the plugin to the existing list
+    TExtensionList * list = iPlugins->At(index);
+    if (list->selectedPlugin == NULL)
+       list->selectedPlugin = info;
+    list->listPluginInfos->AppendL(info);
+    
+    CleanupStack::Pop(info);
 }
 
-const TDesC & CExtensionSupportedPluginList::GetExtension()
-{
-    return(iExtension);
-}
 
-CPluginInfo & CExtensionSupportedPluginList::GetSelectedPluginInfo(void)
-{
-    return(*iSelectedPlugin);
-}
-
-
-CArrayPtrFlat <CPluginInfo> & CExtensionSupportedPluginList::GetPluginInfoList()
-{
-    return(*iListPluginInfos);
-}
-
-void CExtensionSupportedPluginList::SelectPluginL(TUid aSelectedUid)
+void CPluginSupportedList::SelectPluginL(const TDesC& anExtension, TUid aSelectedUid)
 { 
-    TBool found = EFalse;
-    for(TInt i =0; i<iListPluginInfos->Count(); i++)
+    TInt index = FindListL(anExtension);
+    if(index <0) 
+      User::Leave(KErrNotFound);
+       
+    TExtensionList * list = iPlugins->At(index);
+       
+    if (aSelectedUid == TUid::Null())
     {
-        if (iListPluginInfos->At(i)->iControllerUid == aSelectedUid)
+    	list->selectedPlugin = NULL;
+    	return;
+    }
+    
+    TBool found = EFalse;
+    for(TInt i =0; i<list->listPluginInfos->Count(); i++)
+    {
+        if (list->listPluginInfos->At(i)->iControllerUid == aSelectedUid)
         {
-            iSelectedPlugin = iListPluginInfos->At (i) ;
+            list->selectedPlugin = list->listPluginInfos->At (i) ;
             found = ETrue;
         }
     }
     if ( !found ) User::Leave(KErrNotFound);
     
 }
+
+CDesCArrayFlat * CPluginSupportedList::SupportedExtensions()
+{
+    CDesCArrayFlat * extensions = NULL;
+    TRAPD(err,
+    {
+        extensions = new (ELeave) CDesCArrayFlat (3);
+        CleanupStack::PushL(extensions);
+        for (TInt i=0; i<iPlugins->Count(); i++)
+        {
+           extensions->AppendL(iPlugins->At(i)->extension);
+        }
+        CleanupStack::Pop();
+    }
+    ) // END OF TRAP
+    return(extensions);
+}
+
+TInt CPluginSupportedList::FindListL(const TDesC &anExtension)
+{
+    TBool found = EFalse;
+    for (TInt i=0; i<iPlugins->Count(); i++)
+    {
+        if ( anExtension.CompareF( iPlugins->At(i)->extension ) == 0)
+        {
+            return(i);
+        }
+    }
+    return(-1); // Not found
+}
+    
+CPluginInfo * CPluginSupportedList::GetSelectedPluginInfo(const TDesC &anExtension)
+{
+    TInt index = FindListL(anExtension);
+    if(index <0) 
+      return NULL;
+    TExtensionList * list = iPlugins->At(index);
+    if (list == NULL)
+      return NULL;
+    return (list->selectedPlugin);
+}
+
+CArrayPtrFlat <CPluginInfo> * CPluginSupportedList::GetPluginInfoList(const TDesC &anExtension)
+{   
+	TInt index = FindListL(anExtension);
+    if(index <0) 
+      return NULL;
+    TExtensionList * list = iPlugins->At(index);
+    if (list == NULL)
+      return NULL;
+    return (list->listPluginInfos);
+		
+}
+void CPluginSupportedList::AddExtension(const TDesC &anExtension)
+{
+	TInt index = FindListL(anExtension);
+    if(index >=0) 
+      return; // The extension already exists
+    
+    // List not found, create a new list
+    TExtensionList * list = new (ELeave) TExtensionList;	
+    CleanupStack::PushL(list);
+    list->listPluginInfos = new (ELeave) CArrayPtrFlat <CPluginInfo>(1);
+    list->extension = anExtension;
+    list->selectedPlugin = NULL;
+    iPlugins->AppendL(list);
+    CleanupStack::Pop(list);
+}
+	
 ////////////////////////////////////////////////////////////////
 //
 // COggPluginAdaptor
@@ -173,7 +251,10 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         // Find the selected plugin, corresponding to file type
         TParsePtrC p( aFileName);
         TPtrC pp (p.Ext().Mid(1));
-        TUid pluginControllerUID = GetPluginListL(pp).GetSelectedPluginInfo().iControllerUid;
+        CPluginInfo * info = GetPluginListL().GetSelectedPluginInfo(pp);
+        if (info == NULL)
+        	User::Leave(KErrNotFound);
+        TUid pluginControllerUID = info->iControllerUid;
         iPlayer->OpenFileL(aFileName, KNullUid , pluginControllerUID );
        
         // Wait for the init completed callback
@@ -259,7 +340,6 @@ void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &
   CleanupStack::PopAndDestroy(tempBuf);
   TRACEF(COggLog::VA(_L("COggPluginAdaptor::ParseMetaDataValueL !%S!"),&aDestinationBuffer));
 }
-
 
 TInt COggPluginAdaptor::Open(const TDesC& aFileName)
 {
@@ -443,9 +523,7 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
 
 void COggPluginAdaptor::ConstructL()
 {
-    
-    iExtensionSupportedPluginList = new (ELeave) CArrayPtrFlat <CExtensionSupportedPluginList> (4);
-
+	iPluginSupportedList.ConstructL();
     // iPluginInfos will be updated, if required plugin has been found
     SearchPluginsL(_L("ogg"));
     SearchPluginsL(_L("mp3"));
@@ -454,40 +532,9 @@ void COggPluginAdaptor::ConstructL()
 }
 
 
-CDesCArrayFlat * COggPluginAdaptor::SupportedExtensions()
+CPluginSupportedList & COggPluginAdaptor::GetPluginListL()
 {
-    CDesCArrayFlat * extensions = NULL;
-    TRAPD(err,
-    {
-        extensions = new (ELeave) CDesCArrayFlat (3);
-        CleanupStack::PushL(extensions);
-        for (TInt i=0; i<iExtensionSupportedPluginList->Count(); i++)
-        {
-           extensions->AppendL((*iExtensionSupportedPluginList)[i]->GetExtension());
-        }
-        CleanupStack::Pop();
-    }
-    ) // END OF TRAP
-    return(extensions);
-}
-
-CExtensionSupportedPluginList & COggPluginAdaptor::GetPluginListL(const TDesC & anExtension)
-{
-    TInt i;
-    TBool found = EFalse;
-
-    for (i=0; i<iExtensionSupportedPluginList->Count(); i++)
-    {
-        if ( anExtension.CompareF( (*iExtensionSupportedPluginList)[i]->GetExtension() ) == 0)
-        {
-            found = ETrue;
-            break;
-        }
-    }
-    if (!found)
-        User::Leave(KErrNotFound);
-
-    return *(*iExtensionSupportedPluginList)[i];
+    return iPluginSupportedList;
 }
 
 
@@ -500,8 +547,6 @@ CExtensionSupportedPluginList & COggPluginAdaptor::GetPluginListL(const TDesC & 
 COggPluginAdaptor::~COggPluginAdaptor()
 {
     delete (iPlayer);
-    iExtensionSupportedPluginList->ResetAndDestroy();
-    delete(iExtensionSupportedPluginList);
 }
 
 void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
@@ -516,10 +561,8 @@ void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
 {
-    CExtensionSupportedPluginList * newPluginList = new (ELeave) CExtensionSupportedPluginList (anExtension);
-    CleanupStack::PushL(newPluginList);
-    newPluginList->ConstructL();
-
+  
+	iPluginSupportedList.AddExtension(anExtension); // Add this extension to the selected list
     CMMFControllerPluginSelectionParameters * cSelect = CMMFControllerPluginSelectionParameters::NewLC();
     CMMFFormatSelectionParameters * fSelect = CMMFFormatSelectionParameters::NewLC();
 
@@ -567,19 +610,13 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
             ));
        
         nbFound++;
-        newPluginList->AddPluginL(
+        iPluginSupportedList.AddPluginL(anExtension,
             *formatArray[i],
             controllers[ii]->Uid() );
     }
     
     CleanupStack::PopAndDestroy(3); /* cSelect, fSelect, controllers */
 
-    if (nbFound)
-        iExtensionSupportedPluginList->AppendL(newPluginList);
-    else
-        delete newPluginList;
-
-    CleanupStack::Pop(1); /*newPluginList*/
 }
 
 #else

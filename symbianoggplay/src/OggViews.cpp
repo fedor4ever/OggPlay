@@ -30,6 +30,7 @@
 #if defined(SERIES60)
 #include "OggSettingsContainer.h"
 #include "OggUserHotkeys.h"
+#include "OggPluginSelectionDialogS60.h"
 #endif
 
 #if defined(SERIES80)
@@ -113,6 +114,9 @@ void COggFOView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
   CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(ETrue);
 #if defined(SERIES60)
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(EFalse);
+#endif
+  
+#if defined(SERIES60) || defined (SERIES80)
   ((COggPlayAppUi*) CEikonEnv::Static()->AppUi())->UpdateSoftkeys(ETrue); // we KNOW we're the right view!
 #endif
   iOggViewCtl.ChangeLayout(EFalse);
@@ -246,6 +250,65 @@ TVwsViewId COggSettingsView::ViewId() const
 {
   return TVwsViewId(KOggPlayUid, iUid);
 }
+
+
+////////////////////////////////////////////////////////////////
+//
+// class COggPluginSettingsView
+//
+////////////////////////////////////////////////////////////////
+#ifdef PLUGIN_SYSTEM
+
+
+COggPluginSettingsView::COggPluginSettingsView(COggPlayAppView& aOggViewCtl )
+: COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
+	{
+	}
+
+COggPluginSettingsView::~COggPluginSettingsView()
+	{
+    delete iCodecSelection;
+	}
+
+
+TVwsViewId COggPluginSettingsView::ViewId() const
+	{
+	return TVwsViewId(KOggPlayUid, KOggPlayUidCodecSelectionView);
+	}
+
+
+void COggPluginSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, 
+                            TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+  {
+  COggS60Utility::DisplayStatusPane( R_OGG_CODEC_SELECTION);
+
+  COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
+  iCodecSelection = new (ELeave) COggplayCodecSelectionSettingItemList(  );
+  iCodecSelection->SetMopParent(appUi);
+  iCodecSelection->ConstructL( appUi->ClientRect() );
+  appUi->AddToStackL(*this, iCodecSelection);
+
+  // Push new softkeys
+  appUi->Cba()->AddCommandSetToStackL( R_USER_SELECT_BACK_CBA );
+  // Transfert the softkey command ("select") to iCodecSelect
+  appUi->Cba()->UpdateCommandObserverL(0,*iCodecSelection); 
+ 
+  // Added in order to get the CBA drawn
+  iOggViewCtl.SetRect( appUi->ApplicationRect() );
+  }
+
+
+void COggPluginSettingsView::ViewDeactivated()
+  {
+  COggS60Utility::RemoveStatusPane();
+  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+  appUi->Cba()->RemoveCommandObserver(0); 
+  appUi->RemoveFromStack(iCodecSelection);
+  delete iCodecSelection;
+  iCodecSelection = NULL;
+
+  }
+#endif /*PLUGIN_SYSTEM*/
 ////////////////////////////////////////////////////////////////
 //
 // class COggUserHotkeysView

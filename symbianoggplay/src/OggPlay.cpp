@@ -26,6 +26,7 @@ _LIT(KTsyName,"phonetsy.tsy");
 
 #ifdef SERIES80
 #include <eikEnv.h>
+#include "OggDialogsS80.h"
 #endif
 
 #ifdef UIQ
@@ -362,10 +363,11 @@ COggPlayAppUi::ConstructL()
     RegisterViewL(*iSplashView);
 #endif /*SERIES60_SPLASH_WINDOW_SERVER*/
 #ifdef PLUGIN_SYSTEM
-    iCodecSelectionView=new(ELeave) COggSettingsView(*iAppView,KOggPlayUidCodecSelectionView);
+    iCodecSelectionView=new(ELeave) COggPluginSettingsView(*iAppView);
     RegisterViewL(*iCodecSelectionView);
 #endif
 #endif /* SERIES60 */
+    
 	SetProcessPriority();
 	SetThreadPriority();
 	
@@ -600,9 +602,9 @@ COggPlayAppUi::UpdateSoftkeys(TBool aForce)
 #endif //S60||S80
 }
 
+#ifdef SERIES80
 void
 COggPlayAppUi::SetSeries80Softkeys(TInt * aSoftkey) {
-#ifdef SERIES80
   TBuf<50> buf;
   TInt action;
   for (TInt i=0; i<4; i++)
@@ -634,11 +636,10 @@ COggPlayAppUi::SetSeries80Softkeys(TInt * aSoftkey) {
 	      action = EEikCmdCanceled;
 	      break;
   	}
-    Cba()->SetCommandL(i,action, buf); // Ca, ca marche. Tres bien.
+    Cba()->SetCommandL(i,action, buf); 
   }
-
-#endif
 }
+#endif /* SERIES80 */
 
 #if defined(SERIES60)
 void
@@ -739,9 +740,11 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 			SetHotKey();
 			iAppView->SetAlarm();
 		}
+#elif defined(SERIES80)
+        CSettingsS80Dialog *hk = new CSettingsS80Dialog(&iSettings);
+		hk->ExecuteLD(R_DIALOG_OPTIONS) ;
 #elif defined(SERIES60)
     ActivateOggViewL(KOggPlayUidSettingsView);
-//    ActivateLocalViewL(KOggPlayUidSettingsView);
 #endif
 		break;
 					  }
@@ -749,7 +752,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 #ifdef PLUGIN_SYSTEM
     case EOggCodecSelection:
         {
+#if defined(SERIES80)
+		CCodecsS80Dialog *cd = new CCodecsS80Dialog();
+		cd->ExecuteLD(R_DIALOG_CODECS);
+#else
          ActivateOggViewL(KOggPlayUidCodecSelectionView);
+#endif
 		break;
         }
 #endif
@@ -822,6 +830,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		break;
 	  }
 		
+#if defined(SERIES60) || defined(SERIES80)
 #if defined(SERIES60)
   case EAknSoftkeyBack:
   {
@@ -830,8 +839,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     break;
   }
  #endif
- 
-#if defined(SERIES60) || defined(SERIES80)
   case EUserStopPlayingCBA : {
  		HandleCommandL(EOggStop);
     break;

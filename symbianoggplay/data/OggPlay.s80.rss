@@ -222,10 +222,17 @@ RESOURCE DIALOG r_dialog_files_search {
 	id =    EOggScrollableTextDialog;
 	control = FILESEARCHCONTROL
 	{
+#ifdef PLAYLIST_SUPPORT
+	height= 120;
+#else
 	height= 90;
+#endif
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
     filesFoundStr =ogg_filescan_label2_mmf;
+#ifdef PLAYLIST_SUPPORT
+    playlistsFoundStr =ogg_filescan_label3;
+#endif
 	};
     }
   };
@@ -429,6 +436,7 @@ RESOURCE TBUF r_ogg_string_9 { buf=ogg_text_string_9; }
 RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
 RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
+RESOURCE TBUF r_ogg_string_13 { buf=ogg_text_string_13; }
 
 RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view title
 RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title

@@ -336,7 +336,7 @@ private:
   COggSplashView* iSplashView;
 #endif
 #ifdef PLUGIN_SYSTEM
-   COggSettingsView* iCodecSelectionView;
+   COggPluginSettingsView* iCodecSelectionView;
 #endif
 #endif /* SERIES60 */
   RArray<TInt> iViewHistoryStack;

@@ -136,6 +136,7 @@
 #define ogg_cba_back                 "Back"
 #define ogg_cba_clear                "Clear"
 #define ogg_cba_option               "Options"
+#define ogg_cba_modify               "Modify"
 #define ogg_cba_exit                 "Exit"
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"

@@ -501,91 +501,6 @@ RESOURCE ARRAY r_oggplay_volume_boost_item_array
     };
     }
 
-// Codec Selection (Settings) resources
-///////////////////////////////////////////////////////////////////////////////
-
-RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_codec_selection_setting_item_list
-    {
-    flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
-    title = ogg_codec_selection_settings_title;
-    initial_number = 1;
-    items =
-        {
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingOGG;
-			setting_page_resource = r_oggplay_select_ogg;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_ogg;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingMP3;
-			setting_page_resource = r_oggplay_select_mp3;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_mp3;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingAAC;
-			setting_page_resource = r_oggplay_select_aac;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_aac;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingMP4;
-			setting_page_resource = r_oggplay_select_mp4;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_mp4;
-			}
-        };
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_ogg
-    {   
-    label = ogg_codec_ogg;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_mp3
-    {   
-    label = ogg_codec_mp3;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_aac
-    {   
-    label = ogg_codec_aac;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_mp4
-    {   
-    label = ogg_codec_mp4;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_plugin_setting_item_list
-    {
-      setting_texts_resource = r_oggplay_plugin_setting_page_list;
-    }
-
-RESOURCE ARRAY r_oggplay_plugin_setting_page_list
-   {
-    items = { 
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_no_plugin_found; }
-		};
-	}
-
 
 // Codec info items
 ///////////////////////////////////////////////////////////////////////////////
@@ -604,6 +519,16 @@ RESOURCE ARRAY r_codec_info_items
 
 // CBA's (Softkey) definitions
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef PLUGIN_SYSTEM
+RESOURCE CBA r_user_select_back_cba
+{
+  buttons = { 
+    CBA_BUTTON { id = EUserModifyCBA;     txt = ogg_cba_modify; },
+    CBA_BUTTON { id = EUserHotKeyCBABack; txt = ogg_cba_back; }
+    };
+}
+#endif
 
 RESOURCE CBA r_user_empty_back_cba
 {
@@ -769,11 +694,8 @@ RESOURCE TBUF32 r_ogg_by           { buf=ogg_by; }
 
 
 
-RESOURCE TBUF r_ogg_codec_selection_settings_title { buf=ogg_codec_selection; }
 RESOURCE TBUF r_ogg_codec_selection  { buf=ogg_codec_selection; }
 RESOURCE TBUF r_ogg_no_plugin_found  { buf=ogg_no_plugin_found; }
-RESOURCE TBUF r_ogg_codec_ogg        { buf=ogg_codec_ogg; }
-RESOURCE TBUF r_ogg_codec_mp3        { buf=ogg_codec_mp3; }
-RESOURCE TBUF r_ogg_codec_aac        { buf=ogg_codec_aac; }
-RESOURCE TBUF r_ogg_codec_mp4        { buf=ogg_codec_mp4; }
+RESOURCE TBUF R_OGG_USE_NO_CODEC     { buf=ogg_hotkey_none;}
+RESOURCE TBUF r_ogg_disabled         { buf=ogg_popup_off;}
 

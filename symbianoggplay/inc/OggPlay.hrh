@@ -73,10 +73,11 @@ enum {
   EOggFileSearchControlDialog,
 
   EOggCodecSelection,  //For the Codec Settings view
-  EOggCodecSelectionSettingOGG,
-  EOggCodecSelectionSettingMP3,
-  EOggCodecSelectionSettingAAC,
-  EOggCodecSelectionSettingMP4 
+
+  EOggCodecPresentationControl,// For S80 Codec selection dialog
+  EOggCodecSelectionControl, 
+  EOggCodecName
+  
 };
 
 enum TOggplayCommandIds
@@ -112,7 +113,12 @@ enum TOggplaySettingId
 	EOggSettingWarningsId,
     EOggSettingRskIdle,
     EOggSettingRskPlay,
-    EOggSettingVolumeBoost
+    EOggSettingVolumeBoost,
+    EOggSettingCba1,
+    EOggSettingCba2,
+    EOggSettingCba3,
+    EOggSettingCba4
+    
 	};
 
 enum TOggplayMiscSeries60 // Also used for Series80
@@ -124,7 +130,8 @@ enum TOggplayMiscSeries60 // Also used for Series80
   EUserPauseCBA,
   EUserPlayCBA,
   EUserBackCBA,
-  EUserSoftkeyOptions
+  EUserSoftkeyOptions,
+  EUserModifyCBA
   };
 
 #endif      // OGGPLAY_HRH

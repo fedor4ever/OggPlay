@@ -64,25 +64,39 @@ public:
 //
 // CPluginSupportedList class
 //------------------------------------------------------
-class CExtensionSupportedPluginList: public CBase
+class CPluginSupportedList: public CBase
 {
     public:
 
-        CExtensionSupportedPluginList( const TDesC& anExtension );
+        CPluginSupportedList();
         void ConstructL();
-        ~CExtensionSupportedPluginList();
+        ~CPluginSupportedList();
         
-        void AddPluginL(const CMMFFormatImplementationInformation &aFormatInfo,
+        void AddPluginL(const TDesC &extension,
+        	const CMMFFormatImplementationInformation &aFormatInfo,
             const TUid aControllerUid);
-        const TDesC & GetExtension();
-        void SelectPluginL(TUid aUid);
-        CArrayPtrFlat <CPluginInfo> & GetPluginInfoList();
-        CPluginInfo & GetSelectedPluginInfo();
-
+            
+        void SelectPluginL(const TDesC &extension, TUid aUid);
+        CPluginInfo * GetSelectedPluginInfo(const TDesC &extension);
+        CArrayPtrFlat <CPluginInfo> * GetPluginInfoList(const TDesC &extension);
+		
+		void AddExtension(const TDesC &extension);
+		CDesCArrayFlat * SupportedExtensions();
+		
     private:
-        TBuf <10> iExtension;
-        CArrayPtrFlat <CPluginInfo>* iListPluginInfos; 
-        CPluginInfo * iSelectedPlugin; // Plugin that has been selected
+    
+        TInt FindListL(const TDesC &anExtension);
+        
+    
+        typedef struct
+        {
+        	TBuf<10> extension;
+        	CPluginInfo *selectedPlugin;
+        	CArrayPtrFlat <CPluginInfo>* listPluginInfos; 
+        } TExtensionList;
+        
+        CArrayPtrFlat <TExtensionList> * iPlugins; // Plugins that have been selected
+
 };
 
 
@@ -143,8 +157,7 @@ class CAbsPlayback : public CBase {
 #endif
 
 #ifdef PLUGIN_SYSTEM
-  virtual CDesCArrayFlat * SupportedExtensions() = 0;
-  virtual CExtensionSupportedPluginList & GetPluginListL(const TDesC & anExtension) = 0;
+  virtual CPluginSupportedList & GetPluginListL() = 0;
 #endif
    // Implemented Helpers 
    ////////////////////////////////////////////////////////////////
@@ -195,6 +208,9 @@ class CAbsPlayback : public CBase {
    TBuf<KMaxStringLength>   iGenre;
    TBuf<KMaxStringLength>   iTitle;
    TBuf<KMaxStringLength>   iTrackNumber;
+ #ifdef PLUGIN_SYSTEM
+   CPluginSupportedList iPluginSupportedList;
+ #endif
 };
 
 #endif

@@ -60,9 +60,7 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
 #endif
   virtual void SetVolumeGain(TGainType aGain);
   
-  virtual CDesCArrayFlat * SupportedExtensions();
-  virtual CExtensionSupportedPluginList & GetPluginListL(const TDesC & anExtension);
-
+   virtual CPluginSupportedList & GetPluginListL(); 
   private:
       // From MMdaObjectStateChangeObserver
   virtual void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
@@ -72,12 +70,11 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   void OpenL(const TDesC& aFileName);
   void ConstructAPlayerL(const TDesC &aFileName);
   void ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes & aDestinationBuffer);
+  
   COggMsgEnv*               iEnv;
   
   TBuf<100> iFilename;
   TInt iError;
-
-  CArrayPtrFlat <CExtensionSupportedPluginList>* iExtensionSupportedPluginList; 
 
 #ifdef MMF_AVAILABLE
   // RecorderUtility is used instead of PlayerUtility to be able to choose which plugin

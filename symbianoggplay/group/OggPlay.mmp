@@ -34,6 +34,11 @@ SOURCE OggFilesSearchDialogs.cpp
   SOURCE OggSettingsContainer.cpp
   SOURCE OggSplashContainer.cpp
   SOURCE OggUserHotkeys.cpp
+  SOURCE OggPluginSelectionDialogS60.cpp
+#endif
+
+#if defined SERIES80
+  SOURCE OggDialogsS80.cpp
 #endif
 
 #if !defined(PLUGIN_SYSTEM)
@@ -198,6 +203,10 @@ LIBRARY libvorbisidec.lib
 #ifdef MMF_AVAILABLE
 LIBRARY MediaClientAudio.lib
 LIBRARY MMFControllerFramework.lib 
+#endif
+
+#ifdef SERIES80
+LIBRARY cknctl.lib
 #endif
 
 /////////////////////////////////////////////////

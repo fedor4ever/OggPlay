@@ -447,7 +447,7 @@ TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback) :
   iOggKeyAbsoluteIndex.SetFiles(iFiles);
 
 #ifdef PLUGIN_SYSTEM
-  iSupportedExtensionList = iOggPlayback->SupportedExtensions();
+  iSupportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
 #endif
 }
 
