@@ -1683,6 +1683,7 @@ const TDesC & COggNormalPlay::GetPreviousSong()
     {
         // We are at the top of the playlist, stop here.
         SetPlaying(ENoFileSelected);
+		return(KNullDesC);
 	}
     return RetrieveFileName(iFileList[iPlayingIdx]);
 }
