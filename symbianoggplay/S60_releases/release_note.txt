@@ -16,7 +16,8 @@ This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610.
 (And any future Series60 phones that will support MMF.)
 
 The Symbian MMF Ogg Plugin example "OvController" conflicts with this SW.
-If you have installed the example, please remove it before using this release.             
+If you have installed the example, please make sure it is not choosen as the
+use codec for ogg files. (Menu->Options->Codecs)            
 
 History
 --------------------------------------------------------------------------------------------
