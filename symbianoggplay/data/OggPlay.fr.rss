@@ -120,3 +120,6 @@
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"
 #define ogg_cba_play                 "Play"
+
+#define ogg_random_on                "Ordre Aléatoire"
+#define ogg_random_off               "Ordre Normal"

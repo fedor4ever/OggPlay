@@ -118,3 +118,8 @@
 #define ogg_cba_stop                 "Stopp"
 #define ogg_cba_pause                "Paus"
 #define ogg_cba_play                 "Spela"
+
+
+// New Tags, not yet translated:
+#define ogg_random_on                "Shuffle Play"
+#define ogg_random_off               "Normal Play"

@@ -118,3 +118,8 @@ CHARACTER_SET UTF8
 #define ogg_cba_stop                 "Parada"
 #define ogg_cba_pause                "Pausa"
 #define ogg_cba_play                 "Reproducción"
+
+
+// New Tags, not yet translated:
+#define ogg_random_on                "Shuffle Play"
+#define ogg_random_off               "Normal Play"

@@ -121,3 +121,8 @@ CHARACTER_SET UTF8
 #define ogg_cba_stop                 "Dur"
 #define ogg_cba_pause                "Duraklat"
 #define ogg_cba_play                 "Çal"
+
+
+// New Tags, not yet translated:
+#define ogg_random_on                "Shuffle Play"
+#define ogg_random_off               "Normal Play"

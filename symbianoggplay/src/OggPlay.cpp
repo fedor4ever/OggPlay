@@ -1007,11 +1007,14 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 #if defined(UIQ)
         if (iRepeat) 
             aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
+      // UIQ_? for the random stuff
 #else
     // FIXIT - Should perhaps be in the options menu instead ??
     TBuf<50> buf;
     iEikonEnv->ReadResource(buf, (iRepeat) ? R_OGG_REPEAT_ON : R_OGG_REPEAT_OFF );
     aMenuPane->SetItemTextL( EOggRepeat, buf );
+    iEikonEnv->ReadResource(buf, (iRandom) ? R_OGG_RANDOM_ON : R_OGG_RANDOM_OFF );
+    aMenuPane->SetItemTextL( EOggShuffle, buf );
 #endif
 		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName));
 		aMenuPane->SetItemDimmed(EOggInfo   , (!iSongList->AnySongPlaying()) && (iAppView->GetSelectedIndex()<0 || !isSongList));

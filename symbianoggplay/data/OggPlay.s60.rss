@@ -531,7 +531,8 @@ RESOURCE MENU_PANE r_file_menu
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
       MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
                   flags=EEikMenuItemCheckBox;},
-      MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
+      MENU_ITEM { command=EOggShuffle;  txt=ogg_normal_off;
+	              flags=EEikMenuItemCheckBox; },
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
       MENU_ITEM { txt=ogg_options_cascade;
                   cascade=r_options_menu; },
@@ -585,6 +586,8 @@ RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view tit
 RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title
 RESOURCE TBUF32 r_ogg_repeat_on    { buf=ogg_repeat_on; }			// New
 RESOURCE TBUF32 r_ogg_repeat_off   { buf=ogg_repeat_off; }			// New
+RESOURCE TBUF32 r_ogg_random_on    { buf=ogg_random_on; }			// New
+RESOURCE TBUF32 r_ogg_random_off   { buf=ogg_random_off; }			// New
 RESOURCE TBUF32 r_ogg_back_dir     { buf=ogg_back_dir; }			// Oggs listbox '..' string
 RESOURCE TBUF32 r_ogg_backspace    { buf=ogg_backspace; }
 RESOURCE TBUF32 r_ogg_shift        { buf=ogg_shift; }
