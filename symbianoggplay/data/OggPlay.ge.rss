@@ -36,9 +36,13 @@
 #define ogg_stop "Stop"
 #define ogg_play "Wiedergabe"
 #define ogg_pause "Pause"
+
+#define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Suche nach Ogg Dateien"
+#define ogg_filescan_title_mmf "Looking for files" // To be translated
 #define ogg_filescan_label1 "Verzeichnisse durchsucht:"
 #define ogg_filescan_label2 "Anzahl gefundener Oggfiles:"
+#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Anzahl gefundener Playlistfiles:"
@@ -67,6 +71,7 @@
 #define ogg_text_error_25 "Diese Datei ist in Stereo erstellt, aber ihr Telefon unterstützt nur Mono"
 #define ogg_text_error_26 "Oggplay wird die Umrechnung automatisch erledigen. Es ist jedoch vorteilhafter, die Dateien in eiem von Ihrem Telefon unterstützten Format vorzunehmen. Dadurch können deutlich kleinere Dateien bei gleicher Qualität erzeugt werden."
 #define ogg_text_error_27 "Diese Meldung kann im Optionsmenü abgeschaltet werden."
+#define ogg_text_error_28 "Cannot open directory" // To be translated
 
 #define ogg_text_string_1 "Aktualisiere Liste der Dateien..."
 #define ogg_text_string_2 "Schreibe Dateidatenbank..."
@@ -124,6 +129,7 @@
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"
 #define ogg_cba_play                 "Play"
+#define ogg_cba_play_pause           "Play / Pause" // To be Translated 
 
 
 // New Tags, not yet translated:
@@ -139,11 +145,19 @@
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
 
 #define ogg_codec_info_name          "Name"
 #define ogg_codec_info_supplier      "Supplier"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
+
+
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_cba_1                    "Softkey #1" // To be Translated 
+#define ogg_cba_2                    "Softkey #2" // To be Translated 
+#define ogg_cba_3                    "Softkey #3" // To be Translated 
+#define ogg_cba_4                    "Softkey #4" // To be Translated 
+
+#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"     // To be Translated 

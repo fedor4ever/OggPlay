@@ -38,9 +38,12 @@
 #define ogg_play "Play"
 #define ogg_pause "Pause"
 
+#define ogg_filescan_main_title "Recherche fichiers" 
 #define ogg_filescan_title "Recherche fichiers ogg"
+#define ogg_filescan_title_mmf "Explore fichiers" 
 #define ogg_filescan_label1 "Répertoires visités:"
 #define ogg_filescan_label2 "Fichiers trouvés:"
+#define ogg_filescan_label2_mmf "Fichiers trouvés:" 
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Playlists trouvés:"
@@ -72,6 +75,7 @@
 #define ogg_text_error_25 "Ce ficher contient 2 canaux (stéréo). Malheureusement, votre téléphone supporte seulement un canal. "
 #define ogg_text_error_26 "Oggplay va effectuer les convertions nécessaires pour vous permettre d'écouter le fichier. Mais, si vous etes préoccupé par la taille de vos fichiers, il serait bénéfique de les réencoder en utilisant une fréquence supportée par votre téléphone. La taille de vos fichier sera réduite considérablement sans impact sur la qualité."
 #define ogg_text_error_27 "Ce message d'avertissement peut etre désactivé, a partir du menu d'options."
+#define ogg_text_error_28 "Impossible d'explorer le repertoire" 
 
 #define ogg_text_string_1 "Mise à jour de la liste de fichiers..."
 #define ogg_text_string_2 "Ecriture de la base de données des fichiers..."
@@ -129,6 +133,8 @@
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"
 #define ogg_cba_play                 "Play"
+#define ogg_cba_play_pause           "Play / Pause" 
+
 
 #define ogg_random_on                "Ordre Aléatoire"
 #define ogg_random_off               "Ordre Normal"
@@ -141,12 +147,22 @@
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "Aucun détecté"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
 
 #define ogg_codec_info_name          "Nom"
 #define ogg_codec_info_supplier      "Fournisseur"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
+
+
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   
+#define ogg_cba_1                    "Softkey #1" 
+#define ogg_cba_2                    "Softkey #2" 
+#define ogg_cba_3                    "Softkey #3"  
+#define ogg_cba_4                    "Softkey #4"
+
+#define ogg_cba_select               "Select."    
+#define ogg_cba_cancel               "Cancel."    
+
+
 

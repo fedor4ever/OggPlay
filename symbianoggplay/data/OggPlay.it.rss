@@ -36,9 +36,12 @@
 #define ogg_stop "Stop"
 #define ogg_play "Play"
 #define ogg_pause "Pause"
+#define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Looking for ogg files"
+#define ogg_filescan_title_mmf "Looking for files" // To be translate
 #define ogg_filescan_label1 "Directories scanned:"
 #define ogg_filescan_label2 "Number of .ogg found:"
+#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Number of .m3u found:"
@@ -71,6 +74,7 @@
 #define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
 #define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
 #define ogg_text_error_27 "This warning message can be disabled, from the options menu."
+#define ogg_text_error_28 "Cannot open directory" // To be translated
 
 #define ogg_text_string_1 "Aggiornamento lista file" 
 #define ogg_text_string_2 "Sto scrivendo il file nella banca dati..." 

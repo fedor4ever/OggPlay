@@ -38,9 +38,12 @@
 #define ogg_play "Spela"
 #define ogg_pause "Paus"
 
+#define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Söker efter ogg-filer"
+#define ogg_filescan_title_mmf "Looking for files" // To be translated
 #define ogg_filescan_label1 "Kataloger genomsökta:"
 #define ogg_filescan_label2 "Antal funna .ogg-filer:"
+#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Antal funna .m3u-filer:"
@@ -73,6 +76,7 @@
 #define ogg_text_error_25 "Ogg-filen innehåller två ljudspår (stereo). Din telefon kan tyvärr endast spela mono."
 #define ogg_text_error_26 "Oggplayer kommer göra den omvandling som behövs för att spela. Du bör dock överväga att koda om låten i en hastighet som stöds av din telefon om du är bekymrad över filstorleken, eftersom storleken på filen kommer att reducereas drastiskt, utan att kvaliteten på det spelade ljudet påverkas."
 #define ogg_text_error_27 "Detta varningsmeddelande kan slås av från inställningsmenyn"
+#define ogg_text_error_28 "Cannot open directory" // To be translated
 
 #define ogg_text_string_1 "Uppdaterar fillista..."
 #define ogg_text_string_2 "Skriver fildatabas..."
@@ -128,7 +132,7 @@
 #define ogg_cba_stop                 "Stopp"
 #define ogg_cba_pause                "Paus"
 #define ogg_cba_play                 "Spela"
-
+#define ogg_cba_play_pause           "Play / Pause" // To be Translated 
 
 // New Tags, not yet translated:
 #define ogg_random_on                "Shuffle Play"
@@ -143,11 +147,19 @@
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
 
 #define ogg_codec_info_name          "Name"
 #define ogg_codec_info_supplier      "Supplier"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
+
+
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_cba_1                    "Softkey #1" // To be Translated 
+#define ogg_cba_2                    "Softkey #2" // To be Translated 
+#define ogg_cba_3                    "Softkey #3" // To be Translated 
+#define ogg_cba_4                    "Softkey #4" // To be Translated 
+
+#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"     // To be Translated 

@@ -40,9 +40,12 @@
 #define ogg_play "Play"
 #define ogg_pause "Pausa"
 
+#define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Procurando Ficheiros Ogg"
+#define ogg_filescan_title_mmf "Looking for files" // To be translated
 #define ogg_filescan_label1 "Directorias pesquisadas:"
 #define ogg_filescan_label2 "Numero de .ogg encontrados:"
+#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Numero de .m3u encontrados:"
@@ -77,6 +80,8 @@
 #define ogg_text_error_25 "Ficheiro com 2 faixas de audio (stereo), infelizmente o telefone s¢ suporta um canal (mono). "
 #define ogg_text_error_26 "Oggplay vai converter o ficheiro de modo a q seja reproduzido. Se tiver preocupado com o tamanho dos ogg?s converta-os para frequencies suportadas pelo telefone. Isto ira reduzir o tamanho dos ficheiros, sem interferir com a qualidade de reproducao."
 #define ogg_text_error_27 "Esta Mensagem de Aviso pode ser desativada no menu Opcoes."
+#define ogg_text_error_28 "Cannot open directory" // To be translated
+
 #define ogg_text_string_1 "Actualizando Lista..."
 #define ogg_text_string_2 "Escrevendo Base de dados..."
 #define ogg_text_string_3 "Alarme Activo"
@@ -136,6 +141,7 @@
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pausa"
 #define ogg_cba_play                 "Play"
+#define ogg_cba_play_pause           "Play / Pause" // To be Translated 
 
 #define ogg_random_on                "Modo Aleatorio"
 #define ogg_random_off               "Modo Normal"
@@ -148,10 +154,6 @@
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "Nenhum Plugin"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
-#define ogg_codec_mp4                "MP4"
 
 #define ogg_codec_info_name          "Nome"
 #define ogg_codec_info_supplier      "Distribuidor"
@@ -159,5 +161,14 @@
 #define ogg_codec_info_UID           "UID"
 
 
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_cba_1                    "Softkey #1" // To be Translated 
+#define ogg_cba_2                    "Softkey #2" // To be Translated 
+#define ogg_cba_3                    "Softkey #3" // To be Translated 
+#define ogg_cba_4                    "Softkey #4" // To be Translated 
+
+#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"     // To be Translated 
 
 

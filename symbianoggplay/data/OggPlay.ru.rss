@@ -41,9 +41,12 @@ CHARACTER_SET UTF8
 #define ogg_play "Игра"
 #define ogg_pause "Пауза"
 
+#define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Ищем ogg файлы"
+#define ogg_filescan_title_mmf "Looking for files" // To be translated
 #define ogg_filescan_label1 "Сканировано директорий:"
 #define ogg_filescan_label2 "Количество файлов .ogg:"
+#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Количество файлов .m3u:"
@@ -78,6 +81,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_25 "Этот ogg файл содержит 2 аудио канала (стерео), к сожалению ваш телефон поддерживает только моно воспроизведение. "
 #define ogg_text_error_26 "Oggplay произведет необходимую конверсию чтобы проиграть этот ogg файл. Тем не менее, если вас волнует размер ваших ogg файлов, пожалуйста перекодируйте их в sampling rate поддерживаемый вашим телефоном. Это значительно уменьшит размер файлов без потери качества воспроизведения."
 #define ogg_text_error_27 "Это предупреждение можно отключить из меню Опции."
+#define ogg_text_error_28 "Cannot open directory" // To be translated
+
 #define ogg_text_string_1 "Обновляем список файлов..."
 #define ogg_text_string_2 "Пишем файл базы ..."
 #define ogg_text_string_3 "Alarm сработал"
@@ -137,6 +142,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_stop                 "Стоп"
 #define ogg_cba_pause                "Пауза"
 #define ogg_cba_play                 "Игра"
+#define ogg_cba_play_pause           "Play / Pause" // To be Translated 
 
 #define ogg_random_on                "Случайное проигрывание"
 #define ogg_random_off               "Обычное проигрывание"
@@ -149,15 +155,22 @@ CHARACTER_SET UTF8
 
 #define ogg_codec_selection          "Кодеки"
 #define ogg_no_plugin_found          "Плагины не найдены"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
-#define ogg_codec_mp4                "MP4"
 
 #define ogg_codec_info_name          "Название"
 #define ogg_codec_info_supplier      "Поставшик"
 #define ogg_codec_info_version       "Версия"
 #define ogg_codec_info_UID           "UID"
+
+
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_cba_1                    "Softkey #1" // To be Translated 
+#define ogg_cba_2                    "Softkey #2" // To be Translated 
+#define ogg_cba_3                    "Softkey #3" // To be Translated 
+#define ogg_cba_4                    "Softkey #4" // To be Translated 
+
+#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"     // To be Translated 
 
 
 

@@ -39,9 +39,14 @@ CHARACTER_SET UTF8
 #define ogg_stop "Dur"
 #define ogg_play "Çal"
 #define ogg_pause "Duraklat"
+
+
+#define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Ogg dosyaları taranıyor"
+#define ogg_filescan_title_mmf "Looking for files" // To be translated
 #define ogg_filescan_label1 "Taranan klasörler:"
 #define ogg_filescan_label2 "Bulunan .ogg dosyaları:"
+#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Bulunan .m3u dosyaları:"
@@ -74,6 +79,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_25 "Bu ogg dosyası çift ses kanallı (stereo) bir dosya, fakat telefonunuz ancak tek sesli (mono) çalabiliyor. "
 #define ogg_text_error_26 "Oggplay dosyanın çalınabilmesi için gerekli değişikliği yapacak. Ancak, dosya büyüklükleri fazla olursa, telefonunuzun desteklediği bir örnekleme oranında ogg dosyasını oluşturmayı tercih edebilirsiniz. Bu şekilde oluşturulan küçük dosyalar ses kalitesini de düşürmez."
 #define ogg_text_error_27 "Bu uyarı mesajı seçeneklerden kapatılabilir."
+#define ogg_text_error_28 "Cannot open directory" // To be translated
 
 #define ogg_text_string_1 "Dosya listesi yenileniyor..."
 #define ogg_text_string_2 "Dosya veritabanı yazılıyor..."
@@ -131,6 +137,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_stop                 "Dur"
 #define ogg_cba_pause                "Duraklat"
 #define ogg_cba_play                 "Çal"
+#define ogg_cba_play_pause           "Play / Pause" // To be Translated 
 
 
 // New Tags, not yet translated:
@@ -145,11 +152,19 @@ CHARACTER_SET UTF8
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
 
 #define ogg_codec_info_name          "Name"
 #define ogg_codec_info_supplier      "Supplier"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
+
+
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_cba_1                    "Softkey #1" // To be Translated 
+#define ogg_cba_2                    "Softkey #2" // To be Translated 
+#define ogg_cba_3                    "Softkey #3" // To be Translated 
+#define ogg_cba_4                    "Softkey #4" // To be Translated 
+
+#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"     // To be Translated 

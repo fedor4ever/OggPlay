@@ -27,19 +27,11 @@ NAME OGGP
 #include <eikon.rsg>
 #include <uikon.hrh> // EEikMenuTitleRightAlign
 
-#if 0
-#include <avkon.rsg>
-#include <avkon.rh>
-#include <avkon.mbg>
-#include <avkon.hrh>
-#include <avkon.loc>
-#endif
-
 #include "OggPlay.hrh"
 #include "OggDialogs.rh"
 #include "OggOs.h"
 
-#define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OPTIONS_BACK
+
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf="Oggplay"; }
 
@@ -77,6 +69,15 @@ RESOURCE MENU_BAR r_oggplay_menubar
 {
   titles= {
    MENU_TITLE { menu_pane=r_file_menu; txt="OggPlay!"; }
+   
+  };
+}
+
+RESOURCE CBA r_option_stop_cba
+{
+  buttons = {
+    CBA_BUTTON { id = EUserSoftkeyOptions; txt = ogg_cba_option; },
+    CBA_BUTTON { id = EUserStopPlayingCBA; txt = ogg_cba_stop; }
   };
 }
 
@@ -212,6 +213,7 @@ RESOURCE MENU_PANE r_skin_menu
 }
 
 RESOURCE DIALOG r_dialog_files_search {
+  title = ogg_filescan_main_title;
   buttons =  R_EIK_BUTTONS_CANCEL;
   flags   = EEikDialogFlagWait;
   items = {
@@ -223,350 +225,25 @@ RESOURCE DIALOG r_dialog_files_search {
 	height= 90;
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
-    filesFoundStr =ogg_filescan_label2;
+    filesFoundStr =ogg_filescan_label2_mmf;
 	};
     }
   };
 }
 
 
-#if 0
-// Settings resources
-///////////////////////////////////////////////////////////////////////////////
-
-RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
-    {
-    flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle |
-    title = ogg_settings_title;
-    initial_number = 1;
-    items =
-        {
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggSettingScanDir;
-			setting_page_resource = r_oggplay_scan_dir;
-			associated_resource = r_oggplay_scandir_setting_item_list;
-			name = ogg_filescanmode;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier=EOggSettingAutoPlayId;
-			setting_page_resource=r_oggplay_binary_setting_page;
-			associated_resource=r_oggplay_popup_setting_binary_texts;
-			name = ogg_autostart;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier=EOggSettingWarningsId;
-			setting_page_resource= r_oggplay_warnings_setting_page;
-			associated_resource=r_oggplay_popup_setting_binary_texts;
-			name = ogg_warnings;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggSettingRskIdle;
-			setting_page_resource = r_oggplay_rsk_idle;
-			associated_resource = r_oggplay_rsk_idle_setting_item_list;
-			name = ogg_rsk_idle;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggSettingRskPlay;
-			setting_page_resource = r_oggplay_rsk_play;
-			associated_resource = r_oggplay_rsk_play_setting_item_list;
-			name = ogg_rsk_play;
-			}
-#ifndef PLUGIN_SYSTEM
-        ,
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggSettingVolumeBoost;
-			setting_page_resource = r_oggplay_volume_boost;
-			associated_resource = r_oggplay_volume_boost_item_list;
-			name = ogg_volume_boost;
-			}
-#endif
-        };
+RESOURCE DIALOG r_dialog_codec_selection {
+  title   = ogg_codec_selection;
+ // buttons =  r_codec_selection_cba;
+  buttons =  R_EIK_BUTTONS_CONTINUE;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type =  EOggCodecSelectionControl;
+	id =    EOggScrollableTextDialog;
     }
-
-RESOURCE POPUP_SETTING_LIST r_oggplay_popup_setting_list_new_entry
-    {
-//    flags = EAknPopupSettingListFlagAllowsUserDefinedEntry;
-	flags = 0;
-    }
-
-// -------------------------------------------------------------------------
-//
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_scan_dir
-    {
-    label = ogg_filescanmode;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_scandir_setting_item_list
-    {
-    setting_texts_resource = r_oggplay_scandir_setting_page_list;
-    popped_up_texts_resource = r_oggplay_scandir_item_array;
-    }
-
-RESOURCE ARRAY r_oggplay_scandir_setting_page_list
-    {
-    items = {
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_fullscan; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_mmcdir; }
-		};
-	}
-
-RESOURCE ARRAY r_oggplay_scandir_item_array
-    {
-    items = {
-		LBUF { txt = ogg_fullscan; },
-		LBUF { txt = ogg_mmcdir; }
-	};
-    }
-
-// -------------------------------------------------------------------------
-//
-
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_binary_setting_page
-	{
-	number=4;
-	label=ogg_autostart;
-	type=EAknCtPopupSettingList;
-	}
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_popup_setting_binary_texts
-	{
-	flags=0;
-	setting_texts_resource=r_oggplay_on_off_texts;
-	popped_up_texts_resource=r_oggplay_popped_up_on_off_texts;
-	}
-
-RESOURCE ARRAY r_oggplay_on_off_texts
-	{
-	items=
-		{
-		AVKON_ENUMERATED_TEXT { value=1; text = ogg_on; },
-		AVKON_ENUMERATED_TEXT { value=0; text = ogg_off; }
-		};
-	}
-
-RESOURCE ARRAY r_oggplay_popped_up_on_off_texts
-    {
-    items =
-		{
-		LBUF { txt = ogg_popup_on; },
-		LBUF { txt = ogg_popup_off; }
-		};
-	}
-
-
-// -------------------------------------------------------------------------
-//
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_warnings_setting_page
-	{
-	number=4; //??
-	label=ogg_warnings;
-	type=EAknCtPopupSettingList;
-	}
-
-// -------------------------------------------------------------------------
-//
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_rsk_idle
-    {
-    label = ogg_rsk_idle;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_rsk_idle_setting_item_list
-    {
-    setting_texts_resource = r_oggplay_rsk_idle_setting_page_list;
-    popped_up_texts_resource = r_oggplay_rsk_idle_item_array;
-    }
-
-RESOURCE ARRAY r_oggplay_rsk_idle_setting_page_list
-    {
-    items = {
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
-		// skipped:  value = 2; text = ogg_cba_pause;
-		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_cba_play; },
-		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_cba_back; }
-		};
-	}
-
-RESOURCE ARRAY r_oggplay_rsk_idle_item_array
-    {
-    items = {
-		LBUF { txt = ogg_cba_exit; },
-		LBUF { txt = ogg_cba_stop; },
-		LBUF { txt = ogg_cba_play; },
-		LBUF { txt = ogg_cba_back; }
-		};
-    }
-
-
-// -------------------------------------------------------------------------
-//
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_rsk_play
-    {
-    label = ogg_rsk_play;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_rsk_play_setting_item_list
-    {
-    setting_texts_resource = r_oggplay_rsk_play_setting_page_list;
-    popped_up_texts_resource = r_oggplay_rsk_play_item_array;
-    }
-
-RESOURCE ARRAY r_oggplay_rsk_play_setting_page_list
-    {
-    items = {
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
-		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; },
-		// skipped: value = 3; text = ogg_cba_play;
-		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_cba_back; }
-		};
-	}
-
-RESOURCE ARRAY r_oggplay_rsk_play_item_array
-    {
-    items = {
-		LBUF { txt = ogg_cba_exit; },
-		LBUF { txt = ogg_cba_stop; },
-		LBUF { txt = ogg_cba_pause; },
-		LBUF { txt = ogg_cba_back; }
-    };
-    }
-
-// -------------------------------------------------------------------------
-//
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_volume_boost
-    {
-    label = ogg_volume_boost;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_volume_boost_item_list
-    {
-    setting_texts_resource = r_oggplay_volume_boost_setting_page_list;
-    popped_up_texts_resource = r_oggplay_volume_boost_item_array;
-    }
-
-RESOURCE ARRAY r_oggplay_volume_boost_setting_page_list
-    {
-    items = {
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_volume_boost_none; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_volume_boost_6db; },
-		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_volume_boost_12db; }
-		};
-	}
-
-RESOURCE ARRAY r_oggplay_volume_boost_item_array
-    {
-    items = {
-		LBUF { txt = ogg_volume_boost_none; },
-		LBUF { txt = ogg_volume_boost_6db; },
-		LBUF { txt = ogg_volume_boost_12db; }
-    };
-    }
-
-// Codec Selection (Settings) resources
-///////////////////////////////////////////////////////////////////////////////
-
-RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_codec_selection_setting_item_list
-    {
-    flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle |
-    title = ogg_codec_selection_settings_title;
-    initial_number = 1;
-    items =
-        {
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingOGG;
-			setting_page_resource = r_oggplay_select_ogg;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_ogg;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingMP3;
-			setting_page_resource = r_oggplay_select_mp3;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_mp3;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingAAC;
-			setting_page_resource = r_oggplay_select_aac;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_aac;
-			},
-		AVKON_SETTING_ITEM
-			{
-			identifier = EOggCodecSelectionSettingMP4;
-			setting_page_resource = r_oggplay_select_mp4;
-			associated_resource = r_oggplay_plugin_setting_item_list;
-			name = ogg_codec_mp4;
-			}
-        };
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_ogg
-    {
-    label = ogg_codec_ogg;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_mp3
-    {
-    label = ogg_codec_mp3;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_aac
-    {
-    label = ogg_codec_aac;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_oggplay_select_mp4
-    {
-    label = ogg_codec_mp4;
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
-    }
-
-
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_plugin_setting_item_list
-    {
-      setting_texts_resource = r_oggplay_plugin_setting_page_list;
-    }
-
-RESOURCE ARRAY r_oggplay_plugin_setting_page_list
-   {
-    items = {
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_no_plugin_found; }
-		};
-	}
+  };
+}
 
 
 // Codec info items
@@ -582,102 +259,20 @@ RESOURCE ARRAY r_codec_info_items
   };
 }
 
-
-
-// CBA's (Softkey) definitions
-///////////////////////////////////////////////////////////////////////////////
-
-RESOURCE CBA r_user_empty_back_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EUserHotKeyCBAEmpty; txt = ""; },
-    CBA_BUTTON { id = EUserHotKeyCBABack; txt = ogg_cba_back; }
-  };
-}
-
-RESOURCE CBA r_user_clear_back_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EUserHotKeyCBAEmpty; txt = ogg_cba_clear; },
-    CBA_BUTTON { id = EUserHotKeyCBABack; txt = ogg_cba_back; }
-  };
-}
-
-RESOURCE CBA r_option_exit_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
-    CBA_BUTTON { id = EAknSoftkeyBack; txt = ogg_cba_exit; }
-  };
-}
-#endif
-RESOURCE CBA r_option_stop_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EUserSoftkeyOptions; txt = ogg_cba_option; },
-    CBA_BUTTON { id = EUserStopPlayingCBA; txt = ogg_cba_stop; }
-  };
-}
-#if 0
-RESOURCE CBA r_option_pause_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
-    CBA_BUTTON { id = EUserPauseCBA; txt = ogg_cba_pause; }
-  };
-}
-RESOURCE CBA r_option_play_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
-    CBA_BUTTON { id = EUserPlayCBA; txt = ogg_cba_play; }
-  };
-}
-
-RESOURCE CBA r_option_back_cba
-{
-  buttons = {
-    CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
-    CBA_BUTTON { id = EUserBackCBA; txt = ogg_cba_back; }
-  };
-}
-
-// User hotkey listbox settings resources (listbox is code only)
-///////////////////////////////////////////////////////////////////////////////
-
-RESOURCE ARRAY r_user_hotkey_items
-{
-  items = {
-    LBUF { txt = ogg_hotkey_none; },
-    LBUF { txt = ogg_format_text_fast_forward; },
-	LBUF { txt = ogg_format_text_rewind; },
-	LBUF { txt = ogg_format_text_page_up; },
-	LBUF { txt = ogg_format_text_page_down; },
-	LBUF { txt = ogg_format_text_next_song; },
-	LBUF { txt = ogg_format_text_prev_song; },
-	LBUF { txt = ogg_format_text_keylock; },
-	LBUF { txt = ogg_format_text_playpause; },
-	LBUF { txt = ogg_play; },
-	LBUF { txt = ogg_pause; },
-	LBUF { txt = ogg_stop; }
-  };
-}
-
 RESOURCE MENU_PANE r_options_menu
 {
   items= {
-      MENU_ITEM { txt=ogg_skins;
-                  cascade=r_skin_menu; },
-	MENU_ITEM { command=EOggOptions;	txt=ogg_settings; },
-	MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; }
+    //MENU_ITEM { txt=ogg_skins;
+    //              cascade=r_skin_menu; },
+    MENU_ITEM { command=EOggOptions;	txt=ogg_settings; },
+//	MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; }
 #ifdef PLUGIN_SYSTEM
-	, MENU_ITEM { command=EOggCodecSelection; txt=ogg_codec_selection; }
+    MENU_ITEM { command=EOggCodecSelection; txt=ogg_codec_selection; }
 #endif
 
   };
 }
 
-#endif /* 0 */
 RESOURCE MENU_PANE r_file_menu
 {
   items= {
@@ -687,11 +282,110 @@ RESOURCE MENU_PANE r_file_menu
       MENU_ITEM { command=EOggShuffle;  txt=ogg_normal_off;
 	              flags=EEikMenuItemCheckBox; },
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
-//      MENU_ITEM { txt=ogg_options_cascade;
-//                  cascade=r_options_menu; },
+      MENU_ITEM { txt=ogg_options_cascade;
+                     cascade=r_options_menu; },
       MENU_ITEM { command=EOggAbout;	    txt=ogg_about_label; },
       MENU_ITEM { command=EEikCmdExit;	    txt=ogg_exit_label; }
   };
+}
+
+
+RESOURCE DIALOG r_dialog_options {
+  title   = ogg_settings_title;
+  buttons =  R_EIK_BUTTONS_CONTINUE;
+  flags   = EEikDialogFlagWait;
+  pages   = options_multipage_array;
+}
+
+RESOURCE ARRAY options_multipage_array
+{
+    items = {
+       PAGE { id=0;text =ogg_settings; lines = options_multipage1;},
+       PAGE { id=1;text =ogg_softkeys; lines = options_multipage2; }
+    };
+}
+
+RESOURCE ARRAY options_multipage1
+{
+   items = {
+    DLG_LINE {
+             type = EEikCtChoiceList;
+              prompt = ogg_filescanmode;
+              id = EOggSettingScanDir;
+              control = CHOICELIST {
+                array_id= r_oggplay_scandir_item_array;
+              };
+             },
+    DLG_LINE {
+              type = EEikCtCheckBox;
+              prompt = ogg_autostart;
+              id = EOggSettingAutoPlayId;
+             }
+    };
+}
+RESOURCE ARRAY options_multipage2
+{
+   items = {
+    DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_1;
+              id = EOggSettingCba1;
+              control = CHOICELIST {
+                array_id= r_oggplay_rsk_setting_page_list;
+              };
+             },
+     DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_2;
+              id = EOggSettingCba2;
+              control = CHOICELIST {
+                array_id= r_oggplay_rsk_setting_page_list;
+              };
+             },
+     DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_3;
+              id = EOggSettingCba3;
+              control = CHOICELIST {
+                array_id= r_oggplay_rsk_setting_page_list;
+              };
+             },
+     DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_4;
+              id = EOggSettingCba4;
+              control = CHOICELIST {
+                array_id= r_oggplay_rsk_setting_page_list;
+              };
+             }
+   };
+}
+
+RESOURCE ARRAY r_oggplay_scandir_item_array
+    {
+    items = {
+		LBUF { txt = ogg_fullscan; },
+		LBUF { txt = ogg_mmcdir; }
+	};
+    }
+
+	
+RESOURCE ARRAY r_oggplay_rsk_setting_page_list
+	    {
+    items = {
+		LBUF { txt = ogg_cba_exit; },
+		LBUF { txt = ogg_cba_stop; },
+		LBUF { txt = ogg_cba_play_pause; },
+		LBUF { txt = ogg_cba_back; },
+		LBUF { txt = ogg_hotkey_none; }
+		};
+	}
+	
+	
+RESOURCE DIALOG r_dialog_codecs {
+  title   = ogg_codec_selection;
+  buttons =  R_EIK_BUTTONS_CONTINUE;
+  flags   = EEikDialogFlagWait;
 }
 
 
@@ -721,6 +415,7 @@ RESOURCE TBUF r_ogg_error_24 { buf=ogg_text_error_24; }
 RESOURCE TBUF r_ogg_error_25 { buf=ogg_text_error_25; }
 RESOURCE TBUF r_ogg_error_26 { buf=ogg_text_error_26; }
 RESOURCE TBUF r_ogg_error_27 { buf=ogg_text_error_27; }
+RESOURCE TBUF r_ogg_error_28 { buf=ogg_text_error_28; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }
@@ -751,10 +446,6 @@ RESOURCE TBUF32 r_ogg_by           { buf=ogg_by; }
 RESOURCE TBUF r_ogg_codec_selection_settings_title { buf=ogg_codec_selection; }
 RESOURCE TBUF r_ogg_codec_selection  { buf=ogg_codec_selection; }
 RESOURCE TBUF r_ogg_no_plugin_found  { buf=ogg_no_plugin_found; }
-RESOURCE TBUF r_ogg_codec_ogg        { buf=ogg_codec_ogg; }
-RESOURCE TBUF r_ogg_codec_mp3        { buf=ogg_codec_mp3; }
-RESOURCE TBUF r_ogg_codec_aac        { buf=ogg_codec_aac; }
-RESOURCE TBUF r_ogg_codec_mp4        { buf=ogg_codec_mp4; }
 
 
 RESOURCE TBUF R_OGG_CBA_EXIT {buf=ogg_cba_exit;}
@@ -762,49 +453,6 @@ RESOURCE TBUF R_OGG_CBA_STOP {buf=ogg_cba_stop;}
 RESOURCE TBUF R_OGG_CBA_PAUSE {buf=ogg_cba_pause;}
 RESOURCE TBUF R_OGG_CBA_PLAY {buf=ogg_cba_play;}
 RESOURCE TBUF R_OGG_CBA_BACK {buf=ogg_cba_back;}
-
-		
-/* Stuff from the example */
-
-RESOURCE EIK_APP_INFO
-        {
-        hotkeys=r_example_hotkeys;
-        menubar=r_example_menubar;
-        }
-
-enum TExampleMenuCommands
-                {
-                EExampleItem0 = 200,
-                EExampleItem1,
-                EExampleItem2
-                };
-
-RESOURCE HOTKEYS r_example_hotkeys
-    {
-    control=
-        {
-        HOTKEY { command=EEikCmdExit; key='e'; }
-        };
-    }
-
-RESOURCE MENU_BAR r_example_menubar
-    {
-    titles=
-        {
-        MENU_TITLE { menu_pane=r_example_first_menu; txt="HelloWld"; }
-                };
-    }
-
-RESOURCE MENU_PANE r_example_first_menu
-        {
-        items=
-                {
-                MENU_ITEM { command=EExampleItem0; txt="Item 0"; },
-                MENU_ITEM { command=EExampleItem1; txt="Item 1"; },
-                MENU_ITEM { command=EExampleItem2; txt="Item 2"; },
-                MENU_ITEM { command=EEikCmdExit; txt="Close"; }
-        };
-    }
-
-
-
+RESOURCE TBUF R_OGG_USE_NO_CODEC {buf=ogg_hotkey_none;}
+RESOURCE TBUF R_OGG_CBA_SELECT {buf=ogg_cba_select;}
+RESOURCE TBUF R_OGG_DISABLED {buf=ogg_popup_off;}

@@ -40,9 +40,12 @@
 #define ogg_play "Play"
 #define ogg_pause "Pause"
 
+#define ogg_filescan_main_title "File discovery"
 #define ogg_filescan_title "Looking for ogg files"
+#define ogg_filescan_title_mmf "Looking for files"
 #define ogg_filescan_label1 "Directories scanned:"
 #define ogg_filescan_label2 "Number of .ogg found:"
+#define ogg_filescan_label2_mmf "Audio files found:" 
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Number of .m3u found:"
@@ -77,6 +80,7 @@
 #define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
 #define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
 #define ogg_text_error_27 "This warning message can be disabled, from the options menu."
+#define ogg_text_error_28 "Cannot open directory" 
 #define ogg_text_string_1 "Updating list of files..."
 #define ogg_text_string_2 "Writing file database..."
 #define ogg_text_string_3 "Alarm triggered"
@@ -136,6 +140,7 @@
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"
 #define ogg_cba_play                 "Play"
+#define ogg_cba_play_pause           "Play / Pause" // For S80
 
 #define ogg_random_on                "Shuffle Play"
 #define ogg_random_off               "Normal Play"
@@ -148,15 +153,18 @@
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"
-#define ogg_codec_ogg                "OGG"
-#define ogg_codec_mp3                "MP3"
-#define ogg_codec_aac                "AAC"
-#define ogg_codec_mp4                "MP4"
 
 #define ogg_codec_info_name          "Name"
 #define ogg_codec_info_supplier      "Supplier"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
 
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"
+#define ogg_cba_1                    "Softkey #1"
+#define ogg_cba_2                    "Softkey #2"
+#define ogg_cba_3                    "Softkey #3"
+#define ogg_cba_4                    "Softkey #4"
 
-
+#define ogg_cba_select               "Select"
+#define ogg_cba_cancel               "Cancel"
