@@ -27,11 +27,10 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
 {
     TState oldState = iState;
     iState = EClosed;
-    
     if (aFileName != iFileName)
     {
     TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
-        iPlayer->Close(); // Otherwise, will panic with -15 on HW 
+        //   iPlayer->Close(); // Otherwise, will panic with -15 on HW 
         iPlayer->OpenFileL(aFileName);
         // Wait for the init completed callback
         iError = KErrNone;
@@ -71,13 +70,10 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         iBitRate = 0;
 #endif
         iState = EOpen;
+        iTime = 5; // FIXME!
     }
     else
-    {
         iState = oldState;
-        
-    TRACEF(COggLog::VA(_L("Skipping OpenL") ));
-    }
 }
 
 TInt COggPluginAdaptor::Open(const TDesC& aFileName)
@@ -88,19 +84,23 @@ TInt COggPluginAdaptor::Open(const TDesC& aFileName)
 
 void COggPluginAdaptor::Pause()
 {
+    TRACEF(_L("COggPluginAdaptor::Pause()"));
     iPlayer->Pause();
     iState = EPaused;
 }
 void COggPluginAdaptor::Play()
 {
+    TRACEF(_L("COggPluginAdaptor::Play() In"));
     if (iState == EClosed)
         return;
     iPlayer->Play();
     iState = EPlaying;
+    TRACEF(_L("COggPluginAdaptor::Play() Out"));
 }
 
 void COggPluginAdaptor::Stop()
 {
+    TRACEF(_L("COggPluginAdaptor::Stop()"));
     iPlayer->Stop();
     iFileName = KNullDesC;
     iState = EClosed;
@@ -111,11 +111,11 @@ void COggPluginAdaptor::Stop()
 void   COggPluginAdaptor::SetVolume(TInt aVol)
 {
     
+    TRACEF(_L("COggPluginAdaptor::SetVolume()"));
     if ( (aVol <0) || (aVol >KMaxVolume) )
     {
     return;
     }
-
     TInt max = iPlayer->MaxVolume();
     TReal relative = ((TReal) aVol)/KMaxVolume;
     TInt vol = (TInt) (relative*max);
@@ -180,18 +180,13 @@ void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSe
 {
     iError = aError;    
     TRACEF(COggLog::VA(_L("MapcInitComplete %d"), aError ));
-         if (aError)
-             User::Panic(_L("ba"), aError);
+         
     CActiveScheduler::Stop(); // Gives back the control to the waiting OpenL()
-    RDebug::Print(_L("MapcInitComplete"));
 }
 
 void COggPluginAdaptor::MapcPlayComplete(TInt aError)
 {
-    RDebug::Print(_L("PlayComplete"));
     TRACEF(COggLog::VA(_L("MapcPlayComplete %d"), aError ));
-         if (aError)
-             User::Panic(_L("ba"), aError);
     iObserver->NotifyPlayComplete();
 }
 #else
@@ -229,9 +224,6 @@ COggPluginAdaptor::~COggPluginAdaptor()
 void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
 {
     iError = aError; 
-    TRACEF(COggLog::VA(_L("MapcInitComplete %d"), aError ));
-         if (aError)
-             User::Panic(_L("ba"), aError);
     RDebug::Print(_L("MapcInitComplete"));
 }
 

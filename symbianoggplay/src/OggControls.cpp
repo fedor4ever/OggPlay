@@ -1319,6 +1319,7 @@ TInt COggSlider::GetPosFromValue(TInt aValue)
 {
   if (!iKnobIcon) return 0;
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
+  if (iMaxValue <= 0) return 0;
   switch (iStyle) {
   case 0: return (TInt)((float)iw/iMaxValue*aValue); break;
   case 1: return (TInt)((float)ih/iMaxValue*aValue); break;

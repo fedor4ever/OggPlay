@@ -99,7 +99,8 @@ void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)
   // in the real world there are all kinds of coding being used!
   // so we try to find out what it is:
 
-#if 0 //FIXME
+
+#if 0 //FIXME, was initially #if !defined(__VC32__)
       // Doesn't work when used in MMF Framework. Absolutely no clue why.
   TInt i= j_code((char*)aStr,strlen(aStr));
   if (i==BIG5_CODE) {

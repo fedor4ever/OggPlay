@@ -24,7 +24,8 @@
 
 #if 1
 #include <e32svr.h>
-#define PRINT(x) RDebug::Print _L(x);
+#define PRINT(x) TRACEF(_L(x));
+//#define PRINT(x) RDebug::Print _L(x);
 #else
 #define PRINT()
 #endif
@@ -55,7 +56,7 @@ COggPlayController::~COggPlayController()
 
 void COggPlayController::ConstructL()
 {
-    PRINT("COggPlayController::ConstructL()");
+    PRINT("COggPlayController::ConstructL() In");
 
     // Construct custom command parsers
 
@@ -76,6 +77,8 @@ void COggPlayController::ConstructL()
     iState = EStateNotOpened;
     iAdvancedStreaming = new (ELeave) CAdvancedStreaming(*this);
     iAdvancedStreaming->ConstructL();
+    
+    PRINT("COggPlayController::ConstructL() Out");
 }
 
 #ifdef MMF_AVAILABLE
@@ -85,7 +88,7 @@ void COggPlayController::ConstructL()
 ///////////////////////////////////////////////////////////////////
 void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
 {
-    PRINT("COggPlayController::AddDataSourceL");
+    PRINT("COggPlayController::AddDataSourceL In");
 
     if ( iState != EStateNotOpened )
     {
@@ -103,16 +106,18 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
         User::Leave(KOggPlayPluginErrNotSupported);
     }
     OpenFileL(iFileName);
+    PRINT("COggPlayController::AddDataSourceL Out");
 }
 
 void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
 {
-    PRINT("COggPlayController::AddDataSinkL");
+    PRINT("COggPlayController::AddDataSinkL In");
     TUid uid = aDataSink.DataSinkType() ;
     if (uid != KUidMmfAudioOutput)
     {
         User::Leave(KOggPlayPluginErrNotSupported);
     }
+    PRINT("COggPlayController::AddDataSinkL Out");
 }
 
 void COggPlayController::RemoveDataSourceL(MDataSource& /*aDataSource*/)
@@ -195,7 +200,7 @@ void COggPlayController::PrimeL()
 void COggPlayController::PlayL()
 {
     
-    PRINT("COggPlayController::PlayL");
+    PRINT("COggPlayController::PlayL In");
     if (iState == EStateNotOpened)
         User::Leave(KErrNotReady);
     if (iState == EStatePaused)
@@ -211,6 +216,7 @@ void COggPlayController::PlayL()
         iState = EStatePlaying;
     iAdvancedStreaming->Play();
     }
+    PRINT("COggPlayController::PlayL Out");
     
 }
 
@@ -296,7 +302,8 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
     
     if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
         iState= EStateNotOpened;
-        PRINT("Oggplay: File open returns 0 (Error20 Error14)");
+        
+        TRACEF(COggLog::VA(_L("OpenFileL failed %S"), &myname ));
         User::Leave(KOggPlayPluginErrFileNotFound);
     };
     iState= EStateOpen;
@@ -404,6 +411,7 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
 
 void COggPlayController::NotifyPlayInterrupted(TInt aError)
 {
+   TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError));
 #ifdef MMF_AVAILABLE
     DoSendEventToClient(TMMFEvent(KMMFEventCategoryPlaybackComplete, aError));
 #else
