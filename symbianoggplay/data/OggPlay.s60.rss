@@ -227,9 +227,9 @@ RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu 
 {
-  items= {
-      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
-  };
+  // items= {
+  //   MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
+  // };
 }
 
 // Settings resources
