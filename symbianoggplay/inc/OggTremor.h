@@ -135,7 +135,7 @@ class CAbsPlayback : public CBase {
                                             iFileName.SetLength(0);        };
    virtual void   SetObserver( MPlaybackObserver* anObserver )             \
                                           { iObserver = anObserver;        };
-   virtual void   SetVolumeGain(TGainType aGain)
+   virtual void   SetVolumeGain(TGainType /*aGain*/)
                                           { /* No nothing by default */    };
                                           
  protected:
