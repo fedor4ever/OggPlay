@@ -18,6 +18,7 @@
 
 #include "OggPlayAppView.h"
 #include "OggOs.h"
+#include "OggLog.h"
 
 #include <eikclb.h>     // CEikColumnListbox
 #include <eikclbd.h>    // CEikColumnListBoxData
@@ -55,12 +56,18 @@ COggPlayAppView::~COggPlayAppView()
 void
 COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 {
+  _LIT(KS,"Starting OggPlayAppView...");
+  OGGLOG.WriteFormat(KS);
+
   iApp = aApp;
   CreateWindowL();
   SetRect(aRect);
 
   SetComponentsToInheritVisibility(EFalse);
-
+#if defined(SERIES60)
+  CEikStatusPane* sp = iEikonEnv->AppUiFactory()->StatusPane();
+  sp->MakeVisible(EFalse);
+#endif
   iOggFiles= new TOggFiles(iApp->iOggPlayback);
  
   iControls = new(ELeave)CArrayPtrFlat<CCoeControl>(10);
@@ -118,7 +125,7 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   ActivateL();
 }
 
-void
+void 
 COggPlayAppView::ReadSkin(const TFileName& aFileName)
 {
   iCanvas[0]->ClearControls();
@@ -215,62 +222,95 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
   while (!stop) {
     stop= !p.ReadToken() || p.iToken==KEndToken;
 
-    COggControl* c(0);
+    COggControl* c=NULL;
 
     if (p.iToken==_L("Clock")) { 
+      _LIT(KAL,"Adding Clock");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iClock[aCanvas]= (COggText*)c; 
       iClock[aCanvas]->SetFont(iFont); 
     }
     else if (p.iToken==_L("Alarm")) { 
+      _LIT(KAL,"Adding Alarm");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iAlarm[aCanvas]= (COggText*)c;
       iAlarm[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Title")) { 
+      _LIT(KAL,"Adding Title");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iTitle[aCanvas]= (COggText*)c;
       iTitle[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Album")) { 
+      _LIT(KAL,"Adding Album");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iAlbum[aCanvas]= (COggText*)c;
       iAlbum[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Artist")) { 
+      _LIT(KAL,"Adding Artist");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iArtist[aCanvas]= (COggText*)c;
       iArtist[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Genre")) { 
+      _LIT(KAL,"Adding Genre");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iGenre[aCanvas]= (COggText*)c;
       iGenre[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("TrackNumber")) { 
+      _LIT(KAL,"Adding TrackNumber");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iTrackNumber[aCanvas]= (COggText*)c;
       iTrackNumber[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Played")) { 
+      _LIT(KAL,"Adding Played");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggText();
       iPlayed[aCanvas]= (COggText*)c;
       iPlayed[aCanvas]->SetFont(iFont);
       iPlayed[aCanvas]->SetText(_L("00:00 / 00:00"));
     }
     else if (p.iToken==_L("StopButton")) { 
+      _LIT(KAL,"Adding StopButton");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggButton();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iStopButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PlayButton")) { 
+      _LIT(KAL,"Adding PlayButton");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggButton();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iPlayButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PauseButton")) { 
+      _LIT(KAL,"Adding PauseButton");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggButton();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
@@ -278,47 +318,74 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       iPauseButton[aCanvas]->MakeVisible(EFalse);
     }
     else if (p.iToken==_L("PlayingIcon")) { 
+      _LIT(KAL,"Adding PlayingIcon");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iPlaying[aCanvas]= (COggIcon*)c;
     }
     else if (p.iToken==_L("PausedIcon")) { 
+      _LIT(KAL,"Adding PausedIcon");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iPaused[aCanvas]= (COggIcon*)c;
       iPaused[aCanvas]->Hide();
     }
     else if (p.iToken==_L("AlarmIcon")) { 
+      _LIT(KAL,"Adding AlarmIcon");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iAlarmIcon[aCanvas]= (COggIcon*)c;
       iAlarmIcon[aCanvas]->Hide();
     }
-    else if (p.iToken==_L("RepeatIcon")) { 
+    else if (p.iToken==_L("RepeatIcon")) {
+      _LIT(KAL,"Adding RepeadIcon");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
+
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iRepeat[aCanvas]= (COggIcon*)c;
       iRepeat[aCanvas]->MakeVisible(iApp->iRepeat);
     }
     else if (p.iToken==_L("Analyzer")) {
-      c= new COggAnalyzer();
+      _LIT(KAL,"Adding Analyzer");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
+
+	  c= new COggAnalyzer();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iAnalyzer[aCanvas]= (COggAnalyzer*)c;
     }
     else if (p.iToken==_L("Position")) {
-      c= new COggSlider();
+      _LIT(KAL,"Adding Position");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
+      
+	  c= new COggSlider();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iPosition[aCanvas]= (COggSlider*)c;
     }
     else if (p.iToken==_L("Volume")) {
+      _LIT(KAL,"Adding Volume");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggSlider();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iVolume[aCanvas]= (COggSlider*)c;
     }
     else if (p.iToken==_L("ScrollBar")) {
+      _LIT(KAL,"Adding ScrollBar");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggScrollBar();
       c->SetBitmapFile(iIconFileName);
       iScrollBar[aCanvas]= (COggScrollBar*)c;
@@ -328,6 +395,9 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       }
     }
     else if (p.iToken==_L("ListBox")) {
+      _LIT(KAL,"Adding Listbox");
+	  RDebug::Print(KAL);
+	  p.Debug(KAL);
       c= new COggListBox();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
@@ -353,7 +423,14 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 void 
 COggPlayAppView::CreateDefaultSkin()
 {
-
+// 
+// SHOULD NEVER BE REACHED FOR S60, since we load our skin from file
+#if defined(SERIES60)
+	_LIT(KDefaultskin,"OggPlay: Default skin");
+	RDebug::Print(KDefaultskin);
+  OGGLOG.Write(KDefaultskin);
+	__ASSERT_DEBUG(0,User::Panic(_L("Oggplay"),987));
+#endif
   // Create and set up the flip-closed mode canvas:
   //-----------------------------------------------
 
@@ -714,7 +791,7 @@ void
 COggPlayAppView::SelectSong(TInt idx)
 {
   iSelected= idx;
-  iCurrentSong= GetFileName(idx);
+    iCurrentSong= GetFileName(idx);
   if (iListBox[iMode]) {
     iListBox[iMode]->SetCurrentItemIndex(idx);
     UpdateControls();
@@ -756,9 +833,9 @@ COggPlayAppView::ShufflePlaylist()
     pick += i;
     if (pick>=arr->Count()) pick= arr->Count()-1;
     TBuf<512> buf((*arr)[pick]);
-    arr->Delete(pick);
-    arr->InsertL(offset,buf);
-  }
+      arr->Delete(pick);
+      arr->InsertL(offset,buf);
+    }
   if (iListBox[iMode]) iListBox[iMode]->Redraw();
   SelectSong(0);
   Invalidate();
@@ -793,8 +870,13 @@ COggPlayAppView::CallBack(TAny* aPtr)
   if (self->iApp->iForeground) {
 
     if (self->iAnalyzer[self->iMode] && self->iAnalyzer[self->iMode]->Style()>0) {
+#if !defined(SERIES60)
       if (self->iApp->iOggPlayback->State()==TOggPlayback::EPlaying)
-	self->iAnalyzer[self->iMode]->RenderWaveform((short int[2][512])self->iApp->iOggPlayback->GetDataChunk());
+        self->iAnalyzer[self->iMode]->RenderWaveform((short int[2][512])self->iApp->iOggPlayback->GetDataChunk());
+#else
+      if (self->iApp->iOggPlayback->State()==TOggPlayback::EPlaying)
+        self->iAnalyzer[self->iMode]->RenderWaveform((short int*)self->iApp->iOggPlayback->GetDataChunk());
+#endif
     }
     
     if (self->iPosition[self->iMode] && self->iPosChanged<0) 
@@ -992,7 +1074,7 @@ COggPlayAppView::UpdateSongPosition()
   TInt mintot= sectot/60;
   sectot-= mintot*60;
   mbuf.Format(_L("%02d:%02d / %02d:%02d"), min, sec, mintot, sectot);
-
+#if !defined(SERIES60)
   if (IsFlipOpen()) {
     CEikMenuBar* mb = iEikonEnv->AppUiFactory()->MenuBar();
     if (!mb) return;
@@ -1005,8 +1087,11 @@ COggPlayAppView::UpdateSongPosition()
   } else {
     if (iPlayed[iMode]) iPlayed[iMode]->SetText(mbuf);
   }
-
+#else
+  if (iPlayed[iMode]) iPlayed[iMode]->SetText(mbuf);
+#endif
   SetTime(iApp->iOggPlayback->Time());
+
 }
 
 void
@@ -1125,7 +1210,25 @@ COggPlayAppView::HandleControlEventL(CCoeControl* aControl, TCoeEvent aEventType
 TKeyResponse
 COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
+#if defined(SERIES60)
+	enum EOggKeys {
+		//EOggConfirm=EKeyMenu 63557
+		EOggConfirm=EKeyDevice3
+	};
+	enum EOggScancodes {
+		EOggUp=EStdKeyUpArrow,
+		EOggDown=EStdKeyDownArrow
+	};
+#else
+	enum EOggKeys {
+		EOggConfirm=EQuartzKeyConfirm,
+	};
+	enum EOggScancodes {
+		EOggUp=EStdQuartzKeyTwoWayUp,
+		EOggDown=EStdQuartzKeyTwoWayDown
+	};
 
+#endif
   TInt code     = aKeyEvent.iCode;
   TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
   TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
@@ -1136,12 +1239,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     return EKeyWasConsumed;
   }
 
-//FIXME: This needs to be done in a more elegant way. But for now...
-#ifdef SERIES60  
-  if(code == EStdKeyMenu) {
-#else  
-  if(code == EQuartzKeyConfirm) {
-#endif
+  if(code == EOggConfirm) {
     if (IsFlipOpen()) {
       if (iApp->iOggPlayback->State()==TOggPlayback::EPlaying ||
 	  iApp->iOggPlayback->State()==TOggPlayback::EPaused) iApp->HandleCommandL(EOggStop);
@@ -1157,7 +1255,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   if (code>0) {
     if (aKeyEvent.iScanCode==EStdKeyDeviceD) { iApp->NextSong(); return EKeyWasConsumed; }           // jog dial up
     else if (aKeyEvent.iScanCode==EStdKeyDeviceE) { iApp->PreviousSong(); return EKeyWasConsumed; }  // jog dial down
-    else if (aKeyEvent.iScanCode==167) { AppToForeground(EFalse); return EKeyWasConsumed; }          // back key <-
+	else if (aKeyEvent.iScanCode==167) { AppToForeground(EFalse); return EKeyWasConsumed; }          // back key <-
     else if (aKeyEvent.iScanCode==174) { iApp->HandleCommandL(EOggStop); return EKeyWasConsumed; }   // "C" key
     else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
     else if (aKeyEvent.iScanCode==133) { // "*"
@@ -1179,32 +1277,26 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   if (iApp->iOggPlayback->State()==TOggPlayback::EPlaying || !IsFlipOpen() ) {
     // volume
     if (code==0 && aType==EEventKeyDown) { 
-//FIXME: key fix
-#if !defined(SERIES60)
-    if (aKeyEvent.iScanCode==EStdQuartzKeyTwoWayUp || aKeyEvent.iScanCode==EStdQuartzKeyTwoWayDown) {
-		if (aKeyEvent.iScanCode==EStdQuartzKeyTwoWayUp && iApp->iVolume<100) iApp->iVolume+= 5; 
-		if (aKeyEvent.iScanCode==EStdQuartzKeyTwoWayDown && iApp->iVolume>0) iApp->iVolume-= 5;
+    if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown) {
+		if (aKeyEvent.iScanCode==EOggUp && iApp->iVolume<100) iApp->iVolume+= 5; 
+		if (aKeyEvent.iScanCode==EOggDown && iApp->iVolume>0) iApp->iVolume-= 5;
 		iApp->iOggPlayback->SetVolume(iApp->iVolume);
 		UpdateVolume();
 		return EKeyWasConsumed;
       }
-#endif
     }
   } else if (iListBox[iMode]) {
     // move current index in the list box
     if (code==0 && aType==EEventKeyDown) {
       TInt idx= iListBox[iMode]->CurrentItemIndex();
-//FIXME
-#if !defined(SERIES60)
-      if (aKeyEvent.iScanCode==EStdQuartzKeyTwoWayUp && idx>0) {
+      if (aKeyEvent.iScanCode==EOggUp && idx>0) {
 	SelectSong(idx-1);
 	return EKeyWasConsumed;
       }
-      if (aKeyEvent.iScanCode==EStdQuartzKeyTwoWayDown) {
+      if (aKeyEvent.iScanCode==EOggDown) {
 	SelectSong(idx+1);
 	return EKeyWasConsumed;
       }
-#endif
     }
   }
 
@@ -1213,7 +1305,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 }
 
 void
-COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt aValue)
+COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt /*aValue*/)
 {
   if (c==iListBox[iMode]) {
     if (aEventType==1) {

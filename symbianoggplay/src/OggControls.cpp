@@ -16,12 +16,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "OggOs.h"
 #include "OggControls.h"
 
 #include <OggPlay.rsg>
 
 #include <eikenv.h>
 #include <math.h>
+#include <flogger.h>
+
 #include "int_fft.c"
 
 TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
@@ -43,16 +46,33 @@ TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
 TOggParser::TOggParser(const TFileName& aFileName)
 {
   iLine= 1;
-  iDebug= EFalse;
+  iDebug= ETrue;
+  TInt ret=ilog.Connect();
+  if(ret != KErrNone) {
+	  RDebug::Print(_L("Can't connect to file logger"));
+  }
+  _LIT(KLogFolder,"Oggplay");
+  _LIT(KLogFileName,"Parser.log");
+  ilog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
+  ilog.SetDateAndTime(EFalse,ETrue);
+  _LIT(KS,"TOggParser start");
+  ilog.WriteFormat(KS);
   if ((iFile=wfopen((wchar_t*)aFileName.Ptr(),L"rb"))==NULL) {
     iState= EFileNotFound;
+    _LIT(KS,"File not found");
+    ilog.WriteFormat(KS);
+ 
     return;
   }
+  _LIT(KSS,"Reading file %s");
+  ilog.WriteFormat(KSS,aFileName.Ptr());
+
   iState= ESuccess;
 }
 
 TOggParser::~TOggParser()
 {
+  ilog.Close();
   fclose(iFile);
 }
 
@@ -165,6 +185,8 @@ TOggParser::ReportError()
   buf.Append(_L(">"));
   //CCoeEnv::Static()->InfoWinL(_L("Error reading skin file"),buf);
   User::InfoPrint(buf);
+  ilog.WriteFormat(buf);
+
 }
 
 void TOggParser::Debug(const TDesC& txt, TInt level)
@@ -177,8 +199,10 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
   buf.Append(txt);
   buf.Append(_L(" Token:"));
   buf.Append(iToken); 
-  User::InfoPrint(buf);
-  User::After(TTimeIntervalMicroSeconds32(1000000));
+  ilog.WriteFormat(buf);
+
+//  User::InfoPrint(buf);
+//  User::After(TTimeIntervalMicroSeconds32(1000000));
 }
 
 
@@ -195,7 +219,7 @@ COggControl::COggControl() :
   iVisible(ETrue),
   iDimmed(EFalse),
   iObserver(0)
-{  
+{
 }
 
 void
@@ -292,8 +316,8 @@ COggControl::Read(TOggParser& p)
   p.ReadToken();
   if (p.iToken!=KBeginToken) {
     p.iState= TOggParser::EBeginExpected;
-    return EFalse;
-  }
+  return EFalse;
+}
   while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { ReadArguments(p); }
   if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) p.iState= TOggParser::EEndExpected;
   return p.iState==TOggParser::ESuccess;
@@ -633,7 +657,7 @@ COggButton::ReadArguments(TOggParser& p)
   else if (p.iToken==_L("DimmedIcon")) {
     p.Debug(_L("Setting dimmed icon."));
     SetDimmedIcon(p.ReadIcon(iBitmapFile));
-  }
+}
   return COggControl::ReadArguments(p);
 }
 
@@ -1106,12 +1130,19 @@ COggAnalyzer::Draw(CBitmapContext& aBitmapContext)
   }
 }
 
+#if!defined(SERIES60)
 void COggAnalyzer::RenderWaveform(short int data[2][512])
+#else
+void COggAnalyzer::RenderWaveform(short int *data)
+#endif
 {
   if (iStyle==0) return;
-
   for (int i=0; i<512; i++) {
+#if!defined(SERIES60)
     iFFTRe[i]= data[0][i];
+#else //FIXME: untested !
+    iFFTRe[i]= *data++;
+#endif
     iFFTIm[i]= 0;
   }
   window(iFFTRe, 512);
@@ -1412,8 +1443,13 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
 
       p.Set(p.Mid(len+1));
       x+= iData->ColumnWidthPixel(j);
-      x+= iData->ColumnHorizontalGap(j);
-
+	  
+	  //FIXFIXME: On S60, ColumnHorizontalGap returns 1080049501 !!?
+#if !defined(SERIES60)
+	  x+= iData->ColumnHorizontalGap(j);
+#else
+	  x+=2;
+#endif
     }
 
     y+= iLineHeight;
@@ -1465,7 +1501,7 @@ COggListBox::ControlEvent(TInt anEventType, TInt aValue)
 COggCanvas::COggCanvas() :
   if2bm(0),
   iBackground(0),
-  iControls(10),
+  iControls(1),
   iGrabbed(0),
   iFocused(0)
 {
@@ -1554,6 +1590,7 @@ void
 COggCanvas::AddControl(COggControl* c)
 {
   iControls.AppendL(c);
+  RDebug::Print(_L("Adding control - now %d"),iControls.Count());
 }
 
 void COggCanvas::ClearControls()

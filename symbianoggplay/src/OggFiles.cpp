@@ -19,7 +19,7 @@
 #include "OggFiles.h"
 
 #include "OggTremor.h"
-
+#include "OggLog.h"
 
 ////////////////////////////////////////////////////////////////
 //
@@ -131,7 +131,7 @@ TOggFile::Read(TFileText& tf, TInt aVersion)
     tf.Read(aFileName)==KErrNone &&
     tf.Read(aShortName)==KErrNone;
   if (aVersion==1 && success)
-    success|= tf.Read(aTrackNumber)==KErrNone;
+    success|= (tf.Read(aTrackNumber)==KErrNone);
   if (success) {
     SetText(iTitle, aTitle);
     SetText(iAlbum, anAlbum);
@@ -244,12 +244,17 @@ void TOggFiles::CreateDb()
   AddDirectory(_L("C:\\documents\\Media files\\other\\"));
   AddDirectory(_L("D:\\Media files\\document\\"));
   AddDirectory(_L("C:\\documents\\Media files\\document\\"));
+#if defined(SERIES60)  
+  AddDirectory(_L("C:\\Oggs\\"));
+  AddDirectory(_L("D:\\Oggs\\"));
+#endif
   CEikonEnv::Static()->BusyMsgCancel();
 }
 
 void TOggFiles::AddDirectory(const TDesC& aDir)
 {
-
+  _LIT(KS,"Scanning directory %s for oggfiles");
+  OGGLOG.WriteFormat(KS,aDir.Ptr());
   RFs session;
   User::LeaveIfError(session.Connect());
 
@@ -259,6 +264,8 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
   CDirScan* ds = CDirScan::NewL(session);
   TRAPD(err,ds->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) {
+    _LIT(KS,"Unable to setup scan directory %s for oggfiles");
+    OGGLOG.WriteFormat(KS,aDir.Ptr());
     delete ds;
     return;
   }
@@ -266,8 +273,14 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
   CDir* c=0;
   while (1==1) {
 
-    ds->NextL(c);
-    if (c==0) break;
+    TRAPD(err,ds->NextL(c));
+    if (err!=KErrNone) {
+      _LIT(KS,"Unable to scan directory %s for oggfiles");
+      OGGLOG.WriteFormat(KS,aDir.Ptr());
+      delete ds;
+      return;
+    }
+	  if (c==0) break;
 
     for (TInt i=0; i<c->Count(); i++) {
 
@@ -332,11 +345,11 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
       return EFalse;
     }
 
-    while (tf.Read(line)==KErrNone) {
+      while (tf.Read(line)==KErrNone) {
       TOggFile* o= new TOggFile();
       if (!o->Read(tf,iVersion)) break;
-      iFiles->AppendL(o);
-    }
+	iFiles->AppendL(o);
+      }
 
     in.Close();
     return ETrue;

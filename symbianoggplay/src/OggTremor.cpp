@@ -20,6 +20,7 @@
 #pragma warning( disable : 4244 ) // conversion from __int64 to unsigned int: Possible loss of data
 #endif
 
+#include "OggOs.h"
 #include "OggTremor.h"
 
 #include <barsread.h>
@@ -41,10 +42,11 @@
 #include "ivorbiscodec.h"
 #include "ivorbisfile.h"
 
+#if !defined(__VC32__)
 #include "autoconvert.c"
+#endif
 
 #include <OggPlay.rsg>
-
 ////////////////////////////////////////////////////////////////
 //
 // TAbsPlayback
@@ -186,6 +188,7 @@ TOggPlayback::TOggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
 
 TInt TOggPlayback::Open(const TDesC& aFileName)
 {
+
   if (iFileOpen) {
     ov_clear(&iVf);
     fclose(iFile);
@@ -195,6 +198,7 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
   iTime= 0;
 
   if (aFileName.Length() == 0) {
+	RDebug::Print(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_8);
     return -100;
   }
@@ -205,6 +209,7 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
 
   if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
     iFileOpen= 0;
+	RDebug::Print(_L("Oggplay: File open returns 0 (Error20 Error14)"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_14);
     return -101;
   };
@@ -214,6 +219,7 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
     ov_clear(&iVf);
     fclose(iFile);
     iFileOpen= 0;
+    RDebug::Print(_L("Oggplay: ov_open not successful (Error20 Error9)"));
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_9);
     return -102;
   }
@@ -237,7 +243,8 @@ TInt TOggPlayback::Open(const TDesC& aFileName)
     iState= EOpen;
     return KErrNone;
   }
-
+  RDebug::Print(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
+    
   ov_clear(&iVf);
   fclose(iFile);
   iFileOpen=0;
@@ -259,7 +266,7 @@ void TOggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
 
   // in the real world there are all kinds of coding being used!
   // so we try to find out what it is:
-
+#if !defined(__VC32__)
   TInt i= j_code((char*)aStr,strlen(aStr));
   if (i==BIG5_CODE) {
     CCnvCharacterSetConverter* conv= CCnvCharacterSetConverter::NewL();
@@ -273,6 +280,7 @@ void TOggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
     theRFs.Close();
     delete conv;
   }
+#endif
 }
 
 void TOggPlayback::ParseComments(char** ptr)
@@ -427,6 +435,8 @@ void TOggPlayback::Play()
 
   if (iState != EOpen) {
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_15);
+    RDebug::Print(_L("Oggplay: Tremor - State not Open"));
+
     return;
   }
 
@@ -563,7 +573,8 @@ void TOggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
   if (aError == KErrNone) SendBuffer(*iBuffer[b]); 
   else {
     // An unknown error condition. This should never ever happen.
-    TBuf<256> buf,tbuf;
+	RDebug::Print(_L("Oggplay: MaoscBufferCopied unknown error (Error18 Error16)"));
+	TBuf<256> buf,tbuf;
     iEnv->ReadResource(tbuf, R_OGG_ERROR_18);
     iEnv->ReadResource(buf, R_OGG_ERROR_16);
     buf.AppendNum(aError);

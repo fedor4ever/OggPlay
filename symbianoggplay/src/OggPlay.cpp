@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "OggOs.h"
 #include "OggPlay.h"
 
 #ifdef SERIES60
@@ -25,6 +26,7 @@ _LIT(KTsyName,"phonetsy.tsy");
 #else
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 _LIT(KTsyName,"erigsm.tsy");
+
 #endif
 #include <eiklabel.h>   // CEikLabel
 #include <gulicon.h>	// CGulIcon
@@ -36,8 +38,10 @@ _LIT(KTsyName,"erigsm.tsy");
 #include "OggTremor.h"
 #include "OggPlayAppView.h"
 #include "OggDialogs.h" 
+#include "OggLog.h"
 
 #include <OggPlay.rsg>
+
 
 //
 // EXPORTed functions
@@ -72,6 +76,7 @@ COggActive::COggActive(COggPlayAppUi* theAppUi) :
   iInterrupted(0),
   iAppUi(theAppUi)
 {
+#if !defined(SERIES60)
   iServer= new RTelServer;
   int ret= iServer->Connect();
   if (ret!=KErrNone) return;
@@ -98,11 +103,13 @@ COggActive::COggActive(COggPlayAppUi* theAppUi) :
 
   RPhone::TLineInfo LInfo;
   for (int i=0; i<1; i++) {
-    ret= iPhone->GetLineInfo(i,LInfo);
+    ret= iPhone->GetLineInfo(i,LInfo); //paw: get KErrAccessDenied here
     if (ret!=KErrNone) return;
   }
 
   iLine= new RLine;
+#endif
+
 }
 
 TInt
@@ -150,9 +157,11 @@ COggActive::CallBack(TAny* aPtr)
 void
 COggActive::IssueRequest()
 {
+#if !defined(SERIES60)
   iTimer= CPeriodic::New(CActive::EPriorityStandard);
   iCallBack= new TCallBack(COggActive::CallBack,this);
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(1000000),*iCallBack);
+#endif
 }
 
 COggActive::~COggActive()
@@ -186,9 +195,18 @@ COggPlayAppUi::ConstructL()
 {
   BaseConstructL();
 
-  iIniFileName.Copy(Application()->AppFullName());
-  iIniFileName.SetLength(iIniFileName.Length() - 3);
-  iIniFileName.Append(_L("ini"));
+  _LIT(KS,"Starting OggPlay ...");
+  OGGLOG.WriteFormat(KS);
+
+  const TFileName aAppFilename=Application()->AppFullName();
+  TParsePtrC aP(aAppFilename);
+  
+  _LIT(KiIniFileNameExtension,".ini");
+  const TUint KExtLength=4;
+  iIniFileName=HBufC::NewLC(aP.Path().Length()+aP.Name().Length()+KExtLength);
+  iIniFileName->Des().Copy(aP.Path());
+  iIniFileName->Des().Append(aP.Name());  
+  iIniFileName->Des().Append(KiIniFileNameExtension);
 
   iDbFileName.Copy(Application()->AppFullName());
   iDbFileName.SetLength(iDbFileName.Length() - 3);
@@ -214,7 +232,6 @@ COggPlayAppUi::ConstructL()
   iAnalyzerState[1]= 0;
 
   iOggPlayback= new TOggPlayback(iEikonEnv, this);
-
   ReadIniFile();
 
   iAppView=new(ELeave) COggPlayAppView;
@@ -222,6 +239,7 @@ COggPlayAppUi::ConstructL()
   HandleCommandL(EOggSkinOne+iCurrentSkin);
 
   AddToStackL(iAppView); // Receiving Keyboard Events 
+
   iAppView->InitView();
 
   SetHotKey();
@@ -248,12 +266,13 @@ COggPlayAppUi::ConstructL()
   SetThreadPriority();
 
   ActivateOggViewL();
+  CleanupStack::Pop(1); // iIniFileName
 }
 
 
 COggPlayAppUi::~COggPlayAppUi()
 {
-  RemoveFromStack(iAppView);
+  if(iAppView) RemoveFromStack(iAppView);
 
   if (iFOView) {
     DeregisterView(*iFOView);
@@ -269,7 +288,11 @@ COggPlayAppUi::~COggPlayAppUi()
   if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
   iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
 
+  delete iIniFileName;
   delete iSkins;
+  delete iOggPlayback;
+  OGGLOG.Close();
+  delete COggLog::InstanceL();
 }
 
 void COggPlayAppUi::ActivateOggViewL()
@@ -399,7 +422,7 @@ void
 COggPlayAppUi::HandleCommandL(int aCommand)
 {
   if(aCommand == EOggAbout) {
-    COggAboutDialog *d = new COggAboutDialog();
+	COggAboutDialog *d = new COggAboutDialog();
     TBuf<128> buf;
     iEikonEnv->ReadResource(buf, R_OGG_VERSION);
     d->SetVersion(buf);
@@ -503,7 +526,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EOggViewByGenre:
   case EOggViewBySubFolder:
   case EOggViewByFileName:
-  {
+        {
     TBuf<16> dummy;
     //iViewBy= aCommand-EOggViewByTitle;
     iAppView->FillView((TViews)(aCommand-EOggViewByTitle), ETop, dummy);
@@ -534,12 +557,15 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     break;
   }
 
+#if defined(SERIES60)
+  case EAknSoftkeyBack:
+#endif
   case EEikCmdExit: {
-    Exit();
-    break;
-  }
+            Exit();
+            break;
+            }
 
-  }
+        }
 }
 
 void
@@ -684,6 +710,9 @@ COggPlayAppUi::FindSkins()
   CDirScan* ds = CDirScan::NewL(session);
   TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) {
+	_LIT(KS,"Error in FindSkins-SetScanDataL");
+	OGGLOG.WriteFormat(KS);
+
     delete ds;
     return;
   }
@@ -706,11 +735,16 @@ COggPlayAppUi::FindSkins()
       p.Set(fullname,NULL,NULL);
 
       if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN")) {
-	iSkins->AppendL(p.NameAndExt());
-	if (iSkins->Count()==5) break;
+		iSkins->AppendL(p.NameAndExt());
+		_LIT(KS,"Adding skin %s");
+		OGGLOG.WriteFormat(KS,p.NameAndExt().Ptr());
+		RDebug::Print(KS,p.NameAndExt().Ptr());
+		if (iSkins->Count()==5) break;
       }
     }
   }
+	_LIT(KS,"Found %d skin(s)");
+	OGGLOG.WriteFormat(KS,iSkins->Count());
 
 }
 
@@ -718,8 +752,12 @@ void
 COggPlayAppUi::ReadIniFile()
 {
   RFile in;
-  if(in.Open(iCoeEnv->FsSession(), iIniFileName,
-	     EFileRead|EFileStreamText) != KErrNone) return;
+  if(in.Open(iCoeEnv->FsSession(), iIniFileName->Des(),
+	     EFileRead|EFileStreamText) != KErrNone) {
+	  _LIT(KS,"unable to open ini-file %s, maybe doesn't exist");
+	  OGGLOG.WriteFormat(KS,iIniFileName->Des());
+	  return;
+  }
 
   TFileText tf;
   tf.Set(in);
@@ -793,7 +831,7 @@ void
 COggPlayAppUi::WriteIniFile()
 {
   RFile out;
-  if(out.Replace(iCoeEnv->FsSession(), iIniFileName,
+  if(out.Replace(iCoeEnv->FsSession(), iIniFileName->Des(),
 		 EFileWrite|EFileStreamText) != KErrNone) return;
 
   TFileText tf;
@@ -842,6 +880,7 @@ COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 void
 COggPlayAppUi::SetProcessPriority()
 {
+#if !defined(__WINS__) //FIXFIXME
   CEikonEnv::Static()->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
   RProcess P;
   TFindProcess fp(_L("OggPlay*"));
@@ -863,11 +902,13 @@ COggPlayAppUi::SetProcessPriority()
     iEikonEnv->ReadResource(buf, R_OGG_ERROR_4);
     User::InfoPrint(buf);
   }
+#endif
 }
 
 void
 COggPlayAppUi::SetThreadPriority()
 {
+#if !defined(__WINS__) //FIXFIXME
   //CEikonEnv::Static()->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
   RThread T;
   TFindThread ft(_L("OggPlay*"));
@@ -889,6 +930,7 @@ COggPlayAppUi::SetThreadPriority()
     iEikonEnv->ReadResource(buf, R_OGG_ERROR_6);
     User::InfoPrint(buf);
   }
+#endif
 }
 
 
