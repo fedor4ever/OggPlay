@@ -148,6 +148,80 @@ COggAboutDialog::SetVersion(const TDesC& aVersion)
 #else
 
 void
+COggInfoWinDialog::PreLayoutDynInitL()
+{
+  // Create an empty rich text object
+  TCharFormat charFormat;
+  TCharFormatMask charFormatMask;
+  charFormat.iFontSpec.iTypeface.iName = _L("LatinBold12");
+  charFormatMask.SetAttrib(EAttFontTypeface); 
+  
+  iParaFormatLayer=CParaFormatLayer::NewL(); // required para format layer
+  iCharFormatLayer=CCharFormatLayer::NewL(charFormat,charFormatMask); // required char format layer
+  
+  iRichText=CRichText::NewL(iParaFormatLayer, iCharFormatLayer);
+  CParaFormat *paraFormat = CParaFormat::NewL();
+  CleanupStack::PushL(paraFormat);
+  TParaFormatMask paraFormatMask;
+  TInt len;
+  TInt pos;
+  
+  iRichText->AppendParagraphL(2);
+  paraFormatMask.SetAttrib(EAttAlignment); // interested in alignment
+  paraFormat->iHorizontalAlignment=CParaFormat::ECenterAlign; 
+
+  TBuf<128> buf;
+
+  // Now add the text
+  // Center-align
+  
+  charFormatMask.SetAttrib(EAttColor);
+  charFormat.iFontPresentation.iTextColor=TLogicalRgb( TRgb(0,0,255) ) ; //Blue
+
+  pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
+  iRichText->SetInsertCharFormatL(charFormat,charFormatMask,0);
+  iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
+  iRichText->InsertL(0,iMsg1->Des()); 
+
+  iRichText->CancelInsertCharFormat();
+  pos = iRichText->CharPosOfParagraph(len,1); // get start of 2nd para
+  iRichText->InsertL(pos,iMsg2->Des());
+  iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,2);
+
+  UpdateModelL(iRichText);
+}
+
+void
+COggInfoWinDialog::SetInfoWinL(const TDesC& msg1, const TDesC& msg2 )
+{
+    if (iMsg1)
+    {
+        delete iMsg1;
+        iMsg1= NULL;
+    }
+    if (iMsg2)
+    {
+        delete iMsg2;
+        iMsg2= NULL;
+    }
+    iMsg1= msg1.AllocL();
+    iMsg2= msg2.AllocL();
+}
+
+
+COggInfoWinDialog::~COggInfoWinDialog()
+{
+    
+    delete iRichText; // contained text object
+    delete iCharFormatLayer; // character format layer
+    delete iParaFormatLayer; // and para format layer
+    delete iMsg1;
+    delete iMsg2;
+
+}
+
+
+void
 COggAboutDialog::PreLayoutDynInitL()
 {
   // Create an empty rich text object
