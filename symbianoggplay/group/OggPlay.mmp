@@ -1,7 +1,7 @@
 
 TARGET  OggPlay.app
 TARGETTYPE  app
-UID  0x100039CE 0x0BF72853 
+UID  0x100039CE 0x101FF67D
 TARGETPATH \system\apps\Oggplay
 
 
