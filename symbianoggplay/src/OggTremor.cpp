@@ -210,12 +210,15 @@ void COggPlayback::ConstructL() {
 
   iStartAudioStreamingTimer = new (ELeave) COggTimer(
       TCallBack( StartAudioStreamingCallBack,this )   );
+  iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
+
 }
 
 COggPlayback::~COggPlayback() {
   delete  iStartAudioStreamingTimer;
   delete iStream;
   iBuffer.ResetAndDestroy();
+  delete iOggSampleRateConverter;
 }
 
 TInt COggPlayback::Open(const TDesC& aFileName)
@@ -336,22 +339,25 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   TMdaAudioDataSettings::TAudioCaps ac;
   TMdaAudioDataSettings::TAudioCaps rt;
 
+  TInt usedChannels = theChannels;
   
-  if (!(iAudioCaps & TMdaAudioDataSettings::EChannelsStereo) && (theChannels!=1) )
+  if (!(iAudioCaps & TMdaAudioDataSettings::EChannelsStereo) && (theChannels==2) )
   {
       // Only Mono is supported by this phone
       iEnv->OggErrorMsgL(R_OGG_ERROR_12,R_OGG_ERROR_23);
-      return -100;
+      usedChannels = 1; // Use 1 channel
+      //return -100;
   }
 
-  if (theChannels==1) ac= TMdaAudioDataSettings::EChannelsMono;
-  else if (theChannels==2) ac= TMdaAudioDataSettings::EChannelsStereo;
+  if (usedChannels==1) ac= TMdaAudioDataSettings::EChannelsMono;
+  else if (usedChannels==2) ac= TMdaAudioDataSettings::EChannelsStereo;
   else {
     iEnv->OggErrorMsgL(R_OGG_ERROR_12,R_OGG_ERROR_10);
     //OGGLOG.Write(_L("Illegal number of channels"));
     return -100;
   }
 
+ 
   if (theRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
   else if (theRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
   else if (theRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
@@ -364,15 +370,20 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
     return -101;
   }
 
+  TInt usedRate = theRate;
   if ( !(rt & iAudioCaps) )
    {
     // Rate not supported by this phone.
       SamplingRateSupportedMessage();
-    return -101;
+      usedRate = 16000; //That rate should be 
+                        //supported by all phones
+      rt = TMdaAudioDataSettings::ESampleRate16000Hz;
+   // return -101;
    }
 
-  TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
+  iOggSampleRateConverter->Init(this,KBufferSize,(TInt) (0.75*KBufferSize), theRate,usedRate, theChannels,usedChannels);
 
+  TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
   if (error)
   {
       TBuf<256> buf,tbuf;
@@ -590,6 +601,27 @@ void COggPlayback::Stop()
   if (iObserver) iObserver->NotifyUpdate();
 }
 
+
+TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
+{
+    if (iEof)
+        return(KErrNotReady);
+    TInt len = aBuffer.Length();
+    TInt ret=ov_read( &iVf,(char *) &(aBuffer.Ptr()[len]),
+        aBuffer.MaxLength()-len
+        ,&iCurrentSection);
+    if (ret >0)
+    {
+        aBuffer.SetLength(len + ret);
+    }
+    if (ret == 0)
+    {
+        iEof= 1;
+    }
+    return (ret);
+}
+
+
 void COggPlayback::SendBuffer(TDes8& buf)
 {
   if (iEof) return;
@@ -598,7 +630,6 @@ void COggPlayback::SendBuffer(TDes8& buf)
   long ret=0;
   buf.SetLength(KBufferSize);
 
-#ifdef FORCE_FULL_BUFFERS
   TInt cnt = 0;
   if (iFirstBuffers)  {
       buf.FillZ(4000);
@@ -606,33 +637,12 @@ void COggPlayback::SendBuffer(TDes8& buf)
       ret = 4000;
       iFirstBuffers--;
   } else {
-      cnt = 0;
-      TInt maxLength = KBufferSize ;
-      while (cnt <= 0.75 * maxLength ) {
-          ret=ov_read(&iVf,&((char *) buf.Ptr())[cnt],maxLength-cnt,&iCurrentSection);
-          if (ret <=0) 
-          {
-              break;
-          } 
-          cnt += ret;
-      }
+     ret = iOggSampleRateConverter->FillBuffer( buf );
   }
-  if (cnt == 0) {
-    iEof= 1;
-  }
+
   if (ret < 0) {
     // Error in the stream. Bad luck, we will continue anyway.
   } else {
-    buf.SetLength(cnt);
-#else
-  ret= ov_read(&iVf,(char*) buf.Ptr(), KBufferSize, &iCurrentSection);
-  if (ret == 0) {
-    iEof= 1;
-  } else if (ret < 0) {
-    // Error in the stream. Bad luck, we will continue anyway.
-  } else {
-    buf.SetLength(ret);
-#endif
     iBufCount++;
     TRAPD( err, iStream->WriteL(buf) );
     if (err!=KErrNone) {
@@ -756,7 +766,6 @@ TInt COggAudioCapabilityPoll::PollL()
     {
     iCaps=0;
     TInt oneSupportedRate = 0;
-    
     for (TInt i=0; i<7; i++)
         {
         switch(i)
@@ -843,15 +852,17 @@ TInt COggAudioCapabilityPoll::PollL()
 
 
 void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError) 
-    {
+{
+    TRACEF(COggLog::VA(_L("SampleRa:%d"), aError ));
+
     if (aError==KErrNone) 
         {
         // Mode supported.
         iCaps |= iRate;
         }
-    TRACEF(COggLog::VA(_L("SampleRa:%d"), aError ));
     CActiveScheduler::Stop();
-    }
+    
+}
 
 void COggAudioCapabilityPoll::MaoscPlayComplete(TInt /*aError*/)
     {

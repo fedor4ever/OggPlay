@@ -27,6 +27,7 @@
 #include "ivorbisfile.h"
 #include "OggMsgEnv.h"
 #include "OggHelperFcts.h"
+#include "OggRateConvert.h"
 // V0.2:  3 @ 4096   
 // V0.3:  ?
 // V0.4:  6 @ 4096*10  (not sure?!)
@@ -142,6 +143,7 @@ class CAbsPlayback : public CBase {
 //-------------------------------------------------------------
 
 class COggPlayback : public MMdaAudioOutputStreamCallback, 
+             public MOggSampleRateFillBuffer,
 		     public CAbsPlayback
 {
   
@@ -165,6 +167,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual TInt64 Time();
   virtual TInt   Volume();
   virtual const void* GetDataChunk();
+  virtual TInt GetNewSamples(TDes8 &aBuffer);
 
  private:
 
@@ -181,6 +184,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
   COggMsgEnv*               iEnv;
 
+  COggSampleRateConverter *iOggSampleRateConverter;
   // communication with symbian's media streaming framework:
   //--------------------------------------------------------
 

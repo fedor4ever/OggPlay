@@ -20,6 +20,7 @@ SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
 SOURCE OggSettingsContainer.cpp
 SOURCE OggFilesSearchDialogs.cpp
+SOURCE OggRateConvert.cpp
 IFDEF_S60( SOURCE OggUserHotkeys.cpp )
 
 RESOURCE ..\data\OggPlay.rss
