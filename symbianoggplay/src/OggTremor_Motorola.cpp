@@ -48,7 +48,7 @@
 #include "ivorbisfile.h"
 
 #if !defined(__VC32__)
-#include "autoconvert.c"
+#include "Utf8Fix.h"
 #endif
 
 #include <OggPlay.rsg>
