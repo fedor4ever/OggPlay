@@ -98,7 +98,7 @@ class CEikBitmapButton;
 // A utility class monitoring the telephone line
 //----------------------------------------------
 
-class COggActive
+class COggActive : public CBase
 {
  public:
    
