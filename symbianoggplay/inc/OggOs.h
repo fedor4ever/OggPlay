@@ -85,7 +85,7 @@ chSTR2(__LINE__) "):" #desc)
 //#define PLUGIN_SYSTEM 
 // support for legacy audio codec (-:
 // this is experimental at the moment.
-#define MP3_SUPPORT
+//#define MP3_SUPPORT
 
 #endif /* OS70S */
 

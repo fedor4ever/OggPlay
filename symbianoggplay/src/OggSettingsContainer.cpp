@@ -32,13 +32,16 @@ void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
         iListBox = new (ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_SETTING_ITEM_LIST);
     }
+#ifdef MMF_AVAILABLE 
     else if (aId ==  KOggPlayUidCodecSelectionView)
     {
         COggS60Utility::DisplayStatusPane(R_OGG_CODEC_SELECTION_SETTINGS_TITLE);
         iListBox = new (ELeave) COggplayCodecSelectionSettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_CODEC_SELECTION_SETTING_ITEM_LIST);
         
-    } else
+    } 
+#endif
+    else
     {
         User::Leave(KErrNotSupported);
     }
@@ -178,6 +181,7 @@ void  CGainSettingItem:: EditItemL ( TBool aCalledFromMenu )
      }
 
 
+#ifdef MMF_AVAILABLE 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // 
 // Plugin Selection Dialogs
@@ -437,6 +441,6 @@ TKeyResponse CCodecInfoList::OfferKeyEventL(
   return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
 
-
+#endif /* MMF_AVAILABLE */
 
 #endif /* SERIES60 */

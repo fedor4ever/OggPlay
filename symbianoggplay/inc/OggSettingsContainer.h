@@ -93,6 +93,7 @@ class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem
 
 class CCodecSelectionSettingItem;
 
+#ifdef MMF_AVAILABLE 
 class COggplayCodecSelectionSettingItemList : public CAknSettingItemList
 {
 public:
@@ -110,6 +111,7 @@ private:
                             // Setting list will be dismissed
   CCodecSelectionSettingItem * iCodecSelectionSettingItemArray[3];
 };
+
 
 class CCodecSelectionSettingItem : public CAknEnumeratedTextPopupSettingItem 
     {
@@ -154,7 +156,7 @@ private:
   CEikButtonGroupContainer *iCba;
 
   };
-
+#endif /* MMF_AVAILABLE */
 
 #endif /* SERIES60 */
 
