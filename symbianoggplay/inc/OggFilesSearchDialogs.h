@@ -43,7 +43,8 @@ class COggFilesSearchContainer : public CCoeControl
         
         COggFilesSearchContainer::COggFilesSearchContainer();
         
-        static COggFilesSearchContainer* NewL( MOggFilesSearchBackgroundProcess *aBackgroundProcess);
+        static COggFilesSearchContainer* NewL( MOggFilesSearchBackgroundProcess *aBackgroundProcess,
+            CEikButtonGroupContainer * aCba);
         
         ~COggFilesSearchContainer ();
         void UpdateControl();
@@ -65,6 +66,10 @@ class COggFilesSearchContainer : public CCoeControl
     private:
         CArrayPtrFlat <CEikLabel> * iLabels;
         COggFilesSearchAO * iAO;
+        CEikButtonGroupContainer * iCba;
+        CFbsBitmap * ifish1; 
+        CFbsBitmap * ifishmask; 
+        TInt iFishPosition;
     };
 
 class COggFilesSearchAO : public CTimer

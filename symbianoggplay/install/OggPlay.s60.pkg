@@ -5,7 +5,7 @@
 ;        make the installer generate the path (for trace logging)
 ;
 &EN
-#{"OggPlay"},(0x1000A661),0,96,0
+#{"OggPlay"},(0x1000A661),0,97,0
 (0x101F6F88),0,0,0,{"Series60ProductID"}
 "\epoc32\release\armi\udeb\libvorbisidec.dll"-"!:\system\libs\libvorbisidec.dll"
 "\epoc32\release\armi\udeb\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
@@ -15,4 +15,5 @@
 "\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60default.mbm"-"!:\system\apps\OggPlay\S60default.mbm"
 "\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60default.skn"-"!:\system\apps\OggPlay\S60default.skn"
 "..\LICENSE"-"!:\Logs\OggPlay\dummy.txt"
-"\epoc32\release\armi\udeb\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"

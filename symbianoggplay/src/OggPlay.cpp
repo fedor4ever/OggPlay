@@ -683,17 +683,8 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		HandleCommandL(EOggStop);
 		iIsRunningEmbedded = EFalse;
 #ifdef SEARCH_OGGS_FROM_ROOT
-        iAppView->iOggFiles->ClearFiles();
-#if defined(__WINS__)
-        TBool err = iAppView->iOggFiles->AddDirectoryStart(_L("C:\\"),iCoeEnv->FsSession());
-#else
-        TBool err = iAppView->iOggFiles->AddDirectoryStart(_L("E:\\"),iCoeEnv->FsSession());
-#endif
-        if ( err == KErrNone) {
-          COggFilesSearchDialog *d = new (ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
-          d->ExecuteLD(R_DIALOG_FILES_SEARCH);
-        }
-        iAppView->iOggFiles->AddDirectoryStop();
+        COggFilesSearchDialog *d = new (ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
+        iAppView->iOggFiles->SearchAllDrives(d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
 #else
 		iAppView->iOggFiles->CreateDb(iCoeEnv->FsSession());
 #endif

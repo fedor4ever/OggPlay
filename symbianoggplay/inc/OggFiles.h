@@ -24,6 +24,7 @@
 
 #include "OggPlay.h"
 #include "OggFilesSearchDialogs.h"
+#include <eikdialg.h>
 
 class COggPlayback;
 
@@ -102,9 +103,8 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
 
   static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName);
   
+  TInt SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session);
   
-  TInt AddDirectoryStart(const TDesC& aDir, RFs& session);
-  void AddDirectoryStop();
  public:
      // from MOggFilesSearchBackgroundProcess
      void  FileSearchStepL();
@@ -113,12 +113,15 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
      void  FileSearchDialogDismissedL(TInt /*aButtonId*/);
      TInt  FileSearchCycleError(TInt aError);
      void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles);
-     void ClearFiles();
 
  protected:
 
   void AddDirectory(const TDesC& aDir, RFs& session);
   void AddFile(const TDesC& aFile);
+  
+  TInt AddDirectoryStart(const TDesC& aDir, RFs& session);
+  void AddDirectoryStop();
+  void ClearFiles();
 
   CArrayPtrFlat<TOggFile>* iFiles; 
   COggPlayback*            iOggPlayback;
@@ -138,6 +141,10 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   RFs     * iDirScanSession;
   TInt      iNbDirScanned;
   TInt      iNbFilesFound;
+  TInt      iCurrentIndexInDirectory;
+  TInt      iCurrentDriveIndex;
+  CDir    * iDirectory;
+  CDesC16ArrayFlat * iPathArray;
 
 };
 

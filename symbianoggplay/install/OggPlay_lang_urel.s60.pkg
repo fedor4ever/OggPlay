@@ -3,7 +3,7 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA
 ;
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,96,0
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),0,97,0
 ;
 ; 0x101F6F88 for S60 v0.9 and later
 (0x101F6F88),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
@@ -14,7 +14,8 @@
 {"\epoc32\release\armi\urel\OggPlay.ren" "\epoc32\release\armi\urel\OggPlay.rfr" "\epoc32\release\armi\urel\OggPlay.rge" "\epoc32\release\armi\urel\OggPlay.rdu" "\epoc32\release\armi\urel\OggPlay.rit" "\epoc32\release\armi\urel\OggPlay.rsp" "\epoc32\release\armi\urel\OggPlay.rsw" "\epoc32\release\armi\urel\OggPlay.rtu" "\epoc32\release\armi\urel\OggPlay.rda" } -"!:\system\apps\OggPlay\OggPlay.rsc"
 "\epoc32\release\armi\urel\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
 "\epoc32\release\thumb\urel\RECOGG.MDL"-"E:\system\recogs\RECOGG.MDL"
-"\epoc32\release\armi\udeb\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60classic.mbm"-"!:\system\apps\OggPlay\S60classic.mbm"
 "\epoc32\release\wins\udeb\z\system\apps\OGGPLAY\S60classic.skn"-"!:\system\apps\OggPlay\S60classic.skn"
 "..\bitmaps\Skins\GreyZone\GreyZone.skn"-"!:\system\apps\oggplay\GreyZone.skn"

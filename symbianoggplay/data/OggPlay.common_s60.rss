@@ -58,7 +58,7 @@ RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
 
 
 RESOURCE DIALOG r_dialog_about {
-  buttons =  R_AVKON_SOFTKEYS_BACK; 
+  buttons =  R_AVKON_SOFTKEYS_CANCEL; 
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -89,7 +89,7 @@ RESOURCE DIALOG r_dialog_infowin {
 
 
 RESOURCE DIALOG r_dialog_files_search {
-  buttons =  R_AVKON_SOFTKEYS_BACK; 
+  buttons =  R_AVKON_SOFTKEYS_CANCEL; 
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -97,7 +97,7 @@ RESOURCE DIALOG r_dialog_files_search {
 	id =    EOggScrollableTextDialog;
 	control = FILESEARCHCONTROL
 	{
-	height= 75;
+	height= 90;
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
     filesFoundStr =ogg_filescan_label2;

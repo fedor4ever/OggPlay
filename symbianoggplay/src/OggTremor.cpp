@@ -528,22 +528,21 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 
 void COggPlayback::Play() 
 {
-  if (iState == EPaused) {
-    iState= EPlaying;
-    for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
-    return;
-  }
-
-  if (iState != EOpen) {
+    switch(iState) {
+    case EPaused:
+        break;
+    case EOpen:  
+        iEof=0;
+        iBufCount= 0;
+        iCurrentSection= 0;
+        break;
+    default:
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
     RDebug::Print(_L("Oggplay: Tremor - State not Open"));
     return;
   }
 
   iState = EPlaying;
-  iEof=0;
-  iBufCount= 0;
-  iCurrentSection= 0;
   // There is something wrong how Nokia audio streaming handles the
                    // first buffers. They are somehow swallowed.
                    // To avoid that, send few (4) almost empty buffers

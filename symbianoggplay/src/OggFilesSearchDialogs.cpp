@@ -3,6 +3,11 @@
 #include "Oggplay.hrh"
 #include <Oggplay.rsg>
 #include <coemain.h>
+#ifdef SERIES60
+#include <aknappui.h>
+#include <avkon.rsg>
+#include <eikapp.h>
+#endif
 
 
 COggFilesSearchDialog::COggFilesSearchDialog(MOggFilesSearchBackgroundProcess *aBackgroundProcess)
@@ -15,7 +20,7 @@ SEikControlInfo COggFilesSearchDialog::CreateCustomControlL(TInt aControlType)
 {
     if (aControlType == EOggFileSearchControl) 
     { 
-        iContainer = COggFilesSearchContainer::NewL(iBackgroundProcess);
+        iContainer = COggFilesSearchContainer::NewL(iBackgroundProcess,&ButtonGroupContainer());
     } 
     SEikControlInfo info = {iContainer,0,0};
     return info;
@@ -69,6 +74,19 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     CCoeEnv::Static()->ScreenDevice()->ReleaseFont(fontLatinPlain);
     CCoeEnv::Static()->ScreenDevice()->ReleaseFont(fontLatinBold12);
 
+     //Load bitmaps
+
+    TFileName fileName;
+    fileName.Copy(CEikonEnv::Static()->EikAppUi()->Application()->AppFullName());
+    // Parse and strip the application name
+    TParsePtr parse(fileName);
+    // Copy back only drive and path
+    fileName.Copy(parse.DriveAndPath());
+    fileName.Append(_L("fish.mbm"));
+    ifish1 = iEikonEnv->CreateBitmapL(fileName, 0) ; 
+    ifishmask = iEikonEnv->CreateBitmapL(fileName, 1) ;
+    iFishPosition = 40;
+
     ActivateL();	
     iAO = new (ELeave) COggFilesSearchAO(this);
     iAO->StartL();
@@ -76,10 +94,12 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
 
 
 COggFilesSearchContainer* COggFilesSearchContainer::NewL(
-                                      MOggFilesSearchBackgroundProcess *aBackgroundProcess  )
+                                      MOggFilesSearchBackgroundProcess *aBackgroundProcess ,
+                                      CEikButtonGroupContainer * aCba)
     {
     COggFilesSearchContainer* self = new (ELeave) COggFilesSearchContainer;
     self->iBackgroundProcess = aBackgroundProcess;
+    self->iCba = aCba;
     return self;
     }
 
@@ -101,6 +121,10 @@ void COggFilesSearchContainer::Draw(const TRect& aRect) const
     gc.SetBrushColor(KRgbWhite);
     gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
     gc.DrawRect(aRect);
+
+    gc.BitBltMasked(TPoint(iFishPosition,60),ifish1,
+        TRect(0,0, 42, 28), ifishmask, ETrue);
+
     }
 
 
@@ -108,6 +132,8 @@ COggFilesSearchContainer::~COggFilesSearchContainer ()
     {
     iLabels->ResetAndDestroy();
     delete iLabels;
+    delete ifish1;
+    delete ifishmask;
     delete iAO;
     }
 
@@ -128,8 +154,17 @@ void COggFilesSearchContainer::UpdateControl()
      TBuf<10> number2;
     number2.AppendNum(aNbFiles);
     (*iLabels)[4]->SetTextL(number2); 
+#ifdef SERIES60
+    if (  iBackgroundProcess->FileSearchIsProcessDone()) {
+        iCba->SetCommandSetL(  R_AVKON_SOFTKEYS_OK_EMPTY );
+        iCba->DrawNow();
+    }
+#endif
 
     DrawNow();
+    iFishPosition = iFishPosition - 5;
+    if (iFishPosition <5)
+        iFishPosition = 100;
 }
 
 

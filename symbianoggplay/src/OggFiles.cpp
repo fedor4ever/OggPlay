@@ -295,7 +295,18 @@ TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
       return KErrNotFound;
     }
  
+    if (iPathArray == NULL)
+    {
+        iPathArray = new (ELeave) CDesC16ArrayFlat (3);
     iDs = CDirScan::NewL(session);
+        iDirScanFinished = EFalse;
+        iDirScanSession = &session;
+        iDirScanDir = const_cast < TDesC *> (&aDir);
+        iNbDirScanned = 0;
+        iNbFilesFound = 0;
+        iCurrentIndexInDirectory = 0;
+        iCurrentDriveIndex = 0;
+        iDirectory=NULL;
     TRAPD(err,iDs->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) 
     {
@@ -303,24 +314,28 @@ TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
         delete iDs; iDs=0;
         return KErrNotFound;
     }
-    iDirScanFinished = EFalse;
-    iDirScanSession = &session;
-    iDirScanDir = const_cast < TDesC *> (&aDir);
-    iNbDirScanned = 0;
-    iNbFilesFound = 0;
+    }
+    iPathArray->AppendL(aDir);
     return KErrNone;
 }
 
 void TOggFiles::AddDirectoryStop()
 {
   delete iDs; iDs=0;
+  delete iDirectory; iDirectory = 0;
   iOggPlayback->ClearComments();
+  iPathArray->Reset();
+  delete iPathArray; iPathArray = 0;
+
 }
 
 void  TOggFiles::FileSearchStepL()
 {
-  CDir* c=0;
-    TRAPD(err,iDs->NextL(c));
+    if (iCurrentIndexInDirectory == 0) {
+        // New Directory
+        delete iDirectory;
+        iDirectory = NULL;
+        TRAPD(err,iDs->NextL(iDirectory));
     if (err!=KErrNone) 
       {
         TRACEF(COggLog::VA(_L("Unable to scan directory %S for oggfiles"), &iDirScanDir ));
@@ -329,18 +344,38 @@ void  TOggFiles::FileSearchStepL()
       return;
       }
 
-    if (c==0) 
+        if (iDirectory==0) 
+        {
+            // No more files in that drive.
+            // Any other drive to search in?
+            iCurrentDriveIndex++;
+            if (iCurrentDriveIndex < iPathArray->Count() ){
+                // More drives to search
+                TRAPD(err,iDs->SetScanDataL((*iPathArray)[iCurrentDriveIndex],
+                    KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
+                if (err!=KErrNone) 
     {
+                    TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &(*iPathArray)[iCurrentDriveIndex] ));
+                    delete iDs; iDs=0;
         iDirScanFinished = ETrue;
         return;
     }
-
+                iCurrentIndexInDirectory = 0;
+                return;
+            } else {
+                // No more directories to search
+                iDirScanFinished = ETrue;
+                return;
+            }
+        }
+        iNbDirScanned++;
+    }
     HBufC* fullname = HBufC::NewLC(KMaxFileLength);
     HBufC* path = HBufC::NewLC(KMaxFileLength);
-    iNbDirScanned++;
-    for (TInt i=0; i<c->Count(); i++) 
+    TBool found = EFalse;
+    for (TInt i=iCurrentIndexInDirectory; i<iDirectory->Count(); i++) 
       {
-      const TEntry e= (*c)[i];
+        const TEntry e= (*iDirectory)[i];
 
         fullname->Des().Copy(iDs->FullPath());
       fullname->Des().Append(e.iName);
@@ -373,6 +408,9 @@ void  TOggFiles::FileSearchStepL()
 	      
 	        iFiles->AppendL(o);
                 iNbFilesFound++;
+                iCurrentIndexInDirectory = i+1;
+                found = ETrue;
+                break;
           }
         else
           {
@@ -380,15 +418,16 @@ void  TOggFiles::FileSearchStepL()
           }
         }
       }
-    delete c; c=0;
     CleanupStack::PopAndDestroy(2); // fullname + path
+    if ((iCurrentIndexInDirectory >= iDirectory->Count()) || (found == EFalse)) {
+        // Go to next directory
+        iCurrentIndexInDirectory = 0;
+    }
+    
 }
 
 TBool TOggFiles::FileSearchIsProcessDone() const
 {
-    TBuf <100> a;
-    a.Format(_L("FileSearchIsProcessDone %i"), iDirScanFinished);
-    RDebug::Print(a);
     return iDirScanFinished;
 };
 
@@ -409,6 +448,41 @@ void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles)
     aNbFiles = iNbFilesFound;
 };
 
+
+TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session)
+{
+    ClearFiles();
+    
+    TChar driveLetter; TDriveInfo driveInfo;
+    TInt err,driveNumber;
+    for (driveNumber=EDriveA; driveNumber<=EDriveZ; driveNumber++) {
+      session.Drive(driveInfo,driveNumber); 
+      if (driveInfo.iDriveAtt == KDriveAbsent)
+          continue; 
+      if ( (driveInfo.iType != EMediaRom) 
+#ifdef __WINS__
+          // For some reasons, the emulator finds a non-existing drive X, which blows up everything...
+          && (driveInfo.iType != EMediaHardDisk) 
+#endif
+          ){
+          TRAP(err, session.DriveToChar(driveNumber,driveLetter));
+          if (err) break;
+          TBuf <10> driveName;
+          driveName.Format(_L("%c:\\"), driveLetter);
+          err = AddDirectoryStart(driveName,session);
+          if (err) break;
+      }
+    }
+    if ( err == KErrNone) {
+        TRAP(err, aDialog->ExecuteLD(aDialogID));
+    }
+    else {
+        delete (aDialog);
+        aDialog = NULL;
+    }
+    AddDirectoryStop();
+    return (err);
+}
 
 TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
 
