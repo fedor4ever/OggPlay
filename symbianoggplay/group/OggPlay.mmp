@@ -41,7 +41,12 @@ SOURCE OggTremor.cpp
 
 //FIXMAD: should be part of the vorbis dll
 SOURCE OggRateConvert.cpp
+
+#if defined(PLUGIN_SYSTEM)
 SOURCEPATH ..\vorbis\plugin
+#else
+SOURCEPATH ..\vorbis
+#endif
 SOURCE TremorDecoder.cpp
 
 
