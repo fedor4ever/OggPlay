@@ -253,11 +253,12 @@ class COggAnimation : public COggControl {
   virtual void Cycle();
   virtual void Draw(CBitmapContext& aBitmapContext);
 
-  CFbsBitmap* iBitmaps;
+  //CFbsBitmap* iBitmaps;
+  CArrayPtrFlat<CFbsBitmap> iBitmaps;     
   TBool       iPause;
   TInt        iFrequency;
   TInt        iFirstBitmap;
-  TInt        iNumBitmaps;
+  //TInt        iNumBitmaps;
   TInt        iStyle;
 };
 

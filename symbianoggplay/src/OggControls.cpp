@@ -670,11 +670,10 @@ COggIcon::ReadArguments(TOggParser& p)
 
 COggAnimation::COggAnimation() :
   COggControl(),
-  iBitmaps(0),
+  iBitmaps(10),
   iPause(100),
   iFrequency(2),
   iFirstBitmap(0),
-  iNumBitmaps(0),
   iStyle(0)
 {
 }
@@ -687,9 +686,7 @@ COggAnimation::~COggAnimation()
 void
 COggAnimation::ClearBitmaps() 
 {
-  if (iBitmaps) delete [] iBitmaps;
-  iNumBitmaps= 0;
-  iBitmaps= 0;
+  iBitmaps.ResetAndDestroy();
 }
 
 void
@@ -697,10 +694,13 @@ COggAnimation::SetBitmaps(TInt aFirstBitmap, TInt aNumBitmaps)
 {
   ClearBitmaps();
   iFirstBitmap= aFirstBitmap;
-  iNumBitmaps= aNumBitmaps;
-  iBitmaps= new CFbsBitmap[iNumBitmaps];
-  for (TInt i=0; i<iNumBitmaps; i++)
-    iBitmaps[i].Load(iBitmapFile,aFirstBitmap+i);
+  
+  for (TInt i=0; i<aNumBitmaps; i++)
+    {
+    CFbsBitmap* ibitmap= new (ELeave) CFbsBitmap;
+    ibitmap->Load(iBitmapFile,aFirstBitmap+i);
+    iBitmaps.AppendL(ibitmap);
+    }
   iRedraw= ETrue;
 }
 
@@ -762,24 +762,25 @@ void COggAnimation::Cycle()
   TInt style= 1;
   if (iStyle==1) style=2;
 
-  if (iCycle-iPause>=iNumBitmaps*iFrequency*style) iCycle= 0;
+  if (iCycle-iPause>=iBitmaps.Count()*iFrequency*style) iCycle= 0;
   if (iCycle%iFrequency==0) iRedraw= ETrue;
 }
 
 void COggAnimation::Draw(CBitmapContext& aBitmapContext)
 {
-  if (!iBitmaps) return;
+  if (iBitmaps.Count() == 0 ) return;
   if (iFrequency<1) return;
 
   TInt idx= 0;
   if (iCycle>=0 && iCycle-iPause>=0) {
-    idx= ((iCycle-iPause)/iFrequency)%iNumBitmaps;
-    if (iStyle==1 && (iCycle-iPause)/iFrequency>=iNumBitmaps) idx= iNumBitmaps- idx -1;
+    idx= ((iCycle-iPause)/iFrequency)%iBitmaps.Count();
+    if (iStyle==1 && (iCycle-iPause)/iFrequency>=iBitmaps.Count()) 
+      idx= iBitmaps.Count()- idx -1;
   }
 
-  CFbsBitmap& b= iBitmaps[idx];
+  CFbsBitmap* b= iBitmaps[idx];
 
-  aBitmapContext.BitBlt(TPoint(ix,iy),&b,TRect(TPoint(0,0),b.SizeInPixels()));
+  aBitmapContext.BitBlt(TPoint(ix,iy),b,TRect(TPoint(0,0),b->SizeInPixels()));
 }
 
 TBool
