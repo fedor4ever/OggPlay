@@ -803,14 +803,24 @@ COggPlayAppView::CallBack(TAny* aPtr)
 
   if (self->iApp->iForeground) {
 
-    if (self->iAnalyzer[self->iMode] && self->iAnalyzer[self->iMode]->Style()>0) {
-#if !defined(SERIES60)
+    if (self->iAnalyzer[self->iMode] && self->iAnalyzer[self->iMode]->Style()>0) 
+    {
       if (self->iApp->iOggPlayback->State()==CAbsPlayback::EPlaying)
-        self->iAnalyzer[self->iMode]->RenderWaveform((short int[2][512])self->iApp->iOggPlayback->GetDataChunk());
+      {
+#ifdef MDCT_FREQ_ANALYSER 
+          TTime Now;
+          Now.UniversalTime();
+          self->iAnalyzer[self->iMode]->RenderWaveformFromMDCT(
+          self->iApp->iOggPlayback->GetFrequencyBins(Now) );
+#else /* !MDCT_FREQ_ANALYSER */
+#if defined(SERIES60)
+          self->iAnalyzer[self->iMode]->RenderWaveform((short int*)self->iApp->iOggPlayback->GetDataChunk());
 #else
-      if (self->iApp->iOggPlayback->State()==CAbsPlayback::EPlaying)
-        self->iAnalyzer[self->iMode]->RenderWaveform((short int*)self->iApp->iOggPlayback->GetDataChunk());
+          self->iAnalyzer[self->iMode]->RenderWaveform((short int[2][512])self->iApp->iOggPlayback->GetDataChunk());
 #endif
+
+#endif /* MDCT_FREQ_ANALYSER */
+      }
     }
     
     if (self->iPosition[self->iMode] && self->iPosChanged<0) 

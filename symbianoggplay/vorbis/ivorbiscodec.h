@@ -104,6 +104,10 @@ typedef struct vorbis_block{
   long                totaluse;
   struct alloc_chain *reap;
 
+  /* BL : Frequency Analyser Addition  */
+  ogg_int32_t  * dctcoefs;
+  TBool performAnalysys;
+
 } vorbis_block;
 
 /* vorbis_block is a single block of data to be processed as part of

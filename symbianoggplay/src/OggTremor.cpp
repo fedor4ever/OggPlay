@@ -509,6 +509,13 @@ TInt64 COggPlayback::Time()
   return iTime;
 }
 
+
+#ifdef MDCT_FREQ_ANALYSER
+const TInt32 * COggPlayback::GetFrequencyBins(TTime aTime)
+{
+    return Freq_coefs;
+}
+#else
 const void* COggPlayback::GetDataChunk()
 {
   TInt idx= iSentIdx;
@@ -517,6 +524,7 @@ const void* COggPlayback::GetDataChunk()
   else
     return NULL;
 }
+#endif
 
 TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 {
@@ -638,6 +646,10 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
     if (iEof)
         return(KErrNotReady);
     TInt len = aBuffer.Length();
+#ifdef MDCT_FREQ_ANALYSER
+    iVf.vb.performAnalysys = ETrue;
+    iVf.vb.dctcoefs = Freq_coefs;
+#endif
     TInt ret=ov_read( &iVf,(char *) &(aBuffer.Ptr()[len]),
         aBuffer.MaxLength()-len
         ,&iCurrentSection);

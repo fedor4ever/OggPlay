@@ -96,7 +96,13 @@ class CAbsPlayback : public CBase {
   virtual TInt64 Position() = 0;
   virtual TInt64 Time() = 0;
   virtual TInt   Volume() = 0;
+  
+#ifdef MDCT_FREQ_ANALYSER
+  virtual const TInt32 * GetFrequencyBins(TTime aTime) = 0;
+#else
   virtual const void* GetDataChunk() = 0;
+#endif
+
 
   // The following functions have a simple default implementation:
 
@@ -166,7 +172,11 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual TInt64 Position();
   virtual TInt64 Time();
   virtual TInt   Volume();
+#ifdef MDCT_FREQ_ANALYSER
+  virtual const TInt32 * GetFrequencyBins(TTime aTime);
+#else
   virtual const void* GetDataChunk();
+#endif
   virtual TInt GetNewSamples(TDes8 &aBuffer);
 
  private:
@@ -206,6 +216,10 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   COggTimer *              iStartAudioStreamingTimer;
 
 
+#ifdef MDCT_FREQ_ANALYSER
+// BL : Frequency analyser changes
+  TInt32 Freq_coefs[17]; 
+#endif
 
   // communication with the tremor/ogg codec:
   //-----------------------------------------

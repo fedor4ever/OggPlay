@@ -1615,6 +1615,30 @@ void COggAnalyzer::RenderWaveform(short int *data)
   RenderFrequencies(iFFTAbs);
 }
 
+
+void COggAnalyzer::RenderWaveformFromMDCT(const TInt32 * aFreqBins)
+{
+    // This function takes as input the maximal MDCT coefficients of 
+    // each frequency bins 
+    
+    // Convert to log
+    TInt i, j;
+    for (j=0; j<17; j++)
+    {
+        TInt v = aFreqBins[j];
+        for(i=0; i<43; ++i)
+        {
+            if( loud2[i] <= v)
+                break;
+        }
+        /* i is [0 43] */
+        i = - i + 43 ; /* [43 .. 0 ] */
+        iValues[j]= (TInt)((float)(i*ih)/43.0);
+    }
+
+  iRedraw= ETrue;
+}
+
 void COggAnalyzer::RenderFrequencies(short int data[256])
 {
   if (iStyle==0) return;

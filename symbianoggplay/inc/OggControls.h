@@ -510,6 +510,8 @@ class COggAnalyzer : public COggControl {
   void SetValue(TInt i, TInt theValue);
   void SetStyle(TInt aStyle);
   void RenderFrequencies(short int data[256]);
+
+  void RenderWaveformFromMDCT(const TInt32 * aFreqBins);
 #if !defined(SERIES60)
   void RenderWaveform(short int data[2][512]);
 #else
