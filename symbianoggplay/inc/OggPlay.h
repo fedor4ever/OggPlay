@@ -299,7 +299,6 @@ public:
 
   void OpenFileL(const TDesC& aFileName);
   void WriteIniFile();
-  void WriteIniFileOnNextPause();
   void SetRepeat(TBool aRepeat);
 #ifdef SERIES80
   CEikButtonGroupContainer * Cba()  
@@ -320,7 +319,6 @@ private:
   void ShowSplash();
 #endif
 
-	TBool iWriteIniOnNextPause;
   int iCapturedKeyHandle;
   HBufC* iIniFileName;
   TFileName iSkinFileDir;

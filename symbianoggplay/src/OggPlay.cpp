@@ -299,8 +299,7 @@ COggPlayAppUi::ConstructL()
 	iAlarmTime.Set(_L("20030101:120000.000000"));
 	iViewBy= ETop;
 	iAnalyzerState= 0;
-  iIsStartup=ETrue;
-	iWriteIniOnNextPause=EFalse;
+    iIsStartup=ETrue;
     iSettings.iWarningsEnabled = ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
 #ifdef PLUGIN_SYSTEM
@@ -412,7 +411,7 @@ void COggPlayAppUi::PostConstructL()
 
 COggPlayAppUi::~COggPlayAppUi()
 {
-	WriteIniFile();
+	
 	if(iAppView) RemoveFromStack(iAppView);
 	
 	delete iAppView;
@@ -835,6 +834,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EAknSoftkeyBack:
   {
 	HandleCommandL(EOggStop);
+	WriteIniFile();
     Exit();
     break;
   }
@@ -873,6 +873,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 
 	case EEikCmdExit: {
 		HandleCommandL(EOggStop);
+		WriteIniFile();
 		Exit();
 		break;
     }
@@ -951,11 +952,6 @@ COggPlayAppUi::PauseResume()
     iOggPlayback->Pause();
     iAppView->Update();
     UpdateSoftkeys();
-	if(iWriteIniOnNextPause)
-	{
-		iWriteIniOnNextPause=EFalse;
-		WriteIniFile();
-	}
   }
   else if  (iOggPlayback->State()==CAbsPlayback::EPaused)
   {
@@ -1032,6 +1028,9 @@ COggPlayAppUi::SelectNextView()
   if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder)) return;
 #endif
 
+    if (iAppView->GetItemType(idx) == COggListBox::EBack)
+     return;
+    
     iViewHistoryStack.Append(idx);
 
     HBufC * filter = HBufC::NewL(128);
@@ -1409,7 +1408,27 @@ COggPlayAppUi::WriteIniFile()
     
     TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), iIniFileName ));
     
-    if ( out.Replace( iCoeEnv->FsSession(), iIniFileName->Des(), EFileWrite | EFileStreamText) != KErrNone ) return;
+    // Accessing the MMC , using the TFileText is extremely slow. 
+    // We'll do everything using the C:\ drive then move the file to it's final destination
+    // in MMC.
+    
+    TParsePtrC p(iIniFileName->Des());
+	TBool useTemporaryFile = EFalse;
+	TFileName fileName = iIniFileName->Des();
+    if (p.Drive() != _L("C:"))
+    {
+    	useTemporaryFile = ETrue;
+    	// Create the c:\tmp\ directory
+        TInt errorCode = iCoeEnv->FsSession().MkDir(_L("C:\\tmp\\"));
+        if ((errorCode != KErrNone) && (errorCode !=  KErrAlreadyExists) )
+          return;
+          
+        // Create the file
+    	fileName = _L("C:\\tmp\\");
+    	fileName.Append(p.NameAndExt());
+    }
+    
+    if ( out.Replace( iCoeEnv->FsSession(), fileName, EFileWrite | EFileStreamText) != KErrNone ) return;
     
     TRACEF(_L("Writing Inifile..."));
     TInt j;
@@ -1521,12 +1540,19 @@ COggPlayAppUi::WriteIniFile()
    // Please increase ini_version when adding stuff
 	
 	out.Close();
-}
-
-void
-COggPlayAppUi::WriteIniFileOnNextPause()
-{
-	iWriteIniOnNextPause=ETrue;
+	if (useTemporaryFile) 
+	{
+		// Move the file to the MMC
+		
+	    TRAPD(Err2,
+		CFileMan* fileMan = CFileMan::NewL(iCoeEnv->FsSession() );
+		TInt error = fileMan->Move( fileName, *iIniFileName,CFileMan::EOverWrite);
+		delete (fileMan);		
+		); // End of TRAP
+	}
+	
+	
+     TRACEF(_L("Writing Inifile 10..."));
 }
 
 void 
