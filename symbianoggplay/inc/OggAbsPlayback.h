@@ -35,6 +35,7 @@ const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making s
 
 #ifdef PLUGIN_SYSTEM
 
+#include <MdaAudioSampleEditor.h> // For CMMFFormatImplementationInformation
 //
 // CPluginInfo class
 //------------------------------------------------------
@@ -44,24 +45,20 @@ private :
   CPluginInfo();
   
 public:
-   ~CPluginInfo();
-   static CPluginInfo* NewL( const TDesC& anExtension, 
-	   const TDesC& aName,
-	   const TDesC& aSupplier,
-	   const TInt aVersion,
-       const TUid aControllerUid);
-   void ConstructL ( const TDesC& anExtension, 
-	   const TDesC& aName,
-	   const TDesC& aSupplier,
-	   const TInt aVersion,
-       const TUid aControllerUid);
-   
-  HBufC* iExtension;
-  HBufC* iName;
-  HBufC* iSupplier;
-  TInt iVersion;
-  TUid iControllerUid;
-
+    ~CPluginInfo();
+    static CPluginInfo* NewL( const TDesC& anExtension, 
+        const CMMFFormatImplementationInformation &aFormatInfo,
+        const TUid aControllerUid);
+    void ConstructL ( const TDesC& anExtension, 
+        const CMMFFormatImplementationInformation &aFormatInfo,
+        const TUid aControllerUid);
+    
+    HBufC* iExtension;
+    HBufC* iName;
+    HBufC* iSupplier;
+    TInt iVersion;
+    TUid iFormatUid;
+    TUid iControllerUid;
 };
 
 //
@@ -74,9 +71,9 @@ class CExtensionSupportedPluginList: public CBase
         CExtensionSupportedPluginList( const TDesC& anExtension );
         void ConstructL();
         ~CExtensionSupportedPluginList();
-
-        void AddPluginL(const TDesC& aName, const TDesC& aSupplier,
-            const TInt aVersion, const TUid aControllerUid);
+        
+        void AddPluginL(const CMMFFormatImplementationInformation &aFormatInfo,
+            const TUid aControllerUid);
         const TDesC & GetExtension();
         void SelectPlugin(TUid aUid);
         CArrayPtrFlat <CPluginInfo> & GetPluginInfoList();

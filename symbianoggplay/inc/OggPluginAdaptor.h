@@ -83,6 +83,7 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   // we will use, in case of conflits (2 codecs supporting same type)
   // The PlayerUtility doesn't allow this choice.
   CMdaAudioRecorderUtility *iPlayer; 
+  CActiveSchedulerWait iWait;
 #else
   CPseudoMMFController * iPlayer;
   

@@ -264,7 +264,7 @@ void CCodecSelectionSettingItem::CompleteConstructionL()
             CleanupStack::Pop(name);
 
             // Allocate the name, again :-(
-            name = list[0]->iName->AllocLC();
+            name = list[i]->iName->AllocLC();
             enumPopUp->AppendL(name);
             CleanupStack::Pop(name);
             if ( list[i]->iControllerUid == iPluginList->GetSelectedPluginInfo().iControllerUid )

@@ -37,30 +37,27 @@ CPluginInfo::CPluginInfo()
   }
 
 CPluginInfo* CPluginInfo::NewL(const TDesC& anExtension, 
-	   const TDesC& aName,
-	   const TDesC& aSupplier,
-	   const TInt aVersion,
-       const TUid aControllerUid)
-  {
+                               const CMMFFormatImplementationInformation &aFormatInfo,
+                               const TUid aControllerUid)
+{
   CPluginInfo* self = new (ELeave) CPluginInfo();
   CleanupStack::PushL(self);
-  self->ConstructL(anExtension, aName, aSupplier, aVersion, aControllerUid);
+  self->ConstructL(anExtension, aFormatInfo,aControllerUid);
   CleanupStack::Pop(); // self
   return self;
   }
 
 
 void
-CPluginInfo::ConstructL( const TDesC& anExtension, 
-	   const TDesC& aName,
-	   const TDesC& aSupplier,
-	   const TInt aVersion,
-       const TUid aControllerUid) 
+CPluginInfo::ConstructL(const TDesC& anExtension, 
+                        const CMMFFormatImplementationInformation &aFormatInfo,
+                        const TUid aControllerUid) 
 {
     iExtension = anExtension.AllocL();
-    iName = aName.AllocL();
-    iSupplier = aSupplier.AllocL();
-    iVersion = aVersion;
+    iFormatUid = aFormatInfo.Uid();
+    iName = aFormatInfo.DisplayName().AllocL();
+    iSupplier = aFormatInfo.Supplier().AllocL();
+    iVersion = aFormatInfo.Version();
     iControllerUid = aControllerUid;
 }
 
@@ -94,13 +91,12 @@ CExtensionSupportedPluginList::~CExtensionSupportedPluginList()
     delete(iListPluginInfos);
 }
 
-void CExtensionSupportedPluginList::AddPluginL(const TDesC& aName,
-            const TDesC& aSupplier,
-            const TInt aVersion,
-            const TUid aControllerUid)
+void CExtensionSupportedPluginList::AddPluginL(
+           const CMMFFormatImplementationInformation &aFormatInfo,
+           const TUid aControllerUid)
 {
 
-    CPluginInfo* info = CPluginInfo::NewL(iExtension,aName, aSupplier, aVersion, aControllerUid);
+    CPluginInfo* info = CPluginInfo::NewL(iExtension, aFormatInfo, aControllerUid);
         
     iListPluginInfos->AppendL(info);
     iSelectedPlugin = info; // To be removed when UI/OggPlay takes care of selecting the plugins
@@ -164,8 +160,14 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
     iState = EClosed;
     if (aFileName != iFileName)
     {
-    TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
-    
+        TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
+        
+        iTitle  = KNullDesC;
+        iAlbum  = KNullDesC;
+        iArtist = KNullDesC;
+        iGenre  = KNullDesC;
+        iTrackNumber = KNullDesC;
+
         ConstructAPlayerL( aFileName );
   
         // Find the selected plugin, corresponding to file type
@@ -177,8 +179,10 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         // Wait for the init completed callback
         iError = KErrNone;
 #ifdef MMF_AVAILABLE
-        CActiveScheduler::Start(); // This is not good symbian practise, but hey! 
-                                   // It's simple and working :-)
+        if (!iWait.IsStarted())
+        {
+            iWait.Start();
+        }
 #endif
         User::LeaveIfError(iError);
         iFileName = aFileName;
@@ -352,17 +356,28 @@ void COggPluginAdaptor::SetVolumeGain(TGainType /*aGain*/)
 void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode)
 {
     
-  TRACEF(COggLog::VA(_L("MoscoStateChange :%d %d %d "), aPreviousState,  aCurrentState,  aErrorCode));
-  if ((aPreviousState == CMdaAudioClipUtility::ENotReady) 
-      && (aCurrentState == CMdaAudioClipUtility::EOpen))
+    TRACEF(COggLog::VA(_L("MoscoStateChange :%d %d %d "), aPreviousState,  aCurrentState,  aErrorCode));
+    
+#ifdef MMF_AVAILABLE
+    
+    if (iWait.IsStarted())
+    {   
+        // We should be in wait state only when opening a file.       
+        // From not opened to opened
+        TRACEF(COggLog::VA(_L("MoscoStateChange : InitComplete %d"), aErrorCode ));
+        iError = aErrorCode;
+        iWait.AsyncStop(); // Gives back the control to the waiting OpenL()
+    }
+#else
+    if ((aPreviousState == CMdaAudioClipUtility::ENotReady) 
+        && (aCurrentState == CMdaAudioClipUtility::EOpen))
     {
         // From not opened to opened
         TRACEF(COggLog::VA(_L("MoscoStateChange : InitComplete %d"), aErrorCode ));
         iError = aErrorCode;
-#ifdef MMF_AVAILABLE
-        CActiveScheduler::Stop(); // Gives back the control to the waiting OpenL()
-#endif
     }
+    
+#endif
 
     if ( (aCurrentState == CMdaAudioClipUtility::EPlaying) && aErrorCode)
     {
@@ -427,7 +442,7 @@ CExtensionSupportedPluginList & COggPluginAdaptor::GetPluginListL(const TDesC & 
 
     for (i=0; i<iExtensionSupportedPluginList->Count(); i++)
     {
-        if ((*iExtensionSupportedPluginList)[i]->GetExtension() == anExtension)
+        if ( anExtension.CompareF( (*iExtensionSupportedPluginList)[i]->GetExtension() ) == 0)
         {
             found = ETrue;
             break;
@@ -516,9 +531,8 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
             ));
        
         nbFound++;
-        newPluginList->AddPluginL(formatArray[i]->DisplayName(),
-            formatArray[i]->Supplier(),
-            formatArray[i]->Version(),
+        newPluginList->AddPluginL(
+            *formatArray[i],
             controllers[ii]->Uid() );
     }
     

@@ -150,6 +150,10 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void ClearFiles();
 
   TBool isSupportedAudioFile(TParsePtrC& p);
+  
+#ifdef PLUGIN_SYSTEM
+  CDesCArrayFlat * iSupportedExtensionList;
+#endif
 
   CArrayPtrFlat<TOggFile>* iFiles; 
   CAbsPlayback*            iOggPlayback;
