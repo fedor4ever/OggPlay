@@ -44,7 +44,7 @@ LIBRARY MediaClientImage.lib
 LIBRARY libvorbisidec.lib gdi.lib
 LIBRARY etext.lib form.lib // For CScrollableRichTextControl
 //LIBRARY msvcrt.lib
-LIBRARY estor.lib
+LIBRARY estor.lib hal.lib
 
 
 START WINS      
