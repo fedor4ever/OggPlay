@@ -17,8 +17,8 @@
 */
 
 #include "OggOs.h"
-#include "OggPlay.h"
-
+#include "OggPlay.h" // Experimental fix for the headset problem
+#include <hal.h>
 #ifdef SERIES60
 #include <aknkeys.h>	// EStdQuartzKeyConfirm etc.
 #include <akndialog.h>   // for about
@@ -144,6 +144,17 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
     }
 #endif
 #endif
+   // Experimental fix for the headset problem
+	TInt status,r;
+	r = status = KErrNone;
+	r = HAL::Get(HAL::EAccessoryPower, status);
+	TRACEF(COggLog::VA(_L("Accessory %d %d"), r, status));
+
+	r = HAL::Set(HAL::EAccessoryPower, ETrue);
+	TRACEF(COggLog::VA(_L("Accessory %d"), r));
+
+	r = HAL::Get(HAL::EAccessoryPower, status);
+	TRACEF(COggLog::VA(_L("Accessory %d %d"), r, status));
 }
 
 TInt
