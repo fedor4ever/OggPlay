@@ -1296,6 +1296,9 @@ COggScrollBar::COggScrollBar() :
   iIsMoving(EFalse)
 {
 }
+COggScrollBar::~COggScrollBar() {
+    delete iKnobIcon;
+}
 
 void
 COggScrollBar::SetStyle(TInt aStyle)

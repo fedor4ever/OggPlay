@@ -25,8 +25,6 @@ PRJ_EXPORTS
 // copy will be used to copy the source file to its destination
 // If there's no destination then the source file will be copied
 // to the same name in \epoc32\include
-..\S60default.skn \Epoc32\Release\wins\udeb\z\system\apps\OGGPLAY\S60default.skn
-..\S60classic.skn \Epoc32\Release\wins\udeb\z\system\apps\OGGPLAY\S60classic.skn
 ..\Inc\OggPlayUid.h
 
 PRJ_MMPFILES

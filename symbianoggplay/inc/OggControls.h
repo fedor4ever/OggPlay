@@ -402,6 +402,7 @@ class COggScrollBar : public COggControl
  public:
 
   COggScrollBar();
+  virtual ~COggScrollBar();
 
   void SetStyle(TInt aStyle);
   void SetKnobIcon(CGulIcon* anIcon);
