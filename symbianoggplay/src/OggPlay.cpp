@@ -295,7 +295,8 @@ COggPlayAppUi::ConstructL()
 	iViewBy= ETop;
 	iAnalyzerState= 0;
   iIsStartup=ETrue;
-	iOggMsgEnv = new(ELeave) COggMsgEnv();
+    iSettings.iWarningsEnabled = ETrue;
+	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
 	iOggPlayback->ConstructL();
 
@@ -1130,6 +1131,11 @@ COggPlayAppUi::ReadIniFile()
       }
   	}
 
+  if (tf.Read(line) == KErrNone) {
+      TLex parse(line);
+      parse.Val(iSettings.iWarningsEnabled);
+  };
+
   } // version 2 onwards
 
 	in.Close();
@@ -1206,6 +1212,9 @@ COggPlayAppUi::WriteIniFile()
     num.Num(iSettings.iUserHotkeys[j]);
 	  tf.Write(num);
   	}
+
+ 	num.Num(iSettings.iWarningsEnabled);
+	tf.Write(num);
 
 	//please increase iIniversion when adding stuff
 	

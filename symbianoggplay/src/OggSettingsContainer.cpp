@@ -37,6 +37,9 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   case EOggSettingAutoPlayId:
     return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
       iData.iAutoplay);
+  case EOggSettingWarningsId:
+    return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
+      iData.iWarningsEnabled);
   default:
     break;
 		}

@@ -108,6 +108,7 @@ public:
   TInt iScanmode;
   TInt iAutoplay;
   TInt iManeuvringSpeed;
+  TInt iWarningsEnabled;
 
   enum THotkeys {   // COggUserHotkeys
     ENoHotkey,

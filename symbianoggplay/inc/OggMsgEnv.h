@@ -15,10 +15,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <e32base.h>
 
+#include <e32base.h>
 #ifndef OGGMSGENV_H
 #define OGGMSGENV_H
+
+//#include "OggPlay.h"
+class TOggplaySettings;
 
 const TInt KMaxNoteLength = 50;
 
@@ -27,12 +30,15 @@ class COggMsgEnv : public CBase
 public:
     void ConstructL();
     ~COggMsgEnv();
-    COggMsgEnv();
+    COggMsgEnv(TOggplaySettings &aSettings);
 
     // Error Msg
+    void OggWarningMsgL(const TDesC& aWarning);
+
     static void OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine);// const;
     static void OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId=0);// const;
 private:
+    TOggplaySettings &iSettings;
 };
 
 #endif

@@ -101,7 +101,8 @@ enum TOggplaySettingId
 	{
 	EOggSettingScanDir,
 	EOggSettingManeuvringSpeed,
-	EOggSettingAutoPlayId
+	EOggSettingAutoPlayId,
+	EOggSettingWarningsId
 	};
 
 enum TOggplayMiscSeries60

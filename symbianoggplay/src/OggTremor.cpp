@@ -380,7 +380,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   if ( !(rt & iAudioCaps) )
    {
     // Rate not supported by this phone.
-      ConvertChannel = ETrue;
+      ConvertRate = ETrue;
       usedRate = 16000; //That rate should be 
                         //supported by all phones
       rt = TMdaAudioDataSettings::ESampleRate16000Hz;
@@ -458,9 +458,8 @@ void COggPlayback::SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate,
     
     CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_26);
     BufMsg.Append(TmpBuf);
-    CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_27);
 
-    iEnv->OggErrorMsgL(BufMsg, TmpBuf);
+    iEnv->OggWarningMsgL(BufMsg);
     CleanupStack::PopAndDestroy(2);
 }
 

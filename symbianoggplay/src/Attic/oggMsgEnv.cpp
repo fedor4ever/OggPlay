@@ -19,10 +19,11 @@
 #include "OggOs.h"
 #include "OggMsgEnv.h"
 #include "OggDialogs.h"
+#include "OggPlay.h"
 #include <OggPlay.rsg>
 #include <eikenv.h>
 
-COggMsgEnv::COggMsgEnv()
+COggMsgEnv::COggMsgEnv( TOggplaySettings &aSettings) :  iSettings (aSettings)
 {
 }
 
@@ -31,6 +32,19 @@ COggMsgEnv::~COggMsgEnv()
 }
 
 #ifdef SERIES60
+
+void COggMsgEnv::OggWarningMsgL(const TDesC& aWarning)// const
+{
+    if (iSettings.iWarningsEnabled)
+    {
+        TBuf<128> TmpBuf;
+        CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_27);
+        COggInfoWinDialog *d = new COggInfoWinDialog();
+        d->SetInfoWinL(aWarning,TmpBuf);
+        d->ExecuteLD(R_DIALOG_INFOWIN);
+    }
+}
+
 void COggMsgEnv::OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine)// const
 {
     COggInfoWinDialog *d = new COggInfoWinDialog();
