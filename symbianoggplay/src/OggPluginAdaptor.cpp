@@ -114,15 +114,16 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         for (TInt i=0; i< nbMetaData; i++)
         {
             aMetaData = iPlayer->GetMetaDataEntryL(i);
-            if ( aMetaData->Name()  == _L("OggPlayPluginTitle") )
+            TRACEF(COggLog::VA(_L("MetaData %S : %S"), &aMetaData->Name(), &aMetaData->Value() ));
+            if ( aMetaData->Name()  == _L("title") )
                 iTitle = aMetaData->Value();
-            if ( aMetaData->Name()  == _L("OggPlayPluginAlbum") )
+            if ( aMetaData->Name()  == _L("album") )
                 iAlbum = aMetaData->Value();
-            if ( aMetaData->Name()  == _L("OggPlayPluginArtist") )
+            if ( aMetaData->Name()  == _L("artist") )
                 iArtist = aMetaData->Value();
-            if ( aMetaData->Name()  == _L("OggPlayPluginGenre") )
+            if ( aMetaData->Name()  == _L("genre") )
                 iGenre = aMetaData->Value();
-            if ( aMetaData->Name()  == _L("OggPlayPluginTrackNumber") )
+            if ( aMetaData->Name()  == _L("albumtrack") )
                 iTrackNumber = aMetaData->Value();
             // If it is not an OggPlay Plugin, there should be some handling here to guess
             // title, trackname, ...
@@ -194,8 +195,9 @@ void   COggPluginAdaptor::SetVolume(TInt aVol)
 
 void   COggPluginAdaptor::SetPosition(TInt64 aPos)
 {
+    TRACEF(_L("COggPluginAdaptor::SetPosition"));
     if (iPlayer)
-        iPlayer->SetPosition(aPos);
+        iPlayer->SetPosition(aPos * 1000);
 }
 
 TInt64 COggPluginAdaptor::Position()
@@ -203,13 +205,13 @@ TInt64 COggPluginAdaptor::Position()
     TTimeIntervalMicroSeconds aPos(0);
     if (iPlayer)
        iPlayer->GetPosition(aPos);
-    return(aPos.Int64());
+    return(aPos.Int64()/1000); // Dividing by 1000, to get millisecs from microsecs
 }
 
 TInt64 COggPluginAdaptor::Time()
 {
     if (iPlayer)
-        return (iPlayer->Duration().Int64());
+        return (iPlayer->Duration().Int64()/1000);
     return(0);
 }
 
@@ -277,7 +279,7 @@ COggPluginAdaptor::~COggPluginAdaptor()
     delete(iPluginInfos);
 }
 
-void COggPluginAdaptor::ConstructAPlayerL(const TDesC /*&anExtension*/)
+void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
 {
     // Stupid, but true, we must delete the player when loading a new file
     // Otherwise, will panic with -15 on some HW   
