@@ -612,7 +612,7 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
     TFileText tf;
     tf.Set(out);
     
-    // write file version:
+    // Write file version:
     TBuf<16> line;
     line.Num(1);
     tf.Write(line);
@@ -620,6 +620,7 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
     HBufC* dat = HBufC::NewLC(KDiskWriteBufferSize);
     HBufC* tempBuf = HBufC::NewLC(KTFileTextBufferMaxSize*KNofOggDescriptors);
 
+    // Buffer up writes. Speed issue on phones without MMC write cache.
     if (err==KErrNone) {
       for (TInt i=0; i<iFiles->Count(); i++) {
         if (!(*iFiles)[i]->Write(i,tempBuf)) 
@@ -636,8 +637,11 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
       }
 
     // Final write to disk.
-    dat->Des().SetLength( dat->Des().Length()-1 ); 
-    tf.Write(dat->Des());
+    if( dat->Des().Length() > 0 )
+      {
+      dat->Des().SetLength( dat->Des().Length()-1 ); 
+      tf.Write(dat->Des());
+      }
 
     CleanupStack::PopAndDestroy(2); // dat + tempBuf
 
@@ -657,7 +661,6 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
     buf.AppendNum(err);
     User::InfoPrint(buf);
     User::After(TTimeIntervalMicroSeconds32(1000000));
-    //OGGLOG.WriteFormat(_L("Error %d in WriteDB"),err);
   }
   
 }
