@@ -29,6 +29,24 @@ TOggPlayList::TOggPlayList()
 {
 }
 
+TOggPlayList* TOggPlayList::NewL()
+  {
+  TOggPlayList* self = new (ELeave) TOggPlayList();
+  CleanupStack::PushL(self);
+
+  self->iSubFolder =  HBufC::NewL(1);
+  *(self->iSubFolder) = _L("-");
+
+  self->iFileName =  HBufC::NewL(1);
+  *(self->iFileName) = _L("-");
+
+  self->iShortName =  HBufC::NewL(1);
+  *(self->iShortName) = _L("-");
+
+  CleanupStack::Pop(self);
+  return self;
+  }
+  
 TOggPlayList* TOggPlayList::NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName)
   {
   TOggPlayList* self = new (ELeave) TOggPlayList();
@@ -54,6 +72,33 @@ TOggPlayList::~TOggPlayList()
   delete iFileName;
   delete iShortName;
 }
+
+void TOggPlayList::SetTextFromFileL(TFileText& aTf, HBufC* &aBuffer)
+{
+  TBuf<KTFileTextBufferMaxSize> buf;
+  User::LeaveIfError(aTf.Read(buf));
+
+  delete aBuffer;
+  aBuffer = NULL;
+  
+  aBuffer= buf.AllocL();  
+}
+
+void TOggPlayList::ReadL(TFileText& tf)
+{
+  SetTextFromFileL(tf, iSubFolder);
+  SetTextFromFileL(tf, iFileName);
+  SetTextFromFileL(tf, iShortName);
+}    
+
+
+TInt TOggPlayList::Write(TInt aLineNumber, HBufC* aBuf)
+{
+  aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n"), aLineNumber, iSubFolder, iFileName, iShortName);
+ 
+  return KErrNone;
+}
+
 
 ////////////////////////////////////////////////////////////////
 //
@@ -185,20 +230,20 @@ TOggFile::ReadL(TFileText& tf, TInt aVersion)
   SetTextFromFileL( tf, iSubFolder );
   SetTextFromFileL( tf, iFileName );
   SetTextFromFileL( tf, iShortName );
-  if( aVersion == 1 )
+  if( aVersion >= 1 )
     SetTextFromFileL( tf, iTrackNumber );
   SetTrackTitle();
 }    
 
 
-TBool
+TInt
 TOggFile::Write( TInt aLineNumber, HBufC* aBuf )
 {
   aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n"), 
     aLineNumber, 
     iTitle, iAlbum, iArtist, iGenre, iSubFolder, iFileName, iShortName, iTrackNumber);
  
-  return ETrue;
+  return KErrNone;
 }
 
 
@@ -715,29 +760,87 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
     
     // check file version:
     TBuf<KTFileTextBufferMaxSize> line;
+	TInt err;
     iVersion= -1;
     if(tf.Read(line)==KErrNone) {
       TLex parse(line);
       parse.Val(iVersion);
-    };
+    }
     
-    if (iVersion!=0 && iVersion!=1) {
+#ifdef PLAYLIST_SUPPORT
+	if ((iVersion!=0) && (iVersion!=1) && (iVersion!=2))
+#else
+	if ((iVersion!=0) && (iVersion!=1))
+#endif
+	{
       in.Close();
       return EFalse;
     }
 
+#ifdef PLAYLIST_SUPPORT
+	if (iVersion==2)
+	{
+		TInt numPlayLists;
+		if(tf.Read(line)==KErrNone)
+		{
+	      TLex parse(line);
+		  err = parse.Val(numPlayLists);
+		  if (err != KErrNone)
+		  {
+			  in.Close();
+			  return EFalse;
+		  }
+		}
+		else 
+		{
+			in.Close();
+			return EFalse;
+		}
+
+		for (TInt i = 0 ; i<numPlayLists ; i++)
+		{
+		  // Read in the line number.
+		  err = tf.Read(line);
+		  if (err != KErrNone)
+		  {
+			  in.Close();
+			  return ETrue;
+		  }
+
+	      TOggPlayList* o = TOggPlayList::NewL();
+		  TRAP(err, o->ReadL(tf));
+          if (err != KErrNone)
+		  {
+			 delete o;
+
+             in.Close();
+			 return ETrue;
+		  }
+     
+		  o->iAbsoluteIndex = iPlayLists->Count();
+	      iPlayLists->AppendL(o);
+		}
+	}
+#endif
+	
     while (tf.Read(line)==KErrNone) 
       {
       TOggFile* o = TOggFile::NewL();
-      TRAPD( err, o->ReadL(tf,iVersion) );
-      if( err )
+      TRAP( err, o->ReadL(tf,iVersion) );
+      if (err != KErrNone)
+	  {
+	    delete o;
         break;
+	  }
+
       o->iAbsoluteIndex = iFiles->Count();
       iFiles->AppendL(o);
       }
 
     in.Close();
-    return ETrue;
+
+	// TO DO: Parse playlists
+	return ETrue;
   }
   return EFalse;
 }
@@ -749,62 +852,107 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
 
   TBuf<64> buf;
   TInt err= out.Replace(session, aFileName, EFileWrite|EFileStreamText);
-  if (err==KErrNone) {
-
-    TFileText tf;
-    tf.Set(out);
-    
-    // Write file version:
-    TBuf<16> line;
-    line.Num(1);
-    tf.Write(line);
-     
-    HBufC* dat = HBufC::NewLC(KDiskWriteBufferSize);
-    HBufC* tempBuf = HBufC::NewLC(KTFileTextBufferMaxSize*KNofOggDescriptors);
-
-    // Buffer up writes. Speed issue on phones without MMC write cache.
-    if (err==KErrNone) {
-      for (TInt i=0; i<iFiles->Count(); i++) {
-        if (!(*iFiles)[i]->Write(i,tempBuf)) 
-            break;
-          TInt newSize = dat->Length() + tempBuf->Length();
-          if( KDiskWriteBufferSize < newSize ) {
-            // Write to disk. Remove the last '\n' since Write() will add this
-            dat->Des().SetLength( dat->Des().Length()-1 ); 
-            tf.Write(dat->Des());
-            dat->Des().Zero();
-            }
-          dat->Des().Append(tempBuf->Des());
-        }
-      }
-
-    // Final write to disk.
-    if( dat->Des().Length() > 0 )
-      {
-      dat->Des().SetLength( dat->Des().Length()-1 ); 
-      tf.Write(dat->Des());
-      }
-
-    CleanupStack::PopAndDestroy(2); // dat + tempBuf
-
-    if (err!=KErrNone) {
-      buf.Append(_L("Error at write: "));
-      buf.AppendNum(err);
-      User::InfoPrint(buf);
-      User::After(TTimeIntervalMicroSeconds32(1000000));
-    }
-    out.Close();
-    CEikonEnv::Static()->BusyMsgCancel();
-
-  } else {
+  if (err!=KErrNone)
+  {
     CEikonEnv::Static()->BusyMsgCancel();
     buf.SetLength(0);
     buf.Append(_L("Error at open: "));
     buf.AppendNum(err);
     User::InfoPrint(buf);
     User::After(TTimeIntervalMicroSeconds32(1000000));
+	return;
   }
-  
+
+  TFileText tf;
+  tf.Set(out);
+    
+  // Write file version:
+  TBuf<16> line;
+
+#ifdef PLAYLIST_SUPPORT
+  line.Num(2);
+#else
+  line.Num(1);
+#endif
+
+  err = tf.Write(line);
+     
+  HBufC* dat = HBufC::NewLC(KDiskWriteBufferSize);
+  HBufC* tempBuf = HBufC::NewLC(KTFileTextBufferMaxSize*KNofOggDescriptors);
+
+  // Buffer up writes. Speed issue on phones without MMC write cache.
+  TInt i;
+
+#ifdef PLAYLIST_SUPPORT
+  if (err==KErrNone)
+  {
+	line.Num(iPlayLists->Count());
+	tf.Write(line);
+
+	for (i = 0 ; i<iPlayLists->Count() ; i++)
+	{
+		if ((err = (*iPlayLists)[i]->Write(i,tempBuf)) != KErrNone)
+	        break;
+
+	    TInt newSize = dat->Length() + tempBuf->Length();
+		if( KDiskWriteBufferSize < newSize )
+		{
+			// Write to disk. Remove the last '\n' since Write() will add this
+			dat->Des().SetLength( dat->Des().Length()-1 ); 
+			err = tf.Write(dat->Des());
+			if (err != KErrNone)
+				break;
+
+			dat->Des().Zero();
+		}
+          
+		dat->Des().Append(tempBuf->Des());
+	}
+  }
+#endif
+
+  if (err == KErrNone)
+  {
+      for ( i=0; i<iFiles->Count(); i++)
+	  {
+        if ((err = (*iFiles)[i]->Write(i,tempBuf)) != KErrNone)
+            break;
+
+        TInt newSize = dat->Length() + tempBuf->Length();
+        if( KDiskWriteBufferSize < newSize )
+		{
+          // Write to disk. Remove the last '\n' since Write() will add this
+          dat->Des().SetLength( dat->Des().Length()-1 ); 
+          err = tf.Write(dat->Des());
+		  if (err != KErrNone)
+			break;
+
+          dat->Des().Zero();
+        }
+          
+		dat->Des().Append(tempBuf->Des());
+      }
+  }
+
+  // Final write to disk.
+  if( (dat->Des().Length() > 0) && (err == KErrNone))
+  {
+    dat->Des().SetLength( dat->Des().Length()-1 ); 
+    err = tf.Write(dat->Des());
+  }
+
+  CleanupStack::PopAndDestroy(2); // dat + tempBuf
+
+  if (err!=KErrNone)
+  {
+    buf.Append(_L("Error at write: "));
+    buf.AppendNum(err);
+    User::InfoPrint(buf);
+    User::After(TTimeIntervalMicroSeconds32(1000000));
+  }
+
+  out.Close();
+  CEikonEnv::Static()->BusyMsgCancel();
 }
 
 void
@@ -856,6 +1004,10 @@ TOggFiles::ClearFiles()
   //iFiles->Reset();
 
   iFiles->ResetAndDestroy();
+
+#ifdef PLAYLIST_SUPPORT
+  iPlayLists->ResetAndDestroy();
+#endif
 }
 
 

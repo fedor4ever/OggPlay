@@ -39,7 +39,14 @@ private :
 
 public:
   ~TOggPlayList();
+
+  static TOggPlayList* NewL();
   static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
+
+  void ReadL(TFileText& tf);
+  TInt Write(TInt aLineNumber, HBufC* aBuf );
+
+  void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
 
   HBufC* iFileName;
   HBufC* iSubFolder;
@@ -73,7 +80,7 @@ public:
 
   void ReadL(TFileText& tf, TInt aVersion);
   //TBool Write(TInt aLineNumber, TFileText& tf);
-  TBool Write(TInt aLineNumber, HBufC* aBuf );
+  TInt Write(TInt aLineNumber, HBufC* aBuf );
 
   HBufC* iTitle;
   HBufC* iAlbum;
