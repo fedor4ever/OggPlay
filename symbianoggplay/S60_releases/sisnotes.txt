@@ -1,5 +1,27 @@
-This is S60_releases\sisnotes.txt and upon release Captain Claus could write something insightful in here like:
-Welcome to the most brilliant Oggplay - the best open-source media player for Ogg Vorbis for Series60 the world has ever seen (or that we know of).
-Or let's show the user a Changelog and the credits for translations and skin design (Fundaluka!) or whatever. I'm tired now.
-After this we could even display the GPL/LICENSE file. -- option FT,TE in .sisfile
- 
+    Welcome to OggPlay 1.0
+
+ ***** RC 1 - 040323 *****
+
+Welcome to the Series 60
+version of OggPlay, the open
+source media player for Ogg
+Vorbis files on Symbian,
+released under the GPL by
+Leif H. Wilden.
+
+Special thanks goes to the
+patient translators and to
+Martin Cohen for the
+artwork. And Leif :-)
+
+We hope that you will enjoy
+using OggPlay as much as we
+enjoyed making it work on 
+Series 60. 
+Please find contact info in
+the options menu of OggPlay.
+
+     The Series 60 team
+      Berthier Lemieux,   
+       Pascal Wolff &
+        Claus Bjerre
