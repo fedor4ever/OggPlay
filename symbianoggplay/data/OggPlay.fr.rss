@@ -64,8 +64,8 @@
 #define ogg_text_error_21 "COggCanvas: Erreur d'ouverture de l'image d'arrière-plan."
 //#define ogg_text_error_22 "Only the following sample rates are supported: "
 //#define ogg_text_error_23 "Only streams with one channel are supported."
-#define ogg_text_error_24 "Ce fichier a été encodé avec une fréquence d'échantillonnage = %i Hz. Malheureusement, votre téléphone supporte seulement les fréquences suivants: %S. "
-#define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
+#define ogg_text_error_24 "Ce fichier a été encodé avec une fréquence d'échantillonnage = %i Hz. Malheureusement, votre téléphone supporte seulement les fréquences suivantes: %S. "
+#define ogg_text_error_25 "Ce ficher contient 2 canaux (stéréo). Malheureusement, votre téléphone supporte seulement un canal. "
 #define ogg_text_error_26 "Oggplay va effectuer les convertions nécessaires pour vous permettre d'écouter le fichier. Mais, si vous etes préoccupé par la taille de vos fichiers, il serait bénéfique de les réencoder en utilisant une fréquence supportée par votre téléphone. La taille de vos fichier sera réduite considérablement sans impact sur la qualité."
 #define ogg_text_error_27 "Ce message d'avertissement peut etre désactivé, a partir du menu d'options."
 
@@ -91,9 +91,9 @@
 #define ogg_format_text_page_down    "Bas de liste"
 
 #define ogg_settings                 "Parametres"  // in the menu
-#define ogg_settings_title           "Parametres" // on top of the settings screen
+#define ogg_settings_title           "Parametres"  // on top of the settings screen
 #define ogg_filescanmode             "Mode de recherche"
-#define ogg_maneuvring_speed         "Explor. Dir Auto"
+#define ogg_maneuvring_speed         "Explor. Dossiers Auto"
 #define ogg_autostart                "Autoplay au démarrage"
 #define ogg_fullscan                 "Tout le téléphone"
 #define ogg_mmcdir                   "E:\Ogg"
@@ -106,4 +106,5 @@
 #define ogg_back_dir                 "back"
 #define ogg_backspace                "Backspace"
 #define ogg_shift                    "Shift"
+#define ogg_warnings                 "Avertissements"
 
