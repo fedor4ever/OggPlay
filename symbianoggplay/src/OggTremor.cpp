@@ -404,6 +404,9 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   }
 #ifdef MDCT_FREQ_ANALYSER
   iTimeBetweenTwoSamples = 1.0E6/(theRate*theChannels);
+  /* Make a frequency measurement only every .1 seconds, that should be enough */
+  iTimeWithoutFreqCalculation = 0;
+  iTimeWithoutFreqCalculationLim = (TInt)(0.1E6 / iTimeBetweenTwoSamples);
 #endif
   return error;
 
@@ -514,24 +517,25 @@ TInt64 COggPlayback::Time()
 
 
 #ifdef MDCT_FREQ_ANALYSER
-const TInt32 * COggPlayback::GetFrequencyBins(TTime aTime)
+const TInt32 * COggPlayback::GetFrequencyBins(TTime /* aTime */)
 {
 
-  TTimeIntervalMicroSeconds deltaTime = TTimeIntervalMicroSeconds( (aTime-iFirstBufferTime).Int64() );
+    // We're not using aTime anymore, Position gives better results
+  TTimeIntervalMicroSeconds currentPos = iStream->Position();
+
   TInt idx;
   idx = iLastFreqArrayIdx;
+   
   for (TInt i=0; i<KFreqArrayLength; i++)
     {
-      if (iFreqArray[idx].Time < deltaTime )
+      if (iFreqArray[idx].Time < currentPos)
           break;
       
         idx--;
         if (idx < 0)
             idx = KFreqArrayLength-1;
     }
-   // TInt delta = iLastFreqArrayIdx - idx;
-   // if (delta <0) delta += KFreqArrayLength;
-   // TRACEF(COggLog::VA(_L("F:%d %d %d %d"), idx, iLastFreqArrayIdx, delta, deltaTime.Int64()/1000 ));
+ 
     return iFreqArray[idx].FreqCoefs;
 }
 #else
@@ -666,16 +670,16 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         return(KErrNotReady);
     TInt len = aBuffer.Length();
 #ifdef MDCT_FREQ_ANALYSER
-    TBool MeasureNow = ETrue;
-    if (MeasureNow)
+    if (iTimeWithoutFreqCalculation > iTimeWithoutFreqCalculationLim )
+
     {
+        iTimeWithoutFreqCalculation = 0;
         iLastFreqArrayIdx++;
         if (iLastFreqArrayIdx >= KFreqArrayLength)
             iLastFreqArrayIdx = 0;
         ov_getFreqBin(&iVf, ETrue, iFreqArray[iLastFreqArrayIdx].FreqCoefs);
 
         iFreqArray[iLastFreqArrayIdx].Time =  TInt64(iLatestPlayTime) ;
-
     }
     else
     {
@@ -690,6 +694,7 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         aBuffer.SetLength(len + ret);
 #ifdef MDCT_FREQ_ANALYSER
         iLatestPlayTime += ret*iTimeBetweenTwoSamples;
+        iTimeWithoutFreqCalculation += ret;
         //TRACEF(COggLog::VA(_L("U:%d %f "), ret, iLatestPlayTime ));
 #endif
 
@@ -716,6 +721,7 @@ void COggPlayback::SendBuffer(TDes8& buf)
       buf.FillZ(4000);
       cnt = 4000;
       ret = 4000;
+      iLatestPlayTime += ret*iTimeBetweenTwoSamples;
       iFirstBuffers--;
       if (iFirstBuffers == 0)
       {

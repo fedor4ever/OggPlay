@@ -229,9 +229,8 @@ typedef struct
 
   TFixedArray<TFreqBins,KFreqArrayLength> iFreqArray;
   TInt iLastFreqArrayIdx;
-  TBool iNextBufferMeasureTime;
-  TDes8 * iBufferMeasureTime;
-  TTimeIntervalMicroSeconds iFirstBufferTime;
+  TInt iTimeWithoutFreqCalculation;
+  TInt iTimeWithoutFreqCalculationLim;
 #endif
 
   // communication with the tremor/ogg codec:
