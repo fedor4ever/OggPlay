@@ -1,10 +1,17 @@
-// uncomment for UIQ/SERIES60:
+
+#include "OggOs.h"
+
+#if defined(UIQ)
 #include "OggPlay.header.rss"
-//#include "OggPlay.header_s60.rss"
+#else
+#include "OggPlay.header_s60.rss"
+#endif
 
 #include "OggPlay.en.rss"
 
-// uncomment:
+#if defined(UIQ)
 #include "OggPlay.common_uiq.rss"
-//#include "OggPlay.common_s60.rss"
+#else
+#include "OggPlay.common_s60.rss"
+#endif
 

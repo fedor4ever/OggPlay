@@ -30,12 +30,34 @@ chSTR2(__LINE__) "):" #desc)
 #define chmsg(desc)
 #endif
 
+
+
+// DEBUGGING
+//
+//#define TRACE_ON          // See OggLog
+
+
+// NEW CODE ENABLERS
+//
+//#define SERIES60_SPLASH   // OggPlayAif.s60.rss and OggPlay.cpp
+
+
+// BUILD TARGETS
+//
+// Enable this line to enforce the platform target.
+//#define SERIES60
+
+// Automatic platform target. Seen fail on windows systems.
 #if defined(__AVKON_ELAF__) || defined(__AVKON_APAC__)
-#define SERIES60
-//#pragma chmsg(Building for SERIES60)
+  #if !defined(UIQ)
+    #define SERIES60
+#endif
+  //#pragma chmsg(Building for SERIES60)
 #else
-#define UIQ
-//#pragma chmsg(Building for UIQ)
+  #if !defined(SERIES60)
+    #define UIQ
+  #endif
+  //#pragma chmsg(Building for UIQ)
 #endif
 
 

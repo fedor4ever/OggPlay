@@ -8,20 +8,35 @@ Feel free to go wild. The content is more important than the style.
 
 
 
-Issue #1 : Crashes on 44.1/stereo                               State : In work/Claus
+Issue #1 : Crashes on 44.1/stereo                               State : Committed
 Crashes can happen when playing 44.1kHz stereo due to overall 
 system load. (GSM call activity, MP3 started in parallel etc.)
 ........................
 Looking at thread/proc priorities and such. Also the audio
 priority should be decreased from the current 100.
+............................
+Now SX1 survives a GSM call, and the audio priority is set to 70.
 
 
-Issue #2 : App flickers at start up                             State : In work/Claus
+Issue #1.1 : Nicer GSM interaction                              State : Open
+GSM interaction could be more cool than it is now. The first
+hint of a ringing in progress should pause OggPlay.
+
+
+#Issue #1,2 : MP3 chrash                                        State : Open
+When MP3 player is started in parallel with OggPlay the SX1
+give up. It should be checked that it is not OggPlay that is
+the only bully in this scenario.
+
+
+Issue #2 : App flickers at start up                             State : Committed
 App flickers at start up. (Avkon status pane)
 Would it be possible to let OggPlay start in a more cool way 
 regarding graphics ?
 ........................
 I'll make a fast go for evaluation
+........................
+Committed a dinosaur. We'll see what the reaction is.
 
 
 Issue #3 : Ejecting a MMC                                       State : Open
@@ -67,10 +82,22 @@ Bug was aknowledged by Nokia. The only thing we can do is buffer
 a little bit more so that buffer underflow doesn't happens too often.
 
 
-Issue #10. The Options menu doesn't work at all.		State : Open
+Issue #10. The Options menu doesn't work at all.                State : Open
 
 
+Issue #11. Right softkey Back/Exit                              State : To discussion
+When in the 'ogg file system' back should work
+as the '..' and in the 'top view' it could read Exit
+and only here give app exit ?
 
+
+Issue #12. Selection of (files) entry can fail                  State : Open
+Start program, goto last entry (files) and press
+navi center. Nothing happens which is an error.
+
+
+Issue #13. Volume not preserved between sessions                State : Open
+Should be saved. Or recalled ?
 
 
 

@@ -19,10 +19,23 @@
 #ifndef _OGGLOG_H
 #define _OGGLOG_H
 
+#include "OggOs.h"
 #include <flogger.h>
 
 #define OGGLOG COggLog::InstanceL()->iLog
 #define OGGPANIC(msg,reason) COggLog::InstanceL()->Panic(msg,reason)
+
+
+// One reason for putting RDebug::Print in a macro is that the literals in 
+// the debug messages will always be present in the binary, even on urel builds.
+// 
+#ifdef TRACE_ON
+#define TRACE(x)  RDebug::Print(x)
+#define TRACEL(x)  TRACE(COggLog::VA(_L(x)))
+#else
+#define TRACE(x)  ;
+#define TRACEL(x)  ;
+#endif
 
 // OggLog is a class giving access to the RFileLogger facility for all OggPlay classes.
 // It's implemented closely to the singleton pattern 
@@ -38,6 +51,10 @@ public:
 
   void Panic(const TDesC& msg,TInt aReason);
   RFileLogger iLog;
+
+  /// Variable list argument formatting. I.e. TRACE(COggLog::VA(_L("1+1=%d"), 2 )
+  static TRefByValue<const TDesC> VA( TRefByValue<const TDesC> aLit,... );
+
   
 protected:
   COggLog();

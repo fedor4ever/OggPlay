@@ -1,6 +1,6 @@
 /*
 * ============================================================================
-*  Name     : OggPlayaif.rss
+*  Name     : OggPlayaif.s60.rss
 *  Part of  : OggPlay
 *  Created  : 19.07.2003 by 
 *  Description:
@@ -12,6 +12,7 @@
 */
 
 #include <aiftool.rh>
+#include <..\inc\OggOs.h>
 
 RESOURCE AIF_DATA
     {
@@ -19,6 +20,9 @@ RESOURCE AIF_DATA
     num_icons=2;
     embeddability=KAppNotEmbeddable;
     newfile=KAppDoesNotSupportNewFile;
+#if defined(SERIES60_SPLASH)
+    launch=KAppLaunchInBackground;
+#endif
     }
 
 // End of File

@@ -44,6 +44,14 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <OggPlay.rsg>
 
 
+#if defined(UIQ)
+const TInt KThreadPriority = EPriorityAbsoluteHigh;
+#else
+const TInt KThreadPriority = EPriorityAbsoluteBackground;
+#endif
+
+
+
 //
 // EXPORTed functions
 //
@@ -70,7 +78,7 @@ COggActive::COggActive(COggPlayAppUi* theAppUi) :
   iServer(0),
   iPhone(0),
   iLine(0),
-  iLineStatus(),
+  iLineStatus(RCall::EStatusUnknown),
   iRequestStatusChange(),
   iTimer(0),
   iCallBack(0),
@@ -78,7 +86,7 @@ COggActive::COggActive(COggPlayAppUi* theAppUi) :
   iAppUi(theAppUi)
 {
 #if !defined(SERIES60)
-  iServer= new RTelServer;
+  iServer= new (ELeave) RTelServer;
   int ret= iServer->Connect();
   if (ret!=KErrNone) return;
 
@@ -94,7 +102,7 @@ COggActive::COggActive(COggPlayAppUi* theAppUi) :
   ret= iServer->GetPhoneInfo(0,PInfo);
   if (ret!=KErrNone) return;
 
-  iPhone= new RPhone;
+  iPhone= new (ELeave) RPhone;
   ret= iPhone->Open(*iServer,PInfo.iName);
   if (ret!=KErrNone) return;
 
@@ -108,7 +116,7 @@ COggActive::COggActive(COggPlayAppUi* theAppUi) :
     if (ret!=KErrNone) return;
   }
 
-  iLine= new RLine;
+  iLine= new (ELeave) RLine;
 #endif
 
 }
@@ -160,7 +168,7 @@ COggActive::IssueRequest()
 {
 #if !defined(SERIES60)
   iTimer= CPeriodic::New(CActive::EPriorityStandard);
-  iCallBack= new TCallBack(COggActive::CallBack,this);
+  iCallBack= new (ELeave) TCallBack(COggActive::CallBack,this);
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(1000000),*iCallBack);
 #endif
 }
@@ -194,9 +202,63 @@ COggActive::~COggActive()
 void
 COggPlayAppUi::ConstructL()
 {
+
+
+#if defined(SERIES60_SPLASH)
+  #include <S60default.mbg>
+  const TInt KCBAPaneHeight = 20;
+
+  // http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
+  //   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
+
+  TRACEL("COggPlayAppUi::ConstructL() - RFbsSession::Connect()");
+  RFbsSession::Connect();
+  TRACEL("RFbsSession.Connect(). Ok.");
+  CFbsScreenDevice *iDevice = NULL;
+  TRAPD(err,iDevice = CFbsScreenDevice::NewL(_L("scdv"),EColor64K)); // All runs 64K ??
+  CleanupStack::PushL(iDevice);
+  TRACE(COggLog::VA(_L(" - CFbsScreenDevice::NewL returned %d "), err ));
+  
+  CGraphicsContext *iGc = NULL;
+  TRACEL("CreateContext"); 
+  TRAPD(err2,iDevice->CreateContext((CGraphicsContext*&)iGc));
+  CleanupStack::PushL(iGc);
+  TRACE(COggLog::VA(_L(" - CreateContext returned %d"), err2 ));
+  
+  TRACEL("ChangeScreenDevice");
+  iDevice->ChangeScreenDevice(NULL);
+  iDevice->SetAutoUpdate(EFalse);
+  
+  TFileName *appName = new (ELeave) TFileName(Application()->AppFullName());
+  CleanupStack::PushL(appName);
+  TParse *parser = new (ELeave) TParse();
+  CleanupStack::PushL(parser);
+  User::LeaveIfError(parser->Set(*appName, NULL, NULL));
+  TBuf<100> iMbmFileName(parser->DriveAndPath());
+  CleanupStack::PopAndDestroy(2); // appName + parser
+  iMbmFileName.Append( _L("s60default.mbm") );
+  TRACE(COggLog::VA(_L("%S"), &iMbmFileName ));
+  
+  TRACEL("CFbsBitmap");
+  CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
+  CleanupStack::PushL(iBitmap);
+  TRAPD(err3,iBitmap->Load( iMbmFileName,EMbmS60defaultFlipclosed,EFalse));
+  TRACE(COggLog::VA(_L(" - iBitmap->Load returned %d"), err3 ));
+
+  TSize iSize = iDevice->SizeInPixels();
+  iGc->DrawBitmap(TRect(0,0,iSize.iWidth,iSize.iHeight-KCBAPaneHeight),iBitmap);
+  TRACEL("iDevice->Update();");
+  iDevice->Update();
+  
+  RFbsSession::Disconnect();
+  CleanupStack::PopAndDestroy(3);  // iBitmap iGc iDevice;
+#endif
+
   BaseConstructL();
 
-  _LIT(KS,"Starting OggPlay ...");
+  TRACEL("Starting OggPlay ...");
+
+  //_LIT(KS,"Starting OggPlay ...");
   //OGGLOG.WriteFormat(KS);
 
   const TFileName aAppFilename=Application()->AppFullName();
@@ -208,6 +270,8 @@ COggPlayAppUi::ConstructL()
   iIniFileName->Des().Copy(aP.Path());
   iIniFileName->Des().Append(aP.Name());  
   iIniFileName->Des().Append(KiIniFileNameExtension);
+
+  TRACE(COggLog::VA(_L("Inifile : %S"), iIniFileName ));
 
 #if defined(__WINS__)
   // The emulator doesn't like to write to the Z: drive,
@@ -271,6 +335,12 @@ COggPlayAppUi::ConstructL()
   SetThreadPriority();
 
   ActivateOggViewL();
+
+#if defined(SERIES60_SPLASH)
+  // Display player. This could be probably be better.
+  iAppView->Update();
+  iEikonEnv->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNormal);
+#endif
 }
 
 
@@ -741,7 +811,7 @@ COggPlayAppUi::FindSkins()
   CDirScan* ds = CDirScan::NewLC(iCoeEnv->FsSession());
   TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
   if (err!=KErrNone) {
-	_LIT(KS,"Error in FindSkins-SetScanDataL");
+	//_LIT(KS,"Error in FindSkins-SetScanDataL");
 	//OGGLOG.WriteFormat(KS);
 
     delete ds;
@@ -780,7 +850,7 @@ COggPlayAppUi::FindSkins()
   delete ds;
   session.Close();
 
-	_LIT(KS,"Found %d skin(s)");
+	//_LIT(KS,"Found %d skin(s)");
 	//OGGLOG.WriteFormat(KS,iSkins->Count());
 
 }

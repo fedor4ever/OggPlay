@@ -73,3 +73,15 @@ void COggLog::Panic(const TDesC& msg,TInt aReason) {
   iLog.Write(msg);
   User::Panic(_L("OggPlay"),aReason);	
 }
+
+
+TRefByValue<const TDesC> COggLog::VA( TRefByValue<const TDesC> aLit,... )
+  {
+  VA_LIST list;
+  VA_START(list, aLit);
+  TBuf<100> buf(_L("***OggPlay*** "));
+  buf.AppendFormatList(aLit,list);
+  return buf;
+  }
+
+
