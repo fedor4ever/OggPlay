@@ -138,6 +138,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_back                 "Назад"
 #define ogg_cba_clear                "Очистить"
 #define ogg_cba_option               "Опции"
+#define ogg_cba_modify               "Modify" //To be Translated
 #define ogg_cba_exit                 "Выход"
 #define ogg_cba_stop                 "Стоп"
 #define ogg_cba_pause                "Пауза"

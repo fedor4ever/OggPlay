@@ -132,6 +132,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_back                 "Terug"
 #define ogg_cba_clear                "Wissen"
 #define ogg_cba_option               "Opties"
+#define ogg_cba_modify               "Modify" // To be Translated
 #define ogg_cba_exit                 "Sluiten"
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pauze"

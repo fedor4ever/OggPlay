@@ -128,6 +128,7 @@
 #define ogg_cba_back                 "Tillbaka"
 #define ogg_cba_clear                "Rensa"
 #define ogg_cba_option               "Val"
+#define ogg_cba_modify               "Modify" //To be Translated
 #define ogg_cba_exit                 "Avsluta"
 #define ogg_cba_stop                 "Stopp"
 #define ogg_cba_pause                "Paus"

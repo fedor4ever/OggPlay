@@ -1351,7 +1351,7 @@ COggPlayAppUi::ReadIniFile()
         TUid aUid;
         aUid.iUid = uid;
         TRAPD(newermind,
-        iOggPlayback->GetPluginListL(extension).SelectPluginL(aUid); )
+        iOggPlayback->GetPluginListL().SelectPluginL(extension, aUid); )
         
         TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid, newermind));
     }
@@ -1494,7 +1494,7 @@ COggPlayAppUi::WriteIniFile()
     num.Num(iRandom);
     tf.Write(num);
 #ifdef PLUGIN_SYSTEM
-    CDesCArrayFlat * supportedExtensionList = iOggPlayback->SupportedExtensions();
+    CDesCArrayFlat * supportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
     TRAPD(Err,
     {
         CleanupStack::PushL(supportedExtensionList);
@@ -1503,15 +1503,18 @@ COggPlayAppUi::WriteIniFile()
         tf.Write(num);
         for ( j=0; j<supportedExtensionList->Count(); j++ )
         {
-            tf.Write( (*supportedExtensionList)[j] );
-            CPluginInfo & selected = iOggPlayback->GetPluginListL( (*supportedExtensionList)[j] ).GetSelectedPluginInfo();
-            
-            num.Num((TInt)selected.iControllerUid.iUid) ;
+            tf.Write( (*supportedExtensionList)[j]);
+            CPluginInfo * selected = iOggPlayback->GetPluginListL().GetSelectedPluginInfo((*supportedExtensionList)[j]);
+            if (selected)
+            	num.Num((TInt)selected->iControllerUid.iUid) ;
+            else
+            	num.Num(0);
             tf.Write(num);
         }
         
         CleanupStack::PopAndDestroy(1);
-    } ) // End of TRAP
+    } 
+    ) // End of TRAP
 
 #endif
     
@@ -1670,6 +1673,8 @@ CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename
 {
 #ifdef SERIES60
 	iAppUi->OpenFileL(aFilename);
+#else
+	aFilename; // To shut up the compiler warning
 #endif
 
 	return NULL;

@@ -137,6 +137,7 @@
 #define ogg_cba_back                 "Atras"
 #define ogg_cba_clear                "Limpa"
 #define ogg_cba_option               "Opcoes"
+#define ogg_cba_modify               "Modify" //To be Translated
 #define ogg_cba_exit                 "Sair"
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pausa"

@@ -125,6 +125,7 @@
 #define ogg_cba_back                 "Zurück"
 #define ogg_cba_clear                "Löschen"
 #define ogg_cba_option               "Optionen"
+#define ogg_cba_modify               "Modify" // To be Translated
 #define ogg_cba_exit                 "Verlassen"
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"

@@ -211,6 +211,7 @@ void CPluginSupportedList::AddExtension(const TDesC &anExtension)
     CleanupStack::Pop(list);
 }
 	
+
 ////////////////////////////////////////////////////////////////
 //
 // COggPluginAdaptor

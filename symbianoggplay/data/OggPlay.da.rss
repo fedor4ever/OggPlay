@@ -131,6 +131,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_back                 "Tilbage"
 #define ogg_cba_clear                "Slet"
 #define ogg_cba_option               "Menu"
+#define ogg_cba_modify               "Modify" // To be Translated
 #define ogg_cba_exit                 "Afslut"
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"

@@ -21,11 +21,10 @@
 // INCLUDES
 #include "OggPlay.h"
 
-#if defined(SERIES60) && defined(MMF_AVAILABLE)
+#if ( defined(SERIES60) && defined(PLUGIN_SYSTEM) )
 #include <coecntrl.h>
 #include <aknsettingitemlist.h> 
 #include <aknpopupsettingpage.h> 
-#endif
 
 
 class CEikTextListBox;
@@ -95,5 +94,6 @@ private:
   
 #endif /* SERIES60 && MMF_AVAILABLE */
 
+#endif /* OGGPLUGINSELECTIONDIALOGS60_H */
 
 // End of File

@@ -148,7 +148,7 @@ RESOURCE DIALOG r_dialog_files_search {
 #endif
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
-    filesFoundStr =ogg_filescan_label2;
+    filesFoundStr =ogg_filescan_label2_mmf;
 
 #ifdef PLAYLIST_SUPPORT
     playlistsFoundStr =ogg_filescan_label3;

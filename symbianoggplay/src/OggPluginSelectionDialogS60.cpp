@@ -92,7 +92,7 @@ void COggplayCodecSelectionSettingItemList::RefreshListboxModel()
 	   // Codec has been disabled
    		iEikonEnv->ReadResource(tmp,R_OGG_DISABLED);
 	}
-	else tmp = *info->iName;
+	else tmp = (info->iName->Left(50));
 	
     listboxBuf.Format(_L("\t%S\t\t%S"), &extension, &tmp);
 	modelArray->InsertL(i,listboxBuf);

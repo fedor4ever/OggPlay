@@ -133,6 +133,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_back                 "Geri"
 #define ogg_cba_clear                "Sil"
 #define ogg_cba_option               "Seçenek"
+#define ogg_cba_modify               "Modify" //To be Translated
 #define ogg_cba_exit                 "Çık"
 #define ogg_cba_stop                 "Dur"
 #define ogg_cba_pause                "Duraklat"
