@@ -402,6 +402,9 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
       buf.AppendNum(error);
       iEnv->OggErrorMsgL(tbuf,buf);
   }
+#ifdef MDCT_FREQ_ANALYSER
+  iTimeBetweenTwoSamples = 1.0E6/(theRate*theChannels);
+#endif
   return error;
 
 }
@@ -513,7 +516,23 @@ TInt64 COggPlayback::Time()
 #ifdef MDCT_FREQ_ANALYSER
 const TInt32 * COggPlayback::GetFrequencyBins(TTime aTime)
 {
-    return iFreqCoefs;
+
+  TTimeIntervalMicroSeconds deltaTime = TTimeIntervalMicroSeconds( (aTime-iFirstBufferTime).Int64() );
+  TInt idx;
+  idx = iLastFreqArrayIdx;
+  for (TInt i=0; i<KFreqArrayLength; i++)
+    {
+      if (iFreqArray[idx].Time < deltaTime )
+          break;
+      
+        idx--;
+        if (idx < 0)
+            idx = KFreqArrayLength-1;
+    }
+   // TInt delta = iLastFreqArrayIdx - idx;
+   // if (delta <0) delta += KFreqArrayLength;
+   // TRACEF(COggLog::VA(_L("F:%d %d %d %d"), idx, iLastFreqArrayIdx, delta, deltaTime.Int64()/1000 ));
+    return iFreqArray[idx].FreqCoefs;
 }
 #else
 const void* COggPlayback::GetDataChunk()
@@ -647,7 +666,21 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         return(KErrNotReady);
     TInt len = aBuffer.Length();
 #ifdef MDCT_FREQ_ANALYSER
-    ov_getFreqBin(&iVf, ETrue, iFreqCoefs);
+    TBool MeasureNow = ETrue;
+    if (MeasureNow)
+    {
+        iLastFreqArrayIdx++;
+        if (iLastFreqArrayIdx >= KFreqArrayLength)
+            iLastFreqArrayIdx = 0;
+        ov_getFreqBin(&iVf, ETrue, iFreqArray[iLastFreqArrayIdx].FreqCoefs);
+
+        iFreqArray[iLastFreqArrayIdx].Time =  TInt64(iLatestPlayTime) ;
+
+    }
+    else
+    {
+        ov_getFreqBin(&iVf, EFalse, NULL);
+    }
 #endif
     TInt ret=ov_read( &iVf,(char *) &(aBuffer.Ptr()[len]),
         aBuffer.MaxLength()-len
@@ -655,6 +688,12 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
     if (ret >0)
     {
         aBuffer.SetLength(len + ret);
+#ifdef MDCT_FREQ_ANALYSER
+        iLatestPlayTime += ret*iTimeBetweenTwoSamples;
+        //TRACEF(COggLog::VA(_L("U:%d %f "), ret, iLatestPlayTime ));
+#endif
+
+
     }
     if (ret == 0)
     {
@@ -678,7 +717,18 @@ void COggPlayback::SendBuffer(TDes8& buf)
       cnt = 4000;
       ret = 4000;
       iFirstBuffers--;
+      if (iFirstBuffers == 0)
+      {
+	      iNextBufferMeasureTime = ETrue;
+      }
   } else {
+      if (iNextBufferMeasureTime)
+      {
+          // This is to try to evaluate the time when streaming really start
+	      // Do not take into account the first buffer, to avoid the first buffer problem
+	      iNextBufferMeasureTime = EFalse;
+          iBufferMeasureTime = &buf;
+      } 
      ret = iOggSampleRateConverter->FillBuffer( buf );
   }
 
@@ -753,6 +803,13 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
   if (iState != EPlaying) return;
 
+  if (iBufferMeasureTime == &aBuffer)
+  {
+      // Try to evaluate the time the audio stream has really started.
+    TTime now;
+    now.UniversalTime();
+    iFirstBufferTime= now.Int64();
+  }
   TInt b;
   for (b=0; b<KBuffers; b++) if (&aBuffer == iBuffer[b]) break;
 

@@ -48,8 +48,9 @@ const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
 
 const TInt KErrOggFileNotFound = -101;
-
-
+const TInt KFreqArrayLength = 100; // Length of the memory of the previous freqs bin
+const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making same changes
+                                   // to vorbis library !
 class MPlaybackObserver {
  public:
   virtual void NotifyPlayComplete() = 0;
@@ -217,8 +218,20 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
 
 #ifdef MDCT_FREQ_ANALYSER
-// BL : Frequency analyser changes
-  TInt32 iFreqCoefs[17]; 
+  TReal  iLatestPlayTime;
+  TReal  iTimeBetweenTwoSamples;
+
+typedef struct 
+{
+    TTimeIntervalMicroSeconds Time;
+    TInt32 FreqCoefs[KNumberOfFreqBins];
+} TFreqBins;
+
+  TFixedArray<TFreqBins,KFreqArrayLength> iFreqArray;
+  TInt iLastFreqArrayIdx;
+  TBool iNextBufferMeasureTime;
+  TDes8 * iBufferMeasureTime;
+  TTimeIntervalMicroSeconds iFirstBufferTime;
 #endif
 
   // communication with the tremor/ogg codec:
