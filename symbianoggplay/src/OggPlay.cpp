@@ -155,7 +155,6 @@ COggActive::CallBack(TAny* aPtr)
 	if (self->iAppUi->iIsRunningEmbedded && self->iAppUi->iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
 		self->iAppUi->NextSong();
 	}
-#if !defined(SERIES60)
 	
 	self->iAppUi->NotifyUpdate();
 	
@@ -190,14 +189,9 @@ COggActive::CallBack(TAny* aPtr)
 				self->iInterrupted= EFalse;
 				if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
 					self->iAppUi->HandleCommandL(EOggPauseResume);
-				return 1;
 			}
 		}
 	}
-#else
-	self->iTimer->Cancel();
-#endif
-	
 	return 1;
 }
 
