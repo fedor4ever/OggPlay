@@ -215,7 +215,9 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TInt                     iFirstBuffers;  
   static TInt StartAudioStreamingCallBack(TAny* aPtr);
   COggTimer *              iStartAudioStreamingTimer;
-
+  static TInt StopAudioStreamingCallBack(TAny* aPtr);
+  COggTimer *              iStopAudioStreamingTimer;
+  TBool                    iStoppedFromEof;
 
 #ifdef MDCT_FREQ_ANALYSER
   TReal  iLatestPlayTime;

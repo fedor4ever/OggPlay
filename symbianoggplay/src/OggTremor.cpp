@@ -163,6 +163,7 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) :
   iEnv(anEnv),
   iSettings(),
   iSentIdx(0),
+  iStoppedFromEof(EFalse),
   iVf(),
   iFile(0),
   iFileOpen(0),
@@ -210,12 +211,16 @@ void COggPlayback::ConstructL() {
 
   iStartAudioStreamingTimer = new (ELeave) COggTimer(
       TCallBack( StartAudioStreamingCallBack,this )   );
+  
+  iStopAudioStreamingTimer = new (ELeave) COggTimer(
+      TCallBack( StopAudioStreamingCallBack,this )   );
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
 }
 
 COggPlayback::~COggPlayback() {
   delete  iStartAudioStreamingTimer;
+  delete  iStopAudioStreamingTimer;
   delete iStream;
   iBuffer.ResetAndDestroy();
   delete iOggSampleRateConverter;
@@ -604,6 +609,7 @@ void COggPlayback::Play()
         break;
     case EOpen:  
         iEof=0;
+        iStoppedFromEof = EFalse;
         iBufCount= 0;
         iCurrentSection= 0;
         break;
@@ -647,6 +653,7 @@ void COggPlayback::Stop()
   ClearComments();
   iTime= 0;
   iEof= 0;
+  iStoppedFromEof = EFalse;
 
   /*
   // wait until all buffers are played (or 0.5 sec max):
@@ -741,9 +748,9 @@ void COggPlayback::SendBuffer(TDes8& buf)
       iEnv->OggErrorMsgL(tbuf,cbuf);
       User::Leave(err);
     }
-    iSent[iSentIdx]= &buf;
     iSentIdx++;
     if (iSentIdx>=KBuffers) iSentIdx=0;
+    iSent[iSentIdx]= &buf;
   }
 }
 
@@ -757,10 +764,11 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
 
   if (iState==EPaused || iState==EClosed) return;
 
-  if (aError == KErrUnderflow) aError= KErrNone; // no more buffers coming, the stream ends
+  if (aError == KErrUnderflow) 
+      return;
   if (aError == KErrInUse) aError= KErrNone;
 
-  if (aError == KErrCancel) return;
+  if (aError == KErrCancel) aError = KErrNone; 
 
   if (aError == KErrDied) {
     iObserver->NotifyPlayInterrupted();
@@ -808,7 +816,15 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
   TInt b;
   for (b=0; b<KBuffers; b++) if (&aBuffer == iBuffer[b]) break;
+  if ( (iEof) && (iSent[iSentIdx] == &aBuffer) )
+  {
+      // All the buffers have been sent, stop the playback
+      // We cannot rely on a MaoscPlayComplete from the CMdaAudioOutputStream
+      // since not all phone supports that.
 
+      iStoppedFromEof = ETrue;
+      iStopAudioStreamingTimer->Wait(0.1E6);
+  }
   if (aError == KErrUnderflow) aError= KErrNone;
 
   if (aError == KErrNone) SendBuffer(*iBuffer[b]); 
@@ -853,6 +869,15 @@ TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
   
   for (TInt i=0; i<KBuffers; i++) 
       self->SendBuffer(*(self->iBuffer[i]));
+  return 0;
+}
+
+
+TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
+{
+  COggPlayback* self= (COggPlayback*) aPtr;
+  
+  self->iStream->Stop();
   return 0;
 }
 
