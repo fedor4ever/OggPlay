@@ -49,7 +49,7 @@ Automatic resuming of playing can fail after system generated notification sound
 Links:
 ------
 For more information about Oggplay, please see the webpage at
-http://www.geocities.com/p800tools/
+http://symbianoggplay.sourceforge.net/
 
 For help and open discussion about OggPlay see under 'Public Forums' on
 http://sourceforge.net/projects/symbianoggplay/
