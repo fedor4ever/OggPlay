@@ -25,63 +25,24 @@ RESOURCE MENU_BAR r_oggplay_menubar
   
 RESOURCE TBUF r_ogg_version { buf=ogg_txt_version; }
 
+// About view
+RESOURCE TBUF r_ogg_about_line_1 { buf=ogg_version_txt; }
+RESOURCE TBUF r_ogg_about_line_2 { buf=ogg_c_author; }
+RESOURCE TBUF r_ogg_about_line_3 { buf=ogg_link_txt; }
+RESOURCE TBUF r_ogg_about_line_4 { buf=ogg_vorbis_c; }
+RESOURCE TBUF r_ogg_about_line_5 { buf=ogg_translation; }
+RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
+
+
 RESOURCE DIALOG r_dialog_about {
-  title   = ogg_about_oggplay;
   buttons =  R_AVKON_SOFTKEYS_BACK; 
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion;
-	control = LABEL 
+	type =  EOggScrollableTextControl;
+	id =    EOggScrollableTextDialog;
+	control = SCROLLABLERICHTEXT
 	{
-		txt=ogg_version_txt;
-		horiz_align=EEikLabelAlignHCenter;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion2;
-	control = LABEL 
-	{
-		txt=ogg_c_author;
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion3;
-	control = LABEL 
-	{
-		txt=ogg_link_txt;
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion4;
-	control = LABEL 
-	{
-		txt=ogg_vorbis_c;
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion5;
-	control = LABEL 
-	{
-		txt=ogg_translation;
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	id = EOggLabelAboutVersion6;
-	control = LABEL 
-	{
-		txt=ogg_port;
-		horiz_align=EEikLabelAlignHLeft;
 	};
     }	
   };

@@ -63,7 +63,10 @@ enum {
   EOggLabelFileSize,
   EOggLabelBitRate,
   EOggLabelRate,
-  EOggLabelChannels
+  EOggLabelChannels,
+
+  EOggScrollableTextControl,
+  EOggScrollableTextDialog
 };
 
 enum TOggplayCommandIds

@@ -12,7 +12,7 @@
 #define ogg_link_txt "visitar www.geocities.com/p800tools para más detalles"
 #define ogg_vorbis_c "(c) códec Ogg/Vorbis por Xiph.org"
 #define ogg_translation "Translation: David Cano"
-#define ogg_port "Port to S60: Claus Bjerre, Berthier Blemieux, Pascal Wolff"
+#define ogg_port "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff"
 #define ogg_file_prop "Propiedades del archivo"
 #define ogg_filename_txt "Nombre de archivo:"
 #define ogg_filename_unknown "desconocido"

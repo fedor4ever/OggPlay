@@ -24,7 +24,7 @@
 
 #include <eiklabel.h>
 #if defined(SERIES60)
-// include 
+#include <eikenv.h>
 #else
 #include <eikchlst.h>
 #include <eikchkbx.h>
@@ -129,6 +129,7 @@ COggInfoDialog::SetBitRate(TInt aBitRate)
   iBitRate= aBitRate;
 }
 
+#ifndef SERIES60
 
 void
 COggAboutDialog::PreLayoutDynInitL()
@@ -144,85 +145,130 @@ COggAboutDialog::SetVersion(const TDesC& aVersion)
 }
 
 
+#else
 
-#if 0
-// Skeleton of the Class 
-// Soon to be built
-SEikControlInfo COggScrollableInfoDialog::CreateCustomControlL(TInt aControlType) 
+void
+COggAboutDialog::PreLayoutDynInitL()
+{
+  // Create an empty rich text object
+  TCharFormat charFormat;
+  TCharFormatMask charFormatMask;
+  charFormat.iFontSpec.iTypeface.iName = _L("LatinBold12");
+  charFormatMask.SetAttrib(EAttFontTypeface); 
+  
+  iParaFormatLayer=CParaFormatLayer::NewL(); // required para format layer
+  iCharFormatLayer=CCharFormatLayer::NewL(charFormat,charFormatMask); // required char format layer
+  
+  iRichText=CRichText::NewL(iParaFormatLayer, iCharFormatLayer);
+  CParaFormat *paraFormat = CParaFormat::NewL();
+  CleanupStack::PushL(paraFormat);
+  TParaFormatMask paraFormatMask;
+  TInt len;
+  TInt pos;
+  
+  iRichText->AppendParagraphL(7);
+
+  TBuf<128> buf;
+
+  // Now add the text
+  // Center-align
+  paraFormatMask.SetAttrib(EAttAlignment); // interested in alignment
+  paraFormat->iHorizontalAlignment=CParaFormat::ECenterAlign; 
+  pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
+  iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
+  iRichText->InsertL(0,iVersion);
+
+  // One paragraph to add some space.
+
+  pos = iRichText->CharPosOfParagraph(len,2); // get start of 2nd para
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_2);
+  iRichText->InsertL(pos,buf);
+  
+  pos = iRichText->CharPosOfParagraph(len,3); // get start of 3rd para
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_3);
+  _LIT(KAdress, "www.geocities.com/p800tools") ;
+  TInt pos2 = pos + buf.Find(KAdress); // Beginning of the www adress
+  iRichText->InsertL(pos,buf);
+  
+  charFormatMask.SetAttrib(EAttColor);
+  charFormat.iFontPresentation.iTextColor=TLogicalRgb( TRgb(0,0,255) ) ; //Blue
+  charFormatMask.SetAttrib(EAttFontUnderline); // interested in underline
+  charFormat.iFontPresentation.iUnderline=EUnderlineOn; // set it on
+  charFormatMask.SetAttrib(EAttFontPosture);
+  charFormat.iFontSpec.iFontStyle.SetPosture(EPostureItalic);
+  iRichText->ApplyCharFormatL(charFormat, charFormatMask, pos2, KAdress().Length() );
+
+  pos = iRichText->CharPosOfParagraph(len,4); // get start of 4th para
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_4);
+  iRichText->InsertL(pos,buf);
+  pos = iRichText->CharPosOfParagraph(len,5); 
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_5);
+  iRichText->InsertL(pos,buf);
+  pos = iRichText->CharPosOfParagraph(len,6); 
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_6);
+  iRichText->InsertL(pos,buf);
+
+  UpdateModelL(iRichText);
+}
+
+void
+COggAboutDialog::SetVersion(const TDesC& aVersion)
+{
+  iVersion.Copy(aVersion);
+}
+
+
+COggAboutDialog::~COggAboutDialog()
+{
+    
+    delete iRichText; // contained text object
+    delete iCharFormatLayer; // character format layer
+    delete iParaFormatLayer; // and para format layer
+
+}
+
+void
+CScrollableTextDialog::UpdateModelL(CRichText * aRichText)
+{
+    iScrollableControl->UpdateModelL(aRichText);
+}
+
+
+SEikControlInfo CScrollableTextDialog::CreateCustomControlL(TInt aControlType) 
     { 
-    CRichControl *control = NULL; 
-    if (aControlType == EOggClTestBert) 
+    iScrollableControl = NULL; 
+    if (aControlType == EOggScrollableTextControl) 
          { 
-         control = new(ELeave)CRichControl; 
+         iScrollableControl = new(ELeave)CScrollableRichTextControl; 
          } 
-    SEikControlInfo info = {control,0,0};
+    SEikControlInfo info = {iScrollableControl,0,0};
     return info;
     } 
 
 
-
-#ifdef SERIES60
-void CScrollableRichTextControl::ConstructL(const TRect& aRect
-                              , const CCoeControl& aParent
-                              )
-{
-    // create window
-    CreateWindowL(&aParent);
-    // set rectangle to prescription
-    SetRect(aRect);
-    // go for it
-    ActivateL();
-    UpdateModelL(); // phase 0
-}
-
 void CScrollableRichTextControl::ConstructFromResourceL(TResourceReader& aReader)
 {
-    // Read the smiley mood from the resource file
-    // Read the width of the smiley container from the resource file.
     TInt width=aReader.ReadInt16();
     TInt height=aReader.ReadInt16();
-    // Set the height of the container to be half its width
     TSize containerSize (width, height);
     
     SetSize(containerSize);
-    UpdateModelL();
     ActivateL();	
 }
-
 
 CScrollableRichTextControl ::~CScrollableRichTextControl()
 {
     delete iTextView; // text view
     delete iLayout; // text layout
-    delete iRichText; // contained text object
-    delete iCharFormatLayer; // character format layer
-    delete iParaFormatLayer; // and para format layer
 }
 
-
-void CScrollableRichTextControl::UpdateModelL()
+void CScrollableRichTextControl::UpdateModelL(CRichText * aRichText)
 {
-    // Content is just an example
-    // Will be defined later.
-    _LIT(KTitle, "OggPlay");
-    _LIT(KVersion,"Version 0XX");
+    iRichText = aRichText;
     
-    _LIT(KFreeware, "blabla");
+    // Create text view and layout.
     
-    _LIT(KWebAdress, "please consult http://geocities.com/thing.html");
-    _LIT(KEmailAdress, "Comments and improvement ideas are welcome: mail0@hotmail.com");
     
-    // Create text object, text view and layout.
-    
-    TCharFormat charFormat;
-    TCharFormatMask charFormatMask;
-    charFormat.iFontSpec.iTypeface.iName = _L("LatinBold12");
-    charFormatMask.SetAttrib(EAttFontTypeface); 
-    
-    iParaFormatLayer=CParaFormatLayer::NewL(); // required para format layer
-    iCharFormatLayer=CCharFormatLayer::NewL(charFormat,charFormatMask); // required char format layer
-    // Create an empty rich text object
-    iRichText=CRichText::NewL(iParaFormatLayer, iCharFormatLayer);
     // prerequisites for view - viewing rectangle
     iViewRect=Rect();
     iViewRect.Shrink(3,3);
@@ -241,60 +287,11 @@ void CScrollableRichTextControl::UpdateModelL()
         &iCoeEnv->WsSession()
         ); // new view
     
-    CParaFormat *paraFormat = CParaFormat::NewL();
-    CleanupStack::PushL(paraFormat);
-    TParaFormatMask paraFormatMask;
-    TInt len;
-    TInt pos;
-    
-    iRichText->AppendParagraphL(5);
-    
-    // Center-align
-    paraFormatMask.SetAttrib(EAttAlignment); // interested in alignment
-    paraFormat->iHorizontalAlignment=CParaFormat::ECenterAlign; 
-    
-    pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
-    iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
-    // apply format to entire para - even length = 1 char will do
-    iRichText->InsertL(0,KTitle);
-    
-    pos = iRichText->CharPosOfParagraph(len,1); // get start of 2nd para
-    iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
-    //pos=iRichText->DocumentLength();
-    iRichText->InsertL(pos,KVersion);
-    
-    pos = iRichText->CharPosOfParagraph(len,2); // get start of 3rd para
-    //pos=iRichText->DocumentLength();
-    iRichText->InsertL(pos,KFreeware);
-    
-    pos = iRichText->CharPosOfParagraph(len,3); // get start of 3rd para
-    //pos=iRichText->DocumentLength();
-    
-    TBuf<100> buf1;
-    buf1 = KWebAdress;
-    TInt pos2 = buf1.Find(_L("http"));
-    iRichText->InsertL(pos,KWebAdress);
-    
-    charFormatMask.SetAttrib(EAttColor);
-    charFormat.iFontPresentation.iTextColor=TLogicalRgb( TRgb(0,0,255)) ; //Blue
-    charFormatMask.SetAttrib(EAttFontUnderline); // interested in underline
-    charFormat.iFontPresentation.iUnderline=EUnderlineOn; // set it on
-    charFormatMask.SetAttrib(EAttFontPosture);
-    charFormat.iFontSpec.iFontStyle.SetPosture(EPostureItalic);
-    iRichText->ApplyCharFormatL(charFormat, charFormatMask,pos+pos2, buf1.Length()-pos2);
-    
-    pos = iRichText->CharPosOfParagraph(len,4); // get start of 3rd para
-    //pos=iRichText->DocumentLength();
-    iRichText->InsertL(pos,KEmailAdress);
-    buf1 = KEmailAdress;
-    pos2 = buf1.Find(_L("bertq"));
-    iRichText->ApplyCharFormatL(charFormat, charFormatMask,pos+pos2, buf1.Length()-pos2);
-    
     CleanupStack::PopAndDestroy();
     DrawNow();
 }
 
-void CScrollableRichTextControl::Draw(const TRect& aRect) const
+void CScrollableRichTextControl::Draw(const TRect& /*aRect*/) const
 {
     // draw surround
     CGraphicsContext& gc=SystemGc(); // context to draw into
@@ -347,5 +344,4 @@ TKeyResponse CScrollableRichTextControl::OfferKeyEventL(const TKeyEvent& aKeyEve
 }
 
 #endif /*SERIES60*/
-#endif /* if 0 */
     
