@@ -541,7 +541,9 @@ void COggPlayback::Play()
   iEof=0;
   iBufCount= 0;
   iCurrentSection= 0;
-
+  iFirstBuffers = 4;// There is something wrong how Nokia handles the
+                   // first buffers. They are somehow swallowed.
+                   // To avoid that, send few (4) almost empty buffers
   for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
 }
 
@@ -588,16 +590,24 @@ void COggPlayback::SendBuffer(TDes8& buf)
 
 #ifdef FORCE_FULL_BUFFERS
   TInt cnt = 0;
-  TInt maxLength = KBufferSize ;
-  while (cnt <= 0.75 * maxLength ) {
-      ret=ov_read(&iVf,&((char *) buf.Ptr())[cnt],maxLength-cnt,&iCurrentSection);
-      if (ret <=0) 
-      {
-          break;
-      } 
-      cnt += ret;
+  if (iFirstBuffers)  {
+      buf.FillZ(4000);
+      cnt = 4000;
+      ret = 4000;
+      iFirstBuffers--;
+  } else {
+      cnt = 0;
+      TInt maxLength = KBufferSize ;
+      while (cnt <= 0.75 * maxLength ) {
+          ret=ov_read(&iVf,&((char *) buf.Ptr())[cnt],maxLength-cnt,&iCurrentSection);
+          if (ret <=0) 
+          {
+              break;
+          } 
+          cnt += ret;
+      }
   }
-  if (ret == 0) {
+  if (cnt == 0) {
     iEof= 1;
   }
   if (ret < 0) {

@@ -75,8 +75,6 @@ COggPlayAppView::~COggPlayAppView()
 void
 COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 {
-  _LIT(KS,"Starting OggPlayAppView...");
-  //OGGLOG.WriteFormat(KS);
   iTextArray= new(ELeave) CDesCArrayFlat(10);
 
   iApp = aApp;

@@ -188,6 +188,10 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TInt                     iSentIdx;
   TInt                     iMaxVolume;
   TInt                     iAudioCaps;
+  TInt                     iFirstBuffers;   // There is something wrong with Nokia
+                                           // first buffers. They are somehow swallowed.
+                                           // To avoid that, send few almost empty buffers 
+
 
   // communication with the tremor/ogg codec:
   //-----------------------------------------

@@ -170,8 +170,6 @@ COggInfoWinDialog::PreLayoutDynInitL()
   paraFormatMask.SetAttrib(EAttAlignment); // interested in alignment
   paraFormat->iHorizontalAlignment=CParaFormat::ECenterAlign; 
 
-  TBuf<128> buf;
-
   // Now add the text
   // Center-align
   
