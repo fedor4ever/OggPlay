@@ -12,31 +12,36 @@ OggPlay 1 {
     TrackNumber {
       Position 10 3 30 16
     }
-    Volume {
-      Position 110 154 60 16
-      KnobIcon 20 21
+    ListBox {
+      Position 6 64 162 80
+      FocusIcon 20 20
     }
-    Position {
-      Position 85 228 110 16
-      Style 2
-      KnobIcon 25 26
+    StopButton {
+      Position 11 161 20 20
+      NormalIcon 30 31
+      DimmedIcon 32 31
+      FocusIcon 33 31
     }
     PlayButton {
       Position 46 163 20 20
       NormalIcon 34 35
-      DimmedIcon 36 36
+      DimmedIcon 36 35
+      FocusIcon 37 35
     }
     PauseButton {
       Position 46 163 20 20
-      NormalIcon 37 38
+      NormalIcon 38 39
+      FocusIcon 40 39
     }
-    StopButton {
-      Position 11 161 20 20
-      NormalIcon 31 32
-      DimmedIcon 33 33
+    Position {
+      Position 85 228 110 16
+      Style 2
+      KnobIcon 26 27
     }
-    ListBox {
-      Position 6 64 162 80
+    Volume {
+      Position 110 154 60 16
+      KnobIcon 22 23
+      FocusIcon 24 25
     }
   }
 }

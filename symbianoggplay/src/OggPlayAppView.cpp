@@ -35,7 +35,9 @@
 COggPlayAppView::COggPlayAppView() :
   CCoeControl(),
   MCoeControlObserver(),
-  MCoeControlContext()
+  MCoeControlContext(),
+  iFocusControlsHeader(_FOFF(COggControl,iDlink)),
+  iFocusControlsIter(iFocusControlsHeader)
 {
   iControls= 0;
   iOggFiles= 0;
@@ -51,6 +53,13 @@ COggPlayAppView::~COggPlayAppView()
 {
   if (iControls) { delete iControls; iControls= 0; }
   if (iBoldFont) iCoeEnv->ScreenDevice()->ReleaseFont(iBoldFont);
+  if (iTextArray) { delete iTextArray; iTextArray=0; }
+  COggControl* c;
+  iFocusControlsIter.SetToFirst();
+  while ((c = iFocusControlsIter++) != NULL) {
+    c->iDlink.Deque();
+  };
+
 }
 
 void
@@ -140,32 +149,32 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   TOggParser p(aFileName);
   if (p.iState!=TOggParser::ESuccess) {
     p.ReportError();
-    User::Leave(KErrNone);
+    User::Leave(-1);
     return;
   }
   if (!p.ReadHeader()) {
     p.ReportError();
-    User::Leave(KErrNone);
+    User::Leave(-1);
     return;
   }
   p.ReadToken();
   if (p.iToken!=_L("FlipOpen")) {
     p.iState= TOggParser::EFlipOpenExpected;
     p.ReportError();
-    User::Leave(KErrNone);
+    User::Leave(-1);
     return;
   }
   p.ReadToken();
   if (p.iToken!=KBeginToken) {
     p.iState= TOggParser::EBeginExpected;
     p.ReportError();
-    User::Leave(KErrNone);
+    User::Leave(-1);
     return;
   }
   ReadCanvas(0,p);
   if (p.iState!=TOggParser::ESuccess) {
     p.ReportError();
-    User::Leave(KErrNone);
+    User::Leave(-1);
     return;
   }
 
@@ -175,16 +184,19 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
     if (p.iToken!=KBeginToken) {
       p.iState= TOggParser::EBeginExpected;
       p.ReportError();
-      User::Leave(KErrNone);
+      User::Leave(-1);
       return;
     }
     ReadCanvas(1,p);
     if (p.iState!=TOggParser::ESuccess) {
       p.ReportError();
-      User::Leave(KErrNone);
+      User::Leave(-1);
       return;
     }
   }
+  iFocusControlsIter.SetToFirst();
+  COggControl* c=iFocusControlsIter;
+  c->SetFocus(ETrue);
   //User::InfoPrint(_L("New skin installed."));
 }
 
@@ -226,82 +238,82 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 
     if (p.iToken==_L("Clock")) { 
       _LIT(KAL,"Adding Clock");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggText();
       iClock[aCanvas]= (COggText*)c; 
       iClock[aCanvas]->SetFont(iFont); 
     }
     else if (p.iToken==_L("Alarm")) { 
       _LIT(KAL,"Adding Alarm");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggText();
       iAlarm[aCanvas]= (COggText*)c;
       iAlarm[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Title")) { 
       _LIT(KAL,"Adding Title");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggText();
       iTitle[aCanvas]= (COggText*)c;
       iTitle[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Album")) { 
       _LIT(KAL,"Adding Album");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggText();
       iAlbum[aCanvas]= (COggText*)c;
       iAlbum[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Artist")) { 
       _LIT(KAL,"Adding Artist");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggText();
       iArtist[aCanvas]= (COggText*)c;
       iArtist[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Genre")) { 
       _LIT(KAL,"Adding Genre");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggText();
       iGenre[aCanvas]= (COggText*)c;
       iGenre[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("TrackNumber")) { 
       _LIT(KAL,"Adding TrackNumber");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+      RDebug::Print(KAL);
+      p.Debug(KAL);
       c= new COggText();
       iTrackNumber[aCanvas]= (COggText*)c;
       iTrackNumber[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Played")) { 
       _LIT(KAL,"Adding Played");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+      RDebug::Print(KAL);
+      p.Debug(KAL);
       c= new COggText();
       iPlayed[aCanvas]= (COggText*)c;
       iPlayed[aCanvas]->SetFont(iFont);
       iPlayed[aCanvas]->SetText(_L("00:00 / 00:00"));
     }
     else if (p.iToken==_L("StopButton")) { 
-      _LIT(KAL,"Adding StopButton");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
       c= new COggButton();
+      _LIT(KAL,"Adding StopButton at 0x%x");
+      RDebug::Print(KAL,c);
+      OGGLOG.WriteFormat(KAL,c);
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iStopButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PlayButton")) { 
       _LIT(KAL,"Adding PlayButton");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+      RDebug::Print(KAL);
+      p.Debug(KAL);
       c= new COggButton();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
@@ -309,8 +321,8 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("PauseButton")) { 
       _LIT(KAL,"Adding PauseButton");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+      RDebug::Print(KAL);
+      p.Debug(KAL);
       c= new COggButton();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
@@ -319,16 +331,16 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("PlayingIcon")) { 
       _LIT(KAL,"Adding PlayingIcon");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iPlaying[aCanvas]= (COggIcon*)c;
     }
     else if (p.iToken==_L("PausedIcon")) { 
       _LIT(KAL,"Adding PausedIcon");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iPaused[aCanvas]= (COggIcon*)c;
@@ -336,8 +348,8 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("AlarmIcon")) { 
       _LIT(KAL,"Adding AlarmIcon");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
       iAlarmIcon[aCanvas]= (COggIcon*)c;
@@ -345,8 +357,8 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("RepeatIcon")) {
       _LIT(KAL,"Adding RepeadIcon");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
 
       c= new COggIcon();
       c->SetBitmapFile(iIconFileName);
@@ -355,8 +367,8 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("Analyzer")) {
       _LIT(KAL,"Adding Analyzer");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
 
 	  c= new COggAnalyzer();
       c->SetBitmapFile(iIconFileName);
@@ -365,18 +377,18 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("Position")) {
       _LIT(KAL,"Adding Position");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       
-	  c= new COggSlider();
+  	  c= new COggSlider();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iPosition[aCanvas]= (COggSlider*)c;
     }
     else if (p.iToken==_L("Volume")) {
       _LIT(KAL,"Adding Volume");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggSlider();
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
@@ -384,28 +396,28 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("ScrollBar")) {
       _LIT(KAL,"Adding ScrollBar");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
+	    RDebug::Print(KAL);
+	    p.Debug(KAL);
       c= new COggScrollBar();
       c->SetBitmapFile(iIconFileName);
       iScrollBar[aCanvas]= (COggScrollBar*)c;
       if (iListBox[aCanvas]) {
-	iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
-	iScrollBar[aCanvas]->SetAssociatedControl(iListBox[aCanvas]);
+	      iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
+	      iScrollBar[aCanvas]->SetAssociatedControl(iListBox[aCanvas]);
       }
     }
     else if (p.iToken==_L("ListBox")) {
-      _LIT(KAL,"Adding Listbox");
-	  RDebug::Print(KAL);
-	  p.Debug(KAL);
       c= new COggListBox();
+      _LIT(KAL,"Adding Listbox at 0x%x");
+      RDebug::Print(KAL,c);
+      OGGLOG.WriteFormat(KAL,c);
       c->SetBitmapFile(iIconFileName);
       c->SetObserver(this);
       iListBox[aCanvas]= (COggListBox*)c;
       SetupListBox(iListBox[aCanvas]);
       if (iScrollBar[aCanvas]) {
-	iScrollBar[aCanvas]->SetAssociatedControl(iListBox[aCanvas]);
-	iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
+	      iScrollBar[aCanvas]->SetAssociatedControl(iListBox[aCanvas]);
+	      iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
       }
     }
 
@@ -670,6 +682,42 @@ void COggPlayAppView::SetupListBox(COggListBox* aListBox)
   icons->AppendL(backIcon);
   icons->AppendL(playIcon);
   icons->AppendL(pausedIcon);
+}
+
+void COggPlayAppView::SetNextFocus() {
+  COggControl* c;
+  c=iFocusControlsIter;
+  OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
+  __ASSERT_DEBUG(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
+  __ASSERT_DEBUG(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
+  c->SetFocus(EFalse);
+  do {
+    iFocusControlsIter++;
+    if(!iFocusControlsIter) iFocusControlsIter.SetToFirst();
+    c=iFocusControlsIter;
+  } while (!c->IsVisible() || c->IsDimmed());
+  OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
+  __ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
+  c->SetFocus(ETrue);
+  Update();
+}
+  
+void COggPlayAppView::SetPrevFocus() {
+  COggControl* c;
+  c=iFocusControlsIter;
+  OGGLOG.WriteFormat(_L("SetNextFocus from 0x%x"),c);
+  __ASSERT_ALWAYS(c,OGGLOG.Write(_L("Assert: SetNextFocus - iterator has no control !?")));
+  __ASSERT_ALWAYS(c->Focus(),OGGLOG.Write(_L("Assert: SetNextFocus - control did not have focus")));
+  c->SetFocus(EFalse);
+  do {
+    iFocusControlsIter--;
+    if(!iFocusControlsIter) iFocusControlsIter.SetToLast();
+    c=iFocusControlsIter;
+  } while (!c->IsVisible() || c->IsDimmed());
+  OGGLOG.WriteFormat(_L("SetNextFocus to 0x%x"),c);
+  __ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1318));
+  c->SetFocus(ETrue);
+  Update();
 }
 
 void 
@@ -1203,35 +1251,95 @@ COggPlayAppView::ComponentControl(TInt aIndex) const
 }
 
 void
-COggPlayAppView::HandleControlEventL(CCoeControl* aControl, TCoeEvent aEventType)
+COggPlayAppView::HandleControlEventL(CCoeControl* /*aControl*/, TCoeEvent /*aEventType*/)
 {
 }
 
 TKeyResponse
 COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
+
 #if defined(SERIES60)
-	enum EOggKeys {
-		//EOggConfirm=EKeyMenu 63557
-		EOggConfirm=EKeyDevice3
-	};
-	enum EOggScancodes {
-		EOggUp=EStdKeyUpArrow,
-		EOggDown=EStdKeyDownArrow
-	};
+  enum EOggKeys {
+    EOggConfirm=EKeyDevice3
+  };
+  enum EOggScancodes {
+    EOggUp=EStdKeyUpArrow,
+    EOggDown=EStdKeyDownArrow,
+    EOggRight=EStdKeyRightArrow,
+    EOggLeft=EStdKeyLeftArrow
+    };
 #else
-	enum EOggKeys {
-		EOggConfirm=EQuartzKeyConfirm,
-	};
-	enum EOggScancodes {
-		EOggUp=EStdQuartzKeyTwoWayUp,
-		EOggDown=EStdQuartzKeyTwoWayDown
-	};
+  enum EOggKeys {
+      EOggConfirm=EQuartzKeyConfirm,
+  };
+  enum EOggScancodes {
+    EOggUp=EStdQuartzKeyTwoWayUp,
+    EOggDown=EStdQuartzKeyTwoWayDown
+  };
 
 #endif
+
   TInt code     = aKeyEvent.iCode;
   TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
   TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
+
+#if defined(SERIES60) // SERIES60-specific keyhandling 
+  // - needs to be upfront since it might intercept EOggConfirm
+  COggControl* c=iFocusControlsIter;
+  __ASSERT_DEBUG(c,OGGPANIC(_L("no control in focus iterator !"),1321));
+  if (code==0 && aType==EEventKeyDown) { 
+    if(aKeyEvent.iScanCode==EOggLeft) {
+      _LIT(KS,"Key Left");
+      RDebug::Print(KS);
+      OGGLOG.Write(KS);
+      SetPrevFocus();
+      return EKeyWasConsumed;
+    } else if (aKeyEvent.iScanCode==EOggRight) {
+      _LIT(KS,"Key Right");
+      RDebug::Print(KS);
+      OGGLOG.Write(KS);
+      SetNextFocus();
+      return EKeyWasConsumed;
+    } else {
+      if(c==iListBox[iMode]) {
+        TInt idx= iListBox[iMode]->CurrentItemIndex();
+        if (aKeyEvent.iScanCode==EOggDown) {
+          _LIT(KS,"Listbox key down");
+          RDebug::Print(KS);
+          OGGLOG.Write(KS);
+          SelectSong(idx+1);
+          return EKeyWasConsumed;
+        } else if (aKeyEvent.iScanCode==EOggUp && idx>0) {
+          _LIT(KS,"Listbox key up");
+          RDebug::Print(KS);
+          OGGLOG.Write(KS);
+          SelectSong(idx-1);
+          return EKeyWasConsumed;
+        } 
+      } else if(c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown)) {
+        if (aKeyEvent.iScanCode==EOggUp && iApp->iVolume<100) {
+          _LIT(KS,"Volume key up");
+          RDebug::Print(KS);
+          OGGLOG.Write(KS);
+          iApp->iVolume+= 5;
+        } else  if (aKeyEvent.iScanCode==EOggDown && iApp->iVolume>0) {
+          _LIT(KS,"Volume key down");
+          RDebug::Print(KS);
+          OGGLOG.Write(KS);
+          iApp->iVolume-= 5;
+        }
+        iApp->iOggPlayback->SetVolume(iApp->iVolume);
+		    UpdateVolume();
+        return EKeyWasConsumed;
+      } else if((c==iPlayButton[iMode] || c==iPauseButton[iMode]) && code == EOggConfirm ) {
+        iApp->HandleCommandL(EOggPauseResume);
+      } else if(c==iStopButton[iMode] && code == EOggConfirm ) {
+        iApp->HandleCommandL(EOggStop);
+      }
+    }   
+  }  
+#endif // S60 keyhandling
 
   if (iHotkey && aType == EEventKey &&
      code == keycodes[iHotkey-1].code && modifiers==keycodes[iHotkey-1].mask) {
@@ -1255,7 +1363,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   if (code>0) {
     if (aKeyEvent.iScanCode==EStdKeyDeviceD) { iApp->NextSong(); return EKeyWasConsumed; }           // jog dial up
     else if (aKeyEvent.iScanCode==EStdKeyDeviceE) { iApp->PreviousSong(); return EKeyWasConsumed; }  // jog dial down
-	else if (aKeyEvent.iScanCode==167) { AppToForeground(EFalse); return EKeyWasConsumed; }          // back key <-
+    else if (aKeyEvent.iScanCode==167) { AppToForeground(EFalse); return EKeyWasConsumed; }          // back key <-
     else if (aKeyEvent.iScanCode==174) { iApp->HandleCommandL(EOggStop); return EKeyWasConsumed; }   // "C" key
     else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
     else if (aKeyEvent.iScanCode==133) { // "*"
@@ -1274,15 +1382,16 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     // 179    == OK
   }
 
+#if !defined(SERIES60) // UIQ-specific keyhandling:
   if (iApp->iOggPlayback->State()==TOggPlayback::EPlaying || !IsFlipOpen() ) {
     // volume
     if (code==0 && aType==EEventKeyDown) { 
-    if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown) {
-		if (aKeyEvent.iScanCode==EOggUp && iApp->iVolume<100) iApp->iVolume+= 5; 
-		if (aKeyEvent.iScanCode==EOggDown && iApp->iVolume>0) iApp->iVolume-= 5;
-		iApp->iOggPlayback->SetVolume(iApp->iVolume);
-		UpdateVolume();
-		return EKeyWasConsumed;
+      if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown) {
+		    if (aKeyEvent.iScanCode==EOggUp && iApp->iVolume<100) iApp->iVolume+= 5; 
+		    if (aKeyEvent.iScanCode==EOggDown && iApp->iVolume>0) iApp->iVolume-= 5;
+		    iApp->iOggPlayback->SetVolume(iApp->iVolume);
+		    UpdateVolume();
+		    return EKeyWasConsumed;
       }
     }
   } else if (iListBox[iMode]) {
@@ -1290,18 +1399,19 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     if (code==0 && aType==EEventKeyDown) {
       TInt idx= iListBox[iMode]->CurrentItemIndex();
       if (aKeyEvent.iScanCode==EOggUp && idx>0) {
-	SelectSong(idx-1);
-	return EKeyWasConsumed;
+        SelectSong(idx-1);
+        return EKeyWasConsumed;
       }
       if (aKeyEvent.iScanCode==EOggDown) {
-	SelectSong(idx+1);
-	return EKeyWasConsumed;
+        SelectSong(idx+1);
+        return EKeyWasConsumed;
       }
     }
   }
+#endif
+  
 
   return EKeyWasNotConsumed;
-
 }
 
 void
@@ -1348,3 +1458,15 @@ COggPlayAppView::OggPointerEvent(COggControl* c, const TPointerEvent& p)
   }
 }
 
+void COggPlayAppView::AddControlToFocusList(COggControl* c) {
+  COggControl* currentitem = iFocusControlsIter; 
+  if (currentitem) {
+    OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList adding 0x%x"),c);
+    c->iDlink.Enque(&currentitem->iDlink);
+    iFocusControlsIter.Set(*c);
+  } else {
+    OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList - Setting up focus list adding 0x%x"),c);
+    iFocusControlsHeader.AddFirst(*c);
+    iFocusControlsIter.SetToFirst(); 
+  }
+}

@@ -17,6 +17,7 @@
  */
 
 #include "OggOs.h"
+#include "OggLog.h"
 #include "OggControls.h"
 
 #include <OggPlay.rsg>
@@ -185,7 +186,7 @@ TOggParser::ReportError()
   buf.Append(_L(">"));
   //CCoeEnv::Static()->InfoWinL(_L("Error reading skin file"),buf);
   User::InfoPrint(buf);
-  ilog.WriteFormat(buf);
+  OGGLOG.Write(buf);
 
 }
 
@@ -200,6 +201,7 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
   buf.Append(_L(" Token:"));
   buf.Append(iToken); 
   ilog.WriteFormat(buf);
+  OGGLOG.WriteFormat(buf);
 
 //  User::InfoPrint(buf);
 //  User::After(TTimeIntervalMicroSeconds32(1000000));
@@ -218,10 +220,18 @@ COggControl::COggControl() :
   iCycle(0),
   iVisible(ETrue),
   iDimmed(EFalse),
+  iAcceptsFocus(EFalse),
   iObserver(0)
 {
 }
 
+COggControl::~COggControl()
+{
+  //FIXFIXME, check whether:
+  OGGLOG.Write(_L("CoggControl::~COggControl is called"));
+  if (iFocusIcon) { delete iFocusIcon; iFocusIcon= 0; }
+}
+  
 void
 COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
 {
@@ -262,6 +272,23 @@ COggControl::SetDimmed(TBool aDimmed)
   }
 }
 
+void
+COggControl::SetFocus(TBool aFocus)
+{
+  __ASSERT_DEBUG(iAcceptsFocus,OGGLOG.Write(_L("Assert: OggControl::SetFocus - asked to set focus, but should never accept it")));
+  if (aFocus!=iFocus) {
+    iFocus= aFocus;
+    iRedraw= ETrue;
+  }
+}
+
+TBool
+COggControl::Focus()
+{
+  return iFocus;
+}
+
+
 TBool
 COggControl::IsDimmed()
 {
@@ -298,16 +325,32 @@ COggControl::ControlEvent(TInt anEventType, TInt aValue)
   if (iObserver && !iDimmed) iObserver->OggControlEvent(this, anEventType, aValue);
 }
 
-TKeyResponse
-COggControl::KeyEvent(const TKeyEvent& /*aKeyEvent*/, TEventCode /*aType*/)
-{
-  return EKeyWasNotConsumed;
-}
 
 void
 COggControl::SetBitmapFile(const TFileName& aFileName)
 {
   iBitmapFile= aFileName;
+}
+
+void
+COggControl::SetFocusIcon(CGulIcon* anIcon)
+{
+  _LIT(KS,"COggButton::SetFocusIcon");
+  RDebug::Print(KS);
+  OGGLOG.Write(KS);
+  iAcceptsFocus=ETrue;
+  if (iFocusIcon) delete iFocusIcon;
+  iFocusIcon= anIcon;
+  iRedraw= ETrue;
+}
+
+void 
+COggControl::DrawFocus(CBitmapContext& aBitmapContext) {
+  if(iFocus) {
+    __ASSERT_DEBUG(iAcceptsFocus,OGGPANIC(_L("Assert - Control has Focus but should never accept it !?"),3815));
+    __ASSERT_DEBUG(iVisible,OGGPANIC(_L("Assert - Control is not visible, but has focus"),3816));
+    DrawCenteredIcon(aBitmapContext,iFocusIcon);
+  }
 }
 
 TBool
@@ -336,6 +379,16 @@ COggControl::ReadArguments(TOggParser& p)
       p.ReadToken(ah);
     if (success) SetPosition(ax, ay, aw, ah);
     return success;
+  } else if (p.iToken==_L("FocusIcon")) {
+    p.Debug(_L("Setting focused icon."));
+    CGulIcon* aIcon=p.ReadIcon(iBitmapFile);
+    TSize aSize=aIcon->Bitmap()->SizeInPixels();
+    if(aSize.iHeight>ih) OGGLOG.WriteFormat(_L("Info: Bitmap height (%d) > control height (%d)"),aSize.iHeight,ih);
+    if(aSize.iWidth>iw) OGGLOG.WriteFormat(_L("Info: Bitmap width (%d)> control width (%d)"),aSize.iWidth,iw);
+
+    SetFocusIcon(aIcon);
+    __ASSERT_ALWAYS(iObserver,OGGPANIC(_L("No observer set while trying to add control to focus list"),14));
+    iObserver->AddControlToFocusList(this);
   }
   return ETrue;
 }
@@ -555,6 +608,9 @@ COggButton::COggButton() :
 
 COggButton::~COggButton()
 {
+  //FIXFIXME: check
+  OGGLOG.Write(_L("CoggButton::~COggButton is called"));
+
   if (iActiveMask) { delete iActiveMask; iActiveMask= 0; }
   if (iNormalIcon) { delete iNormalIcon; iNormalIcon= 0; }
   if (iPressedIcon) { delete iPressedIcon; iPressedIcon= 0; }
@@ -600,8 +656,9 @@ COggButton::SetDimmedIcon(CGulIcon* anIcon)
   iRedraw= ETrue;
 }
 
+
 void
-COggButton::DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon)
+COggControl::DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon)
 {
   TSize s(anIcon->Bitmap()->SizeInPixels());
   TPoint p(ix+iw/2-s.iWidth/2,iy+ih/2-s.iHeight/2);
@@ -614,10 +671,12 @@ COggButton::Draw(CBitmapContext& aBitmapContext)
   if (iDimmed) {
     if (iDimmedIcon) DrawCenteredIcon(aBitmapContext,iDimmedIcon);
     else if (iNormalIcon) DrawCenteredIcon(aBitmapContext,iNormalIcon);
+    if (iFocus) DrawFocus(aBitmapContext);
   }
   else {
     if (iState==0) {
-      if (iNormalIcon) DrawCenteredIcon(aBitmapContext,iNormalIcon);
+      if (iFocus) DrawFocus(aBitmapContext);
+      else if (iNormalIcon) DrawCenteredIcon(aBitmapContext,iNormalIcon);
     }
     if (iState==1) {
       if (iPressedIcon) DrawCenteredIcon(aBitmapContext,iPressedIcon);
@@ -643,6 +702,7 @@ void COggButton::PointerEvent(const TPointerEvent& p)
   COggControl::PointerEvent(p);
 }
 
+
 TBool
 COggButton::ReadArguments(TOggParser& p)
 {
@@ -657,7 +717,8 @@ COggButton::ReadArguments(TOggParser& p)
   else if (p.iToken==_L("DimmedIcon")) {
     p.Debug(_L("Setting dimmed icon."));
     SetDimmedIcon(p.ReadIcon(iBitmapFile));
-}
+  }
+  
   return COggControl::ReadArguments(p);
 }
 
@@ -723,7 +784,7 @@ void
 COggSlider::Draw(CBitmapContext& aBitmapContext)
 {
   if (!iKnobIcon) return;
-
+  DrawFocus(aBitmapContext);
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
   TRect r(TPoint(0,0),s);
   TPoint p(ix,iy);
@@ -1399,6 +1460,7 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
   if (!iFont) return;
   if (!iData) return;
   if (!iText) return;
+  DrawFocus(aBitmapContext);
 
   aBitmapContext.UseFont(iFont);
   aBitmapContext.SetPenSize(TSize(1,1));

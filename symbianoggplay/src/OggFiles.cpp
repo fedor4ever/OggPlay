@@ -21,6 +21,7 @@
 #include "OggTremor.h"
 #include "OggLog.h"
 
+#include <eikfutil.h>
 ////////////////////////////////////////////////////////////////
 //
 // TOggFile
@@ -259,7 +260,11 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
   User::LeaveIfError(session.Connect());
 
   // Check if the drive is available (i.e. memory stick is inserted)
-  //if (session.CheckDisk(aDir)!=KErrNone) return;
+  if (!EikFileUtils::FolderExists(aDir)) {
+    _LIT(KS,"Folder %s doesn't exist");
+    OGGLOG.WriteFormat(KS,aDir.Ptr());
+    return;
+  }
  
   CDirScan* ds = CDirScan::NewL(session);
   TRAPD(err,ds->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
@@ -425,7 +430,7 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
   }
 }
 
-void TOggFiles::FillAlbums(CDesCArray& arr, const TDesC& anArtist, const TFileName& aSubFolder)
+void TOggFiles::FillAlbums(CDesCArray& arr, const TDesC& /*anArtist*/, const TFileName& aSubFolder)
 {
   arr.Reset();
   iFiles->Sort(iOggKeyAlbums);

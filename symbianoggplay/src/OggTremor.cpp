@@ -436,7 +436,6 @@ void TOggPlayback::Play()
   if (iState != EOpen) {
     iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_15);
     RDebug::Print(_L("Oggplay: Tremor - State not Open"));
-
     return;
   }
 

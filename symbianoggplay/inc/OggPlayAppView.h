@@ -82,6 +82,10 @@ public:
 
   void SetupListBox(COggListBox* aListBox);
 
+  // keyboard focus handling:
+  void SetNextFocus();
+  void SetPrevFocus();
+
   static TInt CallBack(TAny* aPtr); // registered with iTimer (CPeriodic)
 
   // from MCoeControlObserver:
@@ -95,6 +99,7 @@ public:
   // from MOggControlObserver:
   virtual void OggPointerEvent(COggControl* c, const TPointerEvent& p);
   virtual void OggControlEvent(COggControl* c, TInt aEventType, TInt aValue);
+  virtual void AddControlToFocusList(COggControl* c);
 
   TInt       iPosChanged;
   TBuf<512>  iCurrentSong;
@@ -119,6 +124,11 @@ private:
   TFileName  iBackgroundFileName;
   CDesCArray* iTextArray;
   TInt       iSelected; 
+  
+  //keyboard focus handling: 
+  //maintain a doubly linked list of controls that can get focus.
+  TDblQue<COggControl> iFocusControlsHeader;
+  TDblQueIter<COggControl> iFocusControlsIter;
 
   TInt               iMode; // 0 = flip-open; 1= flip-closed
   COggCanvas*        iCanvas[2];

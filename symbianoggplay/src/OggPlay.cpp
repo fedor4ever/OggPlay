@@ -447,9 +447,9 @@ COggPlayAppUi::HandleCommandL(int aCommand)
       TInt previousView;
       parse.Val(previousView);
       if (previousView==ETop) {
-	//iViewBy= ETop;
-	TBuf<16> dummy;
-	iAppView->FillView(ETop, ETop, dummy);
+        //iViewBy= ETop;
+        TBuf<16> dummy;
+        iAppView->FillView(ETop, ETop, dummy);
       }
       else HandleCommandL(EOggViewByTitle+previousView);
       break;
@@ -462,16 +462,16 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     }
     if (iViewBy==ETitle || iViewBy==EFileName) {
       if (curFile.Length()>0) {
-	if (iOggPlayback->State()==TOggPlayback::EPlaying ||
-	    iOggPlayback->State()==TOggPlayback::EPaused) iOggPlayback->Stop();
-	if (iOggPlayback->Open(curFile)==KErrNone) {
-	  iOggPlayback->SetVolume(iVolume);
-	  if (iOggPlayback->State()!=TOggPlayback::EPlaying) {
-	    iAppView->SetTime(iOggPlayback->Time());
-	    iOggPlayback->Play();
-	  }
-	  SetCurrent(idx);
-	} else SetCurrent(-1);
+	      if (iOggPlayback->State()==TOggPlayback::EPlaying ||
+	          iOggPlayback->State()==TOggPlayback::EPaused) iOggPlayback->Stop();
+	      if (iOggPlayback->Open(curFile)==KErrNone) {
+	        iOggPlayback->SetVolume(iVolume);
+	          if (iOggPlayback->State()!=TOggPlayback::EPlaying) {
+	            iAppView->SetTime(iOggPlayback->Time());
+	            iOggPlayback->Play();
+	          }
+	        SetCurrent(idx);
+	      } else SetCurrent(-1);
       }
     }
     break;
@@ -479,7 +479,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     
   case EOggStop: {
     if (iOggPlayback->State()==TOggPlayback::EPlaying ||
-	iOggPlayback->State()==TOggPlayback::EPaused) {
+    	iOggPlayback->State()==TOggPlayback::EPaused) {
       iOggPlayback->Stop();
       SetCurrent(-1);
     }

@@ -42,6 +42,7 @@ class MOggControlObserver {
 
   virtual void OggPointerEvent(COggControl* /*c*/, const TPointerEvent& /*p*/) {}
   virtual void OggControlEvent(COggControl* /*c*/, TInt /*aEventType*/, TInt /*aValue*/) {}
+  virtual void AddControlToFocusList(COggControl* /*c*/) {}
 
 };
 
@@ -101,6 +102,7 @@ class COggControl {
  public:
 
   COggControl();
+  virtual ~COggControl();
 
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
   void         SetObserver(MOggControlObserver* obs);
@@ -109,12 +111,14 @@ class COggControl {
   TBool        IsVisible();
   void         SetDimmed(TBool aDimmed);
   TBool        IsDimmed();
+  void         SetFocus(TBool aFocus);
+  TBool        Focus();
 
   virtual void PointerEvent(const TPointerEvent& p);
   virtual void ControlEvent(TInt anEventType, TInt aValue);
-  TKeyResponse KeyEvent(const TKeyEvent& aKeyEvent, TEventCode aType);
 
   virtual void Redraw();
+  virtual void SetFocusIcon(CGulIcon* anIcon);
 
   TRect        Rect();
   TSize        Size();
@@ -124,6 +128,9 @@ class COggControl {
   TInt   iw;
   TInt   ih;
 
+  CGulIcon*   iFocusIcon;
+  TDblQueLink iDlink;
+  
   virtual void  SetBitmapFile(const TFileName& aBitmapFile);
   virtual TBool Read(TOggParser& p);
 
@@ -133,13 +140,18 @@ class COggControl {
   virtual void Cycle() {}
   virtual void Draw(CBitmapContext& aBitmapContext) = 0;
 
+  virtual void DrawFocus(CBitmapContext& aBitmapContext);
+  void DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon);
+
   // utility functions:
   virtual TBool ReadArguments(TOggParser& p);
 
   TBool  iRedraw;   // if true: something has changed with the control and the control needs to be redrawn
   TInt   iCycle;    // frame nmber of an animation etc. (1 cycle = 10ms)
   TBool  iVisible;  // if false the control will not be drawn
-  TBool  iDimmed;   // if false the control is disabled and rejects pointer events
+  TBool  iDimmed;   // if false the control is disabled and rejects pointer and keyboard focus events
+  TBool  iAcceptsFocus; // if true the control can accept keyboard focus, else it's never focussed.
+  TBool  iFocus;    // if true, control has focus.
 
   MOggControlObserver* iObserver;
 
@@ -233,7 +245,7 @@ class COggButton : public COggControl {
   void SetNormalIcon(CGulIcon* anIcon);
   void SetPressedIcon(CGulIcon* anIcon);
   void SetDimmedIcon(CGulIcon* anIcon);
-
+  
  protected:
 
   virtual TBool ReadArguments(TOggParser& p);
@@ -241,12 +253,12 @@ class COggButton : public COggControl {
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
 
-  void DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon);
-
+  
   CFbsBitmap* iActiveMask;
   CGulIcon*   iNormalIcon;
   CGulIcon*   iPressedIcon;
   CGulIcon*   iDimmedIcon;
+  
 
   TInt        iState; // 0 = normal; 1= pressed
 };
