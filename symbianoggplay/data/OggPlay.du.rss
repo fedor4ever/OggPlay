@@ -106,7 +106,7 @@
 #define ogg_popup_off                "Uitgeschakeld"
 #define ogg_back_dir                 "Terug"
 #define ogg_backspace                "Backspace"
-#define ogg_shift                    "Willekeurig (geen herhaling)"
+#define ogg_shift                    "Shift (geen herhaling)"
 #define ogg_warnings                 "Waarschuwing"
 #define ogg_by                       " door "
 
