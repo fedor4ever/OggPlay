@@ -434,7 +434,7 @@ void  TOggFiles::FileSearchStepL()
 	      if (path->Des().Length()>1 && path->Des()[path->Des().Length()-1]==L'\\')
 	        path->Des().SetLength( path->Des().Length()-1); // get rid of trailing back slash
 
-//        TRACE(COggLog::VA(_L("Processing %S"), &shortname ));
+        TRACE(COggLog::VA(_L("Processing %S"), &shortname ));
 	      TInt err = iOggPlayback->Info(*fullname, ETrue);
 
         if( err == KErrNone )
@@ -892,7 +892,7 @@ TBool TOggFiles::isSupportedAudioFile(TParsePtrC& p)
   TBool result;
   result=(p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0);  
 #ifdef MP3_SUPPORT
-  result=(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0);
+  result=result || (p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0);
 #endif
   return result;
 }

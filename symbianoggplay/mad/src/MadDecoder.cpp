@@ -22,11 +22,11 @@
      
 */
  
+#include "MadDecoder.h"
+#include "OggLog.h"
 #include <mad.h>
 #include <limits.h>
 #include <string.h>
-#include "MadDecoder.h"
-#include "OggLog.h"
 
 #define MadErrorString(x) mad_stream_errorstr(x)
 
@@ -74,8 +74,9 @@ int CMadDecoder::mad_outputpacket(unsigned char* ptr, const unsigned char* endpt
   //TRACEF(_L("CMadDecoder::outputpacket"));
   int counter=0;
   if(ptr+4>=endptr) return 0;
+  int i;
   if(iRememberPcmSamples==iSynth.pcm.length) iRememberPcmSamples=0;
-	for(int i=iRememberPcmSamples;i<iSynth.pcm.length;i++,counter++)
+	for(i=iRememberPcmSamples;i<iSynth.pcm.length;i++,counter++)
 		{
 			signed short	Sample;
 
@@ -426,7 +427,9 @@ TInt CMadDecoder::Bitrate()
 
 TInt64 CMadDecoder::Position()
 { 
-  TInt64 pos(mad_timer_count(iTimer,MAD_UNITS_MILLISECONDS));
+  signed long timer=mad_timer_count(iTimer,MAD_UNITS_MILLISECONDS);
+  TInt64 pos;
+  pos=(TInt)timer;
   return pos;
 }
 
@@ -446,4 +449,8 @@ TInt64 CMadDecoder::TimeTotal()
 void CMadDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber) {
   //TRACEF(_L("CMadDecoder::ParseTags"));
   
+}
+
+void CMadDecoder::GetFrequencyBins(TInt32* aBins,TInt NumberOfBins)
+{
 }

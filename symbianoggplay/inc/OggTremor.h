@@ -194,6 +194,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TInt SetAudioCaps(TInt theChannels, TInt theRate);
   void GetString(TBuf<256>& aBuf, const char* aStr);
   void SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate, TBool aConvertChannel, TInt aNbOfChannels);
+  void SetDecoderL(const TDesC& aFileName);
 
   COggMsgEnv*               iEnv;
 

@@ -223,23 +223,40 @@ void COggPlayback::ConstructL() {
       TCallBack( StopAudioStreamingCallBack,this )   );
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
-  //FIXMAD: For now either mp3 OR ogg is supported. Changing this shouldn't be difficult
-  // by moving this into the open and info members.
-#ifdef MP3_SUPPORT
-  iDecoder=new(ELeave)CMadDecoder;
-#else
-  iDecoder=new(ELeave)CTremorDecoder;
-#endif
 
 }
 
 COggPlayback::~COggPlayback() {
-  delete iDecoder;
+  if(iDecoder) { 
+    delete iDecoder; 
+    iDecoder=NULL; 
+  }
   delete  iStartAudioStreamingTimer;
   delete  iStopAudioStreamingTimer;
   delete iStream;
   iBuffer.ResetAndDestroy();
   delete iOggSampleRateConverter;
+}
+
+void COggPlayback::SetDecoderL(const TDesC& aFileName)
+{
+  if(iDecoder) { 
+    delete iDecoder; 
+    iDecoder=NULL; 
+  }
+
+  TParsePtrC p( aFileName);
+
+  if(p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0) {
+      iDecoder=new(ELeave)CTremorDecoder;
+  } else if(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0) {
+    iDecoder=new(ELeave)CMadDecoder;
+  } else {
+    _LIT(KPanic,"Panic:");
+    _LIT(KNotSupported,"File type not supported");
+    iEnv->OggErrorMsgL(KPanic,KNotSupported);
+  }
+  
 }
 
 TInt COggPlayback::Open(const TDesC& aFileName)
@@ -271,7 +288,8 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     return KErrOggFileNotFound;
   };
   iFileOpen= 1;
-  
+  SetDecoderL(aFileName);
+
   if(iDecoder->Open(iFile) < 0) {
     iDecoder->Close(iFile);
     fclose(iFile);
@@ -513,18 +531,19 @@ void COggPlayback::SetVolume(TInt aVol)
 void COggPlayback::SetPosition(TInt64 aPos)
 {
   if (!iStream) return;
-  iDecoder->Setposition(aPos);
+  if(iDecoder) iDecoder->Setposition(aPos);
 }
 
 TInt64 COggPlayback::Position()
 {
   if (!iStream) return TInt64(0);
-  return iDecoder->Position();
+  if(iDecoder) return iDecoder->Position();
+  return 0;
 }
 
 TInt64 COggPlayback::Time()
 {
-  if (iTime==0) {
+  if (iDecoder && iTime==0) {
     iTime=iDecoder->TimeTotal();
   }
   return iTime;
@@ -583,6 +602,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
     return KErrOggFileNotFound;
   };
 
+  SetDecoderL(aFileName);
   if(iDecoder->OpenInfo(f) < 0) {
     iDecoder->Close(f);
     fclose(f);
@@ -600,6 +620,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 
   iDecoder->Close(f); 
   fclose(f);
+  iFileOpen=0;
 
   return KErrNone;
 }
@@ -677,15 +698,12 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         iLastFreqArrayIdx++;
         if (iLastFreqArrayIdx >= KFreqArrayLength)
             iLastFreqArrayIdx = 0;
-//FIXMAD
-//        ov_getFreqBin(&iVf, ETrue, iFreqArray[iLastFreqArrayIdx].FreqCoefs);
-
+        iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].FreqCoefs,KNumberOfFreqBins);
         iFreqArray[iLastFreqArrayIdx].Time =  TInt64(iLatestPlayTime) ;
     }
     else
     {
-//FIXMAD
-//        ov_getFreqBin(&iVf, EFalse, NULL);
+        iDecoder->GetFrequencyBins(NULL,0);
     }
 #endif
     
@@ -722,7 +740,9 @@ void COggPlayback::SendBuffer(TDes8& buf)
       buf.FillZ(4000);
       cnt = 4000;
       ret = 4000;
+#ifdef MDCT_FREQ_ANALYSER
       iLatestPlayTime += ret*iTimeBetweenTwoSamples;
+#endif
       iFirstBuffers--;
   
   } else {

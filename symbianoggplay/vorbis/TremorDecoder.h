@@ -43,7 +43,8 @@ public:
   TInt64 TimeTotal();
 
   void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
-  
+  void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
+
 private:
 
   void GetString(TDes& aBuf, const char* aStr);

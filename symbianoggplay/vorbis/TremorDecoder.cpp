@@ -131,11 +131,12 @@ TInt CTremorDecoder::Rate()
 
 TInt CTremorDecoder::Bitrate()
 {
-  TInt64 iBitRate;
-  unsigned int hi(0);
-  ogg_int64_t bitrate= vi->bitrate_nominal;
-  iBitRate.Set(hi,bitrate);
-  return iBitRate.Low();
+//  TInt64 iBitRate(vi->bitrate_nominal);
+//  unsigned int hi(0);
+//  ogg_int64_t bitrate= vi->bitrate_nominal;
+//  iBitRate.Set(bitrate);
+//  return iBitRate.Low();
+  return vi->bitrate_nominal;
 }
 
 TInt64 CTremorDecoder::Position()
@@ -164,4 +165,11 @@ TInt64 CTremorDecoder::TimeTotal()
 
   return iTime;
 
+}
+
+void CTremorDecoder::GetFrequencyBins(TInt32* aBins,TInt NumberOfBins)
+{
+  TBool active=EFalse;
+  if(NumberOfBins) active=ETrue;
+  ov_getFreqBin(&iVf, active, aBins);  
 }
