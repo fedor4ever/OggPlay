@@ -924,41 +924,55 @@ COggPlayAppView::UpdateListbox()
   if (iListBox[iMode]) iListBox[iMode]->Redraw();
 }
 
-void 
-COggPlayAppView::UpdateControls()
+TBool
+COggPlayAppView::CanPlay()
 {
-  TBool canPlay= 
-    (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
-     iApp->iOggPlayback->State()==CAbsPlayback::EClosed ||
-     iApp->iOggPlayback->State()==CAbsPlayback::EFirstOpen);
+  return (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
+	  iApp->iOggPlayback->State()==CAbsPlayback::EClosed ||
+	  iApp->iOggPlayback->State()==CAbsPlayback::EFirstOpen);
+}
 
-  TBool canPause=
-    (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+TBool
+COggPlayAppView::CanPause()
+{
+  return (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+}
 
-  TBool playDimmed= 
+TBool
+COggPlayAppView::CanStop()
+{
+  return (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
+	  iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+}
+
+TBool
+COggPlayAppView::PlayDimmed()
+{
+  return 
     (GetSelectedIndex()<0 || GetItemType(GetSelectedIndex())==6 || 
      iApp->iViewBy==COggPlayAppUi::EArtist || iApp->iViewBy==COggPlayAppUi::EAlbum || 
      iApp->iViewBy==COggPlayAppUi::EGenre || iApp->iViewBy==COggPlayAppUi::ESubFolder ||
      iApp->iViewBy==COggPlayAppUi::ETop) 
     && !(iApp->iOggPlayback->State()==CAbsPlayback::EPaused);
+}
 
-  if (iPlayButton[iMode] && canPlay) 
-    iPlayButton[iMode]->SetDimmed(playDimmed);
+void 
+COggPlayAppView::UpdateControls()
+{
+  if (iPlayButton[iMode] && CanPlay()) 
+    iPlayButton[iMode]->SetDimmed(PlayDimmed());
 
   if (iPlayButton2[iMode])
-    iPlayButton2[iMode]->SetDimmed(!canPlay || playDimmed);
+    iPlayButton2[iMode]->SetDimmed(!CanPlay() || PlayDimmed());
   if (iPauseButton2[iMode])
-    iPauseButton2[iMode]->SetDimmed(!canPause);
+    iPauseButton2[iMode]->SetDimmed(!CanPause());
 
-  if (iPlayButton[iMode]) iPlayButton[iMode]->MakeVisible(canPlay);
-  if (iPauseButton[iMode]) iPauseButton[iMode]->MakeVisible(!canPlay);
-
-  TBool canStop= (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
-		  iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+  if (iPlayButton[iMode]) iPlayButton[iMode]->MakeVisible(CanPlay());
+  if (iPauseButton[iMode]) iPauseButton[iMode]->MakeVisible(!CanPlay());
     
-  if (iStopButton[iMode]) iStopButton[iMode]->SetDimmed( !canStop );
+  if (iStopButton[iMode]) iStopButton[iMode]->SetDimmed( !CanStop() );
 
-  if (iPosition[iMode]) iPosition[iMode]->SetDimmed( !canStop );
+  if (iPosition[iMode]) iPosition[iMode]->SetDimmed( !CanStop() );
  
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iRepeat);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iRepeat);
@@ -1223,8 +1237,13 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     else if (aKeyEvent.iScanCode==EStdKeyDeviceE) { iApp->PreviousSong(); return EKeyWasConsumed; }  // jog dial down
     else if (aKeyEvent.iScanCode==167) { AppToForeground(EFalse); return EKeyWasConsumed; }          // back key <-
     else if (aKeyEvent.iScanCode==174) { iApp->HandleCommandL(EOggStop); return EKeyWasConsumed; }   // "C" key
-    else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
-    else if (aKeyEvent.iScanCode==133) { // "*"
+    //else if (aKeyEvent.iScanCode==173) { iApp->HandleCommandL(EOggShuffle); return EKeyWasConsumed; }// menu button
+    else if (aKeyEvent.iScanCode==173) { 
+      iApp->LaunchPopupMenuL(R_POPUP_MENU,TPoint(100,100),EPopupTargetTopLeft);
+      //Invalidate();
+      //Update();
+      return EKeyWasConsumed; 
+    } else if (aKeyEvent.iScanCode==133) { // "*"
       if (iTitle[iMode]) iTitle[iMode]->ScrollNow();
       if (iAlbum[iMode]) iAlbum[iMode]->ScrollNow();
       if (iArtist[iMode]) iArtist[iMode]->ScrollNow();

@@ -86,6 +86,11 @@ public:
   void SetNextFocus();
   void SetPrevFocus();
 
+  TBool CanPlay();
+  TBool CanPause();
+  TBool CanStop();
+  TBool PlayDimmed();
+
   static TInt CallBack(TAny* aPtr); // registered with iTimer (CPeriodic)
 
   // from MCoeControlObserver:

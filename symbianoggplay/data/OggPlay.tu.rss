@@ -35,6 +35,11 @@ CHARACTER_SET UTF8
 #define ogg_options_cascade "Seçenekler..."
 #define ogg_about_label "OggPlay Hakkında..."
 #define ogg_exit_label "Çık"
+#define ogg_prev_song "Previous song"
+#define ogg_next_song "Next song"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
 
 #define ogg_text_error_1 "COggButton: Bit haritası okunurken hata."
 #define ogg_text_error_2 "COggCanvas: Arkaplanı değiştirirken hata: "

@@ -33,6 +33,11 @@
 #define ogg_options_cascade "Inställningar..."
 #define ogg_about_label "Om OggPlay..."
 #define ogg_exit_label "Avsluta"
+#define ogg_prev_song "Previous song"
+#define ogg_next_song "Next song"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
 
 #define ogg_text_error_1 "COggButton: Fel vid läsning av maskbild."
 #define ogg_text_error_2 "COggCanvas: Fel vid konvertering av bakgrundsbild: "

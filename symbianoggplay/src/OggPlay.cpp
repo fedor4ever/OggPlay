@@ -489,6 +489,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EOggPauseResume: {
     if (iOggPlayback->State()==CAbsPlayback::EPlaying) iOggPlayback->Pause();
     else if (iOggPlayback->State()==CAbsPlayback::EPaused) iOggPlayback->Play();
+    else HandleCommandL(EOggPlay);
     iAppView->Update();
     break;
   }
@@ -517,6 +518,16 @@ COggPlayAppUi::HandleCommandL(int aCommand)
       iAppView->SetAlarm();
     }
 #endif
+    break;
+  }
+
+  case EOggNextSong: {
+    NextSong();
+    break;
+  }
+
+  case EOggPrevSong: {
+    PreviousSong();
     break;
   }
 
@@ -701,6 +712,13 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
       item.iFlags= 0;
       aMenuPane->AddMenuItemL(item);
     }
+  }
+
+  if (aMenuId==R_POPUP_MENU) {
+    if (iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
+    aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());
+    aMenuPane->SetItemDimmed(EOggPlay, !iAppView->CanPlay());
+    aMenuPane->SetItemDimmed(EOggPauseResume, !iAppView->CanPause());
   }
 }
 

@@ -67,6 +67,11 @@
 #define ogg_options_cascade "Opties..."
 #define ogg_about_label "Over OggPlay..."
 #define ogg_exit_label "Sluiten"
+#define ogg_prev_song "Previous song"
+#define ogg_next_song "Next song"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
 
 // uncomment:
 #include "OggPlay.common_uiq.rss"

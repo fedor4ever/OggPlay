@@ -33,6 +33,11 @@
 #define ogg_options_cascade "Options..."
 #define ogg_about_label "A propos d'OggPlay..."
 #define ogg_exit_label "Quitter"
+#define ogg_prev_song "Titre préalable"
+#define ogg_next_song "Titre suivante"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
 
 #define ogg_text_error_1 "COggButton: Erreur de lecture de l'image de masque."
 #define ogg_text_error_2 "COggCanvas: Erreur de conversion de l'image d'arrière-plan:"

@@ -49,8 +49,9 @@ TOggParser::TOggParser(const TFileName& aFileName)
 {
   iLine= 1;
   iDebug= ETrue;
-
-  if ((iFile=wfopen((wchar_t*)aFileName.Ptr(),L"rb"))==NULL) {
+  TFileName buf(aFileName);
+  buf.Append(0);
+  if ((iFile=wfopen((wchar_t*)buf.Ptr(),L"rb"))==NULL) {
     iState= EFileNotFound;
     _LIT(KS,"File not found");
     //OGGLOG.WriteFormat(KS);

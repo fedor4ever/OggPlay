@@ -199,6 +199,20 @@ RESOURCE MENU_PANE r_file_menu
   };
 }
 
+RESOURCE MENU_PANE r_popup_menu
+{
+  items= {
+      MENU_ITEM { command=EOggNextSong;	txt=ogg_next_song; },
+      MENU_ITEM { command=EOggPrevSong; txt=ogg_prev_song; },
+      MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
+      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
+                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggPlay; txt=ogg_play; },
+      MENU_ITEM { command=EOggPauseResume; txt=ogg_pause; },
+      MENU_ITEM { command=EOggStop;	txt=ogg_stop; }
+  };
+}
+
 RESOURCE TBUF r_ogg_error_1 { buf=ogg_text_error_1; }
 RESOURCE TBUF r_ogg_error_2 { buf=ogg_text_error_2; }
 RESOURCE TBUF r_ogg_error_3 { buf=ogg_text_error_3; }

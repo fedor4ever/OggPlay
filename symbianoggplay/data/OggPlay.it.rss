@@ -33,7 +33,11 @@
 #define ogg_options_cascade "Opzioni..."
 #define ogg_about_label "Rigardo OggPlay..."
 #define ogg_exit_label "Esci"
-
+#define ogg_prev_song "Previous song"
+#define ogg_next_song "Next song"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
 
 #define ogg_text_error_1 "COggButton: Errore nella lettura della maschera bitmap:" 
 #define ogg_text_error_2 "COggCanvas: Errore nel convertire lo sfondo bitmap:" 

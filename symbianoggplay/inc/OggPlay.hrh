@@ -29,6 +29,8 @@ enum {
   EOggAbout,
   EOggExit,
   EOggGoto,
+  EOggNextSong,
+  EOggPrevSong,
 
   EOggViewByTitle,
   EOggViewByAlbum,
