@@ -45,7 +45,9 @@ chSTR2(__LINE__) "):" #desc)
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-//#define SERIES60
+#define SERIES60
+// There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
+#define DOS
 
 // Switches at least the splash bitmap
 #define UNSTABLE_RELEASE
