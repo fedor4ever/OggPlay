@@ -450,7 +450,6 @@ void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles)
     aNbFiles = iNbFilesFound;
 };
 
-
 TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session)
 {
     ClearFiles();
@@ -475,6 +474,32 @@ TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& sessio
           if (err) break;
       }
     }
+    if ( err == KErrNone) {
+        TRAP(err, aDialog->ExecuteLD(aDialogID));
+    }
+    else {
+        delete (aDialog);
+        aDialog = NULL;
+    }
+    AddDirectoryStop();
+    return (err);
+}
+
+TInt TOggFiles::SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session)
+{
+    ClearFiles();
+    TInt err;
+    if (!EikFileUtils::PathExists(aDir)) 
+    {
+      TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
+      TBuf<256> buf1,buf2;
+      CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_24);
+      buf1.Append(aDir);
+      ((COggPlayAppUi*)CEikonEnv::Static()->AppUi())->iOggMsgEnv->OggErrorMsgL(buf2,buf1);
+      return KErrNotFound;
+    }
+    err = AddDirectoryStart(aDir,session);
+    if (err) return(err);
     if ( err == KErrNone) {
         TRAP(err, aDialog->ExecuteLD(aDialogID));
     }

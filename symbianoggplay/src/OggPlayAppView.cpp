@@ -1330,8 +1330,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       else iApp->HandleCommandL(EOggPlay);
     return EKeyWasConsumed;
     } 
-    IFDEF_S60( 
-      else if(iHotkeys->Hotkey(code) == COggUserHotkeysData::EFastForward) {
+    else if(iHotkeys->Hotkey(code) == COggUserHotkeysData::EFastForward) {
       TInt64 pos=iApp->iOggPlayback->Position();
       pos+=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
@@ -1342,7 +1341,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       iApp->iOggPlayback->SetPosition(pos);
       return EKeyWasConsumed;
     }
-  )
 
   if (code>0) {
     if (aKeyEvent.iScanCode==EStdKeyDeviceD) { iApp->NextSong(); return EKeyWasConsumed; }           // jog dial up

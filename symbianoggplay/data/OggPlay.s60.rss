@@ -234,6 +234,106 @@ RESOURCE MENU_PANE r_skin_menu
   };
 }
 
+// Settings resources
+///////////////////////////////////////////////////////////////////////////////
+
+RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
+    {
+    flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
+    title = ogg_settings_title;
+    initial_number = 1;
+    items =
+        {
+		AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingScanDir;
+			setting_page_resource = r_oggplay_scan_dir;
+			associated_resource = r_oggplay_scandir_setting_item_list;
+			name = ogg_filescanmode;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier=EOggSettingAutoPlayId;
+			setting_page_resource=r_oggplay_binary_setting_page;
+			associated_resource=r_oggplay_popup_setting_binary_texts;
+			name = ogg_autostart;
+			}
+        };
+    }
+
+RESOURCE POPUP_SETTING_LIST r_oggplay_popup_setting_list_new_entry
+    {
+//    flags = EAknPopupSettingListFlagAllowsUserDefinedEntry;
+	flags = 0;
+    }
+
+// -------------------------------------------------------------------------
+// 
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_scan_dir
+    {   
+    label = ogg_filescanmode;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_scandir_setting_item_list
+    {
+    setting_texts_resource = r_oggplay_scandir_setting_page_list;
+    popped_up_texts_resource = r_oggplay_scandir_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_scandir_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_fullscan; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_mmcdir; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_scandir_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_fullscan; },
+		LBUF { txt = ogg_mmcdir; }
+	};
+    }
+
+// -------------------------------------------------------------------------
+// 
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_binary_setting_page
+	{
+	number=4;
+	label=ogg_autostart;
+	type=EAknCtPopupSettingList;
+	}
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_popup_setting_binary_texts
+	{
+	flags=0;
+	setting_texts_resource=r_oggplay_on_off_texts;
+	popped_up_texts_resource=r_oggplay_popped_up_on_off_texts;
+	}
+
+RESOURCE ARRAY r_oggplay_on_off_texts
+	{
+	items= 
+		{
+		AVKON_ENUMERATED_TEXT { value=1; text = ogg_on; },
+		AVKON_ENUMERATED_TEXT { value=0; text = ogg_off; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_popped_up_on_off_texts
+    {
+    items = 
+		{ 
+		LBUF { txt = ogg_popup_on; },
+		LBUF { txt = ogg_popup_off; }
+		};
+	}
+
 RESOURCE LISTBOX r_user_hotkey_setting_list
 {
   flags = EAknListBoxSelectionList;
@@ -272,6 +372,16 @@ RESOURCE ARRAY r_user_hotkey_items
   };
 }
 
+RESOURCE MENU_PANE r_options_menu
+{
+  items= {
+      MENU_ITEM { txt=ogg_skins; 
+                  cascade=r_skin_menu; },
+	MENU_ITEM { command=EOggOptions;	txt=ogg_settings; },
+	MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; }
+  };
+}
+
 RESOURCE MENU_PANE r_file_menu
 {
   items= {
@@ -280,12 +390,9 @@ RESOURCE MENU_PANE r_file_menu
                   flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
-      MENU_ITEM { txt=ogg_skins; 
-                  cascade=r_skin_menu; },
-   /*   MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
-                  flags=EEikMenuItemSeparatorAfter;},*/
+      MENU_ITEM { txt=ogg_options_cascade;
+                  cascade=r_options_menu; },
       MENU_ITEM { command=EOggAbout;	    txt=ogg_about_label; },
-	  MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; },
       MENU_ITEM { command=EEikCmdExit;	    txt=ogg_exit_label; }
   };
 }
@@ -315,6 +422,7 @@ RESOURCE TBUF r_ogg_error_20 { buf=ogg_text_error_20; }
 RESOURCE TBUF r_ogg_error_21 { buf=ogg_text_error_21; }
 RESOURCE TBUF r_ogg_error_22 { buf=ogg_text_error_22; }
 RESOURCE TBUF r_ogg_error_23 { buf=ogg_text_error_23; }
+RESOURCE TBUF r_ogg_error_24 { buf=ogg_text_error_24; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }

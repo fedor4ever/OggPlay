@@ -48,7 +48,7 @@ typedef TUint32 ogg_uint32_t;
 #define inline __inline
 #define alloca _alloca
 #undef HAVE_ALLOCA_H
-#pragma chmsg(compiling for wins with vc32)
+//#pragma chmsg(compiling for wins with vc32)
    
 #elif defined (__MARM__)
 #pragma chmsg(compiling for marm)

@@ -95,6 +95,13 @@ enum TOggplayDlgLineId // dialog line ids
 	EOggLabelAboutVersion6,
 	EwizradialDlg1Label
     };
+//!FIXME
+//Settings list
+enum TOggplaySettingId
+	{
+	EOggSettingScanDir,
+	EOggSettingAutoPlayId
+	};
 
 enum TOggplayMiscSeries60
     {

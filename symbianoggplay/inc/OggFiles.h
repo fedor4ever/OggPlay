@@ -104,6 +104,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName);
   
   TInt SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session);
+  TInt SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session);
   
  public:
      // from MOggFilesSearchBackgroundProcess

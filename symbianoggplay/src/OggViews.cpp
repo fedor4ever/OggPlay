@@ -27,7 +27,6 @@
 #include "OggSettingsContainer.h"
 #include "OggUserHotkeys.h"
 
-
 enum
 {
   EScreenModeFlipOpen = 0,
@@ -103,6 +102,9 @@ void COggFOView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
 {
   COggViewBase::ViewActivatedL(aPrevViewId, aCustomMessageId, aCustomMessage);
   CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(ETrue);
+#if defined(SERIES60)
+  CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(EFalse);
+#endif
   iOggViewCtl.ChangeLayout(EFalse);
 }
 
@@ -151,7 +153,8 @@ void COggFCView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
 //
 ////////////////////////////////////////////////////////////////
 
-COggSettingsView::COggSettingsView()
+COggSettingsView::COggSettingsView(COggPlayAppView& aOggViewCtl)
+: COggViewBase(aOggViewCtl)
 {
 }
 
@@ -161,53 +164,52 @@ COggSettingsView::~COggSettingsView()
 
 void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
 				  const TDesC8& /*aCustomMessage*/)
-//void COggSettingsView::DoActivateL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-//				  const TDesC8& /*aCustomMessage*/)
 {
   TPixelsAndRotation sizeAndRotation;
   CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
   CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
-  //iOggViewCtl.Activated();
+
+#if defined(SERIES60)
+  CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
+  if(Cba) {
+    Cba->AddCommandSetToStackL(R_USER_HOTKEYS_CBA);
+    Cba->DrawNow();
+  }
+  CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
+#endif
+
   if (!iContainer)
     {
     iContainer = new (ELeave) COggSettingsContainer;
-    //iContainer->SetMopParent(this);
     iContainer->ConstructL( ((CAknAppUi*)CEikonEnv::Static()->AppUi())->ClientRect() );
-    //AppUi()->AddToStackL( *this, iContainer );
+    ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->AddToStackL( *this, iContainer );
     }
-
 }
 
 void COggSettingsView::ViewDeactivated()
-//void COggSettingsView::DoDeactivate()
 {
-/*  if ( iContainer )
-    {
-    AppUi()->RemoveFromViewStack( *this, iContainer );
-    }
-*/
-  delete iContainer;
-  iContainer = NULL;
-
-  //iOggViewCtl.Deactivated();
+  if ( iContainer )
+  {
+    ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->RemoveFromViewStack( *this, iContainer );
+    delete iContainer;
+    iContainer = NULL;
+  }
+  
+#ifdef SERIES60
+  CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
+  // Remove status pane
+  CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+  statusPane->MakeVisible(EFalse);
+  // Restore softkeys
+  ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
+#endif
+  
 }
-
-/*void COggSettingsView::ViewConstructL()
-{
-  TInt a;
-  a=2;
-}
-*/
 
 TVwsViewId COggSettingsView::ViewId() const
-//TUid COggSettingsView::Id() const
 {
   return TVwsViewId(KOggPlayUid, KOggPlayUidSettingsView);
-//  return KOggPlayUidSettingsView;
 }
-
-
-
 ////////////////////////////////////////////////////////////////
 //
 // class COggUserView

@@ -29,7 +29,7 @@
 #define ogg_shuffle_playlist "Shuffle playlist"
 #define ogg_find_files "Find new files"
 #define ogg_skins "Skins"
-#define ogg_options_cascade "Options..."
+#define ogg_options_cascade "Options..." 
 #define ogg_about_label "About OggPlay..."
 #define ogg_exit_label "Exit"
 #define ogg_prev_song "Previous song"
@@ -66,6 +66,7 @@
 #define ogg_text_error_21 "COggCanvas: Error opening background image."
 #define ogg_text_error_22 "Only the following sample rates are supported: "
 #define ogg_text_error_23 "Only streams with one channel are supported."
+#define ogg_text_error_24 "Can't find directory" // followed by directory name on second line of dialog.
 
 #define ogg_text_string_1 "Updating list of files..."
 #define ogg_text_string_2 "Writing file database..."
@@ -80,8 +81,19 @@
 #define ogg_text_string_11 "(files)"
 #define ogg_text_string_12 "(unassigned)"
 
-// NEW STRINGS
-
 #define ogg_format_text_fast_forward "Fast forward"
 #define ogg_format_text_rewind       "Rewind"
 #define ogg_user_hotkey              "Hotkeys"
+#define ogg_settings                 "Settings"  // in the menu
+#define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
+#define ogg_filescanmode             "File scan mode"
+#define ogg_autostart                "Autoplay on start"
+#define ogg_fullscan                 "Full Scan"
+#define ogg_mmcdir                   "E:\Ogg"
+#define ogg_on                       "On"
+#define ogg_off                      "Off"
+#define ogg_popup_on                 "Enabled"
+#define ogg_popup_off                "Disabled"
+
+
+

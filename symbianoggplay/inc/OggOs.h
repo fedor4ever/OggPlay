@@ -33,8 +33,8 @@ chSTR2(__LINE__) "):" #desc)
 // VERSION
 //
 #define KVersionMajor 0
-#define KVersionMinor 96
-#define KVersionString "0.96"
+#define KVersionMinor 98
+#define KVersionString "0.98"
 
 #define MULTI_LINGUAL_INSTALLER
 

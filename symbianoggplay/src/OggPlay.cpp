@@ -152,8 +152,11 @@ COggActive::CallBack(TAny* aPtr)
 {
 	COggActive* self= (COggActive*)aPtr;
 	
-	if (self->iAppUi->iIsRunningEmbedded && self->iAppUi->iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
-		self->iAppUi->NextSong();
+	if ( self->iAppUi->iIsRunningEmbedded || 
+      (self->iAppUi->iSettings.iAutoplay && self->iAppUi->iIsStartup) 
+      && self->iAppUi->iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
+		 self->iAppUi->iIsStartup=EFalse;
+     self->iAppUi->NextSong();
 	}
 	
 	self->iAppUi->NotifyUpdate();
@@ -294,6 +297,7 @@ COggPlayAppUi::ConstructL()
 	iAlarmTime.Set(_L("20030101:120000.000000"));
 	iViewBy= ETitle;
 	iAnalyzerState= 0;
+  iIsStartup=ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv();
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
 	iOggPlayback->ConstructL();
@@ -331,7 +335,7 @@ COggPlayAppUi::ConstructL()
 	}
 
 #if defined(SERIES60)
-	iSettingsView=new(ELeave) COggSettingsView();
+	iSettingsView=new(ELeave) COggSettingsView(*iAppView);
 	RegisterViewL(*iSettingsView);
   iUserHotkeys=new(ELeave) COggUserHotkeysView(*iAppView);
 	RegisterViewL(*iUserHotkeys);
@@ -711,7 +715,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		iIsRunningEmbedded = EFalse;
 #ifdef SEARCH_OGGS_FROM_ROOT
         COggFilesSearchDialog *d = new (ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
-        iAppView->iOggFiles->SearchAllDrives(d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
+        if(iSettings.iScanmode==TOggplaySettings::EMmcOgg) {
+          iAppView->iOggFiles->SearchSingleDrive(KMmcSearchDir,d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
+        } else {
+          iAppView->iOggFiles->SearchAllDrives(d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
+        }
+
 #else
 		iAppView->iOggFiles->CreateDb(iCoeEnv->FsSession());
 #endif
@@ -1038,6 +1047,16 @@ COggPlayAppUi::ReadIniFile()
 		if (iCurrentSkin<0) iCurrentSkin=0;
 		if (iCurrentSkin>=iSkins->Count()) iCurrentSkin= iSkins->Count()-1;
 	}
+
+  if (tf.Read(line) == KErrNone) {
+		TLex parse(line);
+		parse.Val(iSettings.iScanmode);
+	};
+
+  if (tf.Read(line) == KErrNone) {
+		TLex parse(line);
+		parse.Val(iSettings.iAutoplay);
+	};
 	
 	//iViewBy= ETitle;
 	//if (tf.Read(line) == KErrNone) {
@@ -1087,7 +1106,12 @@ COggPlayAppUi::WriteIniFile()
 	num.Num(iCurrentSkin);
 	tf.Write(num);
 	
-	//num.Num(iViewBy);
+	num.Num(iSettings.iScanmode);
+	tf.Write(num);
+	num.Num(iSettings.iAutoplay);
+	tf.Write(num);
+
+  //num.Num(iViewBy);
 	//tf.Write(num);
 	
 	//tf.Write(iAlbum);

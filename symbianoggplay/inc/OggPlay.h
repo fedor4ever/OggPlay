@@ -88,6 +88,27 @@ static const struct {
   // EKeyDial
 };
 
+#if defined(__WINS__)
+_LIT(KMmcSearchDir,"C:\\Ogg\\");
+#else
+_LIT(KMmcSearchDir,"E:\\Ogg\\");
+#endif
+
+// global settings - these are set through the settings view
+
+class TOggplaySettings
+	{
+public:
+  enum TScanmode
+		{
+      EFullScan,
+      EMmcOgg,
+      EMmmcFull
+		};
+  TInt iScanmode;
+
+  TInt iAutoplay;  
+	};
 
 // Forward declarations:
 //----------------------
@@ -146,6 +167,11 @@ public:
   enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, ETop, ETrackTitle };
 
   // global settings stored in the ini file:
+  TOggplaySettings iSettings;
+
+  // backwards compatibility - deprecated
+  // as long as these are not part of TOggplaySettings, they can't be set 
+  // through the settings view
   int iHotkey;
   int iVolume;            // [0...100]
   int iRepeat;            // 0=off; 1=on
@@ -162,12 +188,13 @@ public:
 
   TBool iForeground;      // is the application currently in the foreground?
   TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
-
+  TBool iIsStartup;        // is true when just started, needed for autoplay
   TFileName iDbFileName;
   
   COggPlayAppView* iAppView;
   COggPlayback*    iOggPlayback;
   COggActive*      iActive;
+  COggMsgEnv* iOggMsgEnv;
 
   // from MPlaybackObserver:
   virtual void NotifyPlayComplete();
@@ -219,7 +246,6 @@ private:
   COggFOView* iFOView;
   COggFCView* iFCView;
   COggSettingsView* iSettingsView;
-  COggMsgEnv* iOggMsgEnv;
   RArray<TInt> iViewHistoryStack;
   COggUserHotkeysView* iUserHotkeys;
 };
