@@ -17,7 +17,8 @@
  */
 
 #include <e32base.h>
-
+#ifndef OGGHELPERFCTS_H
+#define OGGHELPERFCTS_H
 class COggTimer : public CTimer
     {
     public:
@@ -29,3 +30,4 @@ class COggTimer : public CTimer
         TCallBack iCallBack;
         TBool iEnabled;
     };
+#endif

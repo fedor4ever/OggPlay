@@ -22,6 +22,7 @@
 #include <string.h>
 #include "OggLog.h"
 #include "Plugin\ImplementationUIDs.hrh"
+#include "AdvancedStreaming.h"
 
 #if 1
 #include <e32svr.h> 
@@ -83,8 +84,14 @@ void COggPlayController::ConstructL()
     iState = EStateNotOpened;
      
     iFileLength = TTimeIntervalMicroSeconds(1E6);
+    
+    iOggSource = new (ELeave) COggSource( *this);
+
     PRINT("COggPlayController::ConstructL() Out");
 }
+
+_LIT(KRandomRingingToneFileName, "random_ringing_tone.ogg");
+_LIT(KRandomRingingToneTitle, "this is a random ringing tone");
 
 void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
 {
@@ -95,11 +102,65 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
         User::Leave(KOggPlayPluginErrNotReady);
     }
 
+    iRandomRingingTone = EFalse;
     TUid uid = aDataSource.DataSourceType() ;
     if (uid == KUidMmfFileSource)
     {
         CMMFFile* aFile = STATIC_CAST(CMMFFile*, &aDataSource);
         iFileName = aFile->FullName();
+
+	    TParsePtrC aP(iFileName);
+        TBool result = aP.NameAndExt().CompareF(KRandomRingingToneFileName) == 0;
+        if ( result )
+        {
+            // Use a random file, for ringing tones
+            TFileName aPathToSearch = aP.Drive();
+            aPathToSearch.Append ( aP.Path() );
+            CDir* dirList;
+            RFs fsSession;
+            fsSession.Connect();
+            User::LeaveIfError(fsSession.GetDir(aPathToSearch,
+                KEntryAttMaskSupported,ESortByName,dirList));
+            TInt nbFound=0;
+            TInt i; 
+            for (i=0;i<dirList->Count();i++)
+            {
+                TParsePtrC aParser((*dirList)[i].iName);
+                TBool found = ( aParser.Ext().CompareF(_L(".ogg")) == 0 );
+                TBool theRandomTone = ( ( (*dirList)[i].iName).CompareF(KRandomRingingToneFileName) == 0);
+                if (found && !theRandomTone)
+                    nbFound++;
+            }
+            if (nbFound == 0)
+            {
+                // Only the random_ringing_tone.ogg in that directory, leave
+                User::Leave(KErrNotFound);
+            }
+            // Initialize the random seed
+            TTime t;
+            t.HomeTime();
+            TInt64 seed = t.DateTime().MicroSecond();
+            TReal rnd = Math::FRand(seed);
+            TInt picked= (int)(rnd * ( nbFound ) );
+            nbFound=-1;
+            for (i=0;i<dirList->Count();i++)
+            {
+                TParsePtrC aParser((*dirList)[i].iName);
+                TBool found = ( aParser.Ext().CompareF(_L(".ogg")) == 0 ); 
+                TBool theRandomTone = ( ( (*dirList)[i].iName).CompareF(KRandomRingingToneFileName) == 0);
+                if (found && !theRandomTone)
+                    nbFound++;
+                if (nbFound == picked)
+                    break;
+            }
+            iFileName = aPathToSearch;
+            iFileName.Append ( (*dirList)[i].iName );
+            
+            TRACEF(COggLog::VA(_L("Random iFileName choosen %S "),&iFileName ));
+            delete dirList;
+            fsSession.Close();
+            iRandomRingingTone = ETrue;
+        }
     }
     else
     {
@@ -111,15 +172,11 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
     // Open the file here, in order to get the tags.
     OpenFileL(iFileName);
     // Save the tags.
-
-    iDecoder->Clear(); // Close the file. This is required for the ringing tone stuff.
-
-    iState = EStateNotOpened;
-
-    iOggSource = new (ELeave) COggSource( *this);
-    iOggSource->ConstructL();
     
-    PRINT("COggPlayController::AddDataSourceL Out");
+  iDecoder->Clear(); // Close the file. This is required for the ringing tone stuff.
+  
+  iState = EStateNotOpened;
+  PRINT("COggPlayController::AddDataSourceL Out");
 }
 
 void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
@@ -249,6 +306,49 @@ void COggPlayController::PrimeL()
     iState = EStateOpen;
     OpenFileL(iFileName);
 
+    // Do our own rate conversion, some firmware do it very badly.
+    
+    if ( iUsedRate == 0 )
+    {
+        COggAudioCapabilityPoll pollingAudio;
+        TInt audioCaps = pollingAudio.PollL();
+        
+        TMdaAudioDataSettings::TAudioCaps rt;
+        rt= TMdaAudioDataSettings::ESampleRate8000Hz; // Used to silence the compiler
+
+        iUsedChannels = iDecoder->Channels();
+        
+        iUsedRate = iDecoder->Rate();
+        
+        if (iUsedRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
+        else if (iUsedRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
+        else if (iUsedRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
+        else if (iUsedRate==22050) rt= TMdaAudioDataSettings::ESampleRate22050Hz;
+        else if (iUsedRate==32000) rt= TMdaAudioDataSettings::ESampleRate32000Hz;
+        else if (iUsedRate==44100) rt= TMdaAudioDataSettings::ESampleRate44100Hz;
+        else if (iUsedRate==48000) rt= TMdaAudioDataSettings::ESampleRate48000Hz;
+        else {
+            // Rate not supported by the phone
+            User::Leave(KErrNotSupported);
+        }
+        
+        if ( !(rt & audioCaps) )
+        {
+            // Rate not supported by this phone.
+            iUsedRate = 16000; //That rate should be 
+            //supported by all phones
+        }
+        
+        if (!(audioCaps & TMdaAudioDataSettings::EChannelsStereo) && iDecoder->Channels() )
+        {
+            // Only Mono is supported by this phone, we need to mix the 2 channels together
+            iUsedChannels = 1; // Use 1 channel
+        }
+        
+
+        iOggSource->ConstructL(iDecoder->Rate(),iUsedRate, iDecoder->Channels(), iUsedChannels);
+        
+    }
     iAudioOutput->SinkPrimeL();
     
     if (!iSinkBuffer)
@@ -279,11 +379,14 @@ void COggPlayController::PlayL()
 
     if (iState!=EStatePrimed)
         User::Leave(KErrNotReady);
+    
+
     CFakeFormatDecode* fake = CFakeFormatDecode::NewL(
     			TFourCC(' ', 'P', '1', '6'),
-    			iDecoder->Channels(), 
-                iDecoder->Rate(),
+    			iUsedChannels, 
+                iUsedRate,
     			iDecoder->Bitrate());
+
 	CleanupStack::PushL(fake);
     
     // NegiotiateL leaves with KErrNotSupported if you don't give a CMMFFormatDecode for it's source:
@@ -293,8 +396,6 @@ void COggPlayController::PlayL()
  
 	CleanupStack::PopAndDestroy();
     
-    //iMMFSource->SourcePlayL();
-
     iAudioOutput->SinkPlayL();
     
     // send first buffer to sink - sending a NULL buffer prompts it to request some data
@@ -302,7 +403,7 @@ void COggPlayController::PlayL()
 
     iOggSource->SetSink(iAudioOutput);
     iAudioOutput->EmptyBufferL(NULL, iOggSource, TMediaId(KUidMediaTypeAudio));
-    
+
     iState=EStatePlaying;
     PRINT("COggPlayController:: PlayL ok");   
 }
@@ -314,7 +415,6 @@ void COggPlayController::PauseL()
     if (iState!=EStatePlaying)
         User::Leave(KErrNotReady);
 
-    //iMMFSource->SourcePauseL();
     iAudioOutput->SinkPauseL();
     iOggSource->SourcePauseL();
     iState=EStatePrimed;
@@ -418,8 +518,16 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
         User::Leave(KOggPlayPluginErrOpeningFile);
     }
         
-      // Parse tag information and put it in the provided buffers.
+    // Parse tag information and put it in the provided buffers.
     iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
+
+    // Change the title, to let know the client that we have a random ringing tone
+    if (iRandomRingingTone)
+    {
+        iTitle = KRandomRingingToneTitle;
+    }
+
+    TRACEF(COggLog::VA(_L("Tags: %S %S %S %S"), &iTitle, &iArtist, &iAlbum, &iGenre ));
     iFileLength = iDecoder->TimeTotal() * 1000;
 
 } 
@@ -493,7 +601,7 @@ COggSource::~COggSource()
     delete (iOggSampleRateConverter);
 }
 
-void COggSource::ConstructL()
+void COggSource::ConstructL(TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel)
 {
     // We use the Sample Rate converter only for the buffer filling and the gain settings,
     // sample rate conversion is done by MMF.
@@ -503,8 +611,8 @@ void COggSource::ConstructL()
     
     iOggSampleRateConverter->Init(&iSampleRateFillBuffer, 
         KBufferSize, (TInt) (0.75*KBufferSize), 
-        1, 1,   // The MMF will take care of rate conversion
-        2, 2 ); // The MMF will take care of channel mixing
+        aInputRate,  aOutputRate, 
+        aInputChannel, aOutputChannel );
     PRINT("COggSource::ConstructL() Out");
 }
 

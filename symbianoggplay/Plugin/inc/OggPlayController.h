@@ -24,8 +24,7 @@
 // INCLUDES
 #include <E32Base.h>
 #include <e32std.h>
-#include "OggPlay.h"
-
+#include <e32math.h>
 #include <ImplementationProxy.h>
 #include <mmfcontroller.h>
 #include <mmf\common\mmfstandardcustomcommands.h>
@@ -42,8 +41,6 @@
 class COggSource;
 
 // CLASS DECLARATION
-
-const TInt KBufferSize = 4096;
 
 
 class COggPlayController :	public CMMFController,
@@ -255,7 +252,9 @@ class COggPlayController :	public CMMFController,
         TBool iOwnSinkBuffer;
         COggSource * iOggSource;
         TMMFPrioritySettings iMMFPrioritySettings;
-
+        TBool iRandomRingingTone;
+        TInt iUsedRate;
+        TInt iUsedChannels;
 	};
 
     enum {
@@ -308,7 +307,7 @@ class COggSource: public CBase, public MDataSource
 public:
     COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer);
     ~COggSource();
-    void ConstructL();
+    void ConstructL(TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel);
     // from MDataSource:
     virtual TFourCC SourceDataTypeCode(TMediaId aMediaId);
     virtual void FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId aMediaId);

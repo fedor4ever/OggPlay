@@ -44,13 +44,13 @@ chSTR2(__LINE__) "):" #desc)
 #define SERIES60
 //#define UIQ
 // Enable this line to choose the OS OggPlay will run on.
-//#define OS70S
+#define OS70S
 
 //# Version String
 #if defined(SERIES60)
 #define KVersionMajor 1
-#define KVersionMinor 60
-#define KVersionString "1.60"
+#define KVersionMinor 62
+#define KVersionString "1.62"
 #endif
 #if defined(UIQ)
 #define KVersionMajor 1
@@ -62,7 +62,7 @@ chSTR2(__LINE__) "):" #desc)
 #define DOS
 
 // Switches at least the splash bitmap
-#define UNSTABLE_RELEASE
+//#define UNSTABLE_RELEASE
 
 #if defined(UIQ)
 // Define the type of UIQ platform

@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.6.1 of Oggplay for Series60.
+This is the Release Note for Release 1.6.2 of Oggplay for Series60.
 
 ******************************************************************************
 **** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
@@ -7,8 +7,9 @@ This is the Release Note for Release 1.6.1 of Oggplay for Series60.
 ******************************************************************************
 
 OggPlay is a music player for phones running on the Symbian Operating system. 
-It was originally playing only .ogg file format, but some of the latest versions 
-now plays MP3, AAC, MP4, M4A in addition to OGG files
+It comes bundled with a .ogg file format decoder, but it detects and uses MMF 
+plugins which may come built-in your phone or that might have been installed
+later on. MP3, AAC, MP4, M4A plugins are supported.
 
 See the ReadMeFirst.html to see which file formats your phone supports.
 
@@ -18,6 +19,17 @@ This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610.
 
 History
 --------------------------------------------------------------------------------------------
+
+
+What's new in Release 1.6.2:
+--------------------------
+The ogg plugin can be used as a "random" ringing tone: everytime a phone call
+is received, the ringing tone played will be randomly choosen from the list
+of available .ogg files in the device. The file ReadMeFirst.html gives the 
+instructions for creating the ramdom ringing tones.
+
+Fixed the crackling  & popping sound (most notably on 6600, but also heard on 
+some other phones as well) that was introduced in release 1.6.1.
 
 
 What's new in Release 1.6.1:
