@@ -1,12 +1,22 @@
 
 #include "..\inc\OggOs.h"
 
-TARGET  OggPlay.app
-TARGETTYPE  app
-UID  0x100039CE 0x1000A661
-TARGETPATH \system\apps\Oggplay
+/////////////////////////////////////////////////
+//  Basics
+//
 
+TARGET        OggPlay.app
+TARGETTYPE    app
+TARGETPATH    \system\apps\Oggplay
+UID           0x100039CE 0x1000A661
 EPOCSTACKSIZE 16000
+
+/////////////////////////////////////////////////
+//  Source Files
+//
+
+USERINCLUDE . ..\inc ..\vorbis ..\data ..\vorbis\plugin ..\plugin\inc
+SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 
 SOURCEPATH ..\src
 SOURCE OggLog.cpp
@@ -16,115 +26,113 @@ SOURCE OggDialogs.cpp
 SOURCE OggMsgEnv.cpp
 SOURCE OggPlayAppView.cpp
 SOURCE OggViews.cpp
-
 SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
-#if defined SERIES60
-SOURCE OggSettingsContainer.cpp
-#endif
 SOURCE OggFilesSearchDialogs.cpp
+
 #if defined SERIES60
-SOURCE OggUserHotkeys.cpp
+  SOURCE OggSettingsContainer.cpp
+  SOURCE OggUserHotkeys.cpp
 #endif
 
+#if !defined(PLUGIN_SYSTEM)
+
+  SOURCE Utf8Fix.c
+
+  #if defined(MOTOROLA)
+    SOURCE OggTremor_Motorola.cpp
+  #else
+    SOURCE OggTremor.cpp
+  #endif
+
+  //FIXMAD: should be part of the vorbis dll
+  SOURCE OggRateConvert.cpp
+
+  SOURCEPATH ..\vorbis
+  SOURCE TremorDecoder.cpp
+
+  #if defined MP3_SUPPORT
+    //FIXMAD: MAD should of course have its own dll.
+
+    SOURCEPATH    ..\mad\src
+    SOURCE bstdfile.c
+    SOURCE MadDecoder.cpp
+    SOURCE ttag.c
+    SOURCE tcrc.c
+    SOURCE rgain.c
+    //SOURCE dllentry.cpp     
+
+    SOURCEPATH    ..\mad\libmad
+    SOURCE bit.c
+    SOURCE decoder.c
+    SOURCE fixed.c
+    SOURCE frame.c
+    SOURCE huffman.c
+    SOURCE layer12.c
+    SOURCE layer3.c
+    SOURCE stream.c
+    SOURCE synth.c
+    SOURCE timer.c
+    SOURCE version.c
+
+    MACRO HAVE_CONFIG_H
+    MACRO SYMBIAN_STACKFIX
+    MACRO FPM_ARM
+
+    SOURCEPATH    ..\mad\zlib
+    SOURCE adler32.c
+    SOURCE crc32.c
+    SOURCE compress.c
+    SOURCE deflate.c
+    SOURCE infback.c
+    SOURCE inffast.c
+    SOURCE inflate.c
+    SOURCE inftrees.c
+    SOURCE trees.c
+    SOURCE uncompr.c
+    SOURCE zutil.c
+    MACRO STDC
+
+    SOURCEPATH ..\mad\libid3tag
+    SOURCE compat.c     
+    SOURCE crc.c        
+    //SOURCE debug.c      
+    SOURCE field.c      
+    SOURCE file.c       
+    SOURCE id3frame.c      
+    SOURCE frametype.c  
+    SOURCE genre.c      
+    SOURCE latin1.c     
+    SOURCE parse.c      
+    SOURCE render.c     
+    SOURCE tag.c        
+    SOURCE ucs4.c       
+    SOURCE utf16.c      
+    SOURCE utf8.c       
+    SOURCE util.c       
+    SOURCE id3version.c    
+
+    USERINCLUDE ..\mad\libmad ..\mad\inc ..\mad\zlib ..\mad\libid3tag
+
+  #endif /* End of MP3_SUPPORT */
+
+#endif /* End of !PLUGIN_SYSTEM */
 
 #if defined(PLUGIN_SYSTEM)
+  SOURCE OggPluginAdaptor.cpp
 
-SOURCE OggPluginAdaptor.cpp
+  SOURCEPATH ..\vorbis\plugin
 
-#ifndef MMF_AVAILABLE
-SOURCEPATH ..\plugin\src
-SOURCE PseudoMMFFcts.cpp
-#endif
-
-#else
-SOURCE Utf8Fix.c
-#if defined(MOTOROLA)
-SOURCE OggTremor_Motorola.cpp
-#else
-SOURCE OggTremor.cpp
-#endif
-
-//FIXMAD: should be part of the vorbis dll
-SOURCE OggRateConvert.cpp
-
-#if defined(PLUGIN_SYSTEM)
-SOURCEPATH ..\vorbis\plugin
-#else
-SOURCEPATH ..\vorbis
-#endif
-SOURCE TremorDecoder.cpp
-
-
-#if defined MP3_SUPPORT
-//FIXMAD: MAD should of course have its own dll.
-SOURCEPATH    ..\mad\src
-SOURCE bstdfile.c
-SOURCE MadDecoder.cpp
-SOURCE ttag.c
-SOURCE tcrc.c
-SOURCE rgain.c
-//SOURCE dllentry.cpp     
-
-SOURCEPATH    ..\mad\libmad
-SOURCE bit.c
-SOURCE decoder.c
-SOURCE fixed.c
-SOURCE frame.c
-SOURCE huffman.c
-SOURCE layer12.c
-SOURCE layer3.c
-SOURCE stream.c
-SOURCE synth.c
-SOURCE timer.c
-SOURCE version.c
-
-MACRO HAVE_CONFIG_H
-MACRO SYMBIAN_STACKFIX
-MACRO FPM_ARM
-
-SOURCEPATH    ..\mad\zlib
-SOURCE adler32.c
-SOURCE crc32.c
-SOURCE compress.c
-SOURCE deflate.c
-SOURCE infback.c
-SOURCE inffast.c
-SOURCE inflate.c
-SOURCE inftrees.c
-SOURCE trees.c
-SOURCE uncompr.c
-SOURCE zutil.c
-MACRO STDC
-
-SOURCEPATH ..\mad\libid3tag
-SOURCE compat.c     
-SOURCE crc.c        
-//SOURCE debug.c      
-SOURCE field.c      
-SOURCE file.c       
-SOURCE id3frame.c      
-SOURCE frametype.c  
-SOURCE genre.c      
-SOURCE latin1.c     
-SOURCE parse.c      
-SOURCE render.c     
-SOURCE tag.c        
-SOURCE ucs4.c       
-SOURCE utf16.c      
-SOURCE utf8.c       
-SOURCE util.c       
-SOURCE id3version.c    
-//
-
-USERINCLUDE ..\mad\libmad ..\mad\inc ..\mad\zlib ..\mad\libid3tag
-
-#endif /* MP3_SUPPORT */
+  #ifndef MMF_AVAILABLE
+    SOURCEPATH ..\plugin\src
+    SOURCE PseudoMMFFcts.cpp
+  #endif
 
 #endif /* PLUGIN_SYSTEM */
 
-
-
+/////////////////////////////////////////////////
+//  Resource Files
+//
 
 SOURCEPATH ..\src
 
@@ -139,10 +147,11 @@ LANG SC EN FR GE DU IT SP SW TU DA
 LANG SC
 #endif
 
+/////////////////////////////////////////////////
+//  Library Files
+//
 
-USERINCLUDE . ..\inc ..\vorbis ..\data ..\vorbis\plugin ..\plugin\inc
-SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
-
+// Used by all
 LIBRARY euser.lib 
 LIBRARY apparc.lib
 LIBRARY cone.lib
@@ -159,45 +168,43 @@ LIBRARY bitgdi.lib
 LIBRARY apgrfx.lib
 LIBRARY egul.lib 
 LIBRARY estlib.lib
-#ifdef MONITOR_TELEPHONE_LINE
-LIBRARY etel.lib
-#endif 
 LIBRARY charconv.lib
+LIBRARY flogger.lib 
+LIBRARY hal.lib
+
 #if defined SERIES60
 LIBRARY avkon.lib
-#endif
-#ifdef UIQ
-LIBRARY qikctl.lib
-#endif
-LIBRARY flogger.lib 
-#ifndef PLUGIN_SYSTEM
-LIBRARY libvorbisidec.lib
-#endif
-LIBRARY mediaclientaudiostream.lib
-#if defined SERIES60
 LIBRARY MediaClientImage.lib 
 LIBRARY etext.lib
 LIBRARY form.lib
 LIBRARY estor.lib
 #endif
-LIBRARY hal.lib
-//LIBRARY msvcrt.lib
+
+#ifdef UIQ
+LIBRARY qikctl.lib
+#endif
+
+#ifdef MONITOR_TELEPHONE_LINE
+LIBRARY etel.lib
+#endif 
+
 #if defined(MOTOROLA)
 LIBRARY maudiofb.lib
+#else
+LIBRARY mediaclientaudiostream.lib
 #endif
+
+#ifndef PLUGIN_SYSTEM
+LIBRARY libvorbisidec.lib
 #ifdef MMF_AVAILABLE
 LIBRARY MediaClientAudio.lib
 LIBRARY MMFControllerFramework.lib 
 #endif
+#endif
 
-
-START WINS      
-// ?wins_specific_information
-END
-
-START MARM
-// ?marm_specific_information
-END
+/////////////////////////////////////////////////
+//  Build the AIF & MBM files
+//
 
 #if defined SERIES60
 START BITMAP S60default.mbm
@@ -427,6 +434,18 @@ END
 AIF OggPlay.aif ..\aif OggPlayAif.uiq.rss c16 cdicon_20x16.bmp cdicon_20x16_mask.bmp cdicon_32x32.bmp cdicon_32x32_mask.bmp
 
 #endif  // UIQ
+
+/////////////////////////////////////////////////
+//  ???
+//
+
+START WINS      
+// ?wins_specific_information
+END
+
+START MARM
+// ?marm_specific_information
+END
 
 // For Symbian 7.0 and over
 // OPTION MSVC /Gs16000 /FD

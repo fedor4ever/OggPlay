@@ -31,9 +31,9 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 
 //# Version String
-#define KVersionMajor 1
-#define KVersionMinor 50
-#define KVersionString "1.50"
+#define KVersionMajor 0
+#define KVersionMinor 90
+#define KVersionString "0.90"
 
 #define MULTI_LINGUAL_INSTALLER
 
@@ -62,7 +62,7 @@ chSTR2(__LINE__) "):" #desc)
 
 // When defined, the decoder used are dynamically loaded plugins.
 
-#define PLUGIN_SYSTEM
+//#define PLUGIN_SYSTEM
 // this is experimental at the moment.
 #ifdef PLUGIN_SYSTEM
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
@@ -74,7 +74,7 @@ chSTR2(__LINE__) "):" #desc)
 #else
 // support for legacy audio codec (-:
 // this is experimental at the moment.
-#define MP3_SUPPORT
+//#define MP3_SUPPORT
 #endif /* PLUGIN_SYSTEM */
 
 

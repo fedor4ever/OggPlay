@@ -19,23 +19,14 @@
 NAME OGGP
 
 #include <eikon.rh>
-#include <uikon.rh>
-
 #include <eikon.rsg>
-
-#include <uikon.hrh> // EEikMenuTitleRightAlign
 #include <qikon.rh>
-#include <qikon.hrh>
-#include <qikctl.rsg>
-#define R_OGG_DIALOG_BUTTONS2 R_EIK_BUTTONS_CANCEL_DONE
-#define R_OGG_DIALOG_BUTTONS1 R_EIK_BUTTONS_CONTINUE
 
-#include "../inc/OggDialogs.rh"
-
+#include "OggDialogs.rh"
 #include "OggPlay.hrh"
 
 RESOURCE RSS_SIGNATURE { }
-RESOURCE TBUF { buf=""; }
+RESOURCE TBUF16 { buf=""; }
 
 //# Version string
 #define ogg_txt_version "OggPlay 1.11"
@@ -60,6 +51,9 @@ RESOURCE TBUF { buf=""; }
 #elif defined(LANGUAGE_DA)
 #include "OggPlay.da.rss"
 #endif
+
+#define R_OGG_DIALOG_BUTTONS2 R_EIK_BUTTONS_CANCEL_DONE
+#define R_OGG_DIALOG_BUTTONS1 R_EIK_BUTTONS_CONTINUE
 
 RESOURCE EIK_APP_INFO
 {

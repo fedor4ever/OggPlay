@@ -16,6 +16,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef _UTF8FIX_H
+#define _UTF8FIX_H
+
 // j_code() function return type
 // 0x0 means set code by hand
 #define GB_CODE      0x0001
@@ -26,4 +29,14 @@
 #define UTF8_CODE    0x0040
 #define OTHER_CODE   0x8000
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int j_code(const char * buff,int count);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // _UTF8FIX_H
