@@ -2,8 +2,8 @@
 (0x101F6F88), 0, 0, 0, {"Series60ProductID"} 
 
 ;// Plugin
-"\epoc32\release\armi\urel\OGGTREMORCONTROLLER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
-"\epoc32\release\armi\urel\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
+"\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGPLUGINDECODER.DLL"
+"\epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
 
 ;// Smoketest
 "\epoc32\release\armi\urel\oggtremortest.exe"-"!:\system\apps\OggPlayPlugin\oggtremortest.exe"

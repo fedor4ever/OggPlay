@@ -72,9 +72,9 @@ public:
     virtual void Play() = 0;
     virtual void Pause() = 0;
     virtual void Stop() = 0;
-    virtual TTimeIntervalMicroSeconds PositionL() const = 0;
-    virtual void SetPositionL(const TTimeIntervalMicroSeconds& aPosition) = 0;
-    virtual TTimeIntervalMicroSeconds DurationL() const = 0;
+    virtual TInt GetPosition(TTimeIntervalMicroSeconds& aPosition) = 0;
+    virtual void SetPosition(const TTimeIntervalMicroSeconds& aPosition) = 0;
+    virtual TTimeIntervalMicroSeconds Duration() const = 0;
     virtual TInt GetNumberOfMetaDataEntries(TInt& aNumberOfEntries) = 0;
     virtual CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex) =0;
 

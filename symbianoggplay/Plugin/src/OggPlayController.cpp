@@ -408,6 +408,26 @@ TInt COggPlayController::GetNumberOfMetaDataEntries(TInt& aNumberOfEntries)
     TRAPD(error, GetNumberOfMetaDataEntriesL(aNumberOfEntries));
     return error;
 }
+
+TInt  COggPlayController::GetPosition(TTimeIntervalMicroSeconds& aPosition)
+{
+    TRAPD(error, aPosition = PositionL());
+    
+    return error;
+}
+void  COggPlayController::SetPosition(const TTimeIntervalMicroSeconds& aPosition)
+{
+    TRAPD(error, SetPositionL(aPosition));
+    // The possible leave is stupidly forgotten here
+}
+TTimeIntervalMicroSeconds  COggPlayController::Duration() const
+{
+    TTimeIntervalMicroSeconds  durat;
+    TRAPD(error, durat = DurationL());
+    // The possible leave is stupidly forgotten here
+    return(durat);
+}
+
 #endif
 
 
@@ -432,7 +452,7 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
 
 void COggPlayController::NotifyPlayInterrupted(TInt aError)
 {
-   TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError))
+   TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError));
    if (iState != EStateDestroying)
    {
 #ifdef MMF_AVAILABLE

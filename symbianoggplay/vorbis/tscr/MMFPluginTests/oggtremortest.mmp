@@ -26,5 +26,5 @@ SYSTEMINCLUDE \Epoc32\include\libc
 LIBRARY       euser.lib 
 LIBRARY       flogger.lib 
 #ifdef MMF_AVAILABLE
-LIBRARY       MMFControllerFramework.lib MediaClientAudio.lib 
+LIBRARY       MMFControllerFramework.lib MediaClientAudio.lib bafl.lib 
 #endif

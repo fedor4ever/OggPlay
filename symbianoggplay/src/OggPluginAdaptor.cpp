@@ -20,7 +20,53 @@
 #include "OggAbsPlayback.h"
 #include "OggPluginAdaptor.h"
 #include <e32svr.h>
+#include <badesca.h>
 #include "OggLog.h"
+
+
+
+////////////////////////////////////////////////////////////////
+//
+// CPluginInfo
+//
+////////////////////////////////////////////////////////////////
+
+CPluginInfo::CPluginInfo()
+  {
+  }
+
+CPluginInfo* CPluginInfo::NewL(const TDesC& anExtension, 
+	   const TDesC& aName,
+	   const TDesC& aSupplier,
+	   const TInt aVersion)
+  {
+  CPluginInfo* self = new (ELeave) CPluginInfo();
+  CleanupStack::PushL(self);
+  self->ConstructL(anExtension, aName, aSupplier, aVersion);
+  CleanupStack::Pop(); // self
+  return self;
+  }
+
+
+void
+CPluginInfo::ConstructL( const TDesC& anExtension, 
+	   const TDesC& aName,
+	   const TDesC& aSupplier,
+	   const TInt aVersion ) 
+{
+    iExtension = anExtension.AllocL();
+    iName = aName.AllocL();
+    iSupplier = aSupplier.AllocL();
+    iVersion = aVersion;
+}
+
+CPluginInfo::~CPluginInfo()
+{
+    if ( iExtension) delete iExtension;
+    if ( iName )     delete iName;
+    if ( iSupplier ) delete iSupplier;
+}
+
 
 ////////////////////////////////////////////////////////////////
 //
@@ -30,7 +76,8 @@
 
 COggPluginAdaptor::COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver=0) :
 CAbsPlayback(anObserver),
-iEnv(anEnv)
+iEnv(anEnv), 
+iPluginInfos(0)
 {
 }
 
@@ -153,7 +200,7 @@ void   COggPluginAdaptor::SetPosition(TInt64 aPos)
 
 TInt64 COggPluginAdaptor::Position()
 {
-    TTimeIntervalMicroSeconds aPos = 0;
+    TTimeIntervalMicroSeconds aPos(0);
     if (iPlayer)
        iPlayer->GetPosition(aPos);
     return(aPos.Int64());
@@ -200,20 +247,30 @@ void COggPluginAdaptor::MapcPlayComplete(TInt aError)
     iObserver->NotifyPlayComplete();
 }
 
+void COggPluginAdaptor::ConstructL()
+{
+    RDebug::Print(_L("Leaving constructl"));
+    
+    // Discovery of the supported formats
+    iPluginInfos = new(ELeave) CArrayPtrFlat<CPluginInfo>(3);
+    // iPluginInfos will be updated, if required plugin has been found
+    SearchPluginsL(_L("ogg"));
+    SearchPluginsL(_L("mp3"));
+    SearchPluginsL(_L("aac"));
+}
+
+
 #ifdef MMF_AVAILABLE
 ////////////////////////////////////////////////////
 // Interface using the MMF
 ////////////////////////////////////////////////////
 
-void COggPluginAdaptor::ConstructL()
-    {
-    RDebug::Print(_L("Leaving constructl"));
-    iFilename = _L("C:\\test.ogg");
-    }
 
 COggPluginAdaptor::~COggPluginAdaptor()
 {
     delete (iPlayer);
+    iPluginInfos->ResetAndDestroy();
+    delete(iPluginInfos);
 }
 
 void COggPluginAdaptor::ConstructAPlayerL()
@@ -225,15 +282,76 @@ void COggPluginAdaptor::ConstructAPlayerL()
     iPlayer = CMdaAudioPlayerUtility::NewL(
         *this);
 }
+void COggPluginAdaptor::SupportedFormatL()
+{
+
+}
+
+
+void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
+{
+    CMMFControllerPluginSelectionParameters * cSelect = CMMFControllerPluginSelectionParameters::NewLC();
+    CMMFFormatSelectionParameters * fSelect = CMMFFormatSelectionParameters::NewLC();
+
+    fSelect->SetMatchToFileNameL(anExtension);
+    cSelect->SetRequiredPlayFormatSupportL(*fSelect);
+    
+    RMMFControllerImplInfoArray controllers;
+    CleanupResetAndDestroyPushL(controllers);
+    cSelect->ListImplementationsL(controllers); 
+    
+    if (controllers.Count() >0 )
+    {
+        // Found at least one controller !  
+        // Take the first one for the time being. At some time, users should be able to select 
+        // their favorite one...
+        const RMMFFormatImplInfoArray& formatArray = controllers[0]->PlayFormats();
+    
+        TBuf8 <10> anEx8;
+        anEx8.Copy(anExtension); // Convert the 16 bit descriptor to 8 bits
+        
+        TInt found = EFalse;
+        TInt i;
+        for (i=0; i<formatArray.Count(); i++)
+        {            
+            const CDesC8Array &extensions = formatArray[i]->SupportedFileExtensions();
+            for (TInt j=0; j<extensions.Count(); j++)
+            {
+                if (extensions[j].FindF(anEx8) != KErrNotFound)
+                {
+                    found = ETrue;
+                    break;
+                }
+            }
+            if (found) 
+                break;
+        }
+        
+        __ASSERT_ALWAYS ( found, User::Panic(_L("Extension not found"), 999) );
+        
+        
+        TRACEF(COggLog::VA(_L(".%S Plugin Found:%S %S %i"), &anExtension,
+            &formatArray[i]->DisplayName(),
+            &formatArray[i]->Supplier(),
+            formatArray[i]->Version() ));
+        CPluginInfo* info = CPluginInfo::NewL(
+            anExtension,
+            formatArray[i]->DisplayName(),
+            formatArray[i]->Supplier(),
+            formatArray[i]->Version());
+        
+        iPluginInfos->AppendL(info);
+    }
+    
+    CleanupStack::PopAndDestroy(3); /* cSelect, fSelect, controllers */
+}
+
 #else
 
 ////////////////////////////////////////////////////
 // Interface when MMF is not available
 ////////////////////////////////////////////////////
 
-void COggPluginAdaptor::ConstructL()
-{
-}
 
 COggPluginAdaptor::~COggPluginAdaptor()
 {
@@ -241,6 +359,38 @@ COggPluginAdaptor::~COggPluginAdaptor()
     // Finished with the DLL
     //
     iLibrary.Close();
+    iPluginInfos->ResetAndDestroy();
+    delete (iPluginInfos);
+}
+
+
+void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
+{
+    // NO REAL PLUGIN DISCOVERY, YET. PLEASE WRITE THAT PIECE OF CODE !
+    // Currently, expects that the 2 plugins (.ogg, .mp3) are installed.
+     
+    CPluginInfo* info  = NULL;
+
+    if (anExtension == _L("ogg"))
+    {
+    info = CPluginInfo::NewL(
+        anExtension,
+        _L("OGG tremor decoder"),
+        _L("OggPlay Team"),
+        1);
+    } 
+       
+    if (anExtension == _L("mp3"))
+    {
+    info = CPluginInfo::NewL(
+        anExtension,
+        _L("MP3 Mad decoder"),
+        _L("?"),
+        1);
+    } 
+    
+    if (info) 
+        iPluginInfos->AppendL(info);
 }
 
 void COggPluginAdaptor::ConstructAPlayerL()

@@ -147,6 +147,9 @@ class COggPlayController :	public CPseudoMMFController,
         void SetVolume(TInt aVolume);
         TInt GetVolume(TInt& aVolume);
 		TInt GetNumberOfMetaDataEntries(TInt& aNumberOfEntries);
+        TInt GetPosition(TTimeIntervalMicroSeconds& aPosition);
+        void SetPosition(const TTimeIntervalMicroSeconds& aPosition);
+        TTimeIntervalMicroSeconds Duration() const;
 #endif
 		/**
         * From CMMFController Reset controller.

@@ -5,6 +5,7 @@
 #include <e32cons.h>
 #include "activeconsole.h"
 #include "oggtremortest.h"
+#include "ogglog.h"
 
 // All messages written to this
 LOCAL_D CConsoleBase* console;
@@ -53,7 +54,9 @@ LOCAL_C void mainL()
 	console->Printf(KTxtPressAnyKey);
 	console->Getch(); // get and ignore character
 
-     CleanupStack::PopAndDestroy(2); // Console, Active Scheduler
+    CleanupStack::PopAndDestroy(2); // Console, Active Scheduler
+     
+    COggLog::Exit();  // MUST BE AFTER LAST TRACE, otherwise will leak memory
     }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -30,6 +30,29 @@
 #ifndef OGGPLUGINADAPTOR_H
 #define OGGPLUGINADAPTOR_H
 
+class CPluginInfo : public CBase
+{
+private :
+  CPluginInfo();
+  
+  HBufC* iExtension;
+  HBufC* iName;
+  HBufC* iSupplier;
+  TInt iVersion;
+
+public:
+   ~CPluginInfo();
+   static CPluginInfo* NewL( const TDesC& anExtension, 
+	   const TDesC& aName,
+	   const TDesC& aSupplier,
+	   const TInt aVersion);
+   void ConstructL ( const TDesC& anExtension, 
+	   const TDesC& aName,
+	   const TDesC& aSupplier,
+	   const TInt aVersion );
+
+};
+
 class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
 {
   
@@ -62,13 +85,16 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   virtual void MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration);
   virtual void MapcPlayComplete(TInt aError);
  private:
-
+  void SupportedFormatL();
+  void SearchPluginsL(const TDesC &aName);
   void OpenL(const TDesC& aFileName);
   void ConstructAPlayerL();
   COggMsgEnv*               iEnv;
   
   TBuf<100> iFilename;
   TInt iError;
+
+  CArrayPtrFlat <CPluginInfo>* iPluginInfos; 
 
 #ifdef MMF_AVAILABLE
   CMdaAudioPlayerUtility *iPlayer;
