@@ -1543,12 +1543,13 @@ COggPlayAppUi::WriteIniFile()
 	if (useTemporaryFile) 
 	{
 		// Move the file to the MMC
-		
-	    TRAPD(Err2,
-		CFileMan* fileMan = CFileMan::NewL(iCoeEnv->FsSession() );
-		TInt error = fileMan->Move( fileName, *iIniFileName,CFileMan::EOverWrite);
-		delete (fileMan);		
-		); // End of TRAP
+		CFileMan* fileMan = NULL;
+	    TRAPD(Err2, fileMan = CFileMan::NewL(iCoeEnv->FsSession()));
+		if (Err2 == KErrNone)
+		{
+			fileMan->Move( fileName, *iIniFileName,CFileMan::EOverWrite);
+			delete (fileMan);
+		}
 	}
 	
 	

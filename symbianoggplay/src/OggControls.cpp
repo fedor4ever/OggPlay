@@ -508,6 +508,7 @@ COggText::SetText(const TDesC& aText)
   iNeedsScrolling= iTextWidth>iw;
 
   iCycle= 0;
+  iDrawOffset= 0;
   iHasScrolled= EFalse;
   iRedraw= ETrue;
 }
