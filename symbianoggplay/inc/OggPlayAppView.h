@@ -133,6 +133,8 @@ private:
   TInt       iSelected; 
   
   //keyboard focus handling: 
+  // do we do keyboard focus handling ?
+  TBool      iFocusControlsPresent;
   //maintain a doubly linked list of controls that can get focus.
   TDblQue<COggControl> iFocusControlsHeader;
   TDblQueIter<COggControl> iFocusControlsIter;

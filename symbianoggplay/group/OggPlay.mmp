@@ -49,8 +49,58 @@ START MARM
 // ?marm_specific_information
 END
 
-
 START BITMAP S60default.mbm
+TARGETPATH   \system\apps\OggPlay
+HEADER
+SOURCEPATH   ..\bitmaps
+SOURCE       c12 title.bmp
+SOURCE       1   titlem.bmp
+SOURCE       c12 cdicon.bmp
+SOURCE       1   cdiconm.bmp
+SOURCE       c12 micicon.bmp
+SOURCE       1   miciconm.bmp
+SOURCE       c12 genre.bmp
+SOURCE       1   genrem.bmp
+SOURCE       c12 folder.bmp
+SOURCE       1   folderm.bmp
+SOURCE       c12 file.bmp
+SOURCE       1   filem.bmp
+SOURCE       c12 back.bmp
+SOURCE       1   backm.bmp
+SOURCE       c12 playing.bmp
+SOURCE       1   playingm.bmp
+SOURCE       c12 paused.bmp
+SOURCE       1   pausedm.bmp
+SOURCE       c12 flipclosed.bmp
+SOURCE       c12 flipopen_steel_s60.bmp
+SOURCE       c12 listboxfocus.bmp
+SOURCE       c12 listboxfocusm.bmp
+SOURCE       c12 volume.bmp
+SOURCE       1   volumem.bmp
+SOURCE       c12 volumefocus.bmp
+SOURCE       1   volumefocusm.bmp
+SOURCE       c12 slider.bmp
+SOURCE       1   sliderm.bmp
+SOURCE       c12 sliderfocus.bmp
+SOURCE       1   sliderfocusm.bmp
+SOURCE       c12 stop.bmp
+SOURCE       1   stopm.bmp
+SOURCE       1   stop_dimmed.bmp
+SOURCE       c12 stopfocus.bmp
+SOURCE       c12 play.bmp
+SOURCE       1   playm.bmp
+SOURCE       1   play_dimmed.bmp
+SOURCE       c12 playfocus.bmp
+SOURCE       c12 pause.bmp
+SOURCE       1   pausem.bmp
+SOURCE       c12 pausefocus.bmp
+SOURCE       c12 repeat.bmp
+SOURCE       1   repeatm.bmp
+SOURCE       c12 \symbian\oggplaylogo.bmp
+END
+
+
+START BITMAP S60classic.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
 SOURCEPATH   ..\bitmaps

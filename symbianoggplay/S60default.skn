@@ -17,24 +17,20 @@ OggPlay 1 {
     }
     ListBox {
       Position 6 64 162 80
-      FocusIcon 20 20
     }
     StopButton {
       Position 11 161 20 20
       NormalIcon 30 31
       DimmedIcon 32 31
-      FocusIcon 33 31
     }
     PlayButton {
       Position 46 163 20 20
       NormalIcon 34 35
       DimmedIcon 36 35
-      FocusIcon 37 35
     }
     PauseButton {
       Position 46 163 20 20
       NormalIcon 38 39
-      FocusIcon 40 39
     }
     Position {
       Position 85 228 110 16
@@ -44,7 +40,6 @@ OggPlay 1 {
     Volume {
       Position 110 154 60 16
       KnobIcon 22 23
-      FocusIcon 24 25
     }
   }
 }

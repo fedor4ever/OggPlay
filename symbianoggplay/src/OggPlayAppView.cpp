@@ -37,6 +37,7 @@ COggPlayAppView::COggPlayAppView() :
   CCoeControl(),
   MCoeControlObserver(),
   MCoeControlContext(),
+  iFocusControlsPresent(EFalse),
   iFocusControlsHeader(_FOFF(COggControl,iDlink)),
   iFocusControlsIter(iFocusControlsHeader)
 {
@@ -261,6 +262,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
   TRACELF("ReadCanvas");
   CFont* iFont= const_cast<CFont*>(iCoeEnv->NormalFont());
 
+  iFocusControlsPresent=EFalse;
   bool stop(EFalse);
   while (!stop) {
     stop= !p.ReadToken() || p.iToken==KEndToken;
@@ -1198,14 +1200,14 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   COggControl* c=iFocusControlsIter;
   
   if (code==0 && aType==EEventKeyDown) { 
-    if(aKeyEvent.iScanCode==EOggLeft) {
+    if(iFocusControlsPresent && aKeyEvent.iScanCode==EOggLeft) {
       SetPrevFocus();
       return EKeyWasConsumed;
-    } else if (aKeyEvent.iScanCode==EOggRight) {
+    } else if (iFocusControlsPresent && aKeyEvent.iScanCode==EOggRight) {
       SetNextFocus();
       return EKeyWasConsumed;
     } else {
-      if(c==iListBox[iMode]) {
+      if(c==iListBox[iMode] || !iFocusControlsPresent) {
         TInt idx= iListBox[iMode]->CurrentItemIndex();
         if (aKeyEvent.iScanCode==EOggDown) {
           SelectSong(idx+1);
@@ -1214,10 +1216,13 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
           SelectSong(idx-1);
           return EKeyWasConsumed;
         } 
-      } else if(c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown)) {
-        if (aKeyEvent.iScanCode==EOggUp)  {
+      } 
+      if(   (c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown))
+         || (!iFocusControlsPresent && (aKeyEvent.iScanCode==EOggLeft || aKeyEvent.iScanCode==EOggRight))
+        ) {
+        if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggRight)  {
           iApp->iVolume+= KStepVolume;
-        } else  if (aKeyEvent.iScanCode==EOggDown ) {
+        } else  if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
           iApp->iVolume-= KStepVolume;
         }
         if (iApp->iVolume>KMaxVolume) iApp->iVolume = KMaxVolume;
@@ -1230,7 +1235,13 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   }  
 
   if(code == EOggConfirm) {
-    if(c==iPlayButton[iMode]) { 
+    if(!iFocusControlsPresent) {
+      if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
+	        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
+           iApp->HandleCommandL(EOggStop);
+      else iApp->HandleCommandL(EOggPlay);
+
+    } else if(c==iPlayButton[iMode]) { 
       // manually move focus to pause button
       c->SetFocus(EFalse);
       do {
@@ -1433,6 +1444,7 @@ COggPlayAppView::OggPointerEvent(COggControl* c, const TPointerEvent& p)
 void COggPlayAppView::AddControlToFocusList(COggControl* c) {
   COggControl* currentitem = iFocusControlsIter; 
   if (currentitem) {
+    iFocusControlsPresent=ETrue;
     //OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList adding 0x%x"),c);
     c->iDlink.Enque(&currentitem->iDlink);
     iFocusControlsIter.Set(*c);
