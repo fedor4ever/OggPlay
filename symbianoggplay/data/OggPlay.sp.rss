@@ -81,7 +81,13 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(Géneros)"
 #define ogg_text_string_10 "(Subcarpetas)"
 #define ogg_text_string_11 "(Archivos)"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(sin asignar)"
+#else
 #define ogg_text_string_12 "(sin asignar)"
+#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Atajos"

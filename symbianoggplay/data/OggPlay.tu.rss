@@ -82,7 +82,13 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(çeşitler)"
 #define ogg_text_string_10 "(klasörler)"
 #define ogg_text_string_11 "(dosyalar)"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(karşılıksız)"
+#else
 #define ogg_text_string_12 "(karşılıksız)"
+#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Kısayollar"

@@ -81,7 +81,13 @@
 #define ogg_text_string_9 "(genrer)"
 #define ogg_text_string_10 "(underkataloger)"
 #define ogg_text_string_11 "(filer)"
+
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(ej tilldelade)"
+#else
 #define ogg_text_string_12 "(ej tilldelade)"
+#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Snabbtangenter"
