@@ -36,7 +36,7 @@ CHARACTER_SET UTF8
 #define ogg_prev_song "Forrige"
 #define ogg_next_song "Næste"
 #define ogg_stop "Stop"
-#define ogg_play "Spil"
+#define ogg_play "Afspil"
 #define ogg_pause "Pause"
 
 #define ogg_filescan_title "Leder efter .Ogg filer"
@@ -102,6 +102,8 @@ CHARACTER_SET UTF8
 #define ogg_format_text_page_down    "Fil liste side ned"
 #define ogg_format_text_next_song	 ogg_next_song
 #define ogg_format_text_prev_song	 ogg_prev_song
+#define ogg_format_text_keylock      "Tastelås"
+#define ogg_format_text_playpause	 "Pause/Afspil"
 
 #define ogg_settings                 "Opsætning"  // in the menu
 #define ogg_settings_title           "Oggplay Opsætning" // on top of the settings screen
@@ -127,7 +129,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_exit                 "Afslut"
 #define ogg_cba_stop                 "Stop"
 #define ogg_cba_pause                "Pause"
-#define ogg_cba_play                 "Spil"
+#define ogg_cba_play                 "Afspil"
 
 // New Tags, not yet translated:
 #define ogg_random_on                "Shuffle Play"
@@ -142,6 +144,7 @@ CHARACTER_SET UTF8
 #define ogg_codec_ogg                "OGG"
 #define ogg_codec_mp3                "MP3"
 #define ogg_codec_aac                "AAC"
+#define ogg_codec_mp4                "MP4"
 
 #define ogg_codec_info_name          "Navn"
 #define ogg_codec_info_supplier      "Leverandør"
