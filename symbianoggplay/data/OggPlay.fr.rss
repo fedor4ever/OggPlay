@@ -133,6 +133,8 @@
 #define ogg_random_on                "Ordre Aléatoire"
 #define ogg_random_off               "Ordre Normal"
 #define ogg_volume_boost             "Amplification"
+#define ogg_volume_boost_m6db        "Gain -6dB"
+#define ogg_volume_boost_m12db       "Gain -12dB"
 #define ogg_volume_boost_none        "Normale"
 #define ogg_volume_boost_6db         "Gain 6dB"
 #define ogg_volume_boost_12db        "Gain 12dB"

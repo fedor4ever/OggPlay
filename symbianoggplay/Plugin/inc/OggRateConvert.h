@@ -9,6 +9,8 @@ public:
 
 
 typedef enum {
+    EMinus12dB,
+    EMinus6dB,
     ENoGain,
     EStatic6dB,  // A static gain of 6dB, with saturation
     EStatic12dB   // A static gain of 12 dB, with saturation
@@ -18,6 +20,7 @@ typedef enum {
 class COggSampleRateConverter: public CBase
 {
 public:
+	COggSampleRateConverter();
     ~COggSampleRateConverter();
 
     void Init(MOggSampleRateFillBuffer * aSampleRateFillBufferProvider,
@@ -34,6 +37,7 @@ private:
     void MixChannels( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
     void ConvertRate( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
     void ApplyGain( TDes8 &aInputBuffer, TInt shiftValue );
+    void ApplyNegativeGain( TDes8 &aInputBuffer, TInt shiftValue );
     TInt  iMinimumSamplesInBuffer;
     TBool iRateConvertionNeeded;
     TBool iChannelMixingNeeded;

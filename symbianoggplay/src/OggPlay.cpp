@@ -1321,6 +1321,9 @@ COggPlayAppUi::ReadIniFile()
 
    } // version 2 onwards
 	
+  // Default value (not saved in ini file)
+  iSettings.iGainType = ENoGain;
+
 #ifdef PLUGIN_SYSTEM
     TInt nbController = IniRead32(tf) ;
     TBuf<10> extension;

@@ -140,6 +140,8 @@
 #define ogg_random_on                "Modo Aleatorio"
 #define ogg_random_off               "Modo Normal"
 #define ogg_volume_boost             "Amento de Volume"
+#define ogg_volume_boost_m6db        "Ganho de -6dB"
+#define ogg_volume_boost_m12db       "Ganho de -12dB"
 #define ogg_volume_boost_none        "Sem Ganho"
 #define ogg_volume_boost_6db         "Ganho de 6dB"
 #define ogg_volume_boost_12db        "Ganho de 12dB"

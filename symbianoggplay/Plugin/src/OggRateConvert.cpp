@@ -19,6 +19,11 @@
 #include <e32cons.h>
 #include "OggRateConvert.h"
 
+COggSampleRateConverter::COggSampleRateConverter()
+: iGain(ENoGain)
+{
+}
+
 void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBufferProvider,
                                    TInt /*aBufferSize*/,
                                    TInt aMinimumSamplesInBuffer,
@@ -73,7 +78,6 @@ void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBuff
         // It is a bit of mystery with for HBufC8 we need to divide by 2 the length.
         iIntermediateBuffer = HBufC8::NewL(4096);
     }
-    iGain = ENoGain;
 }
 
 COggSampleRateConverter::~COggSampleRateConverter()
@@ -171,6 +175,16 @@ TInt COggSampleRateConverter::FillBuffer( TDes8 &aBuffer)
     {
     case ENoGain:
         break;
+    case EMinus6dB:
+        {
+            ApplyNegativeGain(aBuffer,1);
+            break;
+        }
+    case EMinus12dB:
+        {
+            ApplyNegativeGain(aBuffer,2);
+            break;
+        }
     case EStatic6dB:
         {
             ApplyGain(aBuffer,1);
@@ -315,6 +329,39 @@ void COggSampleRateConverter::ApplyGain( TDes8 &aInputBuffer, TInt shiftValue )
     :  /* no output registers */
     : "r"(ptr), "r"(length), "r"(shiftValue) /* Input */
     : "r0", "r1", "r2", "r3", "cc", "memory" /* Clobbered */
+        );
+#endif
+}
+
+void COggSampleRateConverter::ApplyNegativeGain( TDes8 &aInputBuffer, TInt shiftValue )
+{
+    TInt16 *ptr = (TInt16 *) aInputBuffer.Ptr();
+    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); /* Divided by 2
+                                              because of Int8 to Int16 cast */
+    if (length <= 0) return;
+    
+#ifdef __WINS__
+TInt tmp,i; 
+for (i=0; i<length; i++)
+{
+    tmp = *ptr;
+    tmp = tmp >> shiftValue;
+    *ptr++ = (TInt16) ((0xFFFF) & tmp);
+}
+#else
+    /* Compiler is lousy, better do it in assembly */
+    asm (
+        
+        "mov   r1, %1;"         /* r1 = loop index */
+        "1:" /* Loop Begins here */
+        "ldrsh   r0, [%0];"
+        "mov   r0, r0, asr %2;"
+        "strh   r0, [%0], #2 ;"
+        "subs   r1, r1, #1;"
+        "bne  1b;"
+    :  /* no output registers */
+    : "r"(ptr), "r"(length), "r"(shiftValue) /* Input */
+    : "r0", "r1", "cc", "memory" /* Clobbered */
         );
 #endif
 }
