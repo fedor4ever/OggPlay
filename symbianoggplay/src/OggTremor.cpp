@@ -122,6 +122,10 @@ void COggPlayback::ConstructL() {
   
   iStopAudioStreamingTimer = new (ELeave) COggTimer(
       TCallBack( StopAudioStreamingCallBack,this )   );
+
+  iRestartAudioStreamingTimer = new (ELeave) COggTimer(
+      TCallBack( RestartAudioStreamingCallBack,this )   );
+
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
   // Read the device uid
@@ -135,6 +139,7 @@ COggPlayback::~COggPlayback() {
   }
   delete  iStartAudioStreamingTimer;
   delete  iStopAudioStreamingTimer;
+  delete  iRestartAudioStreamingTimer;
   delete iStream;
   iBuffer.ResetAndDestroy();
   delete iOggSampleRateConverter;
@@ -750,8 +755,7 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
   if (iState != EPlaying) return;
 
-  TInt b;
-  for (b=0; b<KBuffers; b++) if (&aBuffer == iBuffer[b]) break;
+  for (iB=0; iB<KBuffers; iB++) if (&aBuffer == iBuffer[iB]) break;
   if ( (iEof) && (iSent[iSentIdx] == &aBuffer) )
   {
       // All the buffers have been sent, stop the playback
@@ -760,10 +764,19 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 
       iStoppedFromEof = ETrue;
       iStopAudioStreamingTimer->Wait(0.1E6);
+	  return;
   }
-  if (aError == KErrUnderflow) aError= KErrNone;
+  else if (aError == KErrUnderflow)
+  {
+#ifdef DELAY_AUDIO_STREAMING_START
+      iRestartAudioStreamingTimer->Wait(0.1E6);
+	  return;
+#else
+	  aError = KErrNone;
+#endif
+  }
 
-  if (aError == KErrNone) SendBuffer(*iBuffer[b]); 
+  if (aError == KErrNone) SendBuffer(*iBuffer[iB]); 
   else {
     // An unknown error condition. This should never ever happen.
 	RDebug::Print(_L("Oggplay: MaoscBufferCopied unknown error (Error18 Error16)"));
@@ -827,6 +840,14 @@ TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
     }
     
   }
+  return 0;
+}
+
+TInt COggPlayback::RestartAudioStreamingCallBack(TAny* aPtr)
+{
+  COggPlayback* self= (COggPlayback*) aPtr;
+  
+  self->SendBuffer(*(self->iBuffer[self->iB]));
   return 0;
 }
 

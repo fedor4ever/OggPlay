@@ -128,6 +128,10 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   COggTimer *              iStopAudioStreamingTimer;
   TBool                    iStoppedFromEof;
 
+  static TInt RestartAudioStreamingCallBack(TAny* aPtr);
+  COggTimer *              iRestartAudioStreamingTimer;
+  TInt iB;
+
 #ifdef MDCT_FREQ_ANALYSER
   TReal  iLatestPlayTime;
   TReal  iTimeBetweenTwoSamples;
