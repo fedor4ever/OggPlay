@@ -23,7 +23,9 @@
 #include <badesca.h>
 #include "OggLog.h"
 #include "f32file.h"
-
+#ifdef MMF_AVAILABLE
+#include "OggPlayControllerCustomCommands.h"
+#endif /* MMF_AVAILABLE */
 
 
 ////////////////////////////////////////////////////////////////
@@ -253,8 +255,8 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         CPluginInfo * info = GetPluginListL().GetSelectedPluginInfo(pp);
         if (info == NULL)
         	User::Leave(KErrNotFound);
-        TUid pluginControllerUID = info->iControllerUid;
-        iPlayer->OpenFileL(aFileName, KNullUid , pluginControllerUID );
+        iPluginControllerUID = info->iControllerUid;
+        iPlayer->OpenFileL(aFileName, KNullUid , iPluginControllerUID );
        
         // Wait for the init completed callback
         iError = KErrNone;
@@ -453,10 +455,35 @@ TInt COggPluginAdaptor::Volume()
     return(0);
 }
 
-const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime /*aTime*/)
+const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime aTime)
 {
     // Not Implemented yet
-    return NULL;
+    // Use custom command interface of Video Recorder to get the frequency.
+    // TODO: Check if the custom interface is supported !
+    
+    if (iState != EPlaying)
+      return NULL;
+    
+    TRACEF(_L("COggPluginAdaptor::GetFrequencyBins()"));
+    
+    iFreqBins[0] = 55;
+    
+    TMMFGetFreqsParams pckg;
+    pckg.iTime = aTime;
+    pckg.iFreqBins = iFreqBins;
+    TMMFGetFreqsConfig freqConfig(pckg); // Pack the config.
+    TPckg <TInt32 [16]> aDataFrom(iFreqBins); 
+    
+    TMMFMessageDestination msg( iPluginControllerUID, KMMFObjectHandleController );
+    TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
+    
+    TInt error = iPlayer->PlayControllerCustomCommandSync( packedMsg, 
+                                       EOggPlayControllerCCGetFrequencies, 
+                                       freqConfig, 
+                                       KNullDesC8, aDataFrom );
+ 
+    TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
+    return iFreqBins;
 }
 
 void COggPluginAdaptor::SetVolumeGain(TGainType /*aGain*/)

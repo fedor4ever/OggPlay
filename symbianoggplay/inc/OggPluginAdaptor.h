@@ -82,6 +82,9 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   // The PlayerUtility doesn't allow this choice.
   CMdaAudioRecorderUtility *iPlayer; 
   CActiveSchedulerWait iWait;
+  TUid iPluginControllerUID;
+  TInt32 iFreqBins[16];
+  
 #else
   CPseudoMMFController * iPlayer;
   

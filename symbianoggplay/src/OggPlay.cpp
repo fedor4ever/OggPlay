@@ -314,12 +314,7 @@ COggPlayAppUi::ConstructL()
 	iAppView=new(ELeave) COggPlayAppView;
 	iAppView->ConstructL(this, ClientRect());
 
-    if (iRandom)
-        iSongList = new(ELeave) COggRandomPlay();
-    else
-    iSongList = new(ELeave) COggNormalPlay();
-
-    iSongList->ConstructL(iAppView, iOggPlayback);
+	SetRandomL(iRandom);
 	SetRepeat(iRepeat);
 
 	HandleCommandL(EOggSkinOne+iCurrentSkin);
@@ -708,20 +703,14 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	case EOggShuffle: {
      
 		HandleCommandL(EOggStop);
-        // Toggle random
-        delete(iSongList);
-        iSongList = NULL;
         if (iRandom)
         {
-            iRandom = EFalse;
-            iSongList = new(ELeave) COggNormalPlay();
+            SetRandomL(EFalse);
         }
         else
         {
-            iRandom = ETrue;
-            iSongList = new(ELeave) COggRandomPlay();
+            SetRandomL(ETrue);
         }
-        iSongList->ConstructL(iAppView, iOggPlayback);
         iSongList->SetRepeat(iRepeat);
 		break;
 					  }
@@ -1155,7 +1144,7 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
         if (iRepeat) 
             aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
       // UIQ_? for the random stuff
-#else
+#elif defined(SERIES60)
     // FIXIT - Should perhaps be in the options menu instead ??
     TBuf<50> buf;
     iEikonEnv->ReadResource(buf, (iRepeat) ? R_OGG_REPEAT_ON : R_OGG_REPEAT_OFF );
@@ -1561,6 +1550,24 @@ COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
 	CEikAppUi::HandleForegroundEventL(aForeground);
 	iForeground= aForeground;
+}
+
+void
+COggPlayAppUi::SetRandomL(TBool aRandom)
+{
+
+   // Toggle random
+    if (iSongList)
+     delete(iSongList);
+    iSongList = NULL;
+        
+    iRandom = aRandom;
+    if (iRandom)
+        iSongList = new(ELeave) COggRandomPlay();
+    else
+    	iSongList = new(ELeave) COggNormalPlay();
+    
+    iSongList->ConstructL(iAppView, iOggPlayback);
 }
 
 void

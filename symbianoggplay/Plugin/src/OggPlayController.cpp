@@ -23,6 +23,7 @@
 #include "OggLog.h"
 #include "Plugin\ImplementationUIDs.hrh"
 #include "AdvancedStreaming.h"
+#include "Plugin\OggPlayControllerCustomCommands.h"
 
 #if 1
 #include <e32svr.h> 
@@ -411,6 +412,33 @@ void COggPlayController::PlayL()
     PRINT("COggPlayController:: PlayL ok");   
 }
 
+void COggPlayController::CustomCommand( TMMFMessage& aMessage )
+    {
+    
+    if ( aMessage.Destination().InterfaceId().iUid != KOggTremorUidControllerImplementation )
+        {
+        aMessage.Complete(KErrNotSupported);    
+        return;
+        }
+    TInt error = KErrNone;
+    switch ( aMessage.Function() )
+        {
+        case EOggPlayControllerCCGetFrequencies:
+            {
+            TRAP( error, GetFrequenciesL( aMessage ) );
+            break;
+            }
+
+        default:
+            {
+            error = KErrNotSupported;
+            break;
+            }
+        }
+    aMessage.Complete(error);  
+    }
+
+
 void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
@@ -596,6 +624,28 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
     return (ret);
 }
 
+void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage )
+{
+	
+   	// Get the size of the init data and create a buffer to hold it
+    TInt desLength = aMessage.SizeOfData1FromClient();
+    HBufC8* buf = HBufC8::NewLC(desLength);
+    TPtr8 ptr = buf->Des();
+    aMessage.ReadData1FromClientL(ptr);
+    
+    TMMFGetFreqsParams params;
+    TPckgC<TMMFGetFreqsParams> config(params);
+    config.Set(*buf);
+    params = config();
+    
+	TPckg<TInt32 [16]> binsPckg(iFrequencyBins);
+    iDecoder->GetFrequencyBins(iFrequencyBins,16);
+    aMessage.WriteDataToClient(binsPckg);
+
+    
+   
+    CleanupStack::PopAndDestroy(buf);//buf
+}
 
 /************************************************************************************
 *

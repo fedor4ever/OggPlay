@@ -113,8 +113,7 @@ class COggPlayController :	public CMMFController,
         * @param aMessage Message to controller.
         * @return void
         */
-		void CustomCommand(TMMFMessage& aMessage)
-			{aMessage.Complete(KErrNotSupported);};//default implementation
+		void CustomCommand(TMMFMessage& aMessage);
         
 		/**
         * From CMMFController Set priority settings.
@@ -214,6 +213,7 @@ class COggPlayController :	public CMMFController,
     private: // Internal Functions
 
         void OpenFileL(const TDesC& aFile, TBool aOpenForInfo);
+        void GetFrequenciesL(TMMFMessage& aMessage );
 
 	private: // Data
 
@@ -256,6 +256,7 @@ class COggPlayController :	public CMMFController,
         TBool iRandomRingingTone;
         TInt iUsedRate;
         TInt iUsedChannels;
+        TInt32 iFrequencyBins[16];
 	};
 
     enum {
