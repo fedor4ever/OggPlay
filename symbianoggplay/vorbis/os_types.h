@@ -43,11 +43,18 @@
 #endif
 //#endif
 
+// Undefine NULL, to save some warnings
+#ifdef NULL 
+#undef NULL
+#endif
+
+#include <e32def.h>
+typedef TInt16 ogg_int16_t;
+typedef TInt32 ogg_int32_t;
+typedef TUint32 ogg_uint32_t;
+   
 #if defined( __WINS__ )  && defined(__VC32__)
    typedef __int64 ogg_int64_t;
-   typedef __int32 ogg_int32_t;
-   typedef unsigned __int32 ogg_uint32_t;
-   typedef __int16 ogg_int16_t;
 #define LITTLE_ENDIAN
 #define inline __inline
 #define alloca _alloca
@@ -58,9 +65,10 @@
 #pragma chmsg(compiling for marm)
 
 #  include <sys/types.h>
-#  include "config_types.h"
+ typedef long long ogg_int64_t;
 
 #define BIG_ENDIAN
+#define _ARM_ASSEM_ 1
 
 #elif defined( _WIN32 )
 
