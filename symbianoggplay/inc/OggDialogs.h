@@ -19,6 +19,11 @@
 #ifndef _DIALOG_H
 
 #include <eikdialg.h>
+#include <frmtview.h>
+#include <txtrich.h>
+#include <coemain.h>
+#include <barsread.h>
+
 
 class CHotkeyDialog : public CEikDialog
 {
@@ -66,5 +71,40 @@ class COggAboutDialog : public CEikDialog
 
   TBuf<128> iVersion;
 };
+
+#ifdef SERIES60
+// Needed by Series 60 because of small screen,
+// UIQ can do without.
+class CScrollableRichTextControl : public CCoeControl
+    {
+    public:
+        void ConstructL(const TRect& aRect
+            , const CCoeControl& aParent
+            );
+        // second-phase construction
+        CScrollableRichTextControl() {}; 
+        ~CScrollableRichTextControl(); // destructor
+        void UpdateModelL();
+        void Draw(const TRect& aRect) const;
+        void Quit(); // does termination
+        void Draw(const TRect& /* aRect */);
+        TCoeInputCapabilities InputCapabilities() const;
+        TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
+        
+        void ConstructFromResourceL(TResourceReader& aReader);
+        
+    private:
+        // functions provided for CCoeControl protocol
+        
+        CRichText* iRichText; // global text object
+        CParaFormatLayer* iParaFormatLayer;
+        CCharFormatLayer* iCharFormatLayer;
+        TStreamId iStreamId; // required when storing and restoring global text
+        // text layout and view stuff
+        CTextLayout* iLayout; // text layout
+        CTextView* iTextView; // text view
+        TRect iViewRect; // rectangle through which to view text
+    };
+#endif
 
 #endif

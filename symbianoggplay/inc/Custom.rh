@@ -1,0 +1,13 @@
+// OGGDIALOGS.RH
+//
+//
+
+STRUCT SCROLLABLERICHTEXT
+	{
+	WORD width=176;
+	WORD height = 100;
+	}
+
+
+
+ 

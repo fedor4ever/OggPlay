@@ -142,3 +142,210 @@ COggAboutDialog::SetVersion(const TDesC& aVersion)
 {
   iVersion.Copy(aVersion);
 }
+
+
+
+#if 0
+// Skeleton of the Class 
+// Soon to be built
+SEikControlInfo COggScrollableInfoDialog::CreateCustomControlL(TInt aControlType) 
+    { 
+    CRichControl *control = NULL; 
+    if (aControlType == EOggClTestBert) 
+         { 
+         control = new(ELeave)CRichControl; 
+         } 
+    SEikControlInfo info = {control,0,0};
+    return info;
+    } 
+
+
+
+#ifdef SERIES60
+void CScrollableRichTextControl::ConstructL(const TRect& aRect
+                              , const CCoeControl& aParent
+                              )
+{
+    // create window
+    CreateWindowL(&aParent);
+    // set rectangle to prescription
+    SetRect(aRect);
+    // go for it
+    ActivateL();
+    UpdateModelL(); // phase 0
+}
+
+void CScrollableRichTextControl::ConstructFromResourceL(TResourceReader& aReader)
+{
+    // Read the smiley mood from the resource file
+    // Read the width of the smiley container from the resource file.
+    TInt width=aReader.ReadInt16();
+    TInt height=aReader.ReadInt16();
+    // Set the height of the container to be half its width
+    TSize containerSize (width, height);
+    
+    SetSize(containerSize);
+    UpdateModelL();
+    ActivateL();	
+}
+
+
+CScrollableRichTextControl ::~CScrollableRichTextControl()
+{
+    delete iTextView; // text view
+    delete iLayout; // text layout
+    delete iRichText; // contained text object
+    delete iCharFormatLayer; // character format layer
+    delete iParaFormatLayer; // and para format layer
+}
+
+
+void CScrollableRichTextControl::UpdateModelL()
+{
+    // Content is just an example
+    // Will be defined later.
+    _LIT(KTitle, "OggPlay");
+    _LIT(KVersion,"Version 0XX");
+    
+    _LIT(KFreeware, "blabla");
+    
+    _LIT(KWebAdress, "please consult http://geocities.com/thing.html");
+    _LIT(KEmailAdress, "Comments and improvement ideas are welcome: mail0@hotmail.com");
+    
+    // Create text object, text view and layout.
+    
+    TCharFormat charFormat;
+    TCharFormatMask charFormatMask;
+    charFormat.iFontSpec.iTypeface.iName = _L("LatinBold12");
+    charFormatMask.SetAttrib(EAttFontTypeface); 
+    
+    iParaFormatLayer=CParaFormatLayer::NewL(); // required para format layer
+    iCharFormatLayer=CCharFormatLayer::NewL(charFormat,charFormatMask); // required char format layer
+    // Create an empty rich text object
+    iRichText=CRichText::NewL(iParaFormatLayer, iCharFormatLayer);
+    // prerequisites for view - viewing rectangle
+    iViewRect=Rect();
+    iViewRect.Shrink(3,3);
+    // context and device
+    CWindowGc& gc=SystemGc(); // get graphics context
+    CBitmapDevice *device=(CBitmapDevice*) (gc.Device()); // device
+    // Create the text layout, (required by text view),
+    // with the text object and a wrap width (=width of view rect)
+    iLayout=CTextLayout::NewL(iRichText,iViewRect.Width());
+    // Create text view
+    iTextView=CTextView::NewL(iLayout, iViewRect,
+        device,
+        device,
+        &Window(),
+        0, // no window group
+        &iCoeEnv->WsSession()
+        ); // new view
+    
+    CParaFormat *paraFormat = CParaFormat::NewL();
+    CleanupStack::PushL(paraFormat);
+    TParaFormatMask paraFormatMask;
+    TInt len;
+    TInt pos;
+    
+    iRichText->AppendParagraphL(5);
+    
+    // Center-align
+    paraFormatMask.SetAttrib(EAttAlignment); // interested in alignment
+    paraFormat->iHorizontalAlignment=CParaFormat::ECenterAlign; 
+    
+    pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
+    iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
+    // apply format to entire para - even length = 1 char will do
+    iRichText->InsertL(0,KTitle);
+    
+    pos = iRichText->CharPosOfParagraph(len,1); // get start of 2nd para
+    iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
+    //pos=iRichText->DocumentLength();
+    iRichText->InsertL(pos,KVersion);
+    
+    pos = iRichText->CharPosOfParagraph(len,2); // get start of 3rd para
+    //pos=iRichText->DocumentLength();
+    iRichText->InsertL(pos,KFreeware);
+    
+    pos = iRichText->CharPosOfParagraph(len,3); // get start of 3rd para
+    //pos=iRichText->DocumentLength();
+    
+    TBuf<100> buf1;
+    buf1 = KWebAdress;
+    TInt pos2 = buf1.Find(_L("http"));
+    iRichText->InsertL(pos,KWebAdress);
+    
+    charFormatMask.SetAttrib(EAttColor);
+    charFormat.iFontPresentation.iTextColor=TLogicalRgb( TRgb(0,0,255)) ; //Blue
+    charFormatMask.SetAttrib(EAttFontUnderline); // interested in underline
+    charFormat.iFontPresentation.iUnderline=EUnderlineOn; // set it on
+    charFormatMask.SetAttrib(EAttFontPosture);
+    charFormat.iFontSpec.iFontStyle.SetPosture(EPostureItalic);
+    iRichText->ApplyCharFormatL(charFormat, charFormatMask,pos+pos2, buf1.Length()-pos2);
+    
+    pos = iRichText->CharPosOfParagraph(len,4); // get start of 3rd para
+    //pos=iRichText->DocumentLength();
+    iRichText->InsertL(pos,KEmailAdress);
+    buf1 = KEmailAdress;
+    pos2 = buf1.Find(_L("bertq"));
+    iRichText->ApplyCharFormatL(charFormat, charFormatMask,pos+pos2, buf1.Length()-pos2);
+    
+    CleanupStack::PopAndDestroy();
+    DrawNow();
+}
+
+void CScrollableRichTextControl::Draw(const TRect& aRect) const
+{
+    // draw surround
+    CGraphicsContext& gc=SystemGc(); // context to draw into
+    
+    TRect rect=Rect(); // screen boundary
+    gc.DrawRect(rect); // outline screen boundary
+    rect.Shrink(1,1);
+    gc.SetPenColor(KRgbWhite);
+    gc.DrawRect(rect);
+    rect.Shrink(1,1);
+    gc.SetPenColor(KRgbBlack);
+    gc.DrawRect(rect);
+    // draw editable text - will work unless OOM
+    TInt err;
+    TRAP(err,iTextView->FormatTextL());
+    if (err) return;
+    TRAP(err,iTextView->DrawL(Rect() ) );
+}
+
+
+TCoeInputCapabilities CScrollableRichTextControl::InputCapabilities() const
+{
+    return TCoeInputCapabilities::ENone;
+}
+
+
+TKeyResponse CScrollableRichTextControl::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType)
+{
+    if (aType ==  EEventKey)
+    {
+        switch (aKeyEvent.iScanCode)
+        {
+        case EStdKeyDownArrow: 
+            {
+                TInt line = -1;
+                iTextView->ScrollDisplayLinesL(line);
+                break;
+            }
+            
+        case EStdKeyUpArrow: 
+            {
+                
+                TInt line = 1;
+                iTextView->ScrollDisplayLinesL(line);
+                break;
+            }
+        }
+    }
+    return CCoeControl::OfferKeyEventL(aKeyEvent, aType);
+}
+
+#endif /*SERIES60*/
+#endif /* if 0 */
+    

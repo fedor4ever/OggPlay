@@ -1,3 +1,6 @@
+
+#include "oggdialogs.rh"
+
 RESOURCE EIK_APP_INFO
 {
   menubar=r_oggplay_menubar;
@@ -24,7 +27,7 @@ RESOURCE TBUF r_ogg_version { buf=ogg_txt_version; }
 
 RESOURCE DIALOG r_dialog_about {
   title   = ogg_about_oggplay;
-  buttons = R_OGG_DIALOG_BUTTONS1; 
+  buttons =  R_AVKON_SOFTKEYS_BACK; 
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {

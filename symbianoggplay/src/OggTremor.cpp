@@ -218,7 +218,11 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 
   if (aFileName.Length() == 0) {
     //OGGLOG.Write(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
-    iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_8);
+
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_8);
+    iEnv->InfoWinL(buf1,buf2);
     return -100;
   }
 
@@ -229,7 +233,11 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
     iFileOpen= 0;
     //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
-    iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_14);
+
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_14);
+    iEnv->InfoWinL(buf1,buf2);
     return -101;
   };
   iFileOpen= 1;
@@ -239,7 +247,11 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     fclose(iFile);
     iFileOpen= 0;
     //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
-    iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_9);
+
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_9);
+    iEnv->InfoWinL(buf1,buf2);
     return -102;
   }
 
@@ -329,11 +341,14 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   if (theChannels==1) ac= TMdaAudioDataSettings::EChannelsMono;
   else if (theChannels==2) ac= TMdaAudioDataSettings::EChannelsStereo;
   else {
-    iEnv->InfoWinL(R_OGG_ERROR_12,R_OGG_ERROR_10);
+      
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_12);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_10);
+    iEnv->InfoWinL(buf1,buf2);
     //OGGLOG.Write(_L("Illegal number of channels"));
     return -100;
   }
-
   if (theRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
   else if (theRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
   else if (theRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
@@ -342,15 +357,23 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   else if (theRate==44100) rt= TMdaAudioDataSettings::ESampleRate44100Hz;
   else if (theRate==48000) rt= TMdaAudioDataSettings::ESampleRate48000Hz;
   else {
-    iEnv->InfoWinL(R_OGG_ERROR_12, R_OGG_ERROR_13);
+      
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_12);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_13);
+    iEnv->InfoWinL(buf1,buf2);
     return -101;
   }
 
   if ( !(rt & iAudioCaps) )
    {
     // Rate not supported by this phone.
-    // The infoWinL doesn't work yet
-    // iEnv->InfoWinL(R_OGG_ERROR_12, R_OGG_ERROR_13);
+      
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_12);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_13);
+
+    iEnv->InfoWinL(buf1,buf2);
     return -101;
    }
 
@@ -432,7 +455,12 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   OggVorbis_File vf;
   if(ov_open(f, &vf, NULL, 0) < 0) {
     fclose(f);
-    if (!silent) iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_9);
+    if (!silent) {
+       TBuf<256> buf1,buf2;
+       iEnv->ReadResource(buf1, R_OGG_ERROR_20);
+       iEnv->ReadResource(buf2, R_OGG_ERROR_9);
+       iEnv->InfoWinL(buf1,buf2);
+    }
     return -102;
   }
 
@@ -468,7 +496,11 @@ void COggPlayback::Play()
   }
 
   if (iState != EOpen) {
-    iEnv->InfoWinL(R_OGG_ERROR_20,R_OGG_ERROR_15);
+      
+    TBuf<256> buf1,buf2;
+    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
+    iEnv->ReadResource(buf2, R_OGG_ERROR_15);
+    iEnv->InfoWinL(buf1,buf2);
     RDebug::Print(_L("Oggplay: Tremor - State not Open"));
     return;
   }

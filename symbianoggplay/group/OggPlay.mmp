@@ -33,6 +33,7 @@ LIBRARY libvorbisidec.lib gdi.lib
 //LIBRARY eikcoctl.lib avkon.lib
 //LIBRARY eikdlg.lib
 
+LIBRARY etext.lib form.lib // For CScrollableRichTextControl
 START WINS      
 // ?wins_specific_information
 END
