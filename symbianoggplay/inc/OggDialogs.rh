@@ -16,3 +16,4 @@ STRUCT FILESEARCHCONTROL
 	LTEXT dirScannedStr = "";
 	LTEXT filesFoundStr = "";
     }
+ 
