@@ -11,9 +11,9 @@ OggPlay UID pool
 0x101FF680          Temporary development
 0x101FF681          Amber skin
 0x101FF682          mcNuOggPlay
-0x101FF683          Unused
-0x101FF684          Unused
-0x101FF685          Unused
+0x101FF683          TremorPlugin
+0x101FF684          TremorPluginController
+0x101FF685          TremorPluginFormat
 0x10202027          Unused
 0x10202028          Unused
 0x10202029          Unused

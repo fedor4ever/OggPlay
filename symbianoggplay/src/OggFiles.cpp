@@ -19,7 +19,7 @@
 #include "OggOs.h"
 #include "OggFiles.h"
 
-#include "OggTremor.h"
+#include "OggAbsPlayback.h"
 #include "OggLog.h"
 
 #include <eikfutil.h>
@@ -260,7 +260,7 @@ TOggKeyNumeric::At(TInt anIndex) const
 ////////////////////////////////////////////////////////////////
 
 
-TOggFiles::TOggFiles(COggPlayback* anOggPlayback) :
+TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback) :
   iFiles(0),
   iOggPlayback(anOggPlayback),
   iOggKeyTitles(COggPlayAppUi::ETitle),

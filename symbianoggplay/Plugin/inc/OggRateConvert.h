@@ -1,3 +1,6 @@
+#ifndef OGGRATECONVERT_H
+#define OGGRATECONVERT_H
+
 class MOggSampleRateFillBuffer 
 {
 public:
@@ -46,3 +49,5 @@ private:
     MOggSampleRateFillBuffer * iFillBufferProvider;
     TReal  iSamplingRateFactor ;
 };
+
+#endif

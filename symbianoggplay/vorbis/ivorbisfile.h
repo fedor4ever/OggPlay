@@ -85,43 +85,49 @@ typedef struct OggVorbis_File {
 
 } OggVorbis_File;
 
-IMPORT_C int ov_clear(OggVorbis_File *vf);
-IMPORT_C int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
-IMPORT_C int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
+#ifdef OGGPLAYPLUGIN
+#define IMPORTED 
+#else
+#define IMPORTED IMPORT_C
+#endif
+
+IMPORTED int ov_clear(OggVorbis_File *vf);
+IMPORTED int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
+IMPORTED int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
 
-IMPORT_C int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
-IMPORT_C int ov_test_callbacks(void *datasource, OggVorbis_File *vf,
+IMPORTED int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
+IMPORTED int ov_test_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
-IMPORT_C int ov_test_open(OggVorbis_File *vf);
+IMPORTED int ov_test_open(OggVorbis_File *vf);
 
-IMPORT_C long ov_bitrate(OggVorbis_File *vf,int i);
-IMPORT_C long ov_bitrate_instant(OggVorbis_File *vf);
-IMPORT_C long ov_streams(OggVorbis_File *vf);
-IMPORT_C long ov_seekable(OggVorbis_File *vf);
-IMPORT_C long ov_serialnumber(OggVorbis_File *vf,int i);
+IMPORTED long ov_bitrate(OggVorbis_File *vf,int i);
+IMPORTED long ov_bitrate_instant(OggVorbis_File *vf);
+IMPORTED long ov_streams(OggVorbis_File *vf);
+IMPORTED long ov_seekable(OggVorbis_File *vf);
+IMPORTED long ov_serialnumber(OggVorbis_File *vf,int i);
 
-IMPORT_C ogg_int64_t ov_raw_total(OggVorbis_File *vf,int i);
-IMPORT_C ogg_int64_t ov_pcm_total(OggVorbis_File *vf,int i);
-IMPORT_C ogg_int64_t ov_time_total(OggVorbis_File *vf,int i);
+IMPORTED ogg_int64_t ov_raw_total(OggVorbis_File *vf,int i);
+IMPORTED ogg_int64_t ov_pcm_total(OggVorbis_File *vf,int i);
+IMPORTED ogg_int64_t ov_time_total(OggVorbis_File *vf,int i);
 
-IMPORT_C int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos);
-IMPORT_C int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos);
-IMPORT_C int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
-IMPORT_C int ov_time_seek(OggVorbis_File *vf,ogg_int64_t pos);
-IMPORT_C int ov_time_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
+IMPORTED int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos);
+IMPORTED int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos);
+IMPORTED int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
+IMPORTED int ov_time_seek(OggVorbis_File *vf,ogg_int64_t pos);
+IMPORTED int ov_time_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
 
-IMPORT_C ogg_int64_t ov_raw_tell(OggVorbis_File *vf);
-IMPORT_C ogg_int64_t ov_pcm_tell(OggVorbis_File *vf);
-IMPORT_C ogg_int64_t ov_time_tell(OggVorbis_File *vf);
+IMPORTED ogg_int64_t ov_raw_tell(OggVorbis_File *vf);
+IMPORTED ogg_int64_t ov_pcm_tell(OggVorbis_File *vf);
+IMPORTED ogg_int64_t ov_time_tell(OggVorbis_File *vf);
 
-IMPORT_C vorbis_info *ov_info(OggVorbis_File *vf,int link);
-IMPORT_C vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
+IMPORTED vorbis_info *ov_info(OggVorbis_File *vf,int link);
+IMPORTED vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 
-IMPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int length,
+IMPORTED long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int *bitstream);
 
-IMPORT_C void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin);
+IMPORTED void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin);
 
 #ifdef __cplusplus
 }

@@ -7,12 +7,16 @@ UID 0
 
 SOURCEPATH    .
 SOURCE        console.cpp oggtremortest.cpp
+SOURCEPATH    ..\..\..\src
+SOURCE        OggPluginAdaptor.cpp
 
 USERINCLUDE   .
 USERINCLUDE   ..\..
-USERINCLUDE   ..\..\plugin
+USERINCLUDE   ..\..\..\Plugin\inc
+USERINCLUDE   ..\..\..\inc
 SYSTEMINCLUDE \Epoc32\include
 SYSTEMINCLUDE \Epoc32\include\libc
 
 LIBRARY       euser.lib estlib.lib
 LIBRARY       MediaClientAudio.lib
+LIBRARY       MMFControllerFramework.lib 

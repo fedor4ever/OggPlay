@@ -32,7 +32,7 @@
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 #endif
 #include <stdlib.h>
-#include "OggTremor.h"
+#include "OggAbsPlayback.h"
 
 // UIQ_?
 IFDEF_S60(const TInt KCallBackPeriod = 150000;)  /** Time (usecs) between canvas Refresh() for graphics updating */

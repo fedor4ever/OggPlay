@@ -106,7 +106,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
 {
  public:
 
-  TOggFiles(COggPlayback* anOggPlayback);
+  TOggFiles(CAbsPlayback* anOggPlayback);
   virtual ~TOggFiles();
 
   void  CreateDb(RFs& session);
@@ -152,7 +152,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   TBool isSupportedAudioFile(TParsePtrC& p);
 
   CArrayPtrFlat<TOggFile>* iFiles; 
-  COggPlayback*            iOggPlayback;
+  CAbsPlayback*            iOggPlayback;
   TOggKey                  iOggKeyTitles;
   TOggKey                  iOggKeyAlbums;
   TOggKey                  iOggKeyArtists;

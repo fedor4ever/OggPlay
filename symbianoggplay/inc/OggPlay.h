@@ -50,7 +50,7 @@ const TInt ENoFileSelected = -1;
 
 #include <OggPlay.rsg>
 #include "OggPlay.hrh"
-#include "OggTremor.h"
+#include "OggAbsPlayback.h"
 
 #include "OggViews.h"
 #include "OggControls.h"
@@ -230,7 +230,7 @@ public:
   TFileName iDbFileName;
   
   COggPlayAppView* iAppView;
-  COggPlayback*    iOggPlayback;
+  CAbsPlayback*    iOggPlayback;
 
 #ifdef MONITOR_TELEPHONE_LINE
   COggActive*      iActive;
@@ -311,7 +311,7 @@ private:
 class COggSongList : public CBase
 {
     public:
-     virtual void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+     virtual void ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
      virtual const TDesC & GetNextSong()=0;    
      virtual const TDesC & GetPreviousSong()=0;
      void  SetPlayingFromListBox(TInt aPlaying);
@@ -328,7 +328,7 @@ class COggSongList : public CBase
      TInt iPlayingIdx;           // index of the file which is currently being played
      RArray<TInt> iFileList;
      COggPlayAppView* iAppView; 
-     COggPlayback*    iOggPlayback;
+     CAbsPlayback*    iOggPlayback;
      TBool iRepeat;
      TBool iNewFileList;
 };
@@ -336,7 +336,7 @@ class COggSongList : public CBase
 class COggNormalPlay : public COggSongList
 {
     public:     
-        void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+        void ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
         const TDesC & GetNextSong();  
         const TDesC & GetPreviousSong();
         ~COggNormalPlay();
@@ -347,7 +347,7 @@ class COggNormalPlay : public COggSongList
 class COggRandomPlay : public COggSongList
 {
     public:     
-        void ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback);
+        void ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
         virtual const TDesC & GetNextSong();  
         virtual const TDesC & GetPreviousSong();
         ~COggRandomPlay(); 

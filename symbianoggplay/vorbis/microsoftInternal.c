@@ -33,7 +33,13 @@
 
 #define __NAKED__ __declspec( naked )
 
-__NAKED__ EXPORT_C _allmul()
+#ifdef OGGPLAYPLUGIN
+#define EXPORTED 
+#else
+#define EXPORTED IMPORT_C
+#endif
+
+__NAKED__ EXPORTED _allmul()
  {
   _asm mov         eax,dword ptr [esp+8]
   _asm mov         ecx,dword ptr [esp+10h]
@@ -57,7 +63,7 @@ __NAKED__ EXPORT_C _allmul()
   _asm ret         10h
   }
 
-__NAKED__ EXPORT_C _allshl()
+__NAKED__  EXPORTED _allshl()
     {
         _asm cmp         cl,40h
         _asm jae         label3
@@ -78,7 +84,7 @@ __NAKED__ EXPORT_C _allshl()
         _asm ret
     }
 
-__NAKED__ EXPORT_C _alldiv()
+__NAKED__  EXPORTED _alldiv()
     {
         _asm push        edi
         _asm push        esi
@@ -161,7 +167,7 @@ label11:
     }
 
 
-__NAKED__ EXPORT_C _alloca_probe()
+__NAKED__ EXPORTED _alloca_probe()
     {
         _asm push        ecx
         _asm cmp         eax,1000h

@@ -264,6 +264,15 @@ class COggPlayController :	public CPseudoMMFController,
         TBuf<100> iFileName;
         FILE *iFile;
        
+        
+        enum { KMaxStringLength = 256 };
+        TBuf<KMaxStringLength>   iAlbum;
+        TBuf<KMaxStringLength>   iArtist;
+        TBuf<KMaxStringLength>   iGenre;
+        TBuf<KMaxStringLength>   iTitle;
+        TBuf<KMaxStringLength>   iTrackNumber;
+
+
         CAdvancedStreaming *iAdvancedStreaming;
         MDecoder *iDecoder;
 #ifndef MMF_AVAILABLE

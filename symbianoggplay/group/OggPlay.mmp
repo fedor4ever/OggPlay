@@ -16,25 +16,34 @@ SOURCE OggDialogs.cpp
 SOURCE OggMsgEnv.cpp
 SOURCE OggPlayAppView.cpp
 SOURCE OggViews.cpp
-#if defined(MOTOROLA)
-SOURCE OggTremor_Motorola.cpp
-#else
-SOURCE OggTremor.cpp
-#endif
+
 SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
 #if defined SERIES60
 SOURCE OggSettingsContainer.cpp
 #endif
 SOURCE OggFilesSearchDialogs.cpp
-SOURCE OggRateConvert.cpp
 #if defined SERIES60
 SOURCE OggUserHotkeys.cpp
 #endif
 
+
+#if defined(PLUGIN_SYSTEM)
+
+SOURCE OggPluginAdaptor.cpp
+
+#else
+#if defined(MOTOROLA)
+SOURCE OggTremor_Motorola.cpp
+#else
+SOURCE OggTremor.cpp
+#endif
+
 //FIXMAD: should be part of the vorbis dll
-SOURCEPATH ..\vorbis
+SOURCE OggRateConvert.cpp
+SOURCEPATH ..\vorbis\plugin
 SOURCE TremorDecoder.cpp
+
 
 #if defined MP3_SUPPORT
 //FIXMAD: MAD should of course have its own dll.
@@ -96,7 +105,15 @@ SOURCE utf8.c
 SOURCE util.c       
 SOURCE id3version.c    
 //
-#endif
+
+USERINCLUDE ..\mad\libmad ..\mad\inc ..\mad\zlib ..\mad\libid3tag
+
+#endif /* MP3_SUPPORT */
+
+#endif /* PLUGIN_SYSTEM */
+
+
+
 
 SOURCEPATH ..\src
 
@@ -112,8 +129,7 @@ LANG SC
 #endif
 
 
-USERINCLUDE . ..\inc ..\vorbis ..\data ..\mad\libmad ..\mad\inc ..\mad\zlib ..\mad\libid3tag
-
+USERINCLUDE . ..\inc ..\vorbis ..\data ..\vorbis\plugin ..\plugin\inc
 SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 
 LIBRARY euser.lib 
@@ -156,6 +172,11 @@ LIBRARY hal.lib
 #if defined(MOTOROLA)
 LIBRARY maudiofb.lib
 #endif
+#ifdef MMF_AVAILABLE
+LIBRARY MediaClientAudio.lib
+LIBRARY MMFControllerFramework.lib 
+#endif
+
 
 START WINS      
 // ?wins_specific_information

@@ -28,7 +28,7 @@ PRJ_EXPORTS
 ..\Inc\OggPlayUid.h
 // Plugin Header, OggPlay configuration
 ..\Inc\OggOs.h
-..\Inc\OggPlayPlugin.h
+..\Plugin\Inc\OggPlayPlugin.h
 
 PRJ_MMPFILES
 // Specify the .mmp files required for building the important component

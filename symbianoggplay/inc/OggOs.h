@@ -60,11 +60,18 @@ chSTR2(__LINE__) "):" #desc)
 //#define SONYERICSSON
 #endif
 
+// When defined, the decoder used are dynamically loaded plugins.
+
+//#define PLUGIN_SYSTEM
+// this is experimental at the moment.
+#ifdef PLUGIN_SYSTEM
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
 
-//#define MMF_AVAILABLE
+#define MMF_AVAILABLE
+
+#endif /* PLUGIN_SYSTEM */
 
 
 // NEW CODE ENABLERS

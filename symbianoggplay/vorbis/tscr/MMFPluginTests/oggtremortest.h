@@ -6,26 +6,29 @@
 #include <ivorbisfile.h>
 
 #include <MdaAudioSamplePlayer.h>
+#include "OggPluginAdaptor.h"
+
 #ifndef MMF_AVAILABLE
 #include <e32uid.h>
 #include <OggPlayPlugin.h>
 #endif
 
 
-class CIvorbisTest: public CBase, public MMdaAudioPlayerCallback, public MKeyPressObserver 
+
+class CIvorbisTest: public CBase, public MKeyPressObserver, public MPlaybackObserver
     {
     public:
         
         static CIvorbisTest * NewL(CConsoleBase *aConsole);
-        void OpenFileL(const TDesC8 &aFileName);
 
         // Destruction
         ~CIvorbisTest();
 
+        virtual void NotifyPlayComplete();
+        virtual void NotifyUpdate();
+        virtual void NotifyPlayInterrupted();
     private:
         TInt ProcessKeyPress(TChar aChar) ;
-        void MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration);
-        void MapcPlayComplete(TInt aError);
         
         void ConstructL(CConsoleBase *aConsole);
      
@@ -33,12 +36,6 @@ class CIvorbisTest: public CBase, public MMdaAudioPlayerCallback, public MKeyPre
         TInt iVolume;
         TBuf<100> iFilename;
         TInt iFilenameIdx;
-#ifdef MMF_AVAILABLE
-        CMdaAudioPlayerUtility *iPlayer;
-#else
-        CPseudoMMFController * iPlayer;
-        // Use RLibrary object to interface to the DLL
-        RLibrary iLibrary;
-#endif
+        COggPluginAdaptor * iPlayer;
 
     };

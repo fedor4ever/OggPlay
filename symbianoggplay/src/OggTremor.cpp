@@ -61,30 +61,6 @@ const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
 #endif
 
 
-
-////////////////////////////////////////////////////////////////
-//
-// CAbsPlayback
-//
-////////////////////////////////////////////////////////////////
-
-CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
-  iState(CAbsPlayback::EClosed),
-  iObserver(anObserver),
-  iTime(0),
-  iRate(44100),
-  iChannels(2),
-  iFileSize(0),
-  iBitRate(0),
-  iAlbum(),
-  iArtist(),
-  iGenre(),
-  iTitle(),
-  iTrackNumber()
-
-{
-}
-
 ////////////////////////////////////////////////////////////////
 //
 // COggPlayback

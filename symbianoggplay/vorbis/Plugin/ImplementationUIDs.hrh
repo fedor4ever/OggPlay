@@ -23,6 +23,5 @@
 // These are the ECOM Implementation UIDs for the controller
 
 #define KOggTremorUidControllerImplementation		0x101FF684
-#define KOggTremorUidPlayFormatImplementation		0x101FF685  //NOT LEGITIMATE !!!! FIX ME!!!!
-
+#define KOggTremorUidPlayFormatImplementation		0x101FF685
 #endif

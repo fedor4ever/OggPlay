@@ -36,7 +36,11 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <reent.h>
 
 #include "OggControls.h"
+#ifdef PLUGIN_SYSTEM
+#include "OggPluginAdaptor.h"
+#else
 #include "OggTremor.h"
+#endif
 #include "OggPlayAppView.h"
 #include "OggDialogs.h" 
 #include "OggLog.h"
@@ -302,7 +306,11 @@ COggPlayAppUi::ConstructL()
 	iWriteIniOnNextPause=EFalse;
     iSettings.iWarningsEnabled = ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
+#ifdef PLUGIN_SYSTEM
+	iOggPlayback= new(ELeave) COggPluginAdaptor(iOggMsgEnv, this);
+#else
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
+#endif
 	iOggPlayback->ConstructL();
 
 	ReadIniFile();
@@ -1524,7 +1532,7 @@ CEikAppUi* COggPlayDocument::CreateAppUiL(){
 //
 ///////////////////////////////////////////////////////////////
 
-void COggSongList::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback)
+void COggSongList::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback)
 {
 	iPlayingIdx = ENoFileSelected;
     iAppView = aAppView;
@@ -1650,7 +1658,7 @@ COggNormalPlay::~COggNormalPlay ()
 {
 }
 
-void COggNormalPlay::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback)
+void COggNormalPlay::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback)
 {
 	COggSongList::ConstructL(aAppView, aOggPlayback);
 }
@@ -1730,7 +1738,7 @@ COggRandomPlay::~COggRandomPlay ()
     iRandomMemory.Reset();
 }
 
-void COggRandomPlay::ConstructL(COggPlayAppView* aAppView, COggPlayback* aOggPlayback)
+void COggRandomPlay::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback)
 {
     COggSongList::ConstructL(aAppView, aOggPlayback);
     // Initialize the random seed
@@ -1786,4 +1794,30 @@ const TDesC & COggRandomPlay::GetPreviousSong()
 {
     // Exactly same behaviour has GetNextSong()
     return ( GetNextSong() );
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+// CAbsPlayback
+//
+////////////////////////////////////////////////////////////////
+
+// Just the constructor is defined in this class, everything else is 
+// virtual
+
+CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
+  iState(CAbsPlayback::EClosed),
+  iObserver(anObserver),
+  iTitle(),
+  iAlbum(),
+  iArtist(),
+  iGenre(),
+  iTrackNumber(),
+  iTime(0),
+  iRate(44100),
+  iChannels(2),
+  iFileSize(0),
+  iBitRate(0)
+{
 }

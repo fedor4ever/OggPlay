@@ -1780,6 +1780,9 @@ void COggAnalyzer::RenderWaveformFromMDCT(const TInt32 * aFreqBins)
     
     // Convert to log
     TInt i, j;
+    if (aFreqBins == NULL)
+        // No data to play with
+        return;
     for (j=0; j<16; j++)
     {
         TInt v = aFreqBins[j];

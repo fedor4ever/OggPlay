@@ -252,18 +252,38 @@ TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
 }
 
 
-void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& /*aNumberOfEntries*/)
+void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries)
 {
     
     PRINT("COggPlayController::GetNumberOfMetaDataEntriesL");
-    // Not implemented yet
+    aNumberOfEntries = 5;
 }
 
-CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt /*aIndex*/)
+CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
 {
-    
     PRINT("COggPlayController::GetMetaDataEntryL");
-    // Not implemented yet
+    switch(aIndex)
+    {
+    case 0:
+        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginTitle"), iTitle));
+        break;
+        
+    case 1:
+        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginAlbum"), iAlbum));
+        break;
+        
+    case 2:
+        return (CMMFMetaDataEntry::NewL(_L("OggPlayPlugArtist"), iArtist));
+        break;
+        
+    case 3:
+        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginGenre"), iGenre));
+        break;
+        
+    case 4:
+        return (CMMFMetaDataEntry::NewL(_L("OggPlayPluginTrackNumber"),  iTrackNumber));
+        break;
+    }
     return NULL;
 }
 
@@ -288,6 +308,11 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
     }
     
     iAdvancedStreaming->Open(iDecoder->Channels(), iDecoder->Rate());
+    
+      // Parse tag information and put it in the provided buffers.
+    iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
+
+
 } 
 
 

@@ -5,6 +5,7 @@
 #include "ActiveConsole.h"
 #include "oggtremortest.h"
 #include <mda\common\audio.h>
+
 #ifndef MMF_AVAILABLE
 #include <e32uid.h>
 #include <e32svr.h>
@@ -25,8 +26,8 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
     {
     case '1' :
     case 92 :
-        iConsole->Printf(_L("Playing %S!"), &iFilename);
-        iPlayer->OpenFileL(iFilename);
+        iPlayer->Open(iFilename);
+        iConsole->Printf(_L("Playing %S!\n %S\n"), &iFilename,  &iPlayer->Title());
         iPlayer->Play();
         return(ETrue);
         break;
@@ -47,8 +48,7 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
         {
         iConsole->Printf(_L("Volume Up!\n"));
         iVolume++;
-        TInt aVol = iVolume/10.0 * iPlayer->MaxVolume();
-        iPlayer->SetVolume(iVolume/10.0 * iPlayer->MaxVolume());
+        iPlayer->SetVolume(iVolume);
         return(ETrue);
         break;
         }
@@ -56,7 +56,7 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
     case 'j' :
         iConsole->Printf(_L("Volume Down!\n"));
         iVolume--;
-        iPlayer->SetVolume(iVolume/10.0 * iPlayer->MaxVolume());
+        iPlayer->SetVolume(iVolume);
         return(ETrue);
         break;
     case '6':
@@ -86,6 +86,20 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
     }
 }
 
+void CIvorbisTest::NotifyPlayComplete() 
+{
+    iConsole->Printf(_L("Notify Play complete"));
+}
+void CIvorbisTest::NotifyUpdate() 
+{
+    iConsole->Printf(_L("Notify Update"));
+}
+  
+void CIvorbisTest::NotifyPlayInterrupted()
+{
+    iConsole->Printf(_L("Notify Play Interrupted"));
+}
+
 
 #ifdef MMF_AVAILABLE
 ////////////////////////////////////////////////////
@@ -95,8 +109,8 @@ TInt CIvorbisTest::ProcessKeyPress(TChar aChar)
 void CIvorbisTest::ConstructL(CConsoleBase *aConsole)
     {
     iConsole = aConsole;
-    iPlayer = CMdaAudioPlayerUtility::NewL(
-        *this);
+    iPlayer = new (ELeave) COggPluginAdaptor( NULL, this );
+    iPlayer->ConstructL();
     RDebug::Print(_L("Leaving constructl"));
     iFilename = _L("C:\\test.ogg");
     }
@@ -105,18 +119,7 @@ CIvorbisTest::~CIvorbisTest()
     delete (iPlayer);
 }
 
-void CIvorbisTest::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
-{
-    RDebug::Print(_L("MapcInitComplete"));
-}
-
-void CIvorbisTest::MapcPlayComplete(TInt aError)
-{
-    RDebug::Print(_L("PlayComplete"));
-}
 #else
-
-
 ////////////////////////////////////////////////////
 // Interface when MMF is not available
 ////////////////////////////////////////////////////
@@ -129,7 +132,7 @@ void CIvorbisTest::ConstructL(CConsoleBase *aConsole)
     // Dynamically load the DLL
     const TUid KOggDecoderLibraryUid={0x101FD21D};
     TUidType uidType(KDynamicLibraryUid,KOggDecoderLibraryUid);
-    User::LeaveIfError ( iLibrary.Load(_L("OGGTREMORCONTROLLER.DLL"), uidType) );
+    User::LeaveIfError ( iLibrary.Load(_L("OGGPLUGINDECODER.DLL"), uidType) );
 
     // Function at ordinal 1 creates new C
     TLibraryFunction entry=iLibrary.Lookup(1);
@@ -147,17 +150,6 @@ CIvorbisTest::~CIvorbisTest()
     iLibrary.Close();
 }
 
-void CIvorbisTest::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
-{
-    
-    RDebug::Print(_L("MapcInitComplete"));
-    
-}
-
-void CIvorbisTest::MapcPlayComplete(TInt aError)
-{
-    RDebug::Print(_L("PlayComplete"));
-}
 #endif
 
 
