@@ -548,11 +548,17 @@ COggPlayAppUi::SetHotKey()
 #endif
 }
 
-
+#if defined(SERIES60)
 void
 COggPlayAppUi::UpdateSeries60Softkeys()
 {
-#ifdef SERIES60
+  // Return if somebody else than main view has taken focus, 
+  // others must control the CBA themselves
+  TVwsViewId viewId;
+  GetActiveViewId(viewId);
+  if( viewId.iViewUid != KOggPlayUidFOView )
+    return;
+
   if( iOggPlayback->State() == CAbsPlayback::EPaused ||
 			iOggPlayback->State() == CAbsPlayback::EPlaying )
     {
@@ -563,8 +569,8 @@ COggPlayAppUi::UpdateSeries60Softkeys()
     Cba()->AddCommandSetToStackL(R_IDLE_CBA);
     }
   Cba()->DrawNow();
-#endif
 }
+#endif
 
 void
 COggPlayAppUi::HandleCommandL(int aCommand)
@@ -642,7 +648,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 					  if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
 						  iAppView->SetTime(iOggPlayback->Time());
 						  iOggPlayback->Play();
-              UpdateSeries60Softkeys();
 					  }
 					  SetCurrent(idx);
 				  } else SetCurrent(-1);
@@ -656,7 +661,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
 			iOggPlayback->State()==CAbsPlayback::EPaused) {
 			iOggPlayback->Stop();
-      UpdateSeries60Softkeys();
 			SetCurrent(-1);
 		}
 		break;

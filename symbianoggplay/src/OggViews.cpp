@@ -176,7 +176,6 @@ void COggS60Utility::RemoveStatusPane()
     // Restore softkeys
   ((COggPlayAppUi*) appUi)->UpdateSeries60Softkeys();
 }
-
 #endif
 
 ////////////////////////////////////////////////////////////////

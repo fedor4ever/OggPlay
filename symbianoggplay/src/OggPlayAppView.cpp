@@ -1062,7 +1062,7 @@ COggPlayAppView::UpdateControls()
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iRepeat);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iRepeat);
 
-  iApp->UpdateSeries60Softkeys();
+  IFDEF_S60( iApp->UpdateSeries60Softkeys(); )
 }
 
 void
