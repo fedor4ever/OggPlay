@@ -1697,6 +1697,7 @@ void COggAnalyzer::Clear()
   for (int i=0; i<iNumValues; i++) {
     if (iValues[i]!=0) {
       iValues[i]= 0;
+      iPeaks[i]= 0;
       iRedraw= ETrue;
     }
   }
