@@ -98,7 +98,9 @@ LIBRARY charconv.lib
 #if defined SERIES60
 LIBRARY avkon.lib
 #endif
+#ifdef UIQ
 LIBRARY qikctl.lib
+#endif
 LIBRARY flogger.lib 
 LIBRARY libvorbisidec.lib
 LIBRARY mediaclientaudiostream.lib
