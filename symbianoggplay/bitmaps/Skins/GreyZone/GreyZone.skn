@@ -1,0 +1,42 @@
+OggPlay 1 {
+  FlipOpen {
+    Played {
+      Position 5 6 110 16
+      Font LatinBold17 1 0
+      FontColor 255 255 255
+    }
+    Volume {
+      Position 127 2 40 20
+      KnobIcon 22 23
+    }
+    Title {
+      Position 2 28 174 16
+      Font LatinBold12 1000 0
+      FontColor 255 255 255
+    }
+    Artist {
+      Position 1 41 174 16
+      Font LatinBold12 1000 0
+      FontColor 255 255 255
+    }
+    Album {
+      Position 1 54 174 16
+      Font LatinBold12 20 0
+      FontColor 255 255 255
+    }
+    Position {
+      Position 8 65 160 16
+      Style 2
+      KnobIcon 26 27
+    }
+    ListBox {
+      Position 8 85 162 96
+      Font LatinPlain12 20 0
+    }
+    PlayButton {
+      Position 1 21 174 47
+      NormalIcon 41 42
+      NormalIcon 41 42
+    }
+  }
+}
