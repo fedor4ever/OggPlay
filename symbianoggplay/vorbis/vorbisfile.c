@@ -150,6 +150,8 @@ static ogg_int64_t _get_prev_page(OggVorbis_File *vf,ogg_page *og){
     begin-=CHUNKSIZE;
     if(begin<0)
       begin=0;
+   if(begin<end-CHUNKSIZE*50) 
+     return(OV_EREAD);
     _seek_helper(vf,begin);
     while(vf->offset<end){
       ret=_get_next_page(vf,og,end-vf->offset);

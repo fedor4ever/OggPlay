@@ -86,14 +86,16 @@ chSTR2(__LINE__) "):" #desc)
 #define MDCT_FREQ_ANALYSER 
 
 // Testing new listbox maneuvring. 
-//#define NEW_LISTBOX_STYLE_FIXIT 
+#define NEW_LISTBOX_STYLE_FIXIT 
 
 // OTHERS
 //
 #if defined SERIES60    // Alternative to #ifdef/#endif around Series 60 code
 #define IFDEF_S60(x)   x
+#define IFNDEF_S60(x)  ;
 #else
 #define IFDEF_S60(x)   ;
+#define IFNDEF_S60(x)  x
 #endif
 
 

@@ -527,6 +527,7 @@ COggPlayAppUi::NotifyPlayComplete()
 	if (iCurrentSong.Length()>0 && iOggPlayback->Open(iCurrentSong)==KErrNone) {
 		iOggPlayback->Play();
 		iAppView->SetTime(iOggPlayback->Time());
+    UpdateSeries60Softkeys();
 		iAppView->Update();
 	} else SetCurrent(ENoFileSelected);
 	
@@ -549,10 +550,11 @@ COggPlayAppUi::SetHotKey()
 #endif
 }
 
-#if defined(SERIES60)
 void
 COggPlayAppUi::UpdateSeries60Softkeys()
 {
+  IFDEF_S60( 
+
   // Return if somebody else than main view has taken focus, 
   // others must control the CBA themselves
   TVwsViewId viewId;
@@ -567,10 +569,13 @@ COggPlayAppUi::UpdateSeries60Softkeys()
     SetSeries60Softkeys(iSettings.iRskIdle);
   }
   Cba()->DrawNow();
+
+  )
 }
 
 void
 COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
+  IFDEF_S60( 
     
   switch(aSoftkey) {
     case TOggplaySettings::ECbaStop:
@@ -589,87 +594,42 @@ COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
       Cba()->AddCommandSetToStackL(R_OPTION_BACK_CBA);
       break;
     default:
-      //!FIXME
-      TInt a=5;
-      a++;
       //OGGPANIC(_L("Invalid Softkey"),1319);
       break;
   }
+
+  )
 }
 
-#endif
 
 void
 COggPlayAppUi::HandleCommandL(int aCommand)
 {
-	if(aCommand == EOggAbout) {
+	
+
+  switch (aCommand) {
+
+  case EOggAbout: {
 		COggAboutDialog *d = new COggAboutDialog();
 		TBuf<128> buf;
 		iEikonEnv->ReadResource(buf, R_OGG_VERSION);
 		d->SetVersion(buf);
 		d->ExecuteLD(R_DIALOG_ABOUT);
-		return;
+		break;
 	}
-	
-	int idx = iAppView->GetSelectedIndex();
-	const TDesC& curFile= iAppView->GetFileName(idx);
-//  TRACE(COggLog::VA(_L("HandleCommandL -Index=%d, icurrent=%d, curFile='%S'"), idx, iCurrent,&curFile ));    // FIXIT
 
-  switch (aCommand) {
-		
 	case EOggPlay: {
-		if (iViewBy==ETop) {
-			SelectNextView();
-      break;
-		}
-		if (iAppView->GetItemType(idx)==6) {
-			// the back item was selected: show the previous view
-			SelectPreviousView();
-			break;
-		}
-		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) 
-		{
-			SelectNextView();
-			break;
-		}
-		if (iViewBy==ETitle || iViewBy==EFileName) {
-			if (curFile.Length()>0) {
-				if (iOggPlayback->State()==CAbsPlayback::EPaused && idx==iCurrent)
-						iOggPlayback->Play();
-        else {
-				  if (iOggPlayback->State()==CAbsPlayback::EPlaying)
-            iOggPlayback->Pause();
-				  if (iOggPlayback->Open(curFile)==KErrNone) {
-					  iOggPlayback->SetVolume(iVolume);
-					  if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
-						  iAppView->SetTime(iOggPlayback->Time());
-						  iOggPlayback->Play();
-					  }
-					  SetCurrent(idx);
-				  } else SetCurrent(-1);
-        }
-			}
-		}
+    PlaySelect();
 		break;
 				   }
 		
 	case EOggStop: {
-		if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
-			iOggPlayback->State()==CAbsPlayback::EPaused) {
-			iOggPlayback->Stop();
-			SetCurrent(-1);
-		}
+    Stop();
 		break;
 				   }
 		
 	case EOggPauseResume: {
-		if (iOggPlayback->State()==CAbsPlayback::EPlaying) 
-      iOggPlayback->Pause();
-//		else if (iOggPlayback->State()==CAbsPlayback::EPaused) 
-//      iOggPlayback->Play();
-		else 
-      HandleCommandL(EOggPlay);
-		iAppView->Update();
+    PauseResume();
 		break;
 						  }
 		
@@ -782,8 +742,10 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     break;
     }
   case EUserPauseCBA : {
- 		iOggPlayback->Pause();
+ 		iOggPlayback->Pause(); // does NOT call UpdateS60Softkeys
 		iAppView->Update();
+    UpdateSeries60Softkeys();
+
     break;
     }
   case EUserPlayCBA : {
@@ -794,7 +756,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 
   case EUserBackCBA : {
  		SelectPreviousView();
-		iAppView->Update();
     break;
     }
 
@@ -814,6 +775,87 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     }
   }
 }
+
+void
+COggPlayAppUi::PlaySelect()
+{
+	int idx = iAppView->GetSelectedIndex();
+	const TDesC& curFile= iAppView->GetFileName(idx);
+
+	if (iViewBy==ETop) {
+		SelectNextView();
+    return;
+	}
+
+	if (iAppView->GetItemType(idx)==6) {
+		// the back item was selected: show the previous view
+		SelectPreviousView();
+		return;
+	}
+
+	if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder) 
+	{
+		SelectNextView();
+		return;
+	}
+
+	if ((iViewBy==ETitle || iViewBy==EFileName) && (curFile.Length()>0)) {
+    if (iOggPlayback->State()==CAbsPlayback::EPaused && idx==iCurrent) {
+				iOggPlayback->Play();
+  			SetCurrent(idx);
+        UpdateSeries60Softkeys();
+        return;
+    }
+		
+    if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
+      iOggPlayback->Pause();
+      UpdateSeries60Softkeys();
+    }
+
+    if (iOggPlayback->Open(curFile)==KErrNone) {
+			iOggPlayback->SetVolume(iVolume);
+			if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
+				iAppView->SetTime(iOggPlayback->Time());
+				iOggPlayback->Play();
+			}
+			SetCurrent(idx);
+      UpdateSeries60Softkeys();
+
+    } else {
+      SetCurrent(-1);
+      UpdateSeries60Softkeys();
+    }
+	
+  }
+    return;
+}
+
+void
+COggPlayAppUi::PauseResume()
+{
+  if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
+    iOggPlayback->Pause();
+    iAppView->Update();
+    UpdateSeries60Softkeys();
+  }	else { 
+    PlaySelect();
+  }
+  return;
+}
+
+void
+COggPlayAppUi::Stop()
+{
+  if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
+      iOggPlayback->State()==CAbsPlayback::EPaused) {
+    iOggPlayback->Stop();
+    UpdateSeries60Softkeys();
+    SetCurrent(-1); // calls iAppview->Update
+  }
+  return;
+
+}
+
 
 void
 COggPlayAppUi::SelectPreviousView()

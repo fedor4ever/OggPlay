@@ -60,7 +60,7 @@ const TInt KFullScreenHeight = 320;
 
 const TUid KOggPlayUid1 = { 0x1000007a };
 const TUid KOggPlayUid2 = { 0x100039ce };
-const TUid KOggPlayUid  = { KOggPlayApplicationUidValue }; //0x1000A661;
+const TUid KOggPlayUid  = { KOggPlayApplicationUidValue }; 
 
 const TUid KOggPlayUidFOView = { KOggPlayApplicationUidValue +1 };
 const TUid KOggPlayUidFCView = { KOggPlayApplicationUidValue +2 };
@@ -226,6 +226,9 @@ public:
   virtual void NotifyPlayInterrupted();
 
   // high level functions:
+  void PlaySelect();
+  void PauseResume();
+  void Stop();
   void NextSong();
   void PreviousSong();
   void ShowFileInfo();
@@ -246,11 +249,11 @@ public:
   TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName,const TDesC8& aTail);
 
   void OpenFileL(const TDesC& aFileName);
+  void WriteIniFile();
 
 private: 
 
   void ReadIniFile();
-  void WriteIniFile();
   void SetHotKey();
   TBool IsAlarmTime();
   void SetCurrent(int aCurrent);

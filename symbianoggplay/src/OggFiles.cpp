@@ -392,7 +392,7 @@ void  TOggFiles::FileSearchStepL()
 	      if (path->Des().Length()>1 && path->Des()[path->Des().Length()-1]==L'\\')
 	        path->Des().SetLength( path->Des().Length()-1); // get rid of trailing back slash
 
-        TRACE(COggLog::VA(_L("Processing %S"), &shortname ));
+//        TRACE(COggLog::VA(_L("Processing %S"), &shortname ));
 	      TInt err = iOggPlayback->Info(*fullname, ETrue);
 
         if( err == KErrNone )
@@ -453,7 +453,8 @@ TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& sessio
     ClearFiles();
     
     TChar driveLetter; TDriveInfo driveInfo;
-    TInt err,driveNumber;
+    TInt err=KErrNone;
+    TInt driveNumber;
     for (driveNumber=EDriveA; driveNumber<=EDriveZ; driveNumber++) {
       session.Drive(driveInfo,driveNumber); 
       if (driveInfo.iDriveAtt == KDriveAbsent)

@@ -568,7 +568,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
     return KErrOggFileNotFound;
   };
   OggVorbis_File vf;
-  if(ov_open(f, &vf, NULL, 0) < 0) {
+  if(ov_test(f, &vf, NULL, 0) < 0) {
     fclose(f);
     if (!silent) {
        iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_9);
@@ -583,10 +583,8 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   vorbis_info *vi= ov_info(&vf,-1);
   iRate= vi->rate;
   iChannels= vi->channels;
-  iFileSize= ov_raw_total(&vf,-1);
 
   ogg_int64_t pos(0);
-  pos= ov_time_total(&vf,-1);
   unsigned int hi(0);
   iTime.Set(hi,pos);
 

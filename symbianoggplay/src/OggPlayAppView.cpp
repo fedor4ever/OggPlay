@@ -33,8 +33,10 @@
 #include <stdlib.h>
 #include "OggTremor.h"
 
+// UIQ_?
+IFDEF_S60(const TInt KCallBackPeriod = 150000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
+IFNDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
 // S60 file-listbox maneuvring speed constants
-const TInt KCallBackPeriod = 75000;  /** Time (usecs) between canvas Refresh() for graphics updating */
 const TInt KUserInactivityTimeoutMSecNormal = 1600;
 const TInt KUserInactivityTimeoutTicksNormal = KUserInactivityTimeoutMSecNormal * 1000 / KCallBackPeriod;
 const TInt KUserInactivityTimeoutMSecFast = 600;
@@ -700,7 +702,6 @@ COggPlayAppView::SelectSong(TInt idx)
   iCurrentSong= GetFileName(idx);
   if (iListBox[iMode]) {
     iSelected = iListBox[iMode]->SetCurrentItemIndex(idx);
-    UpdateControls();
   }
 }
 
@@ -1076,7 +1077,6 @@ COggPlayAppView::UpdateControls()
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iRepeat);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iRepeat);
 
-  IFDEF_S60( iApp->UpdateSeries60Softkeys(); )
 }
 
 void

@@ -104,6 +104,7 @@ void COggFOView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
   CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(ETrue);
 #if defined(SERIES60)
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(EFalse);
+  ((COggPlayAppUi*) CEikonEnv::Static()->AppUi())->UpdateSeries60Softkeys();
 #endif
   iOggViewCtl.ChangeLayout(EFalse);
 }

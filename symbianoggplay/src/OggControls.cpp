@@ -31,7 +31,9 @@
 #include "int_fft.c"
 
 const TInt KLengthFFT = 512;
-
+//UIQ_?
+ IFDEF_S60(const TInt KListboxcycles=4;)
+IFNDEF_S60(const TInt KListboxcycles=5;)
 
 TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
 {
@@ -1898,7 +1900,7 @@ COggListBox::SetTopIndex(TInt idx)
 {
   if (idx<0) idx=0;
   if (idx!=iTop) {
-    iCycle= 5;
+    iCycle= KListboxcycles;
     iScroll= (iTop-idx);
     iOffset= iScroll*iLineHeight;
     iTop= idx;
@@ -2016,7 +2018,7 @@ COggListBox::Cycle()
 {
   if (iCycle>0) {
     iCycle--;
-    iOffset -= (iScroll*iLineHeight)/5;
+    iOffset -= (iScroll*iLineHeight)/KListboxcycles;
     iRedraw= ETrue;
   } else {
     if (iOffset!=0) {
