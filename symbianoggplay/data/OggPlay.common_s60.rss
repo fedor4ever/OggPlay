@@ -48,6 +48,22 @@ RESOURCE DIALOG r_dialog_about {
   };
 }
 
+
+RESOURCE DIALOG r_dialog_infowin {
+  buttons =  R_AVKON_SOFTKEYS_BACK; 
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type =  EOggScrollableTextControl;
+	id =    EOggScrollableTextDialog;
+	control = SCROLLABLERICHTEXT
+	{
+	height= 75;
+	};
+    }	
+  };
+}
+
 RESOURCE DIALOG r_dialog_info {
   title   = ogg_file_prop;
   buttons = R_OGG_DIALOG_BUTTONS1;

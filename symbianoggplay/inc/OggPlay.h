@@ -51,6 +51,7 @@ const TInt KFullScreenHeight = 320;
 
 #include "OggViews.h"
 #include "OggControls.h"
+#include "OggMsgEnv.h"
 
 // some global constants:
 //-----------------------
@@ -196,6 +197,7 @@ private:
 
   COggFOView* iFOView;
   COggFCView* iFCView;
+  COggMsgEnv* iOggMsgEnv;
 };
 
 #ifdef SERIES60

@@ -158,7 +158,7 @@ CAbsPlayback::TState CAbsPlayback::State()
 //
 ////////////////////////////////////////////////////////////////
 
-COggPlayback::COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) : 
+COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) : 
   CAbsPlayback(anObserver),
   iEnv(anEnv),
   iSettings(),
@@ -189,10 +189,10 @@ void COggPlayback::ConstructL() {
   TRAPD( err, iStream->Open(&iSettings) );
   if (err!= KErrNone) {
     TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_7);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_20);
+    CEikonEnv::Static()->ReadResource(buf1, R_OGG_ERROR_7);
+    CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_20);
     buf1.AppendNum(err);
-    iEnv->InfoWinL(buf2,buf1);
+    iEnv->OggErrorMsgL(buf2,buf1);
     //OGGLOG.Write(buf2);
     //OGGLOG.Write(buf1);
   }
@@ -228,11 +228,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 
   if (aFileName.Length() == 0) {
     //OGGLOG.Write(_L("Oggplay: Filenamelength is 0 (Error20 Error8"));
-
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_8);
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_8);
     return -100;
   }
 
@@ -244,10 +240,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     iFileOpen= 0;
     //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
 
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_14);
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
     return -101;
   };
   iFileOpen= 1;
@@ -258,10 +251,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     iFileOpen= 0;
     //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
 
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_9);
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
     return -102;
   }
 
@@ -290,10 +280,10 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   iFileOpen=0;
 
   TBuf<256> buf,tbuf;
-  iEnv->ReadResource(buf, R_OGG_ERROR_16);
-  iEnv->ReadResource(tbuf, R_OGG_ERROR_20);
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
+  CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_20);
   buf.AppendNum(err);
-  iEnv->InfoWinL(tbuf,buf);
+  iEnv->OggErrorMsgL(tbuf,buf);
   //OGGLOG.Write(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
   //OGGLOG.WriteFormat(_L("Maybe audio format not supported (%d channels, %l Hz)"),vi->channels,vi->rate);
   //OGGLOG.Write(tbuf);
@@ -351,11 +341,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   if (theChannels==1) ac= TMdaAudioDataSettings::EChannelsMono;
   else if (theChannels==2) ac= TMdaAudioDataSettings::EChannelsStereo;
   else {
-      
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_12);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_10);
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_12,R_OGG_ERROR_10);
     //OGGLOG.Write(_L("Illegal number of channels"));
     return -100;
   }
@@ -367,27 +353,17 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   else if (theRate==44100) rt= TMdaAudioDataSettings::ESampleRate44100Hz;
   else if (theRate==48000) rt= TMdaAudioDataSettings::ESampleRate48000Hz;
   else {
-      
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_12);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_13);
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_12, R_OGG_ERROR_13);
     return -101;
   }
 
-/*
   if ( !(rt & iAudioCaps) )
    {
     // Rate not supported by this phone.
       
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_12);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_13);
-
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_12,R_OGG_ERROR_13);
     return -101;
    }
-*/
 
   TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
 
@@ -459,8 +435,8 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   if ((f=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
     if (!silent) {
       TBuf<128> buf;
-      iEnv->ReadResource(buf, R_OGG_ERROR_14);
-      iEnv->InfoWinL(buf,aFileName);
+      CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_14);
+      iEnv->OggErrorMsgL(buf,aFileName);
     }
     return -101;
   };
@@ -468,10 +444,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   if(ov_open(f, &vf, NULL, 0) < 0) {
     fclose(f);
     if (!silent) {
-       TBuf<256> buf1,buf2;
-       iEnv->ReadResource(buf1, R_OGG_ERROR_20);
-       iEnv->ReadResource(buf2, R_OGG_ERROR_9);
-       iEnv->InfoWinL(buf1,buf2);
+       iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_9);
     }
     return -102;
   }
@@ -508,11 +481,7 @@ void COggPlayback::Play()
   }
 
   if (iState != EOpen) {
-      
-    TBuf<256> buf1,buf2;
-    iEnv->ReadResource(buf1, R_OGG_ERROR_20);
-    iEnv->ReadResource(buf2, R_OGG_ERROR_15);
-    iEnv->InfoWinL(buf1,buf2);
+    iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
     RDebug::Print(_L("Oggplay: Tremor - State not Open"));
     return;
   }
@@ -579,10 +548,10 @@ void COggPlayback::SendBuffer(TDes8& buf)
     if (err!=KErrNone) {
       // This should never ever happen.
       TBuf<256> cbuf,tbuf;
-      iEnv->ReadResource(cbuf,R_OGG_ERROR_16);
-      iEnv->ReadResource(tbuf,R_OGG_ERROR_17);
+      CEikonEnv::Static()->ReadResource(cbuf,R_OGG_ERROR_16);
+      CEikonEnv::Static()->ReadResource(tbuf,R_OGG_ERROR_17);
       cbuf.AppendNum(err);
-      iEnv->InfoWinL(tbuf,cbuf);
+      iEnv->OggErrorMsgL(tbuf,cbuf);
       User::Leave(err);
     }
     iSent[iSentIdx]= &buf;
@@ -607,10 +576,10 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
 
   if (aError != KErrNone) {
     TBuf<256> buf,tbuf;
-    iEnv->ReadResource(tbuf,R_OGG_ERROR_18);
-    iEnv->ReadResource(buf,R_OGG_ERROR_16);
+    CEikonEnv::Static()->ReadResource(tbuf,R_OGG_ERROR_18);
+    CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_16);
     buf.AppendNum(aError);
-    iEnv->InfoWinL(tbuf,buf);
+    iEnv->OggErrorMsgL(tbuf,buf);
   }
 
   if (iObserver) {
@@ -652,10 +621,10 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
     // An unknown error condition. This should never ever happen.
 	RDebug::Print(_L("Oggplay: MaoscBufferCopied unknown error (Error18 Error16)"));
 	TBuf<256> buf,tbuf;
-    iEnv->ReadResource(tbuf, R_OGG_ERROR_18);
-    iEnv->ReadResource(buf, R_OGG_ERROR_16);
+    CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
+    CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
     buf.AppendNum(aError);
-    iEnv->InfoWinL(tbuf,buf);
+    iEnv->OggErrorMsgL(tbuf,buf);
   }
 }
 
@@ -665,10 +634,10 @@ void COggPlayback::MaoscOpenComplete(TInt aError)
   if (aError != KErrNone) {
 
     TBuf<32> buf;
-    iEnv->ReadResource(buf,R_OGG_ERROR_19);
+    CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_19);
     buf.AppendNum(aError);
     _LIT(tit,"MaoscOpenComplete");
-    iEnv->InfoWinL(tit,buf);
+    iEnv->OggErrorMsgL(tit,buf);
 
   } else {
 

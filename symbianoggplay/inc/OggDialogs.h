@@ -137,6 +137,22 @@ private:
     CRichText* iRichText; 
 };
 
+class COggInfoWinDialog : public  CScrollableTextDialog
+{
+public:
+    
+    void SetInfoWinL(const TDesC& msg1, const TDesC& msg2 );
+    void PreLayoutDynInitL();
+
+    ~COggInfoWinDialog();
+private:
+    
+    CParaFormatLayer* iParaFormatLayer;
+    CCharFormatLayer* iCharFormatLayer;
+    HBufC *iMsg1;
+    HBufC *iMsg2;
+    CRichText* iRichText; 
+};
 #endif
 
 #endif

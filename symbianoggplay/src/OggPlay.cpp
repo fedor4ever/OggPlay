@@ -295,7 +295,8 @@ COggPlayAppUi::ConstructL()
   iAlarmTime.Set(_L("20030101:120000.000000"));
   iViewBy= ETitle;
   iAnalyzerState= 0;
-  iOggPlayback= new(ELeave) COggPlayback(iEikonEnv, this);
+  iOggMsgEnv = new(ELeave) COggMsgEnv();
+  iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
   iOggPlayback->ConstructL();
   ReadIniFile();
 
@@ -361,7 +362,7 @@ COggPlayAppUi::~COggPlayAppUi()
 
   delete iIniFileName;
   delete iSkins;
-
+  delete iOggMsgEnv ;
   COggLog::Exit();  
   
   CloseSTDLIB();

@@ -25,6 +25,7 @@
 #include "eikenv.h"
 #include "stdio.h"
 #include "ivorbisfile.h"
+#include "OggMsgEnv.h"
 // V0.2:  3 @ 4096   
 // V0.3:  ?
 // V0.4:  6 @ 4096*10  (not sure?!)
@@ -136,7 +137,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   
  public:
   
-  COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver=0);
+  COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver=0);
   virtual ~COggPlayback();
   void ConstructL();
 
@@ -167,7 +168,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TInt SetAudioCaps(TInt theChannels, TInt theRate);
   void GetString(TBuf<256>& aBuf, const char* aStr);
 
-  CEikonEnv*               iEnv;
+  COggMsgEnv*               iEnv;
 
   // communication with symbian's media streaming framework:
   //--------------------------------------------------------

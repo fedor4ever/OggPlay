@@ -10,6 +10,7 @@ SOURCE OggLog.cpp
 SOURCE OggPlay.cpp
 SOURCE OggControls.cpp
 SOURCE OggDialogs.cpp
+SOURCE OggMsgEnv.cpp
 SOURCE OggPlayAppView.cpp
 SOURCE OggViews.cpp
 SOURCE OggTremor.cpp
