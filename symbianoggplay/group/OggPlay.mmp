@@ -38,6 +38,7 @@ SOURCE PseudoMMFFcts.cpp
 #endif
 
 #else
+SOURCE Utf8Fix.c
 #if defined(MOTOROLA)
 SOURCE OggTremor_Motorola.cpp
 #else
