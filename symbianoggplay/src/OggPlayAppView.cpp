@@ -1253,8 +1253,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 //  TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
 //  TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
 
-  iUserInactivityTickCount = KUserInactivityTimeoutTicks;
-
   COggControl* c=iFocusControlsIter;
   
   if (code==0 && aType==EEventKeyDown) { 
@@ -1269,9 +1267,11 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         TInt idx= iListBox[iMode]->CurrentItemIndex();
         if (aKeyEvent.iScanCode==EOggDown) {
           SelectSong(idx+1);
+          iUserInactivityTickCount = KUserInactivityTimeoutTicks;
           return EKeyWasConsumed;
         } else if (aKeyEvent.iScanCode==EOggUp && idx>0) {
           SelectSong(idx-1);
+          iUserInactivityTickCount = KUserInactivityTimeoutTicks;
           return EKeyWasConsumed;
         } 
       } 
