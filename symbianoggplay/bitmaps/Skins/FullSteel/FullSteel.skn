@@ -1,10 +1,11 @@
 OggPlay 1 {
   FlipOpen {
     Played {
-      Position 5 4 166 16
+      Position 5 6 110 12
+      Font LatinBold12 1 0
     }
     Volume {
-      Position 6 60 164 10
+      Position 131 1 40 16
       KnobIcon 22 23
     }
     Title {
@@ -19,12 +20,17 @@ OggPlay 1 {
       Position 1 47 174 12
       Font LatinBold12 20 0
     }
+    Position {
+      Position 6 64 163 9
+      Style 2
+      KnobIcon 26 27
+    }
     ListBox {
       Position 8 76 162 103
       Font LatinPlain12 20 0
     }
     PlayButton {
-      Position 1 1 174 47
+      Position 1 17 172 43
       NormalIcon 41 42
       NormalIcon 41 42
     }

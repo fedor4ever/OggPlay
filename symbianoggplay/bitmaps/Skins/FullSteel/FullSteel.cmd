@@ -1,4 +1,4 @@
-SimpleSteel.mbm /c12..\..\title.bmp
+FullSteel.mbm /c12..\..\title.bmp
 /1..\..\titlem.bmp
 /c12..\..\cdicon.bmp
 /1..\..\cdiconm.bmp
@@ -17,15 +17,15 @@ SimpleSteel.mbm /c12..\..\title.bmp
 /c12..\..\paused.bmp
 /1..\..\pausedm.bmp
 /c12..\..\flipclosed.bmp
-/c12simple_steel_s60.bmp
+/c16simple_steel_s60.bmp
 /c12..\..\listboxfocus.bmp
 /c12..\..\listboxfocusm.bmp
 /c12volume.bmp
 /1volumem.bmp
 /c12..\..\volumefocus.bmp
 /1..\..\volumefocusm.bmp
-/c12..\..\slider.bmp
-/1..\..\sliderm.bmp
+/c12slider.bmp
+/1sliderm.bmp
 /c12..\..\sliderfocus.bmp
 /1..\..\sliderfocusm.bmp
 /c12..\..\stop.bmp
