@@ -48,6 +48,16 @@
 #endif
 
 #include <OggPlay.rsg>
+
+
+#if defined(UIQ)
+const TInt KAudioPriority = EMdaPriorityMax;
+#else
+const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
+#endif
+
+
+
 ////////////////////////////////////////////////////////////////
 //
 // CAbsPlayback
@@ -171,8 +181,8 @@ COggPlayback::COggPlayback(CEikonEnv* anEnv, MPlaybackObserver* anObserver ) :
 
 void COggPlayback::ConstructL() {
 
-  COggAudioCapabilityPoll pollingAudio;
-  iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
+  //COggAudioCapabilityPoll pollingAudio;
+  //iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
 
   iStream  = CMdaAudioOutputStream::NewL(*this);
   
@@ -365,6 +375,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
     return -101;
   }
 
+/*
   if ( !(rt & iAudioCaps) )
    {
     // Rate not supported by this phone.
@@ -376,6 +387,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
     iEnv->InfoWinL(buf1,buf2);
     return -101;
    }
+*/
 
   TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
 
@@ -666,7 +678,7 @@ void COggPlayback::MaoscOpenComplete(TInt aError)
       iState = EOpen;
     }
 
-    iStream->SetPriority(EMdaPriorityMax, EMdaPriorityPreferenceTimeAndQuality);
+    iStream->SetPriority(KAudioPriority, EMdaPriorityPreferenceTimeAndQuality);
   }
 }
 
