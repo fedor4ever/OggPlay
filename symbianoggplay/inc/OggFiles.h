@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *  Copyright (c) 2003 L. H. Wilden.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,25 +31,29 @@ class TOggFile
  public:
 
   TOggFile();
+  ~TOggFile();
 
-  TOggFile(const TBuf<256>& aTitle, 
-	   const TBuf<256>& anAlbum,
-	   const TBuf<256>& anArtist,
-	   const TBuf<256>& aGenre,
-	   const TFileName& aSubFolder,
-	   const TBuf<512>& aFileName,
-	   const TFileName& aShortName);
+  TOggFile(const TDesC& aTitle, 
+	   const TDesC& anAlbum,
+	   const TDesC& anArtist,
+	   const TDesC& aGenre,
+	   const TDesC& aSubFolder,
+	   const TDesC& aFileName,
+	   const TDesC& aShortName,
+	   const TDesC& aTrackNumber);
 
+  void SetText(HBufC* & aBuffer, const TDesC& aText);
   TBool Read(TFileText& tf);
   TBool Write(TFileText& tf);
 
-  TBuf<256> iTitle;
-  TBuf<256> iAlbum;
-  TBuf<256> iArtist;
-  TBuf<256> iGenre;
-  TBuf<512> iFileName;
-  TFileName iSubFolder;
-  TFileName iShortName;
+  HBufC* iTitle;
+  HBufC* iAlbum;
+  HBufC* iArtist;
+  HBufC* iGenre;
+  HBufC* iFileName;
+  HBufC* iSubFolder;
+  HBufC* iShortName;
+  HBufC* iTrackNumber;
 };
 
 class TOggKey : public TKeyArrayFix
@@ -58,13 +62,13 @@ class TOggKey : public TKeyArrayFix
 
   TOggKey(TInt anOrder);
 
-  void SetFiles(CArrayFixFlat<TOggFile>* theFiles);
+  void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
 
   virtual TAny* At(TInt anIndex) const;
 
  protected:
 
-  CArrayFixFlat<TOggFile>* iFiles;
+  CArrayPtrFlat<TOggFile>* iFiles;
   TInt                     iOrder;
   TOggFile*                iSample;
 };
@@ -91,8 +95,9 @@ class TOggFiles
  protected:
 
   void AddDirectory(const TDesC& aDir);
+  void ClearFiles();
 
-  CArrayFixFlat<TOggFile>* iFiles; 
+  CArrayPtrFlat<TOggFile>* iFiles; 
   TOggPlayback*            iOggPlayback;
   TOggKey                  iOggKeyTitles;
   TOggKey                  iOggKeyAlbums;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden. All rights reserved.
+ *  Copyright (c) 2003 L. H. Wilden.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,60 +28,113 @@
 ////////////////////////////////////////////////////////////////
 
 TOggFile::TOggFile() :
-  iTitle(),
-  iAlbum(),
-  iArtist(),
-  iGenre(),
-  iFileName(),
-  iSubFolder(),
-  iShortName()
+  iTitle(0),
+  iAlbum(0),
+  iArtist(0),
+  iGenre(0),
+  iFileName(0),
+  iSubFolder(0),
+  iShortName(0),
+  iTrackNumber(0)
 {
+  SetText(iTitle,_L("-"));
+  SetText(iAlbum,_L("-"));
+  SetText(iArtist,_L("-"));
+  SetText(iGenre,_L("-"));
+  SetText(iFileName,_L("-"));
+  SetText(iSubFolder,_L("-"));
+  SetText(iShortName,_L("-"));
+  SetText(iTrackNumber,_L("-"));
 }
 
-TOggFile::TOggFile(const TBuf<256>& aTitle,
-		   const TBuf<256>& anAlbum,
-		   const TBuf<256>& anArtist,
-		   const TBuf<256>& aGenre,
-		   const TFileName& aSubFolder,
-		   const TBuf<512>& aFileName,
-		   const TFileName& aShortName)
+TOggFile::TOggFile(const TDesC& aTitle,
+		   const TDesC& anAlbum,
+		   const TDesC& anArtist,
+		   const TDesC& aGenre,
+		   const TDesC& aSubFolder,
+		   const TDesC& aFileName,
+		   const TDesC& aShortName,
+		   const TDesC& aTrackNumber) :
+  iTitle(0),
+  iAlbum(0),
+  iArtist(0),
+  iGenre(0),
+  iFileName(0),
+  iSubFolder(0),
+  iShortName(0),
+  iTrackNumber(0)
 {
-  iTitle= aTitle;
-  iAlbum= anAlbum;
-  iArtist= anArtist;
-  iGenre= aGenre;
-  iSubFolder= aSubFolder;
-  iFileName= aFileName;
-  iShortName= aShortName;
-  if (iTitle.Length()==0) CEikonEnv::Static()->ReadResource(iTitle, R_OGG_STRING_12);
-  if (iAlbum.Length()==0) CEikonEnv::Static()->ReadResource(iAlbum, R_OGG_STRING_12);
-  if (iArtist.Length()==0) CEikonEnv::Static()->ReadResource(iArtist, R_OGG_STRING_12);
-  if (iGenre.Length()==0) CEikonEnv::Static()->ReadResource(iGenre, R_OGG_STRING_12);
+  TBuf<128> buf;
+  CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_12);
+
+  if (aTitle.Length()>0) SetText(iTitle, aTitle); else SetText(iTitle, buf);
+  if (anAlbum.Length()>0) SetText(iAlbum, anAlbum); else SetText(iAlbum, buf);
+  if (anArtist.Length()>0) SetText(iArtist, anArtist); else SetText(iArtist, buf);
+  if (aGenre.Length()>0) SetText(iGenre, aGenre); else SetText(iGenre,buf);
+  if (aSubFolder.Length()>0) SetText(iSubFolder, aSubFolder); else SetText(iSubFolder,buf);
+  SetText(iFileName, aFileName);
+  SetText(iShortName, aShortName);
+  if (aTrackNumber.Length()>0) SetText(iTrackNumber, aTrackNumber); else SetText(iTrackNumber, buf);
+}
+
+TOggFile::~TOggFile()
+{
+  if (iTitle) delete iTitle;
+  if (iAlbum) delete iAlbum;
+  if (iArtist) delete iArtist;
+  if (iGenre) delete iGenre;
+  if (iSubFolder) delete iSubFolder;
+  if (iFileName) delete iFileName;
+  if (iShortName) delete iShortName;
+  if (iTrackNumber) delete iTrackNumber;
+}
+
+void
+TOggFile::SetText(HBufC* & aBuffer, const TDesC& aText)
+{
+  if (aBuffer) delete aBuffer;
+  aBuffer= 0;
+  aBuffer= HBufC::New(aText.Length());
+  *aBuffer= aText;
 }
 
 TBool
 TOggFile::Read(TFileText& tf)
 {
-  return 
-    tf.Read(iTitle)==KErrNone &&
-    tf.Read(iAlbum)==KErrNone &&
-    tf.Read(iArtist)==KErrNone &&
-    tf.Read(iGenre)==KErrNone &&
-    tf.Read(iSubFolder)==KErrNone &&
-    tf.Read(iFileName)==KErrNone &&
-    tf.Read(iShortName)==KErrNone;
+  TBuf<128> aTitle, anAlbum, anArtist, aGenre, aSubFolder, aFileName, aShortName, aTrackNumber;
+  bool success=
+    tf.Read(aTitle)==KErrNone &&
+    tf.Read(anAlbum)==KErrNone &&
+    tf.Read(anArtist)==KErrNone &&
+    tf.Read(aGenre)==KErrNone &&
+    tf.Read(aSubFolder)==KErrNone &&
+    tf.Read(aFileName)==KErrNone &&
+    tf.Read(aShortName)==KErrNone &&
+    tf.Read(aTrackNumber)==KErrNone;
+  if (success) {
+    SetText(iTitle, aTitle);
+    SetText(iAlbum, anAlbum);
+    SetText(iArtist, anArtist);
+    SetText(iGenre, aGenre);
+    SetText(iSubFolder, aSubFolder);
+    SetText(iFileName, aFileName);
+    SetText(iShortName, aShortName);
+    SetText(iTrackNumber, aTrackNumber);
+  }
+  return success;
 }
 
 TBool
 TOggFile::Write(TFileText& tf)
 {
-  tf.Write(iTitle);
-  tf.Write(iAlbum);
-  tf.Write(iArtist);
-  tf.Write(iGenre);
-  tf.Write(iSubFolder);
-  tf.Write(iFileName);
-  tf.Write(iShortName);
+  tf.Write(*iTitle);
+  tf.Write(*iAlbum);
+  tf.Write(*iArtist);
+  tf.Write(*iGenre);
+  tf.Write(*iSubFolder);
+  tf.Write(*iFileName);
+  tf.Write(*iShortName);
+  tf.Write(*iTrackNumber);
   return ETrue;
 }
 
@@ -102,7 +155,7 @@ TOggKey::TOggKey(TInt anOrder) :
 }
 
 void
-TOggKey::SetFiles(CArrayFixFlat<TOggFile>* theFiles)
+TOggKey::SetFiles(CArrayPtrFlat<TOggFile>* theFiles)
 {
   iFiles= theFiles;
 }
@@ -114,12 +167,12 @@ TOggKey::At(TInt anIndex) const
 
   if (anIndex>=0 && anIndex<iFiles->Count()) {
     switch (iOrder) {
-    case COggPlayAppUi::ETitle : return &(*iFiles)[anIndex].iTitle;
-    case COggPlayAppUi::EAlbum : return &(*iFiles)[anIndex].iAlbum;
-    case COggPlayAppUi::EArtist: return &(*iFiles)[anIndex].iArtist;
-    case COggPlayAppUi::EGenre : return &(*iFiles)[anIndex].iGenre;
-    case COggPlayAppUi::ESubFolder: return &(*iFiles)[anIndex].iSubFolder;
-    case COggPlayAppUi::EFileName : return &(*iFiles)[anIndex].iShortName;
+    case COggPlayAppUi::ETitle : return (*iFiles)[anIndex]->iTitle;
+    case COggPlayAppUi::EAlbum : return (*iFiles)[anIndex]->iAlbum;
+    case COggPlayAppUi::EArtist: return (*iFiles)[anIndex]->iArtist;
+    case COggPlayAppUi::EGenre : return (*iFiles)[anIndex]->iGenre;
+    case COggPlayAppUi::ESubFolder: return (*iFiles)[anIndex]->iSubFolder;
+    case COggPlayAppUi::EFileName : return (*iFiles)[anIndex]->iShortName;
     }
   }
 
@@ -144,7 +197,7 @@ TOggFiles::TOggFiles(TOggPlayback* anOggPlayback) :
   iOggKeySubFolders(COggPlayAppUi::ESubFolder),
   iOggKeyFileNames(COggPlayAppUi::EFileName)
 {
-  iFiles= new CArrayFixFlat<TOggFile>(10);
+  iFiles= new CArrayPtrFlat<TOggFile>(10);
   iOggKeyTitles.SetFiles(iFiles);
   iOggKeyAlbums.SetFiles(iFiles);
   iOggKeyArtists.SetFiles(iFiles);
@@ -158,7 +211,7 @@ void TOggFiles::CreateDb()
   TBuf<256> buf;
   CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_1);
   CEikonEnv::Static()->BusyMsgL(buf);
-  iFiles->Reset();
+  ClearFiles();
   AddDirectory(_L("D:\\Media files\\audio\\"));
   AddDirectory(_L("C:\\documents\\Media files\\audio\\"));
   AddDirectory(_L("D:\\Media files\\other\\"));
@@ -213,14 +266,15 @@ void TOggFiles::AddDirectory(const TDesC& aDir)
 
 	iOggPlayback->Info(fullname, EFalse);	
 
-	TOggFile o(iOggPlayback->Title(), 
-		   iOggPlayback->Album(), 
-		   iOggPlayback->Artist(), 
-		   iOggPlayback->Genre(), 
-		   path,
-		   fullname,
-		   shortname);
-
+	TOggFile* o= new TOggFile(iOggPlayback->Title(), 
+				  iOggPlayback->Album(), 
+				  iOggPlayback->Artist(), 
+				  iOggPlayback->Genre(), 
+				  path,
+				  fullname,
+				  shortname,
+				  iOggPlayback->TrackNumber());
+	
 	iFiles->AppendL(o);
 
       }
@@ -248,9 +302,9 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
     };
     
     if (iVersion==0) {  
-      TOggFile o;
+      TOggFile* o= new TOggFile;
       while (tf.Read(line)==KErrNone) {
-	if (!o.Read(tf)) break;
+	if (!o->Read(tf)) break;
 	iFiles->AppendL(o);
       }
     }
@@ -279,7 +333,7 @@ void TOggFiles::WriteDb(const TFileName& aFileName, RFs& session)
     for (TInt i=0; i<iFiles->Count(); i++) {
       line.Num(i);
       tf.Write(line);
-      if (!(*iFiles)[i].Write(tf)) break;
+      if (!(*iFiles)[i]->Write(tf)) break;
     }
     
     out.Close();
@@ -303,21 +357,29 @@ TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC&
   arr.AppendL(buf);
 }
 
-void TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum, 
+void
+TOggFiles::ClearFiles()
+{
+  //for (TInt i=0; i<iFiles->Count(); i++) delete (*iFiles)[i];
+  iFiles->Reset();
+}
+
+void 
+TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum, 
 			   const TDesC& anArtist, const TDesC& aGenre, 
 			   const TFileName& aSubFolder)
 {
   arr.Reset();
   iFiles->Sort(iOggKeyTitles);
   for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= (*iFiles)[i];
+    TOggFile& o= *(*iFiles)[i];
     TBool select=
-      (anAlbum.Length()==0 || o.iAlbum==anAlbum) &&
-      (anArtist.Length()==0 || o.iArtist==anArtist) &&
-      (aGenre.Length()==0 || o.iGenre==aGenre) &&
-      (aSubFolder.Length()==0 || o.iSubFolder==aSubFolder);
+      (anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
+      (anArtist.Length()==0 || *o.iArtist==anArtist) &&
+      (aGenre.Length()==0 || *o.iGenre==aGenre) &&
+      (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
     if (select)
-      AppendLine(arr, COggPlayAppUi::ETitle, o.iTitle, o.iFileName);
+      AppendLine(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), o.iFileName->Des());
   }
 }
 
@@ -327,11 +389,11 @@ void TOggFiles::FillAlbums(CDesCArray& arr, const TDesC& anArtist, const TFileNa
   iFiles->Sort(iOggKeyAlbums);
   TBuf<256> lastAlbum;
   for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= (*iFiles)[i];
-    if (aSubFolder.Length()==0 || o.iSubFolder==aSubFolder) {
-      if (lastAlbum!=o.iAlbum) {
-	AppendLine(arr, COggPlayAppUi::EAlbum, o.iAlbum, o.iAlbum);
-	lastAlbum= o.iAlbum;
+    TOggFile& o= *(*iFiles)[i];
+    if (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder) {
+      if (lastAlbum!=*o.iAlbum) {
+	AppendLine(arr, COggPlayAppUi::EAlbum, *o.iAlbum, *o.iAlbum);
+	lastAlbum= *o.iAlbum;
       }
     }
   }
@@ -343,11 +405,11 @@ void TOggFiles::FillArtists(CDesCArray& arr, const TFileName& aSubFolder)
   iFiles->Sort(iOggKeyArtists);
   TBuf<256> lastArtist;
   for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= (*iFiles)[i];
-    if (aSubFolder.Length()==0 || o.iSubFolder==aSubFolder) {
-      if (lastArtist!=o.iArtist) {
-	AppendLine(arr, COggPlayAppUi::EArtist, o.iArtist, o.iArtist);
-	lastArtist= o.iArtist;
+    TOggFile& o= *(*iFiles)[i];
+    if (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder) {
+      if (lastArtist!=*o.iArtist) {
+	AppendLine(arr, COggPlayAppUi::EArtist, *o.iArtist, *o.iArtist);
+	lastArtist= *o.iArtist;
       }
     }
   }
@@ -359,14 +421,14 @@ void TOggFiles::FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC
   arr.Reset();
   iFiles->Sort(iOggKeyFileNames);
   for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= (*iFiles)[i];
+    TOggFile& o= *(*iFiles)[i];
     TBool select=
-      (anAlbum.Length()==0 || o.iAlbum==anAlbum) &&
-      (anArtist.Length()==0 || o.iAlbum==anArtist) &&
-      (aGenre.Length()==0 || o.iGenre==aGenre) &&
-      (aSubFolder.Length()==0 || o.iSubFolder==aSubFolder);
+      (anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
+      (anArtist.Length()==0 || *o.iArtist==anArtist) &&
+      (aGenre.Length()==0 || *o.iGenre==aGenre) &&
+      (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
     if (select) 
-      AppendLine(arr, COggPlayAppUi::EFileName, o.iShortName, o.iFileName);
+      AppendLine(arr, COggPlayAppUi::EFileName, *o.iShortName, *o.iFileName);
   }
 }
 
@@ -376,10 +438,10 @@ void TOggFiles::FillSubFolders(CDesCArray& arr)
   iFiles->Sort(iOggKeySubFolders);
   TBuf<256> lastSubFolder;
   for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= (*iFiles)[i];
-    if (lastSubFolder!=o.iSubFolder) {
-      AppendLine(arr, COggPlayAppUi::ESubFolder, o.iSubFolder, o.iSubFolder);
-      lastSubFolder= o.iSubFolder;
+    TOggFile& o= *(*iFiles)[i];
+    if (lastSubFolder!=*o.iSubFolder) {
+      AppendLine(arr, COggPlayAppUi::ESubFolder, *o.iSubFolder, *o.iSubFolder);
+      lastSubFolder= *o.iSubFolder;
     }
   }
 }
@@ -391,15 +453,15 @@ void TOggFiles::FillGenres(CDesCArray& arr, const TDesC& anAlbum,
   iFiles->Sort(iOggKeyGenres);
   TBuf<256> lastGenre;
   for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= (*iFiles)[i];
-    if (lastGenre!=o.iGenre) {
+    TOggFile& o= *(*iFiles)[i];
+    if (lastGenre!=*o.iGenre) {
       TBool select=
-	(anAlbum.Length()==0 || o.iAlbum==anAlbum) &&
-	(anArtist.Length()==0 || o.iAlbum==anArtist) &&
-	(aSubFolder.Length()==0 || o.iSubFolder==aSubFolder);
+	(anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
+	(anArtist.Length()==0 || *o.iAlbum==anArtist) &&
+	(aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
       if (select) {
-	AppendLine(arr, COggPlayAppUi::EGenre, o.iGenre, o.iGenre);
-	lastGenre= o.iGenre;
+	AppendLine(arr, COggPlayAppUi::EGenre, *o.iGenre, *o.iGenre);
+	lastGenre= *o.iGenre;
       }
     }
   }
