@@ -71,6 +71,18 @@ TOggPlayList::~TOggPlayList()
   delete iSubFolder;
   delete iFileName;
   delete iShortName;
+
+  iPlayListEntries.Close();
+}
+
+TInt TOggPlayList::NumEntries()
+{
+	return iPlayListEntries.Count();
+}
+
+TOggFile* TOggPlayList::operator[] (TInt aIndex)
+{
+	return iPlayListEntries[aIndex];
 }
 
 void TOggPlayList::SetTextFromFileL(TFileText& aTf, HBufC* &aBuffer)
@@ -91,6 +103,72 @@ void TOggPlayList::ReadL(TFileText& tf)
   SetTextFromFileL(tf, iShortName);
 }    
 
+void TOggPlayList::ScanPlayListL(RFs& aFs, TOggFiles* aFiles)
+{
+  RFile file;
+  User::LeaveIfError(file.Open(aFs, *iFileName, EFileShareReadersOnly));
+  CleanupClosePushL(file);
+
+  TInt fileSize;
+  User::LeaveIfError(file.Size(fileSize));
+  HBufC8* buf = HBufC8::NewLC(fileSize);
+  TPtr8 bufPtr(buf->Des());
+  User::LeaveIfError(file.Read(bufPtr));
+
+  TInt i = 0;
+  TInt j = -1;
+  while (j<fileSize)
+  {
+	i = j+1; // Start of next line
+
+	// Skip any white space
+	TText8 nextChar;
+	for ( ; i<fileSize ; i++)
+	{
+		nextChar = bufPtr[i];
+		if ((nextChar == ' ') || (nextChar == '\n') || (nextChar == '\r') || (nextChar == '\t'))
+			continue;
+
+		break;
+	}
+
+	// Check if we have reached the end
+	if (i == fileSize)
+		break;
+
+	// Extract the file name
+	for (j = i ; j<fileSize ; j++)
+	{
+		nextChar = bufPtr[j];
+		if (nextChar == '\n')
+			break;
+	}
+
+	// Remove any white space from the end
+	do
+	{
+		j--;
+		nextChar = bufPtr[j];
+	} while ((nextChar == ' ') || (nextChar == '\r') || (nextChar == '\t'));
+
+	// Skip comment lines
+	if (bufPtr[i] == '#')
+		continue;
+
+	// Construct the filename (add the playlist path if the filename is relative)
+	TFileName fileName;
+	fileName.Copy(bufPtr.Mid(i, (j-i) + 1));
+	if (fileName[1] != ':')
+		fileName.Insert(0, *iSubFolder);
+
+	// Search for the file and add it to the list (if found)
+	TOggFile* o = aFiles->FindFromFileNameL(fileName);
+	if (o)
+		iPlayListEntries.Append(o);
+  }
+
+  CleanupStack::PopAndDestroy(2, &file); 
+}
 
 TInt TOggPlayList::Write(TInt aLineNumber, HBufC* aBuf)
 {
@@ -349,7 +427,6 @@ TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback) :
   iOggKeyGenres(COggPlayAppUi::EGenre),
   iOggKeySubFolders(COggPlayAppUi::ESubFolder),
   iOggKeyFileNames(COggPlayAppUi::EFileName),
-  // iOggKeyPlayList(COggPlayAppUi::EPlayList),
   iOggKeyTrackTitle(COggPlayAppUi::ETrackTitle),
   iOggKeyAbsoluteIndex(),
   iVersion(-1)
@@ -366,7 +443,6 @@ TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback) :
   iOggKeyGenres.SetFiles(iFiles);
   iOggKeySubFolders.SetFiles(iFiles);
   iOggKeyFileNames.SetFiles(iFiles);
-  // iOggKeyPlayList.SetFiles(iFiles);
   iOggKeyTrackTitle.SetFiles(iFiles);
   iOggKeyAbsoluteIndex.SetFiles(iFiles);
 
@@ -394,6 +470,7 @@ void TOggFiles::CreateDb(RFs& session)
   TBuf<256> buf;
   CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_1);
   CEikonEnv::Static()->BusyMsgL(buf);
+
   ClearFiles();
   AddDirectory(_L("D:\\Media files\\audio\\"),session);
   AddDirectory(_L("C:\\documents\\Media files\\audio\\"),session);
@@ -405,6 +482,18 @@ void TOggFiles::CreateDb(RFs& session)
   AddDirectory(_L("C:\\Oggs\\"),session);
   AddDirectory(_L("E:\\Oggs\\"),session);
 #endif
+
+#ifdef PLAYLIST_SUPPORT
+	// Parse playlists
+	TInt numPlayLists = iPlayLists->Count();
+	TInt err;
+	for (TInt i = 0 ; i<numPlayLists ; i++)
+	{
+		// Parse the playlist, ignoring any errors.
+		TRAP(err, (*iPlayLists)[i]->ScanPlayListL(session, this));
+	}
+#endif
+
   CEikonEnv::Static()->BusyMsgCancel();
 }
 
@@ -439,6 +528,7 @@ TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
         iPathArray = new (ELeave) CDesC16ArrayFlat (3);
     iDs = CDirScan::NewL(session);
         iDirScanFinished = EFalse;
+		iPlayListScanFinished = EFalse;
         iDirScanSession = &session;
         iDirScanDir = const_cast < TDesC *> (&aDir);
         iNbDirScanned = 0;
@@ -588,10 +678,7 @@ TBool TOggFiles::AddNextFileL()
 		// Add the playlist to the list of playlists.
         shortname.Copy(e.iName);
         shortname.Delete(shortname.Length()-4,4); // get rid of the .m3u extension
-        iPath.Copy(iDs->AbbreviatedPath());
-            
-        if (iPath.Length()>1 && iPath[iPath.Length()-1]==L'\\')
-            iPath.SetLength(iPath.Length()-1); // get rid of trailing back slash
+        iPath.Copy(iDs->FullPath());
             
 		TOggPlayList* o = TOggPlayList::NewL(iNbPlayListsFound, iPath, iFullname, shortname);
         iPlayLists->AppendL(o);
@@ -609,6 +696,26 @@ TBool TOggFiles::FileSearchIsProcessDone() const
 {
     return iDirScanFinished;
 };
+
+#ifdef PLAYLIST_SUPPORT
+void TOggFiles::ScanNextPlayList()
+{
+	if (iCurrentIndexInDirectory == iPlayLists->Count())
+	{
+		iPlayListScanFinished = ETrue;
+		return;
+	}
+
+	// Parse the playlist, ignoring any errors.
+	TRAPD(err, (*iPlayLists)[iCurrentIndexInDirectory]->ScanPlayListL(*iDirScanSession, this));
+	iCurrentIndexInDirectory++
+}
+
+TBool TOggFiles::PlayListScanIsProcessDone() const
+{
+    return iPlayListScanFinished;
+}
+#endif
 
 void  TOggFiles::FileSearchProcessFinished()
 {// Not used
@@ -778,9 +885,10 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
     }
 
 #ifdef PLAYLIST_SUPPORT
+	TInt i;
+	TInt numPlayLists = 0;
 	if (iVersion==2)
 	{
-		TInt numPlayLists;
 		if(tf.Read(line)==KErrNone)
 		{
 	      TLex parse(line);
@@ -797,7 +905,7 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 			return EFalse;
 		}
 
-		for (TInt i = 0 ; i<numPlayLists ; i++)
+		for (i = 0 ; i<numPlayLists ; i++)
 		{
 		  // Read in the line number.
 		  err = tf.Read(line);
@@ -817,7 +925,7 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 			 return ETrue;
 		  }
      
-		  o->iAbsoluteIndex = iPlayLists->Count();
+		  o->iAbsoluteIndex = i;
 	      iPlayLists->AppendL(o);
 		}
 	}
@@ -838,8 +946,16 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
       }
 
     in.Close();
+	
+#ifdef PLAYLIST_SUPPORT
+	// Parse playlists
+	for (i = 0 ; i<numPlayLists ; i++)
+	{
+		// Parse the playlist, ignoring any errors.
+		TRAP(err, (*iPlayLists)[i]->ScanPlayListL(session, this));
+	}
+#endif
 
-	// TO DO: Parse playlists
 	return ETrue;
   }
   return EFalse;
@@ -1029,20 +1145,19 @@ TOggFile* TOggFiles::FindFromFileNameL(TFileName& aFileName)
     TOggFile* o = TOggFile::NewL(-1, Empty, Empty, Empty, Empty, Empty, aFileName, Empty, Empty);
 
 	TInt foundIdx;
-    // TInt notFound = iFiles->Find((TOggFile * const &) *o, iOggKeyPlayList, foundIdx );
-	TBool notFound = ETrue;
+	TBool found = EFalse;
 	for (foundIdx = 0 ; foundIdx < iFiles->Count() ; foundIdx++)
 	{
 		TOggFile* o2 = (*iFiles)[foundIdx];
 		if (!(o2->iFileName->Compare(*o->iFileName)))
 		{
-			notFound = EFalse;
+			found = ETrue;
 			break;
 		}
 	}
 
 	delete o;
-	return (notFound) ? NULL : (*iFiles)[foundIdx];
+	return (found) ? (*iFiles)[foundIdx] : NULL ;
 }
 
 void 
@@ -1171,7 +1286,9 @@ void TOggFiles::FillGenres(CDesCArray& arr, const TDesC& anAlbum,
 void TOggFiles::FillPlayLists(CDesCArray& arr)
 {
   arr.Reset();
-  for (TInt i=0; i<iPlayLists->Count(); i++)
+
+  TInt numPlayLists = iPlayLists->Count();
+  for (TInt i=0 ; i<numPlayLists ; i++)
   {
 	  TOggPlayList& o = *(*iPlayLists)[i];
 	  AppendLine(arr, COggListBox::EPlayList, *o.iShortName, *o.iFileName);
@@ -1181,58 +1298,25 @@ void TOggFiles::FillPlayLists(CDesCArray& arr)
 void TOggFiles::FillPlayList(CDesCArray& arr, const TDesC& aPlayListFile)
 {
   arr.Reset();
-  
-  RFs fs;
-  TInt err = fs.Connect();
 
-  RFile file;
-  err = file.Open(fs, aPlayListFile, EFileShareReadersOnly);
-  
-  TInt fileSize;
-  err = file.Size(fileSize);
-  HBufC8* buf = HBufC8::NewL(fileSize);
-  TPtr8 bufPtr(buf->Des());
-  err = file.Read(bufPtr);
-
-  TInt i = 0;
-  TInt j = 0;
-  while (j<fileSize)
+  // Find the playlist in the array
+  TInt i;
+  TInt numPlayLists = iPlayLists->Count();
+  TOggPlayList* playList = NULL;
+  for (i = 0 ; i<numPlayLists ; i++)
   {
-	i = j;
-	TPtr8 linePtr(bufPtr);
-	for ( ; i<fileSize ; i++)
-	{
-		TText8 nextChar = linePtr[i];
-		if ((nextChar == ' ') || (nextChar == '\n') || (nextChar == '\r') || (nextChar == '\t'))
-			continue;
-
-		break;
-	}
-
-	for (j = i ; j<fileSize ; j++)
-	{
-		TText8 nextChar = linePtr[j];
-		if (nextChar == '\n')
-			break;
-	}
-	if (j != fileSize) j--;
-
-	TFileName fileName(aPlayListFile);
-	while (fileName[fileName.Length()-1] != '\\')
-		fileName.SetLength(fileName.Length()-1);
-
-	TFileName linePtr16;
-	linePtr16.Copy(linePtr.Mid(i, j-i));
-	fileName.Append(linePtr16);
-
-	TOggFile* o = FindFromFileNameL(fileName);
-	if (o)
-		AppendLine(arr, COggListBox::EFileName, *(o->iShortName), o->iAbsoluteIndex);
+	  playList = (*iPlayLists)[i];
+	  if ((*playList->iFileName) == aPlayListFile)
+		  break;
   }
 
-  delete buf;
-  file.Close();
-  fs.Close();
+  // Loop through the entries and add them
+  TInt numEntries = playList->NumEntries();
+  for (i = 0 ; i<numEntries ; i++)
+  {
+    TOggFile* o = (*playList)[i];
+	AppendLine(arr, COggListBox::EFileName, *(o->iShortName), o->iAbsoluteIndex);
+  }
 }
 #endif
 

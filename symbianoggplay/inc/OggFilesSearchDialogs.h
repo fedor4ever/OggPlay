@@ -22,6 +22,8 @@ public: // interface
 
 #ifdef PLAYLIST_SUPPORT
 	virtual void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists) = 0;
+	virtual void  ScanNextPlayList() = 0;
+	virtual TBool  PlayListScanIsProcessDone() const = 0;
 #else
     virtual void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles) = 0;
 #endif

@@ -243,12 +243,21 @@ COggFilesSearchAO::~COggFilesSearchAO()
 void COggFilesSearchAO::RunL()
 {
     // Run one iteration of the long process.
-
     MOggFilesSearchBackgroundProcess *longProcess = iContainer->iBackgroundProcess;
-    longProcess->FileSearchStepL();
+
+#ifdef PLAYLIST_SUPPORT
+	if (longProcess->FileSearchIsProcessDone())
+		longProcess->ScanNextPlayList();
+	else
+#endif
+		longProcess->FileSearchStepL();
     
 
+#ifdef PLAYLIST_SUPPORT
+	if (longProcess->PlayListScanIsProcessDone() )
+#else
     if (longProcess->FileSearchIsProcessDone() )
+#endif
     {
         iContainer->UpdateControl();
 

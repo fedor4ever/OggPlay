@@ -32,29 +32,7 @@ const TInt KDiskWriteBufferSize = 20000;
 const TInt KNofOggDescriptors = 9;         /** Nof descriptor fields in an internal ogg store */
 
 class COggPlayback;
-class TOggPlayList : public CBase
-{
-private :
-  TOggPlayList();
-
-public:
-  ~TOggPlayList();
-
-  static TOggPlayList* NewL();
-  static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
-
-  void ReadL(TFileText& tf);
-  TInt Write(TInt aLineNumber, HBufC* aBuf );
-
-  void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
-
-  HBufC* iFileName;
-  HBufC* iSubFolder;
-  HBufC* iShortName;
-  TInt iAbsoluteIndex;
-};
-
-
+class TOggFiles;
 class TOggFile : public CBase
 {
 private :
@@ -92,6 +70,35 @@ public:
   HBufC* iTrackNumber;
   HBufC* iTrackTitle;
   TInt iAbsoluteIndex;
+};
+
+class TOggPlayList : public CBase
+{
+private :
+  TOggPlayList();
+
+public:
+  ~TOggPlayList();
+
+  static TOggPlayList* NewL();
+  static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
+
+  void ReadL(TFileText& tf);
+  TInt Write(TInt aLineNumber, HBufC* aBuf );
+
+  void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
+
+  TInt NumEntries();
+  void ScanPlayListL(RFs& aFs, TOggFiles* aFiles);
+  TOggFile* operator[] (TInt aIndex);
+
+public:
+  HBufC* iFileName;
+  HBufC* iSubFolder;
+  HBufC* iShortName;
+  TInt iAbsoluteIndex;
+
+  RPointerArray<TOggFile> iPlayListEntries;
 };
 
 class TOggKey : public TKeyArrayFix
@@ -172,6 +179,8 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
 
 #ifdef PLAYLIST_SUPPORT
 	 void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists);
+	 void  ScanNextPlayList();
+	 TBool  PlayListScanIsProcessDone() const;
 #else
 	 void  FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles);
 #endif
@@ -204,7 +213,6 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   TOggKey                  iOggKeyGenres;
   TOggKey                  iOggKeySubFolders;
   TOggKey                  iOggKeyFileNames;
-  // TOggKey                  iOggKeyPlayList;
   TOggKey                  iOggKeyTrackTitle;
   TOggKeyNumeric           iOggKeyAbsoluteIndex;
   TInt                     iVersion;
@@ -224,6 +232,8 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
 
   TBuf<KMaxFileLength> iFullname;
   TBuf<KMaxFileLength> iPath;
+
+  TBool iPlayListScanFinished;
 };
 
 #endif
