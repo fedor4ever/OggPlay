@@ -561,19 +561,19 @@ COggPlayAppUi::SetHotKey()
 }
 
 void
-COggPlayAppUi::UpdateSeries60Softkeys()
+COggPlayAppUi::UpdateSeries60Softkeys(TBool aForce)
 {
   IFDEF_S60( 
 
   // Return if somebody else than main view has taken focus, 
-  // others must control the CBA themselves
+  // except if we override this check.
+  // Others must control the CBA themselves
   TVwsViewId viewId;
   GetActiveViewId(viewId);
-  if( viewId.iViewUid != KOggPlayUidFOView )
+  if( !aForce && viewId.iViewUid != KOggPlayUidFOView ) 
     return;
 
-  if( /*iOggPlayback->State() == CAbsPlayback::EPaused ||*/
-    iOggPlayback->State() == CAbsPlayback::EPlaying ) {
+  if(iOggPlayback->State() == CAbsPlayback::EPlaying) {
     SetSeries60Softkeys(iSettings.iRskPlay);
   } else {
     SetSeries60Softkeys(iSettings.iRskIdle);
@@ -735,7 +735,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		if( iAppView->CanStop() )
 			HandleCommandL(EOggStop);
 #endif
-		iAppView->ReadSkin(buf);
+		iAppView->ReadSkin(buf); //FIXME
 		iAppView->Update();
 		iAppView->Invalidate();
 		break;
@@ -780,6 +780,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 #endif
 
 	case EEikCmdExit: {
+		HandleCommandL(EOggStop);
 		Exit();
 		break;
     }
@@ -1374,7 +1375,7 @@ COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 void 
 COggPlayAppUi::ShowSplash()
 {
-	// This is a so-called pre Symbian OS v6.1 direct screen drawing rutine
+	// This is a so-called pre Symbian OS v6.1 direct screen drawing routine
 	// based on CFbsScreenDevice. The inherent problem with this method is that
 	// the window server is unaware of the direct screen access and is likely
 	// to 'refresh' whatever invalidated regions it might think it manages....

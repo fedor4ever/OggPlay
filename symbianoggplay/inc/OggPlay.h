@@ -238,7 +238,7 @@ public:
   void ActivateOggViewL();
   void ActivateOggViewL(const TUid aViewId);
 
-  void UpdateSeries60Softkeys();
+  void UpdateSeries60Softkeys(TBool aForce=EFalse);
   void SetSeries60Softkeys(TInt aSoftkey);
 
   // from CQikAppUi:
