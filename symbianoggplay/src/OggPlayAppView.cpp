@@ -829,9 +829,7 @@ COggPlayAppView::CallBack(TAny* aPtr)
     
     self->iCanvas[self->iMode]->Refresh();
 
-#if defined(SERIES60)
-    self->ListBoxNavigationTimerTick();
-#endif
+    IFDEF_S60( self->ListBoxNavigationTimerTick(); )
   }
 
   return 1;

@@ -405,13 +405,15 @@ COggControl::ReadArguments(TOggParser& p)
   if (p.iToken==_L("Position")) {
     p.Debug(_L("Setting position."));
     TInt ax, ay, aw, ah;
-    TBool success= 
-      p.ReadToken(ax) &&
-      p.ReadToken(ay) &&
-      p.ReadToken(aw) &&
-      p.ReadToken(ah);
-    if (success) SetPosition(ax, ay, aw, ah);
-    return success;
+    if (p.ReadToken(ax) &&
+        p.ReadToken(ay) &&
+        p.ReadToken(aw) &&
+        p.ReadToken(ah)) {
+      SetPosition(ax, ay, aw, ah);
+      return ETrue;
+      }
+    else
+      return EFalse;
   } else if (p.iToken==_L("FocusIcon")) {
     p.Debug(_L("Setting focused icon."));
     CGulIcon* aIcon=p.ReadIcon(iBitmapFile);
@@ -751,6 +753,9 @@ void COggAnimation::Cycle()
   if (iCycle<0) return;
   if (!iVisible) return;
 
+  // UIQ_?
+  IFDEF_S60( if( iBitmaps.Count() <= 1 ) return );
+
   iCycle++;
 
   if (iCycle<iPause) return;
@@ -798,8 +803,13 @@ COggAnimation::ReadArguments(TOggParser& p)
   if (success && p.iToken==_L("Bitmaps")) {
     p.Debug(_L("Settings bitmaps."));
     TInt first, num;
-    success= p.ReadToken(first) && p.ReadToken(num);
-    if (success) SetBitmaps(first,num);
+    success= p.ReadToken(first);
+    if (success) 
+      {
+      success= p.ReadToken(num);
+      if (success) 
+        SetBitmaps(first,num);
+      }
   }
   if (success && p.iToken==_L("Style")) {
     p.Debug(_L("Setting style."));
@@ -1767,12 +1777,6 @@ COggListBox::CountText()
   else return iText->Count();
 }
 
-const TDesC&
-COggListBox::GetText(TInt idx)
-{
-  return (*iText)[idx];
-}
-
 CDesCArray*
 COggListBox::GetTextArray()
 {
@@ -2079,9 +2083,18 @@ void
 COggCanvas::Refresh()
 {
   CycleControls();
+#if defined(UIQ)
   for (int i=0; i<iControls.Count(); i++) 
     if (iControls[i]->iRedraw)
       Window().Invalidate(iControls[i]->Rect());
+#else
+  // Less finesse for Series 60 or the window server (?) can get confused..
+  for (int i=0; i<iControls.Count(); i++) 
+    if (iControls[i]->iRedraw) {
+      Window().Invalidate();
+      return;
+      }
+#endif
 }
 
 void

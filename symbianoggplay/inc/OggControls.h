@@ -453,7 +453,6 @@ class COggListBox : public COggControl
   void ClearText();
   void AppendText(const TDesC& aText);
   TInt CountText();
-  const TDesC& GetText(TInt idx);
   CDesCArray* GetTextArray();
 
   void ScrollBy(TInt nLines);
