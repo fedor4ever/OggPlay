@@ -21,9 +21,10 @@
 #include <utf.h>
 #include <string.h>
 #include "OggLog.h"
+#include "Plugin\ImplementationUIDs.hrh"
 
 #if 1
-#include <e32svr.h>
+#include <e32svr.h> 
 #define PRINT(x) TRACEF(_L(x));
 //#define PRINT(x) RDebug::Print _L(x);
 #else
@@ -49,8 +50,12 @@ COggPlayController::~COggPlayController()
 {
     iState = EStateDestroying;
     PRINT("COggPlayController::~COggPlayController In");
+    if (iOwnSinkBuffer) 
+        delete iSinkBuffer;
+    delete iOggSource;
+    if (iAudioOutput)
+        iAudioOutput->SinkThreadLogoff();
     iDecoder->Clear();
-    delete iAdvancedStreaming;
     delete iDecoder;
     CloseSTDLIB();    	// Just in case
     PRINT("COggPlayController::~COggPlayController Out");
@@ -63,7 +68,6 @@ void COggPlayController::ConstructL()
 
     // Construct custom command parsers
 
-#ifdef MMF_AVAILABLE
     CMMFAudioPlayDeviceCustomCommandParser* audPlayDevParser = 
                                      CMMFAudioPlayDeviceCustomCommandParser::NewL(*this);
     CleanupStack::PushL(audPlayDevParser);
@@ -75,21 +79,13 @@ void COggPlayController::ConstructL()
     CleanupStack::PushL(audPlayCtrlParser);
     AddCustomCommandParserL(*audPlayCtrlParser); //parser now owned by controller framework
     CleanupStack::Pop(audPlayCtrlParser);
-#endif
 
     iState = EStateNotOpened;
-    iAdvancedStreaming = new (ELeave) CAdvancedStreaming(*this);
-    iAdvancedStreaming->ConstructL();
-    
+     
     iFileLength = TTimeIntervalMicroSeconds(1E6);
     PRINT("COggPlayController::ConstructL() Out");
 }
 
-#ifdef MMF_AVAILABLE
-///////////////////////////////////////////////////////////////////
-// Functions used with the MMF Framework, but useless when MMF is not
-// in use (Symbian 7.0 and earlier
-///////////////////////////////////////////////////////////////////
 void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
 {
     PRINT("COggPlayController::AddDataSourceL In");
@@ -102,41 +98,60 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
     TUid uid = aDataSource.DataSourceType() ;
     if (uid == KUidMmfFileSource)
     {
-        CMMFFile* aFile	= STATIC_CAST(CMMFFile*, &aDataSource);
+        CMMFFile* aFile = STATIC_CAST(CMMFFile*, &aDataSource);
         iFileName = aFile->FullName();
     }
     else
     {
         User::Leave(KOggPlayPluginErrNotSupported);
     }
+
+    
+    TRACEF(COggLog::VA(_L("iFileName %S "),&iFileName ));
+    // Open the file here, in order to get the tags.
     OpenFileL(iFileName);
-    iDecoder->Clear();
+    // Save the tags.
+
+    iDecoder->Clear(); // Close the file. This is required for the ringing tone stuff.
+
     iState = EStateNotOpened;
 
+    iOggSource = new (ELeave) COggSource( *this);
+    iOggSource->ConstructL();
+    
     PRINT("COggPlayController::AddDataSourceL Out");
 }
 
 void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
 {
     PRINT("COggPlayController::AddDataSinkL In");
-    TUid uid = aDataSink.DataSinkType() ;
-    if (uid != KUidMmfAudioOutput)
-    {
-        User::Leave(KOggPlayPluginErrNotSupported);
-    }
-     
+    
+    if (aDataSink.DataSinkType() != KUidMmfAudioOutput)
+        User::Leave(KErrNotSupported);
+    if (iAudioOutput)
+        User::Leave(KErrNotSupported);
+
+    iAudioOutput = static_cast<CMMFAudioOutput*>(&aDataSink);
+    iAudioOutput->SinkThreadLogon(*this);
+
     PRINT("COggPlayController::AddDataSinkL Out");
 }
 
 void COggPlayController::RemoveDataSourceL(MDataSource& /*aDataSource*/)
 {
     PRINT("COggPlayController::RemoveDataSourceL");
-    // Not implemented yet
+    // Nothing to do
 }
-void COggPlayController::RemoveDataSinkL(MDataSink& /* aDataSink*/)
+void COggPlayController::RemoveDataSinkL(MDataSink&  aDataSink)
 {
     PRINT("COggPlayController::RemoveDataSinkL");
-    // Not implemented yet
+
+    if (iState==EStatePlaying)
+        User::Leave(KErrNotReady);
+
+    if (iAudioOutput==&aDataSink) 
+        iAudioOutput=NULL;
+
 }
 
 void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& /*aPrioritySettings*/)
@@ -189,29 +204,52 @@ void COggPlayController::MapcGetLoadingProgressL(TInt& /*aPercentageComplete*/)
 }
 
 
-#else
+TInt COggPlayController::SendEventToClient(const TMMFEvent& aEvent)
+    {
+    PRINT("COggPlayController::SendEventToClient");
+    return DoSendEventToClient(aEvent);
+    }
 
-void COggPlayController::SetObserver(MMdaAudioPlayerCallback &anObserver)
-{
-    iObserver = &anObserver;
-}
-
-
-#endif /*MMF_AVAILABLE */
 
 void COggPlayController::ResetL()
 {
     PRINT("COggPlayController::ResetL");
-    // Not implemented yet
+    iAudioOutput=NULL;
+    iDecoder->Clear();
+    fclose(iFile);
+    iState= EStateNotOpened;
 }
 
 void COggPlayController::PrimeL()
 {
     
     PRINT("COggPlayController::PrimeL");
-    // Not implemented yet
+    if (iState==EStatePrimed)
+        return; // Nothing to do
+    if ((iAudioOutput==NULL)||(iState!=EStateNotOpened)) 
+        User::Leave(KErrNotReady);
+  
     iState = EStateOpen;
     OpenFileL(iFileName);
+
+    iAudioOutput->SinkPrimeL();
+    
+    if (!iSinkBuffer)
+    {
+        if (!iAudioOutput->CanCreateSinkBuffer())
+        {
+            iSinkBuffer = CMMFDescriptorBuffer::NewL(0x4000);
+            iOwnSinkBuffer = ETrue;
+        }
+        else
+        {
+            iSinkBuffer = iAudioOutput->CreateSinkBufferL(TMediaId(KUidMediaTypeAudio), iOwnSinkBuffer);
+        }
+        
+    }
+    
+    iState=EStatePrimed;
+
 
 }
 
@@ -219,45 +257,69 @@ void COggPlayController::PlayL()
 {
     
     PRINT("COggPlayController::PlayL In");
-    if (iState == EStateNotOpened)
+
+    if (iState!=EStatePrimed)
         User::Leave(KErrNotReady);
-    if (iState == EStatePaused)
-    {
-        iState = EStatePlaying;
-        iAdvancedStreaming->Play();
-        return;
-        
-    }
-    if (iState != EStatePlaying)
-    { 
-       // iDecoder->Setposition(0);
-        iState = EStatePlaying;
-    iAdvancedStreaming->Play();
-    }
-    PRINT("COggPlayController::PlayL Out");
+    CFakeFormatDecode* fake = CFakeFormatDecode::NewL(
+    			TFourCC(' ', 'P', '1', '6'),
+    			iDecoder->Channels(), 
+                iDecoder->Rate(),
+    			iDecoder->Bitrate());
+	CleanupStack::PushL(fake);
     
+    // NegiotiateL leaves with KErrNotSupported if you don't give a CMMFFormatDecode for it's source:
+    // indeed, it looks to be pretty useless if the source if not a CMMFFormatDecode. So use a 
+    // fake CMMFFormatDecode class that just reports the configuration info (see CFakeFormatDecode)
+	iAudioOutput->NegotiateL(*fake);
+ 
+	CleanupStack::PopAndDestroy();
+    
+    //iMMFSource->SourcePlayL();
+
+    iAudioOutput->SinkPlayL();
+    
+    // send first buffer to sink - sending a NULL buffer prompts it to request some data
+    // the usual way
+
+    iOggSource->SetSink(iAudioOutput);
+    iAudioOutput->EmptyBufferL(NULL, iOggSource, TMediaId(KUidMediaTypeAudio));
+    
+    iState=EStatePlaying;
+    PRINT("COggPlayController:: PlayL ok");   
 }
 
 void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
-    iAdvancedStreaming->Pause();
-    if (iState == EStatePlaying)
-        iState = EStatePaused;
+    
+    if (iState!=EStatePlaying)
+        User::Leave(KErrNotReady);
+
+    //iMMFSource->SourcePauseL();
+    iAudioOutput->SinkPauseL();
+    iOggSource->SourcePauseL();
+    iState=EStatePrimed;
 }
 
 void COggPlayController::StopL()
 {
     PRINT("COggPlayController::StopL");
-    if (iState != EStateNotOpened)
-        iState = EStateOpen;
+    
+    if ((iState!=EStatePrimed)&&(iState!=EStatePlaying)) 
+        User::Leave(KErrNotReady);
+
+    iAudioOutput->SinkStopL();
+
+    iState=EStateNotOpened;
+
     iDecoder->Clear();
 
+    PRINT("COggPlayController::StopL Out");
 }
 
 TTimeIntervalMicroSeconds COggPlayController::PositionL() const
 {
-  //  PRINT("COggPlayController::PositionL");
+    //PRINT("COggPlayController::PositionL");
     
     if(iDecoder && (iState != EStateNotOpened) )
         return( TTimeIntervalMicroSeconds(iDecoder->Position( ) * 1000) );
@@ -276,7 +338,7 @@ void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition
 TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
 {
     
-   // PRINT("COggPlayController::DurationL");
+    //PRINT("COggPlayController::DurationL");
     return (iFileLength);
 }
 
@@ -336,9 +398,7 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
         iState= EStateNotOpened;
         User::Leave(KOggPlayPluginErrOpeningFile);
     }
-    
-    iAdvancedStreaming->Open(iDecoder->Channels(), iDecoder->Rate());
-    
+        
       // Parse tag information and put it in the provided buffers.
     iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
     iFileLength = iDecoder->TimeTotal() * 1000;
@@ -349,94 +409,32 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
 void COggPlayController::MapdSetVolumeL(TInt aVolume)
 {
     TRACEF(COggLog::VA(_L("COggPlayController::SetVolumeL %i"), aVolume ));
-    iAdvancedStreaming->SetVolume(aVolume);
+   
+    if (!iAudioOutput) User::Leave(KErrNotReady);
+    
+    TInt maxVolume = iAudioOutput->SoundDevice().MaxVolume();
+	if( ( aVolume < 0 ) || ( aVolume > maxVolume ))
+	    User::Leave(KErrArgument);
+    
+    iAudioOutput->SoundDevice().SetVolume(aVolume);
+
 }
 
 void COggPlayController::MapdGetMaxVolumeL(TInt& aMaxVolume)
 {
     PRINT("COggPlayController::MapdGetMaxVolumeL");
-    aMaxVolume = KMaxVolume;
+    
+    aMaxVolume = iAudioOutput->SoundDevice().MaxVolume();
 }
 
 void COggPlayController::MapdGetVolumeL(TInt& aVolume)
 {
     PRINT("COggPlayController::MapdGetVolumeL");
-    aVolume = iAdvancedStreaming->Volume();
-}
-
-#ifndef MMF_AVAILABLE
-
-// Non leaving version of the MMF functions
-void COggPlayController::OpenFile(const TDesC& aFile)
-{
-    TRAPD(error, OpenFileL(aFile));
-    iObserver->MapcInitComplete(error, TTimeIntervalMicroSeconds (0) );
-}
-
-void COggPlayController::Play()
-{
-    TRAPD(error, PlayL());
-    if (error) 
-        iObserver->MapcPlayComplete(error);
-}
-void COggPlayController::Pause()
-{   
-    TRAPD(error, PauseL());
-    if (error) 
-        iObserver->MapcPlayComplete(error);
-}
-void COggPlayController::Stop()
-{
-    TRAPD(error, StopL());
-    if (error) 
-        iObserver->MapcPlayComplete(error);
-}
-
-
-TInt COggPlayController::MaxVolume()
-{
-    TInt maxvol=0;
-    TRAPD(error, MapdGetMaxVolumeL(maxvol););
-    // The possible leave is stupidly forgotten here
-    return(maxvol);
-}
-void COggPlayController::SetVolume(TInt aVolume)
-{
-    TRAPD(error, MapdSetVolumeL(aVolume));
-    // The possible leave is stupidly forgotten here
-}
-TInt COggPlayController::GetVolume(TInt& aVolume) 
-{
-    TRAPD(error, MapdGetVolumeL(aVolume));
-    return(error);
-}
-
-TInt COggPlayController::GetNumberOfMetaDataEntries(TInt& aNumberOfEntries)
-{                
-    TRAPD(error, GetNumberOfMetaDataEntriesL(aNumberOfEntries));
-    return error;
-}
-
-TInt  COggPlayController::GetPosition(TTimeIntervalMicroSeconds& aPosition)
-{
-    TRAPD(error, aPosition = PositionL());
+   
+    if (!iAudioOutput) User::Leave(KErrNotReady);
     
-    return error;
+	aVolume = iAudioOutput->SoundDevice().Volume();
 }
-void  COggPlayController::SetPosition(const TTimeIntervalMicroSeconds& aPosition)
-{
-    TRAPD(error, SetPositionL(aPosition));
-    // The possible leave is stupidly forgotten here
-}
-TTimeIntervalMicroSeconds  COggPlayController::Duration() const
-{
-    TTimeIntervalMicroSeconds  durat;
-    TRAPD(error, durat = DurationL());
-    // The possible leave is stupidly forgotten here
-    return(durat);
-}
-
-#endif
 
 
 TInt COggPlayController::GetNewSamples(TDes8 &aBuffer) 
@@ -458,16 +456,164 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
     return (ret);
 }
 
-void COggPlayController::NotifyPlayInterrupted(TInt aError)
+
+/************************************************************************************
+*
+* COggSource
+*
+*************************************************************************************/
+   
+COggSource::COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer) : 
+  MDataSource(TUid::Uid(KOggTremorUidPlayFormatImplementation)),
+  iSampleRateFillBuffer(aSampleRateFillBuffer)
 {
-   TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError));
-   if (iState != EStateDestroying)
-   {
-#ifdef MMF_AVAILABLE
-       DoSendEventToClient(TMMFEvent(KMMFEventCategoryPlaybackComplete, aError));
-#else
-       iObserver->MapcPlayComplete(aError);
-#endif
-   }
 }
 
+COggSource::~COggSource()
+{
+    delete (iOggSampleRateConverter);
+}
+
+void COggSource::ConstructL()
+{
+    // We use the Sample Rate converter only for the buffer filling and the gain settings,
+    // sample rate conversion is done by MMF.
+
+    PRINT("COggSource::ConstructL()");
+    iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
+    
+    iOggSampleRateConverter->Init(&iSampleRateFillBuffer, 
+        KBufferSize, (TInt) (0.75*KBufferSize), 
+        1, 1,   // The MMF will take care of rate conversion
+        2, 2 ); // The MMF will take care of channel mixing
+    PRINT("COggSource::ConstructL() Out");
+}
+
+void COggSource::SetSink(MDataSink* aSink)
+    {
+    iSink=aSink;
+    }
+
+void COggSource::ConstructSourceL(  const TDesC8& /*aInitData*/ )
+    {
+    }
+
+CMMFBuffer* COggSource::CreateSourceBufferL(TMediaId /*aMediaId*/, TBool &aReference)
+    {
+    aReference = EFalse;
+    return NULL;
+    }
+
+TBool COggSource::CanCreateSourceBuffer()
+    {
+    return EFalse;
+    }
+
+TFourCC COggSource::SourceDataTypeCode(TMediaId aMediaId)
+    {
+    if (aMediaId.iMediaType==KUidMediaTypeAudio)
+        {
+        return 1; // only support 1st stream for now
+        }
+    else return 0;
+    }
+
+void COggSource::FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId aMediaId)
+    {
+    
+    if ((aMediaId.iMediaType==KUidMediaTypeAudio)&&(aBuffer->Type()==KUidMmfDescriptorBuffer))
+        {
+        //BufferEmptiedL(aBuffer);
+        CMMFDataBuffer* db = static_cast<CMMFDataBuffer*>(aBuffer);
+        iOggSampleRateConverter->FillBuffer(db->Data());
+        SetSink(aConsumer);
+        aConsumer->BufferFilledL(db);
+        }
+    else User::Leave(KErrNotSupported);
+    }
+
+
+void COggSource::BufferEmptiedL(CMMFBuffer* aBuffer)
+{
+    if ( (aBuffer->Type()==KUidMmfDescriptorBuffer) || (aBuffer->Type()==KUidMmfTransferBuffer))
+    {    
+        CMMFDataBuffer* db = static_cast<CMMFDataBuffer*>(aBuffer);
+        iOggSampleRateConverter->FillBuffer(db->Data());
+        iSink->EmptyBufferL(db, this, TMediaId(KUidMediaTypeAudio));
+    }
+    else User::Leave(KErrNotSupported);
+}
+
+
+/************************************************************************************
+*
+* CFakeFormatDecode
+*
+*************************************************************************************/
+
+CFakeFormatDecode* CFakeFormatDecode::NewL(TFourCC aFourCC, TUint aChannels, TUint aSampleRate, TUint aBitRate)
+	{
+	CFakeFormatDecode* self = new(ELeave) CFakeFormatDecode;
+	self->iFourCC = aFourCC;
+	self->iChannels = aChannels;
+	self->iSampleRate = aSampleRate;
+	self->iBitRate = aBitRate;
+	return self;
+	}
+	
+CFakeFormatDecode::CFakeFormatDecode()
+	{
+	}
+    
+CFakeFormatDecode::~CFakeFormatDecode()
+	{
+	}
+    
+TUint CFakeFormatDecode::Streams(TUid /*aMediaType*/) const
+	{
+	User::Panic(KFakeFormatDecodePanic, 1);
+	return 0;
+	}
+		
+TTimeIntervalMicroSeconds CFakeFormatDecode::FrameTimeInterval(TMediaId /*aMediaType*/) const
+	{
+	User::Panic(KFakeFormatDecodePanic, 2);
+	return TTimeIntervalMicroSeconds(0);
+	}
+	
+TTimeIntervalMicroSeconds CFakeFormatDecode::Duration(TMediaId /*aMediaType*/) const
+	{
+	User::Panic(KFakeFormatDecodePanic, 3);
+	return TTimeIntervalMicroSeconds(0);
+	}
+		
+void CFakeFormatDecode::FillBufferL(CMMFBuffer* /*aBuffer*/, MDataSink* /*aConsumer*/, TMediaId /*aMediaId*/)
+	{
+	User::Panic(KFakeFormatDecodePanic, 4);
+	}
+	
+CMMFBuffer* CFakeFormatDecode::CreateSourceBufferL(TMediaId /*aMediaId*/, TBool& /*aReference*/)
+	{
+	User::Panic(KFakeFormatDecodePanic, 4);
+	return NULL;
+	}
+	
+TFourCC CFakeFormatDecode::SourceDataTypeCode(TMediaId /*aMediaId*/)
+	{
+	return iFourCC;
+	}
+	
+TUint CFakeFormatDecode::NumChannels()
+	{
+	return iChannels;
+	}
+	
+TUint CFakeFormatDecode::SampleRate()
+	{
+	return iSampleRate;
+	}
+		
+TUint CFakeFormatDecode::BitRate()
+	{
+	return iBitRate;
+	}

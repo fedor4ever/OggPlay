@@ -19,16 +19,10 @@
 
 #include "..\..\inc\OggOs.h"  // MMF_AVAILABLE IS DEFINED IN THERE
 
-#if defined MMF_AVAILABLE
 TARGET          OGGPLUGINDECODER.DLL
 TARGETTYPE      ECOMIIC
 UID             0x10009D8D 0x101FF683
 TARGETPATH      \System\Libs\Plugins
-#else
-TARGET          OGGPLUGINDECODERPREMMF.DLL
-TARGETTYPE      DLL
-UID             0x101FD21D 0x101FD21D
-#endif
 
 
 SOURCEPATH    ..
@@ -40,6 +34,8 @@ SOURCE        mdct.c block.c window.c \
 	          vorbisfile.c
 
 SOURCE        microsoftInternal.c
+
+RESOURCE      Plugin\101FF683.RSS
 
 
 USERINCLUDE   ..
@@ -56,18 +52,12 @@ SOURCEPATH    ..\Plugin
 SOURCE        OggTremorPluginFactory.cpp
 SOURCE        TremorDecoder.cpp
 
-#ifndef MMF_AVAILABLE
-SOURCEPATH    ..\..\Plugin\src
-SOURCE        PseudoMMFFcts.cpp
-#endif
-
-#if defined MMF_AVAILABLE
 SYSTEMINCLUDE	\epoc32\include\ecom
 SYSTEMINCLUDE	\epoc32\include\mmf\common
 SYSTEMINCLUDE	\epoc32\include\mmf\server
-LIBRARY	         mmfcontrollerframework.lib mmfstandardcustomcommands.lib
-RESOURCE    	101FF683.RSS
-#endif
+LIBRARY	         mmfcontrollerframework.lib mmfstandardcustomcommands.lib 
+LIBRARY          MMFDevSound.lib mmfserverbaseclasses.lib  ecom.lib
+
 
 LIBRARY       euser.lib estlib.lib charconv.lib MediaClientAudioStream.lib flogger.lib efsrv.lib 
 

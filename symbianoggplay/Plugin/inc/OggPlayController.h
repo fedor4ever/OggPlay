@@ -24,38 +24,33 @@
 // INCLUDES
 #include <E32Base.h>
 #include <e32std.h>
-#include <OggOs.h>
+#include "OggPlay.h"
 
-#ifdef MMF_AVAILABLE
 #include <ImplementationProxy.h>
 #include <mmfcontroller.h>
 #include <mmf\common\mmfstandardcustomcommands.h>
 #include <MmfAudioOutput.h>
 #include <MmfFile.h>
-#else
-#include "OggPlayPlugin.h"
-#endif
-
+#include "Plugin\MMFOggPlayStreaming.h"
 #include "OggPlayDecoder.h"
-#include "AdvancedStreaming.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 // FORWARD DECLARATIONS
 
+class COggSource;
 
 // CLASS DECLARATION
 
-#ifdef MMF_AVAILABLE
+const TInt KBufferSize = 4096;
+
+
 class COggPlayController :	public CMMFController,
                             public MMMFAudioPlayDeviceCustomCommandImplementor,
                             public MMMFAudioPlayControllerCustomCommandImplementor,
-                            public MAdvancedStreamingObserver
-#else
-class COggPlayController :	public CPseudoMMFController,
-                            public MAdvancedStreamingObserver
-#endif
+                            public MAsyncEventHandler,
+                            public MOggSampleRateFillBuffer
 
 	{
 
@@ -82,7 +77,6 @@ class COggPlayController :	public CPseudoMMFController,
 
 	public:	// Functions from base classes
 
-#ifdef MMF_AVAILABLE
 		/**
         * From CMMFController Add data source to controller.
         * @since
@@ -132,25 +126,11 @@ class COggPlayController :	public CPseudoMMFController,
         */
 		void SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings);
 
-#else
-        void SetObserver(MMdaAudioPlayerCallback &anObserver);
-        // Non Leaving version of some of the MMF functions.
-        // These functions acts as the framework does, calling the observer
-        // instead of leaving.
-        
-        void Play();
-        void Pause();
-        void Stop();
-        void OpenFile(const TDesC& aFile);
-        
-        TInt MaxVolume();
-        void SetVolume(TInt aVolume);
-        TInt GetVolume(TInt& aVolume);
-		TInt GetNumberOfMetaDataEntries(TInt& aNumberOfEntries);
-        TInt GetPosition(TTimeIntervalMicroSeconds& aPosition);
-        void SetPosition(const TTimeIntervalMicroSeconds& aPosition);
-        TTimeIntervalMicroSeconds Duration() const;
-#endif
+        /**
+        * From MAsyncEventHandler
+        */
+        virtual TInt SendEventToClient(const TMMFEvent& aEvent);
+
 		/**
         * From CMMFController Reset controller.
         * @since
@@ -228,11 +208,13 @@ class COggPlayController :	public CPseudoMMFController,
             const TTimeIntervalMicroSeconds& aEnd);
         void MapcDeletePlaybackWindowL();
         void MapcGetLoadingProgressL(TInt& aPercentageComplete);
+        
+        //From MOggSampleRateFillBuffer
+
+        TInt GetNewSamples(TDes8 &aBuffer);
 
     private: // Internal Functions
 
-        TInt GetNewSamples(TDes8 &aBuffer) ; 
-        void NotifyPlayInterrupted(TInt aError) ;
         void OpenFileL(const TDesC& aFile);
 
 	private: // Data
@@ -243,6 +225,7 @@ class COggPlayController :	public CPseudoMMFController,
 		enum TOggPlayControllerState
 	    {
 			EStateNotOpened = 0,
+            EStatePrimed,
             EStateOpen,
 			EStatePlaying,
             EStatePaused,
@@ -254,7 +237,6 @@ class COggPlayController :	public CPseudoMMFController,
         // OggTremor stuff
         TBuf<100> iFileName;
         FILE *iFile;
-       
         
         enum { KMaxStringLength = 256 };
         TBuf<KMaxStringLength>   iAlbum;
@@ -264,11 +246,13 @@ class COggPlayController :	public CPseudoMMFController,
         TBuf<KMaxStringLength>   iTrackNumber;
         TTimeIntervalMicroSeconds iFileLength;
 
-        CAdvancedStreaming *iAdvancedStreaming;
         MDecoder *iDecoder;
-#ifndef MMF_AVAILABLE
-        MMdaAudioPlayerCallback *iObserver;
-#endif
+        
+        CMMFOggPlayStreaming * iMMFStreaming;
+        CMMFAudioOutput * iAudioOutput;
+        CMMFBuffer * iSinkBuffer;
+        TBool iOwnSinkBuffer;
+        COggSource * iOggSource;
 	};
 
     enum {
@@ -277,6 +261,72 @@ class COggPlayController :	public CPseudoMMFController,
         KOggPlayPluginErrFileNotFound,
         KOggPlayPluginErrOpeningFile
     };
+
+
+    
+/**
+Fake format decode class: this is required to satisfy CMMFAudioOutput::NegotiateL
+which requires a CMMFFormatDecode: it will query it for configuration info 
+(channels, sample rate etc.) and use this information to configure DevSound. This
+class has no other functionality other than reporting this information.
+*/
+class CFakeFormatDecode : public CMMFFormatDecode
+	{
+public:
+	static CFakeFormatDecode* NewL(	TFourCC aFourCC, 
+									TUint aChannels, 
+									TUint aSampleRate, 
+									TUint aBitRate);
+	virtual ~CFakeFormatDecode();
+	
+	virtual TUint Streams(TUid aMediaType) const;
+	virtual TTimeIntervalMicroSeconds FrameTimeInterval(TMediaId aMediaType) const;
+	virtual TTimeIntervalMicroSeconds Duration(TMediaId aMediaType) const;
+	virtual void FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer, TMediaId aMediaId);
+	virtual CMMFBuffer* CreateSourceBufferL(TMediaId aMediaId, TBool &aReference);
+	virtual TFourCC SourceDataTypeCode(TMediaId aMediaId);
+	virtual TUint NumChannels();
+	virtual TUint SampleRate();
+	virtual TUint BitRate();
+private:
+	CFakeFormatDecode();
+private:
+	TFourCC iFourCC;
+	TUint iChannels;
+	TUint iSampleRate;
+	TUint iBitRate;
+	};
+
+_LIT(KFakeFormatDecodePanic, "FakeFormatDecode");
+
+
+class COggSource: public CBase, public MDataSource
+{
+public:
+    COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer);
+    ~COggSource();
+    void ConstructL();
+    // from MDataSource:
+    virtual TFourCC SourceDataTypeCode(TMediaId aMediaId);
+    virtual void FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId aMediaId);
+    virtual void BufferEmptiedL(CMMFBuffer* aBuffer);
+    virtual TBool CanCreateSourceBuffer();
+    virtual CMMFBuffer* CreateSourceBufferL(TMediaId aMediaId, TBool &aReference);
+    virtual void ConstructSourceL(  const TDesC8& aInitData );
+    
+    
+    // From MOggSampleRateFillBuffer 
+    TInt GetNewSamples(TDes8 &aBuffer) ;
+
+    // Own functions
+    void SetSink(MDataSink* aSink);
+
+private:
+    
+    COggSampleRateConverter *iOggSampleRateConverter;
+    MDataSink * iSink;
+    MOggSampleRateFillBuffer &iSampleRateFillBuffer;
+};
 
 #endif    
             
