@@ -74,7 +74,8 @@ enum {
   EOggCodecSelection,  //For the Codec Settings view
   EOggCodecSelectionSettingOGG,
   EOggCodecSelectionSettingMP3,
-  EOggCodecSelectionSettingAAC
+  EOggCodecSelectionSettingAAC,
+  EOggCodecSelectionSettingMP4 
 };
 
 enum TOggplayCommandIds

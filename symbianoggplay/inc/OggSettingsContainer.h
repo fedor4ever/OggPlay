@@ -107,9 +107,9 @@ protected:
 private:
   TOggplaySettings& iData;
   COggPlayAppUi& iAppUi;
-  TInt iSelectedIndexes[3]; // These indexes will be translated to UIDs when the
-                            // Setting list will be dismissed
-  CCodecSelectionSettingItem * iCodecSelectionSettingItemArray[3];
+  TInt iSelectedIndexes[NUMBER_OF_SEARCHED_EXTENSIONS]; // These indexes will be translated to UIDs when the
+                                                        // Setting list will be dismissed
+  CCodecSelectionSettingItem * iCodecSelectionSettingItemArray[NUMBER_OF_SEARCHED_EXTENSIONS];
 };
 
 

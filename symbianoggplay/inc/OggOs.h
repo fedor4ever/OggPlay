@@ -143,5 +143,6 @@ chSTR2(__LINE__) "):" #desc)
 #define IFNDEF_S60(x)  x
 #endif
 
+#define NUMBER_OF_SEARCHED_EXTENSIONS 4 // OGG,MP3, AAC, MP4
 
 #endif

@@ -403,6 +403,7 @@ void COggPluginAdaptor::ConstructL()
     SearchPluginsL(_L("ogg"));
     SearchPluginsL(_L("mp3"));
     SearchPluginsL(_L("aac"));
+    SearchPluginsL(_L("mp4"));
 }
 
 

@@ -511,6 +511,13 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_codec_selection_setting_item_list
 			setting_page_resource = r_oggplay_select_aac;
 			associated_resource = r_oggplay_plugin_setting_item_list;
 			name = ogg_codec_aac;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = EOggCodecSelectionSettingMP4;
+			setting_page_resource = r_oggplay_select_mp4;
+			associated_resource = r_oggplay_plugin_setting_item_list;
+			name = ogg_codec_mp4;
 			}
         };
     }
@@ -534,6 +541,13 @@ RESOURCE AVKON_SETTING_PAGE r_oggplay_select_mp3
 RESOURCE AVKON_SETTING_PAGE r_oggplay_select_aac
     {   
     label = ogg_codec_aac;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_select_mp4
+    {   
+    label = ogg_codec_mp4;
     type = EAknCtPopupSettingList;
     editor_resource_id = r_oggplay_popup_setting_list_new_entry;
     }
@@ -737,4 +751,5 @@ RESOURCE TBUF r_ogg_no_plugin_found  { buf=ogg_no_plugin_found; }
 RESOURCE TBUF r_ogg_codec_ogg        { buf=ogg_codec_ogg; }
 RESOURCE TBUF r_ogg_codec_mp3        { buf=ogg_codec_mp3; }
 RESOURCE TBUF r_ogg_codec_aac        { buf=ogg_codec_aac; }
+RESOURCE TBUF r_ogg_codec_mp4        { buf=ogg_codec_mp4; }
 

@@ -139,6 +139,7 @@
 #define ogg_codec_ogg                "OGG"
 #define ogg_codec_mp3                "MP3"
 #define ogg_codec_aac                "AAC"
+#define ogg_codec_mp4                "MP4"
 
 #define ogg_codec_info_name          "Name"
 #define ogg_codec_info_supplier      "Supplier"

@@ -150,7 +150,7 @@ public:
 
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
-  TInt32 iControllerUid[3]; // OGG, MP3, AAC 
+  TInt32 iControllerUid[NUMBER_OF_SEARCHED_EXTENSIONS]; // OGG, MP3, AAC , MP4
 	};
 
 // Forward declarations:

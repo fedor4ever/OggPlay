@@ -212,6 +212,11 @@ CAknSettingItem* COggplayCodecSelectionSettingItemList::CreateSettingItemL(TInt 
         item = new (ELeave) CCodecSelectionSettingItem(aIdentifier, 
             iSelectedIndexes[2], iAppUi.iOggPlayback, _L("aac") );
         iCodecSelectionSettingItemArray[2] = item;
+        break;  
+    case  EOggCodecSelectionSettingMP4:
+        item = new (ELeave) CCodecSelectionSettingItem(aIdentifier, 
+            iSelectedIndexes[3], iAppUi.iOggPlayback, _L("mp4") );
+        iCodecSelectionSettingItemArray[3] = item;
         break;
     default:
         item = NULL;
