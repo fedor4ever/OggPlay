@@ -44,6 +44,7 @@ PRJ_MMPFILES
 #endif
 */
 
+..\vorbis\group\oggvorbis.mmp
 OggPlay.mmp
 
 PRJ_TESTMMPFILES
