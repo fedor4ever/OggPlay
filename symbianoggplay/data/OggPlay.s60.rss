@@ -615,4 +615,5 @@ RESOURCE TBUF32 r_ogg_repeat_off   { buf=ogg_repeat_off; }			// New
 RESOURCE TBUF32 r_ogg_back_dir     { buf=ogg_back_dir; }			// Oggs listbox '..' string
 RESOURCE TBUF32 r_ogg_backspace    { buf=ogg_backspace; }
 RESOURCE TBUF32 r_ogg_shift        { buf=ogg_shift; }
+RESOURCE TBUF32 r_ogg_by           { buf=ogg_by; }
 

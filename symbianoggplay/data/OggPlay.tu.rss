@@ -108,6 +108,7 @@ CHARACTER_SET UTF8
 #define ogg_backspace                "Backspace"
 #define ogg_shift                    "Shift (no repeat)"
 #define ogg_warnings                 "Warnings"
+#define ogg_by                       " by "
 
 #define ogg_rsk_idle                 "Right Softkey / Idle "
 #define ogg_rsk_play                 "Right SK / Play mode"

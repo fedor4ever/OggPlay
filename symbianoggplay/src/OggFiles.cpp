@@ -676,6 +676,22 @@ TOggFiles::AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC&
 }
 
 void
+TOggFiles::AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TDesC& aFileName)
+{
+  
+  HBufC* hbuf = HBufC::NewLC(1024);
+  hbuf->Des().AppendNum((TInt) aType);
+  hbuf->Des().Append(KColumnListSeparator);
+  hbuf->Des().Append(aTitle);
+  hbuf->Des().Append(aDelim);
+  hbuf->Des().Append(aArtist);
+  hbuf->Des().Append(KColumnListSeparator);
+  hbuf->Des().Append(aFileName);
+  arr.AppendL(hbuf->Des());
+  CleanupStack::PopAndDestroy();
+}
+
+void
 TOggFiles::ClearFiles()
 {
   //for (TInt i=0; i<iFiles->Count(); i++) delete (*iFiles)[i];
@@ -691,15 +707,25 @@ TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum,
 {
   arr.Reset();
   if (anAlbum.Length()>0) iFiles->Sort(iOggKeyTrackTitle); else iFiles->Sort(iOggKeyTitles);
-  for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= *(*iFiles)[i];
-    TBool select=
-      (anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
-      (anArtist.Length()==0 || *o.iArtist==anArtist) &&
-      (aGenre.Length()==0 || *o.iGenre==aGenre) &&
-      (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
-    if (select)
-      AppendLine(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), o.iFileName->Des());
+  if( anAlbum.Length()==0 && anArtist.Length()==0  && aGenre.Length()==0  && aSubFolder.Length()==0 ) {
+    TBuf<10> buf;
+    CEikonEnv::Static()->ReadResource(buf, R_OGG_BY);
+    for (TInt i=0; i<iFiles->Count(); i++) {
+      TOggFile& o= *(*iFiles)[i];
+      AppendTitleAndArtist(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), buf, o.iArtist->Des(),o.iFileName->Des());
+    }
+
+  } else {
+    for (TInt i=0; i<iFiles->Count(); i++) {
+      TOggFile& o= *(*iFiles)[i];
+      TBool select=
+        (anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
+        (anArtist.Length()==0 || *o.iArtist==anArtist) &&
+        (aGenre.Length()==0 || *o.iGenre==aGenre) &&
+        (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
+      if (select)
+        AppendLine(arr, COggPlayAppUi::ETitle, o.iTitle->Des(), o.iFileName->Des());
+    }
   }
 }
 

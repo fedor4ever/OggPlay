@@ -107,6 +107,7 @@
 #define ogg_backspace                "Slet"
 #define ogg_shift                    "Shift (ingen repeat)"
 #define ogg_warnings                 "Advarsler"
+#define ogg_by                       " by "
 
 #define ogg_rsk_idle                 "Right Softkey / Idle "
 #define ogg_rsk_play                 "Right SK / Play mode"

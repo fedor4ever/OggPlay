@@ -103,6 +103,7 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
   void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
   static void AppendLine(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aText, const TDesC& aFileName);
+  static void AppendTitleAndArtist(CDesCArray& arr, COggPlayAppUi::TViews aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TDesC& aFileName);
   
   TInt SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session);
   TInt SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session);
