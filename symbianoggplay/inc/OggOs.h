@@ -65,9 +65,13 @@ chSTR2(__LINE__) "):" #desc)
 // NEW CODE ENABLERS
 //
 #if defined(SERIES60)
-#define SERIES60_SPLASH   // On trial. See OggPlayAif.s60.rss and OggPlay.cpp
+#define SERIES60_SPLASH
 #endif
 
-
+// Force filling the buffer to at least 75% of their capacity before sending them to
+// the audio streaming device
+// On NGage it gives a serious boost to avoid "not-ready buffer" problem.
+// UIQ_?
+#define FORCE_FULL_BUFFERS
 
 #endif
