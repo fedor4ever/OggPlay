@@ -266,20 +266,19 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
                             TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 	{
 #ifdef SERIES60
-  COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
+  COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
 
+  COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
 	iUserHotkeysContainer = new (ELeave) COggUserHotkeys( appUi->iSettings );
 	iUserHotkeysContainer->SetMopParent(appUi);
-	TRect rec(0,44,176,188); // FIXIT
-	iUserHotkeysContainer->ConstructL( rec );
+	iUserHotkeysContainer->ConstructL( appUi->ClientRect() );
   appUi->AddToStackL(*this, iUserHotkeysContainer);
 
   // Push new softkeys
   appUi->Cba()->AddCommandSetToStackL(R_USER_CLEAR_BACK_CBA);
 
-  iOggViewCtl.SetRect( TRect(0,0,176,208) ); // FIXIT
-
-  COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
+  // Added in order to get the CBA drawn
+  iOggViewCtl.SetRect( appUi->ApplicationRect() );
 #endif
 	}
 

@@ -247,14 +247,11 @@ COggPlayAppUi::ConstructL()
 {
 #if defined(SERIES60_SPLASH)
 	ShowSplash();
+  // Otherwise BaseConstructL() clears screen when launched via recognizer (?!)
+  CEikonEnv::Static()->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNeverAtFront);
 #endif
 	
 	BaseConstructL();
-	
-#if defined(SERIES60)
-	CEikStatusPane* sp = CEikonEnv::Static()->AppUiFactory()->StatusPane();
-  sp->MakeVisible(EFalse);
-#endif
 	
 	TParsePtrC aP(Application()->AppFullName());
   _LIT(KiIniFileNameExtension,".ini");
@@ -343,6 +340,10 @@ COggPlayAppUi::ConstructL()
 	SetThreadPriority();
 	
 	ActivateOggViewL();
+
+#if defined(SERIES60_SPLASH)
+	iEikonEnv->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNormal);
+#endif
 }
 
 void COggPlayAppUi::PostConstructL()
@@ -1224,14 +1225,6 @@ COggPlayAppUi::WriteIniFile()
 void 
 COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
-#if defined(SERIES60_SPLASH)
-	if( iSplashActive )
-    {
-		iSplashActive = EFalse;
-		iEikonEnv->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNormal);
-    }
-#endif
-	
 	CEikAppUi::HandleForegroundEventL(aForeground);
 	iForeground= aForeground;
 }
@@ -1264,7 +1257,6 @@ COggPlayAppUi::ShowSplash()
 	  CleanupStack::PushL(iBitmap);
 	  User::LeaveIfError( iBitmap->Load( iSplashMbmFileName,0,EFalse));
     
-    iSplashActive = ETrue;
 	  CFbsScreenDevice *iDevice = NULL;
 
 	  TDisplayMode dispMode = CCoeEnv::Static()->ScreenDevice()->DisplayMode();

@@ -1560,7 +1560,6 @@ COggAnalyzer::Cycle()
 void
 COggAnalyzer::Draw(CBitmapContext& aBitmapContext)
 {
-
   if (iBarIcon) {
     TInt x= ix;
     TSize s(iBarIcon->Bitmap()->SizeInPixels());
@@ -1598,6 +1597,8 @@ void COggAnalyzer::RenderWaveform(short int data[2][512])
 void COggAnalyzer::RenderWaveform(short int *data)
 #endif
 {
+  IFDEF_S60( if( !data ) return; )
+
   if (iStyle==0) return;
   for (int i=0; i<512; i++) {
 #if!defined(SERIES60)

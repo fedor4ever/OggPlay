@@ -247,7 +247,6 @@ private:
   void FindSkins();
 #if defined(SERIES60_SPLASH)
   void ShowSplash();
-  TBool iSplashActive;
 #endif
 
 

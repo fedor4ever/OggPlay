@@ -8,7 +8,7 @@ OggPlay UID pool
 0x101FF67D          OggPlay Application
 0x101FF67E          FullSteel skin
 0x101FF67F          GreyZone skin
-0x101FF680          Unused
+0x101FF680          Temporary development
 0x101FF681          Unused
 0x101FF682          Unused
 0x101FF683          Unused

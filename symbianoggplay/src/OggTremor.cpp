@@ -512,7 +512,10 @@ TInt64 COggPlayback::Time()
 const void* COggPlayback::GetDataChunk()
 {
   TInt idx= iSentIdx;
-  return iSent[idx]->Ptr();
+  if( iSent[idx] ) 
+    return iSent[idx]->Ptr();
+  else
+    return NULL;
 }
 
 TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
