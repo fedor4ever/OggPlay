@@ -50,7 +50,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_9 "Bu bir ogg vorbis dosyasý deðil?!"
 #define ogg_text_error_10 "Sadece bir veya iki kanallý veri akýmlarý destekleniyor."
 #define ogg_text_error_12 "Desteklenmeyen ses biçimi."
-#define ogg_text_error_13 "Desteklenen örnekleme oranlarý: 11025,16000,22050,32000,44100,48000 Hz."
+//#define ogg_text_error_13 "Desteklenen örnekleme oranlarý: 11025,16000,22050,32000,44100,48000 Hz."
 #define ogg_text_error_14 "Bu dosya açýlamýyor"
 #define ogg_text_error_15 "Açýk dosya yok."
 #define ogg_text_error_16 "Hata kodu "
@@ -59,6 +59,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_19 "Giriþ hatasý "
 #define ogg_text_error_20 "Hata"
 #define ogg_text_error_21 "COggCanvas: Arkaplan resmini açarken hata."
+#define ogg_text_error_22 "Only the following sample rates are supported: "
+#define ogg_text_error_23 "Only streams with one channel are supported."
 
 #define ogg_text_string_1 "Dosya listesi yenileniyor..."
 #define ogg_text_string_2 "Dosya veritabaný yazýlýyor..."

@@ -201,7 +201,7 @@ RESOURCE TBUF r_ogg_error_8 { buf=ogg_text_error_8; }
 RESOURCE TBUF r_ogg_error_9 { buf=ogg_text_error_9; }
 RESOURCE TBUF r_ogg_error_10 { buf=ogg_text_error_10; }
 RESOURCE TBUF r_ogg_error_12 { buf=ogg_text_error_12; }
-RESOURCE TBUF r_ogg_error_13 { buf=ogg_text_error_13; }
+// RESOURCE TBUF r_ogg_error_13 { buf=ogg_text_error_13; } // Not used anymore
 RESOURCE TBUF r_ogg_error_14 { buf=ogg_text_error_14; }
 RESOURCE TBUF r_ogg_error_15 { buf=ogg_text_error_15; }
 RESOURCE TBUF r_ogg_error_16 { buf=ogg_text_error_16; }
@@ -210,6 +210,8 @@ RESOURCE TBUF r_ogg_error_18 { buf=ogg_text_error_18; }
 RESOURCE TBUF r_ogg_error_19 { buf=ogg_text_error_19; }
 RESOURCE TBUF r_ogg_error_20 { buf=ogg_text_error_20; }
 RESOURCE TBUF r_ogg_error_21 { buf=ogg_text_error_21; }
+RESOURCE TBUF r_ogg_error_22 { buf=ogg_text_error_22; }
+RESOURCE TBUF r_ogg_error_23 { buf=ogg_text_error_23; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }

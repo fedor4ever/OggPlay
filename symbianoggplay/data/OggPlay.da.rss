@@ -43,7 +43,7 @@
 #define ogg_text_error_9 "Dette er ikke en ogg vorbis fil?!"
 #define ogg_text_error_10 "Kun mono og stereo er understøttet."
 #define ogg_text_error_12 "Audio formatet er ikke understøttet."
-#define ogg_text_error_13 "Kun 11025,16000,22050,32000,44100 og 48000 Hz er understøttet."
+//#define ogg_text_error_13 "Kun 11025,16000,22050,32000,44100 og 48000 Hz er understøttet."
 #define ogg_text_error_14 "Kan ikke åbne filen"
 #define ogg_text_error_15 "Ingen filer åbne."
 #define ogg_text_error_16 "Fejl code "
@@ -52,6 +52,8 @@
 #define ogg_text_error_19 "Input fejl "
 #define ogg_text_error_20 "Fejl"
 #define ogg_text_error_21 "COggCanvas: Error opening background image."
+#define ogg_text_error_22 "Only the following sample rates are supported: "
+#define ogg_text_error_23 "Only streams with one channel are supported."
 
 #define ogg_text_string_1 "Opdaterer filliste..."
 #define ogg_text_string_2 "Opdaterer fil database..."
