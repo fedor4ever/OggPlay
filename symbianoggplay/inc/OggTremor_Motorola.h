@@ -88,6 +88,7 @@ private:
 
    TInt                     iMaxVolume;
    TInt                     iSentIdx;
+   TBool                    iPlayWhenOpened;
    
    // Communication with the tremor/ogg codec:
    //-----------------------------------------

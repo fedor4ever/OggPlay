@@ -91,12 +91,17 @@ CAbsPlayback::CAbsPlayback( MPlaybackObserver* anObserver )
 COggPlayback::COggPlayback( COggMsgEnv* anEnv, MPlaybackObserver* anObserver )
 : CAbsPlayback(anObserver)
 , iEnv(anEnv)
-, iFile(0)
+, iOggSampleRateConverter( NULL )
+, iStream( NULL )
+, iDelete( NULL )
+, iMaxVolume( 0 )
+, iSentIdx( 0 )
+, iPlayWhenOpened( EFalse )
+, iFile( NULL )
 , iFileOpen( EFalse )
 , iEof( EFalse )
+, iDecoder( NULL )
 {
-   iSentIdx = 0;
-   iDecoder = NULL;
 };
 
 // ~COggPlayback
@@ -104,6 +109,12 @@ COggPlayback::COggPlayback( COggMsgEnv* anEnv, MPlaybackObserver* anObserver )
 
 COggPlayback::~COggPlayback( void )
 {
+   if ( iFileOpen )
+   {
+      iDecoder->Close( iFile );
+      fclose( iFile );
+      iFileOpen = EFalse;
+   }
    if ( iDecoder ) delete iDecoder;
    if ( iStream  ) delete iStream;
    if ( iDelete  ) delete iDelete;
@@ -145,6 +156,14 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 {
    if (aFileName.Length()==0) return -100;
    
+   // Close any existing opened file
+   if ( iFileOpen )
+   {
+      iDecoder->Close( iFile ); 
+      fclose( iFile );
+      iFileOpen = EFalse;
+   }
+
    FILE* f;
    
    // add a zero terminator
@@ -167,6 +186,8 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
    {
       iDecoder->Close(f);
       fclose(f);
+      iFileOpen = EFalse;
+
       if (!silent)
       {
          iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_9);
@@ -236,8 +257,8 @@ TInt COggPlayback::Open( const TDesC& aFileName )
       iDecoder->Close(iFile);
       fclose(iFile);
       iFileOpen = EFalse;
-      //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
       
+      //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
       iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
 
       return -102;
@@ -306,6 +327,14 @@ void COggPlayback::Play()
       }
       break;
       
+   case EClosed:
+      if ( iStream )
+      {
+         iPlayWhenOpened = ETrue;
+         break;
+      }
+      // Else fall-thru
+
    default:
       iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
       RDebug::Print(_L("Oggplay: Tremor - State not Open"));
@@ -480,6 +509,7 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
    case EMAudioFBCallbackStateReady:
       iState = EOpen;
       iMaxVolume = iStream->GetMaxVolume();
+      if ( iPlayWhenOpened ) Play();
       break;
 
    case EMAudioFBCallbackStateDecodeCompleteBufferListEmpty:
