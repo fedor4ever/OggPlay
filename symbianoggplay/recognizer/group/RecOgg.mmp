@@ -1,7 +1,7 @@
 
 // Can somebody make the next line read "#include <OggPlayUid.h>" 
 // and on top make it build, then it would be really neat...
-#include "..\..\..\epoc32\include\OggPlayUid.h"
+#include "..\..\inc\OggPlayUid.h"
 
 TARGET          RECOGG.MDL
 TARGETTYPE      MDL

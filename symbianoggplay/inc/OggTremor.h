@@ -35,7 +35,7 @@
 
 
 #ifdef SERIES60
-const TInt KBuffers= 4;
+const TInt KBuffers= 2;
 const TInt KBufferSize = 4096;
 #else
 const TInt KBuffers= 12;
