@@ -21,11 +21,11 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     ListBox {
-      Position 2 2 166 140
+      Position 0 2 172 138
       Font LatinPlain12 20 0
       FontColor 117 193 226
       FontColorSelected 255 255 255
-      BarColorSelected 117 193 226
+      BarColorSelected 18 130 181
     }
   }
 }
