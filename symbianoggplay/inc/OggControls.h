@@ -19,11 +19,14 @@
 #ifndef OggControls_h
 #define OggControls_h
 
+#include "OggOs.h"
+
 #include <coecntrl.h>
 #include <eikclbd.h>
 #include <mdaimageconverter.h>
 #include <gulicon.h>
 #include <badesca.h>
+#include <flogger.h>
 
 #include <stdio.h>
 
@@ -84,6 +87,7 @@ class TOggParser {
   TInt      iLine;
   TBuf<128> iToken;
   TInt      iVersion;
+  RFileLogger ilog;
 
 };
 
@@ -410,7 +414,11 @@ class COggAnalyzer : public COggControl {
   void SetValue(TInt i, TInt theValue);
   void SetStyle(TInt aStyle);
   void RenderFrequencies(short int data[256]);
+#if !defined(SERIES60)
   void RenderWaveform(short int data[2][512]);
+#else
+  void RenderWaveform(short int *data);
+#endif
   void Clear();
   TInt Style();
 

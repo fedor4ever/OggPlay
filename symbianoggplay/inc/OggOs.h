@@ -19,21 +19,20 @@
 #ifndef __OggOs_h
 #define __OggOs_h
 
-//#define SERIES60
 
-//#if defined( __WINS__ )  && defined(__VC32__)
+#if defined( __WINS__ )  && defined(__VC32__)
 #define chSTR(x)           #x
 #define chSTR2(x)        chSTR(x)
 #define chmsg(desc) message(__FILE__ "("\
 chSTR2(__LINE__) "):" #desc)
 
-//#else
-//#define chmsg(desc)
-//#endif
+#else
+#define chmsg(desc)
+#endif
 
 #if defined(__AVKON_ELAF__) || defined(__AVKON_APAC__)
-//#define SERIES60
-#pragma chmsg(Building for SERIES60)
+#define SERIES60
+//#pragma chmsg(Building for SERIES60)
 #else
 #define UIQ
 //#pragma chmsg(Building for UIQ)

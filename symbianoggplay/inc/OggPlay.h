@@ -140,15 +140,16 @@ public:
   int iVolume;            // [0...100]
   int iRepeat;            // 0=off; 1=on
   int iAnalyzerState[2];  // 0= off; 1=on; 2= on with peaks
-  TViews iViewBy;
+  TViews    iViewBy;
   TTime iAlarmTime;       // the alarm has been set to this time
 
   // global status:
-  int iCurrent;           // index of the file which is currently being played
+  int iCurrent;        // index of the file which is currently being played
   TBuf<512> iCurrentSong; // full path and filename of the current song
-  int iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
-  int iAlarmTriggered;    // did the alarm clock go off?
-  int iAlarmActive;       // has an alarm time been set?
+  int iTryResume;      // after iTryResume seconds try resuming music (after sound device was stolen)
+  int iAlarmTriggered; // did the alarm clock go off?
+  int iAlarmActive;    // has an alarm time been set?
+
   TBool iForeground;      // is the application currently in the foreground?
 
   TFileName iDbFileName;
@@ -175,7 +176,7 @@ public:
   void HandleForegroundEventL(TBool aForeground);
   void DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane);
 
-private:
+private: 
 
   void ReadIniFile();
   void WriteIniFile();
@@ -188,7 +189,7 @@ private:
   void FindSkins();
 
   int iCapturedKeyHandle;
-  TFileName iIniFileName;
+  HBufC* iIniFileName;
   TFileName iSkinFileDir;
   TInt iCurrentSkin;
   CDesCArray* iSkins;

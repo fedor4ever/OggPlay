@@ -16,6 +16,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef OGGPLAY_HRH
+#define OGGPLAY_HRH
 enum {
   EOggPlay = 12345,
   EOggPauseResume,
@@ -56,3 +58,28 @@ enum {
   EOggLabelRate,
   EOggLabelChannels
 };
+
+enum TOggplayCommandIds
+    {
+    EOggplayCmdAppTest = 1
+    };
+
+enum TOggplayTabViewId
+    {
+    EOggplayView1Tab= 1,
+    EOggplayView2Tab
+    };
+ 
+
+enum TOggplayDlgLineId // dialog line ids
+    {
+    EOggplayDlg1Label = 1,
+    EOggplayDlg2Label,
+	EOggLabelAboutVersion2,
+	EOggLabelAboutVersion3,
+	EOggLabelAboutVersion4,
+	EwizradialDlg1Label
+    };
+
+
+#endif      // OGGPLAY_HRH
