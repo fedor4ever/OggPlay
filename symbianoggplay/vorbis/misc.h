@@ -137,24 +137,42 @@ static inline void XPROD32(ogg_int32_t  a, ogg_int32_t  b,
 			   ogg_int32_t  t, ogg_int32_t  v,
 			   ogg_int32_t *x, ogg_int32_t *y)
 {
-  *x = MULT32(a, t) + MULT32(b, v);
-  *y = MULT32(b, t) - MULT32(a, v);
+  ogg_int32_t  ashift;
+  ogg_int32_t  bshift;
+  ashift = a >> 9;
+  bshift = b >> 9;
+//  *x = MULT32(a, t) + MULT32(b, v);
+  *x =  ashift * t + bshift * v;
+//  *y = MULT32(b, t) - MULT32(a, v);
+  *y = bshift *t - ashift * v;
 }
 
 static inline void XPROD31(ogg_int32_t  a, ogg_int32_t  b,
 			   ogg_int32_t  t, ogg_int32_t  v,
 			   ogg_int32_t *x, ogg_int32_t *y)
 {
-  *x = MULT31(a, t) + MULT31(b, v);
-  *y = MULT31(b, t) - MULT31(a, v);
+  ogg_int32_t  ashift;
+  ogg_int32_t  bshift;
+  ashift = a >> 8;
+  bshift = b >> 8;
+//  *x = MULT31(a, t) + MULT31(b, v);
+  *x = ashift * t + bshift * v;
+//  *y = MULT31(b, t) - MULT31(a, v);
+  *y = bshift * t - ashift * v;
 }
 
 static inline void XNPROD31(ogg_int32_t  a, ogg_int32_t  b,
 			    ogg_int32_t  t, ogg_int32_t  v,
 			    ogg_int32_t *x, ogg_int32_t *y)
 {
-  *x = MULT31(a, t) - MULT31(b, v);
-  *y = MULT31(b, t) + MULT31(a, v);
+  ogg_int32_t  ashift;
+  ogg_int32_t  bshift;
+  ashift = a >> 8;
+  bshift = b >> 8;
+//  *x = MULT31(a, t) - MULT31(b, v);
+  *x = ashift * t - bshift * v;
+//  *y = MULT31(b, t) + MULT31(a, v);
+  *y = bshift * t + ashift * v;
 }
 
 #endif
