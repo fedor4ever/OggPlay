@@ -5,7 +5,10 @@ PRJ_PLATFORMS
 WINS WINSCW ARMI
 
 PRJ_MMPFILES
-mad.mmp
+// The non plugin MAD
+//mad.mmp
+// The plugin MAD
+madpluginDecoder.h
 
 PRJ_EXPORTS
 

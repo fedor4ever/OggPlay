@@ -30,28 +30,6 @@
 #ifndef OGGPLUGINADAPTOR_H
 #define OGGPLUGINADAPTOR_H
 
-class CPluginInfo : public CBase
-{
-private :
-  CPluginInfo();
-  
-  HBufC* iExtension;
-  HBufC* iName;
-  HBufC* iSupplier;
-  TInt iVersion;
-
-public:
-   ~CPluginInfo();
-   static CPluginInfo* NewL( const TDesC& anExtension, 
-	   const TDesC& aName,
-	   const TDesC& aSupplier,
-	   const TInt aVersion);
-   void ConstructL ( const TDesC& anExtension, 
-	   const TDesC& aName,
-	   const TDesC& aSupplier,
-	   const TInt aVersion );
-
-};
 
 class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
 {
@@ -68,7 +46,6 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   virtual void   Pause();
   virtual void   Play();
   virtual void   Stop();
-
   virtual void   SetVolume(TInt aVol);
   virtual void   SetPosition(TInt64 aPos);
 
@@ -84,11 +61,11 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   
   virtual void MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration);
   virtual void MapcPlayComplete(TInt aError);
+  virtual CArrayPtrFlat <CPluginInfo> & PluginList();
  private:
-  void SupportedFormatL();
   void SearchPluginsL(const TDesC &aName);
   void OpenL(const TDesC& aFileName);
-  void ConstructAPlayerL();
+  void ConstructAPlayerL(const TDesC &aFileName);
   COggMsgEnv*               iEnv;
   
   TBuf<100> iFilename;
@@ -100,10 +77,15 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaAudioPlayerCallback
   CMdaAudioPlayerUtility *iPlayer;
 #else
   CPseudoMMFController * iPlayer;
+  
+  CPseudoMMFController * iOggPlayer;
+  CPseudoMMFController * iMp3Player;
   // Use RLibrary object to interface to the DLL
-  RLibrary iLibrary;
+  RLibrary iOggLibrary;
+  RLibrary iMp3Library;
 #endif
 
+ 
 };
 
 #endif

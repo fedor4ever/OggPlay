@@ -14,10 +14,10 @@ OggPlay UID pool
 0x101FF683          TremorPlugin
 0x101FF684          TremorPluginController
 0x101FF685          TremorPluginFormat
-0x10202027          Unused
-0x10202028          Unused
-0x10202029          Unused
-0x1020202A          Unused
+0x10202027          MadPlugin
+0x10202028          MadPluginController
+0x10202029          MadPluginFormat
+0x1020202A          MADPLUGINDECODERPREMMF.DLL
 0x1020202B          Unused
 0x1020202C          Unused
 0x1020202D          Unused

@@ -18,6 +18,7 @@
 #include "OggOs.h"
 #include "OggRateConvert.h"
 
+
 #ifndef OGGABSPLAYBACK_H
 #define OGGABSPLAYBACK_H
 
@@ -29,6 +30,35 @@ const TInt KErrOggFileNotFound = -101;
 const TInt KFreqArrayLength = 100; // Length of the memory of the previous freqs bin
 const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making same changes
                                    // to vorbis library !
+
+
+#ifdef PLUGIN_SYSTEM
+//
+// CPluginInfo class
+//------------------------------------------------------
+class CPluginInfo : public CBase
+{
+private :
+  CPluginInfo();
+  
+public:
+   ~CPluginInfo();
+   static CPluginInfo* NewL( const TDesC& anExtension, 
+	   const TDesC& aName,
+	   const TDesC& aSupplier,
+	   const TInt aVersion);
+   void ConstructL ( const TDesC& anExtension, 
+	   const TDesC& aName,
+	   const TDesC& aSupplier,
+	   const TInt aVersion );
+   
+  HBufC* iExtension;
+  HBufC* iName;
+  HBufC* iSupplier;
+  TInt iVersion;
+
+};
+#endif
 
 //
 // MPlaybackObserver class
@@ -83,6 +113,9 @@ class CAbsPlayback : public CBase {
   virtual const void* GetDataChunk() = 0;
 #endif
 
+#ifdef PLUGIN_SYSTEM
+  virtual CArrayPtrFlat <CPluginInfo> & PluginList() = 0; 
+#endif
    // Implemented Helpers 
    ////////////////////////////////////////////////////////////////
 

@@ -897,6 +897,26 @@ void TOggFiles::FillGenres(CDesCArray& arr, const TDesC& anAlbum,
   }
 }
 
+#ifdef PLUGIN_SYSTEM
+
+TBool TOggFiles::isSupportedAudioFile(TParsePtrC& p)
+{
+    TBool result=EFalse;
+    if (p.ExtPresent())
+    {
+        TPtrC pp (p.Ext().Mid(1)); // Remove the . in front of the extension
+        CArrayPtrFlat <CPluginInfo> & pluginList= iOggPlayback->PluginList();
+        for (TInt i=0; i<pluginList.Count(); i++)
+        {
+            result=(pp.CompareF( pluginList[i]->iExtension->Des() ) == 0 );  
+            if (result)
+                break;
+        }
+    }
+    return result;
+}
+#else /*PLUGIN_SYSTEM */
+
 TBool TOggFiles::isSupportedAudioFile(TParsePtrC& p)
 {
 
@@ -907,3 +927,4 @@ TBool TOggFiles::isSupportedAudioFile(TParsePtrC& p)
 #endif
   return result;
 }
+#endif /* PLUGIN_SYSTEM */

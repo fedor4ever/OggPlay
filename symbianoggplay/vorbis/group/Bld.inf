@@ -6,10 +6,9 @@ WINS WINSCW ARMI
 
 PRJ_MMPFILES
 // This is for the non-MMF friendly plugin
-oggvorbis.mmp
+//oggvorbis.mmp
 // This is for the MMF friendly plugin
-// Not yet functional !
-//OggPluginDecoder.mpp
+OggPluginDecoder.mpp
 
 PRJ_EXPORTS
 

@@ -1,0 +1,79 @@
+/*
+ *  Copyright (c) 2004 
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+//  INCLUDES
+#include <RegistryInfo.rh>
+#include "ImplementationUIDs.hrh"
+#include <mmfPluginInterfaceUIDs.hrh>
+
+
+//  RESOURCE DEFINITIONS 
+// -----------------------------------------------------------------------------
+//   
+// theInfo
+// Ogg Decoder controller plugin ECOM registration
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO theInfo
+	{
+	dll_uid = 0x10202027;
+	interfaces = 
+		{
+		INTERFACE_INFO // Controller Plugin Description
+			{
+			interface_uid = KMmfUidPluginInterfaceController;
+			implementations = 
+				{
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = KMadUidControllerImplementation;
+					version_no = 1;
+					display_name = "Mad Mp3 controller";
+					default_data = "?";
+					opaque_data = "<s>OggPlay<i>0x101F5D07<p>0x101F0001";
+					    //0x101F5D07 = KUidMediaTypeAudio
+
+					}
+				};
+			},
+		INTERFACE_INFO // Play Format Description
+			{
+			interface_uid = 0x101F0001 ;
+			implementations = 
+				{
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = KMadUidPlayFormatImplementation;
+					version_no = 1;
+					display_name = "Mad MP3 decoder Format";
+					default_data = "?";
+					opaque_data = "<s>??<i>0x101F5D07<e>.mp3";
+                   // SUPPLIER = ??
+                   // MEDIA ID = uid for audio media type
+                   // FILE EXTENSION = .mp3
+                   // HEADER DATA = lNone currently, should there be???? 
+                   // MIME TYPE = None currently, should there be????
+					}
+				};
+			}
+		};
+	}
+
+
+// End of File

@@ -62,15 +62,19 @@ chSTR2(__LINE__) "):" #desc)
 
 // When defined, the decoder used are dynamically loaded plugins.
 
-//#define PLUGIN_SYSTEM
+#define PLUGIN_SYSTEM
 // this is experimental at the moment.
 #ifdef PLUGIN_SYSTEM
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
 
-#define MMF_AVAILABLE
+//#define MMF_AVAILABLE
 
+#else
+// support for legacy audio codec (-:
+// this is experimental at the moment.
+#define MP3_SUPPORT
 #endif /* PLUGIN_SYSTEM */
 
 
@@ -105,9 +109,6 @@ chSTR2(__LINE__) "):" #desc)
 #define MONITOR_TELEPHONE_LINE 
 #endif
 
-// support for legacy audio codec (-:
-// this is experimental at the moment.
-#define MP3_SUPPORT
 
 // other tags:
 // #define RGAIN_SUPPORT

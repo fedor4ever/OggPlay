@@ -22,6 +22,7 @@
 #include <e32svr.h>
 #include <badesca.h>
 #include "OggLog.h"
+#include "f32file.h"
 
 
 
@@ -97,8 +98,7 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
     {
     TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
     
-        ConstructAPlayerL();
-
+        ConstructAPlayerL( aFileName );
         iPlayer->OpenFileL(aFileName);
         // Wait for the init completed callback
         iError = KErrNone;
@@ -219,20 +219,20 @@ TInt COggPluginAdaptor::Volume()
     return(0);
 }
 
-const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime aTime)
+const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime /*aTime*/)
 {
     // Not Implemented yet
     return NULL;
 }
 
-void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
+void COggPluginAdaptor::SetVolumeGain(TGainType /*aGain*/)
 {
     // Not Implemented yet
 }
 
 
 
-void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& aDuration)
+void COggPluginAdaptor::MapcInitComplete(TInt aError, const TTimeIntervalMicroSeconds& /*aDuration*/)
 {
     iError = aError;    
     TRACEF(COggLog::VA(_L("MapcInitComplete %d"), aError ));
@@ -259,6 +259,10 @@ void COggPluginAdaptor::ConstructL()
     SearchPluginsL(_L("aac"));
 }
 
+CArrayPtrFlat <CPluginInfo> & COggPluginAdaptor::PluginList()
+{
+    return *iPluginInfos;
+}
 
 #ifdef MMF_AVAILABLE
 ////////////////////////////////////////////////////
@@ -273,7 +277,7 @@ COggPluginAdaptor::~COggPluginAdaptor()
     delete(iPluginInfos);
 }
 
-void COggPluginAdaptor::ConstructAPlayerL()
+void COggPluginAdaptor::ConstructAPlayerL(const TDesC /*&anExtension*/)
 {
     // Stupid, but true, we must delete the player when loading a new file
     // Otherwise, will panic with -15 on some HW   
@@ -282,11 +286,6 @@ void COggPluginAdaptor::ConstructAPlayerL()
     iPlayer = CMdaAudioPlayerUtility::NewL(
         *this);
 }
-void COggPluginAdaptor::SupportedFormatL()
-{
-
-}
-
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
 {
@@ -355,60 +354,90 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
 
 COggPluginAdaptor::~COggPluginAdaptor()
 {
-     delete (iPlayer);
-    // Finished with the DLL
+     delete (iOggPlayer);
+     delete (iMp3Player);
+     // Finished with the DLLs
     //
-    iLibrary.Close();
-    iPluginInfos->ResetAndDestroy();
-    delete (iPluginInfos);
+     iOggLibrary.Close();
+     iMp3Library.Close();
+     iPluginInfos->ResetAndDestroy();
+     delete (iPluginInfos);
 }
 
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
 {
-    // NO REAL PLUGIN DISCOVERY, YET. PLEASE WRITE THAT PIECE OF CODE !
-    // Currently, expects that the 2 plugins (.ogg, .mp3) are installed.
-     
     CPluginInfo* info  = NULL;
 
+    const TUid KOggPlayDecoderLibraryUid={0x101FD21D};
     if (anExtension == _L("ogg"))
     {
-    info = CPluginInfo::NewL(
-        anExtension,
-        _L("OGG tremor decoder"),
-        _L("OggPlay Team"),
-        1);
+        if (iOggPlayer == NULL)
+        {
+            TUidType uidType(KDynamicLibraryUid,KOggPlayDecoderLibraryUid);
+            TBool found = (iOggLibrary.Load(_L("OGGPLUGINDECODERPREMMF.DLL"), uidType) == KErrNone) ;
+            if (found)
+            {
+                // Function at ordinal 1 creates new C
+                TLibraryFunction entry=iOggLibrary.Lookup(1);
+                // Call the function to create new CMessenger
+                iOggPlayer = (CPseudoMMFController*) entry();
+                iOggPlayer->SetObserver(*this);
+                
+                info = CPluginInfo::NewL(
+                    anExtension,
+                    _L("OGG tremor decoder"),
+                    _L("OggPlay Team"),
+                    1);
+            }
+        }
     } 
        
     if (anExtension == _L("mp3"))
     {
-    info = CPluginInfo::NewL(
-        anExtension,
-        _L("MP3 Mad decoder"),
-        _L("?"),
-        1);
+        if (iMp3Player == NULL)
+        {
+            TUidType uidType(KDynamicLibraryUid,KOggPlayDecoderLibraryUid);
+            TBool found = (iMp3Library.Load(_L("MADPLUGINDECODERPREMMF.DLL"), uidType) == KErrNone) ;
+            if (found)
+            {
+                // Function at ordinal 1 creates new C
+                TLibraryFunction entry=iMp3Library.Lookup(1);
+                // Call the function to create new CMessenger
+                iMp3Player = (CPseudoMMFController*) entry();
+                iMp3Player->SetObserver(*this);
+                
+                info = CPluginInfo::NewL(
+                    anExtension,
+                    _L("MP3 Mad decoder"),
+                    _L("?"),
+                    1);
+            }
+        }
     } 
     
     if (info) 
         iPluginInfos->AppendL(info);
 }
 
-void COggPluginAdaptor::ConstructAPlayerL()
+void COggPluginAdaptor::ConstructAPlayerL(const TDesC &anExtension)
 {
     // Load the plugin.
-    // Dynamically load the DLL
-    if (iPlayer == NULL)
+    TParsePtrC p( anExtension);
+    TPtrC pp (p.Ext().Mid(1)); // Remove the . in front of the extension
+       
+    if ( pp.CompareF( _L("ogg") ) == 0 )
     {
-        const TUid KOggDecoderLibraryUid={0x101FD21D};
-        TUidType uidType(KDynamicLibraryUid,KOggDecoderLibraryUid);
-        User::LeaveIfError ( iLibrary.Load(_L("OGGPLUGINDECODERPREMMF.DLL"), uidType) );
-        
-        // Function at ordinal 1 creates new C
-        TLibraryFunction entry=iLibrary.Lookup(1);
-        // Call the function to create new CMessenger
-        iPlayer = (CPseudoMMFController*) entry();
-        iPlayer->SetObserver(*this);
+        // an Ogg File
+      iPlayer = iOggPlayer;
     }
+
+    if ( pp.CompareF( _L("mp3") ) == 0 )
+    {
+        // an Ogg File
+      iPlayer = iMp3Player;
+    }
+    __ASSERT_ALWAYS(iPlayer, User::Panic(_L("Couldn't construct a Player"), 999) );
 }
 
 #endif
