@@ -1,13 +1,16 @@
 ;
 ; Series 60 multilingual installer - ARMI urel
 ;
-&EN,FR,GE,DU,IT,SP,SW,TU,DA
+&EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
 ;Version string to be changed
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,64,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+  "OggPlay"},(0x1000A661),1,64,1
 ;
 ; 0x101F7960 for S60 v2.0 and later
-(0x101F7960),0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
+(0x101F7960),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
+                     "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", 
+                     "Series60ProductID", "Series60ProductID", "Series60ProductID" }
 ;
 ; Display Release notes
 ;
@@ -15,8 +18,18 @@
 
 "\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
-{"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.ren" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rfr" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rge" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rdu" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rit" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsp" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsw" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rtu" "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rda" } -"!:\system\apps\OggPlay\OggPlay.rsc"
-"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
+{ "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.ren" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rfr" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rge"   
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rdu"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rit"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsp"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsw" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rtu" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rda"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rpo"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rru" } -"!:\system\apps\OggPlay\OggPlay.rsc"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
 "\Epoc32\data\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"

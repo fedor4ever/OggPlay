@@ -61,6 +61,6 @@ LIBRARY          MMFDevSound.lib mmfserverbaseclasses.lib  ecom.lib
 
 LIBRARY       euser.lib estlib.lib charconv.lib MediaClientAudioStream.lib flogger.lib efsrv.lib 
 
-MACRO         _LOW_ACCURACY_    //Not really needed, the full accuracy version 
+//MACRO         _LOW_ACCURACY_    //Not really needed, the full accuracy version 
                                 // also works ok.
 MACRO         OGGPLAYPLUGIN
