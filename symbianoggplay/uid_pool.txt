@@ -14,3 +14,13 @@ OggPlay UID pool
 0x101FF683          Unused
 0x101FF684          Unused
 0x101FF685          Unused
+0x10202027          Unused
+0x10202028          Unused
+0x10202029          Unused
+0x1020202A          Unused
+0x1020202B          Unused
+0x1020202C          Unused
+0x1020202D          Unused
+0x1020202E          Unused
+0x1020202F          Unused
+0x10202030          Unused
