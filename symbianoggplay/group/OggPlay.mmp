@@ -6,6 +6,8 @@ TARGETTYPE  app
 UID  0x100039CE 0x1000A661
 TARGETPATH \system\apps\Oggplay
 
+EPOCSTACKSIZE 16000
+
 SOURCEPATH ..\src
 SOURCE OggLog.cpp
 SOURCE OggPlay.cpp
@@ -163,6 +165,7 @@ START MARM
 // ?marm_specific_information
 END
 
+#if defined SERIES60
 START BITMAP S60default.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
@@ -212,7 +215,6 @@ SOURCE       c12 repeat.bmp
 SOURCE       1   repeatm.bmp
 SOURCE       c12 \symbian\oggplaylogo.bmp
 END
-
 
 START BITMAP S60classic.mbm
 TARGETPATH   \system\apps\OggPlay
@@ -264,7 +266,6 @@ SOURCE       1   repeatm.bmp
 SOURCE       c12 \symbian\oggplaylogo.bmp
 END
 
-#if defined SERIES60
 START BITMAP S60splash.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
@@ -283,9 +284,115 @@ SOURCEPATH   ..\bitmaps
 SOURCE       c12 fish0.bmp
 SOURCE       1   fishmask.bmp
 END
-#endif
+
 AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c16 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
-epocstacksize 16000
+
+#endif  // Series 60
+
+#if defined UIQ
+
+START BITMAP OggPlay.mbm
+TARGETPATH   \system\apps\OggPlay
+HEADER
+SOURCEPATH   ..\bitmaps
+// Required Icons
+SOURCE       c12 title.bmp             //  0 (title)
+SOURCE       1   titlem.bmp
+SOURCE       c12 cdicon.bmp            //  2 (album) 
+SOURCE       1   cdiconm.bmp
+SOURCE       c12 micicon.bmp           //  4 (artist)
+SOURCE       1   miciconm.bmp          
+SOURCE       c12 genre.bmp             //  6 (genre)
+SOURCE       1   genrem.bmp
+SOURCE       c12 folder.bmp            //  8 (folder)
+SOURCE       1   folderm.bmp
+SOURCE       c12 file.bmp              // 10 (file)
+SOURCE       1   filem.bmp
+SOURCE       c12 back.bmp              // 12 (back)
+SOURCE       1   backm.bmp
+SOURCE       c12 playing.bmp           // 14 (playing - not used ???)
+SOURCE       1   playingm.bmp
+SOURCE       c12 paused.bmp            // 16 (paused)           
+SOURCE       1   pausedm.bmp
+SOURCE       c12 flipclosed.bmp        // 18 (flip opened)
+SOURCE       c12 flipopen_steel.bmp    // 19 (flip closed)
+// Skin Dependent Icons
+SOURCE       c12 volume.bmp            // 20 (volume knob)
+SOURCE       1   volumem.bmp     
+SOURCE       1   volumem.bmp           // 22 (not used ???)
+SOURCE       c12 repeat.bmp            //    (repeat - flip closed)
+SOURCE       1   repeatm.bmp           // 24 
+SOURCE       c12 slider.bmp            //    (position knob)
+SOURCE       1   sliderm.bmp           // 26
+SOURCE       c12 knob.bmp              //    (scroll bar knob)
+SOURCE       1   knobm.bmp             // 28
+SOURCE       c12 bar.bmp               //    (analyzer bar)
+SOURCE       1   barm.bmp              // 30
+SOURCE       c12 stop.bmp              //    (stop normal)
+SOURCE       1   stopm.bmp             // 32
+SOURCE       1   stop_dimmed.bmp       //    (stop dimmed - bitmap & mask)
+SOURCE       c12 play.bmp              // 34 (playing normal)
+SOURCE       1   playm.bmp
+SOURCE       1   play_dimmed.bmp       // 36 (playing dimmed - bitmap & mask)
+SOURCE       c12 pause.bmp             //    (pause normal)
+SOURCE       1   pausem.bmp            // 38
+SOURCE       c12 alarm.bmp             //    (alarm - flip closed)
+SOURCE       1   alarmm.bmp            // 40
+END
+
+START BITMAP Symbian.mbm
+TARGETPATH   \system\apps\OggPlay
+HEADER
+SOURCEPATH   ..\bitmaps
+// Required Icons
+SOURCE       c12 title.bmp             //  0 (title)
+SOURCE       1   titlem.bmp
+SOURCE       c12 cdicon.bmp            //  2 (album) 
+SOURCE       1   cdiconm.bmp
+SOURCE       c12 micicon.bmp           //  4 (artist)
+SOURCE       1   miciconm.bmp          
+SOURCE       c12 genre.bmp             //  6 (genre)
+SOURCE       1   genrem.bmp
+SOURCE       c12 folder.bmp            //  8 (folder)
+SOURCE       1   folderm.bmp
+SOURCE       c12 file.bmp              // 10 (file)
+SOURCE       1   filem.bmp
+SOURCE       c12 back.bmp              // 12 (back)
+SOURCE       1   backm.bmp
+SOURCE       c12 playing.bmp           // 14 (playing - not used ???)
+SOURCE       1   playingm.bmp
+SOURCE       c12 paused.bmp            // 16 (paused)           
+SOURCE       1   pausedm.bmp
+SOURCE       c12 flipclosed.bmp        // 18 (flip opened)
+SOURCE       c12 symbian\flipopen.bmp  // 19 (flip closed)
+// Skin Dependent Icons
+SOURCE       c12 volume.bmp            // 20 (volume knob)
+SOURCE       1   volumem.bmp     
+SOURCE       1   volumem.bmp           // 22 (not used ???)
+SOURCE       c12 repeat.bmp            //    (repeat - flip closed)
+SOURCE       1   repeatm.bmp           // 24 
+SOURCE       c12 symbian\slider.bmp    //    (position knob)
+SOURCE       1   symbian\sliderm.bmp   // 26
+SOURCE       c12 knob.bmp              //    (scroll bar knob)
+SOURCE       1   knobm.bmp             // 28
+SOURCE       c12 bar.bmp               //    (analyzer bar)
+SOURCE       1   barm.bmp              // 30
+SOURCE       c12 stop.bmp              //    (stop normal)
+SOURCE       1   stopm.bmp             // 32
+SOURCE       1   stop_dimmed.bmp       //    (stop dimmed - bitmap & mask)
+SOURCE       c12 play.bmp              // 34 (playing normal)
+SOURCE       1   playm.bmp
+SOURCE       1   play_dimmed.bmp       // 36 (playing dimmed - bitmap & mask)
+SOURCE       c12 pause.bmp             //    (pause normal)
+SOURCE       1   pausem.bmp            // 38
+SOURCE       c12 alarm.bmp             //    (alarm - flip closed)
+SOURCE       1   alarmm.bmp            // 40
+SOURCE       c12 symbian\OggPlayLogo.bmp // 41
+END
+
+AIF OggPlay.aif ..\aif OggPlayAif.uiq.rss c16 cdicon_20x16.bmp cdicon_20x16_mask.bmp cdicon_32x32.bmp cdicon_32x32_mask.bmp
+
+#endif  // UIQ
 
 // For Symbian 7.0 and over
 // OPTION MSVC /Gs16000 /FD

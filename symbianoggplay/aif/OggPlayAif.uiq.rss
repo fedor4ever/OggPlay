@@ -1,4 +1,5 @@
-#include </local/symbian_sdk_7.0/include/aiftool.rh>
+#include <aiftool.rh>
+#include "OggOs.h"
 
 RESOURCE AIF_DATA
 {
@@ -7,7 +8,7 @@ RESOURCE AIF_DATA
 	{ 
 		CAPTION { code=ELangEnglish; caption="OggPlay"; }
 	};
-	num_icons=1;
+	num_icons=2;
 	embeddability=KAppNotEmbeddable;
 	newfile=KAppDoesNotSupportNewFile;
 	datatype_list=
@@ -15,6 +16,7 @@ RESOURCE AIF_DATA
 		DATATYPE { priority=EDataTypePriorityNormal; type="application/ogg"; }
 	};
 
+#if !defined( MOTOROLA ) 
 	view_list =
 	{
 		VIEW_DATA
@@ -36,5 +38,6 @@ RESOURCE AIF_DATA
 			};
 		}
 	};
+#endif
 }
 
