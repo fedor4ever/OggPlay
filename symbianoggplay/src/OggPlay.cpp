@@ -958,7 +958,9 @@ COggPlayAppUi::NextSong()
     {
         // if a song is currently playing, find and play the next song
         const TDesC &songName = iSongList->GetNextSong();
+#ifndef PLUGIN_SYSTEM
         iOggPlayback->Pause();
+#endif
         if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
             iOggPlayback->Play();
             iAppView->SetTime(iOggPlayback->Time());
@@ -993,7 +995,9 @@ COggPlayAppUi::PreviousSong()
     {
         // if a song is currently playing, find and play the previous song
         const TDesC &songName = iSongList->GetPreviousSong();
+#ifndef PLUGIN_SYSTEM
         iOggPlayback->Pause();
+#endif
         if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
             iOggPlayback->Play();
             iAppView->SetTime(iOggPlayback->Time());

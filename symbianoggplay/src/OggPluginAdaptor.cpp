@@ -147,18 +147,22 @@ void   COggPluginAdaptor::SetVolume(TInt aVol)
 
 void   COggPluginAdaptor::SetPosition(TInt64 aPos)
 {
-    // Not Implemented yet
+    if (iPlayer)
+        iPlayer->SetPosition(aPos);
 }
 
 TInt64 COggPluginAdaptor::Position()
 {
-    // Not Implemented yet
-    return(0);
+    TTimeIntervalMicroSeconds aPos = 0;
+    if (iPlayer)
+       iPlayer->GetPosition(aPos);
+    return(aPos.Int64());
 }
 
 TInt64 COggPluginAdaptor::Time()
 {
-    // Not Implemented yet
+    if (iPlayer)
+        return (iPlayer->Duration().Int64());
     return(0);
 }
 

@@ -232,6 +232,7 @@ void COggPlayController::PlayL()
 void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
+    iAdvancedStreaming->Pause();
     if (iState == EStatePlaying)
         iState = EStatePaused;
 }
@@ -246,15 +247,19 @@ void COggPlayController::StopL()
 TTimeIntervalMicroSeconds COggPlayController::PositionL() const
 {
     PRINT("COggPlayController::PositionL");
-    // Not implemented yet
+    
+    if(iDecoder)
+        return( TTimeIntervalMicroSeconds(iDecoder->Position( )) );
+    else
     return TTimeIntervalMicroSeconds(0);
 }
 
-void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& /*aPosition*/)
+void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition)
 {
     
     PRINT("COggPlayController::SetPositionL");
-    // Not implemented yet
+   
+    if(iDecoder) iDecoder->Setposition( aPosition.Int64() );
 }
 
 TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
@@ -262,7 +267,9 @@ TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
     
     PRINT("COggPlayController::DurationL");
     
-    // Not implemented yet
+    if (iDecoder) {
+        return (iDecoder->TimeTotal());
+    }
     return TTimeIntervalMicroSeconds(1E6);
 }
 
@@ -418,13 +425,14 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
     if (ret == 0)
     {
         iState = EStateOpen;
+        return(KErrCompletion);
     }
     return (ret);
 }
 
 void COggPlayController::NotifyPlayInterrupted(TInt aError)
 {
-   TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError));
+   TRACEF(COggLog::VA(_L("COggPlayController::NotifyPlayInterrupted %i"), aError))
    if (iState != EStateDestroying)
    {
 #ifdef MMF_AVAILABLE

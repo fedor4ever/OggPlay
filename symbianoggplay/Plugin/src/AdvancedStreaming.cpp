@@ -267,10 +267,10 @@ void CAdvancedStreaming::Play()
 
 void CAdvancedStreaming::Pause()
 {
-  if (iState == EStreaming) return;
-  if (iState == EStopping) return;
+  if (iState != EStreaming) return;
   // For now on, pausing is exactly the same as stop.
   // Could be improved in the future.
+  iState = EPaused;
   TRAPD( err, iStream->Stop() );
 }
 
@@ -311,10 +311,15 @@ void CAdvancedStreaming::SendBuffer(TDes8& buf)
         ret = iOggSampleRateConverter->FillBuffer( buf );
     }
     
-    if (ret < 0) {
+    if (ret == KErrCompletion)
+    {
+        // End of file reached
+        iState = EEndOfFile;
+    } else if (ret < 0) {
         // Error in the stream. Bad luck, we will continue anyway.
-    } else if (ret == 0) {
-        // End of the file
+    } else if (ret == 0)
+    {
+        // State has been changed by the user (paused, stopped)
         iState = EStopping;
     } else {
         TRAPD( err, iStream->WriteL(buf) );
@@ -343,11 +348,19 @@ void CAdvancedStreaming::MaoscPlayComplete(TInt aError)
   // KErrDied       -13  (interrupted by higher priority)
   // KErrInUse      -14
 
-  if ( (iState != EStopping) && (iState != EDestroying) ) 
+#if 0
+    // This should really be here for safety, but has some bad behaviour
+    // with pre 7.0S OS.
+    // Because stop is not asynchronous in pre 7.0s, it is possible that
+    // this callback is called, after a Stop->Open commands have been done, 
+    // leading into big troubles...
+
+  if ( iState == EStreaming ) 
   {
       NotifyPlayInterrupted(aError);
       return;
   }
+#endif
   if ( aError == KErrUnderflow ) return;
   if ( aError == KErrInUse ) aError= KErrNone;
   if ( aError == KErrCancel ) return;
@@ -377,7 +390,7 @@ void CAdvancedStreaming::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
   TInt b;
   for (b=0; b<KBuffers; b++) if (&aBuffer == iBuffer[b]) break;
 
-  if ( (iState == EStopping) && (iSent[iSentIdx] == &aBuffer) )
+  if ( (iState == EEndOfFile) && (iSent[iSentIdx] == &aBuffer) )
   {
       // All the buffers have been sent, stop the playback
       // We cannot rely on a MaoscPlayComplete from the CMdaAudioOutputStream
@@ -385,6 +398,7 @@ void CAdvancedStreaming::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
       // Thus, we wait for 0.1 sec, that everything is over.
       iStopAudioStreamingTimer->Wait(0.1E6);
   }
+
   if (aError == KErrUnderflow) aError= KErrNone;
 
   if (aError == KErrNone) SendBuffer(*iBuffer[b]); 

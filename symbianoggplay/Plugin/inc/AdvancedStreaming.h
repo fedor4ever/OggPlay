@@ -69,7 +69,9 @@ class CAdvancedStreaming : public CBase,
     EIdle,
     EStopping,
     EStreaming,
-    EDestroying
+    EDestroying,
+    EPaused,
+    EEndOfFile
   };
 
  private:
