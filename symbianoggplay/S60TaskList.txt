@@ -48,14 +48,20 @@ MMC hotswap Nokias yet ?
 ........................
 No Nokia with MMC hotswap available. Even the little new one,
 the 6600 using Symbian 7.0s doesn't have hotswap.
+........................
+Perhaps hotswap on SX1 is stretching the definition a 
+little, lets see what it ends up with. You can eject the 
+MMC card with power on at least !
 
 
-Issue #4 : Missing '.ogg' recognizer.                           State : To discussion
+
+Issue #4 : Missing '.ogg' recognizer.                           State : In Work/Claus
 ........................
 Any comments for or against ?
 ........................
 Bert: For. User should somehow have the possibility to add the
  track to the play list.
+
 
 Issue #5 : New maneuvring ??                                    State : To discussion
 Maneuvring does not conform to Series60, 
@@ -67,6 +73,8 @@ Bert: Would be nice, but the left-right is used to change of control.
  We cannot use the up/down to change control, this is used in the file
  list... We could rotate the volume bar 90 degrees. That way, it would
  be more intuitive to press the up/down. Any better solutions?
+.........................
+Claus. Oups, Auch !-) See issue #11.
 
 
 Issue#6. Skin support not working.                              State : Open
@@ -98,13 +106,18 @@ a little bit more so that buffer underflow doesn't happens too often.
 Issue #10. The Options menu doesn't work at all.                State : Open
 
 
-Issue #11. Right softkey Back/Exit                              State : To discussion
+Issue #11. Right softkey Back/Exit                              State : In work / Claus
 When in the 'ogg file system' back should work
 as the '..' and in the 'top view' it could read Exit
 and only here give app exit ?
 .........................
 Bert. What if we use the softkey for changing control? That way we 
    wouldn't have the problem of changing the volume using up/down ?
+.............................
+Claus. Brilliant ! The 'Back' RSK will read 'Next' and in the list
+box the left navi key could have the same effect as '..' and 
+navi-right would double the center-click functionality. Or did I
+miss anything ? I'll look into making a demo..
 
 
 Issue #12. Selection of (files) entry can fail                  State : Open
