@@ -246,7 +246,7 @@ void COggPlayController::StopL()
 
 TTimeIntervalMicroSeconds COggPlayController::PositionL() const
 {
-    PRINT("COggPlayController::PositionL");
+  //  PRINT("COggPlayController::PositionL");
     
     if(iDecoder)
         return( TTimeIntervalMicroSeconds(iDecoder->Position( )) );
@@ -265,7 +265,7 @@ void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition
 TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
 {
     
-    PRINT("COggPlayController::DurationL");
+   // PRINT("COggPlayController::DurationL");
     
     if (iDecoder) {
         return (iDecoder->TimeTotal());

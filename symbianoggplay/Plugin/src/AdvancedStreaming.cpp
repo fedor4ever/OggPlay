@@ -438,8 +438,8 @@ TInt CAdvancedStreaming::StopAudioStreamingCallBack(TAny* aPtr)
   
   self->iStream->Stop();
 
-  self->NotifyPlayInterrupted(KErrNone);
   self->iState = EIdle;
+  self->NotifyPlayInterrupted(KErrNone);  
   
   return 0;
 }
