@@ -1228,6 +1228,7 @@ COggPlayAppUi::ReadIniFile()
 
    } // version 2 onwards
 	
+#ifdef PLUGIN_SYSTEM
     TInt nbController = IniRead32(tf) ;
     TBuf<10> extension;
     TInt32 uid;
@@ -1243,6 +1244,7 @@ COggPlayAppUi::ReadIniFile()
         
         TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid, newermind));
     }
+#endif
 
    in.Close();
 	
