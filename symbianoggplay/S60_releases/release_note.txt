@@ -1,0 +1,54 @@
+This is the Release Note for Release 1.0 of Oggplay for Series60.
+
+OggPlay is an open source Ogg vorbis audio player for smartphones.
+
+Features:
+---------
++ Works on Siemens SX-1 and on Nokia models : "NGage, 7650, 3650 and 6600".
++ Plays all .ogg files, regardless of sampling rate / bit rate.
++ Random play, repeat, pause, fast-forward, rewind.
++ Support for skins.
++ File Recognizer support: Just click on an .ogg file in any filebrowser and
+  that file starts playing in Oggplay. 
++ Displays File information.
++ Frequency analyzer (Availability depends on skins)
+
+About OggVorbis:
+----------------
+Ogg Vorbis is an audio compression format similar to mp3.However the
+compressed files are approximately a factor two smaller than mp3 files.
+To be more precise an ogg file encoded with 64kbit/sec gives approximately the
+same level of audio quality as a 128kbit/sec mp3 file. In addition the ogg 
+format is a free format, i.e. nobody pays licence fees when recording or 
+playing music in this format. Free converters for the ogg vorbis format are 
+available widely for all platforms. More information and some sample files 
+here: http://www.vorbis.com/.
+
+What's new in Release 1.0:
+--------------------------
+
+Brand new look, navigation simplified.
+Now possible to play ANY ogg files, including on Nokia S60 phones,
+regardless of sample rate. 
+Full updated tranlations for English, French, German, Dutch, Italian, Spanish,
+ Swedish,turkish, Danish.
+Options menu.
+Configurable short-cuts.
+Support for frequency analyzer skins.
+More than 5 time faster file discovery.
+Autoplay on start.
+Improved audio stability.
+Major bug fixes for the Nokia 6600.
+
+
+Links:
+------
+
+For more information about Oggplay, please see the webpage at
+http://www.geocities.com/p800tools/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+
+-the S60 Oggplay developers.
