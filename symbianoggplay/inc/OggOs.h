@@ -47,6 +47,9 @@ chSTR2(__LINE__) "):" #desc)
 // Enable this line to enforce the platform target.
 #define SERIES60
 
+// Switches at least the splash bitmap
+#define UNSTABLE_RELEASE
+
 // Automatic platform target. Seen fail on windows systems.
 #if defined(__AVKON_ELAF__) || defined(__AVKON_APAC__)
   #if !defined(UIQ)
@@ -85,8 +88,6 @@ chSTR2(__LINE__) "):" #desc)
 // Not ready yet for prime time!
 #define MDCT_FREQ_ANALYSER 
 
-// Testing new listbox maneuvring. 
-#define NEW_LISTBOX_STYLE_FIXIT 
 
 // OTHERS
 //

@@ -81,10 +81,9 @@ void COggUserHotkeys::SetHotkey( TInt aRow, TInt aCode )
 // Static method
 TOggplaySettings::THotkeys COggUserHotkeys::Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData )
   {
-//  TRACE(COggLog::VA(_L("Hotkeys:%X:%X"), aKeyEvent.iScanCode, aKeyEvent.iModifiers ));    // FIXIT 
-
   for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
     {
+    // Special processing for the shift key
     if(aKeyEvent.iScanCode == EStdKeyLeftShift || 
       aKeyEvent.iScanCode == EStdKeyRightShift ) {
       if( (aData->iUserHotkeys[i] == aKeyEvent.iScanCode && aType == EEventKeyDown ) )

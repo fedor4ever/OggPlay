@@ -26,7 +26,8 @@
 #include <eikmenub.h>   // CEikMenuBar
 #include <apgtask.h>    // TApaTask
 #ifdef SERIES60
-#include <aknkeys.h>	
+#include <aknkeys.h>
+#include <aknkeylock.h>
 #else
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 #endif
@@ -36,11 +37,6 @@
 // UIQ_?
 IFDEF_S60(const TInt KCallBackPeriod = 150000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
 IFNDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
-// S60 file-listbox maneuvring speed constants
-const TInt KUserInactivityTimeoutMSecNormal = 1600;
-const TInt KUserInactivityTimeoutTicksNormal = KUserInactivityTimeoutMSecNormal * 1000 / KCallBackPeriod;
-const TInt KUserInactivityTimeoutMSecFast = 600;
-const TInt KUserInactivityTimeoutTicksFast = KUserInactivityTimeoutMSecFast * 1000 / KCallBackPeriod;
 
 const TInt KFfRwdStep=20000;
 
@@ -681,7 +677,8 @@ COggPlayAppView::GetValueFromTextLine(TInt idx)
     return (previousViewId);
 
 }
-TBool 
+
+TBool
 COggPlayAppView::HasAFileName(TInt idx)
 {
     // Returns true if a filename is associated with this item
@@ -907,47 +904,11 @@ COggPlayAppView::CallBack(TAny* aPtr)
     
     self->iCanvas[self->iMode]->Refresh();
 
-    IFDEF_S60( self->ListBoxNavigationTimerTick( EFalse ); )
   }
 
   return 1;
 }
 
-#ifdef NEW_LISTBOX_STYLE_FIXIT
-void
-COggPlayAppView::ListBoxNavigationTimerTick( TBool /*aRestart*/ )
-{
-    return;
-}
-#else
-void
-COggPlayAppView::ListBoxNavigationTimerTick( TBool aRestart )
-  {
-  if( aRestart )
-    {
-    // User moved cursor, (re)install timeout counter
-    if( iApp->iSettings.iManeuvringSpeed == 0 )
-      iUserInactivityTickCount = KUserInactivityTimeoutTicksNormal;
-    else if( iApp->iSettings.iManeuvringSpeed == 1 )
-      iUserInactivityTickCount = KUserInactivityTimeoutTicksFast;
-    else
-      iUserInactivityTickCount = -1;
-    }
-  else
-    {
-    // Timer tick - check for a timeout if the counter is active
-    if( iUserInactivityTickCount <= 0 )
-      return;
-
-    if( --iUserInactivityTickCount == 0 )
-      {
-      // Fire navi-center event on non-ogg files only, and only when playing.
-      if( ! HasAFileName(GetSelectedIndex()) && iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
-        iApp->HandleCommandL(EOggPlay);
-      }
-    }
-  }
-#endif
 
 void
 COggPlayAppView::Invalidate()
@@ -1404,9 +1365,8 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     EOggLeft=EStdKeyLeftArrow
     };
 
-  TInt code     = aKeyEvent.iCode;
-//  TInt modifiers= aKeyEvent.iModifiers & EAllStdModifiers;
-//  TInt iHotkey  = ((COggPlayAppUi *)iEikonEnv->EikAppUi())->iHotkey;
+  // Utilities
+  TInt code = aKeyEvent.iCode;
   TInt index = iListBox[iMode]->CurrentItemIndex();
 
   COggControl* c=iFocusControlsIter;
@@ -1420,14 +1380,11 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       return EKeyWasConsumed;
     } else {
       if(c==iListBox[iMode] || !iFocusControlsPresent) {
-        TInt idx= iListBox[iMode]->CurrentItemIndex();
         if (aKeyEvent.iScanCode==EOggDown) {
-          SelectItem(idx+1);
-          ListBoxNavigationTimerTick( ETrue );
+          SelectItem(index+1);
           return EKeyWasConsumed;
         } else if (aKeyEvent.iScanCode==EOggUp ) {
-          SelectItem(idx-1);
-          ListBoxNavigationTimerTick( ETrue );
+          SelectItem(index-1);
           return EKeyWasConsumed;
         } 
       } 
@@ -1448,7 +1405,10 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
           if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
             iApp->SelectPreviousView();
           } else if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggRight) {
-            iApp->SelectNextView();
+            if( HasAFileName(index) )
+              iApp->HandleCommandL(EOggPlay);
+            else
+              iApp->SelectNextView();
           }
 
         }
@@ -1460,7 +1420,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   if(code == EOggConfirm) {
     if(!iFocusControlsPresent) {
 
-#ifdef NEW_LISTBOX_STYLE_FIXIT
        if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
             iApp->iOggPlayback->State()==CAbsPlayback::EPaused) {
             if (iApp->iSongList->IsSelectedFromListBoxCurrentlyPlaying())
@@ -1472,12 +1431,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       else
         // Event without any active files
         iApp->HandleCommandL(EOggPlay);
-#else
-      if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
-	        iApp->iOggPlayback->State()==CAbsPlayback::EPaused) 
-           iApp->HandleCommandL(EOggPauseResume);
-      else iApp->HandleCommandL(EOggPlay);
-#endif
 
     } else if(c==iPlayButton[iMode]) { 
       // manually move focus to pause button
@@ -1519,16 +1472,12 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageDown : {
-      if(index == iListBox[iMode]->CountText() - 1)
-        ListBoxNavigationTimerTick( ETrue );
-      else
+      if(index != iListBox[iMode]->CountText() - 1)
         SelectItem(index + iListBox[iMode]->NofVisibleLines() - 1);
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageUp : {
-      if(index == 0)
-        ListBoxNavigationTimerTick( ETrue );
-      else
+      if(index != 0)
         SelectItem(index - iListBox[iMode]->NofVisibleLines() + 1);
       return EKeyWasConsumed;
       }
@@ -1540,6 +1489,16 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 		iApp->PreviousSong();
 		return EKeyWasConsumed;
 		}
+    case TOggplaySettings::EKeylock : {
+      if( aKeyEvent.iRepeats > 0 )
+        {
+        RAknKeyLock keyLock;
+        keyLock.Connect ();
+        keyLock.EnableKeyLock() ;
+        keyLock.Close() ;
+        }
+      return EKeyWasConsumed;
+      }
     default :
       break;
     }

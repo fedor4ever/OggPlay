@@ -1271,7 +1271,7 @@ COggPlayAppUi::WriteIniFile()
 
   // this should do the trick for forward compatibility:
   TInt magic=0xdb;
-  TInt iniversion=3;
+  TInt iniversion=4;
   
   num.Num(magic);
   tf.Write(num);
@@ -1564,7 +1564,7 @@ COggSongList::SetPlaying(TInt aPlaying)
     iAppView->Update();
 }
 
-_LIT(KEmpty,"");
+_LIT(KEmpty,""); // Use KNullDesC :-)
 
 const TDesC &
 COggSongList::RetrieveFileName(TInt anAbsoluteIndex)

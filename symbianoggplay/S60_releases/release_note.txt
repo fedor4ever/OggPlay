@@ -16,6 +16,7 @@ All the features of 1.0.0 plus:
   + New shortcut option for next/previous song
   + 'Dynamic' random play. No need to shuffle the playlist anymore.
   + Quite a lot of internal changes. 
+  + New shortcut option for engaging keylock
 
 Links:
 ------

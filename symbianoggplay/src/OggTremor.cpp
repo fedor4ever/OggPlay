@@ -648,7 +648,7 @@ void COggPlayback::Pause()
 
 void COggPlayback::Stop()
 {
-  if (iState != EPlaying)
+  if (iState == EClosed ) // FIXIT Was 'EPlaying' and panicked at exit in paused mode
   { 
     return;
   }

@@ -127,8 +127,9 @@ public:
     ERewind,
     EPageUp,
     EPageDown,
-	ENextSong,
-	EPreviousSong,
+    ENextSong,
+    EPreviousSong,
+    EKeylock,
     ENofHotkeys,
     KFirstHotkeyIndex = EFastForward
     };

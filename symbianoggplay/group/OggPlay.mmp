@@ -161,7 +161,11 @@ START BITMAP S60splash.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
 SOURCEPATH   ..\bitmaps
+#if defined UNSTABLE_RELEASE
+SOURCE       c12 s60splash_unstable.bmp
+#else
 SOURCE       c12 s60splash.bmp
+#endif
 END
 
 START BITMAP fish.mbm

@@ -24,8 +24,8 @@
 #define ogg_hotkey_flipopen "Flip open"
 #define ogg_skin_default "default"
 #define ogg_file_info "File info..."
-#define ogg_repeat_on         "Repeat is on"						// New
-#define ogg_repeat_off        "Repeat is off"						// New
+#define ogg_repeat_on         "Repeat is on"
+#define ogg_repeat_off        "Repeat is off"
 
 #define ogg_find_files "Find new files"
 #define ogg_skins "Skins"
@@ -92,17 +92,18 @@
 #define ogg_format_text_page_down    "File list page down"
 #define ogg_format_text_next_song	 ogg_next_song
 #define ogg_format_text_prev_song	 ogg_prev_song
+#define ogg_format_text_keylock      "Keylock"          // NEW 2004-04-24
 
 
 #define ogg_settings                 "Settings"  // in the menu
 #define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
 #define ogg_filescanmode             "File scan mode"
-//#define ogg_maneuvring_speed         "Auto Change Dir"
+//#define ogg_maneuvring_speed         "Auto Change Dir"  // DELETE
 #define ogg_autostart                "Autoplay on start"
 #define ogg_fullscan                 "Full Scan"
 #define ogg_mmcdir                   "E:\Ogg"
-//#define ogg_normal                   "Normal"
-//#define ogg_fast                     "Fast"
+//#define ogg_normal                   "Normal"         // DELETE
+//#define ogg_fast                     "Fast"           // DELETE
 #define ogg_on                       "On"
 #define ogg_off                      "Off"
 #define ogg_popup_on                 "Enabled"
