@@ -634,16 +634,15 @@ COggPlayAppUi::SetSeries80Softkeys(TInt * aSoftkey) {
 	      action = EEikCmdCanceled;
 	      break;
   	}
-    Cba()->SetCommandL(i,action, buf); // Ca, ca marche
+    Cba()->SetCommandL(i,action, buf); // Ca, ca marche. Tres bien.
   }
 
 #endif
 }
 
+#if defined(SERIES60)
 void
 COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
-  IFDEF_S60( 
-    
   switch(aSoftkey) {
     case TOggplaySettings::ECbaStop:
       Cba()->AddCommandSetToStackL(R_OPTION_STOP_CBA);
@@ -664,9 +663,8 @@ COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
       //OGGPANIC(_L("Invalid Softkey"),1319);
       break;
   }
-
-  )
 }
+#endif
 
 
 void

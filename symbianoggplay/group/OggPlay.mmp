@@ -139,7 +139,7 @@ RESOURCE ..\data\OggPlay_caption.rss
 #endif
 
 #if defined MULTI_LINGUAL_INSTALLER
-LANG SC EN FR GE DU IT SP SW TU DA
+LANG SC EN FR GE DU IT SP SW TU DA PO
 #else
 LANG SC
 #endif

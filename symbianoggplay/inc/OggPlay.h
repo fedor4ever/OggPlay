@@ -288,7 +288,7 @@ public:
   void UpdateSoftkeys(TBool aForce=EFalse);
   
   void SetSeries80Softkeys(TInt * aSoftkey);
-  void SetSeries60Softkeys(TInt aSoftkey);
+  IFDEF_S60( void SetSeries60Softkeys(TInt aSoftkey); )
 
   // from CQikAppUi:
   void HandleCommandL(int aCommand);
