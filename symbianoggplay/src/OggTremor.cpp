@@ -436,7 +436,7 @@ void COggPlayback::SetVolume(TInt aVol)
   TInt volume = (TInt) (((TReal) aVol)/KMaxVolume * iMaxVolume);
   if (volume > iMaxVolume)
       volume = iMaxVolume;
-  TRAPD( err, iStream->SetVolume(volume); )
+  iStream->SetVolume(volume);
 }
 
 void COggPlayback::SetPosition(TInt64 aPos)
@@ -569,7 +569,7 @@ void COggPlayback::Play()
   //Also to avoid the first buffer problem, wait a short time before streaming, 
   // so that Application drawing have been done. Processor should then
   // be fully available for doing audio thingies.
-  iStartAudioStreamingTimer->Wait(0.1E6);
+  iStartAudioStreamingTimer->Wait(100000);
 #else
   for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
 #endif
@@ -772,7 +772,7 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 	  iUnderflowing = EFalse;
 
 	  iRestartAudioStreamingTimer->Cancel();
-      iStopAudioStreamingTimer->Wait(0.1E6);
+      iStopAudioStreamingTimer->Wait(100000);
 	  return;
   }
   else if (aError == KErrUnderflow)
@@ -787,7 +787,7 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
       else
           iLastUnderflowBuffer = b;
 
-	  iRestartAudioStreamingTimer->Wait(0.1E6);
+	  iRestartAudioStreamingTimer->Wait(100000);
 	  return;
 #else
 	  aError = KErrNone;
