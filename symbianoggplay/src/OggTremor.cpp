@@ -338,15 +338,16 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 {
   TMdaAudioDataSettings::TAudioCaps ac;
   TMdaAudioDataSettings::TAudioCaps rt;
+  TBool ConvertChannel = EFalse;
+  TBool ConvertRate = EFalse;
 
   TInt usedChannels = theChannels;
   
   if (!(iAudioCaps & TMdaAudioDataSettings::EChannelsStereo) && (theChannels==2) )
   {
-      // Only Mono is supported by this phone
-      iEnv->OggErrorMsgL(R_OGG_ERROR_12,R_OGG_ERROR_23);
+      // Only Mono is supported by this phone, we need to mix the 2 channels together
+      ConvertChannel = ETrue;
       usedChannels = 1; // Use 1 channel
-      //return -100;
   }
 
   if (usedChannels==1) ac= TMdaAudioDataSettings::EChannelsMono;
@@ -358,6 +359,8 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   }
 
  
+  TInt usedRate = theRate;
+
   if (theRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
   else if (theRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
   else if (theRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
@@ -366,19 +369,26 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   else if (theRate==44100) rt= TMdaAudioDataSettings::ESampleRate44100Hz;
   else if (theRate==48000) rt= TMdaAudioDataSettings::ESampleRate48000Hz;
   else {
-      SamplingRateSupportedMessage();
-    return -101;
+      // Rate not supported by the phone
+      ConvertRate = ETrue;
+      
+      usedRate = 16000; // That rate should be 
+                        // supported by all phones
+      rt = TMdaAudioDataSettings::ESampleRate16000Hz;
   }
 
-  TInt usedRate = theRate;
   if ( !(rt & iAudioCaps) )
    {
     // Rate not supported by this phone.
-      SamplingRateSupportedMessage();
+      ConvertChannel = ETrue;
       usedRate = 16000; //That rate should be 
                         //supported by all phones
       rt = TMdaAudioDataSettings::ESampleRate16000Hz;
-   // return -101;
+   }
+  
+  if (ConvertChannel || ConvertRate)
+  {
+      SamplingRateSupportedMessage(ConvertRate, theRate, ConvertChannel, theChannels);
    }
 
   iOggSampleRateConverter->Init(this,KBufferSize,(TInt) (0.75*KBufferSize), theRate,usedRate, theChannels,usedChannels);
@@ -397,7 +407,8 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 }
 
 
-void COggPlayback::SamplingRateSupportedMessage()
+void COggPlayback::SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate, 
+                                                TBool aConvertChannel, TInt /*aNbOfChannels*/)
 {
     // Print an error/info msg displaying all supported rates by this HW.
 
@@ -410,13 +421,19 @@ void COggPlayback::SamplingRateSupportedMessage()
     TMdaAudioDataSettings::ESampleRate48000Hz };
     const TInt rates[] = {8000,11025,16000,22050,32000,44100,48000};
 
-    TBuf<128> buf1;
-    TBuf<128> buf2;
-    CEikonEnv::Static()->ReadResource(buf1, R_OGG_ERROR_12);
-    CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_22);
+    HBufC * HbufMsg = HBufC::NewL(1000);
+    CleanupStack::PushL(HbufMsg);
+    HBufC * HtmpBuf  = HBufC::NewL(500);
+    CleanupStack::PushL(HtmpBuf);
 
+    TPtr BufMsg = HbufMsg->Des();
+    TPtr TmpBuf = HtmpBuf->Des();
+
+    if (aConvertRate)
+    {
+        TBuf<128> buf;
+        CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_24);
     TBool first = ETrue;
-    
     for (TInt i=0; i<7; i++)
     {
         if (iAudioCaps & ratesMask[i])
@@ -424,15 +441,27 @@ void COggPlayback::SamplingRateSupportedMessage()
             if (!first)
             { 
                 // Append a comma
-                buf2.Append(_L(", "));
+                    buf.Append(_L(", "));
             }
             // Append the audio rate
-            buf2.AppendNum(rates[i]);
+                buf.AppendNum(rates[i]);
             first = EFalse;
         }
     }
-    buf2.Append(_L("."));
-    iEnv->OggErrorMsgL(buf1,buf2);
+        BufMsg.Format(TmpBuf, aRate, &buf);
+    }
+    if (aConvertChannel)
+    {
+        CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_25);
+        BufMsg.Append(TmpBuf);
+    }
+    
+    CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_26);
+    BufMsg.Append(TmpBuf);
+    CEikonEnv::Static()->ReadResource(TmpBuf,R_OGG_ERROR_27);
+
+    iEnv->OggErrorMsgL(BufMsg, TmpBuf);
+    CleanupStack::PopAndDestroy(2);
 }
 
 TInt COggPlayback::Volume()

@@ -64,10 +64,13 @@
 #define ogg_text_error_19 "Input error "
 #define ogg_text_error_20 "Error"
 #define ogg_text_error_21 "COggCanvas: Error opening background image."
-#define ogg_text_error_22 "Only the following sample rates are supported: "
-#define ogg_text_error_23 "Only streams with one channel are supported."
-#define ogg_text_error_24 "Can't find directory" // followed by directory name on second line of dialog.
-
+// Not used anymore
+//#define ogg_text_error_22 "Only the following sample rates are supported: "
+//#define ogg_text_error_23 "Only streams with one channel are supported."
+#define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S.\n"
+#define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone.\n"
+#define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
+#define ogg_text_error_27 "This warning message can be disabled, from the options menu."
 #define ogg_text_string_1 "Updating list of files..."
 #define ogg_text_string_2 "Writing file database..."
 #define ogg_text_string_3 "Alarm triggered"
