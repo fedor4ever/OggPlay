@@ -71,6 +71,7 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   void SearchPluginsL(const TDesC &aName);
   void OpenL(const TDesC& aFileName);
   void ConstructAPlayerL(const TDesC &aFileName);
+  void ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes & aDestinationBuffer);
   COggMsgEnv*               iEnv;
   
   TBuf<100> iFilename;

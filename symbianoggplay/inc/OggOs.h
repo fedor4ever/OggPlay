@@ -53,7 +53,7 @@ chSTR2(__LINE__) "):" #desc)
  #if defined(OS70S)
   #define KVersionMajor 1
   #define KVersionMinor 63
-  #define KVersionString "1.63"
+  #define KVersionString "1.64"
  #else
   #define KVersionMajor 1
   #define KVersionMinor 2
