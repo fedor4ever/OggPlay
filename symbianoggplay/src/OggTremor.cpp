@@ -442,7 +442,11 @@ void COggPlayback::SetVolume(TInt aVol)
 void COggPlayback::SetPosition(TInt64 aPos)
 {
   if (!iStream) return;
-  if(iDecoder) iDecoder->Setposition(aPos);
+  if(iDecoder)
+  {
+	  TInt64 zero64(0);
+	  iDecoder->Setposition(aPos>=zero64 ? aPos : zero64);
+  }
 }
 
 TInt64 COggPlayback::Position()
@@ -790,7 +794,16 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 #endif
   }
 
-  if (aError == KErrNone) SendBuffer(*iBuffer[b]); 
+  if (aError == KErrNone)
+  {
+	  if (iUnderflowing)
+	  {
+		  iRestartAudioStreamingTimer->Cancel();
+		  RestartAudioStreamingCallBack(this);
+	  }
+
+	  SendBuffer(*iBuffer[b]); 
+  }
   else {
     // An unknown error condition. This should never ever happen.
 	RDebug::Print(_L("Oggplay: MaoscBufferCopied unknown error (Error18 Error16)"));
