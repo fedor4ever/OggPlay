@@ -52,13 +52,13 @@ CAdvancedStreaming::CAdvancedStreaming(MAdvancedStreamingObserver &anObserver)
 };
 
 void CAdvancedStreaming::ConstructL() {
+  iMaxVolume = 1; // This will be updated when stream is opened.
   iStream  = CMdaAudioOutputStream::NewL(*this);
   iStream->Open(&iSettings);
 
   COggAudioCapabilityPoll pollingAudio;
   iAudioCaps = pollingAudio.PollL();
   
-  iMaxVolume = 1; // This will be updated when stream is opened.
   TDes8* buffer;
 
   // Reserve Buffers
@@ -224,6 +224,12 @@ TInt CAdvancedStreaming::Volume()
   TInt vol=KMaxVolume;
   TRAPD( err, vol=iStream->Volume() );
   return vol;
+}
+
+
+TInt CAdvancedStreaming::MaxVolume()
+{
+  return iMaxVolume;;
 }
 
 void CAdvancedStreaming::SetVolume(TInt aVol)

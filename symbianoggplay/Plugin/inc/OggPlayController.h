@@ -48,9 +48,13 @@
 // CLASS DECLARATION
 
 #ifdef MMF_AVAILABLE
-class COggPlayController :	public CMMFController, public MAdvancedStreamingObserver
+class COggPlayController :	public CMMFController,
+                            public MMMFAudioPlayDeviceCustomCommandImplementor,
+                            public MMMFAudioPlayControllerCustomCommandImplementor,
+                            public MAdvancedStreamingObserver
 #else
-class COggPlayController :	public CPseudoMMFController, public MAdvancedStreamingObserver
+class COggPlayController :	public CPseudoMMFController,
+                            public MAdvancedStreamingObserver
 #endif
 
 	{
@@ -138,6 +142,10 @@ class COggPlayController :	public CPseudoMMFController, public MAdvancedStreamin
         void Pause();
         void Stop();
         void OpenFile(const TDesC& aFile);
+        
+        TInt MaxVolume();
+        void SetVolume(TInt aVolume);
+        TInt GetVolume(TInt& aVolume);
 #endif
 		/**
         * From CMMFController Reset controller.
@@ -220,7 +228,16 @@ class COggPlayController :	public CPseudoMMFController, public MAdvancedStreamin
         */
 		CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex);
 
-        
+        void MapdSetVolumeL(TInt aVolume);
+        void MapdGetMaxVolumeL(TInt& aMaxVolume);
+        void MapdGetVolumeL(TInt& aVolume);
+        void MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration);
+        void MapdSetBalanceL(TInt aBalance);
+        void MapdGetBalanceL(TInt& aBalance);
+        void MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart,
+            const TTimeIntervalMicroSeconds& aEnd);
+        void MapcDeletePlaybackWindowL();
+        void MapcGetLoadingProgressL(TInt& aPercentageComplete);
 
     private: // Internal Functions
 
@@ -235,19 +252,17 @@ class COggPlayController :	public CPseudoMMFController, public MAdvancedStreamin
         */
 		enum TOggPlayControllerState
 	    {
-			EStateOpen = 0,
-			EStateStopped,
-			EStatePrepared,
-			EStatePlaying
+			EStateNotOpened = 0,
+            EStateOpen,
+			EStatePlaying,
+            EStatePaused
 		};
 
 	    TOggPlayControllerState iState;
 
         // OggTremor stuff
         TBuf<100> iFileName;
-        TBool iFileOpen;
         FILE *iFile;
-        TBool iEof;
        
         CAdvancedStreaming *iAdvancedStreaming;
         MDecoder *iDecoder;

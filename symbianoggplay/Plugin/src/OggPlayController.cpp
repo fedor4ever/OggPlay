@@ -56,9 +56,24 @@ COggPlayController::~COggPlayController()
 void COggPlayController::ConstructL()
 {
     PRINT("COggPlayController::ConstructL()");
-    // Normally, custom command parser would be initialized here.
-    // But for now, no custom command parser
-    iFileOpen = EFalse;
+
+    // Construct custom command parsers
+
+#ifdef MMF_AVAILABLE
+    CMMFAudioPlayDeviceCustomCommandParser* audPlayDevParser = 
+                                     CMMFAudioPlayDeviceCustomCommandParser::NewL(*this);
+    CleanupStack::PushL(audPlayDevParser);
+    AddCustomCommandParserL(*audPlayDevParser); //parser now owned by controller framework
+    CleanupStack::Pop();//audPlayDevParser
+
+    CMMFAudioPlayControllerCustomCommandParser* audPlayCtrlParser =
+                                     CMMFAudioPlayControllerCustomCommandParser::NewL(*this);
+    CleanupStack::PushL(audPlayCtrlParser);
+    AddCustomCommandParserL(*audPlayCtrlParser); //parser now owned by controller framework
+    CleanupStack::Pop(audPlayCtrlParser);
+#endif
+
+    iState = EStateNotOpened;
     iAdvancedStreaming = new (ELeave) CAdvancedStreaming(*this);
     iAdvancedStreaming->ConstructL();
 }
@@ -72,7 +87,7 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
 {
     PRINT("COggPlayController::AddDataSourceL");
 
-    if ( iFileOpen )
+    if ( iState != EStateNotOpened )
     {
         User::Leave(KOggPlayPluginErrNotReady);
     }
@@ -118,6 +133,42 @@ void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& /*aPrio
     // Not implemented yet
 }
 
+void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration)
+{
+    PRINT("COggPlayController::MapdSetVolumeRampL");
+    // Not implemented yet
+}
+void COggPlayController::MapdSetBalanceL(TInt aBalance)
+{
+    PRINT("COggPlayController::MapdSetBalanceL");
+    // Not implemented yet
+}
+
+void COggPlayController::MapdGetBalanceL(TInt& aBalance)
+{
+    PRINT("COggPlayController::MapdGetBalanceL");
+    // Not implemented yet
+}
+void COggPlayController::MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart,
+                            const TTimeIntervalMicroSeconds& aEnd)
+{
+    PRINT("COggPlayController::MapcSetPlaybackWindowL");
+    // Not implemented yet
+}
+void COggPlayController::MapcDeletePlaybackWindowL()
+{
+    
+    PRINT("COggPlayController::MapcDeletePlaybackWindowL");
+    // Not implemented yet
+}
+void COggPlayController::MapcGetLoadingProgressL(TInt& aPercentageComplete)
+{
+    
+    PRINT("COggPlayController::MapcGetLoadingProgressL");
+    // Not implemented yet
+}
+
+
 #else
 
 void COggPlayController::SetObserver(MMdaAudioPlayerCallback &anObserver)
@@ -145,29 +196,43 @@ void COggPlayController::PlayL()
 {
     
     PRINT("COggPlayController::PlayL");
-    if (!iFileOpen)
+    if (iState == EStateNotOpened)
         User::Leave(KErrNotReady);
+    if (iState == EStatePaused)
+    {
+        iState = EStatePlaying;
+        iAdvancedStreaming->Play();
+        return;
+        
+    }
+    if (iState != EStatePlaying)
+    { 
     iDecoder->Setposition(0);
+        iState = EStatePlaying;
     iAdvancedStreaming->Play();
+    }
+    
 }
 
 void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
-    // Not implemented yet
+    if (iState == EStatePlaying)
+        iState = EStatePaused;
 }
 
 void COggPlayController::StopL()
 {
     PRINT("COggPlayController::StopL");
-    // Not implemented yet
+    if (iState != EStateNotOpened)
+        iState = EStateOpen;
 }
 
 TTimeIntervalMicroSeconds COggPlayController::PositionL() const
 {
     PRINT("COggPlayController::PositionL");
     // Not implemented yet
-    return NULL;
+    return TTimeIntervalMicroSeconds(0);
 }
 
 void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& /*aPosition*/)
@@ -210,21 +275,39 @@ void COggPlayController::OpenFileL(const TDesC& aFile)
     myname.Append((wchar_t)0);
     
     if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
-        iFileOpen= EFalse;
+        iState= EStateNotOpened;
         PRINT("Oggplay: File open returns 0 (Error20 Error14)");
         User::Leave(KOggPlayPluginErrFileNotFound);
     };
-    iFileOpen = ETrue;
+    iState= EStateOpen;
     if( iDecoder->Open(iFile) < 0) {
         iDecoder->Clear();
         fclose(iFile);
-        iFileOpen= EFalse;
+        iState= EStateNotOpened;
         User::Leave(KOggPlayPluginErrOpeningFile);
     }
     
     iAdvancedStreaming->Open(iDecoder->Channels(), iDecoder->Rate());
 } 
 
+
+void COggPlayController::MapdSetVolumeL(TInt aVolume)
+{
+    PRINT("COggPlayController::SetVolumeL");
+    iAdvancedStreaming->SetVolume(aVolume);
+}
+
+void COggPlayController::MapdGetMaxVolumeL(TInt& aMaxVolume)
+{
+    PRINT("COggPlayController::MapdGetMaxVolumeL");
+    aMaxVolume = KMaxVolume;
+}
+
+void COggPlayController::MapdGetVolumeL(TInt& aVolume)
+{
+    PRINT("COggPlayController::MapdGetVolumeL");
+    aVolume = iAdvancedStreaming->Volume();
+}
 
 #ifndef MMF_AVAILABLE
 
@@ -254,12 +337,31 @@ void COggPlayController::Stop()
         iObserver->MapcPlayComplete(error);
 }
 
+
+TInt COggPlayController::MaxVolume()
+{
+    TInt maxvol=0;
+    TRAPD(error, MapdGetMaxVolumeL(maxvol););
+    // The possible leave is stupidly forgotten here
+    return(maxvol);
+}
+void COggPlayController::SetVolume(TInt aVolume)
+{
+    TRAPD(error, MapdSetVolumeL(aVolume));
+    // The possible leave is stupidly forgotten here
+}
+TInt COggPlayController::GetVolume(TInt& aVolume) 
+{
+    TRAPD(error, MapdGetVolumeL(aVolume));
+    return(error);
+}
+
 #endif
 
 
 TInt COggPlayController::GetNewSamples(TDes8 &aBuffer) 
 {
-    if (iEof)
+    if (iState != EStatePlaying)
         return(0);
 
     TInt len = aBuffer.Length();
@@ -270,7 +372,7 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
     }
     if (ret == 0)
     {
-        iEof= 1;
+        iState = EStateOpen;
     }
     return (ret);
 }

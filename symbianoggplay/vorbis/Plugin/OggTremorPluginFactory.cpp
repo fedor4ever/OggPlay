@@ -20,28 +20,21 @@
 // INCLUDE FILES
 #include <OggOs.h>
 #include "OggPlayController.h"
+#include "TremorDecoder.h"
 #ifdef MMF_AVAILABLE
 #include "ImplementationUIDs.hrh"
-#include "TremorDecoder.h"
-
-
-#ifdef MMF_AVAILABLE
-COggPlayController* NewOggTremorControllerL()
-#else
-EXPORT_C COggPlayController* NewOggTremorControllerL()
-#endif
-    {
-    CTremorDecoder * decoder = new (ELeave) CTremorDecoder;
-    return COggPlayController::NewL(decoder);
-    }
-
-
 
 // -----------------------------------------------------------------------------
 // ImplementationTable
 // Exported proxy for instantiation method resolution.
 // -----------------------------------------------------------------------------
 //
+COggPlayController* NewOggTremorControllerL()
+    {
+    CTremorDecoder * decoder = new (ELeave) CTremorDecoder;
+    return COggPlayController::NewL(decoder);
+    }
+
 const TImplementationProxy ImplementationTable[] =
 	{
 		{{KOggTremorUidControllerImplementation}, NewOggTremorControllerL}
@@ -60,8 +53,14 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
 	return ImplementationTable;
 	}
 
-#endif
 
+#else
+EXPORT_C COggPlayController* NewOggTremorControllerL()
+    {
+    CTremorDecoder * decoder = new (ELeave) CTremorDecoder;
+    return COggPlayController::NewL(decoder);
+    }
+#endif
 
 // -----------------------------------------------------------------------------
 // E32Dll DLL Entry point

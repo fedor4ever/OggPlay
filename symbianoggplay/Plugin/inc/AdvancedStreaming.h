@@ -63,6 +63,7 @@ class CAdvancedStreaming : public CBase,
   void SetVolumeGain(TGainType aGain);
   void SetVolume(TInt aVol);
   TInt Volume();
+  TInt MaxVolume();
 
   enum TState {
     EIdle,

@@ -30,6 +30,9 @@ class CIvorbisTest: public CBase, public MMdaAudioPlayerCallback, public MKeyPre
         void ConstructL(CConsoleBase *aConsole);
      
         CConsoleBase *iConsole;
+        TInt iVolume;
+        TBuf<100> iFilename;
+        TInt iFilenameIdx;
 #ifdef MMF_AVAILABLE
         CMdaAudioPlayerUtility *iPlayer;
 #else

@@ -77,6 +77,10 @@ public:
     virtual TTimeIntervalMicroSeconds DurationL() const = 0;
     virtual void GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries) = 0;
     virtual CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex) =0;
+
+    virtual TInt MaxVolume() = 0;
+    virtual void SetVolume(TInt aVolume) = 0;
+    virtual TInt GetVolume(TInt& aVolume) = 0;
 };
 
 

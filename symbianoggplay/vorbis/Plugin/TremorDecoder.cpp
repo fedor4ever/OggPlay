@@ -25,10 +25,7 @@
 #include <utf.h>
 #include <f32file.h>
 
-// HACK ... these should be included from somewhere ... but they are not ... 
-extern int j_code(const char * buff,int count);
-#define BIG5_CODE	0x0002
-
+#include "autoconvert.c"
 
 CTremorDecoder::~CTremorDecoder() 
 {

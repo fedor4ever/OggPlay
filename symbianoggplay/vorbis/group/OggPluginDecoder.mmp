@@ -58,11 +58,11 @@ SOURCE        TremorDecoder.cpp
 SYSTEMINCLUDE	\epoc32\include\ecom
 SYSTEMINCLUDE	\epoc32\include\mmf\common
 SYSTEMINCLUDE	\epoc32\include\mmf\server
-LIBRARY	         mmfcontrollerframework.lib 
+LIBRARY	         mmfcontrollerframework.lib mmfstandardcustomcommands.lib
 RESOURCE    	101FF683.RSS
 #endif
 
-LIBRARY       euser.lib estlib.lib charconv.lib MediaClientAudioStream.lib flogger.lib 
+LIBRARY       euser.lib estlib.lib charconv.lib MediaClientAudioStream.lib flogger.lib efsrv.lib 
 
 MACRO         _LOW_ACCURACY_    //Not really needed, the full accuracy version 
                                 // also works ok.
