@@ -148,7 +148,6 @@ typedef mad_fixed_t mad_sample_t;
 /* --- Intel --------------------------------------------------------------- */
 
 # elif defined(FPM_INTEL)
-#pragma chmsg(!!! FPM_INTEL fixed)
 #  if defined(_MSC_VER)
 #   pragma warning(push)
 #   pragma warning(disable: 4035)  /* no return value */
@@ -168,8 +167,6 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
   /* implicit return of eax */
 }
 #   pragma warning(pop)
-#pragma chmsg(!!! FPM_INTEL2 fixed)
-
 #   define mad_f_mul		mad_f_mul_inline
 #   define mad_f_scale64
 #  else

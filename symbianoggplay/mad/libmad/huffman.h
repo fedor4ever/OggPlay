@@ -21,6 +21,7 @@
 
 # ifndef LIBMAD_HUFFMAN_H
 # define LIBMAD_HUFFMAN_H
+#pragma warning( disable : 4214 ) // nostandard extension - bit field types other than int 
 
 union huffquad {
   struct {

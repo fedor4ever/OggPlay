@@ -7,6 +7,11 @@
 //#define FPM_ARM
 #endif
 
+#define OPT_SPEED 
+
+/* Define to enable a fast subband synthesis approximation optimization. */
+#define OPT_SSO 
+
 /* Define to enable diagnostic debugging support. */
 /* #undef DEBUG */
 
@@ -71,7 +76,7 @@
 /* #undef HAVE_SYS_WAIT_H */
 
 /* Define to 1 if you have the <unistd.h> header file. */
-/* #undef HAVE_UNISTD_H */
+#define HAVE_UNISTD_H */
 
 /* Define to 1 if you have the `waitpid' function. */
 /* #undef HAVE_WAITPID */

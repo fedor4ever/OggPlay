@@ -40,7 +40,7 @@ int CTremorDecoder::Clear()
   return ov_clear(&iVf);
 }
 
-int CTremorDecoder::Open(FILE* f) 
+int CTremorDecoder::Open(FILE* f,const TDesC& /*aFilename*/) 
 {
   Clear();
   int ret=ov_open(f, &iVf, NULL, 0);
@@ -50,7 +50,7 @@ int CTremorDecoder::Open(FILE* f)
   return ret;
 }
 
-int CTremorDecoder::OpenInfo(FILE* f) 
+int CTremorDecoder::OpenInfo(FILE* f,const TDesC& /*aFilename*/) 
 {
   Clear();
   int ret=ov_test(f, &iVf, NULL, 0);
@@ -132,11 +132,6 @@ TInt CTremorDecoder::Rate()
 
 TInt CTremorDecoder::Bitrate()
 {
-//  TInt64 iBitRate(vi->bitrate_nominal);
-//  unsigned int hi(0);
-//  ogg_int64_t bitrate= vi->bitrate_nominal;
-//  iBitRate.Set(bitrate);
-//  return iBitRate.Low();
   return vi->bitrate_nominal;
 }
 
@@ -144,7 +139,7 @@ TInt64 CTremorDecoder::Position()
 { 
   ogg_int64_t pos= ov_time_tell(&iVf);
   unsigned int hi(0);
-  return TInt64(hi,pos);
+  return TInt64(hi,(TInt)pos);
 }
 
 void CTremorDecoder::Setposition(TInt64 aPosition)
@@ -156,16 +151,21 @@ void CTremorDecoder::Setposition(TInt64 aPosition)
 
 TInt64 CTremorDecoder::TimeTotal()
 {
-
+  
   TInt64 iTime;
-
+  
   ogg_int64_t pos(0);
   pos= ov_time_total(&iVf,-1);
   unsigned int hi(0);
-  iTime.Set(hi,pos);
-
+  iTime.Set(hi,(TInt)pos);
+  
   return iTime;
+  
+}
 
+TInt CTremorDecoder::FileSize()
+{
+  return (TInt) ov_raw_total(&iVf,-1);
 }
 
 void CTremorDecoder::GetFrequencyBins(TInt32* aBins,TInt NumberOfBins)

@@ -1237,7 +1237,10 @@ COggPlayAppUi::ReadIniFile()
 		parse.Val(iSettings.iManeuvringSpeed);
 	};
 
-  for( TInt j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
+  // backwards compatibility for number of hotkeys
+  TInt NofHotkeys=(iIniversion>=5)?TOggplaySettings::ENofHotkeys:TOggplaySettings::ENofHotkeysV4;
+
+  for( TInt j=TOggplaySettings::KFirstHotkeyIndex; j<NofHotkeys; j++ ) 
     {
     if (tf.Read(line) == KErrNone) {
 		  TLex parse(line);
@@ -1286,7 +1289,7 @@ COggPlayAppUi::WriteIniFile()
 
   // this should do the trick for forward compatibility:
   TInt magic=0xdb;
-  TInt iniversion=4;
+  TInt iniversion=5;
   
   num.Num(magic);
   tf.Write(num);

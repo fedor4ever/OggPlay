@@ -19,6 +19,10 @@
  * $Id$
  */
 
+#pragma warning( disable : 4244 )  // conversion loss
+#pragma warning( disable : 4018 )  // signed/unsigned mismatch
+
+
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif

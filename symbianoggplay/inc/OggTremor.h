@@ -145,11 +145,11 @@ class CAbsPlayback : public CBase {
 
    // File properties and tag information   
    //-------------------------------------
-   TInt64                   iBitRate;
+   TInt64                   iTime;
+   TInt                     iRate;
    TInt                     iChannels;
    TInt                     iFileSize;
-   TInt                     iRate;
-   TInt64                   iTime;
+   TInt64                   iBitRate;
   
    enum { KMaxStringLength = 256 };
    TBuf<KMaxStringLength>   iAlbum;

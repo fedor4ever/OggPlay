@@ -30,8 +30,8 @@ class CTremorDecoder: public CBase, public MDecoder
 public:
   ~CTremorDecoder();
   TInt Clear();
-  TInt Open(FILE* f);
-  TInt OpenInfo(FILE* f);
+  TInt Open(FILE* f,const TDesC& aFilename=_L(""));
+  TInt OpenInfo(FILE* f,const TDesC& aFilename=_L(""));
   TInt Read(TDes8& aBuffer,int Pos);
   TInt Close(FILE*);
 
@@ -41,6 +41,7 @@ public:
   TInt64 Position();
   void Setposition(TInt64 aPosition);
   TInt64 TimeTotal();
+  TInt FileSize();
 
   void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
   void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);

@@ -71,16 +71,17 @@ const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
 CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
   iState(CAbsPlayback::EClosed),
   iObserver(anObserver),
-  iTitle(),
-  iAlbum(),
-  iArtist(),
-  iGenre(),
-  iTrackNumber(),
   iTime(0),
   iRate(44100),
   iChannels(2),
   iFileSize(0),
-  iBitRate(0)
+  iBitRate(0),
+  iAlbum(),
+  iArtist(),
+  iGenre(),
+  iTitle(),
+  iTrackNumber()
+
 {
 }
 
@@ -217,7 +218,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   iFileOpen= 1;
   SetDecoderL(aFileName);
 
-  if(iDecoder->Open(iFile) < 0) {
+  if(iDecoder->Open(iFile,myname) < 0) {
     iDecoder->Close(iFile);
     fclose(iFile);
     iFileOpen= 0;
@@ -236,8 +237,11 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   iBitRate=iDecoder->Bitrate();
 
 
-  //FIXMAD -- this is currently only used in file information dialog
-  //iFileSize= ov_raw_total(&iVf,-1);
+  iFileSize= iDecoder->FileSize();
+
+//  TRACEF(COggLog::VA(_L("Samplingrate:%d"), iRate ));
+//  TRACEF(COggLog::VA(_L("Channels:%d"), iChannels));
+//  TRACEF(COggLog::VA(_L("Bitrate:%d"), iBitRate ));
 
   TInt err= SetAudioCaps(iDecoder->Channels(),iDecoder->Rate());
   if (err==KErrNone) {
@@ -251,10 +255,6 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   fclose(iFile);
   iFileOpen=0;
 
-  //OGGLOG.Write(_L("Oggplay: Error on setaudiocaps (Error16 Error20)"));
-  //OGGLOG.WriteFormat(_L("Maybe audio format not supported (%d channels, %l Hz)"),vi->channels,vi->rate);
-  //OGGLOG.Write(tbuf);
-  //OGGLOG.Write(buf);
   return err;
 }
 
@@ -530,7 +530,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   };
 
   SetDecoderL(aFileName);
-  if(iDecoder->OpenInfo(f) < 0) {
+  if(iDecoder->OpenInfo(f,myname) < 0) {
     iDecoder->Close(f);
     fclose(f);
     if (!silent) {

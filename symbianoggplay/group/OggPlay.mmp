@@ -39,6 +39,9 @@ SOURCE TremorDecoder.cpp
 SOURCEPATH    ..\mad\src
 SOURCE bstdfile.c
 SOURCE MadDecoder.cpp
+SOURCE ttag.c
+SOURCE tcrc.c
+SOURCE rgain.c
 //SOURCE dllentry.cpp     
 
 SOURCEPATH    ..\mad\libmad
@@ -58,6 +61,39 @@ MACRO HAVE_CONFIG_H
 MACRO SYMBIAN_STACKFIX
 MACRO FPM_ARM
 
+SOURCEPATH    ..\mad\zlib
+SOURCE adler32.c
+SOURCE crc32.c
+SOURCE compress.c
+SOURCE deflate.c
+SOURCE infback.c
+SOURCE inffast.c
+SOURCE inflate.c
+SOURCE inftrees.c
+SOURCE trees.c
+SOURCE uncompr.c
+SOURCE zutil.c
+MACRO STDC
+
+SOURCEPATH ..\mad\libid3tag
+SOURCE compat.c     
+SOURCE crc.c        
+//SOURCE debug.c      
+SOURCE field.c      
+SOURCE file.c       
+SOURCE id3frame.c      
+SOURCE frametype.c  
+SOURCE genre.c      
+SOURCE latin1.c     
+SOURCE parse.c      
+SOURCE render.c     
+SOURCE tag.c        
+SOURCE ucs4.c       
+SOURCE utf16.c      
+SOURCE utf8.c       
+SOURCE util.c       
+SOURCE id3version.c    
+//
 #endif
 
 SOURCEPATH ..\src
@@ -74,7 +110,7 @@ LANG SC
 #endif
 
 
-USERINCLUDE . ..\inc ..\vorbis ..\data ..\mad\libmad ..\mad\inc
+USERINCLUDE . ..\inc ..\vorbis ..\data ..\mad\libmad ..\mad\inc ..\mad\zlib ..\mad\libid3tag
 
 SYSTEMINCLUDE . \Epoc32\Include \Epoc32\Include\libc
 

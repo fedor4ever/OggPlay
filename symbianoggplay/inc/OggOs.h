@@ -45,8 +45,8 @@ chSTR2(__LINE__) "):" #desc)
 // BUILD TARGETS
 //
 // Enable this line to enforce the platform target.
-//#define SERIES60
-#define UIQ
+#define SERIES60
+//#define UIQ
 
 // There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
 #define DOS
@@ -64,7 +64,7 @@ chSTR2(__LINE__) "):" #desc)
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
 
-#define MMF_AVAILABLE
+//#define MMF_AVAILABLE
 
 
 // NEW CODE ENABLERS
@@ -97,6 +97,14 @@ chSTR2(__LINE__) "):" #desc)
 #if !defined(MOTOROLA)
 #define MONITOR_TELEPHONE_LINE 
 #endif
+
+// support for legacy audio codec (-:
+// this is experimental at the moment.
+#define MP3_SUPPORT
+
+// other tags:
+// #define RGAIN_SUPPORT
+// #IMPROVE_MAD
 
 // OTHERS
 //

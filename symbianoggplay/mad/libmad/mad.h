@@ -211,7 +211,6 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 #   define mad_f_mul		mad_f_mul_inline
 #   define mad_f_scale64
 #  else
-#pragma chmsg(!!! opt_normal mad)
 /*
  * This Intel version is fast and accurate; the disposition of the least
  * significant bit depends on OPT_ACCURACY via mad_f_scale64().
@@ -223,7 +222,6 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 	 : "cc")
 
 #   if defined(OPT_ACCURACY)
-#pragma chmsg(!!! opt_accuracy mad)
  /*
  * This gives best accuracy but is not very fast.
  */

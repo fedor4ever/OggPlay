@@ -132,11 +132,13 @@ public:
     ENextSong,
     EPreviousSong,
     EKeylock,
+    ENofHotkeysV4=EKeylock, 
     EPauseResume,
     EPlay,
     EPause,
     EStop,
-    ENofHotkeys, 
+    ENofHotkeysV5,
+    ENofHotkeys=ENofHotkeysV5,
     KFirstHotkeyIndex = EFastForward
     };
 
