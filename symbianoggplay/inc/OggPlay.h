@@ -69,6 +69,7 @@ const TUid KOggPlayUidFCView = { KOggPlayApplicationUidValue +2 };
 const TUid KOggPlayUidSettingsView = { KOggPlayApplicationUidValue +3 };
 const TUid KOggPlayUidUserView = { KOggPlayApplicationUidValue+4 };
 const TUid KOggPlayUidSplashView = { KOggPlayApplicationUidValue+5 };
+const TUid KOggPlayUidCodecSelectionView = { KOggPlayApplicationUidValue+6 };
 
 
 //_LIT(KAudioResourceFile, "Z:\\System\\Apps\\Audio\\audio.mbm");
@@ -149,6 +150,7 @@ public:
 
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
+  TInt32 iControllerUid[3]; // OGG, MP3, AAC 
 	};
 
 // Forward declarations:
@@ -306,6 +308,9 @@ private:
   COggUserHotkeysView* iUserHotkeys;
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
   COggSplashView* iSplashView;
+#endif
+#ifdef PLUGIN_SYSTEM
+   COggSettingsView* iCodecSelectionView;
 #endif
 #endif /* SERIES60 */
   RArray<TInt> iViewHistoryStack;

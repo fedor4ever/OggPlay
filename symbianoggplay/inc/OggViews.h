@@ -86,7 +86,7 @@ class COggSettingsView : public COggViewBase
 {
   public:
 
-  COggSettingsView(COggPlayAppView&);
+  COggSettingsView(COggPlayAppView&,  TUid aViewUid);
   ~COggSettingsView();
   virtual TVwsViewId ViewId() const;
   COggSettingsContainer* iContainer;
@@ -96,6 +96,8 @@ class COggSettingsView : public COggViewBase
   virtual void ViewDeactivated();
   virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
 			      const TDesC8& /*aCustomMessage*/);
+
+  TUid iUid;
   
 };
 

@@ -189,9 +189,10 @@ void COggS60Utility::RemoveStatusPane()
 //
 ////////////////////////////////////////////////////////////////
 
-COggSettingsView::COggSettingsView(COggPlayAppView& aOggViewCtl)
+COggSettingsView::COggSettingsView(COggPlayAppView& aOggViewCtl,TUid aId )
 : COggViewBase(aOggViewCtl)
 {
+    iUid = aId;
 }
 
 COggSettingsView::~COggSettingsView()
@@ -217,18 +218,20 @@ void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*
   if (!iContainer)
     {
     iContainer = new (ELeave) COggSettingsContainer;
-    iContainer->ConstructL( ((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect() );
+    iContainer->ConstructL( ((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect(),
+       iUid);
     ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->AddToStackL( *this, iContainer );
     }
 }
 
 void COggSettingsView::ViewDeactivated()
 {
+
   if ( iContainer )
   {
     ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->RemoveFromViewStack( *this, iContainer );
-    delete iContainer;
-    iContainer = NULL;
+     delete iContainer;
+     iContainer = NULL;
   }
   
   COggS60Utility::RemoveStatusPane();
@@ -237,7 +240,7 @@ void COggSettingsView::ViewDeactivated()
 
 TVwsViewId COggSettingsView::ViewId() const
 {
-  return TVwsViewId(KOggPlayUid, KOggPlayUidSettingsView);
+  return TVwsViewId(KOggPlayUid, iUid);
 }
 ////////////////////////////////////////////////////////////////
 //
@@ -248,12 +251,11 @@ TVwsViewId COggSettingsView::ViewId() const
 COggUserHotkeysView::COggUserHotkeysView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
-  ;
 	}
 
 COggUserHotkeysView::~COggUserHotkeysView()
 	{
-  delete iUserHotkeysContainer;
+    delete iUserHotkeysContainer;
 	}
 
 

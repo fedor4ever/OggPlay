@@ -117,6 +117,26 @@ CPluginInfo & CExtensionSupportedPluginList::GetSelectedPluginInfo(void)
     return(*iSelectedPlugin);
 }
 
+
+CArrayPtrFlat <CPluginInfo> & CExtensionSupportedPluginList::GetPluginInfoList()
+{
+    return(*iListPluginInfos);
+}
+
+void CExtensionSupportedPluginList::SelectPlugin(TUid aSelectedUid)
+{ 
+    TBool found = EFalse;
+    for(TInt i =0; i<iListPluginInfos->Count(); i++)
+    {
+        if (iListPluginInfos->At(i)->iControllerUid == aSelectedUid)
+        {
+            iSelectedPlugin = iListPluginInfos->At (i) ;
+            found = ETrue;
+        }
+    }
+    __ASSERT_ALWAYS ( found, User::Panic(_L("CExtensionSupportedPluginList Internal Mismatch "),100));
+    
+}
 ////////////////////////////////////////////////////////////////
 //
 // COggPluginAdaptor
@@ -214,7 +234,9 @@ TInt COggPluginAdaptor::Open(const TDesC& aFileName)
 void COggPluginAdaptor::Pause()
 {
     TRACEF(_L("COggPluginAdaptor::Pause()"));
-    iLastPosition = iPlayer->Position();
+    if (!iInterrupted)
+        iLastPosition = iPlayer->Position();
+    
     iPlayer->Stop();
     iState = EPaused;
 }
@@ -288,13 +310,18 @@ void COggPluginAdaptor::SetPosition(TInt64 aPos)
 
 TInt64 COggPluginAdaptor::Position()
 {
+    
     TTimeIntervalMicroSeconds aPos(0);
     if (iState == EPaused)
         aPos = iLastPosition;
     else if (iPlayer)
-       aPos = iPlayer->Position();
+    {
+        aPos = iPlayer->Position();
+        
+    }
     if (aPos != TTimeIntervalMicroSeconds(0))
         iLastPosition = aPos;
+    
     return(aPos.Int64()/1000); // Dividing by 1000, to get millisecs from microsecs
 }
 
@@ -326,7 +353,8 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
 {
     
   TRACEF(COggLog::VA(_L("MoscoStateChange :%d %d %d "), aPreviousState,  aCurrentState,  aErrorCode));
-  if ((aPreviousState == 0) && (aCurrentState == 1))
+  if ((aPreviousState == CMdaAudioClipUtility::ENotReady) 
+      && (aCurrentState == CMdaAudioClipUtility::EOpen))
     {
         // From not opened to opened
         TRACEF(COggLog::VA(_L("MoscoStateChange : InitComplete %d"), aErrorCode ));
@@ -336,26 +364,32 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
 #endif
     }
 
-    if ( (aCurrentState == 2) && aErrorCode)
+    if ( (aCurrentState == CMdaAudioClipUtility::EPlaying) && aErrorCode)
     {
         // From opened to Playing
         // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
-            iObserver->NotifyPlayInterrupted();
             iInterrupted = ETrue;
+            iObserver->NotifyPlayInterrupted();
     }
     
-    if ((aPreviousState == 2) && (aCurrentState ==1))
+    if ((aPreviousState == CMdaAudioClipUtility::EPlaying) 
+        && (aCurrentState == CMdaAudioClipUtility::EOpen))
     {
         // From Playing to stopped playing
         TRACEF(COggLog::VA(_L("MoscoStateChange : PlayComplete %d"), aErrorCode ));
-        if (aErrorCode == KErrDied)
+        switch (aErrorCode)
         {
+        case  KErrDied :
             // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
-            iObserver->NotifyPlayInterrupted();
             iInterrupted = ETrue;
-        }
-        else
+            iObserver->NotifyPlayInterrupted();
+            break;
+        case KErrUnderflow:
+            iState = EClosed;
+            break;
+        default:
             iObserver->NotifyPlayComplete();
+        }
     }
 }
  
@@ -369,7 +403,6 @@ void COggPluginAdaptor::ConstructL()
     SearchPluginsL(_L("ogg"));
     SearchPluginsL(_L("mp3"));
     SearchPluginsL(_L("aac"));
-    //SearchPluginsL(_L("wav"));
 }
 
 

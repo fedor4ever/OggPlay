@@ -49,8 +49,8 @@ chSTR2(__LINE__) "):" #desc)
 //# Version String
 #if defined(SERIES60)
 #define KVersionMajor 1
-#define KVersionMinor 51
-#define KVersionString "1.51"
+#define KVersionMinor 60
+#define KVersionString "1.60"
 #endif
 #if defined(UIQ)
 #define KVersionMajor 1
@@ -62,7 +62,7 @@ chSTR2(__LINE__) "):" #desc)
 #define DOS
 
 // Switches at least the splash bitmap
-//#define UNSTABLE_RELEASE
+#define UNSTABLE_RELEASE
 
 #if defined(UIQ)
 // Define the type of UIQ platform

@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.5.1 of Oggplay for Series60.
+This is the Release Note for Release 1.6.0 of Oggplay for Series60.
 
 ******************************************************************************
 **** This release will only work on Nokia 6600, Nokia 6620 and Nokia 7610 ****
@@ -20,6 +20,13 @@ If you have installed the example, please remove it before using this release.
 
 History
 --------------------------------------------------------------------------------------------
+
+
+What's new in Release 1.6.0:
+--------------------------
+Capability to choose which plugin will be used. Note that the plugin that you choose might
+not be fully compatible with OggPlay (OvController, for example).
+
 
 What's new in Release 1.5.1:
 --------------------------

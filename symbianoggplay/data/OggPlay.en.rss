@@ -133,3 +133,17 @@
 #define ogg_volume_boost_none        "No Extra Gain"
 #define ogg_volume_boost_6db         "6dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
+
+#define ogg_codec_selection          "Codecs"
+#define ogg_no_plugin_found          "No Plugin Found"
+#define ogg_codec_ogg                "OGG"
+#define ogg_codec_mp3                "MP3"
+#define ogg_codec_aac                "AAC"
+
+#define ogg_codec_info_name          "Name"
+#define ogg_codec_info_supplier      "Supplier"
+#define ogg_codec_info_version       "Version"
+#define ogg_codec_info_UID           "UID"
+
+
+

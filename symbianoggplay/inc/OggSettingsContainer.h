@@ -23,22 +23,10 @@
 
 #include <coecntrl.h>
 #if defined(SERIES60)
-#include <aknsettingitemlist.h>  
-
-
-class COggplayDisplaySettingItemList : public CAknSettingItemList
-{
-public:
-  COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi);
-  
-protected:
-  virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
-  
-private:
-  TOggplaySettings& iData;
-  COggPlayAppUi& iAppUi;
-};
+#include <aknsettingitemlist.h> 
+#include <aknpopupsettingpage.h> 
 #endif
+
 
 
 /**
@@ -53,7 +41,7 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
         * EPOC default constructor.
         * @param aRect Frame rectangle for container.
         */
-        void ConstructL(const TRect& aRect);
+        void ConstructL(const TRect& aRect, TUid aId);
         /**
         * Destructor.
         */
@@ -73,9 +61,25 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
 
     private: //data
 #if defined(SERIES60)
-        COggplayDisplaySettingItemList* iListBox;
+        CAknSettingItemList* iListBox;
 #endif
     };
+
+
+
+#if defined(SERIES60)
+class COggplayDisplaySettingItemList : public CAknSettingItemList
+{
+public:
+  COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi);
+  
+protected:
+  virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
+  
+private:
+  TOggplaySettings& iData;
+  COggPlayAppUi& iAppUi;
+};
 
 class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 
     {
@@ -86,6 +90,73 @@ class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem
     private: //data
         COggPlayAppUi& iAppUi;
     };
+
+class CCodecSelectionSettingItem;
+
+class COggplayCodecSelectionSettingItemList : public CAknSettingItemList
+{
+public:
+  COggplayCodecSelectionSettingItemList(COggPlayAppUi& aAppUi);
+  
+protected:
+  virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
+  virtual void EditItemL  ( TInt aIndex, TBool aCalledFromMenu );
+ 
+
+private:
+  TOggplaySettings& iData;
+  COggPlayAppUi& iAppUi;
+  TInt iSelectedIndexes[3]; // These indexes will be translated to UIDs when the
+                            // Setting list will be dismissed
+  CCodecSelectionSettingItem * iCodecSelectionSettingItemArray[3];
+};
+
+class CCodecSelectionSettingItem : public CAknEnumeratedTextPopupSettingItem 
+    {
+    public:  // Constructors and destructor
+        CCodecSelectionSettingItem( TInt aResourceId, TInt &aValue,
+             CAbsPlayback * aPlayback,  const TDesC & anExtension);
+    private: // Functions from base classes
+         // From CAknEnumeratedTextPopupSettingItem         
+        void CompleteConstructionL ()  ;
+        void EditItemL ( TBool aCalledFromMenu );
+    public : // New Functions
+        TInt32 GetSelectedUid();
+    private: //data
+        CExtensionSupportedPluginList *iPluginList;
+        CAbsPlayback & iPlayback;
+    };
+
+
+/* A list, showing the info about the choosen codec */
+
+class CCodecInfoList : public CCoeControl, public MEikCommandObserver
+  {
+public:
+  CCodecInfoList( CPluginInfo& aPluginInfo );
+  void ConstructL(const TRect& aRect);
+  ~CCodecInfoList();
+
+private : // New
+	void RefreshListboxModel();
+
+private : // Framework
+  TInt CountComponentControls() const;
+  CCoeControl* ComponentControl(TInt aIndex) const;
+  TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType );
+
+private: // From MEikCommandObserver
+    void ProcessCommandL (TInt aCommandId);
+private:
+  CPluginInfo& iPluginInfo;
+  CEikTextListBox *iListBox;
+  CActiveSchedulerWait iWait;	
+  CEikButtonGroupContainer *iCba;
+
+  };
+
+
+#endif /* SERIES60 */
 
 #endif
 

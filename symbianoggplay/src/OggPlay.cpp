@@ -17,7 +17,6 @@
 */
 
 #include "OggOs.h"
-#include "OggPlay.h" // Experimental fix for the headset problem
 #include <hal.h>
 #ifdef SERIES60
 #include <aknkeys.h>	// EStdQuartzKeyConfirm etc.
@@ -346,16 +345,19 @@ COggPlayAppUi::ConstructL()
 	}
 
 #if defined(SERIES60)
-	iSettingsView=new(ELeave) COggSettingsView(*iAppView);
+	iSettingsView=new(ELeave) COggSettingsView(*iAppView,KOggPlayUidSettingsView);
 	RegisterViewL(*iSettingsView);
-  iUserHotkeys=new(ELeave) COggUserHotkeysView(*iAppView);
+    iUserHotkeys=new(ELeave) COggUserHotkeysView(*iAppView);
 	RegisterViewL(*iUserHotkeys);
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
     iSplashView=new(ELeave) COggSplashView(*iAppView);
     RegisterViewL(*iSplashView);
 #endif /*SERIES60_SPLASH_WINDOW_SERVER*/
+#ifdef PLUGIN_SYSTEM
+    iCodecSelectionView=new(ELeave) COggSettingsView(*iAppView,KOggPlayUidCodecSelectionView);
+    RegisterViewL(*iCodecSelectionView);
 #endif
-
+#endif /* SERIES60 */
 	SetProcessPriority();
 	SetThreadPriority();
 	
@@ -428,7 +430,13 @@ COggPlayAppUi::~COggPlayAppUi()
     delete iSplashView;
   }
 #endif
+#ifdef PLUGIN_SYSTEM
+  if (iCodecSelectionView) {
+    DeregisterView(*iCodecSelectionView);
+    delete iCodecSelectionView;
+  }
 #endif
+#endif /* SERIES60 */
 
 #ifdef MONITOR_TELEPHONE_LINE
 	if (iActive) { delete iActive; iActive=0; }
@@ -680,7 +688,14 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 #endif
 		break;
 					  }
-		
+
+#ifdef PLUGIN_SYSTEM
+    case EOggCodecSelection:
+        {
+         ActivateOggViewL(KOggPlayUidCodecSelectionView);
+		break;
+        }
+#endif
 	case EOggNextSong: {
 		NextSong();
 		break;
@@ -855,6 +870,8 @@ COggPlayAppUi::PlaySelect()
 void
 COggPlayAppUi::PauseResume()
 {
+    
+  TRACEF(_L("PauseResume"));
   if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
     iOggPlayback->Pause();
     iAppView->Update();

@@ -69,7 +69,12 @@ enum {
   EOggScrollableTextDialog,
 
   EOggFileSearchControl,
-  EOggFileSearchControlDialog
+  EOggFileSearchControlDialog,
+
+  EOggCodecSelection,  //For the Codec Settings view
+  EOggCodecSelectionSettingOGG,
+  EOggCodecSelectionSettingMP3,
+  EOggCodecSelectionSettingAAC
 };
 
 enum TOggplayCommandIds

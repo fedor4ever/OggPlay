@@ -121,7 +121,6 @@ public:
     
 private:
     CScrollableRichTextControl * iScrollableControl;
-    CRichText* iRichText; // global text object
 };
 
 
