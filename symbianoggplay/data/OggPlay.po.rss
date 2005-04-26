@@ -172,4 +172,5 @@
 #define ogg_cba_select               "Select"     // To be Translated 
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
 
-
+#define ogg_boost_up                 "Volume boost up"     // To be Translated
+#define ogg_boost_down               "Volume boost down"   // To be Translated

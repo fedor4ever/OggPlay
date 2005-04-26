@@ -89,6 +89,9 @@ class COggSettingsView : public COggViewBase
   COggSettingsView(COggPlayAppView&,  TUid aViewUid);
   ~COggSettingsView();
   virtual TVwsViewId ViewId() const;
+
+  void VolumeGainChangedL();
+
   COggSettingsContainer* iContainer;
   private:
   

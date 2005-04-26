@@ -1303,7 +1303,9 @@ COggPlayAppUi::ReadIniFile()
       iSettings.iManeuvringSpeed = (TInt) IniRead32( tf );
       
       // For backwards compatibility for number of hotkeys
-      TInt num_of_hotkeys = ( ini_version >= 5 ) ? TOggplaySettings::ENofHotkeys : TOggplaySettings::ENofHotkeysV4;
+      TInt num_of_hotkeys = ( ini_version >= 5 ) ? TOggplaySettings::ENofHotkeysV5 : TOggplaySettings::ENofHotkeysV4;
+	  if (ini_version>=7) num_of_hotkeys = TOggplaySettings::ENofHotkeys;
+ 
       for ( TInt j = TOggplaySettings::KFirstHotkeyIndex; j < num_of_hotkeys; j++ ) 
       {
          iSettings.iUserHotkeys[j] = (TInt) IniRead32( tf );
@@ -1323,9 +1325,6 @@ COggPlayAppUi::ReadIniFile()
       iRandom                    = (TBool) IniRead32( tf, 0, 1 );
 
    } // version 2 onwards
-	
-  // Default value (not saved in ini file)
-  iSettings.iGainType = ENoGain;
 
 #ifdef PLUGIN_SYSTEM
     TInt nbController = IniRead32(tf) ;
@@ -1344,6 +1343,14 @@ COggPlayAppUi::ReadIniFile()
         TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid, newermind));
     }
 #endif
+
+	if ( ini_version >=7)
+	{
+		iSettings.iGainType = IniRead32(tf);
+		iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
+	}
+	else
+		iSettings.iGainType = ENoGain;
 
    in.Close();
 	
@@ -1428,7 +1435,7 @@ COggPlayAppUi::WriteIniFile()
     
     // this should do the trick for forward compatibility:
     TInt magic=0xdb;
-    TInt iniversion=6;
+    TInt iniversion=7;
     
     num.Num(magic);
     tf.Write(num);
@@ -1501,6 +1508,7 @@ COggPlayAppUi::WriteIniFile()
     
     num.Num(iRandom);
     tf.Write(num);
+
 #ifdef PLUGIN_SYSTEM
     CDesCArrayFlat * supportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
     TRAPD(Err,
@@ -1523,10 +1531,12 @@ COggPlayAppUi::WriteIniFile()
         CleanupStack::PopAndDestroy(1);
     } 
     ) // End of TRAP
-
 #endif
     
-   // Please increase ini_version when adding stuff
+    num.Num(iSettings.iGainType);
+    tf.Write(num);
+
+	// Please increase ini_version when adding stuff
 	
 	out.Close();
 	if (useTemporaryFile) 
@@ -1696,6 +1706,14 @@ void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
 		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
 	}
 
+}
+
+void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
+{
+	iOggPlayback->SetVolumeGain(aNewGain);
+	iSettings.iGainType = aNewGain;
+
+	iSettingsView->VolumeGainChangedL();
 }
 
 ////////////////////////////////////////////////////////////////

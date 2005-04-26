@@ -48,6 +48,7 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
         ~COggSettingsContainer();
 
     public: // New functions
+		void VolumeGainChangedL();
 
     public: // Functions from base classes
 
@@ -68,10 +69,12 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
 
 
 #if defined(SERIES60)
+class CGainSettingItem;
 class COggplayDisplaySettingItemList : public CAknSettingItemList
 {
 public:
   COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi);
+  void VolumeGainChangedL();
   
 protected:
   virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
@@ -79,6 +82,8 @@ protected:
 private:
   TOggplaySettings& iData;
   COggPlayAppUi& iAppUi;
+
+  CGainSettingItem* iGainSettingItem;
 };
 
 class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 

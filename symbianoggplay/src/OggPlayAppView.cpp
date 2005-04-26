@@ -1607,7 +1607,25 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
         }
       return EKeyWasConsumed;
       }
-    default :
+
+    case TOggplaySettings::EVolumeBoostUp : {
+		TGainType currentGain = (TGainType) iApp->iSettings.iGainType;
+		TInt newGain = currentGain + 1;
+		if (newGain<=EStatic12dB)
+			iApp->SetVolumeGainL((TGainType) newGain);
+
+		return EKeyWasConsumed;
+		}
+
+	case TOggplaySettings::EVolumeBoostDown : {
+		TGainType currentGain = (TGainType) iApp->iSettings.iGainType;
+		TInt newGain = currentGain - 1;
+		if (newGain>=EMinus18dB)
+			iApp->SetVolumeGainL((TGainType) newGain);
+
+		return EKeyWasConsumed;
+		}
+	default :
       break;
     }
 #endif

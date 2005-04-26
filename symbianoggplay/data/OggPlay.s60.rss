@@ -602,7 +602,9 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_format_text_playpause; },
 	LBUF { txt = ogg_play; },
 	LBUF { txt = ogg_pause; },
-	LBUF { txt = ogg_stop; }
+	LBUF { txt = ogg_stop; },
+	LBUF { txt = ogg_boost_up; },
+	LBUF { txt = ogg_boost_down; }
   };
 }
 

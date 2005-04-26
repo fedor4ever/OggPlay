@@ -143,6 +143,8 @@
 #define ogg_volume_boost_none        "No Extra Gain"
 #define ogg_volume_boost_6db         "6dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
+#define ogg_boost_up                 "Volume boost up"
+#define ogg_boost_down               "Volume boost down"
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"

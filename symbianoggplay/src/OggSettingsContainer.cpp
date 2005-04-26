@@ -107,6 +107,12 @@ TKeyResponse COggSettingsContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,TE
   return response;
 }
 
+void COggSettingsContainer::VolumeGainChangedL()
+{
+	if (iListBox)
+		((COggplayDisplaySettingItemList*) iListBox)->VolumeGainChangedL();
+}
+
 
 
 // ---------------------------------------------------------
@@ -141,11 +147,20 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
     return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
       iData.iRskPlay[0]);
   case EOggSettingVolumeBoost:
-     return new (ELeave) CGainSettingItem(aIdentifier,   iAppUi);
+     return iGainSettingItem = new (ELeave) CGainSettingItem(aIdentifier,   iAppUi);
   default:
     break;
 		}
   return NULL;
+}
+
+void COggplayDisplaySettingItemList::VolumeGainChangedL()
+{
+	if (iGainSettingItem)
+		{
+		iGainSettingItem->LoadL();
+		HandleChangeInItemArrayOrVisibilityL();
+		}
 }
 
 
@@ -166,7 +181,7 @@ CGainSettingItem:: CGainSettingItem( TInt aIdentifier,  COggPlayAppUi& aAppUi)
 void  CGainSettingItem:: EditItemL ( TBool aCalledFromMenu )
      {
      CAknEnumeratedTextPopupSettingItem::EditItemL( aCalledFromMenu );
-     iAppUi.iOggPlayback->SetVolumeGain( (TGainType)InternalValue () ) ;
+     iAppUi.SetVolumeGainL( (TGainType)InternalValue () ) ;
      }
 
 

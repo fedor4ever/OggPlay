@@ -158,8 +158,11 @@ public:
     EPlay,
     EPause,
     EStop,
-    ENofHotkeysV5,
-    ENofHotkeys=ENofHotkeysV5,
+	EVolumeBoostUp,
+	ENofHotkeysV5=EVolumeBoostUp,
+	EVolumeBoostDown,
+    ENofHotkeysV7,
+    ENofHotkeys=ENofHotkeysV7,
     KFirstHotkeyIndex = EFastForward
     };
 
@@ -305,6 +308,8 @@ public:
   CEikButtonGroupContainer * Cba()  
   { return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 
 #endif
+
+  void SetVolumeGainL(TGainType aNewGain);
 
 private: 
 

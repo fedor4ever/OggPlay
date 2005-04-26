@@ -165,5 +165,7 @@
 #define ogg_cba_select               "Select."    
 #define ogg_cba_cancel               "Cancel."    
 
-
+// New Tags, not yet translated:
+#define ogg_boost_up                 "Volume boost up"
+#define ogg_boost_down               "Volume boost down"
 

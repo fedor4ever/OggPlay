@@ -246,6 +246,12 @@ void COggSettingsView::ViewDeactivated()
   
 }
 
+void COggSettingsView::VolumeGainChangedL()
+{
+	if (iContainer)
+		iContainer->VolumeGainChangedL();
+}
+
 TVwsViewId COggSettingsView::ViewId() const
 {
   return TVwsViewId(KOggPlayUid, iUid);
