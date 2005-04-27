@@ -17,6 +17,7 @@
 */
 
 #include "OggOs.h"
+#include <e32std.h>
 #include <hal.h>
 #ifdef SERIES60
 #include <aknkeys.h>	// EStdQuartzKeyConfirm etc.
@@ -1713,7 +1714,9 @@ void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 	iOggPlayback->SetVolumeGain(aNewGain);
 	iSettings.iGainType = aNewGain;
 
+#if defined(SERIES60)
 	iSettingsView->VolumeGainChangedL();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////
