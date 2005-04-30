@@ -28,9 +28,6 @@ NAME OGGP
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf=""; }
 
-//# Version string
-#define ogg_txt_version "OggPlay 1.30"
-
 // Languages : EN/SC FR GE DU IT SP SW TU DA
 #if defined(LANGUAGE_EN) || defined(LANGUAGE_SC)
 #include "OggPlay.en.rss"
@@ -70,7 +67,7 @@ RESOURCE MENU_BAR r_oggplay_menubar
   };
 }
 
-RESOURCE TBUF r_ogg_version { buf=ogg_txt_version; }
+RESOURCE TBUF r_ogg_version { buf=KVersionString; }
 
 RESOURCE DIALOG r_dialog_hotkey {
   title   = ogg_options_title;

@@ -46,6 +46,7 @@ public:
    TInt   Info( const TDesC& aFileName, TBool silent = EFalse );
    TInt   Open( const TDesC& aFileName );
    void   Pause( void );
+   void Resume();
    void   Play( void );
    void   Stop( void );
    void   SetPosition( TInt64 aPos );

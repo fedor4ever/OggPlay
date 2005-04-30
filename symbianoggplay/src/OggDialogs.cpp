@@ -147,7 +147,8 @@ COggAboutDialog::PreLayoutDynInitL()
 void
 COggAboutDialog::SetVersion(const TDesC& aVersion)
 {
-  iVersion.Copy(aVersion);
+  iVersion = _L("OggPlay ");
+  iVersion.Append(aVersion);
 }
 
 

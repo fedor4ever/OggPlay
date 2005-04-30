@@ -1250,6 +1250,9 @@ COggPlayAppUi::ReadIniFile()
       iSettings.iRskPlay[3]      = TOggplaySettings::ECbaExit ;
 #endif
  
+    // Default value
+	iSettings.iGainType = ENoGain;
+
     // Open the file
     if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
     {
@@ -1352,8 +1355,6 @@ COggPlayAppUi::ReadIniFile()
 		iSettings.iGainType = IniRead32(tf);
 		iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
 	}
-	else
-		iSettings.iGainType = ENoGain;
 
    in.Close();
 	
@@ -1688,7 +1689,11 @@ COggPlayAppUi::SetThreadPriority()
 	if (ft.Next(fn)==KErrNone) {
 		int err= T.Open(fn);
 		if (err==KErrNone) {
+#if defined(MOTOROLA)
+			T.SetPriority(EPriorityAbsoluteForeground);
+#else
 			T.SetPriority(EPriorityAbsoluteHigh);
+#endif
 			T.Close();
 		} else {
 			TBuf<256> buf;

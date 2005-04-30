@@ -300,6 +300,12 @@ void COggPlayback::Pause()
    }
 }
 
+void COggPlayback::Resume()
+{
+  //Resume is equivalent of Play() 
+  Play();
+}
+
 // Play
 ////////////////////////////////////////////////////////////////
 
@@ -849,7 +855,7 @@ void COggPlayback::SendBufferL( TInt aIndex )
 
 TInt COggPlayback::SetAudioCaps(TInt aChannels, TInt aRate)
 {
-   iApiStereo = ( aChannels > 1 ) ? EFalse : ETrue;
+   iApiStereo = ( aChannels > 1 ) ? ETrue : EFalse;
    iStream->SetPCMChannel( iApiStereo );
 
    iApiRate = 16000; // The default
