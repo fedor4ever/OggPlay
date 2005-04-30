@@ -128,6 +128,9 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
 {
   switch (aIdentifier)
 		{
+  case EOggRepeat:
+    return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
+      iData.iRepeat);
   case EOggSettingScanDir:
     return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
       iData.iScanmode);

@@ -74,7 +74,7 @@ void COggLog::Exit()
 
 void COggLog::FilePrint(const TDesC& msg) 
   {
-#if defined(SERIES60)
+#if (defined( SERIES60) || defined (SERIES80) )
   InstanceL()->iLog.WriteFormat(msg);
 #endif
   }
@@ -83,7 +83,7 @@ void COggLog::FilePrint(const TDesC& msg)
 
 void COggLog::Panic(const TDesC& msg,TInt aReason) 
   {
-#if defined(SERIES60)
+#if (defined( SERIES60) || defined (SERIES80) )
   iLog.Write(_L("** Fatal: **"));
   iLog.Write(msg);
 #endif

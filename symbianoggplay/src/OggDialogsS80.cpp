@@ -65,7 +65,7 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iAutostartControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iAutoplay));
   
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
-  iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iRepeat));
+  iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iRepeat));
   iRandomControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iRandom));
   UpdateControlsFromRsk();
 }
@@ -337,7 +337,7 @@ void CCodecsS80Container::ConstructL()
 
 void CCodecsS80Container::RefreshListboxModel()
 {
-    TBuf<128> listboxBuf;
+    TBuf<64+64+1> listboxBuf;
     
     CDesCArrayFlat* array = iCoeEnv->ReadDesCArrayResourceL(R_CODEC_INFO_ITEMS);
     CDesCArray* modelArray = static_cast<CDesCArray*>(iDescriptionBox->Model()->ItemTextArray());
@@ -368,11 +368,11 @@ void CCodecsS80Container::RefreshListboxModel()
 	        {
 	        case 0:
 	            // Name
-	            value.Format(_L("%S"), pluginInfo->iName);
+	            value = pluginInfo->iName->Left(64);
 	            break;
 	        case 1:
 	            // Supplier
-	            value.Format(_L("%S"), pluginInfo->iSupplier);
+	            value = pluginInfo->iSupplier->Left(64);
 	            break;
 	        case 2:
 	            // Version
@@ -380,7 +380,7 @@ void CCodecsS80Container::RefreshListboxModel()
 	            break;
 	        case 3:
 	            // Version
-	            value = pluginInfo->iControllerUid.Name();
+	            value = pluginInfo->iControllerUid.Name().Left(64);
 	            break;
 	            
 	        }

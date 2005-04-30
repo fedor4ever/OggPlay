@@ -51,7 +51,7 @@ public:
   void UpdatePlaying();
   void UpdateAnalyzer();
 
-  void ToggleRepeat();
+  void UpdateRepeat();
   void SetTime(TInt64 aTime);
 
   /* Functions to interract with the listbox */

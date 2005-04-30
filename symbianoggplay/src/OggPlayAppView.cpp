@@ -428,7 +428,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iRepeatIcon[aCanvas]= (COggIcon*)c;
-      iRepeatIcon[aCanvas]->MakeVisible(iApp->iRepeat);
+      iRepeatIcon[aCanvas]->MakeVisible(iApp->iSettings.iRepeat);
     }
     else if (p.iToken==_L("RepeatButton")) { 
       _LIT(KAL,"Adding RepeadButton");
@@ -928,14 +928,12 @@ COggPlayAppView::SetTime(TInt64 aTime)
 }
 
 void
-COggPlayAppView::ToggleRepeat()
+COggPlayAppView::UpdateRepeat()
 {
-  if (iApp->iRepeat) {
-    iApp->SetRepeat(EFalse); 
+  if (iApp->iSettings.iRepeat) {
     if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Hide();
     if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(0);
   } else {
-    iApp->SetRepeat(ETrue);
     if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Show();
     if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(1);
   }
@@ -1236,8 +1234,8 @@ COggPlayAppView::UpdateControls()
 
   if (iPosition[iMode]) iPosition[iMode]->SetDimmed( !CanStop() );
  
-  if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iRepeat);
-  if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iRepeat);
+  if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
+  if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iSettings.iRepeat);
 
 }
 
@@ -1645,7 +1643,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       return EKeyWasConsumed;
     }
     else if (aKeyEvent.iScanCode==127) { // "#"
-      ToggleRepeat();
+      iApp->ToggleRepeat();
       return EKeyWasConsumed;
     }
     // 48..57 == "0"..."9"
@@ -1877,7 +1875,7 @@ COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt /*aValue*
   if (c==iStopButton[iMode]) iApp->HandleCommandL(EOggStop);
   if (c==iNextSongButton[iMode]) iApp->NextSong();
   if (c==iPrevSongButton[iMode]) iApp->PreviousSong();
-  if (c==iRepeatButton[iMode]) ToggleRepeat();
+  if (c==iRepeatButton[iMode]) iApp->ToggleRepeat();
 }
 
 void 

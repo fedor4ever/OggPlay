@@ -255,6 +255,13 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
     initial_number = 1;
     items =
         {
+	    AVKON_SETTING_ITEM
+	        {  
+	        identifier = EOggRepeat;
+			setting_page_resource = r_oggplay_binary_setting_page;
+			associated_resource = r_oggplay_popup_setting_binary_texts;
+			name = ogg_repeat;    
+	        },
 		AVKON_SETTING_ITEM
 			{
 			identifier = EOggSettingScanDir;

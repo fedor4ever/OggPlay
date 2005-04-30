@@ -1,0 +1,29 @@
+;
+; Series 80  - ARMI urel
+;
+&EN
+;
+;Version string to be changed
+#{"OggPlay"},(0x1000A661),1,64,1
+;
+;Supports Series 80 v 2.0
+(0x101F8ED2), 0, 0, 0, {"Series80ProductID"}
+;
+; Display Release notes
+;
+"..\S60_releases\sisnotes.txt" - "",FT,TC
+
+"\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
+"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
+"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsc" -"!:\system\apps\OggPlay\OggPlay.rsc"
+;"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.rsc"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
+"\Epoc32\data\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
+"..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
+"..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+; we try to be nice and uninstall our configuration files
+""-"!:\system\apps\OggPlay\oggplay.ini",FN
+""-"!:\system\apps\OggPlay\oggplay.db",FN
+
+"\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
+"\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"

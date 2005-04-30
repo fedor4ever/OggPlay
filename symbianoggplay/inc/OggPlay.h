@@ -168,6 +168,7 @@ public:
 
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
+  TBool iRepeat;
 };
 
 // Forward declarations:
@@ -304,6 +305,8 @@ public:
   void WriteIniFile();
   void SetRandomL(TBool aRandom);
   void SetRepeat(TBool aRepeat);
+  void ToggleRepeat();
+  
 #ifdef SERIES80
   CEikButtonGroupContainer * Cba()  
   { return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 

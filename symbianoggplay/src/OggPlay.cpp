@@ -28,6 +28,7 @@ _LIT(KTsyName,"phonetsy.tsy");
 #ifdef SERIES80
 #include <eikEnv.h>
 #include "OggDialogsS80.h"
+_LIT(KTsyName,"phonetsy.tsy");
 #endif
 
 #ifdef UIQ
@@ -316,7 +317,7 @@ COggPlayAppUi::ConstructL()
 	iAppView->ConstructL(this, ClientRect());
 
 	SetRandomL(iRandom);
-	SetRepeat(iRepeat);
+	SetRepeat(iSettings.iRepeat);
 
 	HandleCommandL(EOggSkinOne+iCurrentSkin);
 	
@@ -397,7 +398,7 @@ void COggPlayAppUi::PostConstructL()
 	}
   if ( iIsRunningEmbedded )
   {
-      // No repeat when running in embedded mode, override the default iRepeat
+      // No repeat when running in embedded mode, override the default iSettings.iRepeat
       iSongList->SetRepeat(EFalse);
   }
   iIsStartup=EFalse;
@@ -712,12 +713,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
         {
             SetRandomL(ETrue);
         }
-        iSongList->SetRepeat(iRepeat);
+        iSongList->SetRepeat(iSettings.iRepeat);
 		break;
 					  }
 		
 	case EOggRepeat: {
-		iAppView->ToggleRepeat();
+	    ToggleRepeat();
 		break;
 					 }
 		
@@ -733,7 +734,8 @@ COggPlayAppUi::HandleCommandL(int aCommand)
         CSettingsS80Dialog *hk = new CSettingsS80Dialog(&iSettings);
 		hk->ExecuteLD(R_DIALOG_OPTIONS) ;
 #elif defined(SERIES60)
-    ActivateOggViewL(KOggPlayUidSettingsView);
+        ActivateOggViewL(KOggPlayUidSettingsView);
+        SetRepeat(iSettings.iRepeat);
 #endif
 		break;
 					  }
@@ -873,7 +875,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 void
 COggPlayAppUi::PlaySelect()
 {
-    iSongList->SetRepeat(iRepeat); // Make sure that the repeat setting in AppUi has same
+    iSongList->SetRepeat(iSettings.iRepeat); // Make sure that the repeat setting in AppUi has same
                                    // value in the songList
 	TInt idx = iAppView->GetSelectedIndex();
 
@@ -1142,13 +1144,13 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 	{
         // "Repeat" on/off entry, UIQ uses check box, Series 60 uses variable argument string.
 #if defined(UIQ)
-        if (iRepeat) 
+        if (iSettings.iRepeat) 
             aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
       // UIQ_? for the random stuff
 #elif defined(SERIES60)
     // FIXIT - Should perhaps be in the options menu instead ??
     TBuf<50> buf;
-    iEikonEnv->ReadResource(buf, (iRepeat) ? R_OGG_REPEAT_ON : R_OGG_REPEAT_OFF );
+    iEikonEnv->ReadResource(buf, (iSettings.iRepeat) ? R_OGG_REPEAT_ON : R_OGG_REPEAT_OFF );
     aMenuPane->SetItemTextL( EOggRepeat, buf );
     iEikonEnv->ReadResource(buf, (iRandom) ? R_OGG_RANDOM_ON : R_OGG_RANDOM_OFF );
     aMenuPane->SetItemTextL( EOggShuffle, buf );
@@ -1171,7 +1173,7 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 
 #ifdef UIQ
 	if (aMenuId==R_POPUP_MENU) {
-		if (iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
+		if (iSettings.iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
 		aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());
 		aMenuPane->SetItemDimmed(EOggPlay, !iAppView->CanPlay());
 		aMenuPane->SetItemDimmed(EOggPauseResume, !iAppView->CanPause());
@@ -1276,7 +1278,7 @@ COggPlayAppUi::ReadIniFile()
     }
 	
    iHotkey = (int)   IniRead32( tf, 0, KMaxKeyCodes );
-   iRepeat = (TBool) IniRead32( tf, 1, 1 );
+   iSettings.iRepeat = (TBool) IniRead32( tf, 1, 1 );
    iVolume = (int)   IniRead32( tf, KMaxVolume, KMaxVolume );
 	
    TInt64 tmp64 = IniRead64( tf );
@@ -1447,7 +1449,7 @@ COggPlayAppUi::WriteIniFile()
 	num.Num(iHotkey);
 	tf.Write(num);
 	
-	num.Num(iRepeat);
+	num.Num(iSettings.iRepeat);
 	tf.Write(num);
 
 	num.Num(iVolume);
@@ -1581,10 +1583,21 @@ COggPlayAppUi::SetRandomL(TBool aRandom)
     iSongList->ConstructL(iAppView, iOggPlayback);
 }
 
+void 
+COggPlayAppUi::ToggleRepeat()
+{
+	if (iSettings.iRepeat)
+	      SetRepeat(EFalse);
+	    else
+	      SetRepeat(ETrue);
+	    
+	iAppView->UpdateRepeat();
+}
+
 void
 COggPlayAppUi::SetRepeat(TBool aRepeat)
 {
-    iRepeat = aRepeat;
+    iSettings.iRepeat = aRepeat;
     iSongList->SetRepeat(aRepeat);
 }
 
