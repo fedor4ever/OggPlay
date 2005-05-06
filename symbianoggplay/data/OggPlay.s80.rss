@@ -190,17 +190,33 @@ RESOURCE DIALOG r_dialog_info {
   };
 }
 
-RESOURCE ARRAY r_hotkey_array {
-  items= {
-    LBUF { txt=ogg_hotkey_none; },
-    LBUF { txt=ogg_hotkey_camera; },
-    LBUF { txt=ogg_hotkey_browser; },
-    LBUF { txt=ogg_hotkey_power; },
-    LBUF { txt=ogg_hotkey_flipopen; }
+#endif
+
+RESOURCE ARRAY r_user_hotkey_items
+{
+  //Must be kept synchronized with the TOggplaySettings::THotkey enum !
+
+  items = {
+    LBUF { txt = ogg_hotkey_none; },
+    LBUF { txt = ogg_format_text_fast_forward; },
+	LBUF { txt = ogg_format_text_rewind; },
+	LBUF { txt = ogg_format_text_page_up; },
+	LBUF { txt = ogg_format_text_page_down; },
+	LBUF { txt = ogg_format_text_next_song; },
+	LBUF { txt = ogg_format_text_prev_song; },
+//	LBUF { txt = ogg_format_text_keylock; },
+//	LBUF { txt = ogg_format_text_playpause; },
+	LBUF { txt = ogg_play; },
+	LBUF { txt = ogg_pause; },
+	LBUF { txt = ogg_stop; },
+	LBUF { txt = ogg_boost_up; },
+	LBUF { txt = ogg_boost_down; },
+	LBUF { txt = ogg_cba_exit; },
+	LBUF { txt = ogg_cba_back; }
   };
 }
 
-#endif
+
 RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu
@@ -302,7 +318,8 @@ RESOURCE ARRAY options_multipage_array
 {
     items = {
        PAGE { id=0;text =ogg_settings; lines = options_multipage1;},
-       PAGE { id=1;text =ogg_softkeys; lines = options_multipage2; }
+       PAGE { id=1;text =ogg_softkeys_idle; lines = options_multipage2;},
+       PAGE { id=2;text =ogg_softkeys_play; lines = options_multipage3;}
     };
 }
 
@@ -342,33 +359,71 @@ RESOURCE ARRAY options_multipage2
     DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_cba_1;
-              id = EOggSettingCba1;
+              id = EOggSettingCba01;
               control = CHOICELIST {
-                array_id= r_oggplay_rsk_setting_page_list;
+                array_id= r_user_hotkey_items;
               };
              },
      DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_cba_2;
-              id = EOggSettingCba2;
+              id = EOggSettingCba02;
               control = CHOICELIST {
-                array_id= r_oggplay_rsk_setting_page_list;
+                array_id= r_user_hotkey_items;
               };
              },
      DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_cba_3;
-              id = EOggSettingCba3;
+              id = EOggSettingCba03;
               control = CHOICELIST {
-                array_id= r_oggplay_rsk_setting_page_list;
+                array_id= r_user_hotkey_items;
               };
              },
      DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_cba_4;
-              id = EOggSettingCba4;
+              id = EOggSettingCba04;
               control = CHOICELIST {
-                array_id= r_oggplay_rsk_setting_page_list;
+                array_id= r_user_hotkey_items;
+              };
+             }
+   };
+}
+
+RESOURCE ARRAY options_multipage3
+{
+   items = {
+    DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_1;
+              id = EOggSettingCba11;
+              control = CHOICELIST {
+                array_id= r_user_hotkey_items;
+              };
+             },
+     DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_2;
+              id = EOggSettingCba12;
+              control = CHOICELIST {
+                array_id= r_user_hotkey_items;
+              };
+             },
+     DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_3;
+              id = EOggSettingCba13;
+              control = CHOICELIST {
+                array_id= r_user_hotkey_items;
+              };
+             },
+     DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_cba_4;
+              id = EOggSettingCba14;
+              control = CHOICELIST {
+                array_id= r_user_hotkey_items;
               };
              }
    };
@@ -382,18 +437,6 @@ RESOURCE ARRAY r_oggplay_scandir_item_array
 	};
     }
 
-	
-RESOURCE ARRAY r_oggplay_rsk_setting_page_list
-	    {
-    items = {
-		LBUF { txt = ogg_cba_exit; },
-		LBUF { txt = ogg_cba_stop; },
-		LBUF { txt = ogg_cba_play_pause; },
-		LBUF { txt = ogg_cba_back; },
-		LBUF { txt = ogg_hotkey_none; }
-		};
-	}
-	
 	
 RESOURCE DIALOG r_dialog_codecs {
   title   = ogg_codec_selection;

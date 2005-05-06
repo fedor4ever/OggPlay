@@ -119,6 +119,8 @@ _LIT(KMmcSearchDir,"E:\\Ogg\\");
  const TInt KNofSoftkeys = 1;
 #endif
  
+ 
+
 class TOggplaySettings
 	{
 public:
@@ -132,16 +134,9 @@ public:
   TInt iAutoplay;
   TInt iManeuvringSpeed;
   TInt iWarningsEnabled;
-  enum TRsk {
-    ECbaExit,
-    ECbaStop,
-    ECbaPause,
-    ECbaPlay,
-    ECbaBack,
-    ECbaNone
-  };
-  TInt iRskIdle[KNofSoftkeys];
-  TInt iRskPlay[KNofSoftkeys];
+   
+  TInt iSoftKeysPlay[KNofSoftkeys];
+  TInt iSoftKeysIdle[KNofSoftkeys];
   TInt iGainType;
   
   enum THotkeys {   // COggUserHotkeys
@@ -153,24 +148,51 @@ public:
     ENextSong,
     EPreviousSong,
     EKeylock,
-    ENofHotkeysV4=EKeylock, 
     EPauseResume,
     EPlay,
     EPause,
     EStop,
 	EVolumeBoostUp,
-	ENofHotkeysV5=EVolumeBoostUp,
 	EVolumeBoostDown,
-    ENofHotkeysV7,
-    ENofHotkeys=ENofHotkeysV7,
-    KFirstHotkeyIndex = EFastForward
+    EHotKeyExit,
+    EHotKeyBack,
+    KFirstHotkeyIndex = EFastForward,
+    ENofHotkeysV4=EKeylock, 
+	ENofHotkeysV5=EVolumeBoostUp,
+	ENofHotkeysV7=EHotKeyExit,
+    ENofHotkeys=EHotKeyBack+1
     };
+
 
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
   TBool iRepeat;
 };
 
+ 
+static const TInt THotkeysActions[]  =
+  {
+  	//Must be kept synchronized with the TOggplaySettings::THotkey enum !
+
+  	EEikCmdCanceled,	// ENoHotkey,
+    EUserFastForward,	// EFastForward,
+    EUserRewind, 		// ERewind,
+    EUserListBoxPageUp, // EPageUp,
+    EUserListBoxPageDown,// EPageDown,
+    EOggNextSong,		// ENextSong,
+    EOggPrevSong,		// EPreviousSong,
+    EUserKeylock,		// EKeylock,
+    NULL,				// EPauseResume,
+    EUserPlayCBA,   	// EPlay,
+    EUserPauseCBA,  	// EPause,
+    EUserStopPlayingCBA,// EStop,
+	EVolumeBoostUp,		// EVolumeBoostUp,
+	EVolumeBoostDown,	// EVolumeBoostDown,
+    EEikCmdExit,    	// EHotKeyExit,
+    EUserBackCBA   		// EHotKeyBack
+  };
+ 
+ 
 // Forward declarations:
 //----------------------
 
@@ -291,9 +313,6 @@ public:
 
   void UpdateSoftkeys(TBool aForce=EFalse);
   
-  void SetSeries80Softkeys(TInt * aSoftkey);
-  IFDEF_S60( void SetSeries60Softkeys(TInt aSoftkey); )
-
   // from CQikAppUi:
   void HandleCommandL(int aCommand);
   void HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent);
@@ -338,7 +357,7 @@ private:
   COggFCView* iFCView;
 #if defined(SERIES60)
   COggSettingsView* iSettingsView;
-  COggUserHotkeysView* iUserHotkeys;
+  COggUserHotkeysView* iUserHotkeysView;
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
   COggSplashView* iSplashView;
 #endif

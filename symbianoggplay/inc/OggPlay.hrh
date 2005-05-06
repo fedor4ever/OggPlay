@@ -116,11 +116,14 @@ enum TOggplaySettingId
     EOggSettingRskIdle,
     EOggSettingRskPlay,
     EOggSettingVolumeBoost,
-    EOggSettingCba1,
-    EOggSettingCba2,
-    EOggSettingCba3,
-    EOggSettingCba4
-    
+    EOggSettingCba01,
+    EOggSettingCba02,
+    EOggSettingCba03,
+    EOggSettingCba04,
+    EOggSettingCba11,
+    EOggSettingCba12,
+    EOggSettingCba13,
+    EOggSettingCba14
 	};
 
 enum TOggplayMiscSeries60 // Also used for Series80
@@ -134,7 +137,14 @@ enum TOggplayMiscSeries60 // Also used for Series80
   EUserBackCBA,
   EUserSoftkeyOptions,
   EUserModifyCBA,
-  EUserSelectCBA
+  EUserSelectCBA,
+  EUserFastForward,
+  EUserRewind,
+  EUserListBoxPageDown,
+  EUserListBoxPageUp,
+  EUserKeylock,
+  EVolumeBoostDown,
+  EVolumeBoostUp
   };
 
 #endif      // OGGPLAY_HRH

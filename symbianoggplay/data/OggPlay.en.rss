@@ -163,7 +163,8 @@
 #define ogg_codec_info_UID           "UID"
 
 // S80 Specific strings
-#define ogg_softkeys                 "Softkeys"
+#define ogg_softkeys_idle            "Idle Softkeys"
+#define ogg_softkeys_play            "PlayMode Softkeys"
 #define ogg_cba_1                    "Softkey #1"
 #define ogg_cba_2                    "Softkey #2"
 #define ogg_cba_3                    "Softkey #3"

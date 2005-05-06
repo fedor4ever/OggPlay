@@ -42,9 +42,6 @@
 IFDEF_S60(const TInt KCallBackPeriod = 150000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
 IFNDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
 
-const TInt KFfRwdStep=20000;
-
-
 COggPlayAppView::COggPlayAppView() :
   CCoeControl(),
   MCoeControlObserver(),
@@ -921,6 +918,22 @@ COggPlayAppView::GetTextArray()
   return iTextArray;
 }
 
+void 
+COggPlayAppView::ListBoxPageDown() 
+{
+  TInt index = iListBox[iMode]->CurrentItemIndex();
+  if( index != iListBox[iMode]->CountText() - 1)
+        SelectItem(index + iListBox[iMode]->NofVisibleLines() - 1);
+}
+    
+void 
+COggPlayAppView::ListBoxPageUp() 
+{
+  TInt index = iListBox[iMode]->CurrentItemIndex();
+  if(index != 0)
+        SelectItem(index - iListBox[iMode]->NofVisibleLines() + 1);
+}
+
 void
 COggPlayAppView::SetTime(TInt64 aTime)
 {
@@ -1542,12 +1555,10 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   } 
   #if defined(SERIES60)
   // S60 User Hotkeys
-  switch(COggUserHotkeys::Hotkey(aKeyEvent,aType,&iApp->iSettings)) {
+  switch(COggUserHotkeysControl::Hotkey(aKeyEvent,aType,&iApp->iSettings)) {
     case TOggplaySettings::EFastForward : {
       TInt64 pos=iApp->iOggPlayback->Position()+=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
-
-	  iPosition[iMode]->SetValue(pos.GetTInt());
 	  UpdateSongPosition();
 	  iCanvas[iMode]->Refresh(EFalse);
 	  return EKeyWasConsumed;
@@ -1555,20 +1566,16 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     case TOggplaySettings::ERewind : {
       TInt64 pos=iApp->iOggPlayback->Position()-=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
-
-	  iPosition[iMode]->SetValue(pos.GetTInt());
 	  UpdateSongPosition();
 	  iCanvas[iMode]->Refresh(EFalse);
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageDown : {
-      if(index != iListBox[iMode]->CountText() - 1)
-        SelectItem(index + iListBox[iMode]->NofVisibleLines() - 1);
+      ListBoxPageDown();
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageUp : {
-      if(index != 0)
-        SelectItem(index - iListBox[iMode]->NofVisibleLines() + 1);
+      ListBoxPageUp();
       return EKeyWasConsumed;
       }
     case TOggplaySettings::ENextSong : {

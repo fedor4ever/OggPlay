@@ -26,6 +26,8 @@
 #include "OggFiles.h"
 #include "OggUserHotkeys.h"
 
+const TInt KFfRwdStep=20000;
+
 class CCoeControl;
 class COggPlayAppView : public CCoeControl,
 			public MCoeControlObserver,
@@ -65,8 +67,9 @@ public:
   const COggPlayAppUi::TViews    GetViewName(TInt idx);
   void GetFilterData(TInt idx, TDes &aData);
   void SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex);
-
-
+  void ListBoxPageDown();
+  void ListBoxPageUp();
+  
   void  SetAlarm();
   void  ClearAlarm();
 

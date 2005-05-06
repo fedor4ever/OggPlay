@@ -352,8 +352,8 @@ COggPlayAppUi::ConstructL()
 #if defined(SERIES60)
 	iSettingsView=new(ELeave) COggSettingsView(*iAppView,KOggPlayUidSettingsView);
 	RegisterViewL(*iSettingsView);
-    iUserHotkeys=new(ELeave) COggUserHotkeysView(*iAppView);
-	RegisterViewL(*iUserHotkeys);
+    iUserHotkeysView =new(ELeave) COggUserHotkeysView(*iAppView);
+	RegisterViewL(*iUserHotkeysView);
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
     iSplashView=new(ELeave) COggSplashView(*iAppView);
     RegisterViewL(*iSplashView);
@@ -363,7 +363,7 @@ COggPlayAppUi::ConstructL()
     RegisterViewL(*iCodecSelectionView);
 #endif
 #endif /* SERIES60 */
-    
+        
 	SetProcessPriority();
 	SetThreadPriority();
 	
@@ -426,9 +426,9 @@ COggPlayAppUi::~COggPlayAppUi()
   	delete iSettingsView;
 	}
 
-  if( iUserHotkeys ) {
-    DeregisterView(*iUserHotkeys);
-    delete iUserHotkeys;
+  if( iUserHotkeysView ) {
+    DeregisterView(*iUserHotkeysView);
+    delete iUserHotkeysView;
     }
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
   if (iSplashView) {
@@ -455,8 +455,8 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iSkins;
 	delete iOggMsgEnv ;
     delete iSongList;
-  iViewHistoryStack.Close();
-  iRestoreStack.Close();
+    iViewHistoryStack.Close();
+    iRestoreStack.Close();
 	COggLog::Exit();  
 	
 	CloseSTDLIB();
@@ -582,86 +582,20 @@ COggPlayAppUi::UpdateSoftkeys(TBool aForce)
   
 #ifdef SERIES60
   if(iOggPlayback->State() == CAbsPlayback::EPlaying) {
-    SetSeries60Softkeys(iSettings.iRskPlay[0]);
+    COggUserHotkeysS60::SetSoftkeys(ETrue);
   } else {
-    SetSeries60Softkeys(iSettings.iRskIdle[0]);
+    COggUserHotkeysS60::SetSoftkeys(EFalse);
   }
 #else
   if(iOggPlayback->State() == CAbsPlayback::EPlaying) {
-    SetSeries80Softkeys(iSettings.iRskPlay);
+    COggUserHotkeysS80::SetSoftkeys(ETrue);
   } else {
-    SetSeries80Softkeys(iSettings.iRskIdle);
+    COggUserHotkeysS80::SetSoftkeys(EFalse);
   }
 #endif
   Cba()->DrawNow();
-
 #endif //S60||S80
 }
-
-#ifdef SERIES80
-void
-COggPlayAppUi::SetSeries80Softkeys(TInt * aSoftkey) {
-  TBuf<50> buf;
-  TInt action;
-  for (TInt i=0; i<4; i++)
-  {
-  	switch(aSoftkey[i])
-  	{
-	    case TOggplaySettings::ECbaStop:
-	      iEikonEnv->ReadResource(buf, R_OGG_CBA_STOP);
-	      action = EUserStopPlayingCBA;
-	      break;
-	    case TOggplaySettings::ECbaExit:
-	      iEikonEnv->ReadResource(buf, R_OGG_CBA_EXIT);
-	      action = EEikCmdExit;
-	      break;
-	    case TOggplaySettings::ECbaPause:
-	      iEikonEnv->ReadResource(buf, R_OGG_CBA_PAUSE);
-	      action = EUserPauseCBA;
-	      break;
-	    case TOggplaySettings::ECbaPlay:
-	      iEikonEnv->ReadResource(buf, R_OGG_CBA_PLAY);
-	      action = EUserPlayCBA;
-	      break;
-	    case TOggplaySettings::ECbaBack:
-	      iEikonEnv->ReadResource(buf, R_OGG_CBA_BACK);
-	      action = EUserBackCBA;
-	      break;
-	    default:
-	      buf = KNullDesC;
-	      action = EEikCmdCanceled;
-	      break;
-  	}
-    Cba()->SetCommandL(i,action, buf); 
-  }
-}
-#endif /* SERIES80 */
-
-#if defined(SERIES60)
-void
-COggPlayAppUi::SetSeries60Softkeys(TInt aSoftkey) {
-  switch(aSoftkey) {
-    case TOggplaySettings::ECbaStop:
-      Cba()->AddCommandSetToStackL(R_OPTION_STOP_CBA);
-      break;
-    case TOggplaySettings::ECbaExit:
-      Cba()->AddCommandSetToStackL(R_OPTION_EXIT_CBA);
-      break;
-    case TOggplaySettings::ECbaPause:
-      Cba()->AddCommandSetToStackL(R_OPTION_PAUSE_CBA);
-      break;
-    case TOggplaySettings::ECbaPlay:
-      Cba()->AddCommandSetToStackL(R_OPTION_PLAY_CBA);
-      break;
-    case TOggplaySettings::ECbaBack:
-      Cba()->AddCommandSetToStackL(R_OPTION_BACK_CBA);
-      break;
-    default:
-      //OGGPANIC(_L("Invalid Softkey"),1319);
-      break;
-  }
-}
-#endif
 
 
 void
@@ -733,6 +667,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 #elif defined(SERIES80)
         CSettingsS80Dialog *hk = new CSettingsS80Dialog(&iSettings);
 		hk->ExecuteLD(R_DIALOG_OPTIONS) ;
+		UpdateSoftkeys(EFalse);
 #elif defined(SERIES60)
         ActivateOggViewL(KOggPlayUidSettingsView);
         SetRepeat(iSettings.iRepeat);
@@ -860,6 +795,25 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EUserHotKeyCBABack: {
     ActivateOggViewL(KOggPlayUidFOView);
     }
+    break;
+    
+  case EUserFastForward : {
+    TInt64 pos= iOggPlayback->Position()+=KFfRwdStep;
+    iOggPlayback->SetPosition(pos);
+	iAppView->UpdateSongPosition();
+    }
+    break;
+  case EUserRewind : {
+    TInt64 pos= iOggPlayback->Position()-=KFfRwdStep;
+    iOggPlayback->SetPosition(pos);
+	iAppView->UpdateSongPosition();
+    }
+    break;
+  case EUserListBoxPageDown :
+  	iAppView->ListBoxPageDown();
+    break;
+  case EUserListBoxPageUp:
+  	iAppView->ListBoxPageUp();
     break;
 #endif
 
@@ -1150,8 +1104,6 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 #elif defined(SERIES60)
     // FIXIT - Should perhaps be in the options menu instead ??
     TBuf<50> buf;
-    iEikonEnv->ReadResource(buf, (iSettings.iRepeat) ? R_OGG_REPEAT_ON : R_OGG_REPEAT_OFF );
-    aMenuPane->SetItemTextL( EOggRepeat, buf );
     iEikonEnv->ReadResource(buf, (iRandom) ? R_OGG_RANDOM_ON : R_OGG_RANDOM_OFF );
     aMenuPane->SetItemTextL( EOggShuffle, buf );
 #endif
@@ -1240,14 +1192,14 @@ COggPlayAppUi::ReadIniFile()
     TInt err;
     
 #ifdef SERIES80
-      iSettings.iRskIdle[0]      = TOggplaySettings::ECbaPlay;
-      iSettings.iRskPlay[0]      = TOggplaySettings::ECbaPause ;
-      iSettings.iRskIdle[1]      = TOggplaySettings::ECbaStop ;
-      iSettings.iRskPlay[1]      = TOggplaySettings::ECbaStop ;
-      iSettings.iRskIdle[2]      = TOggplaySettings::ECbaNone ;
-      iSettings.iRskPlay[2]      = TOggplaySettings::ECbaNone ;
-      iSettings.iRskIdle[3]      = TOggplaySettings::ECbaExit ;
-      iSettings.iRskPlay[3]      = TOggplaySettings::ECbaExit ;
+      iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
+      iSettings.iSoftKeysIdle[1] = TOggplaySettings::EStop ;
+      iSettings.iSoftKeysIdle[2] = TOggplaySettings::ENoHotkey;
+      iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit ;
+      iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
+      iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong ;
+      iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
+      iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit ;
 #endif
  
     // Default value
@@ -1309,24 +1261,43 @@ COggPlayAppUi::ReadIniFile()
       iSettings.iManeuvringSpeed = (TInt) IniRead32( tf );
       
       // For backwards compatibility for number of hotkeys
-      TInt num_of_hotkeys = ( ini_version >= 5 ) ? TOggplaySettings::ENofHotkeysV5 : TOggplaySettings::ENofHotkeysV4;
-	  if (ini_version>=7) num_of_hotkeys = TOggplaySettings::ENofHotkeys;
+      TInt num_of_hotkeys = 0;
+      if (ini_version<7) 
+      {
+          num_of_hotkeys = ( ini_version >= 5 ) ? TOggplaySettings::ENofHotkeysV5 : TOggplaySettings::ENofHotkeysV4;
+      }
+      else 
+      { 
+      	  num_of_hotkeys = (TInt)  IniRead32( tf );
+      }
  
       for ( TInt j = TOggplaySettings::KFirstHotkeyIndex; j < num_of_hotkeys; j++ ) 
       {
          iSettings.iUserHotkeys[j] = (TInt) IniRead32( tf );
       }
       
-      iSettings.iWarningsEnabled = (TInt)  IniRead32( tf );
-      iSettings.iRskIdle[0]      = (TInt)  IniRead32( tf );
-      iSettings.iRskPlay[0]      = (TInt)  IniRead32( tf );
+      iSettings.iWarningsEnabled      = (TInt)  IniRead32( tf );
+      if (ini_version<7) 
+        {
+            // The way the softkeys is stored has changed, ignore the value
+            // from the ini file.
+            IniRead32( tf ); 
+        	IniRead32( tf );
+        	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyExit;
+        	iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyExit;
+        }
+        else
+        {
+      		iSettings.iSoftKeysIdle[0]      = (TInt)  IniRead32( tf );
+      		iSettings.iSoftKeysPlay[0]      = (TInt)  IniRead32( tf );
+        }
 #ifdef SERIES80
-      iSettings.iRskIdle[1]      = (TInt)  IniRead32( tf );
-      iSettings.iRskPlay[1]      = (TInt)  IniRead32( tf );
-      iSettings.iRskIdle[2]      = (TInt)  IniRead32( tf );
-      iSettings.iRskPlay[2]      = (TInt)  IniRead32( tf );
-      iSettings.iRskIdle[3]      = (TInt)  IniRead32( tf );
-      iSettings.iRskPlay[3]      = (TInt)  IniRead32( tf );
+      iSettings.iSoftKeysIdle[1]      = (TInt)  IniRead32( tf );
+      iSettings.iSoftKeysPlay[1]      = (TInt)  IniRead32( tf );
+      iSettings.iSoftKeysIdle[2]      = (TInt)  IniRead32( tf );
+      iSettings.iSoftKeysPlay[2]      = (TInt)  IniRead32( tf );
+      iSettings.iSoftKeysIdle[3]      = (TInt)  IniRead32( tf );
+      iSettings.iSoftKeysPlay[3]      = (TInt)  IniRead32( tf );
  #endif
       iRandom                    = (TBool) IniRead32( tf, 0, 1 );
 
@@ -1492,6 +1463,9 @@ COggPlayAppUi::WriteIniFile()
  	num.Num(iSettings.iManeuvringSpeed);
 	tf.Write(num);
     
+    num.Num(TOggplaySettings::ENofHotkeys);
+    tf.Write(num);
+    
     for( j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
     {
         num.Num(iSettings.iUserHotkeys[j]);
@@ -1503,10 +1477,10 @@ COggPlayAppUi::WriteIniFile()
     
     for( j=0; j<KNofSoftkeys; j++ ) 
     {
-        num.Num(iSettings.iRskIdle[j]);
+        num.Num(iSettings.iSoftKeysIdle[j]);
         tf.Write(num);
     
-        num.Num(iSettings.iRskPlay[j]);
+        num.Num(iSettings.iSoftKeysPlay[j]);
         tf.Write(num);
     }
     

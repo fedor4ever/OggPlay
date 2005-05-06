@@ -18,32 +18,45 @@
 
 // $CVSHeader$
 
-/* OggUserHotkeys.cpp - Series 60 only.
- * Let's the user assign hotkeys (0..9,*,#,backspace,shift) for specified actions like FWD and REW.
- */
 
 #ifndef OGGUSERHOTKEYS_H
 #define OGGUSERHOTKEYS_H
 
-#include <coecntrl.h>
-#include <bautils.h>            // BaflUtils
-#if defined(SERIES60)
-#include <aknquerydialog.h>
-#endif
-
 #include "OggPlay.h"
 #include "OggLog.h"
+
+#if defined(SERIES80)
+
+class COggUserHotkeysS80 : public CBase
+{
+	public: 
+	static void SetSoftkeys(TBool aPlaying);
+	static TInt MapCommandToRssList(TInt aCommandIndex)  ;
+	static TInt MapRssListToCommand(TInt aRSSIndex)  ;
+};
+#endif
+
+#if defined(SERIES60)
+
+/* OggUserHotkeys.cpp - Series 60 only.
+ * Let's the user assign hotkeys (0..9,*,#,backspace,shift) for specified actions like FWD and REW.
+ */
+ 
+#include <coecntrl.h>
+#include <bautils.h>            // BaflUtils
+#include <aknquerydialog.h>
 
 class CEikTextListBox;
 
 /// Control hosting listbox for user hotkey assignments.
 //
-class COggUserHotkeys : public CCoeControl
+
+class COggUserHotkeysControl : public CCoeControl
   {
 public:
-  COggUserHotkeys( TOggplaySettings& aData );
+  COggUserHotkeysControl( TOggplaySettings& aData );
   void ConstructL(const TRect& aRect);
-  ~COggUserHotkeys();
+  ~COggUserHotkeysControl();
 
   static TOggplaySettings::THotkeys Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData );
 
@@ -59,4 +72,13 @@ private:
   TOggplaySettings& iData;
   CEikTextListBox *iListBox;
   };
+  
+class COggUserHotkeysS60 : public CBase
+{
+	public: 
+	static void SetSoftkeys(TBool aPlaying);
+	
+};
+#endif // SERIES60
+
 #endif

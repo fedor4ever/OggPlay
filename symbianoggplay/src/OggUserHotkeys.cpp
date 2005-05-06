@@ -28,14 +28,14 @@
 #include <OggPlay.rsg>
 #include "OggPlay.hrh"
 #include "OggLog.h"
+#include "OggPlay.h"
 
 
-
-COggUserHotkeys::COggUserHotkeys( TOggplaySettings& aData ) : iData(aData)
+COggUserHotkeysControl::COggUserHotkeysControl( TOggplaySettings& aData ) : iData(aData)
   {
   }
 
-void COggUserHotkeys::ConstructL(const TRect& aRect)
+void COggUserHotkeysControl::ConstructL(const TRect& aRect)
   {
   CreateWindowL();
 
@@ -58,12 +58,12 @@ void COggUserHotkeys::ConstructL(const TRect& aRect)
   }
 
 
-COggUserHotkeys::~COggUserHotkeys()
+COggUserHotkeysControl::~COggUserHotkeysControl()
   {
   delete iListBox;
   }
 
-void COggUserHotkeys::SetHotkey( TInt aRow, TInt aCode )
+void COggUserHotkeysControl::SetHotkey( TInt aRow, TInt aCode )
   {
   aRow += TOggplaySettings::KFirstHotkeyIndex;
 
@@ -79,7 +79,7 @@ void COggUserHotkeys::SetHotkey( TInt aRow, TInt aCode )
   }
 
 // Static method
-TOggplaySettings::THotkeys COggUserHotkeys::Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData )
+TOggplaySettings::THotkeys COggUserHotkeysControl::Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData )
   {
   for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
     {
@@ -99,7 +99,7 @@ TOggplaySettings::THotkeys COggUserHotkeys::Hotkey( const TKeyEvent& aKeyEvent, 
   }
 
 
-void COggUserHotkeys::RefreshListboxModel()
+void COggUserHotkeysControl::RefreshListboxModel()
   {
 	TBuf<64> keyBuf,listboxBuf;
 
@@ -107,7 +107,7 @@ void COggUserHotkeys::RefreshListboxModel()
   
   CDesCArray* modelArray = static_cast<CDesCArray*>(iListBox->Model()->ItemTextArray());
 
-  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ ) 
+  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<=TOggplaySettings::EVolumeBoostDown; i++ ) 
     {
     keyBuf.Zero();
     switch( iData.iUserHotkeys[i] ) {
@@ -139,19 +139,19 @@ void COggUserHotkeys::RefreshListboxModel()
   }
 
 
-TInt COggUserHotkeys::CountComponentControls() const
+TInt COggUserHotkeysControl::CountComponentControls() const
   {
   return 1;
   }
 
 
-CCoeControl* COggUserHotkeys::ComponentControl(TInt /*aIndex*/) const
+CCoeControl* COggUserHotkeysControl::ComponentControl(TInt /*aIndex*/) const
   {
   return iListBox;
   }
 
 
-TKeyResponse COggUserHotkeys::OfferKeyEventL(
+TKeyResponse COggUserHotkeysControl::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType )
   {
@@ -178,5 +178,38 @@ TKeyResponse COggUserHotkeys::OfferKeyEventL(
 		return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
 
+
+void
+COggUserHotkeysS60::SetSoftkeys(TBool aPlaying) {
+  CEikonEnv * eikonEnv = CEikonEnv::Static();
+  COggPlayAppUi * appUi = static_cast <COggPlayAppUi *> ( eikonEnv->AppUi() ) ;
+  CEikButtonGroupContainer * Cba = appUi->Cba();  
+  TOggplaySettings settings = appUi->iSettings;
+
+  TInt aSoftkey = settings.iSoftKeysIdle[0];
+  if (aPlaying)
+    aSoftkey = settings.iSoftKeysPlay[0];
+  
+  switch(aSoftkey) {
+    case TOggplaySettings::EStop:
+      Cba->AddCommandSetToStackL(R_OPTION_STOP_CBA);
+      break;
+    case TOggplaySettings::EHotKeyExit:
+      Cba->AddCommandSetToStackL(R_OPTION_EXIT_CBA);
+      break;
+    case TOggplaySettings::EPause:
+      Cba->AddCommandSetToStackL(R_OPTION_PAUSE_CBA);
+      break;
+    case TOggplaySettings::EPlay:
+      Cba->AddCommandSetToStackL(R_OPTION_PLAY_CBA);
+      break;
+    case TOggplaySettings::EHotKeyBack:
+      Cba->AddCommandSetToStackL(R_OPTION_BACK_CBA);
+      break;
+    default:
+      //OGGPANIC(_L("Invalid Softkey"),1319);
+      break;
+  }
+}
 
 // End of File  

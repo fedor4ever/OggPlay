@@ -344,7 +344,7 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
   COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
 
   COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
-	iUserHotkeysContainer = new (ELeave) COggUserHotkeys( appUi->iSettings );
+	iUserHotkeysContainer = new (ELeave) COggUserHotkeysControl( appUi->iSettings );
 	iUserHotkeysContainer->SetMopParent(appUi);
 	iUserHotkeysContainer->ConstructL( appUi->ClientRect() );
   appUi->AddToStackL(*this, iUserHotkeysContainer);

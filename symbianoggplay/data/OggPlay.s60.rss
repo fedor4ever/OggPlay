@@ -257,7 +257,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 	        identifier = EOggRepeat;
 			setting_page_resource = r_oggplay_binary_setting_page;
 			associated_resource = r_oggplay_popup_setting_binary_texts;
-			name = ogg_repeat;    
+			name = ogg_repeat2;    
 	        },
 		AVKON_SETTING_ITEM
 			{
@@ -411,11 +411,19 @@ RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_rsk_idle_setting_item_list
 RESOURCE ARRAY r_oggplay_rsk_idle_setting_page_list
     {
     items = { 
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
+		AVKON_ENUMERATED_TEXT { 
+		   value = 14 ; //TOggplaySettings::EHotKeyExit;
+		   text = ogg_cba_exit;  },
+		AVKON_ENUMERATED_TEXT {
+		   value = 11; //TOggplaySettings::EStop;
+		   text = ogg_cba_stop; },
 		// skipped:  value = 2; text = ogg_cba_pause;
-		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_cba_play; },
-		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_cba_back; }
+		AVKON_ENUMERATED_TEXT { 
+		   value = 9;  //TOggplaySettings::EPlay;
+		   text = ogg_cba_play; },
+		AVKON_ENUMERATED_TEXT { 
+	 	   value = 15; //TOggplaySettings::EHotKeyBack;
+		   text = ogg_cba_back; }
 		};
 	}
 
@@ -449,12 +457,20 @@ RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_rsk_play_setting_item_list
 RESOURCE ARRAY r_oggplay_rsk_play_setting_page_list
     {
     items = { 
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_cba_exit; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_cba_stop; },
-		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_cba_pause; },
-		// skipped: value = 3; text = ogg_cba_play;
-		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_cba_back; }
+		AVKON_ENUMERATED_TEXT { 
+		   value = 14 ; //TOggplaySettings::EHotKeyExit;
+		   text = ogg_cba_exit;  },
+		AVKON_ENUMERATED_TEXT {
+		   value = 11; //TOggplaySettings::EStop;
+		   text = ogg_cba_stop; },
+		AVKON_ENUMERATED_TEXT { 
+		   value = 10; // TOggplaySettings::EPause;
+		   text = ogg_cba_pause; },
+		AVKON_ENUMERATED_TEXT { 
+	 	   value = 15; //TOggplaySettings::EHotKeyBack;
+		   text = ogg_cba_back; }
 		};
+		
 	}
 
 RESOURCE ARRAY r_oggplay_rsk_play_item_array
@@ -630,8 +646,6 @@ RESOURCE MENU_PANE r_file_menu
 {
   items= {
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
-      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
-                  flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggShuffle;  txt=ogg_normal_off;
 	              flags=EEikMenuItemCheckBox; },
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },

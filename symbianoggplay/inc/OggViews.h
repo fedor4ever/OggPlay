@@ -26,7 +26,7 @@
 #endif
 
 class COggPlayAppView;
-class COggUserHotkeys;
+class COggUserHotkeysControl;
 
 class COggViewBase : public CBase, public MCoeView
 {
@@ -115,8 +115,8 @@ class COggUserHotkeysView : public COggViewBase
     void ViewDeactivated();
 
   private:
-		COggUserHotkeys* iUserHotkeysContainer;
-    COggPlayAppView& iOggViewCtl;
+		COggUserHotkeysControl* iUserHotkeysContainer;
+        COggPlayAppView& iOggViewCtl;
 	};
 
 #ifdef PLUGIN_SYSTEM

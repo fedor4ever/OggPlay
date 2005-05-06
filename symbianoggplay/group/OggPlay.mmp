@@ -39,6 +39,7 @@ SOURCE OggFilesSearchDialogs.cpp
 
 #if defined SERIES80
   SOURCE OggDialogsS80.cpp
+  SOURCE OggUserHotkeysS80.cpp
 #endif
 
 #if !defined(PLUGIN_SYSTEM)

@@ -47,8 +47,8 @@ class CSettingsS80Dialog : public CEikDialog
   
  private:
   //new functions
-  void UpdateRskFromControls();
-  void UpdateControlsFromRsk();
+  void UpdateSoftkeysFromControls();
+  void UpdateControlsFromSoftkeys();
   
  private:
   //data
@@ -56,7 +56,7 @@ class CSettingsS80Dialog : public CEikDialog
    CEikCheckBox*  iAutostartControl;
    CEikCheckBox* iRepeatControl;
    CEikCheckBox* iRandomControl;
-   CEikChoiceList* iCbaControl [4] ;
+   CEikChoiceList* iCbaControl [2][4] ;
    
 };
 

@@ -26,6 +26,7 @@
 #include <OggPlay.rsg>
 #include <eikon.rsg>
 #include <gulbordr.h>
+#include "OggUserHotkeys.h"
 
 
 CSettingsS80Dialog::CSettingsS80Dialog(TOggplaySettings *aSettings)
@@ -44,7 +45,7 @@ CSettingsS80Dialog::OkToExitL(int /* aButtonId */)
   appUi->SetRepeat( static_cast <TInt> (iRepeatControl->State()) );
   appUi->SetRandomL( static_cast <TInt> (iRandomControl->State()) );
   
-  UpdateRskFromControls();
+  UpdateSoftkeysFromControls();
   return ETrue;
 }
 
@@ -56,10 +57,14 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iAutostartControl = static_cast <CEikCheckBox*> (Control(EOggSettingAutoPlayId));
   iRepeatControl = static_cast <CEikCheckBox*> (Control(EOggSettingRepeatId));
   iRandomControl = static_cast <CEikCheckBox*> (Control(EOggSettingRandomId));
-  iCbaControl[0] = static_cast <CEikChoiceList*> (Control(EOggSettingCba1));
-  iCbaControl[1] = static_cast <CEikChoiceList*> (Control(EOggSettingCba2));
-  iCbaControl[2] = static_cast <CEikChoiceList*> (Control(EOggSettingCba3));
-  iCbaControl[3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba4));
+  iCbaControl[0][0] = static_cast <CEikChoiceList*> (Control(EOggSettingCba01));
+  iCbaControl[0][1] = static_cast <CEikChoiceList*> (Control(EOggSettingCba02));
+  iCbaControl[0][2] = static_cast <CEikChoiceList*> (Control(EOggSettingCba03));
+  iCbaControl[0][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba04));
+  iCbaControl[1][0] = static_cast <CEikChoiceList*> (Control(EOggSettingCba11));
+  iCbaControl[1][1] = static_cast <CEikChoiceList*> (Control(EOggSettingCba12));
+  iCbaControl[1][2] = static_cast <CEikChoiceList*> (Control(EOggSettingCba13));
+  iCbaControl[1][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba14));
  
   iScanDirControl->SetCurrentItem(iSettings->iScanmode);
   iAutostartControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iAutoplay));
@@ -67,71 +72,37 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
   iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iRepeat));
   iRandomControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iRandom));
-  UpdateControlsFromRsk();
+  UpdateControlsFromSoftkeys();
 }
 
 
 
 
 void 
-CSettingsS80Dialog::UpdateRskFromControls()
+CSettingsS80Dialog::UpdateSoftkeysFromControls()
 {
-
-	const TOggplaySettings::TRsk RskToControl[][5] = 
-	{
-	   // Idle
-		{	TOggplaySettings::ECbaExit,
-	   		TOggplaySettings::ECbaStop,
-	   		TOggplaySettings::ECbaPlay,
-	   		TOggplaySettings::ECbaBack,
-	   		TOggplaySettings::ECbaNone	
-	   },
-	   // Play
-	   {	TOggplaySettings::ECbaExit,
-	   		TOggplaySettings::ECbaStop,
-	   		TOggplaySettings::ECbaPause,
-	   		TOggplaySettings::ECbaBack,
-	   		TOggplaySettings::ECbaNone
-	   }
-	};  
     // Update softkeys
 	for (TInt i=0; i<4; i++)
 	{
-	    iSettings->iRskIdle[i] = RskToControl[0][iCbaControl[i]->CurrentItem()];
-		iSettings->iRskPlay[i] = RskToControl[1][iCbaControl[i]->CurrentItem()];
+	    iSettings->iSoftKeysIdle[i] = 
+	        COggUserHotkeysS80::MapRssListToCommand(iCbaControl[0][i]->CurrentItem());
+        iSettings->iSoftKeysPlay[i] = 
+	        COggUserHotkeysS80::MapRssListToCommand(iCbaControl[1][i]->CurrentItem());
+
 	}
 }
 
 void 
-CSettingsS80Dialog::UpdateControlsFromRsk()
-{
-
-    TInt softKeyIdle;
-    
+CSettingsS80Dialog::UpdateControlsFromSoftkeys()
+{    
 	for (TInt i=0; i<4; i++)
 	{	
-	   switch( iSettings->iRskIdle[i] )
-	   {
-	   	case TOggplaySettings::ECbaExit :
-			  softKeyIdle = 0;  
-			  break;
-	   	case TOggplaySettings::ECbaStop :
-			  softKeyIdle = 1;  
-			  break;	   
-		case TOggplaySettings::ECbaPlay :
-		case TOggplaySettings::ECbaPause :
-			  softKeyIdle = 2;  
-			  break;	   
-	    case TOggplaySettings::ECbaBack :
-			  softKeyIdle = 3;  
-			  break;
-		case TOggplaySettings::ECbaNone :
-			  softKeyIdle = 4;  
-			  break;	   	   			
-	   }
-	   iCbaControl[i]->SetCurrentItem(softKeyIdle);
+	
+	   iCbaControl[0][i]->SetCurrentItem( 
+	      COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysIdle[i]) );
+	   iCbaControl[1][i]->SetCurrentItem( 
+	      COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysPlay[i]) );
 	}
-
 }
 
 ///////////////////////////////////////////////
