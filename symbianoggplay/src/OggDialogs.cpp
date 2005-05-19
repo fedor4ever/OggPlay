@@ -26,6 +26,7 @@
 #elif defined(SERIES80)
 #include <eikchlst.h>
 #include <eikchkbx.h>
+#include <eikenv.h> 
 #else
 #include <eikchlst.h>
 #include <eikchkbx.h>
@@ -135,7 +136,7 @@ COggInfoDialog::SetBitRate(TInt aBitRate)
   iBitRate= aBitRate;
 }
 
-#ifndef SERIES60
+#if !(defined(SERIES60) || defined(SERIES80))
 
 void
 COggAboutDialog::PreLayoutDynInitL()
@@ -256,7 +257,7 @@ COggAboutDialog::PreLayoutDynInitL()
   pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
   iRichText->ApplyParaFormatL(paraFormat,paraFormatMask,pos,1);
   iRichText->InsertL(0,iVersion);
-  IFDEF_S60( iRichText->InsertL(0,_L("OggPlay ")) );
+  iRichText->InsertL(0,_L("OggPlay "));
 
   // One paragraph to add some space.
 
@@ -451,7 +452,9 @@ void CScrollableRichTextControl::UpdateScrollIndicatorL()
     TEikScrollBarFrameLayout layout;
     TRect rect( Rect() );
     iSBFrame->TileL( &hSbarModel, &vSbarModel, rect, rect, layout );        
+#ifdef SERIES60
     iSBFrame->SetVFocusPosToThumbPos( vSbarModel.iThumbPosition );
+#endif
     }
 
     

@@ -62,7 +62,7 @@ class COggInfoDialog : public CEikDialog
 };
 
 
-#ifndef SERIES60
+#if !(defined(SERIES60) || defined(SERIES80) )
 
 class COggAboutDialog : public CEikDialog
 {

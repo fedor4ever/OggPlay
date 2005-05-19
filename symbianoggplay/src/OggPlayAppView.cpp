@@ -243,6 +243,7 @@ COggPlayAppView::ResetControls() {
   iAnalyzer[0]= 0; iAnalyzer[1]= 0;
   iRepeatIcon[0]= 0; iRepeatIcon[1]= 0;
   iRepeatButton[0]= 0; iRepeatButton[1]= 0;
+  iRandomIcon[0]=0; iRandomIcon[1]=0;
   iScrollBar[0]= 0; iScrollBar[1]= 0;
   iAnimation[0]= 0; iAnimation[1]= 0;
   iLogo[0]= 0; iLogo[1]= 0;
@@ -426,6 +427,14 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       c= new(ELeave) COggIcon();
       iRepeatIcon[aCanvas]= (COggIcon*)c;
       iRepeatIcon[aCanvas]->MakeVisible(iApp->iSettings.iRepeat);
+    }    
+    else if (p.iToken==_L("RandomIcon")) {
+      _LIT(KAL,"Adding RandomIcon");
+//	    RDebug::Print(KAL);
+	    p.Debug(KAL);
+      c= new(ELeave) COggIcon();
+      iRandomIcon[aCanvas]= (COggIcon*)c;
+      iRandomIcon[aCanvas]->MakeVisible(iApp->iRandom);
     }
     else if (p.iToken==_L("RepeatButton")) { 
       _LIT(KAL,"Adding RepeadButton");
@@ -944,11 +953,21 @@ void
 COggPlayAppView::UpdateRepeat()
 {
   if (iApp->iSettings.iRepeat) {
-    if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Hide();
-    if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(0);
-  } else {
     if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Show();
     if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(1);
+  } else {
+    if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Hide();
+    if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(0);
+  }
+}
+
+void
+COggPlayAppView::UpdateRandom()
+{
+  if (iApp->iRandom) {
+    if (iRandomIcon[iMode]) iRandomIcon[iMode]->Show();
+  } else {
+    if (iRandomIcon[iMode]) iRandomIcon[iMode]->Hide();
   }
 }
 
@@ -1249,7 +1268,7 @@ COggPlayAppView::UpdateControls()
  
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iSettings.iRepeat);
-
+  if (iRandomIcon[iMode]) iRandomIcon[iMode]->MakeVisible(iApp->iRandom);
 }
 
 void
@@ -1466,29 +1485,43 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   COggControl* c=iFocusControlsIter;
   
   if (code==0 && aType==EEventKeyDown) { 
-    if(iFocusControlsPresent && aKeyEvent.iScanCode==EOggLeft) {
+    TInt scanCode = aKeyEvent.iScanCode;
+    switch (scanCode)
+    {
+    	case EStdKeyDevice6 : scanCode = EOggLeft; //S80 joystick
+    	    break;
+    	case EStdKeyDevice7 : scanCode = EOggRight;//S80 joystick
+    	    break;
+    	case EStdKeyDevice8 : scanCode = EOggUp;   //S80 joystick
+    	    break;
+    	case EStdKeyDevice9 : scanCode = EOggDown; //S80 joystick
+    		break;
+    	 case  EStdKeyDevice3 : code = EOggConfirm;//S80 joystick
+    	    break;
+    }
+    if(iFocusControlsPresent && scanCode==EOggLeft) {
       SetPrevFocus();
       return EKeyWasConsumed;
-    } else if (iFocusControlsPresent && aKeyEvent.iScanCode==EOggRight) {
+    } else if (iFocusControlsPresent && scanCode==EOggRight) {
       SetNextFocus();
       return EKeyWasConsumed;
     } else {
       if(c==iListBox[iMode] || !iFocusControlsPresent) {
-        if (aKeyEvent.iScanCode==EOggDown) {
+        if (scanCode==EOggDown) {
           SelectItem(index+1);
           return EKeyWasConsumed;
-        } else if (aKeyEvent.iScanCode==EOggUp ) {
+        } else if (scanCode==EOggUp ) {
           SelectItem(index-1);
           return EKeyWasConsumed;
         } 
       } 
-      if(   (c==iVolume[iMode] && (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggDown))
-         || (!iFocusControlsPresent && (aKeyEvent.iScanCode==EOggLeft || aKeyEvent.iScanCode==EOggRight))
+      if(   (c==iVolume[iMode] && (scanCode==EOggUp || scanCode==EOggDown))
+         || (!iFocusControlsPresent && (scanCode==EOggLeft || scanCode==EOggRight))
         ) {
         if(iApp->iOggPlayback->State()==CAbsPlayback::EPlaying) {
-          if (aKeyEvent.iScanCode==EOggUp || aKeyEvent.iScanCode==EOggRight)  {
+          if (scanCode==EOggUp || scanCode==EOggRight)  {
             iApp->iVolume+= KStepVolume;
-          } else  if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
+          } else  if (scanCode==EOggDown || scanCode==EOggLeft) {
             iApp->iVolume-= KStepVolume;
           }
           if (iApp->iVolume>KMaxVolume) iApp->iVolume = KMaxVolume;
@@ -1496,9 +1529,9 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
           iApp->iOggPlayback->SetVolume(iApp->iVolume);
 		      UpdateVolume();
         } else { // not playing, i.e. stopped or paused
-          if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggLeft) {
+          if (scanCode==EOggDown || scanCode==EOggLeft) {
             iApp->SelectPreviousView();
-          } else if (aKeyEvent.iScanCode==EOggDown || aKeyEvent.iScanCode==EOggRight) {
+          } else if (scanCode==EOggDown || scanCode==EOggRight) {
             if( HasAFileName(index) )
               iApp->HandleCommandL(EOggPlay);
             else

@@ -7,7 +7,7 @@ CHARACTER_SET UTF8
 #define ogg_about_oggplay "Om OggPlay"
 #define ogg_version_txt "Version " KVersionString
 #define ogg_c_author "(c) 2003 af Leif H. Wilden"
-#define ogg_link_txt "se også www.geocities.com/p800tools"
+#define ogg_link_txt "se også http://symbianoggplay.sourceforge.net"
 #define ogg_vorbis_c "(c) Ogg/Vorbis codec fra Xiph.org"
 #define ogg_translation ""
 #define ogg_port "S60 version: Claus Bjerre, Berthier Lemieux, Pascal Wolff"

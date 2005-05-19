@@ -1,0 +1,102 @@
+
+This is the Release Note for Release 1.6.4 of Oggplay for Series60.
+
+******************************************************************************
+**** This release will NOT work on Nokia 7650, Nokia 3650, Nokia NGage,   ****
+**** Nokia NGage QD, Siemens SX-1 , Sendo X                               ****
+****                                                                      ****
+******************************************************************************
+
+OggPlay is a music player for phones running on the Symbian Operating system. 
+It comes bundled with a .ogg file format decoder, but it detects and uses MMF 
+plugins which may come built-in your phone or that might have been installed
+later on. MP3, AAC, MP4, M4A plugins are supported.
+
+See the ReadMeFirst.html to see which file formats your phone supports.
+
+This release will only work on phones that supports MMF framework.
+         
+
+History
+--------------------------------------------------------------------------------------------
+
+What's new in Release 1.6.4:
+--------------------------
+Winamp playlist support.
+Few bugs squashed.
+
+What's new in Release 1.6.3:
+--------------------------
+Fix for the too long filename crahsing the MMFController.
+Somehow faster file scan.
+
+What's new in Release 1.6.2:
+--------------------------
+The ogg plugin can be used as a "random" ringing tone: everytime a phone call
+is received, the ringing tone played will be randomly choosen from the list
+of available .ogg files in the device. The file ReadMeFirst.html gives the 
+instructions for creating the ramdom ringing tones.
+
+Fixed the crackling  & popping sound (most notably on 6600, but also heard on 
+some other phones as well) that was introduced in release 1.6.1.
+
+
+What's new in Release 1.6.1:
+--------------------------
+Ogg files can now be reliably used as ringing tone. 
+Support for bluetooth headset.
+
+This adress a feature of previous versions where ogg files could be set as ringing tone,
+but they were simply not ringing when call was received. This has been fixed. And as expected,
+when using ogg as ringing tone, vibration will work, if enabled. 
+Proper functionality of ringing tones has been verified on 2 different firmware versions of 6600, 
+and on one 7610.
+
+
+What's new in Release 1.6.0:
+--------------------------
+Support for MP4 format.
+Support for M4A format, aka, the iTunes(TM) format. This format is exactly same as mp4, 
+but in order to use it, you´ll have to rename the file extension from m4a to mp4.
+
+Capability to choose which plugin will be used. Note that the plugin that you choose might
+not be fully compatible with OggPlay (OvController, for example).
+
+A little bunch of bug fixes.
+
+What's new in Release 1.5.1:
+--------------------------
+Some bug fixes related to MP3 and AAC reading on the Nokia 7610:
+ + Forward/Rewind now functional
+ + Volume not going back to maximum level, when changing tune.
+
+Ogg files can now be played using "Nokia Music Player", in the very
+unlikely event that OggPlay UI is not preferred.
+
+What's new in Release 1.5.0:
+--------------------------
+
+OggPlay nows plays MP3 and AAC in addition to Ogg file format, depending
+on the phone capabilities.
+
+
+What's missing:
+---------------
+Some features present in 1.0.0 have been dropped, since quite a lot of work is required to
+make them work in a MMF plugin. They will be reintroduced in future releases.
+These features are:
+  - Amplification (6, 12 db)
+  - Frequency analyzer
+
+
+
+Links:
+---------------------------------------------------------------------------------------------
+For more information about Oggplay, please see the webpage at
+http://symbianoggplay.sourceforge.net/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+
+-the S60 Oggplay developers.

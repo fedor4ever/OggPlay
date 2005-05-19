@@ -6,7 +6,7 @@
 #define ogg_about_oggplay "Au sujet d'OggPlay"
 #define ogg_version_txt "Version ???"
 #define ogg_c_author "(c) 2003 par Leif H. Wilden"
-#define ogg_link_txt "voir www.geocities.com/p800tools pour plus d'infos"
+#define ogg_link_txt "voir http://symbianoggplay.sourceforge.net pour plus d'infos"
 #define ogg_vorbis_c "(c) codec Ogg/Vorbis par Xiph.org"
 #define ogg_translation "Traduit par Colin Savary et Berthier Lemieux"
 #define ogg_port "Adaptation pour S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff"

@@ -610,9 +610,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		TBuf<128> buf;
 		iEikonEnv->ReadResource(buf, R_OGG_VERSION);
 		d->SetVersion(buf);
-#ifndef SERIES80 // To be removed when functionality has been implemented
-		d->ExecuteLD(R_DIALOG_ABOUT);
-#endif		
+		d->ExecuteLD(R_DIALOG_ABOUT);	
 		break;
 	}
 
@@ -1328,8 +1326,10 @@ COggPlayAppUi::ReadIniFile()
 	}
 
    in.Close();
-	
-   IFDEF_S60( iAnalyzerState = EDecay; )
+
+#if (defined(SERIES60 ) || defined (SERIES80) )	
+   iAnalyzerState = EDecay; 
+#endif
 	}
 
 TInt32 
@@ -1556,6 +1556,7 @@ COggPlayAppUi::SetRandomL(TBool aRandom)
     	iSongList = new(ELeave) COggNormalPlay();
     
     iSongList->ConstructL(iAppView, iOggPlayback);
+    iAppView->UpdateRandom();
 }
 
 void 
@@ -1574,6 +1575,7 @@ COggPlayAppUi::SetRepeat(TBool aRepeat)
 {
     iSettings.iRepeat = aRepeat;
     iSongList->SetRepeat(aRepeat);
+    iAppView->UpdateRepeat();
 }
 
 #if defined(SERIES60_SPLASH)

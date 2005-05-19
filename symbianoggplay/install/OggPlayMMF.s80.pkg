@@ -11,7 +11,7 @@
 ;
 ; Display Release notes
 ;
-"..\S60_releases\sisnotes.txt" - "",FT,TC
+"..\S80_releases\sisnotes.txt" - "",FT,TC
 
 "\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
@@ -19,8 +19,8 @@
 ;"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.rsc"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
 "\Epoc32\data\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
-"..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
-"..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+"..\bitmaps\Skins\icys80\icys80.skn"-"!:\system\apps\oggplay\icys80.skn"
+"..\bitmaps\Skins\icys80\icys80.mbm"-"!:\system\apps\oggplay\icys80.mbm"
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ini",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN

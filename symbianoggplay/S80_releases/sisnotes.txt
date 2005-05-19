@@ -1,0 +1,15 @@
+    Welcome to OggPlay 1.6.4
+
+Welcome to the Series 80
+version of OggPlay, the open
+source media player on Symbian,
+released under the GPL by 
+Leif H. Wilden.
+
+This is the first beta release 
+for Series 80. All comments are
+welcome. BTW, For the artists 
+out there, we're looking for a 
+better looking default skin...
+
+Enjoy!

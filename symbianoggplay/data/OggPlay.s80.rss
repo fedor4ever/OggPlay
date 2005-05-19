@@ -91,9 +91,8 @@ RESOURCE TBUF r_ogg_about_line_5 { buf=ogg_translation; }
 RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
 
 
-#if 0
 RESOURCE DIALOG r_dialog_about {
-  buttons =  R_AVKON_SOFTKEYS_CANCEL;
+  buttons =  R_EIK_BUTTONS_CONTINUE; 
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -101,10 +100,14 @@ RESOURCE DIALOG r_dialog_about {
 	id =    EOggScrollableTextDialog;
 	control = SCROLLABLERICHTEXT
 	{
+	  width = 300;
+	  height = 150;
+
 	};
     }
   };
 }
+#if 0
 
 RESOURCE DIALOG r_dialog_infowin {
   buttons =  R_AVKON_SOFTKEYS_BACK;
@@ -283,8 +286,8 @@ RESOURCE ARRAY r_codec_info_items
 RESOURCE MENU_PANE r_options_menu
 {
   items= {
-    //MENU_ITEM { txt=ogg_skins;
-    //              cascade=r_skin_menu; },
+    MENU_ITEM { txt=ogg_skins;
+                  cascade=r_skin_menu; },
     MENU_ITEM { command=EOggOptions;	txt=ogg_settings; },
 //	MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; }
 #ifdef PLUGIN_SYSTEM

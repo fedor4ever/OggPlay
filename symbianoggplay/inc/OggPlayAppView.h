@@ -53,7 +53,8 @@ public:
   void UpdatePlaying();
   void UpdateAnalyzer();
 
-  void UpdateRepeat();
+  void UpdateRepeat(); 
+  void UpdateRandom();
   void SetTime(TInt64 aTime);
 
   /* Functions to interract with the listbox */
@@ -173,6 +174,7 @@ private:
 
   COggIcon*          iAlarmIcon[2];
   COggIcon*          iRepeatIcon[2];
+  COggIcon*          iRandomIcon[2];
   COggIcon*          iEye[2];
   COggIcon*          iPlaying[2];
   COggIcon*          iPaused[2];

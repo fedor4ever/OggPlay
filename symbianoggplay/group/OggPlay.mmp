@@ -178,6 +178,9 @@ LIBRARY hal.lib
 #if defined SERIES60
 LIBRARY avkon.lib
 LIBRARY MediaClientImage.lib 
+#endif
+
+#if ( defined(SERIES60) || defined (SERIES80) )
 LIBRARY etext.lib
 LIBRARY form.lib
 LIBRARY estor.lib

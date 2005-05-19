@@ -8,7 +8,7 @@ CHARACTER_SET UTF8
 #define ogg_about_oggplay "OggPlay Hakkında"
 #define ogg_version_txt "Sürüm ???"
 #define ogg_c_author "(c) 2003, Leif H. Wilden"
-#define ogg_link_txt "Bilgi için www.geocities.com/p800tools"
+#define ogg_link_txt "Bilgi için http://symbianoggplay.sourceforge.net"
 #define ogg_vorbis_c "(c) Ogg/Vorbis codec Xiph.org"
 #define ogg_translation "Tercüme: A. A. Aydıner"
 #define ogg_port "S60'a uyarlama: Claus Bjerre, Berthier Lemieux, Pascal Wolff"
