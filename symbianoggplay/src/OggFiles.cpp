@@ -788,7 +788,7 @@ TInt TOggFiles::SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt 
     {
       TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
       TBuf<256> buf1,buf2;
-      CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_24);
+      CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_28);
       buf1.Append(aDir);
       ((COggPlayAppUi*)CEikonEnv::Static()->AppUi())->iOggMsgEnv->OggErrorMsgL(buf2,buf1);
       return KErrNotFound;

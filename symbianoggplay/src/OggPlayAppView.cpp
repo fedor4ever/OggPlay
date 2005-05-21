@@ -1496,7 +1496,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     	    break;
     	case EStdKeyDevice9 : scanCode = EOggDown; //S80 joystick
     		break;
-    	 case  EStdKeyDevice3 : code = EOggConfirm;//S80 joystick
+    	case EStdKeyDeviceA : code = EOggConfirm;//S80 joystick
     	    break;
     }
     if(iFocusControlsPresent && scanCode==EOggLeft) {
