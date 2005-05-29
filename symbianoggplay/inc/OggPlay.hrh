@@ -144,7 +144,8 @@ enum TOggplayMiscSeries60 // Also used for Series80
   EUserListBoxPageUp,
   EUserKeylock,
   EVolumeBoostDown,
-  EVolumeBoostUp
+  EVolumeBoostUp,
+  EUserVolumeHelp
   };
 
 #endif      // OGGPLAY_HRH

@@ -102,6 +102,7 @@
 #define ogg_text_string_12 "(unassigned)"
 #endif
 
+#define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"
 #define ogg_format_text_fast_forward "Fast forward"
@@ -172,3 +173,4 @@
 
 #define ogg_cba_select               "Select"
 #define ogg_cba_cancel               "Cancel"
+#define ogg_format_text_volume_help  "Volume help"

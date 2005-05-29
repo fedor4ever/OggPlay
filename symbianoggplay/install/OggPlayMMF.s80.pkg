@@ -4,7 +4,7 @@
 &EN
 ;
 ;Version string to be changed
-#{"OggPlay"},(0x1000A661),1,64,1
+#{"OggPlay"},(0x1000A661),1,65,1
 ;
 ;Supports Series 80 v 2.0
 (0x101F8ED2), 0, 0, 0, {"Series80ProductID"}

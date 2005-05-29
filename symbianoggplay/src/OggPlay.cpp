@@ -813,6 +813,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   case EUserListBoxPageUp:
   	iAppView->ListBoxPageUp();
     break;
+  case EUserVolumeHelp:  {
+    TBuf<256> buf;
+	iEikonEnv->ReadResource(buf, R_OGG_STRING_14);
+	User::InfoPrint(buf);
+	break;
+  }
 #endif
 
 	case EEikCmdExit: {
@@ -1192,7 +1198,7 @@ COggPlayAppUi::ReadIniFile()
 #ifdef SERIES80
       iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
       iSettings.iSoftKeysIdle[1] = TOggplaySettings::EStop ;
-      iSettings.iSoftKeysIdle[2] = TOggplaySettings::ENoHotkey;
+      iSettings.iSoftKeysIdle[2] = TOggplaySettings::EHotkeyVolumeHelp;
       iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit ;
       iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
       iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong ;

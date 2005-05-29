@@ -212,10 +212,11 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_play; },
 	LBUF { txt = ogg_pause; },
 	LBUF { txt = ogg_stop; },
-	LBUF { txt = ogg_boost_up; },
-	LBUF { txt = ogg_boost_down; },
+//	LBUF { txt = ogg_boost_up; },
+//	LBUF { txt = ogg_boost_down; },
 	LBUF { txt = ogg_cba_exit; },
-	LBUF { txt = ogg_cba_back; }
+	LBUF { txt = ogg_cba_back; },
+	LBUF { txt = ogg_format_text_volume_help; }
   };
 }
 
@@ -489,6 +490,7 @@ RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
 RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
 RESOURCE TBUF r_ogg_string_13 { buf=ogg_text_string_13; }
+RESOURCE TBUF r_ogg_string_14 { buf=ogg_text_string_14; }
 
 RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view title
 RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title

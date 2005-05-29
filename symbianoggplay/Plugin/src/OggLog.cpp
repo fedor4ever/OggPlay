@@ -74,7 +74,7 @@ void COggLog::Exit()
 
 void COggLog::FilePrint(const TDesC& msg) 
   {
-#if defined(SERIES60)
+#if (defined( SERIES60) || defined (SERIES80) )
   InstanceL()->iLog.WriteFormat(msg);
 #endif
   }
@@ -83,7 +83,7 @@ void COggLog::FilePrint(const TDesC& msg)
 
 void COggLog::Panic(const TDesC& msg,TInt aReason) 
   {
-#if defined(SERIES60)
+#if (defined( SERIES60) || defined (SERIES80) )
   iLog.Write(_L("** Fatal: **"));
   iLog.Write(msg);
 #endif
@@ -101,6 +101,32 @@ const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   VA_START(list, aLit);
   COggLog::InstanceL()->iBuf.Zero();
   COggLog::InstanceL()->iBuf.AppendFormatList(aLit,list);
+  
+  // There can't be at this point any % left, otherwise
+  // whole thing going to panic (typically another format is called
+  // right after this...).
+  // Change all % into %%
+  // This code stinks. Can't find a better way to do that search and replace
+  
+  TUint16* bufStart = (TUint16*)InstanceL()->iBuf.Ptr();
+  TInt len = InstanceL()->iBuf.Length();
+  TPtr16 descriptor( bufStart,len, 1024);
+  
+  TInt nbFound =0; 
+  TInt found=descriptor.Locate('%');
+  while ( found != KErrNotFound)
+  {
+      nbFound++;
+      descriptor.Replace(found,1,_L("%%"));
+      bufStart = bufStart + found + 2;
+      len = len - (found + 2) + 1;
+      descriptor.Set(bufStart, len, 1024 - nbFound);
+      found=descriptor.Locate('%');
+  }
+  descriptor.Set((TUint16*)InstanceL()->iBuf.Ptr(),
+                  InstanceL()->iBuf.Length()+nbFound,1024);
+  COggLog::InstanceL()->iBuf = descriptor;
+  
   return COggLog::InstanceL()->iBuf;
 #endif
   }

@@ -464,7 +464,7 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime aTime)
     if (iState != EPlaying)
       return NULL;
     
-    TRACEF(_L("COggPluginAdaptor::GetFrequencyBins()"));
+    //TRACEF(_L("COggPluginAdaptor::GetFrequencyBins()"));
     
     iFreqBins[0] = 55;
     

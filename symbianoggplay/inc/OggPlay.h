@@ -156,11 +156,12 @@ public:
 	EVolumeBoostDown,
     EHotKeyExit,
     EHotKeyBack,
+    EHotkeyVolumeHelp,
     KFirstHotkeyIndex = EFastForward,
     ENofHotkeysV4=EKeylock, 
 	ENofHotkeysV5=EVolumeBoostUp,
 	ENofHotkeysV7=EHotKeyExit,
-    ENofHotkeys=EHotKeyBack+1
+    ENofHotkeys=EHotkeyVolumeHelp+1
     };
 
 
@@ -189,7 +190,8 @@ static const TInt THotkeysActions[]  =
 	EVolumeBoostUp,		// EVolumeBoostUp,
 	EVolumeBoostDown,	// EVolumeBoostDown,
     EEikCmdExit,    	// EHotKeyExit,
-    EUserBackCBA   		// EHotKeyBack
+    EUserBackCBA,  		// EHotKeyBack,
+    EUserVolumeHelp     // EHotkeyVolumeHelp 
   };
  
  

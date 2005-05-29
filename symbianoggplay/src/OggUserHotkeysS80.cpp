@@ -38,10 +38,11 @@ static const TInt TMapRssListToCommand[]  =
     TOggplaySettings::EPlay,
     TOggplaySettings::EPause,
     TOggplaySettings::EStop,
-	TOggplaySettings::EVolumeBoostUp,
-	TOggplaySettings::EVolumeBoostDown,
+	// TOggplaySettings::EVolumeBoostUp,(not used in S80)
+	// TOggplaySettings::EVolumeBoostDown,(not used in S80)
     TOggplaySettings::EHotKeyExit,
-    TOggplaySettings::EHotKeyBack
+    TOggplaySettings::EHotKeyBack,
+    TOggplaySettings::EHotkeyVolumeHelp
   };
 
 TInt 
@@ -55,10 +56,16 @@ TInt
 COggUserHotkeysS80::MapCommandToRssList(TInt aCommandIndex)  
   {
   	TInt j;
+  	TBool found = EFalse;
 	for ( j=0; j<TOggplaySettings::ENofHotkeys; j++ )
 	   if ( aCommandIndex == TMapRssListToCommand[j] )
+	   {
+	       found = 1;
 	      break;
-	return j;
+	   }
+	if (found)
+	   return j;
+	return 0; // Return NoHotkeys if not found
   };
 
 void
