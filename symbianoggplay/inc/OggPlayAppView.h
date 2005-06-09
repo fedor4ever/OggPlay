@@ -64,10 +64,10 @@ public:
   CDesCArray* GetTextArray();
   TBool HasAFileName(TInt idx);
   const TDesC & GetFileName(TInt idx);
-  const TInt  GetFileAbsoluteIndex(TInt idx);
+  TOggFile* GetFile(TInt idx);
   const COggPlayAppUi::TViews    GetViewName(TInt idx);
   void GetFilterData(TInt idx, TDes &aData);
-  void SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex);
+  void SelectFile(TOggFile* aFile);
   void ListBoxPageDown();
   void ListBoxPageUp();
   

@@ -136,8 +136,39 @@ COggInfoDialog::SetBitRate(TInt aBitRate)
   iBitRate= aBitRate;
 }
 
-#if !(defined(SERIES60) || defined(SERIES80))
 
+void COggPlayListInfoDialog::PreLayoutDynInitL()
+{
+  CEikLabel* cFileName= (CEikLabel*)Control(EOggLabelFileName);
+  cFileName->SetTextL(iFileName);
+
+  CEikLabel* cFileSize= (CEikLabel*)Control(EOggLabelFileSize);
+  TBuf<256> buf;
+  buf.Num(iFileSize);
+  cFileSize->SetTextL(buf);
+
+  CEikLabel* cPlayListEntries= (CEikLabel*)Control(EOggLabelPlayListEntries);
+  buf.Num(iPlayListEntries);
+  cPlayListEntries->SetTextL(buf);
+}
+
+void COggPlayListInfoDialog::SetFileName(const TDesC& aFileName)
+{
+  iFileName.Copy(aFileName);
+}
+
+void COggPlayListInfoDialog::SetFileSize(TInt aFileSize)
+{
+  iFileSize= aFileSize;
+}
+
+void COggPlayListInfoDialog::SetPlayListEntries(TInt aPlayListEntries)
+{
+  iPlayListEntries= aPlayListEntries;
+}
+
+
+#if !(defined(SERIES60) || defined(SERIES80))
 void
 COggAboutDialog::PreLayoutDynInitL()
 {

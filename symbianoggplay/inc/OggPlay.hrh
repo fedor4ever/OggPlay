@@ -65,6 +65,7 @@ enum {
   EOggLabelBitRate,
   EOggLabelRate,
   EOggLabelChannels,
+  EOggLabelPlayListEntries,
 
   EOggScrollableTextControl,
   EOggScrollableTextDialog,

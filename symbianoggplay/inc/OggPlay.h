@@ -119,8 +119,6 @@ _LIT(KMmcSearchDir,"E:\\Ogg\\");
  const TInt KNofSoftkeys = 1;
 #endif
  
- 
-
 class TOggplaySettings
 	{
 public:
@@ -323,6 +321,7 @@ public:
   TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName,const TDesC8& aTail);
 
   void OpenFileL(const TDesC& aFileName);
+  TInt FileSize(const TDesC& aFileName);
   void WriteIniFile();
   void SetRandomL(TBool aRandom);
   void SetRepeat(TBool aRepeat);
@@ -372,11 +371,41 @@ private:
   TInt iRestoreCurrent;
 };
 
+class TOggPlayList;
+class TOggPlayListStackEntry
+{
+public:
+	TOggPlayListStackEntry()
+	{ }
+
+	TOggPlayListStackEntry(TOggPlayList* aPlayList, TInt aPlayingIdx)
+	: iPlayList(aPlayList), iPlayingIdx(aPlayingIdx)
+	{ }
+
+public:
+	TOggPlayList* iPlayList;
+	TInt iPlayingIdx;
+};
+
+class ROggPlayListStack
+{
+public:
+	TInt Push(const TOggPlayListStackEntry& aPlayListStackEntry);
+	void Pop(TOggPlayListStackEntry& aPlayListStackEntry);
+
+	void Reset();
+	void Close();
+
+private:
+	RPointerArray<TOggPlayList> iPlayListArray;
+	RArray<TInt> iPlayingIdxArray;
+};
+
+
 // COggSongList:
 // Base class defining the interface for managing the song list.
 //------------------------------------------------------
-
-
+class TOggFile;
 class COggSongList : public CBase
 {
     public:
@@ -385,7 +414,7 @@ class COggSongList : public CBase
      virtual const TDesC & GetPreviousSong()=0;
      void  SetPlayingFromListBox(TInt aPlaying);
      const TDesC& GetPlaying();
-     const TInt GetPlayingAbsoluteIndex();
+     const TOggFile* GetPlayingFile();
      const TBool AnySongPlaying();
      void  SetRepeat(TBool aRepeat);
      const TBool IsSelectedFromListBoxCurrentlyPlaying();
@@ -393,13 +422,16 @@ class COggSongList : public CBase
     protected:
         
      void  SetPlaying(TInt aPlaying);
-     const TDesC & RetrieveFileName(TInt anAbsoluteIndex);
      TInt iPlayingIdx;           // index of the file which is currently being played
-     RArray<TInt> iFileList;
+     RPointerArray<TOggFile> iFileList;
      COggPlayAppView* iAppView; 
      CAbsPlayback*    iOggPlayback;
      TBool iRepeat;
      TBool iNewFileList;
+
+	 ROggPlayListStack iPlayListStack;
+	 TOggPlayList* iPlayList;
+	 TInt iPlayListIdx;
 };
 
 class COggNormalPlay : public COggSongList
@@ -422,7 +454,8 @@ class COggRandomPlay : public COggSongList
         ~COggRandomPlay(); 
         COggRandomPlay();
     private:
-        RArray<TInt> iRandomMemory;
+        RPointerArray<TOggFile> iRandomMemory;
+        RArray<TInt> iRandomMemoryIdx;
         TInt64 iSeed;
 };
 

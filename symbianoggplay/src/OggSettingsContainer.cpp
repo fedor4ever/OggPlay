@@ -30,7 +30,6 @@ void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
         iListBox = new (ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_SETTING_ITEM_LIST);
     }
-
     else
     {
         User::Leave(KErrNotSupported);

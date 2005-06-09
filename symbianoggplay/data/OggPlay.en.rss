@@ -174,3 +174,4 @@
 #define ogg_cba_select               "Select"
 #define ogg_cba_cancel               "Cancel"
 #define ogg_format_text_volume_help  "Volume help"
+#define ogg_playlist_entries         "Playlist entries:"

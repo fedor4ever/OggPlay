@@ -170,4 +170,4 @@ CHARACTER_SET UTF8
 
 #define ogg_cba_select               "Select"     // To be Translated 
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
-
+#define ogg_playlist_entries         "Playlist entries:"

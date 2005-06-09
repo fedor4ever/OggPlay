@@ -77,17 +77,53 @@ E32Dll(TDllReason)
 	return KErrNone;
 }
 
-////////////////////////////////////////////////////////////////
-//
-// COggActive class
-//
-///////////////////////////////////////////////////////////////
+void ROggPlayListStack::Reset()
+{
+	iPlayListArray.Reset();
+	iPlayingIdxArray.Reset();
+}
 
+TInt ROggPlayListStack::Push(const TOggPlayListStackEntry& aPlayListStackEntry)
+{
+	TInt err = iPlayListArray.Append(aPlayListStackEntry.iPlayList);
+	if (err != KErrNone)
+		return err;
+
+	err = iPlayingIdxArray.Append(aPlayListStackEntry.iPlayingIdx);
+	if (err != KErrNone)
+		iPlayListArray.Remove(iPlayListArray.Count()-1);
+
+	return err;
+}
+
+void ROggPlayListStack::Pop(TOggPlayListStackEntry& aPlayListStackEntry)
+{
+	aPlayListStackEntry.iPlayList = NULL;
+	aPlayListStackEntry.iPlayingIdx = -1;
+
+	TInt lastIndex = iPlayListArray.Count()-1;
+	if (lastIndex>=0)
+	{
+		aPlayListStackEntry.iPlayList = iPlayListArray[lastIndex];
+		aPlayListStackEntry.iPlayingIdx = iPlayingIdxArray[lastIndex];
+
+		iPlayListArray.Remove(lastIndex);
+		iPlayingIdxArray.Remove(lastIndex);
+	}
+}
+
+void ROggPlayListStack::Close()
+{
+	iPlayListArray.Close();
+	iPlayingIdxArray.Close();
+}
+
+
+// COggActive class
 #ifdef MONITOR_TELEPHONE_LINE
 COggActive::COggActive():iServer(0),iPhone(0),iLine(0),iRequestStatusChange(),iTimer(0),iCallBack(0),  iInterrupted(0)
 {
 }
-
 
 void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 {
@@ -601,8 +637,6 @@ COggPlayAppUi::UpdateSoftkeys(TBool aForce)
 void
 COggPlayAppUi::HandleCommandL(int aCommand)
 {
-	
-
   switch (aCommand) {
 
   case EOggAbout: {
@@ -983,37 +1017,77 @@ COggPlayAppUi::SelectNextView()
     
     iViewHistoryStack.Append(idx);
 
-    HBufC * filter = HBufC::NewL(128);
-    CleanupStack::PushL(filter);
-    TPtr tmp = filter->Des();
-    iAppView->GetFilterData(idx, tmp);
-    iAppView->FillView(ETitle, iViewBy, filter->Des());
-    CleanupStack::PopAndDestroy();
+    TBuf<128> filter;
+    iAppView->GetFilterData(idx, filter);
+    if ((iViewBy==EPlayList) || (iViewBy==ESubFolder))
+		iAppView->FillView(EFileName, iViewBy, filter);
+	else
+		iAppView->FillView(ETitle, iViewBy, filter);
 }
 
 void
 COggPlayAppUi::ShowFileInfo()
 {
     TBool songPlaying = iSongList->AnySongPlaying();
-	if ((!songPlaying) && iAppView->GetSelectedIndex()<0) return;
+	TInt selectedIndex = iAppView->GetSelectedIndex();
+	if (!songPlaying && (selectedIndex<0)) return;
+
+	COggListBox::TItemTypes itemType;
 	if (!songPlaying) {
 		// no song is playing, show info for selected song if possible
-		if (iAppView->GetItemType(iAppView->GetSelectedIndex())==COggListBox::EBack) return;
+		itemType = iAppView->GetItemType(selectedIndex);
+		if (itemType==COggListBox::EBack) return;
 		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==ETop) return;
-		if (iOggPlayback->Info( iAppView->GetFileName(iAppView->GetSelectedIndex()))!=KErrNone)
-            return;
+
+		if (itemType != COggListBox::EPlayList)
+		{
+			const TDesC& fileName = iAppView->GetFileName(selectedIndex);
+			if (iOggPlayback->Info(fileName)!=KErrNone)
+				return;
+		}
 	}
-	COggInfoDialog *d = new COggInfoDialog();
-	d->SetFileName(iOggPlayback->FileName());
-	d->SetRate(iOggPlayback->Rate());
-	d->SetChannels(iOggPlayback->Channels());
-	d->SetFileSize(iOggPlayback->FileSize());
-	d->SetTime(iOggPlayback->Time().GetTInt());
-	d->SetBitRate(iOggPlayback->BitRate()/1000);
-	if ( ! iSongList->AnySongPlaying() ) iOggPlayback->ClearComments();
-#ifndef SERIES80 // To be removed when functionality has been implemented
-	d->ExecuteLD(R_DIALOG_INFO);
-#endif
+	else
+		itemType = (iSongList->GetPlayingFile()->FileType() == TOggFile::EPlayList) ? COggListBox::EPlayList : COggListBox::EFileName;
+
+	if (itemType == COggListBox::EPlayList)
+	{
+		TOggPlayList* playList;
+		if (!songPlaying)
+			playList = (TOggPlayList*) iAppView->GetFile(selectedIndex);
+		else
+			playList = (TOggPlayList*) iSongList->GetPlayingFile();
+
+		COggPlayListInfoDialog *d = new COggPlayListInfoDialog();
+		const TDesC& fileName = *(playList->iFileName);
+		d->SetFileName(fileName);
+		d->SetFileSize(FileSize(fileName));
+		d->SetPlayListEntries(playList->Count());
+
+		#ifndef SERIES80 // To be removed when functionality has been implemented
+		d->ExecuteLD(R_DIALOG_PLAYLIST_INFO);
+		#endif
+	}
+	else
+	{
+		TInt fileSize;
+		if (songPlaying)
+			fileSize = iOggPlayback->FileSize();
+		else
+			fileSize = FileSize(iOggPlayback->FileName());
+
+		COggInfoDialog *d = new COggInfoDialog();
+		d->SetFileName(iOggPlayback->FileName());
+		d->SetRate(iOggPlayback->Rate());
+		d->SetChannels(iOggPlayback->Channels());
+		d->SetFileSize(fileSize);
+		d->SetTime(iOggPlayback->Time().GetTInt());
+		d->SetBitRate(iOggPlayback->BitRate()/1000);
+		if (!songPlaying) iOggPlayback->ClearComments();
+
+		#ifndef SERIES80 // To be removed when functionality has been implemented
+		d->ExecuteLD(R_DIALOG_INFO);
+		#endif
+	}
 }
 
 
@@ -1111,7 +1185,7 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
     iEikonEnv->ReadResource(buf, (iRandom) ? R_OGG_RANDOM_ON : R_OGG_RANDOM_OFF );
     aMenuPane->SetItemTextL( EOggShuffle, buf );
 #endif
-		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName));
+		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName) || (iViewBy == EPlayList));
 		aMenuPane->SetItemDimmed(EOggInfo   , (!iSongList->AnySongPlaying()) && (iAppView->GetSelectedIndex()<0 || !isSongList));
 	}
 	
@@ -1195,15 +1269,20 @@ COggPlayAppUi::ReadIniFile()
     RFile in;
     TInt err;
     
-#ifdef SERIES80
-      iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
-      iSettings.iSoftKeysIdle[1] = TOggplaySettings::EStop ;
+#if defined(SERIES60)
+	  iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyExit;
+      iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyExit;
+#else
+#if defined(SERIES80)
+	  iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
+      iSettings.iSoftKeysIdle[1] = TOggplaySettings::EStop;
       iSettings.iSoftKeysIdle[2] = TOggplaySettings::EHotkeyVolumeHelp;
-      iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit ;
+      iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit;
       iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
-      iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong ;
+      iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong;
       iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
-      iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit ;
+      iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit;
+#endif
 #endif
  
     // Default value
@@ -1469,7 +1548,7 @@ COggPlayAppUi::WriteIniFile()
  	num.Num(iSettings.iManeuvringSpeed);
 	tf.Write(num);
     
-    num.Num(TOggplaySettings::ENofHotkeys);
+    num.Num((TUint) TOggplaySettings::ENofHotkeys);
     tf.Write(num);
     
     for( j=TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys; j++ ) 
@@ -1709,6 +1788,19 @@ void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
 
 }
 
+TInt COggPlayAppUi::FileSize(const TDesC& aFileName)
+{
+  RFile file;
+  TInt err = file.Open(iCoeEnv->FsSession(), aFileName, EFileShareReadersOnly);
+  if (err != KErrNone)
+	  return 0;
+
+  TInt fileSize(0);
+  file.Size(fileSize);
+  file.Close();
+  return fileSize; 
+}
+
 void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 {
 	iOggPlayback->SetVolumeGain(aNewGain);
@@ -1735,7 +1827,6 @@ CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename
 	return NULL;
 }
 
-
 CEikAppUi* COggPlayDocument::CreateAppUiL(){
     iAppUi = new (ELeave) COggPlayAppUi;
     return iAppUi;	
@@ -1760,7 +1851,8 @@ void COggSongList::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayb
 
 COggSongList::~COggSongList()
 {
-  iFileList.Reset();
+  iFileList.Close();
+  iPlayListStack.Close();
 }
 
 void
@@ -1780,7 +1872,7 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
         if (iAppView->HasAFileName(i))  
         {
             // We're dealing with a file, not the "back" button or something similar
-            iFileList.Append(iAppView->GetFileAbsoluteIndex(i));
+			iFileList.Append(iAppView->GetFile(i));
             if (i == aPlaying)
                 iPlayingIdx = iFileList.Count()-1;
         }
@@ -1791,37 +1883,57 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
 void 
 COggSongList::SetPlaying(TInt aPlaying)
 {   
-    
     iPlayingIdx = aPlaying;
     if (aPlaying != ENoFileSelected)
     {
+		TOggFile* file = iFileList[aPlaying];
+		if (file->FileType() == TOggFile::EPlayList)
+		{
+			// Playing a new playlist, so reset the playlist stack and set iPlaylist, iPlayListIdx
+			iPlayListStack.Reset();
+			
+			iPlayListIdx = 0;
+			iPlayList = (TOggPlayList*) file;
+			file = (*iPlayList)[iPlayListIdx];
+
+			while (file->FileType() == TOggFile::EPlayList)
+			{
+				// Another playlist. Push the current playlist onto the stack and get the next file
+				TOggPlayListStackEntry playListStackEntry(iPlayList, iPlayListIdx);
+				TInt err = iPlayListStack.Push(playListStackEntry);
+				if (err != KErrNone)
+				{
+					iPlayListStack.Reset();
+					return;
+				}
+
+				iPlayList = (TOggPlayList*) file;
+				iPlayListIdx = 0;
+
+				file = (*iPlayList)[iPlayListIdx];
+			}
+		}
+		else
+			iPlayList = NULL;
+
         // Check that the file is still there (media hasn't been removed)
-        if( iOggPlayback->Info(RetrieveFileName(iFileList[aPlaying]), ETrue) == KErrOggFileNotFound )
+        if( iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound )
             iPlayingIdx = ENoFileSelected;
     }
     
     if (iPlayingIdx != ENoFileSelected)
-    {
-        iAppView->SelectItemFromAbsoluteIndex(iFileList[iPlayingIdx]);
-    }
-    iAppView->Update();
+        iAppView->SelectFile(iFileList[iPlayingIdx]);
+
+	iAppView->Update();
 }
 
-const TDesC &
-COggSongList::RetrieveFileName(TInt anAbsoluteIndex)
-{
-    if (anAbsoluteIndex == ENoFileSelected) 
-        return KNullDesC;
-    return (iAppView->iOggFiles->FindFromIndex(anAbsoluteIndex));
-}
-
-
-const TInt 
-COggSongList::GetPlayingAbsoluteIndex()
+const TOggFile*
+COggSongList::GetPlayingFile()
 {
     if (iPlayingIdx != ENoFileSelected)
         return ( iFileList[iPlayingIdx] );
-    return(ENoFileSelected);
+
+	return(NULL);
 }
 
 const TDesC& 
@@ -1829,7 +1941,12 @@ COggSongList::GetPlaying()
 {
     if (iPlayingIdx == ENoFileSelected)
         return KNullDesC;
-    return(RetrieveFileName(iFileList[iPlayingIdx]));
+
+	TOggFile* playingFile = iFileList[iPlayingIdx];
+	if (playingFile->FileType() == TOggFile::EPlayList)
+		playingFile = (*iPlayList)[iPlayListIdx];
+
+    return(*(playingFile->iFileName));
 }
 
 const TBool 
@@ -1847,7 +1964,7 @@ COggSongList::IsSelectedFromListBoxCurrentlyPlaying()
     TInt idx = iAppView->GetSelectedIndex();
     if (iAppView->HasAFileName(idx))
     {
-        if ( GetPlayingAbsoluteIndex() == iAppView->GetFileAbsoluteIndex(idx) )
+        if ( GetPlayingFile() == iAppView->GetFile(idx) )
         {
             return (ETrue);
         }
@@ -1881,23 +1998,112 @@ void COggNormalPlay::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPla
 }
 
    
-const TDesC & COggNormalPlay::GetNextSong()
+const TDesC& COggNormalPlay::GetNextSong()
 {
-
     int nSongs= iFileList.Count();
     if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
     {
         SetPlaying(ENoFileSelected);
         return(KNullDesC);
-    }
-    
-    if (iPlayingIdx+1<nSongs) {
-        // We are in the middle of the playlist. Now play the next song.
+	}
+
+	TOggFile* file = iFileList[iPlayingIdx];
+	if (file->FileType() == TOggFile::EPlayList)
+	{
+		// We are playing a playlist, so get the next file from the playlist
+		TInt nextFile = iPlayListIdx+1;
+		if (nextFile<iPlayList->Count())
+		{
+			iPlayListIdx++;
+			file = (*iPlayList)[iPlayListIdx];
+
+			while (file->FileType() == TOggFile::EPlayList)
+			{
+				// Another playlist. Push the current playlist onto the stack and get the next file
+				TOggPlayListStackEntry playListStackEntry(iPlayList, iPlayListIdx);
+				TInt err = iPlayListStack.Push(playListStackEntry);
+				if (err != KErrNone)
+				{
+					iPlayListStack.Reset();
+					return KNullDesC;
+				}
+
+				iPlayList = (TOggPlayList*) file;
+				iPlayListIdx = 0;
+
+				file = (*iPlayList)[iPlayListIdx];
+			}
+
+	        // Check that the file is still there (media hasn't been removed)
+		    if (iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound)
+			    iPlayingIdx = ENoFileSelected;
+
+			if (iPlayingIdx == ENoFileSelected)
+				return (KNullDesC);
+
+			return *(file->iFileName);
+		}
+		else
+		{
+			// End of current playlist, pop the previous playlist from the stack
+			TOggPlayListStackEntry playListStackEntry;
+			iPlayListStack.Pop(playListStackEntry);
+
+			iPlayList = playListStackEntry.iPlayList;
+			iPlayListIdx = playListStackEntry.iPlayingIdx;
+			while (iPlayList != NULL)
+			{
+				// Grab the next file if possible (else pop another playlist and try again)
+				TInt nextFile = iPlayListIdx+1;
+				if (nextFile<iPlayList->Count())
+				{
+					iPlayListIdx++;
+					file = (*iPlayList)[iPlayListIdx];
+				
+					// If we have another play list, drop into it (as above)
+					while (file->FileType() == TOggFile::EPlayList)
+					{
+						TOggPlayListStackEntry playListStackEntry(iPlayList, iPlayListIdx);
+						TInt err = iPlayListStack.Push(playListStackEntry);
+						if (err != KErrNone)
+						{
+							iPlayListStack.Reset();
+							return KNullDesC;
+						}
+
+						iPlayList = (TOggPlayList*) file;
+						iPlayListIdx = 0;
+
+						file = (*iPlayList)[iPlayListIdx];
+					}
+
+					// Check that the file is still there (media hasn't been removed)
+					if (iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound)
+						iPlayingIdx = ENoFileSelected;
+
+					if (iPlayingIdx == ENoFileSelected)
+						return (KNullDesC);
+
+					return *(file->iFileName);
+				}
+
+				TOggPlayListStackEntry playListStackEntry;
+				iPlayListStack.Pop(playListStackEntry);
+
+				iPlayList = playListStackEntry.iPlayList;
+				iPlayListIdx = playListStackEntry.iPlayingIdx;				
+			}
+		}
+	}
+	
+	if (iPlayingIdx+1<nSongs)
+	{
+        // We are in the middle of the song list. Now play the next song.
         SetPlaying(iPlayingIdx+1);
     }
 	else if (iRepeat)
     {
-		// We are at the end of the playlist, repeat it 
+		// We are at the end of the song list, repeat it 
 		SetPlaying(0);
     }
     else 
@@ -1905,16 +2111,19 @@ const TDesC & COggNormalPlay::GetNextSong()
         // We are at the end of the playlist, stop here.
         SetPlaying(ENoFileSelected);
 	}
-    if (iPlayingIdx == ENoFileSelected)
-    {
+
+	if (iPlayingIdx == ENoFileSelected)
         return (KNullDesC);
-    }
-    return RetrieveFileName( iFileList[iPlayingIdx] );
+
+	file = iFileList[iPlayingIdx];
+	if (file->FileType() == TOggFile::EPlayList)
+		file = (*iPlayList)[iPlayListIdx];
+
+	return *(file->iFileName);
 }
 
 const TDesC & COggNormalPlay::GetPreviousSong()
 {
-    
     int nSongs= iFileList.Count();
     if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
     {
@@ -1922,7 +2131,97 @@ const TDesC & COggNormalPlay::GetPreviousSong()
         return(KNullDesC);
     }
 
-    if (iPlayingIdx-1>=0) {
+	TOggFile* file = iFileList[iPlayingIdx];
+	if (file->FileType() == TOggFile::EPlayList)
+	{
+		// We are playing a playlist, so get the previous file from the playlist
+		TInt prevFile = iPlayListIdx-1;
+		if (prevFile>=0)
+		{
+			iPlayListIdx--;
+			file = (*iPlayList)[iPlayListIdx];
+
+			while (file->FileType() == TOggFile::EPlayList)
+			{
+				// Another playlist. Push the current playlist onto the stack and get the previous file
+				TOggPlayListStackEntry playListStackEntry(iPlayList, iPlayListIdx);
+				TInt err = iPlayListStack.Push(playListStackEntry);
+				if (err != KErrNone)
+				{
+					iPlayListStack.Reset();
+					return KNullDesC;
+				}
+
+				iPlayList = (TOggPlayList*) file;
+				iPlayListIdx = iPlayList->Count()-1;
+
+				file = (*iPlayList)[iPlayListIdx];
+			}
+
+	        // Check that the file is still there (media hasn't been removed)
+		    if (iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound)
+			    iPlayingIdx = ENoFileSelected;
+
+			if (iPlayingIdx == ENoFileSelected)
+				return (KNullDesC);
+
+			return *(file->iFileName);
+		}
+		else
+		{
+			// Beginning of current playlist, pop the previous playlist from the stack
+			TOggPlayListStackEntry playListStackEntry;
+			iPlayListStack.Pop(playListStackEntry);
+
+			iPlayList = playListStackEntry.iPlayList;
+			iPlayListIdx = playListStackEntry.iPlayingIdx;
+			while (iPlayList != NULL)
+			{
+				// Grab the previous file if possible (else pop another playlist and try again)
+				TInt prevFile = iPlayListIdx-1;
+				if (prevFile>=0)
+				{
+					iPlayListIdx--;
+					file = (*iPlayList)[iPlayListIdx];
+				
+					// If we have another play list, drop into it (as above)
+					while (file->FileType() == TOggFile::EPlayList)
+					{
+						TOggPlayListStackEntry playListStackEntry(iPlayList, iPlayListIdx);
+						TInt err = iPlayListStack.Push(playListStackEntry);
+						if (err != KErrNone)
+						{
+							iPlayListStack.Reset();
+							return KNullDesC;
+						}
+
+						iPlayList = (TOggPlayList*) file;
+						iPlayListIdx = iPlayList->Count()-1;
+
+						file = (*iPlayList)[iPlayListIdx];
+					}
+
+					// Check that the file is still there (media hasn't been removed)
+					if (iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound)
+						iPlayingIdx = ENoFileSelected;
+
+					if (iPlayingIdx == ENoFileSelected)
+						return (KNullDesC);
+
+					return *(file->iFileName);
+				}
+
+				TOggPlayListStackEntry playListStackEntry;
+				iPlayListStack.Pop(playListStackEntry);
+
+				iPlayList = playListStackEntry.iPlayList;
+				iPlayListIdx = playListStackEntry.iPlayingIdx;				
+			}
+		}
+	}
+
+	if (iPlayingIdx-1>=0)
+	{
         // We are in the middle of the playlist. Now play the previous song.
         SetPlaying(iPlayingIdx-1);
     }
@@ -1937,7 +2236,12 @@ const TDesC & COggNormalPlay::GetPreviousSong()
         SetPlaying(ENoFileSelected);
 		return(KNullDesC);
 	}
-    return RetrieveFileName(iFileList[iPlayingIdx]);
+
+	file = iFileList[iPlayingIdx];
+	if (file->FileType() == TOggFile::EPlayList)
+		file = (*iPlayList)[iPlayListIdx];
+
+	return *(file->iFileName);
 }
 
 
@@ -1952,7 +2256,8 @@ COggRandomPlay::COggRandomPlay ()
 
 COggRandomPlay::~COggRandomPlay ()
 {
-    iRandomMemory.Reset();
+    iRandomMemory.Close();
+	iRandomMemoryIdx.Close();
 }
 
 void COggRandomPlay::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback)
@@ -1964,9 +2269,6 @@ void COggRandomPlay::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPla
     iSeed = t.DateTime().MicroSecond();
 }
 
-
-
-
 const TDesC & COggRandomPlay::GetNextSong()
 {
     int nSongs= iFileList.Count();
@@ -1976,35 +2278,125 @@ const TDesC & COggRandomPlay::GetNextSong()
         return(KNullDesC);
     }
     
+	TInt picked = -1;
     if (iNewFileList || ( (iRandomMemory.Count() == 0) && iRepeat) )
     {
         // Build a new list, if the playlist has changed, or if we have played all tunes and repeat is on
         // Build internal 'not already played' list, at beginning list is full
         iRandomMemory.Reset();
-        for (TInt i=0; i<iFileList.Count(); i++)
+		iRandomMemoryIdx.Reset();
+
+		TOggFile* playingFile = iFileList[iPlayingIdx];
+		if (playingFile->FileType() == TOggFile::EPlayList)
+			playingFile = (*iPlayList)[iPlayListIdx];
+
+		for (TInt i=0; i<iFileList.Count(); i++)
         {
-            iRandomMemory.Append(i);
+			TOggFile* file = iFileList[i];
+			if (file->FileType() == TOggFile::EPlayList)
+			{
+				// Add all the files in the playlist
+				ROggPlayListStack playListStack;
+				TOggPlayListStackEntry playListStackEntry;
+				TOggPlayList* playList = (TOggPlayList*) file;
+				TInt nextFile = 0;
+				while (playList)
+				{
+					TInt endOfPlayList = playList->Count();
+					for ( ; nextFile<endOfPlayList ; nextFile++)
+					{
+						file = (*playList)[nextFile];
+						if (file->FileType() == TOggFile::EPlayList)
+						{
+							playListStackEntry.iPlayingIdx = nextFile;
+							playListStackEntry.iPlayList = playList;
+							playListStack.Push(playListStackEntry);
+
+							nextFile = 0;
+							playList = (TOggPlayList* ) file;
+							break;
+						}
+						else
+						{
+							if ((file == playingFile) && (playList == iPlayList))
+								picked = iRandomMemory.Count();
+
+							iRandomMemory.Append(file);
+							iRandomMemoryIdx.Append(i);
+						}
+					}
+
+					if (nextFile)
+					{
+						playListStack.Pop(playListStackEntry);
+						playList = playListStackEntry.iPlayList;
+						nextFile = playListStackEntry.iPlayingIdx + 1;
+					}
+				}
+			}
+			else
+			{
+				if (file == playingFile)
+					picked = iRandomMemory.Count();
+				
+				iRandomMemory.Append(file);
+				iRandomMemoryIdx.Append(i);
+			}
         }
     }
+
     if (iNewFileList)
     {
         // Remove the file currently played from the list
-        iRandomMemory.Remove(iPlayingIdx);
-        iNewFileList=EFalse;
+        iRandomMemory.Remove(picked);
+        iRandomMemoryIdx.Remove(picked);
     }
+
     if ( iRandomMemory.Count() == 0)
     {
         SetPlaying(ENoFileSelected);
         return(KNullDesC);
     }
 
-    TReal rnd = Math::FRand(iSeed);
-    TInt picked= (int)(rnd * ( iRandomMemory.Count() ) );
+	TInt64 rnd;
+	TInt64 picked64;
+	TInt64 maxInt64 = KMaxTInt;
+	TInt64 memCount = iRandomMemory.Count();
+	TInt nextPick;
+	if (iNewFileList)
+	{
+		rnd = Math::Rand(iSeed);
+		picked64 = (rnd * memCount) / maxInt64;
+		nextPick = picked64.Low();
+
+		iNewFileList = EFalse;
+	}
+	else
+	{
+		// Avoid playing the same track (possible at the end of the track list when repeat is on)
+		do
+		{
+			rnd = Math::Rand(iSeed);
+			picked64 = (rnd * memCount) / maxInt64;
+			nextPick = picked64.Low();
+		} while (nextPick == picked);
+	}
   
-    TInt songIdx = iRandomMemory[picked];
-    iRandomMemory.Remove(picked);
-    SetPlaying(songIdx);
-    return RetrieveFileName( iFileList[songIdx] );
+    TOggFile* file = iRandomMemory[nextPick];
+    iRandomMemory.Remove(nextPick);
+    
+    iPlayingIdx = iRandomMemoryIdx[nextPick];
+	iRandomMemoryIdx.Remove(nextPick);
+
+    // Check that the file is still there (media hasn't been removed)
+    if( iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound )
+        iPlayingIdx = ENoFileSelected;
+    
+    if (iPlayingIdx != ENoFileSelected)
+		iAppView->SelectFile(iFileList[iPlayingIdx]);
+
+	iAppView->Update();
+	return *(file->iFileName);
 }
 
 const TDesC & COggRandomPlay::GetPreviousSong()

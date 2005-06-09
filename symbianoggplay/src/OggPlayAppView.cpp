@@ -780,33 +780,32 @@ COggPlayAppView::HasAFileName(TInt idx)
     // Returns true if a filename is associated with this item
 
 	COggListBox::TItemTypes type = GetItemType(idx) ;
-	if ((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type ==COggListBox::EPlaying) || (type == COggListBox::EPaused) )
+	if ((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type == COggListBox::EPlayList))
         return(ETrue);
     return(EFalse);
-}
-
-const TInt
-COggPlayAppView::GetFileAbsoluteIndex(TInt idx)
-{
-    
-    COggListBox::TItemTypes type = GetItemType(idx) ;
-
-  __ASSERT_ALWAYS ( ( (type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type ==COggListBox::EPlaying) || (type == COggListBox::EPaused)),
-      User::Panic(_L("GetFileAbsoluteIndex called with wrong argument"),0 ) );
-
-  TInt index = GetValueFromTextLine(idx);
-  return index;
 }
 
 const TDesC &
 COggPlayAppView::GetFileName(TInt idx)
 {
-    TInt absoluteIndex = GetFileAbsoluteIndex(idx);
-    if (absoluteIndex <0) 
-  return KEmpty;
-    return (iOggFiles->FindFromIndex(absoluteIndex));
+	return *(GetFile(idx)->iFileName);
 }
 
+TOggFile* COggPlayAppView::GetFile(TInt idx)
+{
+    COggListBox::TItemTypes type = GetItemType(idx);
+
+	__ASSERT_ALWAYS(((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type == COggListBox::EPlayList)),
+    User::Panic(_L("GetFile called with wrong argument"),0 ) );
+
+	TBuf<128> filter;
+    GetFilterData(idx, filter);
+
+    TInt fileInt(0);
+    TLex parse(filter);
+    parse.Val(fileInt);
+    return (TOggFile*) fileInt;
+}
 
 
 const COggPlayAppUi::TViews
@@ -826,7 +825,7 @@ COggPlayAppView::GetFilterData(TInt idx, TDes & aData)
 	COggListBox::TItemTypes type = GetItemType(idx) ;
 
 #ifdef PLAYLIST_SUPPORT
-	__ASSERT_ALWAYS ( ( (type == COggListBox::EAlbum) || (type == COggListBox::EArtist) || (type ==COggListBox::EGenre) || (type == COggListBox::ESubFolder) || (type == COggListBox::EPlayList) ), 
+	__ASSERT_ALWAYS ( ( (type == COggListBox::EAlbum) || (type == COggListBox::EArtist) || (type ==COggListBox::EGenre) || (type == COggListBox::ESubFolder) || (type == COggListBox::EPlayList) || (type == COggListBox::ETitle) || (type == COggListBox::EFileName) ), 
       User::Panic(_L("COggPlayAppView::GetFilterData called with wrong argument"),0 ) );
 #else
    __ASSERT_ALWAYS ( ( (type == COggListBox::EAlbum) || (type == COggListBox::EArtist) || (type ==COggListBox::EGenre) || (type == COggListBox::ESubFolder) ), 
@@ -880,14 +879,14 @@ COggPlayAppView::SelectItem(TInt idx)
 }
 
 void
-COggPlayAppView::SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex)
+COggPlayAppView::SelectFile(TOggFile* aFile)
 {
   TInt found = -1;
   for (TInt i=0; i<GetTextArray()->Count(); i++)
   {
       if( HasAFileName(i) )
       {
-          if (GetFileAbsoluteIndex(i) == anAbsoluteIndex)
+          if (GetFile(i) == aFile)
           {
               // A match !
               found = i;
@@ -904,7 +903,6 @@ COggPlayAppView::SelectItemFromAbsoluteIndex(TInt anAbsoluteIndex)
           iSelected = iListBox[iMode]->SetCurrentItemIndex(found);
       }
   } // Otherwise, do nothing
-
 }
 
 
@@ -1094,7 +1092,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     case COggPlayAppUi::EAlbum    : iOggFiles->FillTitles(*GetTextArray(), aSelection, dummy, dummy, dummy); break;
     case COggPlayAppUi::EArtist   : iOggFiles->FillTitles(*GetTextArray(), dummy, aSelection, dummy, dummy); break;
     case COggPlayAppUi::EGenre    : iOggFiles->FillTitles(*GetTextArray(), dummy, dummy, aSelection, dummy); break;
-    case COggPlayAppUi::ESubFolder: iOggFiles->FillTitles(*GetTextArray(), dummy, dummy, dummy, aSelection); break;
+    case COggPlayAppUi::ESubFolder: iOggFiles->FillFileNames(*GetTextArray(), dummy, dummy, dummy, aSelection); break;
     case COggPlayAppUi::EFileName : iOggFiles->FillFileNames(*GetTextArray(), dummy, dummy, dummy, dummy); break;
 
 #ifdef PLAYLIST_SUPPORT
@@ -1186,28 +1184,30 @@ COggPlayAppView::UpdateListbox()
   CDesCArray* txt= GetTextArray();
   // BERT: Add a check if there is a song currently playing...
   TBool paused = iApp->iOggPlayback->State()==CAbsPlayback::EPaused;
-  const TInt currSong = iApp->iSongList->GetPlayingAbsoluteIndex();
+  const TOggFile* currSong = iApp->iSongList->GetPlayingFile();
 
   for (TInt i=0; i<txt->Count(); i++) {
     TPtrC sel;
     sel.Set((*txt)[i]);
     TBuf<512> buf(sel);
 
-	// TO DO: Remove these hard coded numbers (they should be from COggListBox::TItemTypes)
-	// the icons being used here:
-    // 0: title
-    // 5: file
-    // 6: back
-    // 7: playing
-    // 8: paused
+	COggListBox::TItemTypes type = GetItemType(i);
+	if (type!=COggListBox::EBack) {
+		TBuf<1> playState;
+		if ((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type == COggListBox::EPlayList))
+		{
+			if ( GetFile(i) == currSong ) {
+				// Mark as paused or playing
+				if (paused)
+					playState.Num((TUint) COggListBox::EPaused);
+				else
+					playState.Num((TUint) COggListBox::EPlaying);
+			}
+			else
+				playState.Num(0);
 
-    if (buf[0]!=L'6') {
-        if ( GetFileAbsoluteIndex(i) == currSong ) {
-            if (paused) buf[0]='8'; else buf[0]='7'; 
-      } 
-      else {
-	      if (iApp->iViewBy==COggPlayAppUi::ETitle) buf[0]='0'; else buf[0]='5';
-      }
+			buf.Replace(buf.Length()-1, 1, playState);
+		}
     }
 
     txt->Delete(i);
@@ -1549,7 +1549,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 
        if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying ||
             iApp->iOggPlayback->State()==CAbsPlayback::EPaused) {
-            if (iApp->iSongList->IsSelectedFromListBoxCurrentlyPlaying())
+            if (iApp->iSongList->IsSelectedFromListBoxCurrentlyPlaying() && ((iApp->iViewBy==COggPlayAppUi::ETitle) || (iApp->iViewBy==COggPlayAppUi::EFileName)))
                 // Event on the current active file
                 iApp->HandleCommandL(EOggPauseResume);
             else
@@ -1592,6 +1592,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     case TOggplaySettings::EFastForward : {
       TInt64 pos=iApp->iOggPlayback->Position()+=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
+  	  iPosition[iMode]->SetValue(pos.GetTInt());
 	  UpdateSongPosition();
 	  iCanvas[iMode]->Refresh(EFalse);
 	  return EKeyWasConsumed;
@@ -1599,6 +1600,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     case TOggplaySettings::ERewind : {
       TInt64 pos=iApp->iOggPlayback->Position()-=KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
+  	  iPosition[iMode]->SetValue(pos.GetTInt());
 	  UpdateSongPosition();
 	  iCanvas[iMode]->Refresh(EFalse);
       return EKeyWasConsumed;

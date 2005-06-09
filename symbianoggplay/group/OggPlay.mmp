@@ -46,11 +46,11 @@ SOURCE OggFilesSearchDialogs.cpp
 
   SOURCE Utf8Fix.c
 
-  #if defined(MOTOROLA)
+#if defined(MOTOROLA)
     SOURCE OggTremor_Motorola.cpp
-  #else
+#else
     SOURCE OggTremor.cpp
-  #endif
+#endif
 
   //FIXMAD: should be part of the vorbis dll
   SOURCE OggRateConvert.cpp

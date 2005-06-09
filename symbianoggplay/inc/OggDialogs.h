@@ -53,7 +53,7 @@ class COggInfoDialog : public CEikDialog
   void PreLayoutDynInitL();
  private:
 
-  TBuf<512> iFileName;
+  TFileName iFileName;
   TInt      iFileSize;
   TInt      iRate;
   TInt      iChannels;
@@ -61,6 +61,21 @@ class COggInfoDialog : public CEikDialog
   TInt      iBitRate;
 };
 
+class COggPlayListInfoDialog : public CEikDialog
+{
+ public:
+
+  void SetFileName(const TDesC& aFileName);
+  void SetFileSize(TInt aFileSize);
+  void SetPlayListEntries(TInt aPlayListEntries);
+
+  void PreLayoutDynInitL();
+ private:
+
+  TFileName iFileName;
+  TInt      iFileSize;
+  TInt      iPlayListEntries;
+};
 
 #if !(defined(SERIES60) || defined(SERIES80) )
 

@@ -225,6 +225,53 @@ RESOURCE DIALOG r_dialog_info {
   };
 }
 
+RESOURCE DIALOG r_dialog_playlist_info {
+  title   = ogg_file_prop;
+  buttons = R_OGG_DIALOG_BUTTONS1;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt = ogg_filename_txt;
+        id = EOggInfoDialog;
+	control = LABEL 
+	{
+		txt="";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+        id = EOggLabelFileName;
+	control = LABEL 
+	{
+		txt=ogg_filename_unknown;
+		horiz_align=EEikLabelAlignHLeft;
+	};	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_filesize;
+	id= EOggLabelFileSize;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_playlist_entries;
+	id = EOggLabelPlayListEntries;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    }
+  };
+}
+
 RESOURCE DIALOG r_dialog_files_search {
   buttons = R_EIK_BUTTONS_CANCEL; 
   flags   = EEikDialogFlagWait;
@@ -319,6 +366,7 @@ RESOURCE TBUF r_ogg_error_24 { buf=ogg_text_error_24; }
 RESOURCE TBUF r_ogg_error_25 { buf=ogg_text_error_25; }
 RESOURCE TBUF r_ogg_error_26 { buf=ogg_text_error_26; }
 RESOURCE TBUF r_ogg_error_27 { buf=ogg_text_error_27; }
+RESOURCE TBUF r_ogg_error_28 { buf=ogg_text_error_28; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }
@@ -332,10 +380,8 @@ RESOURCE TBUF r_ogg_string_9 { buf=ogg_text_string_9; }
 RESOURCE TBUF r_ogg_string_10 { buf=ogg_text_string_10; }
 RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
-
-#ifdef PLAYLIST_SUPPORT
 RESOURCE TBUF r_ogg_string_13 { buf=ogg_text_string_13; }
-#endif
+RESOURCE TBUF r_ogg_string_14 { buf=ogg_text_string_14; }
 
 RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view title
 RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title

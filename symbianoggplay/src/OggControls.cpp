@@ -2123,6 +2123,18 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
 					if (iData->IconArray()->Count() == idx)
 						idx = EFileName; // Use the file icon instead
 				#endif
+
+					if ((idx == ETitle) || (idx == EFileName) || (idx == EPlayList))
+					{
+						// These items can be stopped, paused or playing
+						TLex lex(p.Right(1));
+
+						TInt playState(0);
+						lex.Val(playState);
+						if (playState)
+							idx = playState;
+					}
+
 					CGulIcon* icn= (*iData->IconArray())[idx];
 					TSize s(icn->Bitmap()->SizeInPixels());
 					TPoint pt(x+iData->ColumnWidthPixel(j)/2-s.iWidth/2,y+iLineHeight/2-s.iHeight/2-iOffset%iLineHeight);

@@ -35,31 +35,30 @@ class COggPlayback;
 class TOggFiles;
 class TOggFile : public CBase
 {
-private :
-  TOggFile();
+public:
+	enum TFileTypes { EFile, EPlayList };
 
 public:
-  virtual ~TOggFile();
+  ~TOggFile();
 
   static TOggFile* NewL();
-  static TOggFile* NewL(TInt aAbsoluteIndex,
-       const TDesC& aTitle, 
-	   const TDesC& anAlbum,
-	   const TDesC& anArtist,
-	   const TDesC& aGenre,
-	   const TDesC& aSubFolder,
-	   const TDesC& aFileName,
-	   const TDesC& aShortName,
-	   const TDesC& aTrackNumber);
+  static TOggFile* NewL(TFileText& tf, TInt aVersion);
+  static TOggFile* NewL(TInt aAbsoluteIndex, const TDesC& aTitle, const TDesC& anAlbum, const TDesC& anArtist,
+  const TDesC& aGenre, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName, const TDesC& aTrackNumber);
 
   void SetText(HBufC* & aBuffer, const TDesC& aText);
   void SetTrackTitle();
   void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
 
   void ReadL(TFileText& tf, TInt aVersion);
-  //TBool Write(TInt aLineNumber, TFileText& tf);
-  TInt Write(TInt aLineNumber, HBufC* aBuf );
+  TInt Write(TInt aLineNumber, HBufC* aBuf);
 
+  virtual TFileTypes FileType() const;
+
+protected:
+  TOggFile();
+
+public:
   HBufC* iTitle;
   HBufC* iAlbum;
   HBufC* iArtist;
@@ -72,15 +71,14 @@ public:
   TInt iAbsoluteIndex;
 };
 
-class TOggPlayList : public CBase
+class TOggPlayList : public TOggFile
 {
 private :
   TOggPlayList();
 
 public:
   ~TOggPlayList();
-
-  static TOggPlayList* NewL();
+  static TOggPlayList* NewL(TFileText& tf);
   static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
 
   void ReadL(TFileText& tf);
@@ -88,16 +86,14 @@ public:
 
   void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
 
-  TInt NumEntries();
+  TInt Count();
   void ScanPlayListL(RFs& aFs, TOggFiles* aFiles);
   TOggFile* operator[] (TInt aIndex);
 
-public:
-  HBufC* iFileName;
-  HBufC* iSubFolder;
-  HBufC* iShortName;
-  TInt iAbsoluteIndex;
+  // From TOggFile
+  TFileTypes FileType() const;
 
+public:
   RPointerArray<TOggFile> iPlayListEntries;
 };
 
@@ -205,7 +201,6 @@ class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess
 #endif
 
   CArrayPtrFlat<TOggFile>* iFiles; 
-  CArrayPtrFlat<TOggPlayList>* iPlayLists; 
   CAbsPlayback*            iOggPlayback;
   TOggKey                  iOggKeyTitles;
   TOggKey                  iOggKeyAlbums;
