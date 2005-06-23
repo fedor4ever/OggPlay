@@ -111,6 +111,9 @@ _LIT(KMmcSearchDir,"C:\\Ogg\\");
 _LIT(KMmcSearchDir,"E:\\Ogg\\");
 #endif
 
+
+_LIT(KFullScanString,"Full scan");
+
 // global settings - these are set through the settings view
 
 #ifdef SERIES80
@@ -127,8 +130,16 @@ public:
       EFullScan,
       EMmcOgg,
       EMmmcFull
+#ifdef SERIES80
+      ,ECustomDir
+#endif
 		};
   TInt iScanmode;
+  
+#ifdef SERIES80
+  TBuf<255> iCustomScanDir;
+#endif
+  
   TInt iAutoplay;
   TInt iManeuvringSpeed;
   TInt iWarningsEnabled;
@@ -339,6 +350,9 @@ private:
   void ReadIniFile();
   TInt32 IniRead32( TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = 0x7FFFFFFF );
   TInt64 IniRead64( TFileText& aFile, TInt64 aDefault = 0 );
+#ifdef SERIES80
+  void IniReadDes( TFileText& aFile, TDes& value,const TDesC& defaultValue );
+#endif
   void SetHotKey();
   TBool IsAlarmTime();
   void SetProcessPriority();

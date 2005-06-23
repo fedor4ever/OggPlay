@@ -750,7 +750,13 @@ COggPlayAppUi::HandleCommandL(int aCommand)
         COggFilesSearchDialog *d = new (ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
         if(iSettings.iScanmode==TOggplaySettings::EMmcOgg) {
           iAppView->iOggFiles->SearchSingleDrive(KMmcSearchDir,d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
-        } else {
+        } 
+#ifdef SERIES80
+		else if(iSettings.iScanmode==TOggplaySettings::ECustomDir) {
+          iAppView->iOggFiles->SearchSingleDrive(iSettings.iCustomScanDir,d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
+        } 
+#endif
+        else {
           iAppView->iOggFiles->SearchAllDrives(d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
         }
 
@@ -1340,6 +1346,9 @@ COggPlayAppUi::ReadIniFile()
 	
       iRestoreCurrent            = (TInt) IniRead32( tf );
       iSettings.iScanmode        = (TInt) IniRead32( tf );
+#ifdef SERIES80      
+      IniReadDes( tf ,iSettings.iCustomScanDir,KMmcSearchDir);
+#endif
       iSettings.iAutoplay        = (TInt) IniRead32( tf );
       iSettings.iManeuvringSpeed = (TInt) IniRead32( tf );
       
@@ -1439,6 +1448,10 @@ COggPlayAppUi::IniRead32( TFileText& aFile, TInt32 aDefault, TInt32 aMaxValue )
    return ( val );
 	  }
   
+  
+  
+  
+  
 TInt64 
 COggPlayAppUi::IniRead64( TFileText& aFile, TInt64 aDefault )
 {
@@ -1456,6 +1469,24 @@ COggPlayAppUi::IniRead64( TFileText& aFile, TInt64 aDefault )
 
    return ( val );
 }
+#ifdef SERIES80
+
+void COggPlayAppUi::IniReadDes( TFileText& aFile, TDes& value,const TDesC& defaultValue )
+{
+   TBuf<255> line;
+
+   if ( aFile.Read(line) == KErrNone )
+   {
+		   value.Copy(line);
+		   
+    } else 
+    {
+    	   value.Copy(defaultValue);
+    	   
+    }
+}
+
+#endif
 
 void
 COggPlayAppUi::WriteIniFile()
@@ -1495,8 +1526,12 @@ COggPlayAppUi::WriteIniFile()
     
     // this should do the trick for forward compatibility:
     TInt magic=0xdb;
+#ifdef SERIES80
+    TInt iniversion=8;
+#else
     TInt iniversion=7;
-    
+#endif    
+
     num.Num(magic);
     tf.Write(num);
     
@@ -1541,7 +1576,9 @@ COggPlayAppUi::WriteIniFile()
 	
 	num.Num(iSettings.iScanmode);
 	tf.Write(num);
-
+#ifdef SERIES80	
+	tf.Write(iSettings.iCustomScanDir);
+#endif
 	num.Num(iSettings.iAutoplay);
 	tf.Write(num);
 

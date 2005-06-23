@@ -28,6 +28,7 @@
 #include <eikchlst.h>
 #include <eikchkbx.h>
 #include <eiklbbut.h>
+#include <eikcmbox.h>
 #include <badesca.h>
 #include <eiktxlbm.h>
 #include <ckninfrm.h>
@@ -36,28 +37,33 @@
 
 class CCodecsLabel;
      
-class CSettingsS80Dialog : public CEikDialog
+class CSettingsS80Dialog : public CEikDialog,MEikCommandObserver
 {
  public:
+ 
   CSettingsS80Dialog(TOggplaySettings *aSettings);
 
   TBool OkToExitL(TInt aButtonId);
   void PreLayoutDynInitL();
+  void ProcessCommandL(TInt aButtonId);
   TOggplaySettings *iSettings;
   
  private:
   //new functions
   void UpdateSoftkeysFromControls();
   void UpdateControlsFromSoftkeys();
+  void ShowFolderCommand(TBool show);
+  void LineChangedL(TInt aControlId);
+  void PageChangedL(TInt aPageId);
+
   
  private:
   //data
-   CEikChoiceList* iScanDirControl ;
+   CEikComboBox* iScanDirControl ;
    CEikCheckBox*  iAutostartControl;
    CEikCheckBox* iRepeatControl;
    CEikCheckBox* iRandomControl;
    CEikChoiceList* iCbaControl [2][4] ;
-   
 };
 
 

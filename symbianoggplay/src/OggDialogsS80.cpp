@@ -26,6 +26,8 @@
 #include <OggPlay.rsg>
 #include <eikon.rsg>
 #include <gulbordr.h>
+#include <ckndgtrg.h>
+
 #include "OggUserHotkeys.h"
 
 
@@ -36,9 +38,21 @@ CSettingsS80Dialog::CSettingsS80Dialog(TOggplaySettings *aSettings)
 
 
 TBool
-CSettingsS80Dialog::OkToExitL(int /* aButtonId */)
+CSettingsS80Dialog::OkToExitL(int  /*aButtonId */)
 {
-  iSettings->iScanmode = iScanDirControl->CurrentItem();  
+  _LIT(KBackslash,"\\");	
+ 
+  iScanDirControl->GetText(iSettings->iCustomScanDir);
+  iSettings->iCustomScanDir.TrimAll();
+  if (iSettings->iCustomScanDir==KFullScanString || iSettings->iCustomScanDir==KNullDesC) {
+	iSettings->iScanmode = TOggplaySettings::EFullScan;    
+  } else {  	
+  	iSettings->iScanmode = TOggplaySettings::ECustomDir;    
+  	if (iSettings->iCustomScanDir.Right(1)[0]!=KBackslash().Right(1)[0]) {
+  		iSettings->iCustomScanDir.Append(KBackslash);
+  	}
+  }
+  
   iSettings->iAutoplay = static_cast <TInt> (iAutostartControl->State());
   
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
@@ -49,11 +63,25 @@ CSettingsS80Dialog::OkToExitL(int /* aButtonId */)
   return ETrue;
 }
 
+void
+CSettingsS80Dialog::ProcessCommandL(TInt aButtonId)
+{
+	if (aButtonId==ECbaSelectFolder) {
+	TBuf<255> temp; 
+	iScanDirControl->GetText(temp);
+	if (CCknTargetFolderDialog::RunSelectFolderDlgLD(temp)) {
+		iScanDirControl->SetTextL(&temp);
+	};
+	}
+	
+}
+
+
 
 void
 CSettingsS80Dialog::PreLayoutDynInitL()
 {
-  iScanDirControl = static_cast <CEikChoiceList*> (Control(EOggSettingScanDir));
+  iScanDirControl = static_cast <CEikComboBox*> (Control(EOggSettingScanDir));
   iAutostartControl = static_cast <CEikCheckBox*> (Control(EOggSettingAutoPlayId));
   iRepeatControl = static_cast <CEikCheckBox*> (Control(EOggSettingRepeatId));
   iRandomControl = static_cast <CEikCheckBox*> (Control(EOggSettingRandomId));
@@ -65,8 +93,10 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iCbaControl[1][1] = static_cast <CEikChoiceList*> (Control(EOggSettingCba12));
   iCbaControl[1][2] = static_cast <CEikChoiceList*> (Control(EOggSettingCba13));
   iCbaControl[1][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba14));
- 
-  iScanDirControl->SetCurrentItem(iSettings->iScanmode);
+  CDesCArray *listboxArray=new (ELeave) CDesCArrayFlat(10);
+  listboxArray->AppendL(KFullScanString); 
+  iScanDirControl->SetArray(listboxArray);
+  iScanDirControl->SetTextL(&(iSettings->iCustomScanDir));
   iAutostartControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iAutoplay));
   
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
@@ -104,6 +134,65 @@ CSettingsS80Dialog::UpdateControlsFromSoftkeys()
 	      COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysPlay[i]) );
 	}
 }
+
+
+void CSettingsS80Dialog::ShowFolderCommand(TBool show)
+{
+
+	CEikButtonGroupContainer* cba=&(ButtonGroupContainer());
+	TBool redrawCba=EFalse; 
+	if (show)
+	{
+		if(cba->ControlOrNull(ECbaSelectFolder)==NULL)
+			{
+			TBuf<30> buf;
+			CEikonEnv::Static()->ReadResource( buf, R_SELECT_FOLDER_BUTTON_TEXT );
+			cba->SetCommandL(1,ECbaSelectFolder,buf);
+			cba->CleanupCommandPushL(1);
+			cba->UpdateCommandObserverL(1,*this);
+			cba->CleanupCommandPop();
+			ButtonGroupContainer().SetDefaultCommand(ECbaSelectFolder);
+			redrawCba=ETrue;
+			}
+	}
+
+	else if(cba->ControlOrNull(ECbaSelectFolder)!=NULL)
+		{
+		cba->SetCommandL(1,EEikBidBlank,KNullDesC);
+		cba->RemoveCommandObserver(1);
+		redrawCba=ETrue;
+		}
+
+	if(redrawCba) {
+		cba->DrawDeferred();}
+	
+	
+}
+
+void CSettingsS80Dialog::LineChangedL(TInt aControlId)
+{
+
+	if (aControlId==EOggSettingScanDir)
+		{
+			ShowFolderCommand(ETrue);
+		} else 
+		{
+			ShowFolderCommand(EFalse);
+		};
+}
+
+
+void CSettingsS80Dialog::PageChangedL(TInt aPageId)
+{
+
+	if(aPageId!=0)
+		{
+			ShowFolderCommand(EFalse);
+		}
+}
+
+
+
 
 ///////////////////////////////////////////////
 
@@ -165,7 +254,7 @@ SEikControlInfo CCodecsS80Dialog::CreateCustomControlL(TInt aControlType)
 }
 
 
-void CCodecsS80Dialog::ProcessCommandL (TInt aCommandId)
+void CCodecsS80Dialog::ProcessCommandL(TInt aCommandId)
 {
 	if (aCommandId == EUserSelectCBA)
 	{
