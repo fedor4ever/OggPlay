@@ -1,4 +1,4 @@
-CHARACTER_SET UTF8
+﻿CHARACTER_SET UTF8
 
 #define ogg_options_title "Опции"
 #define ogg_hotkey "Клавиша:"
@@ -41,12 +41,12 @@ CHARACTER_SET UTF8
 #define ogg_play "Игра"
 #define ogg_pause "Пауза"
 
-#define ogg_filescan_main_title "File discovery" // To be translated
+#define ogg_filescan_main_title "Поиск файлов" // To be translated
 #define ogg_filescan_title "Ищем ogg файлы"
-#define ogg_filescan_title_mmf "Looking for files" // To be translated
+#define ogg_filescan_title_mmf "Ищем файлы" // To be translated
 #define ogg_filescan_label1 "Сканировано директорий:"
 #define ogg_filescan_label2 "Количество файлов .ogg:"
-#define ogg_filescan_label2_mmf "Audio files found:" // To be translated
+#define ogg_filescan_label2_mmf "Найдено звуковых файлов:" // To be translated
 
 #ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Количество файлов .m3u:"
@@ -164,16 +164,17 @@ CHARACTER_SET UTF8
 
 
 // S80 Specific strings
-#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_softkeys                 "Softkeys "   // To be Translated 
 #define ogg_cba_1                    "Softkey #1" // To be Translated 
 #define ogg_cba_2                    "Softkey #2" // To be Translated 
 #define ogg_cba_3                    "Softkey #3" // To be Translated 
 #define ogg_cba_4                    "Softkey #4" // To be Translated 
 
-#define ogg_cba_select               "Select"     // To be Translated 
-#define ogg_cba_cancel               "Cancel"     // To be Translated 
+#define ogg_cba_select               "Выбор"     
+#define ogg_cba_cancel               "Отмена"    
 
-#define ogg_boost_up                 "Volume boost up"     // To be Translated
-#define ogg_boost_down               "Volume boost down"   // To be Translated
-#define ogg_playlist_entries         "Playlist entries:"
+#define ogg_boost_up                 "Увел. громкость"     
+#define ogg_boost_down               "Умен. громкость"   // To be Translated
+#define ogg_playlist_entries         "Записи из плэйлиста:"
+#define ogg_cba_select_folder        "Папка"
 

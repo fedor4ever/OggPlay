@@ -85,7 +85,7 @@ CHARACTER_SET UTF8
 #define ogg_text_string_4 "No se puede establecer la prioridad del proceso: Cód. error "
 #define ogg_text_string_5 "Orden aleatorizado"
 #define ogg_text_string_6 "(Titulos)"
-#define ogg_text_string_7 "(Álbums)"
+#define ogg_text_string_7 "(�?lbums)"
 #define ogg_text_string_8 "(Autores)"
 #define ogg_text_string_9 "(Géneros)"
 #define ogg_text_string_10 "(Subcarpetas)"
@@ -168,3 +168,4 @@ CHARACTER_SET UTF8
 #define ogg_cba_select               "Select"     // To be Translated 
 #define ogg_cba_cancel               "Cancel"     // To be Translated
 #define ogg_playlist_entries         "Playlist entries:"
+#define ogg_cba_select_folder        "Folder"	//To be translated

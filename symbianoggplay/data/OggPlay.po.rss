@@ -175,3 +175,4 @@
 #define ogg_boost_up                 "Volume boost up"     // To be Translated
 #define ogg_boost_down               "Volume boost down"   // To be Translated
 #define ogg_playlist_entries         "Playlist entries:"
+#define ogg_cba_select_folder        "Folder"	//To be translated
