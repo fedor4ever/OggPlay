@@ -341,11 +341,12 @@ RESOURCE ARRAY options_multipage1
               id = EOggSettingRandomId;
               },
     DLG_LINE {
-              type = EEikCtChoiceList;
+              type = EEikCtComboBox;
               prompt = ogg_filescanmode;
               id = EOggSettingScanDir;
-              control = CHOICELIST {
-                array_id= r_oggplay_scandir_item_array;
+              control = COMBOBOX {
+				width=10;
+				maxlength=254;
               };
              },
     DLG_LINE {
@@ -518,3 +519,4 @@ RESOURCE TBUF R_OGG_CBA_BACK {buf=ogg_cba_back;}
 RESOURCE TBUF R_OGG_USE_NO_CODEC {buf=ogg_hotkey_none;}
 RESOURCE TBUF R_OGG_CBA_SELECT {buf=ogg_cba_select;}
 RESOURCE TBUF R_OGG_DISABLED {buf=ogg_popup_off;}
+RESOURCE TBUF r_select_folder_button_text { buf = ogg_cba_select_folder;}
