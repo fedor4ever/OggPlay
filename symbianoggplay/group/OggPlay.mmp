@@ -211,6 +211,7 @@ LIBRARY MMFControllerFramework.lib
 
 #ifdef SERIES80
 LIBRARY cknctl.lib
+LIBRARY ckndlg.lib
 #endif
 
 /////////////////////////////////////////////////
@@ -338,7 +339,7 @@ SOURCE       c12 fish0.bmp
 SOURCE       1   fishmask.bmp
 END
 
-AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c16 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp
+AIF OggPlay.aif ..\aif OggPlayAif.s60.rss c16 context_pane_fish.bmp context_pane_fish_mask.bmp list_icon_fish.bmp list_icon_fish_mask.bmp list_icon_fish_24x24.bmp list_icon_fish_mask_24x24.bmp 
 
 #endif  // Series 60
 
