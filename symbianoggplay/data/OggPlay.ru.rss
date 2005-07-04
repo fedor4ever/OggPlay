@@ -1,4 +1,4 @@
-﻿CHARACTER_SET UTF8
+CHARACTER_SET UTF8
 
 #define ogg_options_title "Опции"
 #define ogg_hotkey "Клавиша:"
