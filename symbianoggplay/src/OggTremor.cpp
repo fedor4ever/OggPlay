@@ -560,16 +560,19 @@ void COggPlayback::Play()
 
   iState = EPlaying;
   // There is something wrong how Nokia audio streaming handles the
-                   // first buffers. They are somehow swallowed.
-                   // To avoid that, send few (4) almost empty buffers
+  // first buffers. They are somehow swallowed.
+  // To avoid that, send few (4) almost empty buffers
   if (iMachineUid != EMachineUid_SendoX) // Sendo X doesn't need this fix. 
       iFirstBuffers = 4; 
 
 #ifdef DELAY_AUDIO_STREAMING_START
-  //Also to avoid the first buffer problem, wait a short time before streaming, 
+  // Also to avoid the first buffer problem, wait a short time before streaming, 
   // so that Application drawing have been done. Processor should then
   // be fully available for doing audio thingies.
-  iStartAudioStreamingTimer->Wait(100000);
+  if (iMachineUid == EMachineUid_SendoX) // Latest 1.198.8.2 Sendo X firmware needs a little more time
+	iStartAudioStreamingTimer->Wait(175000);
+  else
+	iStartAudioStreamingTimer->Wait(100000);
 #else
   for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
 #endif
