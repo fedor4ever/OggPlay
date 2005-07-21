@@ -570,7 +570,7 @@ void COggPlayback::Play()
   // so that Application drawing have been done. Processor should then
   // be fully available for doing audio thingies.
   if (iMachineUid == EMachineUid_SendoX) // Latest 1.198.8.2 Sendo X firmware needs a little more time
-	iStartAudioStreamingTimer->Wait(175000);
+	iStartAudioStreamingTimer->Wait(275000);
   else
 	iStartAudioStreamingTimer->Wait(100000);
 #else
