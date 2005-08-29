@@ -444,7 +444,6 @@ void COggPlayAppUi::PostConstructL()
 
 COggPlayAppUi::~COggPlayAppUi()
 {
-	
 	if(iAppView) RemoveFromStack(iAppView);
 	
 	delete iAppView;
@@ -1221,10 +1220,7 @@ void
 COggPlayAppUi::FindSkins()
 {
 	iSkins->Reset();
-	
-	RFs session;
-	User::LeaveIfError(session.Connect());
-	
+		
 	CDirScan* ds = CDirScan::NewLC(iCoeEnv->FsSession());
 	TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
 	if (err!=KErrNone) {
@@ -1262,7 +1258,6 @@ COggPlayAppUi::FindSkins()
 	
 	CleanupStack::PopAndDestroy(); // fullname
 	delete ds;
-	session.Close();
 	
 	//_LIT(KS,"Found %d skin(s)");
 	//OGGLOG.WriteFormat(KS,iSkins->Count());
@@ -1447,10 +1442,6 @@ COggPlayAppUi::IniRead32( TFileText& aFile, TInt32 aDefault, TInt32 aMaxValue )
 
    return ( val );
 	  }
-  
-  
-  
-  
   
 TInt64 
 COggPlayAppUi::IniRead64( TFileText& aFile, TInt64 aDefault )
