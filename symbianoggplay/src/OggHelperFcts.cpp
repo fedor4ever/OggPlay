@@ -35,7 +35,7 @@ void COggTimer::RunL()
 void COggTimer::Wait(TTimeIntervalMicroSeconds32 aInterval)
     {
     Cancel(); // Cancel any pending timer operation
-        After(aInterval);
+    After(aInterval);
     }
 
 void COggTimer::Cancel()
