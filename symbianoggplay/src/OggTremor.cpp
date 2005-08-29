@@ -55,13 +55,6 @@
 #include <OggPlay.rsg>
 
 
-#if defined(UIQ)
-const TInt KAudioPriority = EMdaPriorityMax;
-#else
-const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
-#endif
-
-
 ////////////////////////////////////////////////////////////////
 //
 // COggPlayback
@@ -73,11 +66,9 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) :
   iEnv(anEnv),
   iSettings(),
   iSentIdx(0),
-  iStoppedFromEof(EFalse),
   iFile(0),
   iFileOpen(0),
-  iEof(0),
-  iBufCount(0)
+  iEof(0)
 {
     iSettings.Query();
     
@@ -229,8 +220,6 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 
   TInt err= SetAudioCaps(iDecoder->Channels(),iDecoder->Rate());
   if (err==KErrNone) {
-    unsigned int hi(0);
-    iBitRate.Set(hi,iDecoder->Bitrate());
     iState= EOpen;
     return KErrNone;
   }
@@ -549,8 +538,6 @@ void COggPlayback::Play()
         break;
     case EOpen:  
         iEof=0;
-        iStoppedFromEof = EFalse;
-        iBufCount= 0;
         break;
     default:
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
@@ -610,7 +597,6 @@ void COggPlayback::Stop()
   ClearComments();
   iTime= 0;
   iEof= 0;
-  iStoppedFromEof = EFalse;
   iUnderflowing = EFalse;
 
   if (iObserver) iObserver->NotifyUpdate();
@@ -685,7 +671,6 @@ void COggPlayback::SendBuffer(TDes8& buf)
   if (ret < 0) {
     // Error in the stream. Bad luck, we will continue anyway.
   } else {
-    iBufCount++;
     TRAPD( err, iStream->WriteL(buf) );
     if (err!=KErrNone) {
       // This should never ever happen.
@@ -771,7 +756,6 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
       // We cannot rely on a MaoscPlayComplete from the CMdaAudioOutputStream
       // since not all phone supports that.
 
-      iStoppedFromEof = ETrue;
 	  iUnderflowing = EFalse;
 
 	  iRestartAudioStreamingTimer->Cancel();

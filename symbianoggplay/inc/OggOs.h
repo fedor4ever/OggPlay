@@ -56,8 +56,8 @@ chSTR2(__LINE__) "):" #desc)
   #define KVersionString "1.64"
  #else
   #define KVersionMajor 1
-  #define KVersionMinor 5
-  #define KVersionString "1.05"
+  #define KVersionMinor 8
+  #define KVersionString "1.08"
  #endif
 #endif
 #if defined(UIQ)
@@ -122,6 +122,13 @@ chSTR2(__LINE__) "):" #desc)
 // On NGage it gives a serious boost to avoid "not-ready buffer" problem.
 // UIQ_?
 #define FORCE_FULL_BUFFERS
+
+// Multi threaded playback, non MMF only (experimental)
+#if defined(SERIES60)
+  #if !defined(OS70S)
+  #define MULTI_THREAD_PLAYBACK
+#endif
+#endif
 
 // There is something wrong how Nokia audio streaming handles the
 // first buffers. They are somehow swallowed.

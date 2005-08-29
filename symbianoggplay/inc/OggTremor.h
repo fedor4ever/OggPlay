@@ -38,9 +38,11 @@
 #ifdef SERIES60
 const TInt KBuffers= 2;
 const TInt KBufferSize = 4096;
+const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
 #else
 const TInt KBuffers= 12;
 const TInt KBufferSize = 4096*10;
+const TInt KAudioPriority = EMdaPriorityMax;
 #endif
 
 
@@ -80,11 +82,13 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual TInt64 Position();
   virtual TInt64 Time();
   virtual TInt   Volume();
+
 #ifdef MDCT_FREQ_ANALYSER
   virtual const TInt32 * GetFrequencyBins(TTime aTime);
 #else
   virtual const void* GetDataChunk();
 #endif
+
   virtual TInt GetNewSamples(TDes8 &aBuffer);
   virtual void SetVolumeGain(TGainType aGain);
 
@@ -126,7 +130,6 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   COggTimer *              iStartAudioStreamingTimer;
   static TInt StopAudioStreamingCallBack(TAny* aPtr);
   COggTimer *              iStopAudioStreamingTimer;
-  TBool                    iStoppedFromEof;
 
   static TInt RestartAudioStreamingCallBack(TAny* aPtr);
   COggTimer *              iRestartAudioStreamingTimer;
@@ -156,7 +159,6 @@ typedef struct
   FILE*                    iFile;
   TInt                     iFileOpen;
   TInt                     iEof;            // true after ov_read has encounted the eof
-  TInt                     iBufCount;       // counts buffers sent to the audio stream
  
 
   MDecoder*             iDecoder;
@@ -164,7 +166,6 @@ typedef struct
   // Machine uid (for identifying the phone model)
   TInt iMachineUid;
 };
-
 
 
 class COggAudioCapabilityPoll : public CBase, public MMdaAudioOutputStreamCallback
@@ -179,11 +180,10 @@ class COggAudioCapabilityPoll : public CBase, public MMdaAudioOutputStreamCallba
         
     private:
         CMdaAudioOutputStream* iStream;
-        TMdaAudioDataSettings    iSettings;
+        TMdaAudioDataSettings  iSettings;
         TInt iCaps;
         TInt iRate;
     };
     
 #endif // !MOTOROLA
-
 #endif // _OggTremor_h

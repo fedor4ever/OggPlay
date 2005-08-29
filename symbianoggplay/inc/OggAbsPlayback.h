@@ -165,7 +165,7 @@ class CAbsPlayback : public CBase {
    virtual TState State()                 { return ( iState );             };
    
    // Information about the playback file 
-   virtual TInt   BitRate()               { return ( iBitRate.GetTInt() ); };
+   virtual TInt   BitRate()               { return ( iBitRate ); };
    virtual TInt   Channels()              { return ( iChannels );          };
    virtual TInt   FileSize()              { return ( iFileSize );          };
    virtual TInt   Rate()                  { return ( iRate );              };
@@ -195,7 +195,7 @@ class CAbsPlayback : public CBase {
 
    // File properties and tag information   
    //-------------------------------------
-   TInt64                   iBitRate;
+   TInt                     iBitRate;
    TInt                     iChannels;
    TInt                     iFileSize;
    TInt                     iRate;
