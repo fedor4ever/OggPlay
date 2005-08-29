@@ -68,7 +68,6 @@ TOggParser::TOggParser(const TFileName& aFileName)
 TOggParser::~TOggParser()
 {
   fclose(iFile);
-  CloseSTDLIB(); // see Symbian KB FAQ-0577
 }
 
 TBool
