@@ -310,13 +310,13 @@ COggAboutDialog::PreLayoutDynInitL()
   charFormat.iFontSpec.iFontStyle.SetPosture(EPostureItalic);
   iRichText->ApplyCharFormatL(charFormat, charFormatMask, pos2, KAdress().Length() );
 
-  pos = iRichText->CharPosOfParagraph(len,4); // get start of 4th para
+  pos = iRichText->CharPosOfParagraph(len,5); // get start of 4th para
   CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_4);
   iRichText->InsertL(pos,buf);
-  pos = iRichText->CharPosOfParagraph(len,5); 
+  pos = iRichText->CharPosOfParagraph(len,6); 
   CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_5);
   iRichText->InsertL(pos,buf);
-  pos = iRichText->CharPosOfParagraph(len,6); 
+  pos = iRichText->CharPosOfParagraph(len,7); 
   CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_6);
   iRichText->InsertL(pos,buf);
 

@@ -55,20 +55,11 @@
 #include <OggPlay.rsg>
 
 
-////////////////////////////////////////////////////////////////
-//
 // COggPlayback
-//
-////////////////////////////////////////////////////////////////
-
 COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) : 
   CAbsPlayback(anObserver),
   iEnv(anEnv),
-  iSettings(),
-  iSentIdx(0),
-  iFile(0),
-  iFileOpen(0),
-  iEof(0)
+  iSettings()
 {
     iSettings.Query();
     
@@ -77,36 +68,21 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) :
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
     iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
     iSettings.iVolume = 0;
-};
+}
 
 void COggPlayback::ConstructL() {
+  // Set up the session with the file server
+  User::LeaveIfError(iFs.Connect());
 
+  // Discover audio capabilities
   COggAudioCapabilityPoll pollingAudio;
-  iAudioCaps = pollingAudio.PollL(); // Discover Audio Capabilities
+  iAudioCaps = pollingAudio.PollL();
 
   iStream  = CMdaAudioOutputStream::NewL(*this);
-  
-  TRAPD( err, iStream->Open(&iSettings) );
-  if (err!= KErrNone) {
-    TBuf<256> buf1,buf2;
-    CEikonEnv::Static()->ReadResource(buf1, R_OGG_ERROR_7);
-    CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_20);
-    buf1.AppendNum(err);
-    iEnv->OggErrorMsgL(buf2,buf1);
-    //OGGLOG.Write(buf2);
-    //OGGLOG.Write(buf1);
-  }
-  iMaxVolume = 1; // This will be updated when stream is opened.
-  //OGGLOG.WriteFormat(_L("Max volume is %d"),iMaxVolume);
-  TDes8* buffer;
+  iStream->Open(&iSettings);
 
-  for (TInt i=0; i<KBuffers; i++) {
-    buffer = new(ELeave) TBuf8<KBufferSize>;
-    buffer->SetMax();
-    CleanupStack::PushL(buffer);
-    User::LeaveIfError(iBuffer.Append(buffer));
-    CleanupStack::Pop(buffer);
-  }
+  for (TInt i=0; i<KBuffers; i++)
+	iBuffer[i] = HBufC8::NewL(KBufferSize);
 
   iStartAudioStreamingTimer = new (ELeave) COggTimer(
       TCallBack( StartAudioStreamingCallBack,this )   );
@@ -124,33 +100,31 @@ void COggPlayback::ConstructL() {
 }
 
 COggPlayback::~COggPlayback() {
-  if(iDecoder) { 
     delete iDecoder; 
-    iDecoder=NULL; 
-  }
   delete  iStartAudioStreamingTimer;
   delete  iStopAudioStreamingTimer;
   delete  iRestartAudioStreamingTimer;
   delete iStream;
-  iBuffer.ResetAndDestroy();
+
+  for (TInt i=0; i<KBuffers; i++)
+	delete iBuffer[i];
+
   delete iOggSampleRateConverter;
+  iFs.Close();
 }
 
-void COggPlayback::SetDecoderL(const TDesC& aFileName)
+MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 {
-  if(iDecoder) { 
-    delete iDecoder; 
-    iDecoder=NULL; 
-  }
+  MDecoder* decoder = NULL;
 
   TParsePtrC p( aFileName);
 
   if(p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0) {
-      iDecoder=new(ELeave)CTremorDecoder;
+      decoder=new(ELeave)CTremorDecoder;
   } 
 #if defined(MP3_SUPPORT)
   else if(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0) {
-    iDecoder=new(ELeave)CMadDecoder;
+    decoder=new(ELeave)CMadDecoder;
   }
 #endif
   else {
@@ -158,17 +132,18 @@ void COggPlayback::SetDecoderL(const TDesC& aFileName)
     _LIT(KNotSupported,"File type not supported");
     iEnv->OggErrorMsgL(KPanic,KNotSupported);
   }
-  
+
+  return decoder;
 }
 
 TInt COggPlayback::Open(const TDesC& aFileName)
 {
-
   TRACEF(COggLog::VA(_L("OPEN") ));
-  if (iFileOpen) {
+  if (iFile)
+  {
     iDecoder->Close(iFile);
     fclose(iFile);
-    iFileOpen= 0;
+	iFile = NULL;
   }
 
   iTime= 0;
@@ -184,19 +159,20 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   myname.Append((wchar_t)0);
 
   if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
-    iFileOpen= 0;
+    iFile = NULL;
     //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
     TRACE(COggLog::VA(_L("COggPlayback::Open(%S). Failed"), &aFileName ));
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
     return KErrOggFileNotFound;
-  };
-  iFileOpen= 1;
-  SetDecoderL(aFileName);
+  }
 
+  delete iDecoder;
+  iDecoder = NULL;
+  iDecoder = GetDecoderL(aFileName);
   if(iDecoder->Open(iFile,myname) < 0) {
     iDecoder->Close(iFile);
     fclose(iFile);
-    iFileOpen= 0;
+    iFile = NULL;
     //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
 
     iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
@@ -219,14 +195,15 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 //  TRACEF(COggLog::VA(_L("Bitrate:%d"), iBitRate ));
 
   TInt err= SetAudioCaps(iDecoder->Channels(),iDecoder->Rate());
-  if (err==KErrNone) {
-    iState= EOpen;
-    return KErrNone;
-  }
+  if (err == KErrNone)
+	iState= EOpen;
+  else
+  {
     
   iDecoder->Close(iFile);
   fclose(iFile);
-  iFileOpen=0;
+  iFile = NULL;
+  }
 
   return err;
 }
@@ -243,14 +220,11 @@ void COggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
   TInt i= j_code((char*)aStr,strlen(aStr));
   if (i==BIG5_CODE) {
     CCnvCharacterSetConverter* conv= CCnvCharacterSetConverter::NewL();
-    RFs theRFs;
-    theRFs.Connect();
-    CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, theRFs);
+    CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, iFs);
     if (a==CCnvCharacterSetConverter::EAvailable) {
       TInt theState= CCnvCharacterSetConverter::KStateDefault;
       conv->ConvertToUnicode(aBuf, p, theState);
     }
-    theRFs.Close();
     delete conv;
   }
 #endif
@@ -341,14 +315,15 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
       buf.AppendNum(error);
       iEnv->OggErrorMsgL(tbuf,buf);
   }
+
 #ifdef MDCT_FREQ_ANALYSER
   iTimeBetweenTwoSamples = 1.0E6/(theRate*theChannels);
   /* Make a frequency measurement only every .1 seconds, that should be enough */
   iTimeWithoutFreqCalculation = 0;
   iTimeWithoutFreqCalculationLim = (TInt)(0.1E6 / iTimeBetweenTwoSamples);
 #endif
-  return error;
 
+  return error;
 }
 
 
@@ -453,11 +428,9 @@ TInt64 COggPlayback::Time()
   return iTime;
 }
 
-
 #ifdef MDCT_FREQ_ANALYSER
 const TInt32 * COggPlayback::GetFrequencyBins(TTime /* aTime */)
 {
-
     // We're not using aTime anymore, Position gives better results
   TTimeIntervalMicroSeconds currentPos = iStream->Position();
 
@@ -504,34 +477,34 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
       iEnv->OggErrorMsgL(buf,aFileName);
     }
     return KErrOggFileNotFound;
-  };
+  }
 
-  SetDecoderL(aFileName);
-  if(iDecoder->OpenInfo(f,myname) < 0) {
-    iDecoder->Close(f);
+  MDecoder* decoder = GetDecoderL(aFileName);
+  if(decoder->OpenInfo(f,myname) < 0) {
+    decoder->Close(f);
+	delete decoder;
     fclose(f);
     if (!silent) {
        iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_9);
     }
     return -102;
   }
-  iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
+  decoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
 
-  iFileName= aFileName;
-  iRate= iDecoder->Rate();
-  iChannels=iDecoder->Channels();
-  iBitRate=iDecoder->Bitrate();
+  iFileName = aFileName;
+  iRate = decoder->Rate();
+  iChannels = decoder->Channels();
+  iBitRate = decoder->Bitrate();
 
-  iDecoder->Close(f); 
+  decoder->Close(f); 
+  delete decoder;
   fclose(f);
-  iFileOpen=0;
 
   return KErrNone;
 }
 
 void COggPlayback::Play() 
 {
-
     TRACEF(COggLog::VA(_L("PLAY %i "), iState ));
     switch(iState) {
     case EPaused:
@@ -557,9 +530,9 @@ void COggPlayback::Play()
   // so that Application drawing have been done. Processor should then
   // be fully available for doing audio thingies.
   if (iMachineUid == EMachineUid_SendoX) // Latest 1.198.8.2 Sendo X firmware needs a little more time
-	iStartAudioStreamingTimer->Wait(275000);
+	iStartAudioStreamingTimer->Wait(KSendoStreamStartDelay);
   else
-	iStartAudioStreamingTimer->Wait(100000);
+	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 #else
   for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
 #endif
@@ -567,10 +540,10 @@ void COggPlayback::Play()
 
 void COggPlayback::Pause()
 {
-  TRACEF(COggLog::VA(_L("PAUSE") ));
+  TRACEF(COggLog::VA(_L("PAUSE")));
   if (iState != EPlaying) return;
   iState= EPaused;
-  TRAPD( err, iStream->Stop() );
+  iStream->Stop();
 }
 
 void COggPlayback::Resume()
@@ -581,22 +554,20 @@ void COggPlayback::Resume()
 
 void COggPlayback::Stop()
 {
-    
   TRACEF(COggLog::VA(_L("STOP") ));
-  if (iState == EClosed ) // FIXIT Was 'EPlaying' and panicked at exit in paused mode
-  { 
+  if (iState == EClosed)
     return;
-  }
-  TRAPD( err, iStream->Stop() );
+
+  iStream->Stop();
   iState= EClosed;
-  if (iFileOpen) {
+  if (iFile) {
     iDecoder->Close(iFile);
     fclose(iFile);
-    iFileOpen= 0;
+	iFile = NULL;
   }
   ClearComments();
   iTime= 0;
-  iEof= 0;
+  iEof= EFalse;
   iUnderflowing = EFalse;
 
   if (iObserver) iObserver->NotifyUpdate();
@@ -639,23 +610,22 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
     }
     if (ret == 0)
     {
-        iEof= 1;
+        iEof= ETrue;
     }
     return (ret);
 }
 
 
-void COggPlayback::SendBuffer(TDes8& buf)
+void COggPlayback::SendBuffer(HBufC8& buf)
 {
   if (iEof) return;
   if (iState==EPaused) return;
 
   long ret=0;
-  buf.SetLength(KBufferSize);
-
   TInt cnt = 0;
+  TPtr8 bufPtr(buf.Des());
   if (iFirstBuffers)  {
-      buf.FillZ(4000);
+      bufPtr.FillZ(4000);
       cnt = 4000;
       ret = 4000;
 #ifdef MDCT_FREQ_ANALYSER
@@ -665,7 +635,7 @@ void COggPlayback::SendBuffer(TDes8& buf)
   
   } else {
     
-     ret = iOggSampleRateConverter->FillBuffer( buf );
+     ret = iOggSampleRateConverter->FillBuffer(bufPtr);
   }
 
   if (ret < 0) {
@@ -687,7 +657,7 @@ void COggPlayback::SendBuffer(TDes8& buf)
   }
 }
 
-void COggPlayback::MaoscPlayComplete(TInt aError)
+void COggPlayback::MaoscPlayComplete(TInt aErr)
 {
   // Error codes:
   // KErrCancel      -3
@@ -696,26 +666,26 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
   // KErrInUse      -14
 
     
-  TRACEF(COggLog::VA(_L("MaoscPlayComplete:%d"), aError ));
+  TRACEF(COggLog::VA(_L("MaoscPlayComplete:%d"), aErr ));
   if (iState==EPaused || iState==EClosed) return;
 
-  if (aError == KErrUnderflow) 
+  if (aErr == KErrUnderflow) 
       return;
-  if (aError == KErrInUse) aError= KErrNone;
+  if (aErr == KErrInUse) aErr= KErrNone;
 
-  if (aError == KErrCancel)
+  if (aErr == KErrCancel)
       return;
 
-  if (aError == KErrDied) {
+  if (aErr == KErrDied) {
     iObserver->NotifyPlayInterrupted();
     return;
   }
 
-  if (aError != KErrNone) {
+  if (aErr != KErrNone) {
     TBuf<256> buf,tbuf;
     CEikonEnv::Static()->ReadResource(tbuf,R_OGG_ERROR_18);
     CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_16);
-    buf.AppendNum(aError);
+    buf.AppendNum(aErr);
     iEnv->OggErrorMsgL(tbuf,buf);
     if (iObserver )
     {
@@ -727,7 +697,7 @@ void COggPlayback::MaoscPlayComplete(TInt aError)
   
 }
 
-void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
+void COggPlayback::MaoscBufferCopied(TInt aErr, const TDesC8& aBuffer)
 {
   // Error codes:
   // KErrCancel      -3  (not sure when this happens, but ignore for now)
@@ -737,14 +707,14 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
   // KErrAbort      -39  (stream was stopped before this buffer was copied)
 
     
-  if (aError != KErrNone)
-    { TRACEF(COggLog::VA(_L("MaoscBufferCopied:%d"), aError )); }
-  if (aError == KErrCancel) aError= KErrNone;
+  if (aErr != KErrNone)
+    { TRACEF(COggLog::VA(_L("MaoscBufferCopied:%d"), aErr )); }
+  if (aErr == KErrCancel) aErr= KErrNone;
 
-  if (aError == KErrAbort ||
-      aError == KErrInUse ||
-      aError == KErrDied  ||
-      aError == KErrCancel) return;
+  if (aErr == KErrAbort ||
+      aErr == KErrInUse ||
+      aErr == KErrDied  ||
+      aErr == KErrCancel) return;
 
   if (iState != EPlaying) return;
 
@@ -755,14 +725,13 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
       // All the buffers have been sent, stop the playback
       // We cannot rely on a MaoscPlayComplete from the CMdaAudioOutputStream
       // since not all phone supports that.
-
 	  iUnderflowing = EFalse;
 
 	  iRestartAudioStreamingTimer->Cancel();
-      iStopAudioStreamingTimer->Wait(100000);
+      iStopAudioStreamingTimer->Wait(KStreamStopDelay);
 	  return;
   }
-  else if (aError == KErrUnderflow)
+  else if (aErr == KErrUnderflow)
   {
 #ifdef DELAY_AUDIO_STREAMING_START
       if (!iUnderflowing)
@@ -774,14 +743,14 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
       else
           iLastUnderflowBuffer = b;
 
-	  iRestartAudioStreamingTimer->Wait(100000);
+	  iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
 	  return;
 #else
-	  aError = KErrNone;
+	  aErr = KErrNone;
 #endif
   }
 
-  if (aError == KErrNone)
+  if (aErr == KErrNone)
   {
 	  if (iUnderflowing)
 	  {
@@ -797,32 +766,23 @@ void COggPlayback::MaoscBufferCopied(TInt aError, const TDesC8& aBuffer)
 	TBuf<256> buf,tbuf;
     CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
     CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
-    buf.AppendNum(aError);
+    buf.AppendNum(aErr);
     iEnv->OggErrorMsgL(tbuf,buf);
   }
 }
 
-void COggPlayback::MaoscOpenComplete(TInt aError) 
+void COggPlayback::MaoscOpenComplete(TInt aErr) 
 { 
-    
-  TRACEF(COggLog::VA(_L("MaoscOpenComplete:%d"), aError ));
+  TRACEF(COggLog::VA(_L("MaoscOpenComplete:%d"), aErr ));
   iMaxVolume=iStream->MaxVolume();
-  if (aError != KErrNone) {
-
+  if (aErr != KErrNone) {
     TBuf<32> buf;
     CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_19);
-    buf.AppendNum(aError);
+    buf.AppendNum(aErr);
     _LIT(tit,"MaoscOpenComplete");
     iEnv->OggErrorMsgL(tit,buf);
-
   } else {
-
-    if (iState == EClosed) {
-      iState = EFirstOpen;
-    } else {
-      iState = EOpen;
-    }
-
+    iState = EFirstOpen;
     iStream->SetPriority(KAudioPriority, EMdaPriorityPreferenceTimeAndQuality);
   }
 }
@@ -945,7 +905,6 @@ TInt COggAudioCapabilityPoll::PollL()
 
         delete iStream; // This is rude...
         iStream = NULL;
-        
         }
     
     // Poll for stereo support
@@ -969,17 +928,18 @@ TInt COggAudioCapabilityPoll::PollL()
           iCaps &= ~iRate;
        }
     }
+
     delete iStream; // This is rude...
     iStream = NULL;
     return iCaps;
     }
 
 
-void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError) 
+void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aErr) 
 {
-    TRACEF(COggLog::VA(_L("SampleRa:%d"), aError ));
+    TRACEF(COggLog::VA(_L("AudioCapPoll OpenComplete: %d"), aErr ));
 
-    if (aError==KErrNone) 
+    if (aErr==KErrNone) 
         {
         // Mode supported.
         iCaps |= iRate;
@@ -988,10 +948,10 @@ void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError)
     
 }
 
-void COggAudioCapabilityPoll::MaoscPlayComplete(TInt /*aError*/)
+void COggAudioCapabilityPoll::MaoscPlayComplete(TInt /* aErr */)
     {
     }
 
-void COggAudioCapabilityPoll::MaoscBufferCopied(TInt /*aError*/, const TDesC8& /*aBuffer*/)
+void COggAudioCapabilityPoll::MaoscBufferCopied(TInt /* aErr */, const TDesC8& /* aBuffer */)
     {
     }

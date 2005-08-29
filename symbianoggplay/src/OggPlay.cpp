@@ -345,6 +345,7 @@ COggPlayAppUi::ConstructL()
 #else
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
 #endif
+	
 	iOggPlayback->ConstructL();
 
 	ReadIniFile();
@@ -480,10 +481,10 @@ COggPlayAppUi::~COggPlayAppUi()
 #endif /* SERIES60 */
 
 #ifdef MONITOR_TELEPHONE_LINE
-	if (iActive) { delete iActive; iActive=0; }
+	delete iActive;
 #endif
 
-	if (iOggPlayback) { delete iOggPlayback; iOggPlayback=0; }
+	delete iOggPlayback;
 	iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
 	
 	delete iIniFileName;
@@ -2446,11 +2447,8 @@ const TDesC & COggRandomPlay::GetPreviousSong()
 CAbsPlayback::CAbsPlayback(MPlaybackObserver* anObserver) :
   iState(CAbsPlayback::EClosed),
   iObserver(anObserver),
-  iBitRate(0),
   iChannels(2),
-  iFileSize(0),
   iRate(44100),
-  iTime(0),
   iAlbum(),
   iArtist(),
   iGenre(),

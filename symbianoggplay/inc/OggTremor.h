@@ -45,6 +45,10 @@ const TInt KBufferSize = 4096*10;
 const TInt KAudioPriority = EMdaPriorityMax;
 #endif
 
+const TInt KStreamStartDelay = 100000;
+const TInt KSendoStreamStartDelay = 275000;
+const TInt KStreamRestartDelay = 100000;
+const TInt KStreamStopDelay = 100000;
 
 #if defined(MOTOROLA)
 #include "OggTremor_Motorola.h"
@@ -54,7 +58,7 @@ const TInt KAudioPriority = EMdaPriorityMax;
 #include "mda/common/audio.h"
 
 // COggPlayback:
-// An implementation of TAbsPlayback for the Ogg/Vorbis format:
+// An implementation of CAbsPlayback for the Ogg/Vorbis format:
 //-------------------------------------------------------------
 
 class COggPlayback : public MMdaAudioOutputStreamCallback, 
@@ -99,12 +103,12 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
   virtual void MaoscOpenComplete(TInt aError);
 
-  void SendBuffer(TDes8& buf);
+  void SendBuffer(HBufC8& buf);
   void ParseComments(char** ptr);
   TInt SetAudioCaps(TInt theChannels, TInt theRate);
   void GetString(TBuf<256>& aBuf, const char* aStr);
   void SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate, TBool aConvertChannel, TInt aNbOfChannels);
-  void SetDecoderL(const TDesC& aFileName);
+  MDecoder* GetDecoderL(const TDesC& aFileName);
 
   COggMsgEnv*               iEnv;
 
@@ -114,8 +118,8 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
 
   CMdaAudioOutputStream*   iStream;
   TMdaAudioDataSettings    iSettings;
-  RPointerArray<TDes8>     iBuffer;
-  TDes8*                   iSent[KBuffers];
+  HBufC8*                  iBuffer[KBuffers];
+  HBufC8*                  iSent[KBuffers];
   TInt                     iSentIdx;
   TInt                     iMaxVolume;
   TInt                     iAudioCaps;
@@ -157,14 +161,14 @@ typedef struct
   //-----------------------------------------
 
   FILE*                    iFile;
-  TInt                     iFileOpen;
-  TInt                     iEof;            // true after ov_read has encounted the eof
+  TBool                    iEof;            // true after ov_read has encounted the eof
  
 
   MDecoder*             iDecoder;
 
   // Machine uid (for identifying the phone model)
   TInt iMachineUid;
+  RFs iFs;
 };
 
 
