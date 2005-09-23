@@ -962,8 +962,6 @@ COggPlayAppUi::Stop()
     UpdateSoftkeys();
     iSongList->SetPlayingFromListBox(ENoFileSelected); // calls iAppview->Update
   }
-  return;
-
 }
 
 

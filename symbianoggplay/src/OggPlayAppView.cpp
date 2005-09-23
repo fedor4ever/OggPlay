@@ -1660,7 +1660,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 	case TOggplaySettings::EVolumeBoostDown : {
 		TGainType currentGain = (TGainType) iApp->iSettings.iGainType;
 		TInt newGain = currentGain - 1;
-		if (newGain>=EMinus18dB)
+		if (newGain>=EMinus24dB)
 			iApp->SetVolumeGainL((TGainType) newGain);
 
 		return EKeyWasConsumed;

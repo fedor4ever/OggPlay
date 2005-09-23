@@ -42,6 +42,10 @@
 #define ogg_boost_up "Volume boost up"
 #define ogg_boost_down "Volume boost down"
 
+#define ogg_buffering_mode "Buffering mode"
+#define ogg_thread_priority "Thread priority" 
+
+
 #define ogg_filescan_main_title "File discovery"
 #define ogg_filescan_title "Looking for ogg files"
 #define ogg_filescan_title_mmf "Looking for files"
@@ -151,6 +155,7 @@
 #define ogg_volume_boost             "Volume Boost"
 #define ogg_volume_boost_m12db        "-12dB Gain"
 #define ogg_volume_boost_m18db        "-18dB Gain"
+#define ogg_volume_boost_m24db        "-24dB Gain"
 #define ogg_volume_boost_none        "No Extra Gain"
 #define ogg_volume_boost_6db         "6dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
@@ -162,6 +167,9 @@
 #define ogg_codec_info_supplier      "Supplier"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
+
+#define ogg_playback                 "Playback"
+#define ogg_playback_title           "Playback options"
 
 // S80 Specific strings
 #define ogg_softkeys_idle            "Idle Softkeys"

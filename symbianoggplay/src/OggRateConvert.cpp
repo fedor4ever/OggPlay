@@ -175,28 +175,29 @@ TInt COggSampleRateConverter::FillBuffer( TDes8 &aBuffer)
     {
     case ENoGain:
         break;
+
     case EMinus12dB:
-        {
-            ApplyNegativeGain(aBuffer,2);
-            break;
-        }
-    case EMinus18dB:
-        {
-            ApplyNegativeGain(aBuffer,3);
-            break;
-        }
+        ApplyNegativeGain(aBuffer,2);
+        break;
+
+	case EMinus18dB:
+        ApplyNegativeGain(aBuffer,3);
+        break;
+
+	case EMinus24dB:
+        ApplyNegativeGain(aBuffer,4);
+        break;
+
     case EStatic6dB:
-        {
-            ApplyGain(aBuffer,1);
-            break;
-        }
+        ApplyGain(aBuffer,1);
+        break;
+
     case EStatic12dB:   
-            ApplyGain(aBuffer,2);
-            break;
+        ApplyGain(aBuffer,2);
         break;
     }
-    // TRACEF(COggLog::VA(_L("FillBuf out") ));
 
+	// TRACEF(COggLog::VA(_L("FillBuf out") ));
     return (ret);
 }
 

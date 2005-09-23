@@ -548,17 +548,19 @@ RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_volume_boost_item_list
 RESOURCE ARRAY r_oggplay_volume_boost_setting_page_list
     {
     items = { 
-		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_volume_boost_m18db; },
-		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_volume_boost_m12db; },
-		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_volume_boost_none; },
-		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_volume_boost_6db; },
-		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_volume_boost_12db; }
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_volume_boost_m24db; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_volume_boost_m18db; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_volume_boost_m12db; },
+		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_volume_boost_none; },
+		AVKON_ENUMERATED_TEXT { value = 4; text = ogg_volume_boost_6db; },
+		AVKON_ENUMERATED_TEXT { value = 5; text = ogg_volume_boost_12db; }
 		};
 	}
 
 RESOURCE ARRAY r_oggplay_volume_boost_item_array
     {
     items = { 
+		LBUF { txt = ogg_volume_boost_m24db; },
 		LBUF { txt = ogg_volume_boost_m18db; },
 		LBUF { txt = ogg_volume_boost_m12db; },
 		LBUF { txt = ogg_volume_boost_none; },

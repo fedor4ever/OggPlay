@@ -139,6 +139,7 @@
 #define ogg_volume_boost             "Volume Boost"
 #define ogg_volume_boost_m12db        "-12dB Gain"
 #define ogg_volume_boost_m18db        "-18dB Gain"
+#define ogg_volume_boost_m24db        "-24dB Gain"
 #define ogg_volume_boost_none        "No Extra Gain"
 #define ogg_volume_boost_6db         "6dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
@@ -165,3 +166,10 @@
 #define ogg_cba_cancel               "Abbrechen"     // To be Translated 
 #define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Ordner"
+
+// Multi thread playback strings
+#define ogg_buffering_mode "Buffering mode"
+#define ogg_thread_priority "Thread priority" 
+
+#define ogg_playback                 "Playback"
+#define ogg_playback_title           "Playback options"

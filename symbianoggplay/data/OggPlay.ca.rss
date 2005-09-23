@@ -1,1 +1,161 @@
-#define ogg_options_title "Opcions"#define ogg_hotkey "Tecla d'accés:"#define ogg_alarm "Alarma:"#define ogg_active "Activa:"#define ogg_about_oggplay "Sobre l'OggPlay"#define ogg_version_txt "Versió ???"#define ogg_c_author "(c) 2003 por Leif H. Wilden"#define ogg_link_txt "visita http://symbianoggplay.sourceforge.net per a més informació"#define ogg_vorbis_c "(c) códec Ogg/Vorbis per Xiph.org"#define ogg_translation "(c) códec Ogg/Vorbis per Xiph.org"#define ogg_port "Propietats del fitxer"#define ogg_file_prop "Nom de l'arxiu:"#define ogg_filename_txt "desconegut"#define ogg_filename_unknown "?"#define ogg_filesize "Tamany [en Octets]:"#define ogg_bitrate "Freqüencia [kbit/s]:"#define ogg_rate_hz "Freqüencia [Hz]:"#define ogg_channels "Canals:"#define ogg_hotkey_none "Cap"#define ogg_hotkey_camera "Tecla de la càmara"#define ogg_hotkey_browser "Tecla d'Internet"#define ogg_hotkey_power "Tecla Conexió/Desconexió"#define ogg_hotkey_flipopen "obrir la tapa (el teclat)"#define ogg_skin_default ""#define ogg_file_info "Informació de l'arxiu..."#define ogg_repeat_on "Repetir"#define ogg_repeat_off "Non Repetir"#define ogg_repeat2 "Repetir"#define ogg_shuffle_playlist "Ordre aleatori"#define ogg_find_files "Buscar nous arxius"#define ogg_skins "Interfícies"#define ogg_options_cascade "Opcions..."#define ogg_about_label "Sobre OggPlay..."#define ogg_exit_label "Sortir"#define ogg_prev_song "Previous song"#define ogg_next_song "Next song"#define ogg_stop "Stop"#define ogg_play "Play"#define ogg_pause "Pause"#define ogg_filescan_main_title "File discovery"#define ogg_filescan_title "Looking for ogg files"#define ogg_filescan_title_mmf "Looking for files"#define ogg_filescan_label2_mmf "Audio files found:" #define ogg_filescan_label1 "Directories scanned:"#define ogg_filescan_label2 "Number of .ogg found:"#ifdef PLAYLIST_SUPPORT#define ogg_filescan_label3 "Number of .m3u found:"#endif#define ogg_text_error_1 "COggButton: Error llegint l'imatge de la mascara"#define ogg_text_error_2 "COggCanvas: Error fent la conversió de la imatge de fons: "#define ogg_text_error_3 "COggPlayAppUi: No es pot establir la prioritat del procés: Err code "#define ogg_text_error_4 "COggPlayAppUi: Perdoni... No  es pot trobar el procés ¡¿?¿?!"#define ogg_text_error_5 "COggPlayAppUi: No es pot establir la prioritat del fil: Cód. error "#define ogg_text_error_6 "COggPlayAppUi: Perdoni... No es pot trobar el fil ¡¿?¿?!"#define ogg_text_error_7 "TOggPlayback: Error obrint el medi. Err code "#define ogg_text_error_8 "TOggPlayback: No heu especificat l'arxiu."#define ogg_text_error_9 "No és un fitxer OGG Vorbis?!"#define ogg_text_error_10 "Només es soporten arxius amb 1 o 2 canals."#define ogg_text_error_12 "Format d'audio no suportat."#define ogg_text_error_13 "només es suporten aquestes frecuencies: 11025,16000,22050,32000,44100,48000 Hz."#define ogg_text_error_14 "No es pot obrir aquest arxiu"#define ogg_text_error_15 "No hi ha cap arxiu carregat."#define ogg_text_error_16 "Codi d'error "#define ogg_text_error_17 "Error enviant dades a la memoria cau"#define ogg_text_error_18 "Error copiant dades a la memoria cau"#define ogg_text_error_19 "Error d'entrada "#define ogg_text_error_20 "Error"#define ogg_text_error_21 "COggCanvas: Error carregant l'imatge de fons."#define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "#define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "#define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."#define ogg_text_error_27 "This warning message can be disabled, from the options menu."#define ogg_text_error_28 "Cannot open directory" // To be translated#define ogg_text_string_1 "Actualitzant llista de fitxers..."#define ogg_text_string_2 "s'està escribint el fitxer de base de dades..."#define ogg_text_string_3 "Alarma activada"#define ogg_text_string_4 "No es pot establir la prioritat del procés: Cód. error "#define ogg_text_string_5 "Ordre aleatori"#define ogg_text_string_6 "(Títols)"#define ogg_text_string_7 "(Àlbums)"#define ogg_text_string_8 "(Autors)"#define ogg_text_string_9 "(Géneres)"#define ogg_text_string_10 "(Subcarpetes)"#define ogg_text_string_11 "(Arxius)"#ifdef PLAYLIST_SUPPORT#define ogg_text_string_12 "(playlists)"#define ogg_text_string_13 "(sense assignar)"#else#define ogg_text_string_12 "(sense assignar)"#endif// S60 Hotkey settings#define ogg_user_hotkey              "Hotkeys"#define ogg_format_text_fast_forward "Fast forward"#define ogg_format_text_rewind       "Rewind"#define ogg_format_text_page_up      "File list page up"#define ogg_format_text_page_down    "File list page down"#define ogg_format_text_next_song	 ogg_next_song#define ogg_format_text_prev_song	 ogg_prev_song#define ogg_settings                 "Settings"  // in the menu#define ogg_settings_title           "Oggplay Settings" // on top of the settings screen#define ogg_filescanmode             "File scan mode"//#define ogg_maneuvring_speed         "Auto Change Dir"#define ogg_autostart                "Autoplay on start"#define ogg_fullscan                 "Full Scan"#define ogg_mmcdir                   "E:\Ogg"//#define ogg_normal                   "Normal"//#define ogg_fast                     "Fast"#define ogg_on                       "On"#define ogg_off                      "Off"#define ogg_popup_on                 "Enabled"#define ogg_popup_off                "Disabled"#define ogg_back_dir                 "back"#define ogg_backspace                "Backspace"#define ogg_shift                    "Shift (no repeat)"#define ogg_warnings                 "Warnings"#define ogg_by                       " by "#define ogg_rsk_idle                 "Right Softkey / Idle "#define ogg_rsk_play                 "Right SK / Play mode"#define ogg_cba_back                 "Back"#define ogg_cba_clear                "Clear"#define ogg_cba_option               "Options"#define ogg_cba_modify               "Modify" // To be Translated#define ogg_cba_exit                 "Exit"#define ogg_cba_stop                 "Stop"#define ogg_cba_pause                "Pause"#define ogg_cba_play                 "Play"#define ogg_cba_play_pause            "Play / Pause" // To be Translated #define ogg_random_on                "Shuffle Play"#define ogg_random_off               "Normal Play"#define ogg_volume_boost             "Volume Boost"#define ogg_volume_boost_m12db        "-12dB Gain"#define ogg_volume_boost_m18db        "-18dB Gain"#define ogg_volume_boost_none        "No Extra Gain"#define ogg_volume_boost_6db         "6dB Gain"#define ogg_volume_boost_12db        "12dB Gain"#define ogg_boost_up                 "Volume boost up"#define ogg_boost_down               "Volume boost down"#define ogg_codec_selection          "Codecs"#define ogg_no_plugin_found          "No Plugin Found"#define ogg_codec_info_name          "Name"#define ogg_codec_info_supplier      "Supplier"#define ogg_codec_info_version       "Version"#define ogg_codec_info_UID           "UID"// S80 Specific strings#define ogg_softkeys                 "Softkeys"   // To be Translated #define ogg_cba_1                    "Softkey #1" // To be Translated #define ogg_cba_2                    "Softkey #2" // To be Translated #define ogg_cba_3                    "Softkey #3" // To be Translated #define ogg_cba_4                    "Softkey #4" // To be Translated #define ogg_cba_select               "Select"     // To be Translated #define ogg_cba_cancel               "Cancel"     // To be Translated #define ogg_playlist_entries         "Playlist entries:"#define ogg_cba_select_folder        "Folder"	//To be translated
+
+#define ogg_options_title "Opcions"
+#define ogg_hotkey "Tecla d'accés:"
+#define ogg_alarm "Alarma:"
+#define ogg_active "Activa:"
+#define ogg_about_oggplay "Sobre l'OggPlay"
+#define ogg_version_txt "Versió ???"
+#define ogg_c_author "(c) 2003 por Leif H. Wilden"
+#define ogg_link_txt "visita http://symbianoggplay.sourceforge.net per a més informació"
+#define ogg_vorbis_c "(c) códec Ogg/Vorbis per Xiph.org"
+#define ogg_translation "(c) códec Ogg/Vorbis per Xiph.org"
+#define ogg_port "Propietats del fitxer"
+#define ogg_file_prop "Nom de l'arxiu:"
+#define ogg_filename_txt "desconegut"
+#define ogg_filename_unknown "?"
+#define ogg_filesize "Tamany [en Octets]:"
+#define ogg_bitrate "Freqüencia [kbit/s]:"
+#define ogg_rate_hz "Freqüencia [Hz]:"
+#define ogg_channels "Canals:"
+#define ogg_hotkey_none "Cap"
+#define ogg_hotkey_camera "Tecla de la càmara"
+#define ogg_hotkey_browser "Tecla d'Internet"
+#define ogg_hotkey_power "Tecla Conexió/Desconexió"
+#define ogg_hotkey_flipopen "obrir la tapa (el teclat)"
+#define ogg_skin_default ""
+#define ogg_file_info "Informació de l'arxiu..."
+#define ogg_repeat_on "Repetir"
+#define ogg_repeat_off "Non Repetir"
+#define ogg_repeat2 "Repetir"
+#define ogg_shuffle_playlist "Ordre aleatori"
+#define ogg_find_files "Buscar nous arxius"
+#define ogg_skins "Interfícies"
+#define ogg_options_cascade "Opcions..."
+#define ogg_about_label "Sobre OggPlay..."
+#define ogg_exit_label "Sortir"
+#define ogg_prev_song "Previous song"
+#define ogg_next_song "Next song"
+#define ogg_stop "Stop"
+#define ogg_play "Play"
+#define ogg_pause "Pause"
+#define ogg_filescan_main_title "File discovery"
+#define ogg_filescan_title "Looking for ogg files"
+#define ogg_filescan_title_mmf "Looking for files"
+#define ogg_filescan_label2_mmf "Audio files found:" 
+#define ogg_filescan_label1 "Directories scanned:"
+#define ogg_filescan_label2 "Number of .ogg found:"
+#ifdef PLAYLIST_SUPPORT
+#define ogg_filescan_label3 "Number of .m3u found:"
+#endif
+#define ogg_text_error_1 "COggButton: Error llegint l'imatge de la mascara"
+#define ogg_text_error_2 "COggCanvas: Error fent la conversió de la imatge de fons: "
+#define ogg_text_error_3 "COggPlayAppUi: No es pot establir la prioritat del procés: Err code "
+#define ogg_text_error_4 "COggPlayAppUi: Perdoni... No  es pot trobar el procés ¡¿?¿?!"
+#define ogg_text_error_5 "COggPlayAppUi: No es pot establir la prioritat del fil: Cód. error "
+#define ogg_text_error_6 "COggPlayAppUi: Perdoni... No es pot trobar el fil ¡¿?¿?!"
+#define ogg_text_error_7 "TOggPlayback: Error obrint el medi. Err code "
+#define ogg_text_error_8 "TOggPlayback: No heu especificat l'arxiu."
+#define ogg_text_error_9 "No és un fitxer OGG Vorbis?!"
+#define ogg_text_error_10 "Només es soporten arxius amb 1 o 2 canals."
+#define ogg_text_error_12 "Format d'audio no suportat."
+#define ogg_text_error_13 "només es suporten aquestes frecuencies: 11025,16000,22050,32000,44100,48000 Hz."
+#define ogg_text_error_14 "No es pot obrir aquest arxiu"
+#define ogg_text_error_15 "No hi ha cap arxiu carregat."
+#define ogg_text_error_16 "Codi d'error "
+#define ogg_text_error_17 "Error enviant dades a la memoria cau"
+#define ogg_text_error_18 "Error copiant dades a la memoria cau"
+#define ogg_text_error_19 "Error d'entrada "
+#define ogg_text_error_20 "Error"
+#define ogg_text_error_21 "COggCanvas: Error carregant l'imatge de fons."
+#define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "
+#define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
+#define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
+#define ogg_text_error_27 "This warning message can be disabled, from the options menu."
+#define ogg_text_error_28 "Cannot open directory" // To be translated
+#define ogg_text_string_1 "Actualitzant llista de fitxers..."
+#define ogg_text_string_2 "s'està escribint el fitxer de base de dades..."
+#define ogg_text_string_3 "Alarma activada"
+#define ogg_text_string_4 "No es pot establir la prioritat del procés: Cód. error "
+#define ogg_text_string_5 "Ordre aleatori"
+#define ogg_text_string_6 "(Títols)"
+#define ogg_text_string_7 "(Àlbums)"
+#define ogg_text_string_8 "(Autors)"
+#define ogg_text_string_9 "(Géneres)"
+#define ogg_text_string_10 "(Subcarpetes)"
+#define ogg_text_string_11 "(Arxius)"
+#ifdef PLAYLIST_SUPPORT
+#define ogg_text_string_12 "(playlists)"
+#define ogg_text_string_13 "(sense assignar)"
+#else
+#define ogg_text_string_12 "(sense assignar)"
+#endif
+// S60 Hotkey settings
+#define ogg_user_hotkey              "Hotkeys"
+#define ogg_format_text_fast_forward "Fast forward"
+#define ogg_format_text_rewind       "Rewind"
+#define ogg_format_text_page_up      "File list page up"
+#define ogg_format_text_page_down    "File list page down"
+#define ogg_format_text_next_song	 ogg_next_song
+#define ogg_format_text_prev_song	 ogg_prev_song
+#define ogg_settings                 "Settings"  // in the menu
+#define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
+#define ogg_filescanmode             "File scan mode"
+//#define ogg_maneuvring_speed         "Auto Change Dir"
+#define ogg_autostart                "Autoplay on start"
+#define ogg_fullscan                 "Full Scan"
+#define ogg_mmcdir                   "E:\Ogg"
+//#define ogg_normal                   "Normal"
+//#define ogg_fast                     "Fast"
+#define ogg_on                       "On"
+#define ogg_off                      "Off"
+#define ogg_popup_on                 "Enabled"
+#define ogg_popup_off                "Disabled"
+#define ogg_back_dir                 "back"
+#define ogg_backspace                "Backspace"
+#define ogg_shift                    "Shift (no repeat)"
+#define ogg_warnings                 "Warnings"
+#define ogg_by                       " by "
+#define ogg_rsk_idle                 "Right Softkey / Idle "
+#define ogg_rsk_play                 "Right SK / Play mode"
+#define ogg_cba_back                 "Back"
+#define ogg_cba_clear                "Clear"
+#define ogg_cba_option               "Options"
+#define ogg_cba_modify               "Modify" // To be Translated
+#define ogg_cba_exit                 "Exit"
+#define ogg_cba_stop                 "Stop"
+#define ogg_cba_pause                "Pause"
+#define ogg_cba_play                 "Play"
+#define ogg_cba_play_pause            "Play / Pause" // To be Translated 
+#define ogg_random_on                "Shuffle Play"
+#define ogg_random_off               "Normal Play"
+#define ogg_volume_boost             "Volume Boost"
+#define ogg_volume_boost_m12db        "-12dB Gain"
+#define ogg_volume_boost_m18db        "-18dB Gain"
+#define ogg_volume_boost_m24db        "-24dB Gain"
+#define ogg_volume_boost_none        "No Extra Gain"
+#define ogg_volume_boost_6db         "6dB Gain"
+#define ogg_volume_boost_12db        "12dB Gain"
+#define ogg_boost_up                 "Volume boost up"
+#define ogg_boost_down               "Volume boost down"
+#define ogg_codec_selection          "Codecs"
+#define ogg_no_plugin_found          "No Plugin Found"
+#define ogg_codec_info_name          "Name"
+#define ogg_codec_info_supplier      "Supplier"
+#define ogg_codec_info_version       "Version"
+#define ogg_codec_info_UID           "UID"
+// S80 Specific strings
+#define ogg_softkeys                 "Softkeys"   // To be Translated 
+#define ogg_cba_1                    "Softkey #1" // To be Translated 
+#define ogg_cba_2                    "Softkey #2" // To be Translated 
+#define ogg_cba_3                    "Softkey #3" // To be Translated 
+#define ogg_cba_4                    "Softkey #4" // To be Translated 
+#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"     // To be Translated 
+#define ogg_playlist_entries         "Playlist entries:"
+#define ogg_cba_select_folder        "Folder"	//To be translated
+// Multi thread playback strings
+#define ogg_buffering_mode "Buffering mode"
+#define ogg_thread_priority "Thread priority" 
+
+#define ogg_playback                 "Playback"
+#define ogg_playback_title           "Playback options"

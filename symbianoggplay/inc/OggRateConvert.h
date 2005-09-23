@@ -9,6 +9,7 @@ public:
 
 
 typedef enum {
+    EMinus24dB,
     EMinus18dB,
     EMinus12dB,
     ENoGain,
