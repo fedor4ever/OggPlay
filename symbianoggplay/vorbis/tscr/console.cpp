@@ -44,8 +44,8 @@ LOCAL_C void mainL()
     vorbisDecoder =  CIvorbisTest::NewL(CIvorbisTest::EWriteFile);
     CleanupStack::PushL( vorbisDecoder );
 
-    vorbisDecoder->SetOutputFileL( _L8("C:\\pcm.out") );
-    vorbisDecoder->OpenFileL( _L8( "C:\\aFile.ogg" ) );
+    vorbisDecoder->SetOutputFileL(_L("C:\\pcm.out"));
+    vorbisDecoder->OpenFileL(_L( "C:\\aFile.ogg"));
 
     while ( vorbisDecoder->FillSampleBufferL() > 0);
 
@@ -60,7 +60,7 @@ LOCAL_C void mainL()
     vorbisDecoder =  CIvorbisTest::NewL(CIvorbisTest::EStreamAudio);
     CleanupStack::PushL( vorbisDecoder );
 
-    vorbisDecoder->OpenFileL( _L8( "C:\\aFile.ogg" ) );
+    vorbisDecoder->OpenFileL(_L( "C:\\aFile.ogg"));
 
     // For streaming, we need the active object framework
     CActiveScheduler::Start();

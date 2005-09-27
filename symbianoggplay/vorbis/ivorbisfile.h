@@ -23,7 +23,6 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-#include <stdio.h>
 #include "ivorbiscodec.h"
 
 #define CHUNKSIZE 1024
@@ -38,7 +37,7 @@ extern "C"
  * unseekable
  */
 typedef struct {
-  size_t (*read_func)  (void *ptr, size_t size, size_t nmemb, void *datasource);
+  size_t (*read_func)  (void *ptr, size_t size, void *datasource);
   int    (*seek_func)  (void *datasource, ogg_int64_t offset, int whence);
   int    (*close_func) (void *datasource);
   long   (*tell_func)  (void *datasource);
@@ -91,12 +90,22 @@ typedef struct OggVorbis_File {
 #define IMPORTED IMPORT_C
 #endif
 
+#ifndef SEEK_SET
+#define	SEEK_SET	0	/* set file offset to offset */
+#endif
+#ifndef SEEK_CUR
+#define	SEEK_CUR	1	/* set file offset to current plus offset */
+#endif
+#ifndef SEEK_END
+#define	SEEK_END	2	/* set file offset to EOF plus offset */
+#endif
+
 IMPORTED int ov_clear(OggVorbis_File *vf);
-IMPORTED int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
+IMPORTED int ov_open(void *f,OggVorbis_File *vf,char *initial,long ibytes);
 IMPORTED int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
 
-IMPORTED int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
+IMPORTED int ov_test(void *f,OggVorbis_File *vf,char *initial,long ibytes);
 IMPORTED int ov_test_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
 IMPORTED int ov_test_open(OggVorbis_File *vf);

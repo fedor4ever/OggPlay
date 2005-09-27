@@ -24,21 +24,24 @@ void CIvorbisTest::ConstructL(ETestType aType)
         {
         iOutputStream =  CMdaAudioOutputStream::NewL(*this);
         }
+
+	User::LeaveIfError(iFs.Connect());
+	}
+
+void CIvorbisTest::SetOutputFileL(const TDesC& aFileName)
+    {
+	delete iFileOut ; iFileOut = NULL;
+
+    iFileOut = new(ELeave) RFile;
+	User::LeaveIfError(iFileOut->Open(iFs, aFileName, EFileWrite));
     }
 
-void CIvorbisTest::SetOutputFileL(const TDesC8 &aFileName)
+void CIvorbisTest::OpenFileL(const TDesC& aFileName)
     {
-    iFileOut = fopen( reinterpret_cast <const char *> ( aFileName.Ptr() ),"w");
-    }
-
-void CIvorbisTest::OpenFileL(const TDesC8 &aFileName)
-    {
-    FILE * aFile;
-    char * filename ;
-    filename = (char *) aFileName.Ptr();
-    aFile = fopen((char *) aFileName.Ptr() , "r+");
+    RFile* file = new(ELeave) RFile;
+	User::LeaveIfError(file->Open(iFs, aFileName, EFileShareReadersOnly));
     
-    if(ov_open(aFile, &iVf, NULL, 0) < 0) {
+    if(ov_open(file, &iVf, NULL, 0) < 0) {
         fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
         User::Leave(KErrNotSupported);
         }
@@ -94,7 +97,8 @@ void CIvorbisTest::OpenFileL(const TDesC8 &aFileName)
         default:
             User::Leave(KErrNotSupported);
         }
-    TMdaAudioDataSettings settings;
+
+	TMdaAudioDataSettings settings;
     settings.Query();
     fprintf(stderr,"defaults %x\n", settings.iCaps);
     
@@ -107,12 +111,13 @@ void CIvorbisTest::OpenFileL(const TDesC8 &aFileName)
         fprintf(stderr,"volume:%i\n", settings.iVolume );
         iOutputStream->Open(&settings);
         }
+
+	delete file;
     }
 
 
 int CIvorbisTest::FillSampleBufferL()
     {
-
     // Fill one buffer of PCM samples
 
     int current_section;
@@ -166,7 +171,7 @@ void CIvorbisTest::BufferFullL(TDes8 &aBuffer)
             iOutputStream->WriteL( aBuffer );
             break;
         case EWriteFile:
-            fwrite(aBuffer.Ptr(),1,aBuffer.Length(),iFileOut);
+            iFileOut->Write(aBuffer);
             break;
         }
     }
@@ -179,15 +184,15 @@ void CIvorbisTest::EndOfFileL()
 
 CIvorbisTest:: ~CIvorbisTest()
     {
-    
     /* cleanup */
     ov_clear(&iVf);
     
     fprintf(stderr,"Done.\n");
-    
-    CloseSTDLIB();
-    delete( iOutputStream );
-    
+   	CloseSTDLIB();
+
+    delete iOutputStream;
+	delete iFileOut;
+	iFs.Close();
     }
 
 

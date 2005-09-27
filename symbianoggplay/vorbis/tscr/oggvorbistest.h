@@ -1,10 +1,9 @@
 #include <e32std.h>
 #include <e32base.h>
+#include <f32file.h>
 #include <mdaaudiooutputstream.h>
 #include <ivorbiscodec.h>
 #include <ivorbisfile.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <MdaAudioSampleEditor.h>
 
 class CIvorbisTest: public CBase, public MMdaAudioOutputStreamCallback
@@ -15,11 +14,11 @@ class CIvorbisTest: public CBase, public MMdaAudioOutputStreamCallback
             EStreamAudio } ETestType;
         
         static CIvorbisTest * NewL(ETestType aType);
-        void OpenFileL(const TDesC8 &aFileName);
+        void OpenFileL(const TDesC& aFileName);
         void EndOfFileL();
-        void BufferFullL(TDes8 & aBuffer);
+        void BufferFullL(TDes8& aBuffer);
         int FillSampleBufferL();
-        void SetOutputFileL(const TDesC8 & aFileName);
+        void SetOutputFileL(const TDesC& aFileName);
 
         // Destruction
         ~CIvorbisTest();
@@ -27,14 +26,14 @@ class CIvorbisTest: public CBase, public MMdaAudioOutputStreamCallback
         void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
 
     private:
+        void ConstructL(ETestType aType);
+
         void MaoscPlayComplete(TInt aError) ;
         void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer) ;
         void MaoscOpenComplete(TInt aError) ;
         
-        
-        void ConstructL(ETestType aType);
-        
-        CMdaAudioOutputStream *iOutputStream;
+	private:
+		CMdaAudioOutputStream *iOutputStream;
         
         OggVorbis_File iVf;
         TBuf8<4096> iPcmout1;    
@@ -44,9 +43,9 @@ class CIvorbisTest: public CBase, public MMdaAudioOutputStreamCallback
         TInt iRate, iNbChannels;
         ETestType iTestType;
 
-        FILE * iFileOut;
+        RFile* iFileOut;
         CMdaAudioRecorderUtility *iPlayer;
-        
-        TMdaAudioDataSettings audioSets;
 
+        TMdaAudioDataSettings audioSets;
+		RFs iFs;
     };

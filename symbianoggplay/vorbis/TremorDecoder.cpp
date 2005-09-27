@@ -26,6 +26,10 @@
 #include <utf.h>
 #include <f32file.h>
 
+CTremorDecoder::CTremorDecoder(RFs& aFs)
+: iFs(aFs)
+{
+}
 
 CTremorDecoder::~CTremorDecoder() 
 {
@@ -37,7 +41,7 @@ int CTremorDecoder::Clear()
   return ov_clear(&iVf);
 }
 
-int CTremorDecoder::Open(FILE* f,const TDesC& /*aFilename*/) 
+int CTremorDecoder::Open(RFile* f,const TDesC& /*aFilename*/) 
 {
   Clear();
   int ret=ov_open(f, &iVf, NULL, 0);
@@ -47,7 +51,7 @@ int CTremorDecoder::Open(FILE* f,const TDesC& /*aFilename*/)
   return ret;
 }
 
-int CTremorDecoder::OpenInfo(FILE* f,const TDesC& /*aFilename*/) 
+int CTremorDecoder::OpenInfo(RFile* f,const TDesC& /*aFilename*/) 
 {
   Clear();
   int ret=ov_test(f, &iVf, NULL, 0);
@@ -57,7 +61,7 @@ int CTremorDecoder::OpenInfo(FILE* f,const TDesC& /*aFilename*/)
   return ret;
 }
 
-int CTremorDecoder::Close(FILE*) 
+int CTremorDecoder::Close()
 {
   return Clear();
 }
@@ -76,9 +80,10 @@ void CTremorDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& 
   aAlbum.SetLength(0);
   aGenre.SetLength(0);
   aTrackNumber.SetLength(0);
+
+  TBuf<256> buf;
   while (*ptr) {
     char* s= *ptr;
-    TBuf<256> buf;
     GetString(buf,s);
     buf.UpperCase();
     if (buf.Find(_L("ARTIST="))==0) GetString(aArtist, s+7); 
@@ -103,14 +108,11 @@ void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)
   TInt i= j_code((char*)aStr,strlen(aStr));
   if (i==BIG5_CODE) {
     CCnvCharacterSetConverter* conv= CCnvCharacterSetConverter::NewL();
-    RFs theRFs;
-    theRFs.Connect();
-    CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, theRFs);
+    CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, iFs);
     if (a==CCnvCharacterSetConverter::EAvailable) {
       TInt theState= CCnvCharacterSetConverter::KStateDefault;
       conv->ConvertToUnicode(aBuf, p, theState);
     }
-    theRFs.Close();
     delete conv;
   }
 #endif
@@ -148,16 +150,15 @@ void CTremorDecoder::Setposition(TInt64 aPosition)
 
 TInt64 CTremorDecoder::TimeTotal()
 {
-  
   TInt64 iTime;
-  
+
   ogg_int64_t pos(0);
   pos= ov_time_total(&iVf,-1);
   unsigned int hi(0);
   iTime.Set(hi,(TInt)pos);
-  
+
   return iTime;
-  
+
 }
 
 TInt CTremorDecoder::FileSize()

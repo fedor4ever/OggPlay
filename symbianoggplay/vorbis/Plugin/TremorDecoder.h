@@ -20,20 +20,21 @@
 #define TREMORDECODER_H
 
 #include <e32base.h>
-#include <stdio.h>
 #include "OggPlayDecoder.h"
 #include "ivorbisfile.h"
 
 
+class RFs;
 class CTremorDecoder: public CBase, public MDecoder
 {
 public:
+  CTremorDecoder(RFs& aFs);
   ~CTremorDecoder();
   TInt Clear();
-  TInt Open(FILE* f,const TDesC& aFilename=_L(""));
-  TInt OpenInfo(FILE* f,const TDesC& aFilename=_L(""));
+  TInt Open(RFile* f,const TDesC& aFilename=_L(""));
+  TInt OpenInfo(RFile* f,const TDesC& aFilename=_L(""));
   TInt Read(TDes8& aBuffer,int Pos);
-  TInt Close(FILE*);
+  TInt Close();
 
   TInt Channels();
   TInt Rate();
@@ -53,11 +54,11 @@ private:
 public: 
 
 private:
-  TInt                     iCurrentSection; // used in the call to ov_read
-  OggVorbis_File   iVf;
+  TInt iCurrentSection; // used in the call to ov_read
+  OggVorbis_File iVf;
   vorbis_info *vi;
-  FILE* iInputFp;
-};
 
+  RFs& iFs;
+};
 
 #endif

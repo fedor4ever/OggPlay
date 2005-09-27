@@ -15,9 +15,10 @@ SOURCE        mdct.c block.c window.c \
 	          vorbisfile.c
 
 SOURCE        microsoftInternal.c
+SOURCE        Symbian.cpp
 
 USERINCLUDE   .
 SYSTEMINCLUDE \Epoc32\include
 SYSTEMINCLUDE \Epoc32\include\libc
 
-LIBRARY       euser.lib estlib.lib
+LIBRARY       euser.lib estlib.lib efsrv.lib

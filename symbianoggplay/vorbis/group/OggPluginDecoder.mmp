@@ -34,6 +34,7 @@ SOURCE        mdct.c block.c window.c \
 	          vorbisfile.c
 
 SOURCE        microsoftInternal.c
+SOURCE        Symbian.cpp
 
 RESOURCE      Plugin\101FF683.RSS
 

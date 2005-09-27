@@ -19,21 +19,24 @@
 #ifndef OGGPLAYDECODER_H
 #define OGGPLAYDECODER_H
 
-#include <stdio.h>
-
+class RFile;
 class MDecoder 
 {
 public:
   virtual ~MDecoder() { };
+
   // Initialize Decoder settings
   virtual TInt Clear()=0;
+
   // Open file and get ready to decode
-  virtual TInt Open(FILE* f, const TDesC& aFilename=_L(""))=0;
+  virtual TInt Open(RFile* f, const TDesC& aFilename=_L(""))=0;
+
   // Internal cleanup
-  virtual TInt Close(FILE* f)=0;
+  virtual TInt Close()=0;
+
   // Open file with just enough information to start reading tag info 
   // and get basic file information like channels, bitrate etc.
-  virtual TInt OpenInfo(FILE* f, const TDesC& aFilename=_L(""))=0;
+  virtual TInt OpenInfo(RFile* f, const TDesC& aFilename=_L(""))=0;
 
   // Parse tag information and put it in the provided buffers.
   virtual void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, 

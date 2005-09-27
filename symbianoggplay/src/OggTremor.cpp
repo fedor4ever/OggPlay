@@ -118,10 +118,9 @@ MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
   MDecoder* decoder = NULL;
 
   TParsePtrC p( aFileName);
-
   if(p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0) {
-      decoder=new(ELeave)CTremorDecoder;
-  } 
+      decoder=new(ELeave)CTremorDecoder(iFs);
+  }
 #if defined(MP3_SUPPORT)
   else if(p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0) {
     decoder=new(ELeave)CMadDecoder;
@@ -141,8 +140,10 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   TRACEF(COggLog::VA(_L("OPEN") ));
   if (iFile)
   {
-    iDecoder->Close(iFile);
-    fclose(iFile);
+    iDecoder->Close();
+    iFile->Close();
+	
+	delete iFile;
 	iFile = NULL;
   }
 
@@ -154,12 +155,12 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     return -100;
   }
 
-  // add a zero terminator
-  TBuf<512> myname(aFileName);
-  myname.Append((wchar_t)0);
-
-  if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
+  iFile = new(ELeave) RFile;
+  if ((iFile->Open(iFs, aFileName, EFileShareReadersOnly)) != KErrNone)
+  {
+    delete iFile;
     iFile = NULL;
+
     //OGGLOG.Write(_L("Oggplay: File open returns 0 (Error20 Error14)"));
     TRACE(COggLog::VA(_L("COggPlayback::Open(%S). Failed"), &aFileName ));
     iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
@@ -169,12 +170,14 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   delete iDecoder;
   iDecoder = NULL;
   iDecoder = GetDecoderL(aFileName);
-  if(iDecoder->Open(iFile,myname) < 0) {
-    iDecoder->Close(iFile);
-    fclose(iFile);
-    iFile = NULL;
-    //OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
-
+  if(iDecoder->Open(iFile, aFileName) < 0)
+  {
+    iDecoder->Close();
+    iFile->Close();
+	delete iFile;
+	iFile = NULL;
+    
+	//OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
     iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
     return -102;
   }
@@ -186,23 +189,18 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   iChannels=iDecoder->Channels();
   iTime=iDecoder->TimeTotal();
   iBitRate=iDecoder->Bitrate();
-
-
   iFileSize= iDecoder->FileSize();
-
-//  TRACEF(COggLog::VA(_L("Samplingrate:%d"), iRate ));
-//  TRACEF(COggLog::VA(_L("Channels:%d"), iChannels));
-//  TRACEF(COggLog::VA(_L("Bitrate:%d"), iBitRate ));
-
-  TInt err= SetAudioCaps(iDecoder->Channels(),iDecoder->Rate());
+  
+  TInt err= SetAudioCaps(iDecoder->Channels(), iDecoder->Rate());
   if (err == KErrNone)
 	iState= EOpen;
   else
   {
-    
-  iDecoder->Close(iFile);
-  fclose(iFile);
-  iFile = NULL;
+	iDecoder->Close();
+	iFile->Close();
+  
+	delete iFile;
+	iFile = NULL;
   }
 
   return err;
@@ -255,7 +253,6 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   TBool ConvertRate = EFalse;
 
   TInt usedChannels = theChannels;
-  
   if (!(iAudioCaps & TMdaAudioDataSettings::EChannelsStereo) && (theChannels==2) )
   {
       // Only Mono is supported by this phone, we need to mix the 2 channels together
@@ -271,9 +268,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
     return -100;
   }
 
- 
   TInt usedRate = theRate;
-
   if (theRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
   else if (theRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
   else if (theRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
@@ -300,11 +295,9 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
    }
   
   if (ConvertChannel || ConvertRate)
-  {
       SamplingRateSupportedMessage(ConvertRate, theRate, ConvertChannel, theChannels);
-   }
 
-  iOggSampleRateConverter->Init(this,KBufferSize,(TInt) (0.75*KBufferSize), theRate,usedRate, theChannels,usedChannels);
+  iOggSampleRateConverter->Init(this, KBufferSize, (TInt) (0.75*KBufferSize), theRate, usedRate, theChannels, usedChannels);
 
   TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
   if (error)
@@ -464,13 +457,8 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 {
   if (aFileName.Length()==0) return -100;
 
-  FILE* f;
-
-  // add a zero terminator
-  TBuf<512> myname(aFileName);
-  myname.Append((wchar_t)0);
-
-  if ((f=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
+  RFile* f = new RFile;
+  if ((f->Open(iFs, aFileName, EFileShareReadersOnly)) != KErrNone) {
     if (!silent) {
       TBuf<128> buf;
       CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_14);
@@ -480,11 +468,14 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   }
 
   MDecoder* decoder = GetDecoderL(aFileName);
-  if(decoder->OpenInfo(f,myname) < 0) {
-    decoder->Close(f);
+  if(decoder->OpenInfo(f, aFileName) < 0) {
+    decoder->Close();
 	delete decoder;
-    fclose(f);
-    if (!silent) {
+
+	f->Close();
+	delete f;
+
+	if (!silent) {
        iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_9);
     }
     return -102;
@@ -496,9 +487,11 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
   iChannels = decoder->Channels();
   iBitRate = decoder->Bitrate();
 
-  decoder->Close(f); 
+  decoder->Close(); 
   delete decoder;
-  fclose(f);
+
+  f->Close();
+  delete f;
 
   return KErrNone;
 }
@@ -525,7 +518,7 @@ void COggPlayback::Play()
   if (iMachineUid != EMachineUid_SendoX) // Sendo X doesn't need this fix. 
       iFirstBuffers = 4; 
 
-#ifdef DELAY_AUDIO_STREAMING_START
+#if defined(DELAY_AUDIO_STREAMING_START)
   // Also to avoid the first buffer problem, wait a short time before streaming, 
   // so that Application drawing have been done. Processor should then
   // be fully available for doing audio thingies.
@@ -560,11 +553,15 @@ void COggPlayback::Stop()
 
   iStream->Stop();
   iState= EClosed;
-  if (iFile) {
-    iDecoder->Close(iFile);
-    fclose(iFile);
+  if (iFile)
+  {
+    iDecoder->Close();
+    iFile->Close();
+
+	delete iFile;
 	iFile = NULL;
   }
+
   ClearComments();
   iTime= 0;
   iEof= EFalse;
@@ -578,7 +575,7 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 {
     if (iEof)
         return(KErrNotReady);
-    TInt len = aBuffer.Length();
+
 #ifdef MDCT_FREQ_ANALYSER
     if (iTimeWithoutFreqCalculation > iTimeWithoutFreqCalculationLim )
 
@@ -596,7 +593,8 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
     }
 #endif
     
-    TInt ret=iDecoder->Read(aBuffer,len); 
+    TInt len = aBuffer.Length();
+    TInt ret = iDecoder->Read(aBuffer,len); 
     if (ret >0)
     {
         aBuffer.SetLength(len + ret);
@@ -845,6 +843,7 @@ void COggPlayback::SetVolumeGain(TGainType aGain)
 {
     iOggSampleRateConverter->SetVolumeGain(aGain);
 }
+
 
 TInt COggAudioCapabilityPoll::PollL()
     {

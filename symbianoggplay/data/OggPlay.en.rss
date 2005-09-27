@@ -171,6 +171,10 @@
 #define ogg_playback                 "Playback"
 #define ogg_playback_title           "Playback options"
 
+#define ogg_buffering_mode_multi     "Multi thread"
+#define ogg_buffering_mode_single    "Single thread"
+#define ogg_buffering_mode_none      "No buffering"
+
 // S80 Specific strings
 #define ogg_softkeys_idle            "Idle Softkeys"
 #define ogg_softkeys_play            "PlayMode Softkeys"

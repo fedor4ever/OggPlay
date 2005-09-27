@@ -25,12 +25,21 @@
 #  define LOOKUP_T const ogg_int32_t
 #endif
 
+#ifndef _STDDEF_H_
+typedef unsigned int size_t;
+#endif
+
+void* OggPlayAlloc(size_t);
+void* OggPlayCalloc(size_t, size_t);
+void* OggPlayReAlloc(void*, size_t);
+void OggPlayFree(void*);
+
 /* make it easy on the folks that want to compile the libs with a
    different malloc than stdlib */
-#define _ogg_malloc  malloc
-#define _ogg_calloc  calloc
-#define _ogg_realloc realloc
-#define _ogg_free    free
+#define _ogg_malloc  OggPlayAlloc
+#define _ogg_calloc  OggPlayCalloc
+#define _ogg_realloc OggPlayReAlloc
+#define _ogg_free    OggPlayFree
 
 
 #ifndef chmsg

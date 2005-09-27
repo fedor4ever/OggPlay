@@ -34,12 +34,9 @@
 #include "Plugin\MMFOggPlayStreaming.h"
 #include "OggPlayDecoder.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 // FORWARD DECLARATIONS
-
 class COggSource;
+class RFile;
 
 // CLASS DECLARATION
 
@@ -58,7 +55,7 @@ class COggPlayController :	public CMMFController,
         * Two-phased constructor.
         */
         // The decoder passed in the NewL is owned and will be destroyed by the controller
-		static COggPlayController* NewL(MDecoder *aDecoder);
+		static COggPlayController* NewL(RFs* aFs, MDecoder *aDecoder);
 
         /**
         * Destructor.
@@ -67,7 +64,7 @@ class COggPlayController :	public CMMFController,
 
 	private:
 
-        COggPlayController(MDecoder *aDecoder);
+        COggPlayController(RFs* aFs, MDecoder *aDecoder);
 		/**
         * Symbian 2nd phase constructor.
         */
@@ -201,17 +198,14 @@ class COggPlayController :	public CMMFController,
         void MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration);
         void MapdSetBalanceL(TInt aBalance);
         void MapdGetBalanceL(TInt& aBalance);
-        void MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart,
-            const TTimeIntervalMicroSeconds& aEnd);
+        void MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart, const TTimeIntervalMicroSeconds& aEnd);
         void MapcDeletePlaybackWindowL();
         void MapcGetLoadingProgressL(TInt& aPercentageComplete);
         
         //From MOggSampleRateFillBuffer
-
         TInt GetNewSamples(TDes8 &aBuffer);
 
     private: // Internal Functions
-
         void OpenFileL(const TDesC& aFile, TBool aOpenForInfo);
         void GetFrequenciesL(TMMFMessage& aMessage );
 
@@ -235,7 +229,7 @@ class COggPlayController :	public CMMFController,
 
         // OggTremor stuff
         TFileName iFileName;
-        FILE *iFile;
+        RFile *iFile;
         
         enum { KMaxStringLength = 256 };
         TBuf<KMaxStringLength>   iAlbum;
@@ -246,6 +240,7 @@ class COggPlayController :	public CMMFController,
         TTimeIntervalMicroSeconds iFileLength;
 
         MDecoder *iDecoder;
+		RFs* iFs;
         
         CMMFOggPlayStreaming * iMMFStreaming;
         CMMFAudioOutput * iAudioOutput;

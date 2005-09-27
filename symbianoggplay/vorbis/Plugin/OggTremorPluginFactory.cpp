@@ -31,8 +31,31 @@
 //
 COggPlayController* NewOggTremorControllerL()
     {
-    CTremorDecoder * decoder = new (ELeave) CTremorDecoder;
-    return COggPlayController::NewL(decoder);
+	// Create the file server session
+	RFs* fs = new RFs;
+	if (!fs)
+		User::Leave(KErrNoMemory);
+
+	// Connect to the file server
+	TInt err = fs->Connect();
+	if (err != KErrNone)
+	{
+		delete fs;
+		User::Leave(err);
+	}
+
+	// Create the decoder
+    CTremorDecoder* decoder = new CTremorDecoder(*fs);
+	if (!decoder)
+	{
+		fs->Close();
+		delete fs;
+
+		User::Leave(KErrNoMemory);
+	}
+
+	// Create the controller, transferring ownership of the file server session and decoder
+    return COggPlayController::NewL(fs, decoder);
     }
 
 const TImplementationProxy ImplementationTable[] =
@@ -57,8 +80,31 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
 #else
 EXPORT_C COggPlayController* NewOggTremorControllerL()
     {
-    CTremorDecoder * decoder = new (ELeave) CTremorDecoder;
-    return COggPlayController::NewL(decoder);
+	// Create the file server session
+	RFs* fs = new RFs;
+	if (!fs)
+		User::Leave(KErrNoMemory);
+
+	// Connect to the file server
+	TInt err = fs->Connect();
+	if (err != KErrNone)
+	{
+		delete fs;
+		User::Leave(err);
+	}
+
+	// Create the decoder
+    CTremorDecoder* decoder = new CTremorDecoder(*fs);
+	if (!decoder)
+	{
+		fs->Close();
+		delete fs;
+
+		User::Leave(KErrNoMemory);
+	}
+
+	// Create the controller, transferring ownership of the file server session and decoder
+    return COggPlayController::NewL(fs, decoder);
     }
 #endif
 

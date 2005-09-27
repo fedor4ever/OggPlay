@@ -20,8 +20,6 @@
 #pragma warning( disable : 4706 ) // Assignment within conditional expression
 #include <e32def.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
 #include <string.h>
 #include <math.h>
 
@@ -37,6 +35,12 @@
 #else
 #define EXPORTED EXPORT_C
 #endif
+
+size_t OggPlayRead(void*, size_t, void*);
+int OggPlaySeek(void*, long, int);
+int OggPlayTell(void*);
+int OggPlayClose(void*);
+
 
 /* A 'chained bitstream' is a Vorbis bitstream that contains more than
    one logical bitstream arranged end to end (the only form of Ogg
@@ -70,12 +74,11 @@
 
 /* read a little more data from the file/pipe into the ogg_sync framer */
 static long _get_data(OggVorbis_File *vf){
-  errno=0;
   if(vf->datasource){
     unsigned char *buffer=ogg_sync_bufferin(vf->oy,CHUNKSIZE);
-    long bytes=(vf->callbacks.read_func)(buffer,1,CHUNKSIZE,vf->datasource);
+    long bytes=(vf->callbacks.read_func)(buffer,CHUNKSIZE,vf->datasource);
     if(bytes>0)ogg_sync_wrote(vf->oy,bytes);
-    if(bytes==0 && errno)return(-1);
+    if(bytes<0)return(-1);
     return(bytes);
   }else
     return(0);
@@ -669,12 +672,12 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 
 /* if, eg, 64 bit stdio is configured by default, this will build with
    fseek64 */
-static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
+static int _fseek64_wrap(void *f,ogg_int64_t off,int whence){
   if(f==NULL)return(-1);
   if (off >0x7FFFFFFF)
       // Overflow.
       return(-1);
-  return fseek(f, (long) off,whence);
+  return OggPlaySeek(f, (long) off,whence);
 }
 
 static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
@@ -779,12 +782,12 @@ EXPORTED int ov_open_callbacks(void *f,OggVorbis_File *vf,char *initial,long iby
   return _ov_open2(vf);
 }
 
-EXPORTED int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
+EXPORTED int ov_open(void *f,OggVorbis_File *vf,char *initial,long ibytes){
   ov_callbacks callbacks = {
-    (size_t (*)(void *, size_t, size_t, void *))  fread,
-    (int (*)(void *, ogg_int64_t, int))              _fseek64_wrap,
-    (int (*)(void *))                             fclose,
-    (long (*)(void *))                            ftell
+    (size_t (*)(void *, size_t, void *))  OggPlayRead,
+    (int (*)(void *, ogg_int64_t, int))   _fseek64_wrap,
+    (int (*)(void *))                     OggPlayClose,
+    (long (*)(void *))                    OggPlayTell
   };
 
   return ov_open_callbacks((void *)f, vf, initial, ibytes, callbacks);
@@ -801,15 +804,15 @@ EXPORTED int ov_test_callbacks(void *f,OggVorbis_File *vf,char *initial,long iby
   return _ov_open1(f,vf,initial,ibytes,callbacks);
 }
 
-EXPORTED int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
+EXPORTED int ov_test(void *f,OggVorbis_File *vf,char *initial,long ibytes){
   ov_callbacks callbacks = {
-    (size_t (*)(void *, size_t, size_t, void *))  fread,
-    (int (*)(void *, ogg_int64_t, int))              _fseek64_wrap,
-    (int (*)(void *))                             fclose,
-    (long (*)(void *))                            ftell
+    (size_t (*)(void *, size_t, void *))  OggPlayRead,
+    (int (*)(void *, ogg_int64_t, int))   _fseek64_wrap,
+    (int (*)(void *))                     OggPlayClose,
+    (long (*)(void *))                    OggPlayTell
   };
 
-  return ov_test_callbacks((void *)f, vf, initial, ibytes, callbacks);
+  return ov_test_callbacks(f, vf, initial, ibytes, callbacks);
 }
   
 EXPORTED int ov_test_open(OggVorbis_File *vf){

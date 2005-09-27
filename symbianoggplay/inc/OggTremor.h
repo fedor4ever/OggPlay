@@ -68,7 +68,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   
  public:
   
-  COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver=0);
+  COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver = NULL);
   virtual ~COggPlayback();
   void ConstructL();
 
@@ -157,12 +157,10 @@ typedef struct
   TInt iTimeWithoutFreqCalculationLim;
 #endif
 
-  // communication with the decoder:
-  //-----------------------------------------
-
-  FILE*                    iFile;
-  TBool                    iEof;            // true after ov_read has encounted the eof
- 
+  // Communication with the decoder
+  // ------------------------------
+  RFile*                   iFile;
+  TBool                     iEof; // true after ov_read has encounted the eof
 
   MDecoder*             iDecoder;
 

@@ -20,6 +20,7 @@
 #include <charconv.h>
 #include <utf.h>
 #include <string.h>
+#include <stdlib.h>
 #include "OggLog.h"
 #include "Plugin\ImplementationUIDs.hrh"
 #include "AdvancedStreaming.h"
@@ -33,19 +34,31 @@
 #define PRINT()
 #endif
 
-COggPlayController* COggPlayController::NewL(MDecoder * aDecoder)
+COggPlayController* COggPlayController::NewL(RFs* aFs, MDecoder *aDecoder)
 {
     PRINT("COggPlayController::NewL()");
-    COggPlayController* self = new(ELeave) COggPlayController(aDecoder);
+
+	// Take ownership of the file session and the decoder
+    COggPlayController* self = new COggPlayController(aFs, aDecoder);
+	if (!self)
+	{
+		delete aDecoder;
+
+		aFs->Close();
+		delete aFs;
+
+		User::Leave(KErrNoMemory);
+	}
+
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop();
     return self;
 }
 
-COggPlayController::COggPlayController(MDecoder *aDecoder)
+COggPlayController::COggPlayController(RFs* aFs, MDecoder *aDecoder)
+: iFs(aFs), iDecoder(aDecoder)
 {
-    iDecoder = aDecoder;
 }
 
 COggPlayController::~COggPlayController()
@@ -57,8 +70,17 @@ COggPlayController::~COggPlayController()
     delete iOggSource;
     if (iAudioOutput)
         iAudioOutput->SinkThreadLogoff();
-    iDecoder->Clear();
-    delete iDecoder;
+
+	iDecoder->Clear();
+	if (iFile)
+		iFile->Close();
+
+	delete iFile;
+	delete iDecoder;
+
+	iFs->Close();
+	delete iFs;
+
     CloseSTDLIB();    	// Just in case
     PRINT("COggPlayController::~COggPlayController Out");
     COggLog::Exit();  // MUST BE AFTER LAST TRACE, otherwise will leak memory
@@ -68,8 +90,7 @@ void COggPlayController::ConstructL()
 {
     PRINT("COggPlayController::ConstructL() In");
 
-    // Construct custom command parsers
-
+	// Construct custom command parsers
     CMMFAudioPlayDeviceCustomCommandParser* audPlayDevParser = 
                                      CMMFAudioPlayDeviceCustomCommandParser::NewL(*this);
     CleanupStack::PushL(audPlayDevParser);
@@ -121,9 +142,7 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
             TFileName aPathToSearch = aP.Drive();
             aPathToSearch.Append ( aP.Path() );
             CDir* dirList;
-            RFs fsSession;
-            fsSession.Connect();
-            User::LeaveIfError(fsSession.GetDir(aPathToSearch,
+            User::LeaveIfError(iFs->GetDir(aPathToSearch,
                 KEntryAttMaskSupported,ESortByName,dirList));
             TInt nbFound=0;
             TInt i; 
@@ -162,7 +181,6 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
             
             TRACEF(COggLog::VA(_L("Random iFileName choosen %S "),&iFileName ));
             delete dirList;
-            fsSession.Close();
             iRandomRingingTone = ETrue;
         }
     }
@@ -178,6 +196,12 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
     // Save the tags.
     
   iDecoder->Clear(); // Close the file. This is required for the ringing tone stuff.
+
+  if (iFile)
+	iFile->Close();
+  
+  delete iFile;
+  iFile = NULL;
   
   iState = EStateNotOpened;
   PRINT("COggPlayController::AddDataSourceL Out");
@@ -287,8 +311,14 @@ void COggPlayController::ResetL()
     PRINT("COggPlayController::ResetL");
     iAudioOutput=NULL;
     iDecoder->Clear();
-    fclose(iFile);
-    iState= EStateNotOpened;
+
+	if (iFile)
+		iFile->Close();
+
+    delete iFile;
+	iFile = NULL;
+
+	iState= EStateNotOpened;
 }
 
 void COggPlayController::PrimeL()
@@ -301,7 +331,14 @@ void COggPlayController::PrimeL()
     if (iState == EStateInterrupted) 
     {
         iDecoder->Clear();
-        iState = EStateNotOpened;
+
+		if (iFile)
+			iFile->Close();
+
+		delete iFile;
+		iFile = NULL;
+
+		iState = EStateNotOpened;
     }
 
     if ( (iAudioOutput==NULL) || (iState!=EStateNotOpened) )
@@ -464,6 +501,12 @@ void COggPlayController::StopL()
 
     iDecoder->Clear();
 
+	if (iFile)
+		iFile->Close();
+
+	delete iFile;
+	iFile = NULL;
+
     PRINT("COggPlayController::StopL Out");
 }
 
@@ -530,17 +573,18 @@ CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
 
 void COggPlayController::OpenFileL(const TDesC& aFile, TBool aOpenForInfo)
 {
-    
-    // add a zero terminator
-    TBuf<512> myname(aFile);
-    myname.Append((wchar_t)0);
-    
-    if ((iFile=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) {
+	iFile = new(ELeave) RFile;
+    if (iFile->Open(*iFs, aFile, EFileShareReadersOnly) != KErrNone)
+	{
         iState= EStateNotOpened;
+
+		delete iFile;
+		iFile = NULL;
         
-        TRACEF(COggLog::VA(_L("OpenFileL failed %S"), &myname ));
+        TRACEF(COggLog::VA(_L("OpenFileL failed %S"), &aFile ));
         User::Leave(KOggPlayPluginErrFileNotFound);
-    };
+    }
+
     iState= EStateOpen;
     TInt ret=0;
     if (aOpenForInfo)
@@ -553,8 +597,12 @@ void COggPlayController::OpenFileL(const TDesC& aFile, TBool aOpenForInfo)
     }
     if( ret < 0) {
         iDecoder->Clear();
-        fclose(iFile);
-        iState= EStateNotOpened;
+		iFile->Close();
+
+		delete iFile;
+		iFile = NULL;
+
+		iState= EStateNotOpened;
         User::Leave(KOggPlayPluginErrOpeningFile);
     }
         
