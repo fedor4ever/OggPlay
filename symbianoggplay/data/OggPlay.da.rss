@@ -178,3 +178,7 @@ CHARACTER_SET UTF8
 
 #define ogg_playback                 "Playback"
 #define ogg_playback_title           "Playback options"
+
+#define ogg_buffering_mode_multi     "Multi thread"
+#define ogg_buffering_mode_single    "Single thread"
+#define ogg_buffering_mode_none      "No buffering"

@@ -74,6 +74,7 @@ enum {
   EOggFileSearchControlDialog,
 
   EOggCodecSelection,  //For the Codec Settings view
+  EOggPlaybackOptions,
 
   EOggCodecPresentationControl,// For S80 Codec selection dialog
   EOggCodecSelectionControl, 
@@ -117,6 +118,8 @@ enum TOggplaySettingId
     EOggSettingRskIdle,
     EOggSettingRskPlay,
     EOggSettingVolumeBoost,
+    EOggSettingBufferingMode,
+    EOggSettingThreadPriority,
     EOggSettingCba01,
     EOggSettingCba02,
     EOggSettingCba03,

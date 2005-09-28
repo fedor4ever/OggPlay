@@ -151,7 +151,7 @@ class CAbsPlayback : public CBase {
   virtual TInt   Volume() = 0;
   
 #ifdef MDCT_FREQ_ANALYSER
-  virtual const TInt32 * GetFrequencyBins(TTime aTime) = 0;
+  virtual const TInt32 * GetFrequencyBins() = 0;
 #else
   virtual const void* GetDataChunk() = 0;
 #endif

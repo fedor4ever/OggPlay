@@ -481,9 +481,8 @@ void COggPlayback::SetVolumeGain( TGainType aGain )
 ////////////////////////////////////////////////////////////////
 
 #ifdef MDCT_FREQ_ANALYSER
-const TInt32 * COggPlayback::GetFrequencyBins(TTime /* aTime */)
+const TInt32 * COggPlayback::GetFrequencyBins()
 {
-   // We're not using aTime anymore, Position gives better results
    TTimeIntervalMicroSeconds currentPos;
    iStream->Position( currentPos );
    

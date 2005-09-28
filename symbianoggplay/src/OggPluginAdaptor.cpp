@@ -455,7 +455,7 @@ TInt COggPluginAdaptor::Volume()
     return(0);
 }
 
-const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime aTime)
+const TInt32 * COggPluginAdaptor::GetFrequencyBins()
 {
     // Not Implemented yet
     // Use custom command interface of Video Recorder to get the frequency.
@@ -469,7 +469,6 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins(TTime aTime)
     iFreqBins[0] = 55;
     
     TMMFGetFreqsParams pckg;
-    pckg.iTime = aTime;
     pckg.iFreqBins = iFreqBins;
     TMMFGetFreqsConfig freqConfig(pckg); // Pack the config.
     TPckg <TInt32 [16]> aDataFrom(iFreqBins); 

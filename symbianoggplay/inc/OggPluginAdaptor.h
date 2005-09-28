@@ -54,7 +54,7 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   virtual TInt64 Time();
   virtual TInt   Volume();
 #ifdef MDCT_FREQ_ANALYSER
-  virtual const TInt32 * GetFrequencyBins(TTime aTime);
+  virtual const TInt32 * GetFrequencyBins();
 #else
   virtual const void* GetDataChunk();
 #endif

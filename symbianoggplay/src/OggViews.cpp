@@ -49,7 +49,6 @@ enum
 // class COggViewBase
 //
 ////////////////////////////////////////////////////////////////
-
 COggViewBase::COggViewBase(COggPlayAppView& aOggViewCtl)
   : iOggViewCtl(aOggViewCtl)
 {
@@ -83,7 +82,6 @@ void COggViewBase::ViewConstructL()
 // class COggFOView
 //
 ////////////////////////////////////////////////////////////////
-
 COggFOView::COggFOView(COggPlayAppView& aOggViewCtl)
   : COggViewBase(aOggViewCtl)
 {
@@ -128,7 +126,6 @@ void COggFOView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
 // class COggFCView
 //
 ////////////////////////////////////////////////////////////////
-
 COggFCView::COggFCView(COggPlayAppView& aOggViewCtl)
   : COggViewBase(aOggViewCtl)
 {
@@ -160,13 +157,12 @@ void COggFCView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
   iOggViewCtl.ChangeLayout(ETrue);
 }
 
+#if defined(SERIES60)
 ////////////////////////////////////////////////////////////////
 //
 // class COggS60Utility
 //
 ////////////////////////////////////////////////////////////////
-
-#if defined(SERIES60)
 void COggS60Utility::DisplayStatusPane( TInt aTitleID )
 {
   // Enable statuspane
@@ -191,12 +187,12 @@ void COggS60Utility::RemoveStatusPane()
   ((COggPlayAppUi*) appUi)->UpdateSoftkeys();
 }
 
+
 ////////////////////////////////////////////////////////////////
 //
 // class COggSettingsView
 //
 ////////////////////////////////////////////////////////////////
-
 COggSettingsView::COggSettingsView(COggPlayAppView& aOggViewCtl,TUid aId )
 : COggViewBase(aOggViewCtl)
 {
@@ -210,10 +206,6 @@ COggSettingsView::~COggSettingsView()
 void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
 				  const TDesC8& /*aCustomMessage*/)
 {
-  TPixelsAndRotation sizeAndRotation;
-  CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
-  CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
-
   CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
   if(Cba) {
     Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
@@ -234,16 +226,14 @@ void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*
 
 void COggSettingsView::ViewDeactivated()
 {
-
   if ( iContainer )
   {
     ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->RemoveFromViewStack( *this, iContainer );
      delete iContainer;
      iContainer = NULL;
   }
-  
-  COggS60Utility::RemoveStatusPane();
-  
+
+  COggS60Utility::RemoveStatusPane(); 
 }
 
 void COggSettingsView::VolumeGainChangedL()
@@ -258,14 +248,12 @@ TVwsViewId COggSettingsView::ViewId() const
 }
 
 
+#ifdef PLUGIN_SYSTEM
 ////////////////////////////////////////////////////////////////
 //
 // class COggPluginSettingsView
 //
 ////////////////////////////////////////////////////////////////
-#ifdef PLUGIN_SYSTEM
-
-
 COggPluginSettingsView::COggPluginSettingsView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
@@ -276,12 +264,10 @@ COggPluginSettingsView::~COggPluginSettingsView()
     delete iCodecSelection;
 	}
 
-
 TVwsViewId COggPluginSettingsView::ViewId() const
 	{
 	return TVwsViewId(KOggPlayUid, KOggPlayUidCodecSelectionView);
 	}
-
 
 void COggPluginSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, 
                             TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
@@ -303,7 +289,6 @@ void COggPluginSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
   iOggViewCtl.SetRect( appUi->ApplicationRect() );
   }
 
-
 void COggPluginSettingsView::ViewDeactivated()
   {
   COggS60Utility::RemoveStatusPane();
@@ -312,15 +297,15 @@ void COggPluginSettingsView::ViewDeactivated()
   appUi->RemoveFromStack(iCodecSelection);
   delete iCodecSelection;
   iCodecSelection = NULL;
-
   }
 #endif /*PLUGIN_SYSTEM*/
+
+  
 ////////////////////////////////////////////////////////////////
 //
 // class COggUserHotkeysView
 //
 ////////////////////////////////////////////////////////////////
-
 COggUserHotkeysView::COggUserHotkeysView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
@@ -356,7 +341,6 @@ void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/,
   iOggViewCtl.SetRect( appUi->ApplicationRect() );
 	}
 
-
 void COggUserHotkeysView::ViewDeactivated()
   {
   COggS60Utility::RemoveStatusPane();
@@ -368,13 +352,13 @@ void COggUserHotkeysView::ViewDeactivated()
 
   }
 
+
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
 ////////////////////////////////////////////////////////////////
 //
 // class COggSplashView
 //
 ////////////////////////////////////////////////////////////////
-
 COggSplashView::COggSplashView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
@@ -384,12 +368,10 @@ COggSplashView::~COggSplashView()
 	{
 	}
 
-
 TVwsViewId COggSplashView::ViewId() const
 	{
 	return TVwsViewId(KOggPlayUid, KOggPlayUidSplashView);
 	}
-
 
 void COggSplashView::ViewActivatedL(const TVwsViewId& aPrevViewId, 
                                     TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
@@ -400,7 +382,6 @@ void COggSplashView::ViewActivatedL(const TVwsViewId& aPrevViewId,
     iSplashContainer->ConstructL( appUi->ApplicationRect(), aPrevViewId );
     appUi->AddToStackL(*this, iSplashContainer);
 }
-
 
 void COggSplashView::ViewDeactivated()
 {

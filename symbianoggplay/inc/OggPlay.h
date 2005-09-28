@@ -82,9 +82,6 @@ const TUid KOggPlayUidSplashView = { KOggPlayApplicationUidValue+5 };
 const TUid KOggPlayUidCodecSelectionView = { KOggPlayApplicationUidValue+6 };
 
 
-//_LIT(KAudioResourceFile, "Z:\\System\\Apps\\Audio\\audio.mbm");
-_LIT(KAudioResourceFile, "Z:\\System\\Apps\\OggPlay\\OggPlay.mbm");
-_LIT(KQTimeResourceFile, "Z:\\System\\Apps\\QTime\\QTime.mbm");
 
 
 struct TKeyCodes

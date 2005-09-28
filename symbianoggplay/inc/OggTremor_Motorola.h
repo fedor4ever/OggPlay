@@ -56,9 +56,9 @@ public:
    void   SetVolumeGain(TGainType aGain);
    TInt   Volume( void );
 #ifdef MDCT_FREQ_ANALYSER
-   const TInt32* GetFrequencyBins( TTime aTime );
+   const TInt32* GetFrequencyBins();
 #else
-   const void*   GetDataChunk( void );
+   const void* GetDataChunk( void );
 #endif
 
    // Other local methods

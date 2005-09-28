@@ -143,6 +143,7 @@
 #define ogg_codec_info_supplier      "Supplier"
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
+
 // S80 Specific strings
 #define ogg_softkeys                 "Softkeys"   // To be Translated 
 #define ogg_cba_1                    "Softkey #1" // To be Translated 
@@ -153,9 +154,14 @@
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
 #define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
+
 // Multi thread playback strings
 #define ogg_buffering_mode "Buffering mode"
 #define ogg_thread_priority "Thread priority" 
 
 #define ogg_playback                 "Playback"
 #define ogg_playback_title           "Playback options"
+
+#define ogg_buffering_mode_multi     "Multi thread"
+#define ogg_buffering_mode_single    "Single thread"
+#define ogg_buffering_mode_none      "No buffering"

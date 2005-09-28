@@ -88,7 +88,7 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   virtual TInt   Volume();
 
 #ifdef MDCT_FREQ_ANALYSER
-  virtual const TInt32 * GetFrequencyBins(TTime aTime);
+  virtual const TInt32 * GetFrequencyBins();
 #else
   virtual const void* GetDataChunk();
 #endif
@@ -145,11 +145,12 @@ class COggPlayback : public MMdaAudioOutputStreamCallback,
   TReal  iLatestPlayTime;
   TReal  iTimeBetweenTwoSamples;
 
-typedef struct 
+class TFreqBins 
 {
-    TTimeIntervalMicroSeconds Time;
-    TInt32 FreqCoefs[KNumberOfFreqBins];
-} TFreqBins;
+public:
+    TTimeIntervalMicroSeconds iTime;
+    TInt32 iFreqCoefs[KNumberOfFreqBins];
+};
 
   TFixedArray<TFreqBins,KFreqArrayLength> iFreqArray;
   TInt iLastFreqArrayIdx;

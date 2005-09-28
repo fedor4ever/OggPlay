@@ -422,17 +422,15 @@ TInt64 COggPlayback::Time()
 }
 
 #ifdef MDCT_FREQ_ANALYSER
-const TInt32 * COggPlayback::GetFrequencyBins(TTime /* aTime */)
+const TInt32 * COggPlayback::GetFrequencyBins()
 {
-    // We're not using aTime anymore, Position gives better results
   TTimeIntervalMicroSeconds currentPos = iStream->Position();
 
   TInt idx;
   idx = iLastFreqArrayIdx;
-   
   for (TInt i=0; i<KFreqArrayLength; i++)
     {
-      if (iFreqArray[idx].Time < currentPos)
+      if (iFreqArray[idx].iTime < currentPos)
           break;
       
         idx--;
@@ -440,7 +438,7 @@ const TInt32 * COggPlayback::GetFrequencyBins(TTime /* aTime */)
             idx = KFreqArrayLength-1;
     }
  
-    return iFreqArray[idx].FreqCoefs;
+  return iFreqArray[idx].iFreqCoefs;
 }
 #else
 const void* COggPlayback::GetDataChunk()
@@ -517,6 +515,11 @@ void COggPlayback::Play()
   // To avoid that, send few (4) almost empty buffers
   if (iMachineUid != EMachineUid_SendoX) // Sendo X doesn't need this fix. 
       iFirstBuffers = 4; 
+
+#ifdef MDCT_FREQ_ANALYSER
+  iLastFreqArrayIdx = 0;
+  iLatestPlayTime = 0.0;
+#endif
 
 #if defined(DELAY_AUDIO_STREAMING_START)
   // Also to avoid the first buffer problem, wait a short time before streaming, 

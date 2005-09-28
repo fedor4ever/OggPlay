@@ -1322,9 +1322,9 @@ COggPlayAppUi::ReadIniFile()
    TInt64 tmp64 = IniRead64( tf );
    if ( val != 0 )
    {
-      TTime t(tmp64);
-			iAlarmTime= t;
-		}
+	TTime t(tmp64);
+	iAlarmTime= t;
+   }
 
    iAnalyzerState = (int)  IniRead32( tf, 0, 3 );
    val            =        IniRead32( tf );  // For backward compatibility
@@ -1407,7 +1407,7 @@ COggPlayAppUi::ReadIniFile()
     }
 #endif
 
-	if ( ini_version >=7)
+	if (ini_version>=7)
 	{
 		iSettings.iGainType = IniRead32(tf);
 		iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
@@ -1601,7 +1601,7 @@ COggPlayAppUi::WriteIniFile()
 
 #ifdef PLUGIN_SYSTEM
     CDesCArrayFlat * supportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
-    TRAPD(Err,
+    TRAPD(err,
     {
         CleanupStack::PushL(supportedExtensionList);
         
@@ -1633,8 +1633,8 @@ COggPlayAppUi::WriteIniFile()
 	{
 		// Move the file to the MMC
 		CFileMan* fileMan = NULL;
-	    TRAPD(Err2, fileMan = CFileMan::NewL(iCoeEnv->FsSession()));
-		if (Err2 == KErrNone)
+	    TRAPD(err2, fileMan = CFileMan::NewL(iCoeEnv->FsSession()));
+		if (err2 == KErrNone)
 		{
 			fileMan->Move( fileName, *iIniFileName,CFileMan::EOverWrite);
 			delete (fileMan);

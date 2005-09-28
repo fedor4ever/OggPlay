@@ -981,10 +981,8 @@ COggPlayAppView::CallBack(TAny* aPtr)
       if (self->iApp->iOggPlayback->State()==CAbsPlayback::EPlaying)
       {
 #ifdef MDCT_FREQ_ANALYSER 
-          TTime Now;
-          Now.UniversalTime();
           self->iAnalyzer[self->iMode]->RenderWaveformFromMDCT(
-          self->iApp->iOggPlayback->GetFrequencyBins(Now) );
+          self->iApp->iOggPlayback->GetFrequencyBins() );
 #else /* !MDCT_FREQ_ANALYSER */
 #if defined(SERIES60)
           self->iAnalyzer[self->iMode]->RenderWaveform((short int*)self->iApp->iOggPlayback->GetDataChunk());
