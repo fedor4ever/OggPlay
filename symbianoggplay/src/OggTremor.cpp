@@ -587,8 +587,8 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         iLastFreqArrayIdx++;
         if (iLastFreqArrayIdx >= KFreqArrayLength)
             iLastFreqArrayIdx = 0;
-        iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].FreqCoefs,KNumberOfFreqBins);
-        iFreqArray[iLastFreqArrayIdx].Time =  TInt64(iLatestPlayTime) ;
+        iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].iFreqCoefs, KNumberOfFreqBins);
+        iFreqArray[iLastFreqArrayIdx].iTime =  TInt64(iLatestPlayTime);
     }
     else
     {
