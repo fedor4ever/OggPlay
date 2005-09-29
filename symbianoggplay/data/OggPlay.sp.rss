@@ -78,6 +78,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_26 "Oggplay convertirá adecuadamente el archivo para su reproducción. No obstante, si te interesa ahorrar espacio por favor considera codificar tu música a un ratio soportado por tu teléfono. Esto reducirá considerablemente el tamaño de tu música, sin repercusión en la calidad de audio."
 #define ogg_text_error_27 "Éste mensaje de aviso puede deshabilitarse, desde el menú opciones."
 #define ogg_text_error_28 "Cannot open directory" // To be translated
+#define ogg_text_error_29 "Not enough memory"
+#define ogg_text_error_30 "Audio playback taken by another process"
 
 #define ogg_text_string_1 "Actualizando lista de archivos..."
 #define ogg_text_string_2 "escribiendo el archivo de la base de datos..."

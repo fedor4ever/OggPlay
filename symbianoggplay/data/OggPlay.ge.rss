@@ -72,6 +72,8 @@
 #define ogg_text_error_26 "Oggplay wird die Umrechnung automatisch erledigen. Es ist jedoch vorteilhafter, die Dateien in eiem von Ihrem Telefon unterstützten Format vorzunehmen. Dadurch können deutlich kleinere Dateien bei gleicher Qualität erzeugt werden."
 #define ogg_text_error_27 "Diese Meldung kann im Optionsmenü abgeschaltet werden."
 #define ogg_text_error_28 "Cannot open directory" // To be translated
+#define ogg_text_error_29 "Not enough memory"
+#define ogg_text_error_30 "Audio playback taken by another process"
 
 #define ogg_text_string_1 "Aktualisiere Liste der Dateien..."
 #define ogg_text_string_2 "Schreibe Dateidatenbank..."

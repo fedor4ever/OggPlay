@@ -79,6 +79,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_26 "Oggplay vil automatisk down-sample filen så den kan afspilles. Overvej evt. at resample filen/filerne for at spare plads. Kvaliteten vil blive den samme."
 #define ogg_text_error_27 "Denne advarsel kan slås fra i opsætnings menuen."
 #define ogg_text_error_28 "Cannot open directory" // To be translated
+#define ogg_text_error_29 "Not enough memory"
+#define ogg_text_error_30 "Audio playback taken by another process"
 
 #define ogg_text_string_1 "Opdaterer filliste..."
 #define ogg_text_string_2 "Opdaterer fil database..."

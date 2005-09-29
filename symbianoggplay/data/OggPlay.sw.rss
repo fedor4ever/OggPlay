@@ -77,6 +77,8 @@
 #define ogg_text_error_26 "Oggplayer kommer göra den omvandling som behövs för att spela. Du bör dock överväga att koda om låten i en hastighet som stöds av din telefon om du är bekymrad över filstorleken, eftersom storleken på filen kommer att reducereas drastiskt, utan att kvaliteten på det spelade ljudet påverkas."
 #define ogg_text_error_27 "Detta varningsmeddelande kan slås av från inställningsmenyn"
 #define ogg_text_error_28 "Cannot open directory" // To be translated
+#define ogg_text_error_29 "Not enough memory"
+#define ogg_text_error_30 "Audio playback taken by another process"
 
 #define ogg_text_string_1 "Uppdaterar fillista..."
 #define ogg_text_string_2 "Skriver fildatabas..."

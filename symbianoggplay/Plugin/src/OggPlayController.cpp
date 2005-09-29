@@ -674,7 +674,6 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
 
 void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage )
 {
-	
    	// Get the size of the init data and create a buffer to hold it
     TInt desLength = aMessage.SizeOfData1FromClient();
     HBufC8* buf = HBufC8::NewLC(desLength);
@@ -690,8 +689,6 @@ void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage )
     iDecoder->GetFrequencyBins(iFrequencyBins,16);
     aMessage.WriteDataToClient(binsPckg);
 
-    
-   
     CleanupStack::PopAndDestroy(buf);//buf
 }
 

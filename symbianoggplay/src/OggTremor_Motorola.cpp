@@ -315,6 +315,11 @@ void COggPlayback::Play()
    RDebug::Print( _L("Play:%d"), iState );
 #endif
 
+#ifdef MDCT_FREQ_ANALYSER
+  iLastFreqArrayIdx = 0;
+  iLatestPlayTime = 0.0;
+#endif
+
    TInt err;
 
    switch (iState)
@@ -491,7 +496,7 @@ const TInt32 * COggPlayback::GetFrequencyBins()
    
    for (TInt i=0; i<KFreqArrayLength; i++)
    {
-      if (iFreqArray[idx].Time < currentPos)
+      if (iFreqArray[idx].iTime < currentPos)
       {
          break;
       }
@@ -503,7 +508,7 @@ const TInt32 * COggPlayback::GetFrequencyBins()
       }
    }
    
-   return iFreqArray[idx].FreqCoefs;
+   return iFreqArray[idx].iFreqCoefs;
 }
 #endif
 
@@ -671,8 +676,8 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer )
             iLastFreqArrayIdx = 0;
          }
 
-         iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].FreqCoefs,KNumberOfFreqBins);
-         iFreqArray[iLastFreqArrayIdx].Time =  TInt64(iLatestPlayTime) ;
+         iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].iFreqCoefs, KNumberOfFreqBins);
+         iFreqArray[iLastFreqArrayIdx].iTime =  TInt64(iLatestPlayTime) ;
       }
       else
       {

@@ -131,11 +131,12 @@ private:
    TReal  iLatestPlayTime;
    TReal  iTimeBetweenTwoSamples;
    
-   typedef struct 
-   {
-      TTimeIntervalMicroSeconds Time;
-      TInt32 FreqCoefs[KNumberOfFreqBins];
-   } TFreqBins;
+	class TFreqBins 
+	{
+	public:
+		TTimeIntervalMicroSeconds iTime;
+		TInt32 iFreqCoefs[KNumberOfFreqBins];
+	};
    
    TFixedArray<TFreqBins,KFreqArrayLength> iFreqArray;
    TInt iLastFreqArrayIdx;

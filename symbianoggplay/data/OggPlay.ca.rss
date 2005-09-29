@@ -72,6 +72,9 @@
 #define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
 #define ogg_text_error_27 "This warning message can be disabled, from the options menu."
 #define ogg_text_error_28 "Cannot open directory" // To be translated
+#define ogg_text_error_29 "Not enough memory"
+#define ogg_text_error_30 "Audio playback taken by another process"
+
 #define ogg_text_string_1 "Actualitzant llista de fitxers..."
 #define ogg_text_string_2 "s'està escribint el fitxer de base de dades..."
 #define ogg_text_string_3 "Alarma activada"

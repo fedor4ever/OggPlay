@@ -367,6 +367,8 @@ RESOURCE TBUF r_ogg_error_25 { buf=ogg_text_error_25; }
 RESOURCE TBUF r_ogg_error_26 { buf=ogg_text_error_26; }
 RESOURCE TBUF r_ogg_error_27 { buf=ogg_text_error_27; }
 RESOURCE TBUF r_ogg_error_28 { buf=ogg_text_error_28; }
+RESOURCE TBUF r_ogg_error_29 { buf=ogg_text_error_29; }
+RESOURCE TBUF r_ogg_error_30 { buf=ogg_text_error_30; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }

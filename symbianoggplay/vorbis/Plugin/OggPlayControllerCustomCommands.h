@@ -32,7 +32,6 @@ enum TOggPlayControllerCustomCommands
 class TMMFGetFreqsParams
 	{
 public:
-	TTime iTime ; // Time of the desired frequency bins
 	const TInt32 *iFreqBins ; //Pointer to the frequency bins
 	                          //to be updated.
 	} ;
