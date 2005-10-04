@@ -389,20 +389,33 @@ COggPlayAppUi::ConstructL()
 #if defined(SERIES60)
 	iSettingsView=new(ELeave) COggSettingsView(*iAppView,KOggPlayUidSettingsView);
 	RegisterViewL(*iSettingsView);
-    iUserHotkeysView =new(ELeave) COggUserHotkeysView(*iAppView);
+
+	iUserHotkeysView = new(ELeave) COggUserHotkeysView(*iAppView);
 	RegisterViewL(*iUserHotkeysView);
+
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
     iSplashView=new(ELeave) COggSplashView(*iAppView);
     RegisterViewL(*iSplashView);
 #endif /*SERIES60_SPLASH_WINDOW_SERVER*/
+
 #ifdef PLUGIN_SYSTEM
     iCodecSelectionView=new(ELeave) COggPluginSettingsView(*iAppView);
     RegisterViewL(*iCodecSelectionView);
 #endif
+
+#if defined(MULTI_THREAD_PLAYBACK)
+	iPlaybackOptionsView = new(ELeave) COggPlaybackOptionsView(*iAppView, KOggPlayUidPlaybackOptionsView);
+	RegisterViewL(*iPlaybackOptionsView);
+#endif
 #endif /* SERIES60 */
         
+#if defined(MULTI_THREAD_PLAYBACK)
+	// Disable thread priority changes
+	CEikonEnv::Static()->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
+#else
 	SetProcessPriority();
 	SetThreadPriority();
+#endif
 	
 
 #if defined(SERIES60_SPLASH_WINDOW_SERVER)
@@ -472,11 +485,20 @@ COggPlayAppUi::~COggPlayAppUi()
     delete iSplashView;
   }
 #endif
+
 #ifdef PLUGIN_SYSTEM
   if (iCodecSelectionView) {
     DeregisterView(*iCodecSelectionView);
     delete iCodecSelectionView;
   }
+#endif
+
+#if defined(MULTI_THREAD_PLAYBACK)
+	if (iPlaybackOptionsView)
+	{
+		DeregisterView(*iPlaybackOptionsView);
+  		delete iPlaybackOptionsView;
+	}
 #endif
 #endif /* SERIES60 */
 
@@ -585,6 +607,14 @@ COggPlayAppUi::NotifyPlayComplete()
 	
     NextSong();
 }
+
+#if defined (MULTI_THREAD_PLAYBACK)
+void COggPlayAppUi::NotifyFatalPlayError()
+{
+	// Try to exit cleanly
+	HandleCommandL(EEikCmdExit);
+}
+#endif
 
 void
 COggPlayAppUi::SetHotKey()
@@ -719,6 +749,13 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		break;
         }
 #endif
+
+#if defined(MULTI_THREAD_PLAYBACK)
+    case EOggPlaybackOptions:
+		ActivateOggViewL(KOggPlayUidPlaybackOptionsView);
+		break;
+#endif
+
 	case EOggNextSong: {
 		NextSong();
 		break;
@@ -1285,8 +1322,13 @@ COggPlayAppUi::ReadIniFile()
 #endif
 #endif
  
-    // Default value
+    // Default values
 	iSettings.iGainType = ENoGain;
+
+#if defined(MULTI_THREAD_PLAYBACK)
+	iSettings.iBufferingMode = ENoBuffering;
+	iSettings.iThreadPriority = ENormal;
+#endif
 
     // Open the file
     if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
@@ -1413,6 +1455,19 @@ COggPlayAppUi::ReadIniFile()
 		iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
 	}
 
+#if defined(MULTI_THREAD_PLAYBACK)
+	if (ini_version>=8)
+	{
+		iSettings.iBufferingMode = IniRead32(tf);
+		TInt err = ((COggPlayback*) iOggPlayback)->SetBufferingMode((TBufferingMode) iSettings.iBufferingMode);
+		if (err != KErrNone)
+			iSettings.iBufferingMode = ENoBuffering;
+
+		iSettings.iThreadPriority = IniRead32(tf);
+		((COggPlayback*) iOggPlayback)->SetThreadPriority((TStreamingThreadPriority) iSettings.iThreadPriority);
+	}
+#endif
+
    in.Close();
 
 #if (defined(SERIES60 ) || defined (SERIES80) )	
@@ -1517,9 +1572,9 @@ COggPlayAppUi::WriteIniFile()
     // this should do the trick for forward compatibility:
     TInt magic=0xdb;
 #ifdef SERIES80
-    TInt iniversion=8;
+    TInt iniversion=9;
 #else
-    TInt iniversion=7;
+    TInt iniversion=8;
 #endif    
 
     num.Num(magic);
@@ -1624,6 +1679,12 @@ COggPlayAppUi::WriteIniFile()
 #endif
     
     num.Num(iSettings.iGainType);
+    tf.Write(num);
+
+    num.Num(iSettings.iBufferingMode);
+    tf.Write(num);
+
+	num.Num(iSettings.iThreadPriority);
     tf.Write(num);
 
 	// Please increase ini_version when adding stuff
@@ -1737,9 +1798,8 @@ COggPlayAppUi::ShowSplash()
 #endif // #if defined(SERIES60_SPLASH)
 
 
-
-void
-COggPlayAppUi::SetProcessPriority()
+#if !defined(MULTI_THREAD_PLAYBACK)
+void COggPlayAppUi::SetProcessPriority()
 {
 #if !defined(__WINS__) //FIXFIXME
 	CEikonEnv::Static()->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
@@ -1766,8 +1826,7 @@ COggPlayAppUi::SetProcessPriority()
 #endif
 }
 
-void
-COggPlayAppUi::SetThreadPriority()
+void COggPlayAppUi::SetThreadPriority()
 {
 #if !defined(__WINS__) //FIXFIXME
 	//CEikonEnv::Static()->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
@@ -1797,6 +1856,8 @@ COggPlayAppUi::SetThreadPriority()
 	}
 #endif
 }
+#endif
+
 TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand /*aCommand*/, TFileName& /*aDocumentName*/,const TDesC8& /*aTail*/)
 {
     return ETrue;
@@ -1834,9 +1895,38 @@ void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 	iSettings.iGainType = aNewGain;
 
 #if defined(SERIES60)
+  #if defined(MULTI_THREAD_PLAYBACK)
+	iPlaybackOptionsView->VolumeGainChangedL();
+  #else
 	iSettingsView->VolumeGainChangedL();
+  #endif
 #endif
 }
+
+#if defined(MULTI_THREAD_PLAYBACK)
+void COggPlayAppUi::SetBufferingModeL(TBufferingMode aNewBufferingMode)
+{
+	TInt err = ((COggPlayback *) iOggPlayback)->SetBufferingMode(aNewBufferingMode);
+	if (err == KErrNone)
+		iSettings.iBufferingMode = aNewBufferingMode;
+	else
+	{
+		// Pop up a message (reset the value in the playback options too)
+		TBuf<256> buf, tbuf;
+		iEikonEnv->ReadResource(tbuf, R_OGG_ERROR_20);
+		iEikonEnv->ReadResource(buf, R_OGG_ERROR_29);		
+		iOggMsgEnv->OggErrorMsgL(tbuf, buf);		
+
+		iPlaybackOptionsView->BufferingModeChangedL();
+	}
+}
+
+void COggPlayAppUi::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority)
+{
+	((COggPlayback *) iOggPlayback)->SetThreadPriority(aNewThreadPriority);
+	iSettings.iThreadPriority = aNewThreadPriority;
+}
+#endif
 
 ////////////////////////////////////////////////////////////////
 //

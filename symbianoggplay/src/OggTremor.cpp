@@ -54,13 +54,22 @@
 
 #include <OggPlay.rsg>
 
+#if defined(MULTI_THREAD_PLAYBACK)
+#ifdef __VC32__
+#pragma warning( disable : 4355 ) // 'this' used in base member initializer list
+#endif
+#endif
+
 
 // COggPlayback
-COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) : 
-  CAbsPlayback(anObserver),
-  iEnv(anEnv),
-  iSettings()
+COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver)
+#if defined(MULTI_THREAD_PLAYBACK)
+:  CAbsPlayback(anObserver), iEnv(anEnv), iSharedData(*this, iUIThread, iBufferingThread)
+#else
+:  CAbsPlayback(anObserver), iEnv(anEnv)
+#endif
 {
+#if !defined(MULTI_THREAD_PLAYBACK)
     iSettings.Query();
     
     // These basic rates should be supported by all Symbian OS
@@ -68,30 +77,75 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver ) :
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
     iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
     iSettings.iVolume = 0;
+#endif
 }
 
-void COggPlayback::ConstructL() {
+void COggPlayback::ConstructL()
+{
   // Set up the session with the file server
   User::LeaveIfError(iFs.Connect());
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  User::LeaveIfError(iFs.Share());
+  User::LeaveIfError(AttachToFs());
+#endif
 
   // Discover audio capabilities
   COggAudioCapabilityPoll pollingAudio;
   iAudioCaps = pollingAudio.PollL();
 
-  iStream  = CMdaAudioOutputStream::NewL(*this);
+#if defined(MULTI_THREAD_PLAYBACK)
+  // Create at least one audio buffer
+  iBuffer[0] = HBufC8::NewL(KBufferSize);
+
+  // Open thread handles to the UI thread and the buffering thread
+  // Currently the UI and buffering threads are the same (this thread)
+  TThreadId uiThreadId = iThread.Id();
+  User::LeaveIfError(iUIThread.Open(uiThreadId));
+  User::LeaveIfError(iBufferingThread.Open(uiThreadId));
+
+  // Create the streaming thread
+  User::LeaveIfError(iStreamingThread.Create(_L("OggPlayStream"), StreamingThread, KDefaultStackSize, NULL, &iSharedData));
+
+  // Create the streaming thread panic handler
+  iStreamingThreadPanicHandler = new(ELeave) CThreadPanicHandler(EPriorityHigh, iStreamingThread, *this);
+
+  // Create the streaming thread command handler
+  iStreamingThreadCommandHandler = new(ELeave) CStreamingThreadCommandHandler(iUIThread, iStreamingThread, *iStreamingThreadPanicHandler);
+  iSharedData.iStreamingThreadCommandHandler = iStreamingThreadCommandHandler;
+
+  // Launch the streaming thread
+  User::LeaveIfError(iStreamingThreadCommandHandler->ResumeCommandHandlerThread());
+
+  // Record the fact that the streaming thread started ok
+  iStreamingThreadRunning = ETrue;
+
+  // Create the buffering active object
+  iBufferingThreadAO = new(ELeave) CBufferingThreadAO(iSharedData);
+  iSharedData.iBufferingThreadAO = iBufferingThreadAO;
+
+  // Add it to the buffering threads active scheduler (this thread)
+  CActiveScheduler::Add(iBufferingThreadAO);
+ 
+  // Create the streaming thread listener
+  iStreamingThreadListener = new(ELeave) CStreamingThreadListener(*this, iSharedData);
+  iSharedData.iStreamingThreadListener = iStreamingThreadListener;
+#else
+  iStream = CMdaAudioOutputStream::NewL(*this);
   iStream->Open(&iSettings);
 
   for (TInt i=0; i<KBuffers; i++)
 	iBuffer[i] = HBufC8::NewL(KBufferSize);
+#endif
 
-  iStartAudioStreamingTimer = new (ELeave) COggTimer(
-      TCallBack( StartAudioStreamingCallBack,this )   );
-  
-  iStopAudioStreamingTimer = new (ELeave) COggTimer(
-      TCallBack( StopAudioStreamingCallBack,this )   );
+  iStartAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StartAudioStreamingCallBack, this));
+  iStopAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
 
-  iRestartAudioStreamingTimer = new (ELeave) COggTimer(
-      TCallBack( RestartAudioStreamingCallBack,this )   );
+#if !defined(MULTI_THREAD_PLAYBACK)
+  // The restart timer is in the streaming thread for multi thread playback, so only create one if MULTI_THREAD_PLAYBACK is not defined
+  // This may change in the future, it might be better to do restarts from the UI thread when MULTI_THREAD_PLAYBACK is enabled
+  iRestartAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
+#endif
 
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
@@ -99,17 +153,51 @@ void COggPlayback::ConstructL() {
   HAL::Get(HALData::EMachineUid, iMachineUid);
 }
 
-COggPlayback::~COggPlayback() {
-    delete iDecoder; 
-  delete  iStartAudioStreamingTimer;
-  delete  iStopAudioStreamingTimer;
-  delete  iRestartAudioStreamingTimer;
+COggPlayback::~COggPlayback()
+{
+  __ASSERT_ALWAYS((iState == EClosed) || (iState == EFirstOpen), User::Panic(_L("~COggPlayback"), 0));
+	
+  delete iDecoder; 
+  delete iStartAudioStreamingTimer;
+  delete iStopAudioStreamingTimer;
+  delete iOggSampleRateConverter;
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  if (iBufferingThreadAO)
+	iBufferingThreadAO->Cancel();
+
+  if (iStreamingThreadListener)
+	iStreamingThreadListener->Cancel();
+
+  if (iStreamingThreadRunning)
+	iStreamingThreadCommandHandler->ShutdownCommandHandlerThread();
+
+  if (iStreamingThreadCommandHandler)
+	  iStreamingThreadCommandHandler->Cancel();
+	
+  if (iStreamingThreadPanicHandler)
+	  iStreamingThreadPanicHandler->Cancel();
+
+  iThread.Close();
+  iUIThread.Close();
+  iBufferingThread.Close();
+  iStreamingThread.Close();
+
+  delete iBufferingThreadAO;
+  delete iStreamingThreadListener;
+  delete iStreamingThreadCommandHandler;
+  delete iStreamingThreadPanicHandler;
+
+  for (TInt i = 0 ; i<KMultiThreadBuffers ; i++)
+  	delete iBuffer[i];
+#else
+  delete iRestartAudioStreamingTimer;
   delete iStream;
 
   for (TInt i=0; i<KBuffers; i++)
 	delete iBuffer[i];
+#endif
 
-  delete iOggSampleRateConverter;
   iFs.Close();
 }
 
@@ -169,6 +257,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 
   delete iDecoder;
   iDecoder = NULL;
+
   iDecoder = GetDecoderL(aFileName);
   if(iDecoder->Open(iFile, aFileName) < 0)
   {
@@ -297,15 +386,20 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   if (ConvertChannel || ConvertRate)
       SamplingRateSupportedMessage(ConvertRate, theRate, ConvertChannel, theChannels);
 
+#if defined(MULTI_THREAD_PLAYBACK)
+  iOggSampleRateConverter->Init(this, KBufferSize, (TInt) (0.90*KBufferSize), theRate, usedRate, theChannels, usedChannels);
+  TInt err = SetAudioProperties(usedRate, usedChannels);
+#else
   iOggSampleRateConverter->Init(this, KBufferSize, (TInt) (0.75*KBufferSize), theRate, usedRate, theChannels, usedChannels);
+  TRAPD(err, iStream->SetAudioPropertiesL(rt, ac));
+#endif
 
-  TRAPD( error, iStream->SetAudioPropertiesL(rt, ac) );
-  if (error)
+  if (err)
   {
       TBuf<256> buf,tbuf;
       CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
       CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_20);
-      buf.AppendNum(error);
+      buf.AppendNum(err);
       iEnv->OggErrorMsgL(tbuf,buf);
   }
 
@@ -316,7 +410,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   iTimeWithoutFreqCalculationLim = (TInt)(0.1E6 / iTimeBetweenTwoSamples);
 #endif
 
-  return error;
+  return err;
 }
 
 
@@ -378,38 +472,83 @@ void COggPlayback::SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate,
 
 TInt COggPlayback::Volume()
 {
-  if (!iStream) return KMaxVolume;
-  TInt vol=KMaxVolume;
-  TRAPD( err, vol=iStream->Volume() );
-  return vol;
+#if defined (MULTI_THREAD_PLAYBACK)
+  iStreamingThreadCommandHandler->Volume(); 
+  return iSharedData.iVolume;
+#else
+  return iStream->Volume();
+#endif
 }
 
 void COggPlayback::SetVolume(TInt aVol)
 {
-  if (!iStream) return;
+#if defined(MULTI_THREAD_PLAYBACK)
+  iSharedData.iVolume = aVol;
+  iStreamingThreadCommandHandler->SetVolume();
+#else
   if (aVol>KMaxVolume) aVol= KMaxVolume;
   else if(aVol<0) aVol= 0;
 
   TInt volume = (TInt) (((TReal) aVol)/KMaxVolume * iMaxVolume);
   if (volume > iMaxVolume)
       volume = iMaxVolume;
+
   iStream->SetVolume(volume);
+#endif
+}
+
+void COggPlayback::SetVolumeGain(TGainType aGain)
+{
+#if defined(MULTI_THREAD_PLAYBACK)
+	TBufferingMode bufferingMode = iSharedData.iBufferingMode;
+	TBool bufferFlushRequired = (iState == EPlaying) && (bufferingMode != ENoBuffering);
+	if (bufferFlushRequired)
+		FlushBuffers(aGain);
+	else
+		iOggSampleRateConverter->SetVolumeGain(aGain);
+#else
+  iOggSampleRateConverter->SetVolumeGain(aGain);
+#endif
 }
 
 void COggPlayback::SetPosition(TInt64 aPos)
 {
-  if (!iStream) return;
   if(iDecoder)
   {
-	  TInt64 zero64(0);
-	  iDecoder->Setposition(aPos>=zero64 ? aPos : zero64);
+	  if (aPos<0)
+		  aPos = 0;
+
+#if defined(MULTI_THREAD_PLAYBACK)
+	  TBool bufferFlushRequired = (iState == EPlaying);
+	  if (bufferFlushRequired)
+	  {
+		// Stop/Restart the stream instead of flushing buffers
+	    // This works better with FF/RW because, like next/prev track, key repeats are possible (and very likely on FF/RW)
+		StopStreaming();
+		iDecoder->Setposition(aPos);
+		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+	  }
+	  else
+		iDecoder->Setposition(aPos);
+#else
+	  iDecoder->Setposition(aPos);
+#endif
   }
 }
 
 TInt64 COggPlayback::Position()
 {
-  if (!iStream) return TInt64(0);
+#if defined(MULTI_THREAD_PLAYBACK)
+  if(iDecoder)
+  {
+	  TInt bufferMillisecs = (500*iSharedData.iBufferBytes)/(iSharedData.iSampleRate*iSharedData.iChannels);
+	  return iDecoder->Position() - TInt64(bufferMillisecs);
+  }
+#else
+  // TO DO: Also take into account the buffers (see comments in GetFrequencyBins)
   if(iDecoder) return iDecoder->Position();
+#endif
+
   return 0;
 }
 
@@ -424,10 +563,16 @@ TInt64 COggPlayback::Time()
 #ifdef MDCT_FREQ_ANALYSER
 const TInt32 * COggPlayback::GetFrequencyBins()
 {
-  TTimeIntervalMicroSeconds currentPos = iStream->Position();
+  // Use Position() to get the position
+  // TO DO: Use CMdaAudioOutputStream::Position() instead to get the stream position more accurately (we need to add a member to hold the start position, because the stream is reset after FF/RW or when the audio has to restart)
+  // Better still, just change Position() to return the stream position (only if iState == EPlaying, maybe)
+#if defined(MULTI_THREAD_PLAYBACK)
+  TTimeIntervalMicroSeconds currentPos(TInt64(1000)*Position());
+#else
+  TTimeIntervalMicroSeconds currentPos = TInt64(1000)*Position();
+#endif
 
-  TInt idx;
-  idx = iLastFreqArrayIdx;
+  TInt idx = iLastFreqArrayIdx;
   for (TInt i=0; i<KFreqArrayLength; i++)
     {
       if (iFreqArray[idx].iTime < currentPos)
@@ -525,12 +670,21 @@ void COggPlayback::Play()
   // Also to avoid the first buffer problem, wait a short time before streaming, 
   // so that Application drawing have been done. Processor should then
   // be fully available for doing audio thingies.
+
+#if !defined(MULTI_THREAD_PLAYBACK)
+  // A longer delay is necessary if MULTI_THREAD_PLAYBACK is not defined
   if (iMachineUid == EMachineUid_SendoX) // Latest 1.198.8.2 Sendo X firmware needs a little more time
 	iStartAudioStreamingTimer->Wait(KSendoStreamStartDelay);
   else
+#endif
+
 	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 #else
-  for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
+  #if defined(MULTI_THREAD_PLAYBACK)
+    StartStreaming();
+  #else
+    for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
+  #endif
 #endif
 }
 
@@ -538,8 +692,15 @@ void COggPlayback::Pause()
 {
   TRACEF(COggLog::VA(_L("PAUSE")));
   if (iState != EPlaying) return;
-  iState= EPaused;
+
+  iState = EPaused;
+  iStopAudioStreamingTimer->Cancel();
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  StopStreaming();
+#else
   iStream->Stop();
+#endif
 }
 
 void COggPlayback::Resume()
@@ -554,8 +715,15 @@ void COggPlayback::Stop()
   if (iState == EClosed)
     return;
 
+  iState = EClosed;
+  iStopAudioStreamingTimer->Cancel();
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  StopStreaming();
+#else
   iStream->Stop();
-  iState= EClosed;
+#endif
+
   if (iFile)
   {
     iDecoder->Close();
@@ -563,12 +731,18 @@ void COggPlayback::Stop()
 
 	delete iFile;
 	iFile = NULL;
+
+	delete iDecoder;
+	iDecoder = NULL;
   }
 
   ClearComments();
   iTime= 0;
   iEof= EFalse;
+
+#if !defined(MULTI_THREAD_PLAYBACK)
   iUnderflowing = EFalse;
+#endif
 
   if (iObserver) iObserver->NotifyUpdate();
 }
@@ -581,7 +755,6 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 
 #ifdef MDCT_FREQ_ANALYSER
     if (iTimeWithoutFreqCalculation > iTimeWithoutFreqCalculationLim )
-
     {
         iTimeWithoutFreqCalculation = 0;
         iLastFreqArrayIdx++;
@@ -616,7 +789,411 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
     return (ret);
 }
 
+TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
+{
+  COggPlayback* self= (COggPlayback*) aPtr;
 
+#if defined(MULTI_THREAD_PLAYBACK)
+  self->StartStreaming();
+#else
+  for (TInt i=0; i<KBuffers; i++) 
+      self->SendBuffer(*(self->iBuffer[i]));
+#endif
+
+  return 0;
+}
+
+TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
+{
+  COggPlayback* self= (COggPlayback*) aPtr; 
+ 
+  self->Stop();
+  self->iObserver->NotifyPlayComplete(); 
+  return 0;
+}
+
+#if defined(MULTI_THREAD_PLAYBACK)
+TInt COggPlayback::AttachToFs()
+{
+  return iFs.Attach();
+}
+
+TInt COggPlayback::SetAudioProperties(TInt aSampleRate, TInt aChannels)
+{
+  iSharedData.iSampleRate = aSampleRate;
+  iSharedData.iChannels = aChannels;
+  return iStreamingThreadCommandHandler->SetAudioProperties();
+}
+
+void COggPlayback::StartStreaming()
+{
+  // Start the buffering listener
+  if (iSharedData.iBufferingMode == EBufferThread)
+	iBufferingThreadAO->StartListening();
+
+  // Start the streaming
+  iStreamingThreadCommandHandler->StartStreaming();
+}
+
+void COggPlayback::StopStreaming()
+{
+  // Stop the streaming
+  iStreamingThreadCommandHandler->StopStreaming();
+
+  // Cancel the buffering AO
+  iBufferingThreadAO->Cancel();
+}
+
+TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
+{
+  if (aNewBufferingMode == iSharedData.iBufferingMode)
+	  return KErrNone;
+
+  if (iState == EPlaying)
+  {
+	// Flush the buffers (and stop the stream)
+	FlushBuffers();
+  }
+
+  // Set the new buffering mode
+  TBufferingMode oldMode = iSharedData.iBufferingMode;
+  iSharedData.iBufferingMode = aNewBufferingMode;
+ 
+  // Set buffering values and allocate or free buffers
+  TInt err = BufferingModeChanged();
+  if (err != KErrNone)
+  {
+	  // Reset back to the old mode
+	  iSharedData.iBufferingMode = oldMode;
+
+	  // Free any buffers that got allocated
+	  BufferingModeChanged();
+
+	  // Restart the stream
+	  if (iState == EPlaying)
+		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+
+	  return err;
+  }
+
+  // Set the new buffering mode values in the streaming thread
+  iStreamingThreadCommandHandler->SetBufferingMode();
+
+  // Restart the stream
+  if (iState == EPlaying)
+	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+
+  return KErrNone;
+}
+
+void COggPlayback::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority)
+{
+  // Set the thread priorities (Normal or High)
+  iSharedData.iStreamingThreadPriority = aNewThreadPriority;
+  iStreamingThreadCommandHandler->SetThreadPriority();
+}
+
+void COggPlayback::FlushBuffers()
+{
+  // The buffering mode has changed, so flush the buffers (and stop the stream)
+  iSharedData.iFlushBufferEvent = EBufferingModeChanged;
+
+  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  iBufferingThreadAO->Cancel();
+
+  iStreamingThreadCommandHandler->FlushBuffers();
+}
+
+void COggPlayback::FlushBuffers(TInt64 aNewPosition)
+{
+  // The position has been changed so flush the buffers (and set the new position)
+  iSharedData.iFlushBufferEvent = EPositionChanged;
+  iSharedData.iNewPosition = aNewPosition;
+
+  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  iBufferingThreadAO->Cancel();
+
+  if (iSharedData.iBufferingMode == EBufferThread)
+	iBufferingThreadAO->StartListening();
+
+  iStreamingThreadCommandHandler->FlushBuffers();
+}
+
+void COggPlayback::FlushBuffers(TGainType aNewGain)
+{
+  // The volume gain has been changed so flush the buffers (and set the new gain)
+  iSharedData.iFlushBufferEvent = EVolumeGainChanged;
+  iSharedData.iNewGain = aNewGain;
+
+  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  iBufferingThreadAO->Cancel();
+
+  if (iSharedData.iBufferingMode == EBufferThread)
+	iBufferingThreadAO->StartListening();
+
+  iStreamingThreadCommandHandler->FlushBuffers();
+}
+
+TInt64 COggPlayback::DecoderPosition()
+{
+  // Read the audio position we've decoded to (return value is milliseconds) 
+	return iDecoder->Position();
+}
+
+void COggPlayback::SetDecoderPosition(TInt64 aPos)
+{
+  // Set the deocder position (aPos is in milliseconds)
+  iDecoder->Setposition(aPos);
+}
+
+void COggPlayback::SetSampleRateConverterVolumeGain(TGainType aGain)
+{
+  // Set the volume gain (called by the streaming thread after the buffers have been flushed)
+  iOggSampleRateConverter->SetVolumeGain(aGain);
+}
+
+TInt COggPlayback::StreamingThread(TAny* aThreadData)
+{
+  // Access the shared data / command handler
+  TStreamingThreadData& sharedData = *((TStreamingThreadData *) aThreadData);
+  CStreamingThreadCommandHandler& streamingThreadCommandHandler = *sharedData.iStreamingThreadCommandHandler;
+
+  // Create a cleanup stack
+  CTrapCleanup* cleanupStack = CTrapCleanup::New();
+  if (!cleanupStack)
+  {
+	// Inform the UI thread that starting the streaming thread failed
+	streamingThreadCommandHandler.ResumeComplete(KErrNoMemory);
+	return KErrNoMemory;
+  }
+
+  // Set the thread priority
+  RThread streamingThread;
+  streamingThread.SetPriority(EPriorityMore);
+  streamingThread.Close();
+
+  // Allocate resources and start the active scheduler
+  TRAPD(err, StreamingThreadL(sharedData));
+
+  // Cleanup
+  COggLog::Exit();  
+  delete cleanupStack;
+
+  // Complete the shutdown request
+  streamingThreadCommandHandler.ShutdownComplete(err);
+  return err;
+}
+
+void COggPlayback::StreamingThreadL(TStreamingThreadData& aSharedData)
+{
+  // Attach to the file session
+  User::LeaveIfError(aSharedData.iOggPlayback.AttachToFs());
+
+  // Create a scheduler
+  CActiveScheduler* scheduler = new(ELeave) CActiveScheduler;
+  CleanupStack::PushL(scheduler);
+
+  // Install the scheduler
+  CActiveScheduler::Install(scheduler);
+
+  // Add the streaming command handler to the scheduler
+  CStreamingThreadCommandHandler& streamingThreadCommandHandler = *aSharedData.iStreamingThreadCommandHandler;
+  CActiveScheduler::Add(&streamingThreadCommandHandler);
+
+  // Create the audio playback engine
+  CStreamingThreadPlaybackEngine* playbackEngine = CStreamingThreadPlaybackEngine::NewLC(aSharedData);
+
+  // Listen for commands and dispatch them to the playback engine
+  streamingThreadCommandHandler.ListenForCommands(*playbackEngine);
+
+  // Inform the UI thread that the streaming thread has started
+  streamingThreadCommandHandler.ResumeComplete(KErrNone);
+
+  // Start the scheduler
+  CActiveScheduler::Start();
+
+  // Cancel the command handler
+  streamingThreadCommandHandler.Cancel();
+
+  // Uninstall the scheduler
+  CActiveScheduler::Install(NULL);
+
+  // Delete the scheduler and audio engine
+  CleanupStack::PopAndDestroy(2, scheduler);
+}
+
+TBool COggPlayback::PrimeBuffer(HBufC8& buf)
+{
+  // Read and decode the next buffer
+  TPtr8 bufPtr(buf.Des());
+  iOggSampleRateConverter->FillBuffer(bufPtr);
+  return iEof;
+}
+
+void COggPlayback::NotifyOpenComplete(TInt aErr)
+{
+  // Called by the streaming thread listener when CMdaAudioOutputStream::Open() completes
+  if (aErr == KErrNone)
+	iState = EFirstOpen;
+  else
+  {
+    TBuf<32> buf;
+	CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_19);
+	buf.AppendNum(aErr);
+
+	_LIT(tit, "MaoscOpenComplete");
+	iEnv->OggErrorMsgL(tit, buf);
+  }
+}
+
+TInt COggPlayback::BufferingModeChanged()
+{
+  // The buffering mode has changed so allocate or free buffers
+  TInt i;
+  TInt allocError = KErrNone;
+  switch (iSharedData.iBufferingMode)
+  {
+	case ENoBuffering:
+		iSharedData.iBuffersToUse = KNoBuffers;
+		iSharedData.iMaxBuffers = KNoBuffers;
+
+		// Delete all the buffers
+		for (i = 1 ; i<KMultiThreadBuffers ; i++)
+		{
+			delete iBuffer[i];
+			iBuffer[i] = NULL;
+		}
+		break;
+
+	case EBufferStream:
+		iSharedData.iBuffersToUse = KSingleThreadBuffersToUse;
+		iSharedData.iMaxBuffers = KSingleThreadBuffers;
+
+		if (iBuffer[KNoBuffers])
+		{
+			// The previous mode was EBufferThread so free some buffers
+			for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
+			{
+				delete iBuffer[i];
+				iBuffer[i] = NULL;
+			}
+		}
+		else
+		{
+			// Allocate the buffers
+			for (i = 1 ; i<KSingleThreadBuffers ; i++)
+			{
+				iBuffer[i] = HBufC8::New(KBufferSize);
+				if (!iBuffer[i])
+				{
+					allocError = KErrNoMemory;
+					break;
+				}
+			}
+		}
+		break;
+
+	case EBufferThread:
+		iSharedData.iBuffersToUse = KMultiThreadBuffersToUse;
+		iSharedData.iMaxBuffers = KMultiThreadBuffers;
+
+		if (iBuffer[KNoBuffers])
+		{
+			// The previous mode was EBufferStream so allocate some more buffers
+			for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
+			{
+				iBuffer[i] = HBufC8::New(KBufferSize);
+				if (!iBuffer[i])
+				{
+					allocError = KErrNoMemory;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Allocate the buffers
+			for (i = 1 ; i<KMultiThreadBuffers ; i++)
+			{
+				iBuffer[i] = HBufC8::New(KBufferSize);
+				if (!iBuffer[i])
+				{
+					allocError = KErrNoMemory;
+					break;
+				}
+			}
+		}
+		break;
+  }
+
+  return allocError;
+}
+
+void COggPlayback::NotifyStreamingStatus(TInt aErr)
+{
+  // Called by the streaming thread listener when the last buffer has been copied or play has been interrupted
+  // Ignore streaming status if we are already handling an error
+  if (iStreamingErrorDetected)
+	return;
+
+  // Check for an error
+  if (aErr < 0)
+  {
+	// Stop the stream
+	StopStreaming();
+	iStreamingErrorDetected = ETrue;
+
+	// Notify the user
+	TBuf<256> buf, tbuf;
+	if (aErr == KErrInUse)
+		{
+		CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
+		CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_30);
+		}
+	else
+		{
+		CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
+		CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);	
+		buf.AppendNum(aErr);
+		}
+
+	// Display the message and wait for the user
+	iEnv->OggErrorMsgL(tbuf, buf);
+
+	// Notify the UI, try to restart
+	iObserver->NotifyPlayInterrupted();
+	iStreamingErrorDetected = EFalse;
+	return;
+  }
+
+  // Handle stream events
+  TStreamingThreadStatus status = (TStreamingThreadStatus) aErr;
+  switch (status)
+  {
+	case ELastBufferCopied:
+		// Not all phones call MaoscPlayComplete,
+		// so start a timer that will stop playback afer a delay 
+		iStopAudioStreamingTimer->Wait(KStreamStopDelay);
+		break;
+
+	case EPlayInterrupted:
+		// Playback has been interrupted so notify the observer
+		iObserver->NotifyPlayInterrupted();
+		break;
+  }
+}
+
+void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt /* aErr */)
+{
+  // Great, the streaming thread has panic'd, now what do we do!?
+  iStreamingThreadRunning = EFalse;
+  iState = EClosed;
+  
+  // Try to exit cleanly
+  iObserver->NotifyFatalPlayError();
+}
+
+#else
 void COggPlayback::SendBuffer(HBufC8& buf)
 {
   if (iEof) return;
@@ -788,36 +1365,6 @@ void COggPlayback::MaoscOpenComplete(TInt aErr)
   }
 }
 
-
-TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
-{
-  COggPlayback* self= (COggPlayback*) aPtr;
-  
-  for (TInt i=0; i<KBuffers; i++) 
-      self->SendBuffer(*(self->iBuffer[i]));
-  return 0;
-}
-
-
-TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
-{
-  COggPlayback* self= (COggPlayback*) aPtr;
-  
-  self->iStream->Stop();
-
-  if (self->iObserver) {
-    if ( self->iEof ) {
-      self->Stop();
-      self->ClearComments();
-      self->iTime= 0;
-      self->iObserver->NotifyPlayComplete();
-      return 0;
-    }
-    
-  }
-  return 0;
-}
-
 TInt COggPlayback::RestartAudioStreamingCallBack(TAny* aPtr)
 {
   COggPlayback* self= (COggPlayback*) aPtr;
@@ -841,11 +1388,7 @@ TInt COggPlayback::RestartAudioStreamingCallBack(TAny* aPtr)
   }
   return 0;
 }
-
-void COggPlayback::SetVolumeGain(TGainType aGain)
-{
-    iOggSampleRateConverter->SetVolumeGain(aGain);
-}
+#endif
 
 
 TInt COggAudioCapabilityPoll::PollL()
@@ -935,7 +1478,6 @@ TInt COggAudioCapabilityPoll::PollL()
     iStream = NULL;
     return iCaps;
     }
-
 
 void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aErr) 
 {

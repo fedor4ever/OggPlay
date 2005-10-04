@@ -1,0 +1,972 @@
+/*
+ *  Copyright (c) 2005 S. Fisher
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <e32std.h>
+#include "OggOs.h"
+#include "OggLog.h"
+#include "OggTremor.h"
+#include "OggMultiThread.h"
+
+
+// Shared data class
+TStreamingThreadData::TStreamingThreadData(COggPlayback& aOggPlayback, RThread& aUIThread, RThread& aBufferingThread)
+: iOggPlayback(aOggPlayback), iUIThread(aUIThread), iBufferingThread(aBufferingThread),
+iNumBuffers(0), iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL), iBufferBytes(0), iBufferingMode(ENoBuffering)
+{
+}
+
+// Buffering AO (base class for CBufferingThreadAO and CStreamingThreadAO)
+CBufferingAO::CBufferingAO(TInt aPriority, TStreamingThreadData& aSharedData)
+: CActive(aPriority), iSharedData(aSharedData)
+{
+}
+
+CBufferingAO::~CBufferingAO()
+{
+}
+
+// Decode (prime) the next audio buffer
+// iSharedData.iPrimeBufNum holds the index of the next buffer
+// Set the last buffer ptr if eof is encountered
+void CBufferingAO::PrimeNextBuffer()
+{
+	TBool lastBuffer = iSharedData.iOggPlayback.PrimeBuffer(*(iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]));
+	iSharedData.iBufferBytes += iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]->Length();
+	iSharedData.iNumBuffers++;
+
+	if (lastBuffer)
+		iSharedData.iLastBuffer = iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum];
+ 
+	iSharedData.iPrimeBufNum++;
+	if (iSharedData.iPrimeBufNum == iSharedData.iMaxBuffers)
+		iSharedData.iPrimeBufNum = 0;
+}
+
+// Buffering thread AO (used in MultiThread mode only)
+// This AO is owned by the COggPlayback object and runs in the buffering thread
+CBufferingThreadAO::CBufferingThreadAO(TStreamingThreadData& aSharedData)
+: CBufferingAO(EPriorityIdle, aSharedData)
+{
+}
+
+CBufferingThreadAO::~CBufferingThreadAO()
+{
+}
+
+void CBufferingThreadAO::StartListening()
+{
+	// Set the AO active (wait for the streaming thread to make a buffering request)
+	iStatus = KRequestPending;
+	SetActive();
+}
+
+// Prime the next buffer and self complete to prime more buffers if possible
+void CBufferingThreadAO::RunL()
+{
+	// Decode the next buffer
+	PrimeNextBuffer();
+
+	// Stop buffering if we have filled all the buffers (or if we have got to the last buffer)
+	if ((iSharedData.iNumBuffers == iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
+	{
+	  // Listen for the next buffering request
+	  iStatus = KRequestPending;
+	  SetActive();
+
+	  iSharedData.iBufRequestInProgress = EFalse;
+	}
+	else if (!iSharedData.iLastBuffer)
+	{
+	  // More buffers are required, so self complete
+	  TRequestStatus* status = &iStatus;
+	  User::RequestComplete(status, KErrNone);
+
+	  SetActive();
+	}
+	else
+	  iSharedData.iBufRequestInProgress = EFalse;
+}
+
+// The buffering thread AO is owned by COggPlayback
+// The COggPlayback object must ensure that the buffering AO is not cancelled if the streaming thread could be about to make a buffering request
+// In other words, the streaming thread must be in a known, "inactive", state before the buffering thread AO is cancelled
+void CBufferingThreadAO::DoCancel()
+{
+	// If iSharedData.iBufRequestInProgress is true we will have self completed so there is nothing to do
+	// If iSharedData.iBufRequestInProgress is false we are waiting for a request from the streaming thread so we must complete the request with KErrCancel
+	if (!iSharedData.iBufRequestInProgress)
+	{
+		TRequestStatus* status = &iStatus;
+		User::RequestComplete(status, KErrCancel);
+	}
+
+	iSharedData.iBufRequestInProgress = EFalse;
+}
+
+// Streaming thread AO (It is used in SingleThread and MultiThread mode only)
+// The streaming thread AO is owned by the playback engine and runs in the streaming thread
+// aBufferFlushPending and aBufferingThreadPriority are references to the values held in the playback engine
+CStreamingThreadAO::CStreamingThreadAO(TStreamingThreadData& aSharedData, TBool& aBufferFlushPending, TThreadPriority& aBufferingThreadPriority)
+: CBufferingAO(EPriorityIdle, aSharedData),iBufferFlushPending(aBufferFlushPending), iBufferingThreadPriority(aBufferingThreadPriority)
+{
+}
+
+CStreamingThreadAO::~CStreamingThreadAO()
+{
+}
+
+void CStreamingThreadAO::StartBuffering()
+{
+	// Fetch the pre buffers
+	for (TInt i = 0 ; i<KPreBuffers ; i++)
+		PrimeNextBuffer();
+
+	// Start the AO
+	if (iSharedData.iBufferingMode != ENoBuffering)
+		ResumeBuffering();
+}
+
+void CStreamingThreadAO::ResumeBuffering()
+{
+	// Schedule the buffering (self complete)
+	TRequestStatus* status = &iStatus;
+	User::RequestComplete(status, KErrNone);
+
+	SetActive();
+}
+
+// Prime the next buffer and self complete to prime more buffers if possible
+// In MultiThread mode transfer the buffering to the buffering thread once there are KPrimeBuffers available
+void CStreamingThreadAO::RunL()
+{
+	// Decode the next buffer
+	PrimeNextBuffer();
+
+	// If we've got enough buffers and more buffering is required, transfer the buffering to the buffering thread
+	if ((iSharedData.iNumBuffers > KPrimeBuffers) && !iSharedData.iLastBuffer && (iSharedData.iBufferingMode == EBufferThread))
+	{
+		// We can't transfer the buffering if there is a buffer flush pending, so simply return
+		if (iBufferFlushPending)
+			return;
+
+		// Set the buffering request flag
+		iSharedData.iBufRequestInProgress = ETrue;
+
+		// Increase the buffering thread priority
+		iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityNormal) ? EPriorityMore : EPriorityAbsoluteHigh;
+		iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+
+		// Transfer buffering to the buffering thread
+		TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
+		iSharedData.iBufferingThread.RequestComplete(status, KErrNone);
+	}
+	else if ((iSharedData.iNumBuffers < iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
+	{
+		// Self complete (keep buffering)
+		TRequestStatus* status = &iStatus;
+		User::RequestComplete(status, KErrNone);
+
+		SetActive();
+	}
+}
+
+void CStreamingThreadAO::DoCancel()
+{
+	// There is nothing to do here:
+	// this AO is either inactive or will have self completed
+}
+
+// Streaming thread command handler AO
+// The streaming thread command handler is owned by the COggPlayback object and runs in the streaming thread
+// Accepts commands from the UI thread (the command thread)
+// Executes commands in the streaming thread (the command handler thread)
+CStreamingThreadCommandHandler::CStreamingThreadCommandHandler(RThread& aCommandThread, RThread& aStreamingThread, CThreadPanicHandler& aPanicHandler)
+: CThreadCommandHandler(EPriorityHigh, aCommandThread, aStreamingThread, aPanicHandler)
+{
+}
+
+CStreamingThreadCommandHandler::~CStreamingThreadCommandHandler()
+{
+}
+
+void CStreamingThreadCommandHandler::Volume()
+{
+	SendCommand(EStreamingThreadVolume);
+}
+
+void CStreamingThreadCommandHandler::SetVolume()
+{
+	SendCommand(EStreamingThreadSetVolume);
+}
+
+TInt CStreamingThreadCommandHandler::SetAudioProperties()
+{
+	return SendCommand(EStreamingThreadSetAudioProperties);
+}
+
+void CStreamingThreadCommandHandler::StartStreaming()
+{
+	SendCommand(EStreamingThreadStartStreaming);
+}
+
+void CStreamingThreadCommandHandler::StopStreaming()
+{
+	SendCommand(EStreamingThreadStopStreaming);
+}
+
+void CStreamingThreadCommandHandler::SetBufferingMode()
+{
+	SendCommand(EStreamingThreadSetBufferingMode);
+}
+
+void CStreamingThreadCommandHandler::SetThreadPriority()
+{
+	SendCommand(EStreamingThreadSetThreadPriority);
+}
+
+void CStreamingThreadCommandHandler::PrepareToFlushBuffers()
+{
+	SendCommand(EStreamingThreadPrepareToFlushBuffers);
+}
+
+void CStreamingThreadCommandHandler::FlushBuffers()
+{
+	SendCommand(EStreamingThreadFlushBuffers);
+}
+
+// Wait for commands
+// Commands are passed to the playback engine
+void CStreamingThreadCommandHandler::ListenForCommands(CStreamingThreadPlaybackEngine& aPlaybackEngine)
+{
+	iPlaybackEngine = &aPlaybackEngine;
+	CThreadCommandHandler::ListenForCommands();
+}
+
+// Handle commands
+// The AO completion status is the command to execute
+void CStreamingThreadCommandHandler::RunL()
+{
+	// Get the status
+	TInt status = iStatus.Int();
+
+	// Start listening again
+	iStatus = KRequestPending;
+	SetActive();
+
+	// Dispatch commands to the playback engine
+	TInt err = KErrNone;
+	switch (status)
+	{
+	case EStreamingThreadSetAudioProperties:
+		TRAP(err, iPlaybackEngine->SetAudioPropertiesL());
+		break;
+
+	case EStreamingThreadVolume:
+		iPlaybackEngine->Volume();
+		break;
+
+	case EStreamingThreadSetVolume:
+		iPlaybackEngine->SetVolume();
+		break;
+
+	case EStreamingThreadStartStreaming:
+		iPlaybackEngine->StartStreaming();
+		break;
+
+	case EStreamingThreadStopStreaming:
+		iPlaybackEngine->StopStreaming();
+		break;
+
+	case EStreamingThreadSetBufferingMode:
+		iPlaybackEngine->SetBufferingMode();
+		break;
+
+	case EStreamingThreadSetThreadPriority:
+		iPlaybackEngine->SetThreadPriority();
+		break;
+
+	case EStreamingThreadPrepareToFlushBuffers:
+		iPlaybackEngine->PrepareToFlushBuffers();
+		break;
+
+	case EStreamingThreadFlushBuffers:
+		iPlaybackEngine->FlushBuffers();
+		break;
+
+	case EThreadShutdown:
+		iPlaybackEngine->Shutdown();
+		CActiveScheduler::Stop();
+		return;
+
+	default:
+		// Panic if we get an unkown command
+		User::Panic(_L("STCL: RunL"), 0);
+		break;
+	}
+
+	// Complete the request
+	RequestComplete(err);
+}
+
+void CStreamingThreadCommandHandler::DoCancel()
+{
+	// Stop listening
+	TRequestStatus* status = &iStatus;
+	User::RequestComplete(status, KErrCancel);
+}
+
+// Playback engine class
+// Handles communication with the media server (CMdaAoudioOutputStream) and manages the audio buffering
+CStreamingThreadPlaybackEngine* CStreamingThreadPlaybackEngine::NewLC(TStreamingThreadData& aSharedData)
+{
+	CStreamingThreadPlaybackEngine* self = new(ELeave) CStreamingThreadPlaybackEngine(aSharedData);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	return self;
+}
+
+CStreamingThreadPlaybackEngine::CStreamingThreadPlaybackEngine(TStreamingThreadData& aSharedData)
+: iSharedData(aSharedData), iBufferingThreadPriority(EPriorityNormal)
+{
+	// Initialise buffer settings
+	iSharedData.iBuffersToUse = KNoBuffers;
+	iSharedData.iMaxBuffers = KNoBuffers;
+	iMaxStreamBuffers = KNoBuffers;
+	iBufferLowThreshold = KNoBuffers;
+
+	iSettings.Query();
+    
+    // These basic rates should be supported by all Symbian OS
+    // Higher quality might not be supported.
+    iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
+    iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
+    iSettings.iVolume = 0;
+}
+
+void CStreamingThreadPlaybackEngine::ConstructL()
+{
+	iStream = CMdaAudioOutputStream::NewL(*this);
+	iStream->Open(&iSettings);
+
+	iRestartAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
+	iStreamingThreadAO = new(ELeave) CStreamingThreadAO(iSharedData, iBufferFlushPending, iBufferingThreadPriority);
+	CActiveScheduler::Add(iStreamingThreadAO);
+}
+
+CStreamingThreadPlaybackEngine::~CStreamingThreadPlaybackEngine()
+{
+	if (iRestartAudioStreamingTimer)
+		iRestartAudioStreamingTimer->Cancel();
+
+	if (iStreamingThreadAO)
+		iStreamingThreadAO->Cancel();
+
+	iThread.Close();
+
+	delete iRestartAudioStreamingTimer;
+	delete iStreamingThreadAO;
+	delete iStream;
+}
+
+void CStreamingThreadPlaybackEngine::SetAudioPropertiesL()
+{
+	TMdaAudioDataSettings::TAudioCaps ac = TMdaAudioDataSettings::EChannelsMono;
+	if (iSharedData.iChannels == 1)
+		ac = TMdaAudioDataSettings::EChannelsMono;
+	else
+		ac = TMdaAudioDataSettings::EChannelsStereo;
+
+	TMdaAudioDataSettings::TAudioCaps rt = TMdaAudioDataSettings::ESampleRate8000Hz;
+	switch (iSharedData.iSampleRate)
+	{
+		case 8000:
+			rt = TMdaAudioDataSettings::ESampleRate8000Hz;
+			break;
+
+		case 11025:
+			rt = TMdaAudioDataSettings::ESampleRate11025Hz;
+			break;
+
+		case 16000:
+			rt = TMdaAudioDataSettings::ESampleRate16000Hz;
+			break;
+
+		case 22050:
+			rt = TMdaAudioDataSettings::ESampleRate22050Hz;
+			break;
+
+		case 32000:
+			rt = TMdaAudioDataSettings::ESampleRate32000Hz;
+			break;
+
+		case 44100:
+			rt = TMdaAudioDataSettings::ESampleRate44100Hz;
+			break;
+
+		case 48000:
+			rt = TMdaAudioDataSettings::ESampleRate48000Hz;
+			break;
+
+		default:
+			User::Leave(KErrNotSupported);
+			break;
+	}
+
+	iStream->SetAudioPropertiesL(rt, ac);
+}
+
+void CStreamingThreadPlaybackEngine::Volume()
+{
+	iSharedData.iVolume = iStream->Volume();
+}
+
+void CStreamingThreadPlaybackEngine::SetVolume()
+{
+	TInt vol = iSharedData.iVolume;
+	if (vol>KMaxVolume)
+		vol = KMaxVolume;
+	else if (vol<0)
+		vol = 0;
+
+	vol = (TInt) (((TReal) vol)/KMaxVolume * iMaxVolume);
+	if (vol > iMaxVolume)
+		vol = iMaxVolume;
+	iStream->SetVolume(vol);
+}
+
+void CStreamingThreadPlaybackEngine::StartStreaming()
+{
+	if (iStreaming)
+		User::Panic(_L("STPE: StartStream"), 0);
+
+	// Init streaming values
+	iBufNum = 0;
+	iStreaming = ETrue;
+
+	// Start the streaming thread AO
+	iStreamingThreadAO->StartBuffering();
+
+	// Stream the pre buffers
+	for (TInt i = 0 ; i<KPreBuffers ; i++)
+		SendNextBuffer();
+}
+
+void CStreamingThreadPlaybackEngine::StopStreaming()
+{
+	if (iStreaming)
+	{
+		// Stop the stream
+		iStream->Stop();
+
+		// Stop the AOs
+		iStreamingThreadAO->Cancel();
+		iRestartAudioStreamingTimer->Cancel();
+
+		// Reset streaming data
+		iStreaming = EFalse;
+		iStreamBuffers = 0;
+		iBufferFlushPending = EFalse;
+
+		// Reset shared data
+		iSharedData.iNumBuffers = 0;
+		iSharedData.iPrimeBufNum = 0;
+		iSharedData.iLastBuffer = NULL;
+		iSharedData.iBufferBytes = 0;
+
+		// Reset the thread priorities
+		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
+		{
+			iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
+			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+		}
+	}
+}
+
+void CStreamingThreadPlaybackEngine::SetBufferingMode()
+{
+	if (iStreaming)
+		User::Panic(_L("STPE: SBM1"), 0);
+
+	// Set the buffering values
+	switch(iSharedData.iBufferingMode)
+	{
+		case ENoBuffering:
+			iMaxStreamBuffers = KNoBuffers;
+			iBufferLowThreshold = KNoBuffers;
+			break;
+
+		case EBufferStream:
+			iMaxStreamBuffers = KSingleThreadStreamBuffers;
+			iBufferLowThreshold = KSingleThreadLowThreshold;
+			break;
+
+		case EBufferThread:
+			iMaxStreamBuffers = KMultiThreadStreamBuffers;
+			iBufferLowThreshold = KMultiThreadLowThreshold;
+			break;
+
+		default:
+			User::Panic(_L("STPE: SBM2"), 0);
+			break;
+	}
+}
+
+void CStreamingThreadPlaybackEngine::SetThreadPriority()
+{
+	// Set the thread priorities
+	switch(iSharedData.iStreamingThreadPriority)
+	{
+		case ENormal:
+			// Use normal (relative) thread priorities
+			if (iBufferingThreadPriority == EPriorityAbsoluteForeground)
+				iBufferingThreadPriority = EPriorityNormal;
+			else if (iBufferingThreadPriority == EPriorityAbsoluteHigh)
+				iBufferingThreadPriority = EPriorityMore;
+			else
+				break;
+
+			iThread.SetPriority(EPriorityMore);
+			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+			break;
+
+		case EHigh:
+			// Use high (absolute) thread priorities
+			if (iBufferingThreadPriority == EPriorityNormal)
+				iBufferingThreadPriority = EPriorityAbsoluteForeground;
+			else if (iBufferingThreadPriority == EPriorityMore)
+				iBufferingThreadPriority = EPriorityAbsoluteHigh;
+			else
+				break;
+
+			iThread.SetPriority(EPriorityAbsoluteHigh);
+			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+			break;
+
+		default:
+			User::Panic(_L("STPE: STP"), 0);
+			break;
+	}
+}
+
+void CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
+{
+	// Mark that a buffer flush is pending (this inhibits requests to the buffering thread)
+	iBufferFlushPending = ETrue;
+}
+
+void CStreamingThreadPlaybackEngine::FlushBuffers()
+{
+	if (!iStreaming)
+		User::Panic(_L("STPE: FB"), 0);
+
+	// Reset the audio stream (move position / change volume gain)
+	switch (iSharedData.iFlushBufferEvent)
+	{
+		case EBufferingModeChanged:
+		{
+			// Flush all of the data
+			TInt millisecsToFlush = (500*iSharedData.iBufferBytes)/(iSharedData.iSampleRate*iSharedData.iChannels);
+			if (millisecsToFlush)
+				iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iOggPlayback.DecoderPosition() - TInt64(millisecsToFlush));
+
+			// Stop streaming
+			StopStreaming();
+			return;
+		}
+
+		case EVolumeGainChanged:
+		{
+			// Calculate how much data needs to be flushed
+			// Don't flush buffers that are already in the stream and leave another KPreBuffers unflushed
+			TInt availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+			TBool buffersToFlush = availBuffers>KPreBuffers;
+			TInt numFlushBuffers = (buffersToFlush) ? availBuffers-KPreBuffers : 0;
+			iSharedData.iNumBuffers -= numFlushBuffers;
+
+			TInt bytesFlushed = 0;
+			if (buffersToFlush)
+			{
+				TInt bufNum = iBufNum + KPreBuffers;
+				if (bufNum>=iSharedData.iMaxBuffers)
+					bufNum -= iSharedData.iMaxBuffers;
+				iSharedData.iPrimeBufNum = bufNum;
+
+				for (TInt i = 0 ; i<numFlushBuffers ; i++)
+				{
+					bytesFlushed += iSharedData.iOggPlayback.iBuffer[bufNum]->Length();
+					bufNum++;
+					if (bufNum == iSharedData.iMaxBuffers)
+						bufNum = 0;
+				}
+				iSharedData.iBufferBytes -= bytesFlushed;
+			}
+
+			// Reset the decoder position
+			TInt millisecsToFlush = (500*bytesFlushed)/(iSharedData.iSampleRate*iSharedData.iChannels);
+			if (millisecsToFlush)
+				iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iOggPlayback.DecoderPosition() - TInt64(millisecsToFlush));
+
+			// Set the new volume gain (and carry on as if nothing had happened)
+			iSharedData.iOggPlayback.SetSampleRateConverterVolumeGain(iSharedData.iNewGain);
+			break;
+		}
+
+		case EPositionChanged:
+			// This isn't currently used (FF/RW stop and start the stream instead)
+			// iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iNewPosition);
+			// break;
+
+		default:
+			User::Panic(_L("STPE: Flush"), 0);		
+	}
+
+	// Start the streaming thread AO
+	if (!iStreamingThreadAO->IsActive() && (iSharedData.iBufferingMode != ENoBuffering))
+	{
+		// Reset the buffering thread priority
+		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
+		{
+			iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
+			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+		}
+
+		iStreamingThreadAO->ResumeBuffering();
+	}
+
+	// Reset the buffer flush pending flag 
+	iBufferFlushPending = EFalse;
+}
+
+void CStreamingThreadPlaybackEngine::Shutdown()
+{
+	// We can't shutdown if we are streaming, so panic
+	if (iStreaming)
+		User::Panic(_L("STPE: Shutdown"), 0);
+}
+
+TInt CStreamingThreadPlaybackEngine::RestartAudioStreamingCallBack(TAny* aPtr)
+{
+	CStreamingThreadPlaybackEngine* self= (CStreamingThreadPlaybackEngine*) aPtr;
+	self->RestartStreaming();
+
+	return 0;
+}
+
+// Restart streaming
+// TO DO: Possibly move this back to the UI thread (to be investigated)
+void CStreamingThreadPlaybackEngine::RestartStreaming()
+{
+	// If there are enough available buffers, start streaming again
+    TInt availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+	if (availBuffers>=KPreBuffers)
+	{
+		for (TInt i = 0 ; i<KPreBuffers ; i++)
+			SendNextBuffer();
+	}
+	else if (iSharedData.iBufferingMode == ENoBuffering)
+	{
+		iStreamingThreadAO->StartBuffering();
+
+		for (TInt i = 0 ; i<KPreBuffers ; i++)
+			SendNextBuffer();
+	}
+	else
+	{
+		// Try again after another delay
+		iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
+	}
+}
+
+// Send the next audio buffer to the stream
+// iBufNum holds the index of the next buffer
+void CStreamingThreadPlaybackEngine::SendNextBuffer()
+{
+	TRAPD(err, iStream->WriteL(*iSharedData.iOggPlayback.iBuffer[iBufNum]));
+	if (err != KErrNone)
+	{
+		// If an error occurs notify the UI thread
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		iSharedData.iUIThread.RequestComplete(status, err);
+	}
+
+	// Increment the number of stream buffers (we have one more now)
+	iStreamBuffers++;
+
+	// Move on to the next buffer
+	iBufNum++;
+	if (iBufNum == iSharedData.iMaxBuffers)
+		iBufNum = 0;
+}
+
+void CStreamingThreadPlaybackEngine::MaoscOpenComplete(TInt aErr)
+{ 
+	TRACEF(COggLog::VA(_L("MaoscOpenComplete:%d"), aErr));
+	TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+	iSharedData.iUIThread.RequestComplete(status, aErr);
+
+	if (aErr != KErrNone)
+		return;
+
+	iMaxVolume = iStream->MaxVolume();
+	iStream->SetPriority(KAudioPriority, EMdaPriorityPreferenceTimeAndQuality);
+}
+
+// MaoscBufferCopied does all of the work to manage the buffering
+void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& aBuffer)
+{
+	// Error codes:
+	// KErrCancel      -3  (not sure when this happens, but ignore for now)
+	// KErrUnderflow  -10  (ignore this, do as if nothing has happend, and live happily ever after)
+	// KErrDied       -13  (interrupted by higher priority)
+	// KErrInUse      -14  (the sound device was stolen from us)
+	// KErrAbort      -39  (stream was stopped before this buffer was copied)
+
+	// Debug trace, if error
+	if (aErr != KErrNone)
+		{ TRACEF(COggLog::VA(_L("MaoscBufferCopied:%d"), aErr)); }
+		
+	// Decrement the stream buffers (we have one less now)
+	iStreamBuffers--;
+
+	// Adjust the number of bytes we have in buffers
+	iSharedData.iBufferBytes -= aBuffer.Length();
+
+	// Decrement the total number of buffers
+	iSharedData.iNumBuffers--;
+
+	// If we have reached the last buffer, notify the UI thread
+	if (iSharedData.iLastBuffer == &aBuffer)
+	{
+		// Notify the UI thread that we have copied the last buffer to the stream
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		iSharedData.iUIThread.RequestComplete(status, ELastBufferCopied);
+		return;
+	}
+
+	// Dynamically adjust the buffering thread priority
+	TBool streamingThreadActive = iStreamingThreadAO->IsActive();
+	if (iSharedData.iBufferingMode == EBufferThread)
+	{
+		if (iSharedData.iNumBuffers < KBufferThreadLowThreshold)
+		{
+			if ((iBufferingThreadPriority != EPriorityMore) && (iBufferingThreadPriority != EPriorityAbsoluteHigh))
+			{
+				if (!streamingThreadActive && !iSharedData.iLastBuffer)
+				{
+					iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityNormal) ? EPriorityMore : EPriorityAbsoluteHigh;
+					iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+				}
+			}
+		}
+		else if (iSharedData.iNumBuffers > KBufferThreadHighThreshold)
+		{
+			if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
+			{
+				iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
+				iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+			}
+		}
+	}
+ 
+	// Ignore most of the error codes
+	if ((aErr == KErrAbort) || (aErr == KErrInUse) || (aErr == KErrDied)  || (aErr == KErrCancel))
+		return;
+
+	if ((aErr != KErrNone) && (aErr != KErrUnderflow))
+	{
+		// Notify the UI thread (unknown error)
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		iSharedData.iUIThread.RequestComplete(status, aErr);
+		return;
+	}
+
+	// Ignore underflow if there are stream buffers left
+	if ((aErr == KErrUnderflow) && iStreamBuffers)
+		return;
+
+	// Check if we have available buffers
+	TInt availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+	if (!availBuffers)
+	{
+		// If the streaming thread is doing the buffering, prime another buffer now 
+		if ((streamingThreadActive || (iSharedData.iBufferingMode == ENoBuffering)) && (aErr != KErrUnderflow))
+			iStreamingThreadAO->PrimeNextBuffer();
+		else
+		{
+			// If we still have stream buffers, ignore the fact there are no buffers left
+			if (iStreamBuffers)
+				return;
+
+			// Otherwise try to re-start playback
+			iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
+			return;
+		}
+	}
+
+	// Stream the next buffer
+	SendNextBuffer();
+
+	availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+	if ((iStreamBuffers<iMaxStreamBuffers) && availBuffers)
+	{
+		// Try to catch up by writing another buffer
+		SendNextBuffer();
+	}
+
+	// If the number of buffers has dropped below a certain threshold, request the buffering thread to start buffering
+	if (iSharedData.iNumBuffers<iBufferLowThreshold) 
+	{
+		// Nothing to do if the streaming thread is already buffering
+		// If a buffer flush is pending we don't want to start any more buffering
+		if (streamingThreadActive || iBufferFlushPending)
+			return;
+
+		switch (iSharedData.iBufferingMode)
+		{
+			case ENoBuffering:
+				break;
+
+			case EBufferStream:
+				if (!iSharedData.iLastBuffer)
+					iStreamingThreadAO->ResumeBuffering();
+				break;
+
+			case EBufferThread:
+				{
+					// Nothing to do if the buffering thread is already buffering
+					if (iSharedData.iBufRequestInProgress)
+						break;
+
+					// Nothing to do if we have reached eof
+					if (iSharedData.iLastBuffer)
+						break;
+
+					// Issue a buffering request
+					iSharedData.iBufRequestInProgress = ETrue;
+					TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
+					iSharedData.iBufferingThread.RequestComplete(status, KErrNone);
+				}
+				break;
+
+			default:
+				User::Panic(_L("STPE: MaoscBC"), 0);
+				break;
+		}
+	}
+}
+
+// Handle play complete
+// There are five possibilities possibilities:
+// 1. Playback is stopped by the user
+// In this case there is nothing to do, the UI thread will handle everything
+
+// 2. KErrUnderflow
+// MaoscBufferCopied will have scheduled the restart timer, so we ignore KErrUnderflow
+
+// 3. KErrDied
+// I'm not sure what causes this, but we simply inform the UI thread
+// The UI thread will make a number of attempts to restart playback
+// (This behaviour is the same as OggPlay 1.07 and earlier)
+
+// 4. KErrInUse
+// This is caused when another application takes the sound device from us (real player does this)
+// OggPlay will stop playback and display a message informing the user.
+// OggPlay will attempt to restart playback when the user presses "back"
+
+// 5. Unknown error
+// This is handled in the same way as KErrInUse, except that the UI thread will display the error code
+void CStreamingThreadPlaybackEngine::MaoscPlayComplete(TInt aErr)
+{
+	// Error codes:
+	// KErrNone         0 (stopped by user)
+	// KErrCancel      -3 (also stopped by user)
+	// KErrUnderflow  -10 (ran out of audio, EOF or lack of cpu power)
+	// KErrDied       -13 (interrupted by higher priority)
+	// KErrInUse      -14 (the sound device was stolen from us)
+
+	// Trace the reason for the play complete
+	TRACEF(COggLog::VA(_L("MaoscPlayComplete:%d"), aErr));
+  
+	// Stopped by the user
+	if ((aErr == KErrNone) || (aErr == KErrCancel))
+		return;
+
+	// Ignore underflow, underflow is handled by MaoscBufferCopied
+	if (aErr == KErrUnderflow)
+		return;
+
+	// Expect KErrDied if interrupted
+	if (aErr == KErrDied)
+	{
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		iSharedData.iUIThread.RequestComplete(status, EPlayInterrupted);
+		return;
+	}
+
+	// Unknown error (or KErrInUse)
+	TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+	iSharedData.iUIThread.RequestComplete(status, aErr);
+}
+
+
+// Streaming thread listener AO
+// This AO owned is owned by the COggPlayback object and runs in the UI thread
+// It handles events from the audio stream (CMdaAudioOutputStream events from the streaming thread)
+CStreamingThreadListener::CStreamingThreadListener(COggPlayback& aOggPlayback, TStreamingThreadData& aSharedData)
+: CActive(EPriorityHigh), iOggPlayback(aOggPlayback), iSharedData(aSharedData), iListeningState(EListeningForOpenComplete)
+{
+	CActiveScheduler::Add(this);
+
+	// Start listening
+	iStatus = KRequestPending;
+	SetActive();
+}
+
+CStreamingThreadListener::~CStreamingThreadListener()
+{
+}
+
+void CStreamingThreadListener::RunL()
+{
+	// Get the status
+	TInt status = iStatus.Int();
+
+	// Start listening again
+	iStatus = KRequestPending;
+	SetActive();
+
+	// Handle the message
+	switch (iListeningState)
+	{
+	case EListeningForOpenComplete:
+		iOggPlayback.NotifyOpenComplete(status);
+		iListeningState = EListeningForStreamingStatus;
+		break;
+
+	case EListeningForStreamingStatus:
+		iOggPlayback.NotifyStreamingStatus(status);
+		break;
+	}
+}
+
+void CStreamingThreadListener::DoCancel()
+{
+	// Stop listening
+	TRequestStatus* status = &iStatus;
+	User::RequestComplete(status, KErrCancel);
+}

@@ -65,6 +65,7 @@ const TInt ENoFileSelected = -1;
 #include "OggViews.h"
 #include "OggControls.h"
 #include "OggMsgEnv.h"
+#include "OggMultiThread.h"
 
 // some global constants:
 //-----------------------
@@ -81,7 +82,9 @@ const TUid KOggPlayUidUserView = { KOggPlayApplicationUidValue+4 };
 const TUid KOggPlayUidSplashView = { KOggPlayApplicationUidValue+5 };
 const TUid KOggPlayUidCodecSelectionView = { KOggPlayApplicationUidValue+6 };
 
-
+#if defined(MULTI_THREAD_PLAYBACK)
+const TUid KOggPlayUidPlaybackOptionsView = { KOggPlayApplicationUidValue+7 };
+#endif
 
 
 struct TKeyCodes
@@ -170,10 +173,12 @@ public:
     ENofHotkeys=EHotkeyVolumeHelp+1
     };
 
-
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
   TBool iRepeat;
+// Multi thread playback settings
+  TInt iBufferingMode;
+  TInt iThreadPriority;	
 };
 
  
@@ -302,9 +307,13 @@ public:
   COggSongList*    iSongList;
 
   // from MPlaybackObserver:
-  virtual void NotifyPlayComplete();
   virtual void NotifyUpdate();
+  virtual void NotifyPlayComplete();
   virtual void NotifyPlayInterrupted();
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  virtual void NotifyFatalPlayError();
+#endif
 
   // high level functions:
   void PlaySelect();
@@ -342,6 +351,11 @@ public:
 
   void SetVolumeGainL(TGainType aNewGain);
 
+#if defined(MULTI_THREAD_PLAYBACK)
+  void SetBufferingModeL(TBufferingMode aNewBufferingMode);
+  void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
+#endif
+
 private: 
 
   void ReadIniFile();
@@ -352,8 +366,12 @@ private:
 #endif
   void SetHotKey();
   TBool IsAlarmTime();
+
+#if !defined(MULTI_THREAD_PLAYBACK)
   void SetProcessPriority();
   void SetThreadPriority();
+#endif
+
   void FindSkins();
 #if defined(SERIES60_SPLASH)
   void ShowSplash();
@@ -370,13 +388,20 @@ private:
 #if defined(SERIES60)
   COggSettingsView* iSettingsView;
   COggUserHotkeysView* iUserHotkeysView;
+
 #ifdef SERIES60_SPLASH_WINDOW_SERVER
   COggSplashView* iSplashView;
 #endif
+
 #ifdef PLUGIN_SYSTEM
    COggPluginSettingsView* iCodecSelectionView;
 #endif
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  COggPlaybackOptionsView* iPlaybackOptionsView;
+#endif
 #endif /* SERIES60 */
+
   RArray<TInt> iViewHistoryStack;
   RArray<TInt> iRestoreStack;
   TInt iRestoreCurrent;

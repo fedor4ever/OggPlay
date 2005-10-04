@@ -108,9 +108,13 @@ class CPluginSupportedList: public CBase
 class MPlaybackObserver 
 {
  public:
-  virtual void NotifyPlayComplete() = 0;
   virtual void NotifyUpdate() = 0;
+  virtual void NotifyPlayComplete() = 0;
   virtual void NotifyPlayInterrupted() = 0;
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  virtual void NotifyFatalPlayError() = 0;
+#endif
 };
 
 class CAbsPlayback : public CBase {

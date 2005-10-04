@@ -236,11 +236,13 @@ void COggSettingsView::ViewDeactivated()
   COggS60Utility::RemoveStatusPane(); 
 }
 
+#if !defined(MULTI_THREAD_PLAYBACK)
 void COggSettingsView::VolumeGainChangedL()
 {
 	if (iContainer)
 		iContainer->VolumeGainChangedL();
 }
+#endif
 
 TVwsViewId COggSettingsView::ViewId() const
 {
@@ -392,4 +394,68 @@ void COggSplashView::ViewDeactivated()
     
 }
 #endif /* SERIES60_SPLASH_WINDOW_SERVER */
-#endif
+
+
+#if defined(MULTI_THREAD_PLAYBACK)
+COggPlaybackOptionsView::COggPlaybackOptionsView(COggPlayAppView& aOggViewCtl, TUid aId)
+: COggViewBase(aOggViewCtl)
+{
+    iUid = aId;
+}
+
+COggPlaybackOptionsView::~COggPlaybackOptionsView()
+{
+}
+
+void COggPlaybackOptionsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+{
+  CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
+  if (Cba)
+  {
+    Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
+    Cba->DrawNow();
+  }
+
+  CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
+  COggS60Utility::DisplayStatusPane(R_OGG_PLAYBACK);
+
+  if (!iContainer)
+    {
+    iContainer = new (ELeave) COggSettingsContainer;
+    iContainer->ConstructL(((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect(), iUid);
+    ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->AddToStackL(*this, iContainer);
+    }
+}
+
+void COggPlaybackOptionsView::ViewDeactivated()
+{
+  if (iContainer)
+  {
+	((CCoeAppUi*) CEikonEnv::Static()->AppUi())->RemoveFromViewStack(*this, iContainer);
+
+	delete iContainer;
+	iContainer = NULL;
+  }
+
+  COggS60Utility::RemoveStatusPane(); 
+}
+
+TVwsViewId COggPlaybackOptionsView::ViewId() const
+{
+  return TVwsViewId(KOggPlayUid, iUid);
+}
+
+void COggPlaybackOptionsView::VolumeGainChangedL()
+{
+	if (iContainer)
+		iContainer->VolumeGainChangedL();
+}
+
+void COggPlaybackOptionsView::BufferingModeChangedL()
+{
+	if (iContainer)
+		iContainer->BufferingModeChangedL();
+}
+
+#endif /* MULTI_THREAD_PLAYBACK */
+#endif /* SERIES60 */

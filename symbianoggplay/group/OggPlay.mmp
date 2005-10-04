@@ -50,6 +50,10 @@ SOURCE OggFilesSearchDialogs.cpp
     SOURCE OggTremor_Motorola.cpp
 #else
     SOURCE OggTremor.cpp
+#if defined(MULTI_THREAD_PLAYBACK)
+    SOURCE OggMultiThread.cpp
+    SOURCE OggThreadClasses.cpp
+#endif
 #endif
 
   //FIXMAD: should be part of the vorbis dll

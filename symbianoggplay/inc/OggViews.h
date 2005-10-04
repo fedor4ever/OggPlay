@@ -90,7 +90,9 @@ class COggSettingsView : public COggViewBase
   ~COggSettingsView();
   virtual TVwsViewId ViewId() const;
 
+#if !defined(MULTI_THREAD_PLAYBACK)
   void VolumeGainChangedL();
+#endif
 
   COggSettingsContainer* iContainer;
   private:
@@ -154,5 +156,30 @@ class COggSplashView : public COggViewBase
         CSplashContainer *iSplashContainer;
 	};
 #endif /*SERIES60_SPLASH_WINDOW_SERVER*/
+
+#if defined(MULTI_THREAD_PLAYBACK)
+class COggPlaybackOptionsView : public COggViewBase
+{
+public:
+  COggPlaybackOptionsView(COggPlayAppView&,  TUid aViewUid);
+  ~COggPlaybackOptionsView();
+ 
+  virtual TVwsViewId ViewId() const;
+  void VolumeGainChangedL();
+  void BufferingModeChangedL();
+
+public:
+  COggSettingsContainer* iContainer;
+
+private:
+  // implements MCoeView:
+  virtual void ViewDeactivated();
+  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/);
+
+private:
+  TUid iUid;
+};
 #endif
+
+#endif /* SERIES_60 */
 #endif

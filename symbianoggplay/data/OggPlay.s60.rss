@@ -341,8 +341,8 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			name = ogg_rsk_play;
 			}
 #ifndef PLUGIN_SYSTEM
-        ,
-		AVKON_SETTING_ITEM
+#if !defined(MULTI_THREAD_PLAYBACK)
+        , AVKON_SETTING_ITEM
 			{
 			identifier = EOggSettingVolumeBoost;
 			setting_page_resource = r_oggplay_volume_boost;
@@ -350,8 +350,42 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			name = ogg_volume_boost;
 			}
 #endif
+#endif
         };
     }
+
+#if defined(MULTI_THREAD_PLAYBACK)
+RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_playback_options_item_list
+    {
+    flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
+    title = ogg_playback_title;
+    initial_number = 1;
+    items =
+        {
+		AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingBufferingMode;
+			setting_page_resource = r_oggplay_buffering_mode;
+			associated_resource = r_oggplay_buffering_mode_item_list;
+			name = ogg_buffering_mode;
+			},
+	    AVKON_SETTING_ITEM
+	        {  
+	        identifier = EOggSettingThreadPriority;
+			setting_page_resource = r_oggplay_thread_priority_page;
+			associated_resource = r_oggplay_popup_thread_priority_texts;
+			name = ogg_thread_priority;    
+	        },
+        AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingVolumeBoost;
+			setting_page_resource = r_oggplay_volume_boost;
+			associated_resource = r_oggplay_volume_boost_item_list;
+			name = ogg_volume_boost;
+			}
+        };
+    }
+#endif
 
 RESOURCE POPUP_SETTING_LIST r_oggplay_popup_setting_list_new_entry
     {
@@ -569,6 +603,74 @@ RESOURCE ARRAY r_oggplay_volume_boost_item_array
     };
     }
 
+// ---------------------------------------------------------------
+
+#if defined(MULTI_THREAD_PLAYBACK)
+RESOURCE AVKON_SETTING_PAGE r_oggplay_buffering_mode
+    {   
+    label = ogg_buffering_mode;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_buffering_mode_item_list
+    {
+    setting_texts_resource = r_oggplay_buffering_mode_page_list;
+    popped_up_texts_resource = r_oggplay_buffering_mode_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_buffering_mode_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_buffering_mode_multi; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_buffering_mode_single; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_buffering_mode_none; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_buffering_mode_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_buffering_mode_multi; },
+		LBUF { txt = ogg_buffering_mode_single; },
+		LBUF { txt = ogg_buffering_mode_none; }
+	};
+    }
+
+// ---------------------------------------------------------------
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_thread_priority_page
+	{
+	label=ogg_thread_priority;
+	type=EAknCtPopupSettingList;
+	}
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_popup_thread_priority_texts
+	{
+	flags=0;
+	setting_texts_resource=r_oggplay_thread_priority_texts;
+	popped_up_texts_resource=r_oggplay_popped_up_thread_priority_texts;
+	}
+
+RESOURCE ARRAY r_oggplay_thread_priority_texts
+	{
+	items= 
+		{
+		AVKON_ENUMERATED_TEXT { value=1; text = "High"; },
+		AVKON_ENUMERATED_TEXT { value=0; text = "Normal"; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_popped_up_thread_priority_texts
+    {
+    items = 
+		{ 
+		LBUF { txt = "High"; },
+		LBUF { txt = "Normal"; }
+		};
+	}
+#endif
+
 
 // Codec info items
 ///////////////////////////////////////////////////////////////////////////////
@@ -679,14 +781,17 @@ RESOURCE ARRAY r_user_hotkey_items
 RESOURCE MENU_PANE r_options_menu
 {
   items= {
-      MENU_ITEM { txt=ogg_skins; 
-                  cascade=r_skin_menu; },
-	MENU_ITEM { command=EOggOptions;	txt=ogg_settings; },
-	MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; }
+	MENU_ITEM { txt=ogg_skins; cascade=r_skin_menu; },
+	MENU_ITEM { command=EOggOptions; txt=ogg_settings; },
+	MENU_ITEM { command=EOggUserHotkeys; txt=ogg_user_hotkey; }
+
 #ifdef PLUGIN_SYSTEM
 	, MENU_ITEM { command=EOggCodecSelection; txt=ogg_codec_selection; }
 #endif
-	
+
+#if defined(MULTI_THREAD_PLAYBACK)
+	, MENU_ITEM { command=EOggPlaybackOptions; txt=ogg_playback; }
+#endif
   };
 }
 

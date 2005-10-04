@@ -94,7 +94,7 @@ void COggSampleRateConverter::SetVolumeGain(TGainType aGain)
     iGain = aGain;
 }
 
-TInt COggSampleRateConverter::FillBuffer( TDes8 &aBuffer)
+TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
 {
     long ret=0;
     aBuffer.SetLength(0);

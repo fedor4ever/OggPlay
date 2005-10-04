@@ -27,13 +27,19 @@ void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
     if (aId ==  KOggPlayUidSettingsView)
     {
         COggS60Utility::DisplayStatusPane(R_OGG_SETTINGS);
-        iListBox = new (ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
+        iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_SETTING_ITEM_LIST);
     }
+#if defined(MULTI_THREAD_PLAYBACK)
+	else if (aId == KOggPlayUidPlaybackOptionsView)
+	{
+        COggS60Utility::DisplayStatusPane(R_OGG_PLAYBACK);
+        iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
+        iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_PLAYBACK_OPTIONS_ITEM_LIST);
+	}
     else
-    {
         User::Leave(KErrNotSupported);
-    }
+#endif
     
     SetRect(aRect);
     ActivateL();
@@ -42,7 +48,6 @@ void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
     
     iListBox->SetRect(aRect);
     iListBox->ActivateL();
-    
 }
 
 COggSettingsContainer::~COggSettingsContainer()
@@ -112,7 +117,13 @@ void COggSettingsContainer::VolumeGainChangedL()
 		((COggplayDisplaySettingItemList*) iListBox)->VolumeGainChangedL();
 }
 
-
+#if defined(MULTI_THREAD_PLAYBACK)
+void COggSettingsContainer::BufferingModeChangedL()
+{
+	if (iListBox)
+		((COggplayDisplaySettingItemList*) iListBox)->BufferingModeChangedL();
+}
+#endif
 
 // ---------------------------------------------------------
 
@@ -122,37 +133,46 @@ COggplayDisplaySettingItemList::COggplayDisplaySettingItemList(COggPlayAppUi& aA
 {
 }
 
-
 CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdentifier)
 {
   switch (aIdentifier)
-		{
+  {
   case EOggRepeat:
-    return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
-      iData.iRepeat);
+    return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iRepeat);
+
   case EOggSettingScanDir:
-    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
-      iData.iScanmode);
+    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iScanmode);
+
   case EOggSettingManeuvringSpeed:
-    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
-      iData.iManeuvringSpeed);
+    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iManeuvringSpeed);
+
   case EOggSettingAutoPlayId:
-    return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
-      iData.iAutoplay);
+    return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iAutoplay);
+
   case EOggSettingWarningsId:
-    return new (ELeave) CAknBinaryPopupSettingItem(aIdentifier,
-      iData.iWarningsEnabled);
+    return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iWarningsEnabled);
+
   case EOggSettingRskIdle:
-    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
-      iData.iSoftKeysIdle[0]);
+    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iSoftKeysIdle[0]);
+
   case EOggSettingRskPlay:
-    return new (ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, 
-      iData.iSoftKeysPlay[0]);
+    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iSoftKeysPlay[0]);
+
   case EOggSettingVolumeBoost:
-     return iGainSettingItem = new (ELeave) CGainSettingItem(aIdentifier,   iAppUi);
+     return iGainSettingItem = new(ELeave) CGainSettingItem(aIdentifier, iAppUi);
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  case EOggSettingBufferingMode:
+    return iBufferingModeItem = new(ELeave) CBufferingModeSettingItem(aIdentifier, iAppUi);
+
+  case EOggSettingThreadPriority:
+    return new(ELeave) CThreadPrioritySettingItem(aIdentifier, iAppUi);
+#endif
+
   default:
     break;
-		}
+  }
+
   return NULL;
 }
 
@@ -165,28 +185,56 @@ void COggplayDisplaySettingItemList::VolumeGainChangedL()
 		}
 }
 
-
+#if defined(MULTI_THREAD_PLAYBACK)
+void COggplayDisplaySettingItemList::BufferingModeChangedL()
+{
+	if (iBufferingModeItem)
+		{
+		iBufferingModeItem->LoadL();
+		HandleChangeInItemArrayOrVisibilityL();
+		}
+}
+#endif
 
 /////////////////////////////////////
 // 
 // Overload of the Gain setting, so that change will take place right away
 // 
 /////////////////////////////////////
+CGainSettingItem::CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iGainType), iAppUi(aAppUi)
+{
+}
  
-CGainSettingItem:: CGainSettingItem( TInt aIdentifier,  COggPlayAppUi& aAppUi)
-: CAknEnumeratedTextPopupSettingItem ( aIdentifier , aAppUi.iSettings.iGainType ), iAppUi(aAppUi)
+void  CGainSettingItem::EditItemL(TBool aCalledFromMenu)
+{
+  CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
+  iAppUi.SetVolumeGainL((TGainType) InternalValue());
+}
 
-    {
-    }
 
+#if defined(MULTI_THREAD_PLAYBACK)
+CBufferingModeSettingItem::CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iBufferingMode), iAppUi(aAppUi)
+{
+}
  
-void  CGainSettingItem:: EditItemL ( TBool aCalledFromMenu )
-     {
-     CAknEnumeratedTextPopupSettingItem::EditItemL( aCalledFromMenu );
-     iAppUi.SetVolumeGainL( (TGainType)InternalValue () ) ;
-     }
+void  CBufferingModeSettingItem::EditItemL(TBool aCalledFromMenu)
+{
+  CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
+  iAppUi.SetBufferingModeL((TBufferingMode) InternalValue());
+}
 
 
-
-
+CThreadPrioritySettingItem::CThreadPrioritySettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iThreadPriority), iAppUi(aAppUi)
+{
+}
+ 
+void  CThreadPrioritySettingItem::EditItemL(TBool aCalledFromMenu)
+{
+  CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+  iAppUi.SetThreadPriority((TStreamingThreadPriority) InternalValue());
+}
+#endif
 #endif /* SERIES60 */

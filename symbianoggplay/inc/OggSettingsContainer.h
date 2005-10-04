@@ -28,7 +28,6 @@
 #endif
 
 
-
 /**
 *  COggSettingsContainer  container control class.
 *  
@@ -50,6 +49,10 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
     public: // New functions
 		void VolumeGainChangedL();
 
+		#if defined(MULTI_THREAD_PLAYBACK)
+		void BufferingModeChangedL();
+		#endif
+
     public: // Functions from base classes
 
     private: // Functions from base classes
@@ -67,14 +70,18 @@ class COggSettingsContainer : public CCoeControl, MCoeControlObserver
     };
 
 
-
 #if defined(SERIES60)
 class CGainSettingItem;
+class CBufferingModeSettingItem;
 class COggplayDisplaySettingItemList : public CAknSettingItemList
 {
 public:
   COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi);
   void VolumeGainChangedL();
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  void BufferingModeChangedL();
+#endif
   
 protected:
   virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
@@ -84,20 +91,48 @@ private:
   COggPlayAppUi& iAppUi;
 
   CGainSettingItem* iGainSettingItem;
+
+#if defined(MULTI_THREAD_PLAYBACK)
+  CBufferingModeSettingItem* iBufferingModeItem;
+#endif
 };
 
 class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 
-    {
-    public:  // Constructors and destructor
-        CGainSettingItem( TInt aIdentifier,  COggPlayAppUi& aAppUi);
-    private: // Functions from base classes
-        void EditItemL ( TBool aCalledFromMenu );
-    private: //data
-        COggPlayAppUi& iAppUi;
-    };
+{
+public:  // Constructors and destructor
+    CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private: // Functions from base classes
+    void EditItemL(TBool aCalledFromMenu);
+
+private: //data
+    COggPlayAppUi& iAppUi;
+};
+
+// Multi thread playback classes
+class CBufferingModeSettingItem : public CAknEnumeratedTextPopupSettingItem
+{
+public:  // Constructors and destructor
+    CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private: // Functions from base classes
+    void EditItemL(TBool aCalledFromMenu);
+
+private: //data
+	COggPlayAppUi& iAppUi;
+};
+
+class CThreadPrioritySettingItem : public CAknBinaryPopupSettingItem
+{
+public:  // Constructors and destructor
+    CThreadPrioritySettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private: // Functions from base classes
+    void EditItemL(TBool aCalledFromMenu);
+
+private: //data
+	COggPlayAppUi& iAppUi;
+};
 
 #endif /* SERIES60 */
-
 #endif
-
-// End of File
