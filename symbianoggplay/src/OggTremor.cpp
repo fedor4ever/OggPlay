@@ -697,7 +697,8 @@ void COggPlayback::Pause()
   iStopAudioStreamingTimer->Cancel();
 
 #if defined(MULTI_THREAD_PLAYBACK)
-  StopStreaming();
+  // Flush buffers (and stop the stream)
+  FlushBuffers();
 #else
   iStream->Stop();
 #endif

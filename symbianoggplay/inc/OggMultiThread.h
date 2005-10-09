@@ -80,6 +80,7 @@ enum TFlushBufferEvent
 	EVolumeGainChanged,
 
 	// The user has changed the buffering mode
+	// This is also used for pause
 	EBufferingModeChanged,
 
 	// The user has changed the position (ff/rw)
