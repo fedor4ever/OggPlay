@@ -137,8 +137,7 @@ void CStreamingThreadAO::StartBuffering()
 		PrimeNextBuffer();
 
 	// Start the AO
-	if (iSharedData.iBufferingMode != ENoBuffering)
-		ResumeBuffering();
+	ResumeBuffering();
 }
 
 void CStreamingThreadAO::ResumeBuffering()
@@ -458,12 +457,23 @@ void CStreamingThreadPlaybackEngine::StartStreaming()
 	iBufNum = 0;
 	iStreaming = ETrue;
 
-	// Start the streaming thread AO
-	iStreamingThreadAO->StartBuffering();
+	if (iSharedData.iBufferingMode == ENoBuffering)
+	{
+		// Fetch the first buffer
+		iStreamingThreadAO->PrimeNextBuffer();
 
-	// Stream the pre buffers
-	for (TInt i = 0 ; i<KPreBuffers ; i++)
+		// Stream the first buffer
 		SendNextBuffer();
+	}
+	else
+	{
+		// Start the streaming thread AO
+		iStreamingThreadAO->StartBuffering();
+
+		// Stream the pre buffers
+		for (TInt i = 0 ; i<KPreBuffers ; i++)
+			SendNextBuffer();
+	}
 }
 
 void CStreamingThreadPlaybackEngine::StopStreaming()
