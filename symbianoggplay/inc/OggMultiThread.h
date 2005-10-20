@@ -80,8 +80,10 @@ enum TFlushBufferEvent
 	EVolumeGainChanged,
 
 	// The user has changed the buffering mode
-	// This is also used for pause
 	EBufferingModeChanged,
+
+	// The user has paused playback
+	EPlaybackPaused,
 
 	// The user has changed the position (ff/rw)
 	EPositionChanged
@@ -157,6 +159,9 @@ public:
 
 	// The number of audio PCM bytes currently in buffers (changes whenever iNumBuffers changes)
     TInt iBufferBytes;
+
+	// The number of audio PCM bytes currently read from the file (used to work out the position)
+	TInt64 iTotalBufferBytes;
 
 	// Shared data for commands (These should be a union, really (TO DO))
 	// Sample Rate and channels (for SetAudioProperties)
@@ -277,7 +282,8 @@ public:
 	void SetAudioPropertiesL();
 
 	void StartStreaming();
-	void StopStreaming();
+	void PauseStreaming();
+	void StopStreaming(TBool aResetPosition = ETrue);
 
 	void SetBufferingMode();
 	void SetThreadPriority();

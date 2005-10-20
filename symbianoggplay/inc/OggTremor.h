@@ -208,11 +208,10 @@ public:
   TInt SetBufferingMode(TBufferingMode aNewBufferingMode);
   void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
 
-  void FlushBuffers();
+  void FlushBuffers(TFlushBufferEvent aFlushBufferEvent);
   void FlushBuffers(TInt64 aNewPosition);
   void FlushBuffers(TGainType aNewGain);
 
-  TInt64 DecoderPosition();
   void SetDecoderPosition(TInt64 aPos);
   void SetSampleRateConverterVolumeGain(TGainType aGain);
 

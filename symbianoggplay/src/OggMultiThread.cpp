@@ -26,7 +26,8 @@
 // Shared data class
 TStreamingThreadData::TStreamingThreadData(COggPlayback& aOggPlayback, RThread& aUIThread, RThread& aBufferingThread)
 : iOggPlayback(aOggPlayback), iUIThread(aUIThread), iBufferingThread(aBufferingThread),
-iNumBuffers(0), iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL), iBufferBytes(0), iBufferingMode(ENoBuffering)
+iNumBuffers(0), iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL),
+iBufferBytes(0), iTotalBufferBytes(0), iSampleRate(8000), iChannels(1), iBufferingMode(ENoBuffering)
 {
 }
 
@@ -46,7 +47,9 @@ CBufferingAO::~CBufferingAO()
 void CBufferingAO::PrimeNextBuffer()
 {
 	TBool lastBuffer = iSharedData.iOggPlayback.PrimeBuffer(*(iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]));
-	iSharedData.iBufferBytes += iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]->Length();
+	TInt bufferBytes = iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]->Length();
+	iSharedData.iBufferBytes += bufferBytes;
+	iSharedData.iTotalBufferBytes += bufferBytes;
 	iSharedData.iNumBuffers++;
 
 	if (lastBuffer)
@@ -181,6 +184,10 @@ void CStreamingThreadAO::RunL()
 		User::RequestComplete(status, KErrNone);
 
 		SetActive();
+
+		// Deschedule the streaming thread for a little while (1ms)
+		// This gives other threads a chance to run and really helps on phones where the thread scheduling doesn't work properly
+		User::After(1000);
 	}
 }
 
@@ -476,7 +483,13 @@ void CStreamingThreadPlaybackEngine::StartStreaming()
 	}
 }
 
-void CStreamingThreadPlaybackEngine::StopStreaming()
+void CStreamingThreadPlaybackEngine::PauseStreaming()
+{
+	// Stop the stream, but don't reset the position
+	StopStreaming(EFalse);
+}
+
+void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 {
 	if (iStreaming)
 	{
@@ -497,6 +510,9 @@ void CStreamingThreadPlaybackEngine::StopStreaming()
 		iSharedData.iPrimeBufNum = 0;
 		iSharedData.iLastBuffer = NULL;
 		iSharedData.iBufferBytes = 0;
+
+		if (aResetPosition)
+			iSharedData.iTotalBufferBytes = 0;
 
 		// Reset the thread priorities
 		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
@@ -581,21 +597,36 @@ void CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
 
 void CStreamingThreadPlaybackEngine::FlushBuffers()
 {
-	if (!iStreaming)
+	// Reset the buffer flush pending flag 
+	iBufferFlushPending = EFalse;
+
+	// The COggPlayback state engine isn't brilliant at figuring out whether it is playing or not
+	// Consequently we sometimes get called with a pause or position event when we are not actually streaming
+	// TO DO: Fix COggPlayback so that delayed play start doesn't set the state to playing (set to EPlayPending, perhaps)
+	if (!iStreaming && (iSharedData.iFlushBufferEvent != EPlaybackPaused) && (iSharedData.iFlushBufferEvent != EPositionChanged))
 		User::Panic(_L("STPE: FB"), 0);
 
+	// Pause event received when we are not streaming, so just return
+	if (!iStreaming && (iSharedData.iFlushBufferEvent == EPlaybackPaused))
+		return;
+
 	// Reset the audio stream (move position / change volume gain)
+	const TInt64 KConst500 = TInt64(500);
 	switch (iSharedData.iFlushBufferEvent)
 	{
+		case EPlaybackPaused:
 		case EBufferingModeChanged:
 		{
 			// Flush all of the data
-			TInt millisecsToFlush = (500*iSharedData.iBufferBytes)/(iSharedData.iSampleRate*iSharedData.iChannels);
-			if (millisecsToFlush)
-				iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iOggPlayback.DecoderPosition() - TInt64(millisecsToFlush));
+			if (iSharedData.iBufferBytes)
+			{
+				TInt64 newPositionBytes = iSharedData.iTotalBufferBytes - iSharedData.iBufferBytes;
+				TInt64 newPositionMillisecs = (KConst500*newPositionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
+				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
+			}
 
-			// Stop streaming
-			StopStreaming();
+			// Pause the stream
+			PauseStreaming();
 			return;
 		}
 
@@ -627,9 +658,12 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 			}
 
 			// Reset the decoder position
-			TInt millisecsToFlush = (500*bytesFlushed)/(iSharedData.iSampleRate*iSharedData.iChannels);
-			if (millisecsToFlush)
-				iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iOggPlayback.DecoderPosition() - TInt64(millisecsToFlush));
+			if (bytesFlushed)
+			{
+				TInt64 newPositionBytes = iSharedData.iTotalBufferBytes - bytesFlushed;
+				TInt64 newPositionMillisecs = (KConst500*newPositionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
+				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
+			}
 
 			// Set the new volume gain (and carry on as if nothing had happened)
 			iSharedData.iOggPlayback.SetSampleRateConverterVolumeGain(iSharedData.iNewGain);
@@ -637,9 +671,15 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 		}
 
 		case EPositionChanged:
-			// This isn't currently used (FF/RW stop and start the stream instead)
-			// iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iNewPosition);
-			// break;
+			// Recalculate the number of buffer bytes
+			iSharedData.iTotalBufferBytes = (iSharedData.iNewPosition*TInt64(iSharedData.iSampleRate*iSharedData.iChannels))/KConst500;
+
+			// Set the new position
+			iSharedData.iOggPlayback.SetDecoderPosition(iSharedData.iNewPosition);
+
+			// Pause the stream
+			PauseStreaming();
+			return;
 
 		default:
 			User::Panic(_L("STPE: Flush"), 0);		
@@ -657,9 +697,6 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 
 		iStreamingThreadAO->ResumeBuffering();
 	}
-
-	// Reset the buffer flush pending flag 
-	iBufferFlushPending = EFalse;
 }
 
 void CStreamingThreadPlaybackEngine::Shutdown()

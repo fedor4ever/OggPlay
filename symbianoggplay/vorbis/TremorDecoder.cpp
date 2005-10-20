@@ -136,6 +136,12 @@ TInt CTremorDecoder::Bitrate()
 
 TInt64 CTremorDecoder::Position()
 { 
+#if defined(MULTI_THREAD_PLAYBACK)
+	// This shouldn't be called in multi thread playback mode
+    // (Multi threaded access to the tremor object, iVf, isn't allowed)
+	User::Panic(_L("CTD::Pos"), 0);
+#endif
+
   ogg_int64_t pos= ov_time_tell(&iVf);
   unsigned int hi(0);
   return TInt64(hi,(TInt)pos);

@@ -233,6 +233,9 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 	
 	delete iFile;
 	iFile = NULL;
+
+	delete iDecoder;
+	iDecoder = NULL;
   }
 
   iTime= 0;
@@ -255,9 +258,6 @@ TInt COggPlayback::Open(const TDesC& aFileName)
     return KErrOggFileNotFound;
   }
 
-  delete iDecoder;
-  iDecoder = NULL;
-
   iDecoder = GetDecoderL(aFileName);
   if(iDecoder->Open(iFile, aFileName) < 0)
   {
@@ -266,6 +266,9 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 	delete iFile;
 	iFile = NULL;
     
+	delete iDecoder;
+	iDecoder = NULL;
+
 	//OGGLOG.Write(_L("Oggplay: ov_open not successful (Error20 Error9)"));
     iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
     return -102;
@@ -290,6 +293,9 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   
 	delete iFile;
 	iFile = NULL;
+
+	delete iDecoder;
+	iDecoder = NULL;
   }
 
   return err;
@@ -522,10 +528,11 @@ void COggPlayback::SetPosition(TInt64 aPos)
 	  TBool bufferFlushRequired = (iState == EPlaying);
 	  if (bufferFlushRequired)
 	  {
-		// Stop/Restart the stream instead of flushing buffers
+		// Pause/Restart the stream instead of just flushing buffers
 	    // This works better with FF/RW because, like next/prev track, key repeats are possible (and very likely on FF/RW)
-		StopStreaming();
-		iDecoder->Setposition(aPos);
+        FlushBuffers(aPos);
+
+		// Restart streaming
 		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 	  }
 	  else
@@ -539,24 +546,21 @@ void COggPlayback::SetPosition(TInt64 aPos)
 TInt64 COggPlayback::Position()
 {
 #if defined(MULTI_THREAD_PLAYBACK)
-  if(iDecoder)
-  {
-	  TInt bufferMillisecs = (500*iSharedData.iBufferBytes)/(iSharedData.iSampleRate*iSharedData.iChannels);
-	  return iDecoder->Position() - TInt64(bufferMillisecs);
-  }
+  const TInt64 KConst500 = TInt64(500);
+  TInt64 positionBytes = iSharedData.iTotalBufferBytes - iSharedData.iBufferBytes;
+  TInt64 positionMillisecs = (KConst500*positionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
+
+  return positionMillisecs;
 #else
   // TO DO: Also take into account the buffers (see comments in GetFrequencyBins)
   if(iDecoder) return iDecoder->Position();
-#endif
 
   return 0;
+#endif
 }
 
 TInt64 COggPlayback::Time()
 {
-  if (iDecoder && iTime==0) {
-    iTime=iDecoder->TimeTotal();
-  }
   return iTime;
 }
 
@@ -649,12 +653,13 @@ void COggPlayback::Play()
         iEof=0;
         break;
     default:
-    iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
-    RDebug::Print(_L("Oggplay: Tremor - State not Open"));
-    return;
+        iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
+        RDebug::Print(_L("Oggplay: Tremor - State not Open"));
+        return;
   }
 
   iState = EPlaying;
+
   // There is something wrong how Nokia audio streaming handles the
   // first buffers. They are somehow swallowed.
   // To avoid that, send few (4) almost empty buffers
@@ -694,11 +699,12 @@ void COggPlayback::Pause()
   if (iState != EPlaying) return;
 
   iState = EPaused;
+  iStartAudioStreamingTimer->Cancel();
   iStopAudioStreamingTimer->Cancel();
 
 #if defined(MULTI_THREAD_PLAYBACK)
-  // Flush buffers (and stop the stream)
-  FlushBuffers();
+  // Flush buffers (and pause the stream)
+  FlushBuffers(EPlaybackPaused);
 #else
   iStream->Stop();
 #endif
@@ -717,6 +723,7 @@ void COggPlayback::Stop()
     return;
 
   iState = EClosed;
+  iStartAudioStreamingTimer->Cancel();
   iStopAudioStreamingTimer->Cancel();
 
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -853,7 +860,7 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
   if (iState == EPlaying)
   {
 	// Flush the buffers (and stop the stream)
-	FlushBuffers();
+	FlushBuffers(EBufferingModeChanged);
   }
 
   // Set the new buffering mode
@@ -894,10 +901,12 @@ void COggPlayback::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority
   iStreamingThreadCommandHandler->SetThreadPriority();
 }
 
-void COggPlayback::FlushBuffers()
+void COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
 {
-  // The buffering mode has changed, so flush the buffers (and stop the stream)
-  iSharedData.iFlushBufferEvent = EBufferingModeChanged;
+  __ASSERT_DEBUG((aFlushBufferEvent == EBufferingModeChanged) || (aFlushBufferEvent == EPlaybackPaused), User::Panic(_L("COggPlayback::FB"), 0));
+
+  // Set the flush buffer event
+  iSharedData.iFlushBufferEvent = aFlushBufferEvent;
 
   iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
@@ -913,9 +922,6 @@ void COggPlayback::FlushBuffers(TInt64 aNewPosition)
 
   iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
-
-  if (iSharedData.iBufferingMode == EBufferThread)
-	iBufferingThreadAO->StartListening();
 
   iStreamingThreadCommandHandler->FlushBuffers();
 }
@@ -933,12 +939,6 @@ void COggPlayback::FlushBuffers(TGainType aNewGain)
 	iBufferingThreadAO->StartListening();
 
   iStreamingThreadCommandHandler->FlushBuffers();
-}
-
-TInt64 COggPlayback::DecoderPosition()
-{
-  // Read the audio position we've decoded to (return value is milliseconds) 
-	return iDecoder->Position();
 }
 
 void COggPlayback::SetDecoderPosition(TInt64 aPos)
