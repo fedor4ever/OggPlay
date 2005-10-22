@@ -112,6 +112,10 @@ class MPlaybackObserver
   virtual void NotifyPlayComplete() = 0;
   virtual void NotifyPlayInterrupted() = 0;
 
+#if defined (DELAY_AUDIO_STREAMING_START)
+  virtual void NotifyPlayStarted() = 0;
+#endif
+
 #if defined(MULTI_THREAD_PLAYBACK)
   virtual void NotifyFatalPlayError() = 0;
 #endif

@@ -311,6 +311,10 @@ public:
   virtual void NotifyPlayComplete();
   virtual void NotifyPlayInterrupted();
 
+#if defined(DELAY_AUDIO_STREAMING_START)
+  virtual void NotifyPlayStarted();
+#endif
+
 #if defined(MULTI_THREAD_PLAYBACK)
   virtual void NotifyFatalPlayError();
 #endif

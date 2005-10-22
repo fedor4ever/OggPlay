@@ -815,6 +815,7 @@ TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
 
 #if defined(MULTI_THREAD_PLAYBACK)
   self->StartStreaming();
+  self->iObserver->NotifyPlayStarted();
 #else
   for (TInt i=0; i<KBuffers; i++) 
       self->SendBuffer(*(self->iBuffer[i]));

@@ -608,7 +608,16 @@ COggPlayAppUi::NotifyPlayComplete()
     NextSong();
 }
 
-#if defined (MULTI_THREAD_PLAYBACK)
+#if defined(DELAY_AUDIO_STREAMING_START)
+void COggPlayAppUi::NotifyPlayStarted()
+{
+	// Update the appView and the softkeys
+	iAppView->Update();
+	UpdateSoftkeys();
+}
+#endif
+
+#if defined(MULTI_THREAD_PLAYBACK)
 void COggPlayAppUi::NotifyFatalPlayError()
 {
 	// Try to exit cleanly
@@ -941,25 +950,31 @@ COggPlayAppUi::PlaySelect()
              (iSongList->IsSelectedFromListBoxCurrentlyPlaying() ) )
         {
             iOggPlayback->Resume();
+
+			#if !defined(DELAY_AUDIO_STREAMING_START)
             iAppView->Update();
             UpdateSoftkeys();
+			#endif
             return;
         }
 
-        if (iOggPlayback->State()==CAbsPlayback::EPlaying) {
+        if (iOggPlayback->State()==CAbsPlayback::EPlaying)
+		{
             iOggPlayback->Stop();
             UpdateSoftkeys();
         }
         
         iSongList->SetPlayingFromListBox(idx);
-        if (iOggPlayback->Open(iSongList->GetPlaying())==KErrNone) {
+        if (iOggPlayback->Open(iSongList->GetPlaying())==KErrNone)
+		{
             iOggPlayback->SetVolume(iVolume);
-            if (iOggPlayback->State()!=CAbsPlayback::EPlaying) {
-                iAppView->SetTime(iOggPlayback->Time());
-                iOggPlayback->Play();
-                iAppView->Update();
-            }
+            iOggPlayback->Play();
+
+			#if !defined(DELAY_AUDIO_STREAMING_START)
+            iAppView->SetTime(iOggPlayback->Time());
+            iAppView->Update();
             UpdateSoftkeys();
+			#endif
         } else {
             iSongList->SetPlayingFromListBox(ENoFileSelected);
             UpdateSoftkeys();
@@ -983,8 +998,11 @@ COggPlayAppUi::PauseResume()
   else if  (iOggPlayback->State()==CAbsPlayback::EPaused)
   {
 	  iOggPlayback->Resume();
+
+	  #if !defined(DELAY_AUDIO_STREAMING_START)
 	  iAppView->Update();
       UpdateSoftkeys();
+	  #endif
   }
   else
     PlaySelect();
@@ -1146,11 +1164,15 @@ COggPlayAppUi::NextSong()
 #ifndef PLUGIN_SYSTEM
         iOggPlayback->Stop();
 #endif
-        if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
+        if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone)
+		{
             iOggPlayback->Play();
+
+			#if !defined(DELAY_AUDIO_STREAMING_START)
             iAppView->SetTime(iOggPlayback->Time());
-            UpdateSoftkeys();
+			UpdateSoftkeys();
             iAppView->Update();
+			#endif
         } else {
             iSongList->SetPlayingFromListBox(ENoFileSelected);
             HandleCommandL(EOggStop);
@@ -1183,11 +1205,15 @@ COggPlayAppUi::PreviousSong()
 #ifndef PLUGIN_SYSTEM
         iOggPlayback->Stop();
 #endif
-        if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone) {
+        if (songName.Length()>0 && iOggPlayback->Open(songName)==KErrNone)
+		{
             iOggPlayback->Play();
-            iAppView->SetTime(iOggPlayback->Time());
+
+			#if !defined(DELAY_AUDIO_STREAMING_START)
+			iAppView->SetTime(iOggPlayback->Time());
             UpdateSoftkeys();
             iAppView->Update();
+			#endif
         } else {
             iSongList->SetPlayingFromListBox(ENoFileSelected);
             HandleCommandL(EOggStop);
@@ -2032,16 +2058,18 @@ COggSongList::SetPlaying(TInt aPlaying)
 		}
 		else
 			iPlayList = NULL;
-
-        // Check that the file is still there (media hasn't been removed)
-        if( iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound )
-            iPlayingIdx = ENoFileSelected;
     }
-    
+
     if (iPlayingIdx != ENoFileSelected)
+		{
         iAppView->SelectFile(iFileList[iPlayingIdx]);
 
-	iAppView->Update();
+		#if !defined(DELAY_AUDIO_STREAMING_START)
+		iAppView->Update();
+		#endif
+		}
+	else
+		iAppView->Update();
 }
 
 const TOggFile*

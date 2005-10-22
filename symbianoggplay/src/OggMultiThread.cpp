@@ -596,8 +596,8 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 	// Reset the buffer flush pending flag 
 	iBufferFlushPending = EFalse;
 
-	// Panic if we are not streaming
-	if (!iStreaming)
+	// Panic if we are not streaming, unless changing position
+	if (!iStreaming && (iSharedData.iFlushBufferEvent != EPositionChanged))
 		User::Panic(_L("STPE: FB"), 0);
 
 	// Reset the audio stream (move position / change volume gain)
@@ -610,8 +610,8 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 			// Flush all of the data
 			if (iSharedData.iBufferBytes)
 			{
-				TInt64 newPositionBytes = iSharedData.iTotalBufferBytes - iSharedData.iBufferBytes;
-				TInt64 newPositionMillisecs = (KConst500*newPositionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
+				iSharedData.iTotalBufferBytes-= iSharedData.iBufferBytes;
+				TInt64 newPositionMillisecs = (KConst500*iSharedData.iTotalBufferBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
 				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
 			}
 
@@ -650,8 +650,8 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 			// Reset the decoder position
 			if (bytesFlushed)
 			{
-				TInt64 newPositionBytes = iSharedData.iTotalBufferBytes - bytesFlushed;
-				TInt64 newPositionMillisecs = (KConst500*newPositionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
+				iSharedData.iTotalBufferBytes-= bytesFlushed;
+				TInt64 newPositionMillisecs = (KConst500*iSharedData.iTotalBufferBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
 				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
 			}
 
