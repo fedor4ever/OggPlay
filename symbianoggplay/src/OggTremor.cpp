@@ -521,6 +521,11 @@ void COggPlayback::SetPosition(TInt64 aPos)
 {
   if(iDecoder)
   {
+	  // Limit FF to five seconds before the end of the track
+	  if (aPos>iTime)
+		  aPos = iTime - TInt64(5000);
+
+	  // And don't allow RW past the beginning either
 	  if (aPos<0)
 		  aPos = 0;
 
@@ -536,7 +541,13 @@ void COggPlayback::SetPosition(TInt64 aPos)
 		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 	  }
 	  else
+	  {
+	    // Recalculate the number of buffer bytes
+		iSharedData.iTotalBufferBytes = (aPos*TInt64(iSharedData.iSampleRate*iSharedData.iChannels))/TInt64(500);
+
+		// Set the new position
 		iDecoder->Setposition(aPos);
+	  }
 #else
 	  iDecoder->Setposition(aPos);
 #endif
@@ -658,8 +669,6 @@ void COggPlayback::Play()
         return;
   }
 
-  iState = EPlaying;
-
   // There is something wrong how Nokia audio streaming handles the
   // first buffers. They are somehow swallowed.
   // To avoid that, send few (4) almost empty buffers
@@ -685,6 +694,8 @@ void COggPlayback::Play()
 
 	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 #else
+  iState = EPlaying;
+
   #if defined(MULTI_THREAD_PLAYBACK)
     StartStreaming();
   #else
@@ -800,6 +811,7 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
 {
   COggPlayback* self= (COggPlayback*) aPtr;
+  self->iState = EPlaying;
 
 #if defined(MULTI_THREAD_PLAYBACK)
   self->StartStreaming();

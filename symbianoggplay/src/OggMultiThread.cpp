@@ -184,10 +184,6 @@ void CStreamingThreadAO::RunL()
 		User::RequestComplete(status, KErrNone);
 
 		SetActive();
-
-		// Deschedule the streaming thread for a little while (1ms)
-		// This gives other threads a chance to run and really helps on phones where the thread scheduling doesn't work properly
-		User::After(1000);
 	}
 }
 
@@ -600,15 +596,9 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 	// Reset the buffer flush pending flag 
 	iBufferFlushPending = EFalse;
 
-	// The COggPlayback state engine isn't brilliant at figuring out whether it is playing or not
-	// Consequently we sometimes get called with a pause or position event when we are not actually streaming
-	// TO DO: Fix COggPlayback so that delayed play start doesn't set the state to playing (set to EPlayPending, perhaps)
-	if (!iStreaming && (iSharedData.iFlushBufferEvent != EPlaybackPaused) && (iSharedData.iFlushBufferEvent != EPositionChanged))
+	// Panic if we are not streaming
+	if (!iStreaming)
 		User::Panic(_L("STPE: FB"), 0);
-
-	// Pause event received when we are not streaming, so just return
-	if (!iStreaming && (iSharedData.iFlushBufferEvent == EPlaybackPaused))
-		return;
 
 	// Reset the audio stream (move position / change volume gain)
 	const TInt64 KConst500 = TInt64(500);
@@ -881,7 +871,19 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 		// Nothing to do if the streaming thread is already buffering
 		// If a buffer flush is pending we don't want to start any more buffering
 		if (streamingThreadActive || iBufferFlushPending)
+		{
+			if (streamingThreadActive)
+			{
+				// Deschedule the streaming thread for a little while (1ms)
+				// This gives other threads a chance to run and really helps
+				// on phones where the thread scheduling doesn't work properly
+				#if !defined(__VC32__)
+				User::After(1000);
+				#endif
+			}
+
 			return;
+		}
 
 		switch (iSharedData.iBufferingMode)
 		{
@@ -914,6 +916,16 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 				User::Panic(_L("STPE: MaoscBC"), 0);
 				break;
 		}
+	}
+
+	if (streamingThreadActive)
+	{
+		// Deschedule the streaming thread for a little while (1ms)
+		// This gives other threads a chance to run and really helps
+		// on phones where the thread scheduling doesn't work properly
+		#if !defined(__VC32__)
+		User::After(1000);
+		#endif
 	}
 }
 
