@@ -596,8 +596,8 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 	// Reset the buffer flush pending flag 
 	iBufferFlushPending = EFalse;
 
-	// Panic if we are not streaming, unless changing position
-	if (!iStreaming && (iSharedData.iFlushBufferEvent != EPositionChanged))
+	// Panic if we are not streaming
+	if (!iStreaming)
 		User::Panic(_L("STPE: FB"), 0);
 
 	// Reset the audio stream (move position / change volume gain)

@@ -536,6 +536,7 @@ void COggPlayback::SetPosition(TInt64 aPos)
 		// Pause/Restart the stream instead of just flushing buffers
 	    // This works better with FF/RW because, like next/prev track, key repeats are possible (and very likely on FF/RW)
         FlushBuffers(aPos);
+		iState = EPaused;
 
 		// Restart streaming
 		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
@@ -892,7 +893,10 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
 
 	  // Restart the stream
 	  if (iState == EPlaying)
+	  {
+		iState = EPaused;
 		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+	  }
 
 	  return err;
   }
@@ -902,7 +906,10 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
 
   // Restart the stream
   if (iState == EPlaying)
+  {
+    iState = EPaused;
 	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+  }
 
   return KErrNone;
 }
