@@ -241,9 +241,9 @@ void CStreamingThreadCommandHandler::SetThreadPriority()
 	SendCommand(EStreamingThreadSetThreadPriority);
 }
 
-void CStreamingThreadCommandHandler::PrepareToFlushBuffers()
+TBool CStreamingThreadCommandHandler::PrepareToFlushBuffers()
 {
-	SendCommand(EStreamingThreadPrepareToFlushBuffers);
+	return SendCommand(EStreamingThreadPrepareToFlushBuffers) ? ETrue : EFalse;
 }
 
 void CStreamingThreadCommandHandler::FlushBuffers()
@@ -303,7 +303,7 @@ void CStreamingThreadCommandHandler::RunL()
 		break;
 
 	case EStreamingThreadPrepareToFlushBuffers:
-		iPlaybackEngine->PrepareToFlushBuffers();
+		err = iPlaybackEngine->PrepareToFlushBuffers() ? 1 : 0;
 		break;
 
 	case EStreamingThreadFlushBuffers:
@@ -585,20 +585,19 @@ void CStreamingThreadPlaybackEngine::SetThreadPriority()
 	}
 }
 
-void CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
+TBool CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
 {
 	// Mark that a buffer flush is pending (this inhibits requests to the buffering thread)
 	iBufferFlushPending = ETrue;
+
+	// Return streaming status
+	return iStreaming;
 }
 
 void CStreamingThreadPlaybackEngine::FlushBuffers()
 {
 	// Reset the buffer flush pending flag 
 	iBufferFlushPending = EFalse;
-
-	// Panic if we are not streaming
-	if (!iStreaming)
-		User::Panic(_L("STPE: FB"), 0);
 
 	// Reset the audio stream (move position / change volume gain)
 	const TInt64 KConst500 = TInt64(500);
@@ -617,7 +616,7 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 
 			// Pause the stream
 			PauseStreaming();
-			return;
+			break;
 		}
 
 		case EVolumeGainChanged:
@@ -669,14 +668,14 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 
 			// Pause the stream
 			PauseStreaming();
-			return;
+			break;
 
 		default:
 			User::Panic(_L("STPE: Flush"), 0);		
 	}
 
 	// Start the streaming thread AO
-	if (!iStreamingThreadAO->IsActive() && (iSharedData.iBufferingMode != ENoBuffering))
+	if (iStreaming && !iStreamingThreadAO->IsActive() && (iSharedData.iBufferingMode != ENoBuffering))
 	{
 		// Reset the buffering thread priority
 		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))

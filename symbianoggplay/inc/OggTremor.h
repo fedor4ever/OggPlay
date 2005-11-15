@@ -167,11 +167,20 @@ private:
    // To avoid that, wait a short time before streaming, so that AppView
    // draw have been done. Also send few empty (zeroed) buffers .
   TInt iFirstBuffers;
+
+  void StartAudioStreamingCallBack();
   static TInt StartAudioStreamingCallBack(TAny* aPtr);
   COggTimer* iStartAudioStreamingTimer;
 
+  void RestartAudioStreamingCallBack();
+  static TInt RestartAudioStreamingCallBack(TAny* aPtr);
+  COggTimer* iRestartAudioStreamingTimer;
+
+  void StopAudioStreamingCallBack();
   static TInt StopAudioStreamingCallBack(TAny* aPtr);
   COggTimer* iStopAudioStreamingTimer;
+
+  void CancelTimers();
 
 #ifdef MDCT_FREQ_ANALYSER
   TReal  iLatestPlayTime;
@@ -208,8 +217,8 @@ public:
   TInt SetBufferingMode(TBufferingMode aNewBufferingMode);
   void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
 
-  void FlushBuffers(TFlushBufferEvent aFlushBufferEvent);
-  void FlushBuffers(TInt64 aNewPosition);
+  TBool FlushBuffers(TFlushBufferEvent aFlushBufferEvent);
+  TBool FlushBuffers(TInt64 aNewPosition);
   void FlushBuffers(TGainType aNewGain);
 
   void SetDecoderPosition(TInt64 aPos);
@@ -268,8 +277,6 @@ private:
   TInt iMaxVolume;
   TInt iSentIdx;
 
-  static TInt RestartAudioStreamingCallBack(TAny* aPtr);
-  COggTimer* iRestartAudioStreamingTimer;
   TBool iUnderflowing;
   TInt iFirstUnderflowBuffer;
   TInt iLastUnderflowBuffer;

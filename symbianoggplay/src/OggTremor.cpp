@@ -139,13 +139,8 @@ void COggPlayback::ConstructL()
 #endif
 
   iStartAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StartAudioStreamingCallBack, this));
-  iStopAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
-
-#if !defined(MULTI_THREAD_PLAYBACK)
-  // The restart timer is in the streaming thread for multi thread playback, so only create one if MULTI_THREAD_PLAYBACK is not defined
-  // This may change in the future, it might be better to do restarts from the UI thread when MULTI_THREAD_PLAYBACK is enabled
   iRestartAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
-#endif
+  iStopAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
 
   iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
 
@@ -159,6 +154,7 @@ COggPlayback::~COggPlayback()
 	
   delete iDecoder; 
   delete iStartAudioStreamingTimer;
+  delete iRestartAudioStreamingTimer;
   delete iStopAudioStreamingTimer;
   delete iOggSampleRateConverter;
 
@@ -506,12 +502,7 @@ void COggPlayback::SetVolume(TInt aVol)
 void COggPlayback::SetVolumeGain(TGainType aGain)
 {
 #if defined(MULTI_THREAD_PLAYBACK)
-	TBufferingMode bufferingMode = iSharedData.iBufferingMode;
-	TBool bufferFlushRequired = (iState == EPlaying) && (bufferingMode != ENoBuffering);
-	if (bufferFlushRequired)
-		FlushBuffers(aGain);
-	else
-		iOggSampleRateConverter->SetVolumeGain(aGain);
+	FlushBuffers(aGain);
 #else
   iOggSampleRateConverter->SetVolumeGain(aGain);
 #endif
@@ -530,25 +521,13 @@ void COggPlayback::SetPosition(TInt64 aPos)
 		  aPos = 0;
 
 #if defined(MULTI_THREAD_PLAYBACK)
-	  TBool bufferFlushRequired = (iState == EPlaying);
-	  if (bufferFlushRequired)
-	  {
 		// Pause/Restart the stream instead of just flushing buffers
 	    // This works better with FF/RW because, like next/prev track, key repeats are possible (and very likely on FF/RW)
-        FlushBuffers(aPos);
-		iState = EPaused;
+        TBool streamStopped = FlushBuffers(aPos);
 
 		// Restart streaming
-		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
-	  }
-	  else
-	  {
-	    // Recalculate the number of buffer bytes
-		iSharedData.iTotalBufferBytes = (aPos*TInt64(iSharedData.iSampleRate*iSharedData.iChannels))/TInt64(500);
-
-		// Set the new position
-		iDecoder->Setposition(aPos);
-	  }
+		if (streamStopped)
+			iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 #else
 	  iDecoder->Setposition(aPos);
 #endif
@@ -677,8 +656,15 @@ void COggPlayback::Play()
       iFirstBuffers = 4; 
 
 #ifdef MDCT_FREQ_ANALYSER
+  // Reset the frequency analyser
   iLastFreqArrayIdx = 0;
-  iLatestPlayTime = 0.0;
+  const TInt64 KMaxTInt64 = TInt64(0x7FFFFFFF, 0xFFFFFFFF);
+  for (TInt i=0; i<KFreqArrayLength; i++)
+  {
+	iFreqArray[i].iTime = KMaxTInt64;
+	for (TInt j = 0 ; j<KNumberOfFreqBins ; j++)
+		iFreqArray[i].iFreqCoefs[j] = 0;
+  }
 #endif
 
 #if defined(DELAY_AUDIO_STREAMING_START)
@@ -695,14 +681,15 @@ void COggPlayback::Play()
 
 	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
 #else
-  iState = EPlaying;
-
   #if defined(MULTI_THREAD_PLAYBACK)
     StartStreaming();
   #else
     for (TInt i=0; i<KBuffers; i++) SendBuffer(*iBuffer[i]);
   #endif
 #endif
+
+  iState = EPlaying;
+  iObserver->NotifyPlayStarted();
 }
 
 void COggPlayback::Pause()
@@ -711,8 +698,7 @@ void COggPlayback::Pause()
   if (iState != EPlaying) return;
 
   iState = EPaused;
-  iStartAudioStreamingTimer->Cancel();
-  iStopAudioStreamingTimer->Cancel();
+  CancelTimers();
 
 #if defined(MULTI_THREAD_PLAYBACK)
   // Flush buffers (and pause the stream)
@@ -735,8 +721,7 @@ void COggPlayback::Stop()
     return;
 
   iState = EClosed;
-  iStartAudioStreamingTimer->Cancel();
-  iStopAudioStreamingTimer->Cancel();
+  CancelTimers();
 
 #if defined(MULTI_THREAD_PLAYBACK)
   StopStreaming();
@@ -767,6 +752,12 @@ void COggPlayback::Stop()
   if (iObserver) iObserver->NotifyUpdate();
 }
 
+void COggPlayback::CancelTimers()
+{
+  iStartAudioStreamingTimer->Cancel();
+  iRestartAudioStreamingTimer->Cancel();
+  iStopAudioStreamingTimer->Cancel();
+}
 
 TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 {
@@ -799,9 +790,8 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         iTimeWithoutFreqCalculation += ret;
         //TRACEF(COggLog::VA(_L("U:%d %f "), ret, iLatestPlayTime ));
 #endif
-
-
     }
+
     if (ret == 0)
     {
         iEof= ETrue;
@@ -809,30 +799,56 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
     return (ret);
 }
 
+void COggPlayback::StartAudioStreamingCallBack()
+{
+  #if defined(MULTI_THREAD_PLAYBACK)
+  StartStreaming();
+  #else
+  for (TInt i=0; i<KBuffers; i++) 
+	SendBuffer(*(self->iBuffer[i]));
+  #endif
+}
+
+void COggPlayback::RestartAudioStreamingCallBack()
+{
+  #if defined(MULTI_THREAD_PLAYBACK)
+  StartStreaming();
+  #else
+  for (TInt i=0; i<KBuffers; i++) 
+	SendBuffer(*(self->iBuffer[i]));
+  #endif
+}
+
+void COggPlayback::StopAudioStreamingCallBack()
+{
+  Stop();
+  iObserver->NotifyPlayComplete();
+}
+
 TInt COggPlayback::StartAudioStreamingCallBack(TAny* aPtr)
 {
   COggPlayback* self= (COggPlayback*) aPtr;
-  self->iState = EPlaying;
+  self->StartAudioStreamingCallBack();
 
-#if defined(MULTI_THREAD_PLAYBACK)
-  self->StartStreaming();
-  self->iObserver->NotifyPlayStarted();
-#else
-  for (TInt i=0; i<KBuffers; i++) 
-      self->SendBuffer(*(self->iBuffer[i]));
-#endif
+  return 0;
+}
+
+TInt COggPlayback::RestartAudioStreamingCallBack(TAny* aPtr)
+{
+  COggPlayback* self= (COggPlayback*) aPtr;
+  self->RestartAudioStreamingCallBack();
 
   return 0;
 }
 
 TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
 {
-  COggPlayback* self= (COggPlayback*) aPtr; 
- 
-  self->Stop();
-  self->iObserver->NotifyPlayComplete(); 
+  COggPlayback* self= (COggPlayback*) aPtr;
+  self->StopAudioStreamingCallBack();
+
   return 0;
 }
+
 
 #if defined(MULTI_THREAD_PLAYBACK)
 TInt COggPlayback::AttachToFs()
@@ -871,11 +887,8 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
   if (aNewBufferingMode == iSharedData.iBufferingMode)
 	  return KErrNone;
 
-  if (iState == EPlaying)
-  {
-	// Flush the buffers (and stop the stream)
-	FlushBuffers(EBufferingModeChanged);
-  }
+  // Flush the buffers (and stop the stream)
+  TBool streamStopped = FlushBuffers(EBufferingModeChanged);
 
   // Set the new buffering mode
   TBufferingMode oldMode = iSharedData.iBufferingMode;
@@ -892,11 +905,8 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
 	  BufferingModeChanged();
 
 	  // Restart the stream
-	  if (iState == EPlaying)
-	  {
-		iState = EPaused;
+	  if (streamStopped)
 		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
-	  }
 
 	  return err;
   }
@@ -906,10 +916,7 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
 
   // Restart the stream
   if (iState == EPlaying)
-  {
-    iState = EPaused;
 	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
-  }
 
   return KErrNone;
 }
@@ -921,29 +928,31 @@ void COggPlayback::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority
   iStreamingThreadCommandHandler->SetThreadPriority();
 }
 
-void COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
+TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
 {
   __ASSERT_DEBUG((aFlushBufferEvent == EBufferingModeChanged) || (aFlushBufferEvent == EPlaybackPaused), User::Panic(_L("COggPlayback::FB"), 0));
 
   // Set the flush buffer event
   iSharedData.iFlushBufferEvent = aFlushBufferEvent;
 
-  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
 
   iStreamingThreadCommandHandler->FlushBuffers();
+  return streaming;
 }
 
-void COggPlayback::FlushBuffers(TInt64 aNewPosition)
+TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
 {
   // The position has been changed so flush the buffers (and set the new position)
   iSharedData.iFlushBufferEvent = EPositionChanged;
   iSharedData.iNewPosition = aNewPosition;
 
-  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
 
   iStreamingThreadCommandHandler->FlushBuffers();
+  return streaming;
 }
 
 void COggPlayback::FlushBuffers(TGainType aNewGain)
@@ -952,10 +961,10 @@ void COggPlayback::FlushBuffers(TGainType aNewGain)
   iSharedData.iFlushBufferEvent = EVolumeGainChanged;
   iSharedData.iNewGain = aNewGain;
 
-  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
 
-  if (iSharedData.iBufferingMode == EBufferThread)
+  if (streaming && (iSharedData.iBufferingMode == EBufferThread))
 	iBufferingThreadAO->StartListening();
 
   iStreamingThreadCommandHandler->FlushBuffers();

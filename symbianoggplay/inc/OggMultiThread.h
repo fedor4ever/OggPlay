@@ -254,7 +254,7 @@ public:
 	void SetBufferingMode();
 	void SetThreadPriority();
 
-	void PrepareToFlushBuffers();
+	TBool PrepareToFlushBuffers();
 	void FlushBuffers();
 
 protected:
@@ -288,7 +288,7 @@ public:
 	void SetBufferingMode();
 	void SetThreadPriority();
 
-	void PrepareToFlushBuffers();
+	TBool PrepareToFlushBuffers();
 	void FlushBuffers();
 
 	void Shutdown();
