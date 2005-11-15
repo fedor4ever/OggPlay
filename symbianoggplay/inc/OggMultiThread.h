@@ -57,7 +57,10 @@ enum TStreamingThreadCommand
 	EStreamingThreadFlushBuffers,
 
 	// Set the thread priorities (normal or high)
-	EStreamingThreadSetThreadPriority
+	EStreamingThreadSetThreadPriority,
+
+	// Get the streaming position
+	EStreamingThreadPosition
 };
 
 // Buffering mode to use
@@ -106,7 +109,10 @@ enum TStreamingThreadStatus
 	ELastBufferCopied,
 
 	// Play has been interrupted by another process
-	EPlayInterrupted
+	EPlayInterrupted,
+
+	// Playback has underflowed (aka restart request)
+	EPlayUnderflow
 };
 
 // Shared data between the UI, buffering and streaming threads
@@ -181,6 +187,9 @@ public:
 
 	// The thread priorities to use (used by SetThreadPriority())
 	TStreamingThreadPriority iStreamingThreadPriority;
+
+	// Streaming position
+	TTimeIntervalMicroSeconds iStreamingPosition;
 };
 
 // Base class for the buffering AOs
@@ -255,7 +264,9 @@ public:
 	void SetThreadPriority();
 
 	TBool PrepareToFlushBuffers();
-	void FlushBuffers();
+	TBool FlushBuffers();
+
+	void Position();
 
 protected:
 	// From CActive
@@ -288,8 +299,10 @@ public:
 	void SetBufferingMode();
 	void SetThreadPriority();
 
+	void Position();
+
 	TBool PrepareToFlushBuffers();
-	void FlushBuffers();
+	TBool FlushBuffers();
 
 	void Shutdown();
 
@@ -302,15 +315,13 @@ private:
 	void MaoscOpenComplete(TInt aError);
 
 	void SendNextBuffer();
-	void RestartStreaming();
-    static TInt RestartAudioStreamingCallBack(TAny* aPtr);
 
 private:
 	CMdaAudioOutputStream* iStream;
     TMdaAudioDataSettings iSettings;
 	TStreamingThreadData& iSharedData;
 
-	COggTimer* iRestartAudioStreamingTimer;
+	// Streaming thread AO, performs initial buffering (and buffering in single thread mode) 
 	CStreamingThreadAO* iStreamingThreadAO;
 
 	// The number of buffers currently "in the stream"

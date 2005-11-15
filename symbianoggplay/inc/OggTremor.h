@@ -197,6 +197,8 @@ public:
   TInt iLastFreqArrayIdx;
   TInt iTimeWithoutFreqCalculation;
   TInt iTimeWithoutFreqCalculationLim;
+
+  TInt64 iLastPlayTotalBytes;
 #endif
 
   // Communication with the decoder

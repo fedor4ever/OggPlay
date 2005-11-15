@@ -241,14 +241,19 @@ void CStreamingThreadCommandHandler::SetThreadPriority()
 	SendCommand(EStreamingThreadSetThreadPriority);
 }
 
+void CStreamingThreadCommandHandler::Position()
+{
+	SendCommand(EStreamingThreadPosition);
+}
+
 TBool CStreamingThreadCommandHandler::PrepareToFlushBuffers()
 {
 	return SendCommand(EStreamingThreadPrepareToFlushBuffers) ? ETrue : EFalse;
 }
 
-void CStreamingThreadCommandHandler::FlushBuffers()
+TBool CStreamingThreadCommandHandler::FlushBuffers()
 {
-	SendCommand(EStreamingThreadFlushBuffers);
+	return SendCommand(EStreamingThreadFlushBuffers) ? ETrue : EFalse;
 }
 
 // Wait for commands
@@ -302,12 +307,16 @@ void CStreamingThreadCommandHandler::RunL()
 		iPlaybackEngine->SetThreadPriority();
 		break;
 
+	case EStreamingThreadPosition:
+		iPlaybackEngine->Position();
+		break;
+
 	case EStreamingThreadPrepareToFlushBuffers:
 		err = iPlaybackEngine->PrepareToFlushBuffers() ? 1 : 0;
 		break;
 
 	case EStreamingThreadFlushBuffers:
-		iPlaybackEngine->FlushBuffers();
+		err = iPlaybackEngine->FlushBuffers() ? 1 : 0;
 		break;
 
 	case EThreadShutdown:
@@ -365,22 +374,17 @@ void CStreamingThreadPlaybackEngine::ConstructL()
 	iStream = CMdaAudioOutputStream::NewL(*this);
 	iStream->Open(&iSettings);
 
-	iRestartAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
 	iStreamingThreadAO = new(ELeave) CStreamingThreadAO(iSharedData, iBufferFlushPending, iBufferingThreadPriority);
 	CActiveScheduler::Add(iStreamingThreadAO);
 }
 
 CStreamingThreadPlaybackEngine::~CStreamingThreadPlaybackEngine()
 {
-	if (iRestartAudioStreamingTimer)
-		iRestartAudioStreamingTimer->Cancel();
-
 	if (iStreamingThreadAO)
 		iStreamingThreadAO->Cancel();
 
 	iThread.Close();
 
-	delete iRestartAudioStreamingTimer;
 	delete iStreamingThreadAO;
 	delete iStream;
 }
@@ -494,7 +498,6 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 
 		// Stop the AOs
 		iStreamingThreadAO->Cancel();
-		iRestartAudioStreamingTimer->Cancel();
 
 		// Reset streaming data
 		iStreaming = EFalse;
@@ -585,6 +588,11 @@ void CStreamingThreadPlaybackEngine::SetThreadPriority()
 	}
 }
 
+void CStreamingThreadPlaybackEngine::Position()
+{
+	iSharedData.iStreamingPosition = iStream->Position();
+}
+
 TBool CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
 {
 	// Mark that a buffer flush is pending (this inhibits requests to the buffering thread)
@@ -594,8 +602,12 @@ TBool CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
 	return iStreaming;
 }
 
-void CStreamingThreadPlaybackEngine::FlushBuffers()
+TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 {
+	// Return the streaming status
+	// (Get the value before we flush the buffers and possibly change it)
+	TBool ret = iStreaming;
+
 	// Reset the buffer flush pending flag 
 	iBufferFlushPending = EFalse;
 
@@ -686,6 +698,8 @@ void CStreamingThreadPlaybackEngine::FlushBuffers()
 
 		iStreamingThreadAO->ResumeBuffering();
 	}
+
+	return ret;
 }
 
 void CStreamingThreadPlaybackEngine::Shutdown()
@@ -693,39 +707,6 @@ void CStreamingThreadPlaybackEngine::Shutdown()
 	// We can't shutdown if we are streaming, so panic
 	if (iStreaming)
 		User::Panic(_L("STPE: Shutdown"), 0);
-}
-
-TInt CStreamingThreadPlaybackEngine::RestartAudioStreamingCallBack(TAny* aPtr)
-{
-	CStreamingThreadPlaybackEngine* self= (CStreamingThreadPlaybackEngine*) aPtr;
-	self->RestartStreaming();
-
-	return 0;
-}
-
-// Restart streaming
-// TO DO: Possibly move this back to the UI thread (to be investigated)
-void CStreamingThreadPlaybackEngine::RestartStreaming()
-{
-	// If there are enough available buffers, start streaming again
-    TInt availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
-	if (availBuffers>=KPreBuffers)
-	{
-		for (TInt i = 0 ; i<KPreBuffers ; i++)
-			SendNextBuffer();
-	}
-	else if (iSharedData.iBufferingMode == ENoBuffering)
-	{
-		iStreamingThreadAO->StartBuffering();
-
-		for (TInt i = 0 ; i<KPreBuffers ; i++)
-			SendNextBuffer();
-	}
-	else
-	{
-		// Try again after another delay
-		iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
-	}
 }
 
 // Send the next audio buffer to the stream
@@ -849,7 +830,8 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 				return;
 
 			// Otherwise try to re-start playback
-			iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
+			TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+			iSharedData.iUIThread.RequestComplete(status, EPlayUnderflow);
 			return;
 		}
 	}

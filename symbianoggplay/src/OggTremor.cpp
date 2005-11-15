@@ -537,6 +537,7 @@ void COggPlayback::SetPosition(TInt64 aPos)
 TInt64 COggPlayback::Position()
 {
 #if defined(MULTI_THREAD_PLAYBACK)
+  // Approximate position will do here
   const TInt64 KConst500 = TInt64(500);
   TInt64 positionBytes = iSharedData.iTotalBufferBytes - iSharedData.iBufferBytes;
   TInt64 positionMillisecs = (KConst500*positionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
@@ -558,11 +559,12 @@ TInt64 COggPlayback::Time()
 #ifdef MDCT_FREQ_ANALYSER
 const TInt32 * COggPlayback::GetFrequencyBins()
 {
-  // Use Position() to get the position
-  // TO DO: Use CMdaAudioOutputStream::Position() instead to get the stream position more accurately (we need to add a member to hold the start position, because the stream is reset after FF/RW or when the audio has to restart)
-  // Better still, just change Position() to return the stream position (only if iState == EPlaying, maybe)
 #if defined(MULTI_THREAD_PLAYBACK)
-  TTimeIntervalMicroSeconds currentPos(TInt64(1000)*Position());
+  // Get the precise position from the streaming thread
+  iStreamingThreadCommandHandler->Position();
+  const TInt64 KConst500000 = TInt64(500000);
+  TInt64 streamPositionBytes = (iSharedData.iStreamingPosition.Int64()*TInt64(iSharedData.iSampleRate*iSharedData.iChannels))/KConst500000;
+  TInt64 positionBytes = iLastPlayTotalBytes + streamPositionBytes;
 #else
   TTimeIntervalMicroSeconds currentPos = TInt64(1000)*Position();
 #endif
@@ -570,7 +572,7 @@ const TInt32 * COggPlayback::GetFrequencyBins()
   TInt idx = iLastFreqArrayIdx;
   for (TInt i=0; i<KFreqArrayLength; i++)
     {
-      if (iFreqArray[idx].iTime < currentPos)
+      if (iFreqArray[idx].iTime <= positionBytes)
           break;
       
         idx--;
@@ -654,18 +656,6 @@ void COggPlayback::Play()
   // To avoid that, send few (4) almost empty buffers
   if (iMachineUid != EMachineUid_SendoX) // Sendo X doesn't need this fix. 
       iFirstBuffers = 4; 
-
-#ifdef MDCT_FREQ_ANALYSER
-  // Reset the frequency analyser
-  iLastFreqArrayIdx = 0;
-  const TInt64 KMaxTInt64 = TInt64(0x7FFFFFFF, 0xFFFFFFFF);
-  for (TInt i=0; i<KFreqArrayLength; i++)
-  {
-	iFreqArray[i].iTime = KMaxTInt64;
-	for (TInt j = 0 ; j<KNumberOfFreqBins ; j++)
-		iFreqArray[i].iFreqCoefs[j] = 0;
-  }
-#endif
 
 #if defined(DELAY_AUDIO_STREAMING_START)
   // Also to avoid the first buffer problem, wait a short time before streaming, 
@@ -772,7 +762,7 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         if (iLastFreqArrayIdx >= KFreqArrayLength)
             iLastFreqArrayIdx = 0;
         iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].iFreqCoefs, KNumberOfFreqBins);
-        iFreqArray[iLastFreqArrayIdx].iTime =  TInt64(iLatestPlayTime);
+        iFreqArray[iLastFreqArrayIdx].iTime = iSharedData.iTotalBufferBytes;
     }
     else
     {
@@ -865,6 +855,20 @@ TInt COggPlayback::SetAudioProperties(TInt aSampleRate, TInt aChannels)
 
 void COggPlayback::StartStreaming()
 {
+#ifdef MDCT_FREQ_ANALYSER
+  // Reset the frequency analyser
+  iLastFreqArrayIdx = 0;
+  const TInt64 KMaxTInt64 = TInt64(0x7FFFFFFF, 0xFFFFFFFF);
+  for (TInt i=0; i<KFreqArrayLength; i++)
+  {
+	iFreqArray[i].iTime = KMaxTInt64;
+	for (TInt j = 0 ; j<KNumberOfFreqBins ; j++)
+		iFreqArray[i].iFreqCoefs[j] = 0;
+  }
+
+  iLastPlayTotalBytes = iSharedData.iTotalBufferBytes;
+#endif
+
   // Start the buffering listener
   if (iSharedData.iBufferingMode == EBufferThread)
 	iBufferingThreadAO->StartListening();
@@ -935,11 +939,10 @@ TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
   // Set the flush buffer event
   iSharedData.iFlushBufferEvent = aFlushBufferEvent;
 
-  TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
 
-  iStreamingThreadCommandHandler->FlushBuffers();
-  return streaming;
+  return iStreamingThreadCommandHandler->FlushBuffers();
 }
 
 TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
@@ -948,11 +951,10 @@ TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
   iSharedData.iFlushBufferEvent = EPositionChanged;
   iSharedData.iNewPosition = aNewPosition;
 
-  TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
+  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
   iBufferingThreadAO->Cancel();
 
-  iStreamingThreadCommandHandler->FlushBuffers();
-  return streaming;
+  return iStreamingThreadCommandHandler->FlushBuffers();
 }
 
 void COggPlayback::FlushBuffers(TGainType aNewGain)
@@ -1209,6 +1211,16 @@ void COggPlayback::NotifyStreamingStatus(TInt aErr)
 	case EPlayInterrupted:
 		// Playback has been interrupted so notify the observer
 		iObserver->NotifyPlayInterrupted();
+		break;
+
+	case EPlayUnderflow:
+		// Flush buffers (and pause the stream)
+		FlushBuffers(EPlaybackPaused);
+		iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
+		break;
+
+	default:
+		User::Panic(_L("COggPlayback::NSS"), 0);
 		break;
   }
 }
