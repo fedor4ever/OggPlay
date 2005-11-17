@@ -39,7 +39,7 @@
 #include "OggAbsPlayback.h"
 
 // UIQ_?
-IFDEF_S60(const TInt KCallBackPeriod = 150000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
+IFDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
 IFNDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
 
 COggPlayAppView::COggPlayAppView() :
@@ -132,11 +132,10 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 
   iCanvas[0]->SetFocus(ETrue);
 
-  // start the canvas refresh timer (KCallBackPeriod):
-  iTimer= CPeriodic::NewL(CActive::EPriorityStandard);
-  //FIXME: check whether iCallback can be on the stack:
-  //TCallBack* iCallBack= new TCallBack(COggPlayAppView::CallBack,this);
-  iCallBack= new TCallBack(COggPlayAppView::CallBack,this);
+  // Start the canvas refresh timer (KCallBackPeriod):
+  iTimer = CPeriodic::NewL(CActive::EPriorityStandard);
+  iCallBack = new TCallBack(COggPlayAppView::CallBack, this);
+
   //FIXME: only start timer once all initialization has been done
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(KCallBackPeriod),*iCallBack);
 
@@ -874,7 +873,7 @@ COggPlayAppView::SelectItem(TInt idx)
   iSelected= idx;
   if (iListBox[iMode]) {
     iSelected = iListBox[iMode]->SetCurrentItemIndex(idx);
-    iCanvas[iMode]->Refresh(EFalse);
+    iCanvas[iMode]->Refresh();
   }
 }
 
@@ -972,38 +971,65 @@ COggPlayAppView::UpdateRandom()
 TInt
 COggPlayAppView::CallBack(TAny* aPtr)
 {
-  COggPlayAppView* self= (COggPlayAppView*)aPtr;
-
-  if (self->iApp->iForeground) {
-
-    if (self->iAnalyzer[self->iMode] && self->iAnalyzer[self->iMode]->Style()>0) 
-    {
-      if (self->iApp->iOggPlayback->State()==CAbsPlayback::EPlaying)
-      {
-#ifdef MDCT_FREQ_ANALYSER 
-          self->iAnalyzer[self->iMode]->RenderWaveformFromMDCT(
-          self->iApp->iOggPlayback->GetFrequencyBins() );
-#else /* !MDCT_FREQ_ANALYSER */
-#if defined(SERIES60)
-          self->iAnalyzer[self->iMode]->RenderWaveform((short int*)self->iApp->iOggPlayback->GetDataChunk());
-#else
-          self->iAnalyzer[self->iMode]->RenderWaveform((short int[2][512])self->iApp->iOggPlayback->GetDataChunk());
-#endif
-
-#endif /* MDCT_FREQ_ANALYSER */
-      }
-    }
-    
-    if (self->iPosition[self->iMode] && self->iPosChanged<0) 
-      self->iPosition[self->iMode]->SetValue(self->iApp->iOggPlayback->Position().GetTInt());
-    
-    self->iCanvas[self->iMode]->Refresh();
-
-  }
+  COggPlayAppView* self= (COggPlayAppView*) aPtr;
+  self->HandleCallBack();
 
   return 1;
 }
 
+void COggPlayAppView::HandleCallBack()
+{
+  if (iAnalyzer[iMode] && iAnalyzer[iMode]->Style()>0) 
+  {
+    if (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying)
+    {
+#ifdef MDCT_FREQ_ANALYSER 
+      iAnalyzer[iMode]->RenderWaveformFromMDCT(
+      iApp->iOggPlayback->GetFrequencyBins() );
+#else /* !MDCT_FREQ_ANALYSER */
+#if defined(SERIES60)
+      iAnalyzer[iMode]->RenderWaveform((short int*)iApp->iOggPlayback->GetDataChunk());
+#else
+      iAnalyzer[iMode]->RenderWaveform((short int[2][512])iApp->iOggPlayback->GetDataChunk());
+#endif
+#endif /* MDCT_FREQ_ANALYSER */
+    }
+  }
+
+#if defined(UIQ)
+  // Leave UIQ behaviour unchanged (for now)
+  if (iPosition[iMode] && iPosChanged<0) 
+	iPosition[iMode]->SetValue(iApp->iOggPlayback->Position().GetTInt());
+
+  iCanvas[iMode]->CycleLowFrequencyControls();
+  iCanvas[iMode]->CycleHighFrequencyControls();
+  iCanvas[iMode]->Refresh();
+#else
+  if (iCycleFrequencyDivider == 0)
+  {
+	if (iPosition[iMode] && iPosChanged<0) 
+		iPosition[iMode]->SetValue(iApp->iOggPlayback->Position().GetTInt());
+    
+	iCanvas[iMode]->CycleLowFrequencyControls();
+	iCycleFrequencyDivider = 2; // Low frequency controls run slower by this factor
+  }
+
+  iCanvas[iMode]->CycleHighFrequencyControls();
+  iCanvas[iMode]->Refresh();
+  iCycleFrequencyDivider--;
+#endif
+}
+
+void COggPlayAppView::RestartCallBack()
+{
+  if (!iTimer->IsActive())
+	iTimer->Start(TTimeIntervalMicroSeconds32(KCallBackPeriod), TTimeIntervalMicroSeconds32(KCallBackPeriod), *iCallBack);
+}
+
+void COggPlayAppView::StopCallBack()
+{
+  iTimer->Cancel();
+}
 
 void
 COggPlayAppView::Invalidate()
@@ -1272,8 +1298,6 @@ COggPlayAppView::UpdateControls()
 void
 COggPlayAppView::UpdateSongPosition()
 {
-  if (!iApp->iForeground) return;
-
 #if defined(SERIES60)
   // Only show "Played" time component when not stopped, i.e. only show 
   // when artist, title etc is displayed.
@@ -1592,7 +1616,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       iApp->iOggPlayback->SetPosition(pos);
   	  iPosition[iMode]->SetValue(pos.GetTInt());
 	  UpdateSongPosition();
-	  iCanvas[iMode]->Refresh(EFalse);
+	  iCanvas[iMode]->Refresh();
 	  return EKeyWasConsumed;
       }
     case TOggplaySettings::ERewind : {
@@ -1600,7 +1624,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       iApp->iOggPlayback->SetPosition(pos);
   	  iPosition[iMode]->SetValue(pos.GetTInt());
 	  UpdateSongPosition();
-	  iCanvas[iMode]->Refresh(EFalse);
+	  iCanvas[iMode]->Refresh();
       return EKeyWasConsumed;
       }
     case TOggplaySettings::EPageDown : {

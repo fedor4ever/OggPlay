@@ -583,10 +583,8 @@ COggPlayAppUi::NotifyUpdate()
 	
 	iAppView->UpdateClock();
 	
-	if (iOggPlayback->State()!=CAbsPlayback::EPlaying &&
-		iOggPlayback->State()!=CAbsPlayback::EPaused) return; 
-	
-	iAppView->UpdateSongPosition();
+	if ((iOggPlayback->State() == CAbsPlayback::EPlaying) && IsForeground())
+		iAppView->UpdateSongPosition();
 }
 
 void
@@ -1736,7 +1734,10 @@ void
 COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
 	CEikAppUi::HandleForegroundEventL(aForeground);
-	iForeground= aForeground;
+	if (aForeground)
+		iAppView->RestartCallBack();
+	else
+		iAppView->StopCallBack();
 }
 
 void

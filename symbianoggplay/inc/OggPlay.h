@@ -290,7 +290,6 @@ public:
   int iAlarmTriggered;    // did the alarm clock go off?
   int iAlarmActive;       // has an alarm time been set?
 
-  TBool iForeground;      // is the application currently in the foreground?
   TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
   TBool iIsStartup;        // is true when just started, needed for autoplay
   TFileName iDbFileName;

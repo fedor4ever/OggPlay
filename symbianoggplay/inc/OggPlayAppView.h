@@ -101,6 +101,10 @@ public:
   TBool PlayDimmed();
 
   static TInt CallBack(TAny* aPtr); // registered with iTimer (CPeriodic)
+  void HandleCallBack();
+
+  void RestartCallBack();
+  void StopCallBack();
 
 
   // from MCoeControlObserver:
@@ -121,7 +125,6 @@ public:
   TCallBack*            iCallBack;
 
 private:
-
   void  ReadCanvas(TInt aCanvas, TOggParser& p);
   void  ResetControls();
   void  ClearCanvases();
@@ -199,6 +202,7 @@ private:
   COggAnimation*     iAnimation[2];
   COggAnimation*     iLogo[2];
 
+  TInt iCycleFrequencyDivider;
 };
 
 #endif

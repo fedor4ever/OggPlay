@@ -240,17 +240,16 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
  * COggControl
  *
  ***********************************************************/
-
-COggControl::COggControl() :
-  ix(0),iy(0),iw(0),ih(0),
-  iRedraw(ETrue),
-  iCycle(0),
-  iVisible(ETrue),
-  iDimmed(EFalse),
-  iAcceptsFocus(EFalse),
-  iObserver(0)
+COggControl::COggControl()
+: iRedraw(ETrue), iVisible(ETrue)
 {
   //TRACE(COggLog::VA(_L("COggControl::COggControl() 0x%X"), this ));
+}
+
+COggControl::COggControl(TBool aHighFrequency)
+: iRedraw(ETrue), iVisible(ETrue), iHighFrequency(aHighFrequency)
+{
+  //TRACE(COggLog::VA(_L("COggControl::COggControl(TBool aHighFrequency) 0x%X"), this ));
 }
 
 COggControl::~COggControl()
@@ -430,6 +429,11 @@ COggControl::ReadArguments(TOggParser& p)
     iObserver->AddControlToFocusList(this);
   }
   return ETrue;
+}
+
+TBool COggControl::HighFrequency()
+{
+	return iHighFrequency;
 }
 
 
@@ -1597,12 +1601,8 @@ COggScrollBar::ReadArguments(TOggParser& p)
  * COggAnalyzer
  *
  ***********************************************************/
-
-COggAnalyzer::COggAnalyzer() :
-  COggControl(),
-  iBarIcon(0),
-  iNumValues(16),
-  iStyle(1)
+COggAnalyzer::COggAnalyzer()
+: COggControl(ETrue), iNumValues(16), iStyle(1)
 {
   iValues= new TInt[iNumValues];
   iPeaks= new TInt[iNumValues];
@@ -1774,16 +1774,13 @@ void COggAnalyzer::RenderWaveform(short int *data)
 }
 
 
-void COggAnalyzer::RenderWaveformFromMDCT(const TInt32 * aFreqBins)
+void COggAnalyzer::RenderWaveformFromMDCT(const TInt32* aFreqBins)
 {
     // This function takes as input the maximal MDCT coefficients of 
     // each frequency bins 
     
     // Convert to log
     TInt i, j;
-    if (aFreqBins == NULL)
-        // No data to play with
-        return;
     for (j=0; j<16; j++)
     {
         TInt v = aFreqBins[j];
@@ -2320,11 +2317,8 @@ void COggCanvas::MiuoConvertComplete(TInt aError)
 
 
 void
-COggCanvas::Refresh(TBool aCycleControls)
+COggCanvas::Refresh()
 {
-  if (aCycleControls)
-      CycleControls();
-
   TBool redrawRequired = EFalse;
   TInt i;
   for (i=0; i<iControls.Count(); i++) 
@@ -2501,8 +2495,22 @@ void COggCanvas::HandlePointerEventL(const TPointerEvent& aPointerEvent)
   if (aPointerEvent.iType==TPointerEvent::EButton1Up) iGrabbed= 0;
 }
 
-void COggCanvas::CycleControls()
+void COggCanvas::CycleHighFrequencyControls()
 {
   for (int i=0; i<iControls.Count(); i++)
-    iControls[i]->Cycle();
+  {
+    COggControl* control = iControls[i];
+    if (control->HighFrequency())
+		control->Cycle();
+  }
+}
+
+void COggCanvas::CycleLowFrequencyControls()
+{
+  for (int i=0; i<iControls.Count(); i++)
+  {
+    COggControl* control = iControls[i];
+    if (!control->HighFrequency())
+		control->Cycle();
+  }
 }

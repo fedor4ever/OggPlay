@@ -113,6 +113,7 @@ class COggControl : public CBase {
  public:
 
   COggControl();
+  COggControl(TBool aHighFrequency);
   virtual ~COggControl();
 
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
@@ -145,8 +146,9 @@ class COggControl : public CBase {
   virtual void  SetBitmapFile(const TFileName& aBitmapFile);
   virtual TBool Read(TOggParser& p);
 
- protected:
+  TBool HighFrequency();
 
+ protected:
   // these can/must be overriden to create specific behaviour:
   virtual void Cycle() {}
   virtual void Draw(CBitmapContext& aBitmapContext) = 0;
@@ -165,8 +167,8 @@ class COggControl : public CBase {
   TBool  iFocus;    // if true, control has focus.
 
   MOggControlObserver* iObserver;
-
   TFileName iBitmapFile;
+  TBool iHighFrequency;
 
   friend class COggCanvas;
 };
@@ -603,7 +605,7 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
   virtual ~COggCanvas();
   void LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
 
-  void Refresh(TBool aCycleControls = ETrue);
+  void Refresh();
   void Invalidate();
 
   void DrawControl();  // redraw the off screen bitmap
@@ -613,7 +615,8 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
   void AddControl(COggControl* c);
   void ClearControls();
 
-  //void RegisterCallBack(TInt (*fnc)(TAny*));
+  void CycleHighFrequencyControls();
+  void CycleLowFrequencyControls();
 
   void Read(FILE* tf);
 
@@ -628,7 +631,6 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
   virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent);
   virtual TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
 
-  void CycleControls();
   virtual void DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& aBitmapDevice) const;
 
   void SizeChanged();
