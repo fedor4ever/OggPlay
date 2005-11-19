@@ -19,7 +19,7 @@
  
 #include "OggHelperFcts.h"
 
-COggTimer::COggTimer(TCallBack aCallBack) : CTimer(EPriorityHigh)
+COggTimer::COggTimer(TCallBack aCallBack) : CTimer(EPriorityStandard)
     {
     iCallBack = aCallBack;
     CTimer::ConstructL();

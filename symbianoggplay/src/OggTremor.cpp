@@ -527,7 +527,7 @@ void COggPlayback::SetPosition(TInt64 aPos)
 
 		// Restart streaming
 		if (streamStopped)
-			iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+			iRestartAudioStreamingTimer->Wait(KStreamStartDelay);
 #else
 	  iDecoder->Setposition(aPos);
 #endif
@@ -910,7 +910,7 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
 
 	  // Restart the stream
 	  if (streamStopped)
-		iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+		iRestartAudioStreamingTimer->Wait(KStreamStartDelay);
 
 	  return err;
   }
@@ -920,7 +920,7 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
 
   // Restart the stream
   if (iState == EPlaying)
-	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
+	iRestartAudioStreamingTimer->Wait(KStreamStartDelay);
 
   return KErrNone;
 }
@@ -1164,6 +1164,10 @@ TInt COggPlayback::BufferingModeChanged()
 void COggPlayback::NotifyStreamingStatus(TInt aErr)
 {
   // Called by the streaming thread listener when the last buffer has been copied or play has been interrupted
+  // Theoretically it's possible for a restart to be in progress, so make sure it doesn't complete
+  // (i.e. when the streaming thread generates an event at the same time as the UI thread has started processing a RW\FW key press)
+  iRestartAudioStreamingTimer->Cancel();
+
   // Ignore streaming status if we are already handling an error
   if (iStreamingErrorDetected)
 	return;

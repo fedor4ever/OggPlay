@@ -767,7 +767,8 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	iSharedData.iNumBuffers--;
 
 	// If we have reached the last buffer, notify the UI thread
-	if (iSharedData.iLastBuffer == &aBuffer)
+	// but don't notify the UI thread if we are being stopped
+	if ((iSharedData.iLastBuffer == &aBuffer) && (aErr != KErrAbort))
 	{
 		// Notify the UI thread that we have copied the last buffer to the stream
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
