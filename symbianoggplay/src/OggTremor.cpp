@@ -70,8 +70,6 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver)
 #endif
 {
 #if !defined(MULTI_THREAD_PLAYBACK)
-    iSettings.Query();
-    
     // These basic rates should be supported by all Symbian OS
     // Higher quality might not be supported.
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
@@ -187,7 +185,6 @@ COggPlayback::~COggPlayback()
   for (TInt i = 0 ; i<KMultiThreadBuffers ; i++)
   	delete iBuffer[i];
 #else
-  delete iRestartAudioStreamingTimer;
   delete iStream;
 
   for (TInt i=0; i<KBuffers; i++)
@@ -572,7 +569,11 @@ const TInt32 * COggPlayback::GetFrequencyBins()
   TInt idx = iLastFreqArrayIdx;
   for (TInt i=0; i<KFreqArrayLength; i++)
     {
+#if defined(MULTI_THREAD_PLAYBACK)
       if (iFreqArray[idx].iTime <= positionBytes)
+#else
+      if (iFreqArray[idx].iTime <= currentPos)
+#endif
           break;
       
         idx--;
@@ -762,7 +763,12 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
         if (iLastFreqArrayIdx >= KFreqArrayLength)
             iLastFreqArrayIdx = 0;
         iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].iFreqCoefs, KNumberOfFreqBins);
-        iFreqArray[iLastFreqArrayIdx].iTime = iSharedData.iTotalBufferBytes;
+
+#if defined(MULTI_THREAD_PLAYBACK)
+		iFreqArray[iLastFreqArrayIdx].iTime = iSharedData.iTotalBufferBytes;
+#else
+		iFreqArray[iLastFreqArrayIdx].iTime = TInt64(iLatestPlayTime);
+#endif
     }
     else
     {
@@ -795,19 +801,16 @@ void COggPlayback::StartAudioStreamingCallBack()
   StartStreaming();
   #else
   for (TInt i=0; i<KBuffers; i++) 
-	SendBuffer(*(self->iBuffer[i]));
+	SendBuffer(*(iBuffer[i]));
   #endif
 }
 
+#if defined(MULTI_THREAD_PLAYBACK)
 void COggPlayback::RestartAudioStreamingCallBack()
 {
-  #if defined(MULTI_THREAD_PLAYBACK)
   StartStreaming();
-  #else
-  for (TInt i=0; i<KBuffers; i++) 
-	SendBuffer(*(self->iBuffer[i]));
-  #endif
 }
+#endif
 
 void COggPlayback::StopAudioStreamingCallBack()
 {
@@ -1411,28 +1414,25 @@ void COggPlayback::MaoscOpenComplete(TInt aErr)
   }
 }
 
-TInt COggPlayback::RestartAudioStreamingCallBack(TAny* aPtr)
+void COggPlayback::RestartAudioStreamingCallBack()
 {
-  COggPlayback* self= (COggPlayback*) aPtr;
-  
-  self->iUnderflowing = EFalse;
-  TInt firstUnderflowBuffer = self->iFirstUnderflowBuffer;
-  TInt lastUnderflowBuffer = self->iLastUnderflowBuffer;
+  iUnderflowing = EFalse;
+  TInt firstUnderflowBuffer = iFirstUnderflowBuffer;
+  TInt lastUnderflowBuffer = iLastUnderflowBuffer;
   TInt i;
   if (lastUnderflowBuffer>=firstUnderflowBuffer)
   {
 	for (i = firstUnderflowBuffer ; i<=lastUnderflowBuffer ; i++)
-		self->SendBuffer(*(self->iBuffer[i]));
+		SendBuffer(*(iBuffer[i]));
   }
   else
   {
 	for (i = firstUnderflowBuffer ; i<KBuffers ; i++)
-		self->SendBuffer(*(self->iBuffer[i]));
+		SendBuffer(*(iBuffer[i]));
 
 	for (i = 0 ; i<=lastUnderflowBuffer ; i++)
-		self->SendBuffer(*(self->iBuffer[i]));
+		SendBuffer(*(iBuffer[i]));
   }
-  return 0;
 }
 #endif
 
@@ -1467,8 +1467,7 @@ TInt COggAudioCapabilityPoll::PollL()
                 iRate= TMdaAudioDataSettings::ESampleRate48000Hz;
                 break;
             }
-        iSettings.Query();
-        
+
         iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
         iSettings.iSampleRate= iRate;
         iSettings.iVolume = 0;

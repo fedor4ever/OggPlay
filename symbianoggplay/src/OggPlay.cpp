@@ -296,7 +296,8 @@ void
 COggPlayAppUi::ConstructL()
 {
 #if defined(SERIES60_SPLASH)
-	ShowSplash();
+  ShowSplash();
+
   // Otherwise BaseConstructL() clears screen when launched via recognizer (?!)
   CEikonEnv::Static()->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNeverAtFront);
 #endif
@@ -324,8 +325,7 @@ COggPlayAppUi::ConstructL()
   iDbFileName = _L("C:\\oggplay.db");
 #endif
 
-	
-	iSkins= new CDesCArrayFlat(3);
+	iSkins= new(ELeave) CDesCArrayFlat(3);
 	FindSkins();
 	iCurrentSkin= 0;
 	
@@ -340,6 +340,7 @@ COggPlayAppUi::ConstructL()
     iIsStartup=ETrue;
     iSettings.iWarningsEnabled = ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
+
 #ifdef PLUGIN_SYSTEM
 	iOggPlayback= new(ELeave) COggPluginAdaptor(iOggMsgEnv, this);
 #else
@@ -1290,14 +1291,13 @@ COggPlayAppUi::FindSkins()
 		delete ds;
 		return;
 	}
-	CleanupStack::Pop(ds);
-	CDir* c=0;
-	
+
+	CDir* c = NULL;	
 	HBufC* fullname = HBufC::NewLC(512);
-	
 	for(;;) {
 		ds->NextL(c);
-		if (c==0) break;
+		if (!c)
+			break;
 		
 		for (TInt i=0; i<c->Count(); i++) 
 		{
@@ -1316,12 +1316,7 @@ COggPlayAppUi::FindSkins()
 		delete c; c=NULL;
     }
 	
-	CleanupStack::PopAndDestroy(); // fullname
-	delete ds;
-	
-	//_LIT(KS,"Found %d skin(s)");
-	//OGGLOG.WriteFormat(KS,iSkins->Count());
-	
+	CleanupStack::PopAndDestroy(2, ds);
 }
 
 void

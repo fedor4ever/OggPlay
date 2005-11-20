@@ -360,8 +360,6 @@ CStreamingThreadPlaybackEngine::CStreamingThreadPlaybackEngine(TStreamingThreadD
 	iMaxStreamBuffers = KNoBuffers;
 	iBufferLowThreshold = KNoBuffers;
 
-	iSettings.Query();
-    
     // These basic rates should be supported by all Symbian OS
     // Higher quality might not be supported.
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
