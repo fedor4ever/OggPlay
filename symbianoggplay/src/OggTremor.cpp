@@ -89,7 +89,7 @@ void COggPlayback::ConstructL()
 #endif
 
   // Discover audio capabilities
-  COggAudioCapabilityPoll pollingAudio;
+  TOggAudioCapabilityPoll pollingAudio;
   iAudioCaps = pollingAudio.PollL();
 
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -499,7 +499,7 @@ void COggPlayback::SetVolume(TInt aVol)
 void COggPlayback::SetVolumeGain(TGainType aGain)
 {
 #if defined(MULTI_THREAD_PLAYBACK)
-	FlushBuffers(aGain);
+  FlushBuffers(aGain);
 #else
   iOggSampleRateConverter->SetVolumeGain(aGain);
 #endif
@@ -922,7 +922,7 @@ TInt COggPlayback::SetBufferingMode(TBufferingMode aNewBufferingMode)
   iStreamingThreadCommandHandler->SetBufferingMode();
 
   // Restart the stream
-  if (iState == EPlaying)
+  if (streamStopped)
 	iRestartAudioStreamingTimer->Wait(KStreamStartDelay);
 
   return KErrNone;
@@ -1437,11 +1437,12 @@ void COggPlayback::RestartAudioStreamingCallBack()
 #endif
 
 
-TInt COggAudioCapabilityPoll::PollL()
-    {
-    iCaps=0;
-    TInt oneSupportedRate = 0;
-    for (TInt i=0; i<7; i++)
+TInt TOggAudioCapabilityPoll::PollL()
+{
+  iCaps=0;
+  TInt oneSupportedRate = 0;
+  CMdaAudioOutputStream* stream = NULL;
+  for (TInt i=0; i<7; i++)
         {
         switch(i)
             {
@@ -1470,16 +1471,18 @@ TInt COggAudioCapabilityPoll::PollL()
 
         iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
         iSettings.iSampleRate= iRate;
+		iSettings.iFlags = TMdaAudioDataSettings::ENoNetworkRouting;
         iSettings.iVolume = 0;
         
-        iStream  = CMdaAudioOutputStream::NewL(*this);
-        iStream->Open(&iSettings);
+        stream = CMdaAudioOutputStream::NewL(*this);
+        stream->Open(&iSettings);
         CActiveScheduler::Start();
 
-        if (iCaps & iRate){
+		if (iCaps & iRate)
+		{
             // We need to make sure, Nokia 6600 for example won't tell in the
             // Open() that the requested rate is not supported.
-            TRAPD(err,iStream->SetAudioPropertiesL(iRate,iSettings.iChannels););
+            TRAPD(err, stream->SetAudioPropertiesL(iRate,iSettings.iChannels););
             TRACEF(COggLog::VA(_L("SampleRate Supported:%d"), err ));
             if (err == KErrNone)
             {
@@ -1493,24 +1496,24 @@ TInt COggAudioCapabilityPoll::PollL()
             }
         }
 
-        delete iStream; // This is rude...
-        iStream = NULL;
-        }
+        delete stream;
+      }
     
     // Poll for stereo support
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsStereo;
     iSettings.iSampleRate= oneSupportedRate;
+	iSettings.iFlags = TMdaAudioDataSettings::ENoNetworkRouting;
     iSettings.iVolume = 0;
+	iRate = TMdaAudioDataSettings::EChannelsStereo;
     
-    iStream  = CMdaAudioOutputStream::NewL(*this);
-    iStream->Open(&iSettings);
-    iRate = TMdaAudioDataSettings::EChannelsStereo;
+    stream  = CMdaAudioOutputStream::NewL(*this);
+    stream->Open(&iSettings);
     CActiveScheduler::Start();
     
     if (iCaps & iRate){
        // We need to make sure, Nokia 6600 for example won't tell in the
        // Open() that the requested rate is not supported.
-       TRAPD(err,iStream->SetAudioPropertiesL(iSettings.iSampleRate,iSettings.iChannels););
+       TRAPD(err, stream->SetAudioPropertiesL(iSettings.iSampleRate,iSettings.iChannels););
        TRACEF(COggLog::VA(_L("Stereo Supported:%d"), err ));
        if (err != KErrNone)
        {
@@ -1519,12 +1522,11 @@ TInt COggAudioCapabilityPoll::PollL()
        }
     }
 
-    delete iStream; // This is rude...
-    iStream = NULL;
+    delete stream;
     return iCaps;
     }
 
-void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aErr) 
+void TOggAudioCapabilityPoll::MaoscOpenComplete(TInt aErr) 
 {
     TRACEF(COggLog::VA(_L("AudioCapPoll OpenComplete: %d"), aErr ));
 
@@ -1534,13 +1536,12 @@ void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aErr)
         iCaps |= iRate;
         }
     CActiveScheduler::Stop();
-    
 }
 
-void COggAudioCapabilityPoll::MaoscPlayComplete(TInt /* aErr */)
+void TOggAudioCapabilityPoll::MaoscPlayComplete(TInt /* aErr */)
     {
     }
 
-void COggAudioCapabilityPoll::MaoscBufferCopied(TInt /* aErr */, const TDesC8& /* aBuffer */)
+void TOggAudioCapabilityPoll::MaoscBufferCopied(TInt /* aErr */, const TDesC8& /* aBuffer */)
     {
     }

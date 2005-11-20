@@ -286,7 +286,7 @@ private:
 };
 
 
-class COggAudioCapabilityPoll : public CBase, public MMdaAudioOutputStreamCallback
+class TOggAudioCapabilityPoll : public MMdaAudioOutputStreamCallback
     {
     public:
         TInt PollL();
@@ -297,7 +297,6 @@ class COggAudioCapabilityPoll : public CBase, public MMdaAudioOutputStreamCallba
         void MaoscOpenComplete(TInt aError);
         
     private:
-        CMdaAudioOutputStream* iStream;
         TMdaAudioDataSettings  iSettings;
         TInt iCaps;
         TInt iRate;

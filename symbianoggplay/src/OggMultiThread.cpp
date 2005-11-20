@@ -364,6 +364,7 @@ CStreamingThreadPlaybackEngine::CStreamingThreadPlaybackEngine(TStreamingThreadD
     // Higher quality might not be supported.
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
     iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
+	iSettings.iFlags = TMdaAudioDataSettings::ENoNetworkRouting;
     iSettings.iVolume = 0;
 }
 

@@ -233,6 +233,7 @@ class COggActive : public CBase
 
   void IssueRequest();
   static TInt CallBack(TAny* aPtr);
+  void CallBack();
 
  private:
   RTelServer*    iServer;

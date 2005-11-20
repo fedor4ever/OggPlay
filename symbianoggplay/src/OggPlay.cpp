@@ -195,54 +195,57 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 #endif
 }
 
-TInt
-COggActive::CallBack(TAny* aPtr)
+TInt COggActive::CallBack(TAny* aPtr)
 {
 	COggActive* self= (COggActive*)aPtr;
-	
-  if(self->iAppUi->iIsStartup) {
-    self->iAppUi->PostConstructL();
-	}
-	
-	self->iAppUi->NotifyUpdate();
-	
-	if( self->iLine )
-    {
-		RPhone::TLineInfo LInfo;
-		
-		self->iPhone->GetLineInfo(self->iLineToMonitor,LInfo);
-		self->iLine->Open(*self->iPhone,LInfo.iName);
-		TInt nCalls=0;
-		self->iLine->EnumerateCall(nCalls);
-		self->iLine->Close();
-		
-		TBool isRinging = nCalls > self->iLineCallsReportedAtIdle;
-		TBool isIdle    = nCalls == self->iLineCallsReportedAtIdle;
-		
-		if (isRinging && !self->iInterrupted) 
-		{
-			// the phone is ringing or someone is making a call, pause the music if any
-			if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying) {
-				TRACELF("GSM is active");
-				self->iInterrupted= ETrue;
-				self->iAppUi->HandleCommandL(EOggPauseResume);
-			}
-		}
-		else if (self->iInterrupted) 
-		{
-			// our music was interrupted by a phone call, now what
-			if (isIdle) {
-				TRACELF("GSM is idle");
-				// okay, the phone is idle again, let's continue with the music
-				self->iInterrupted= EFalse;
-				if (self->iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
-					self->iAppUi->HandleCommandL(EOggPauseResume);
-			}
-		}
-	}
+	self->CallBack();
+
 	return 1;
 }
 
+void COggActive::CallBack()
+{	
+  if(iAppUi->iIsStartup)
+    iAppUi->PostConstructL();
+	
+  iAppUi->NotifyUpdate();
+	
+  if (iLine)
+  {
+	RPhone::TLineInfo LInfo;
+		
+	iPhone->GetLineInfo(iLineToMonitor, LInfo);
+	iLine->Open(*iPhone, LInfo.iName);
+	TInt nCalls=0;
+	iLine->EnumerateCall(nCalls);
+	iLine->Close();
+		
+	TBool isRinging = nCalls > iLineCallsReportedAtIdle;
+	TBool isIdle    = nCalls == iLineCallsReportedAtIdle;
+	if (isRinging && !iInterrupted) 
+	{
+		// the phone is ringing or someone is making a call, pause the music if any
+		if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying)
+		{
+			TRACELF("GSM is active");
+			iInterrupted= ETrue;
+			iAppUi->HandleCommandL(EOggPauseResume);
+		}
+	}
+	else if (iInterrupted) 
+	{
+		// our music was interrupted by a phone call, now what
+		if (isIdle)
+		{
+			TRACELF("GSM is idle");
+			// okay, the phone is idle again, let's continue with the music
+			iInterrupted= EFalse;
+			if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
+				iAppUi->HandleCommandL(EOggPauseResume);
+		}
+	}
+  }
+}
 
 void
 COggActive::IssueRequest()
@@ -454,7 +457,6 @@ void COggPlayAppUi::PostConstructL()
   }
   iIsStartup=EFalse;
   iIsRunningEmbedded=EFalse;
-
 }
 
 COggPlayAppUi::~COggPlayAppUi()
