@@ -330,16 +330,8 @@ COggPlayAppUi::ConstructL()
 
 	iSkins= new(ELeave) CDesCArrayFlat(3);
 	FindSkins();
-	iCurrentSkin= 0;
 	
-	iHotkey= 0;
-	iVolume= KMaxVolume;
-	iTryResume= 0;
-	iAlarmTriggered= 0;
-	iAlarmActive= 0;
-	iAlarmTime.Set(_L("20030101:120000.000000"));
 	iViewBy= ETop;
-	iAnalyzerState= 0;
     iIsStartup=ETrue;
     iSettings.iWarningsEnabled = ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
@@ -1345,6 +1337,12 @@ COggPlayAppUi::ReadIniFile()
  
     // Default values
 	iSettings.iGainType = ENoGain;
+	iVolume = KMaxVolume;
+	iAlarmTime.Set(_L("20030101:120000.000000"));
+
+#if (defined(SERIES60 ) || defined (SERIES80) )	
+    iAnalyzerState = EDecay; 
+#endif
 
 #if defined(MULTI_THREAD_PLAYBACK)
 	iSettings.iBufferingMode = ENoBuffering;
@@ -1383,11 +1381,8 @@ COggPlayAppUi::ReadIniFile()
    iVolume = (int)   IniRead32( tf, KMaxVolume, KMaxVolume );
 	
    TInt64 tmp64 = IniRead64( tf );
-   if ( val != 0 )
-   {
-	TTime t(tmp64);
-	iAlarmTime= t;
-   }
+   TTime t(tmp64);
+   iAlarmTime= t;
 
    iAnalyzerState = (int)  IniRead32( tf, 0, 3 );
    val            =        IniRead32( tf );  // For backward compatibility
@@ -1490,10 +1485,6 @@ COggPlayAppUi::ReadIniFile()
 #endif
 
    in.Close();
-
-#if (defined(SERIES60 ) || defined (SERIES80) )	
-   iAnalyzerState = EDecay; 
-#endif
 	}
 
 TInt32 
