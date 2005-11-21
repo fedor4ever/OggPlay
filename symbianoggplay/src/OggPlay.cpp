@@ -1290,7 +1290,7 @@ COggPlayAppUi::FindSkins()
 		//_LIT(KS,"Error in FindSkins-SetScanDataL");
 		//OGGLOG.WriteFormat(KS);
 		
-		delete ds;
+		CleanupStack::PopAndDestroy(ds);
 		return;
 	}
 
