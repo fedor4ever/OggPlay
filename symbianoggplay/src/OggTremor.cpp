@@ -74,7 +74,7 @@ COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver)
     // Higher quality might not be supported.
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
     iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
-    iSettings.iVolume = 0;
+	iSettings.iFlags = TMdaAudioDataSettings::ENoNetworkRouting;
 #endif
 }
 
@@ -87,10 +87,6 @@ void COggPlayback::ConstructL()
   User::LeaveIfError(iFs.Share());
   User::LeaveIfError(AttachToFs());
 #endif
-
-  // Discover audio capabilities
-  TOggAudioCapabilityPoll pollingAudio;
-  iAudioCaps = pollingAudio.PollL();
 
 #if defined(MULTI_THREAD_PLAYBACK)
   // Create at least one audio buffer
@@ -112,6 +108,10 @@ void COggPlayback::ConstructL()
   iStreamingThreadCommandHandler = new(ELeave) CStreamingThreadCommandHandler(iUIThread, iStreamingThread, *iStreamingThreadPanicHandler);
   iSharedData.iStreamingThreadCommandHandler = iStreamingThreadCommandHandler;
 
+  // Create the streaming thread listener
+  iStreamingThreadListener = new(ELeave) CStreamingThreadListener(*this, iSharedData);
+  iSharedData.iStreamingThreadListener = iStreamingThreadListener;
+
   // Launch the streaming thread
   User::LeaveIfError(iStreamingThreadCommandHandler->ResumeCommandHandlerThread());
 
@@ -124,11 +124,11 @@ void COggPlayback::ConstructL()
 
   // Add it to the buffering threads active scheduler (this thread)
   CActiveScheduler::Add(iBufferingThreadAO);
- 
-  // Create the streaming thread listener
-  iStreamingThreadListener = new(ELeave) CStreamingThreadListener(*this, iSharedData);
-  iSharedData.iStreamingThreadListener = iStreamingThreadListener;
 #else
+  // Discover audio capabilities
+  TOggAudioCapabilityPoll pollingAudio;
+  iAudioCaps = pollingAudio.PollL();
+
   iStream = CMdaAudioOutputStream::NewL(*this);
   iStream->Open(&iSettings);
 

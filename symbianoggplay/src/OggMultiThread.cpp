@@ -365,11 +365,15 @@ CStreamingThreadPlaybackEngine::CStreamingThreadPlaybackEngine(TStreamingThreadD
     iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
     iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
 	iSettings.iFlags = TMdaAudioDataSettings::ENoNetworkRouting;
-    iSettings.iVolume = 0;
 }
 
 void CStreamingThreadPlaybackEngine::ConstructL()
 {
+	// Discover audio capabilities
+	TOggAudioCapabilityPoll pollingAudio;
+	iSharedData.iOggPlayback.iAudioCaps = pollingAudio.PollL();
+
+	// Open the stream
 	iStream = CMdaAudioOutputStream::NewL(*this);
 	iStream->Open(&iSettings);
 
@@ -965,7 +969,7 @@ void CStreamingThreadPlaybackEngine::MaoscPlayComplete(TInt aErr)
 
 
 // Streaming thread listener AO
-// This AO owned is owned by the COggPlayback object and runs in the UI thread
+// This AO is owned by the COggPlayback object and runs in the UI thread
 // It handles events from the audio stream (CMdaAudioOutputStream events from the streaming thread)
 CStreamingThreadListener::CStreamingThreadListener(COggPlayback& aOggPlayback, TStreamingThreadData& aSharedData)
 : CActive(EPriorityHigh), iOggPlayback(aOggPlayback), iSharedData(aSharedData), iListeningState(EListeningForOpenComplete)

@@ -160,7 +160,6 @@ private:
 
   COggMsgEnv*               iEnv;
   COggSampleRateConverter *iOggSampleRateConverter;
-  TInt                     iAudioCaps;
 
    // There is something wrong with Nokia Audio Streaming (NGage)
    // First buffers are somehow swallowed.
@@ -231,6 +230,7 @@ public:
 
 public:
   HBufC8* iBuffer[KMultiThreadBuffers];
+  TInt iAudioCaps;
 
 private:
   TInt AttachToFs();
@@ -278,6 +278,7 @@ private:
   HBufC8* iSent[KBuffers];
   TInt iMaxVolume;
   TInt iSentIdx;
+  TInt iAudioCaps;
 
   TBool iUnderflowing;
   TInt iFirstUnderflowBuffer;

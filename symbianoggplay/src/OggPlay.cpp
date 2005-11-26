@@ -406,8 +406,15 @@ COggPlayAppUi::ConstructL()
 #endif /* SERIES60 */
         
 #if defined(MULTI_THREAD_PLAYBACK)
-	// Disable thread priority changes
+	// Resist any attempts by the OS to give us anything other than foreground priority
+	// Disable process priority changes
 	CEikonEnv::Static()->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
+
+	// Change the process priority to EPriorityForeground
+	RProcess process;
+	process.SetPriority(EPriorityForeground);
+	// process.Close(); (Don't close the handle because it causes a panic)
+
 #else
 	SetProcessPriority();
 	SetThreadPriority();

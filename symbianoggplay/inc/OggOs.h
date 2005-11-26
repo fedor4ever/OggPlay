@@ -57,7 +57,7 @@ chSTR2(__LINE__) "):" #desc)
  #else
   #define KVersionMajor 1
   #define KVersionMinor 9
-  #define KVersionString "1.09"
+  #define KVersionString "1.09a"
  #endif
 #endif
 #if defined(UIQ)
