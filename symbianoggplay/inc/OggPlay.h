@@ -303,7 +303,6 @@ public:
 #endif
 
   COggMsgEnv*      iOggMsgEnv;
-
   COggSongList*    iSongList;
 
   // from MPlaybackObserver:
@@ -461,7 +460,7 @@ class COggSongList : public CBase
      ~COggSongList();
     protected:
         
-     void  SetPlaying(TInt aPlaying);
+     void  SetPlaying(TInt aPlaying, TBool aPreviousSong = EFalse);
      TInt iPlayingIdx;           // index of the file which is currently being played
      RPointerArray<TOggFile> iFileList;
      COggPlayAppView* iAppView; 
@@ -510,7 +509,6 @@ public:
 #endif
 
   CFileStore*  OpenFileL(TBool aDoOpen ,const TDesC& aFilename, RFs& aFs);
-  
   CEikAppUi* CreateAppUiL() ;
 };
 

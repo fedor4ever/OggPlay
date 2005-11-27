@@ -1153,11 +1153,10 @@ COggPlayAppUi::ShowFileInfo()
 void
 COggPlayAppUi::NextSong()
 {
-	// This function guarantees that a next song will be played.
-	// This is important since it is also being used if an alarm is triggered.
-	// If neccessary the current view will be switched.
-	
- if ( iSongList->AnySongPlaying() ) 
+  // This function guarantees that a next song will be played.
+  // This is important since it is also being used if an alarm is triggered.
+  // If neccessary the current view will be switched.	
+  if ( iSongList->AnySongPlaying() ) 
     {
         // if a song is currently playing, find and play the next song
         const TDesC &songName = iSongList->GetNextSong();
@@ -1197,8 +1196,7 @@ COggPlayAppUi::NextSong()
 void
 COggPlayAppUi::PreviousSong()
 {
-	
-      if ( iSongList->AnySongPlaying() ) 
+    if ( iSongList->AnySongPlaying() ) 
     {
         // if a song is currently playing, find and play the previous song
         const TDesC &songName = iSongList->GetPreviousSong();
@@ -2020,7 +2018,7 @@ COggSongList::SetPlayingFromListBox(TInt aPlaying)
 }
 
 void 
-COggSongList::SetPlaying(TInt aPlaying)
+COggSongList::SetPlaying(TInt aPlaying, TBool aPreviousSong)
 {   
     iPlayingIdx = aPlaying;
     if (aPlaying != ENoFileSelected)
@@ -2031,10 +2029,13 @@ COggSongList::SetPlaying(TInt aPlaying)
 			// Playing a new playlist, so reset the playlist stack and set iPlaylist, iPlayListIdx
 			iPlayListStack.Reset();
 			
-			iPlayListIdx = 0;
 			iPlayList = (TOggPlayList*) file;
-			file = (*iPlayList)[iPlayListIdx];
+			if (aPreviousSong)
+				iPlayListIdx = iPlayList->Count()-1;
+			else
+				iPlayListIdx = 0;
 
+			file = (*iPlayList)[iPlayListIdx];
 			while (file->FileType() == TOggFile::EPlayList)
 			{
 				// Another playlist. Push the current playlist onto the stack and get the next file
@@ -2047,7 +2048,10 @@ COggSongList::SetPlaying(TInt aPlaying)
 				}
 
 				iPlayList = (TOggPlayList*) file;
-				iPlayListIdx = 0;
+				if (aPreviousSong)
+					iPlayListIdx = iPlayList->Count()-1;
+				else
+					iPlayListIdx = 0;
 
 				file = (*iPlayList)[iPlayListIdx];
 			}
@@ -2218,13 +2222,6 @@ const TDesC& COggNormalPlay::GetNextSong()
 						file = (*iPlayList)[iPlayListIdx];
 					}
 
-					// Check that the file is still there (media hasn't been removed)
-					if (iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound)
-						iPlayingIdx = ENoFileSelected;
-
-					if (iPlayingIdx == ENoFileSelected)
-						return (KNullDesC);
-
 					return *(file->iFileName);
 				}
 
@@ -2263,7 +2260,7 @@ const TDesC& COggNormalPlay::GetNextSong()
 	return *(file->iFileName);
 }
 
-const TDesC & COggNormalPlay::GetPreviousSong()
+const TDesC& COggNormalPlay::GetPreviousSong()
 {
     int nSongs= iFileList.Count();
     if ( (iPlayingIdx == ENoFileSelected) || (nSongs <=0) )
@@ -2298,13 +2295,6 @@ const TDesC & COggNormalPlay::GetPreviousSong()
 
 				file = (*iPlayList)[iPlayListIdx];
 			}
-
-	        // Check that the file is still there (media hasn't been removed)
-		    if (iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound)
-			    iPlayingIdx = ENoFileSelected;
-
-			if (iPlayingIdx == ENoFileSelected)
-				return (KNullDesC);
 
 			return *(file->iFileName);
 		}
@@ -2364,12 +2354,12 @@ const TDesC & COggNormalPlay::GetPreviousSong()
 	if (iPlayingIdx-1>=0)
 	{
         // We are in the middle of the playlist. Now play the previous song.
-        SetPlaying(iPlayingIdx-1);
+        SetPlaying(iPlayingIdx-1, ETrue);
     }
 	else if (iRepeat)
     {
 		// We are at the top of the playlist, repeat it 
-		SetPlaying(nSongs-1);
+		SetPlaying(nSongs-1, ETrue);
     }
     else 
     {
