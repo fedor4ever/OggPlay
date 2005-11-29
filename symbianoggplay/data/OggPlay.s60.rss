@@ -30,7 +30,6 @@ NAME OGGP
 #include <avkon.rh>
 #include <avkon.mbg>
 #include <avkon.hrh>
-#include <avkon.loc>
 
 #include "OggPlay.hrh" 
 #include "OggDialogs.rh"
