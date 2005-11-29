@@ -130,11 +130,13 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 #endif
 
-// There is something wrong how Nokia audio streaming handles the
-// first buffers. They are somehow swallowed.
-// To avoid that problem, wait a short time before streaming, 
-// so that Application drawing have been done.
-#define DELAY_AUDIO_STREAMING_START
+#if !defined(OS70S)
+  // There is something wrong how Nokia audio streaming handles the
+  // first buffers. They are somehow swallowed.
+  // To avoid that problem, wait a short time before streaming, 
+  // so that Application drawing have been done.
+  #define DELAY_AUDIO_STREAMING_START
+#endif
 
 #if defined(SERIES60) || defined(SERIES80)
 #define SEARCH_OGGS_FROM_ROOT
