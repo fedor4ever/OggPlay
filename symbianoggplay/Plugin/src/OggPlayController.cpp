@@ -117,7 +117,6 @@ void COggPlayController::ConstructL()
 
 _LIT(KRandomRingingToneFileName, "random_ringing_tone.ogg");
 _LIT(KRandomRingingToneTitle, "this is a random ringing tone");
-
 void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
 {
     PRINT("COggPlayController::AddDataSourceL In");
@@ -249,48 +248,6 @@ void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& aPriori
     if (iAudioOutput)
         iAudioOutput->SetSinkPrioritySettings(aPrioritySettings);
 }
-
-void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& /*aRampDuration*/)
-{
-    PRINT("COggPlayController::MapdSetVolumeRampL");
-    // No implementation
-    User::Leave(KErrNotSupported);
-}
-void COggPlayController::MapdSetBalanceL(TInt /*aBalance*/)
-{
-    PRINT("COggPlayController::MapdSetBalanceL");
-    // No implementation
-    User::Leave(KErrNotSupported);
-}
-
-void COggPlayController::MapdGetBalanceL(TInt& /*aBalance*/)
-{
-    PRINT("COggPlayController::MapdGetBalanceL");
-    // No implementation
-    User::Leave(KErrNotSupported);
-}
-void COggPlayController::MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& /*aStart*/,
-                            const TTimeIntervalMicroSeconds& /*aEnd*/)
-{
-    PRINT("COggPlayController::MapcSetPlaybackWindowL");
-    // No implementation
-    User::Leave(KErrNotSupported);
-}
-void COggPlayController::MapcDeletePlaybackWindowL()
-{
-    
-    PRINT("COggPlayController::MapcDeletePlaybackWindowL");
-    // No implementation
-    User::Leave(KErrNotSupported);
-}
-void COggPlayController::MapcGetLoadingProgressL(TInt& /*aPercentageComplete*/)
-{
-    
-    PRINT("COggPlayController::MapcGetLoadingProgressL");
-    // No implementation
-    User::Leave(KErrNotSupported);
-}
-
 
 TInt COggPlayController::SendEventToClient(const TMMFEvent& aEvent)
     {
@@ -475,7 +432,6 @@ void COggPlayController::CustomCommand( TMMFMessage& aMessage )
     aMessage.Complete(error);  
     }
 
-
 void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
@@ -534,7 +490,6 @@ TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
     //PRINT("COggPlayController::DurationL");
     return (iFileLength);
 }
-
 
 void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries)
 {
@@ -618,14 +573,52 @@ void COggPlayController::OpenFileL(const TDesC& aFile, TBool aOpenForInfo)
     TRACEF(COggLog::VA(_L("Tags: %S %S %S %S"), &iTitle, &iArtist, &iAlbum, &iGenre ));
     if (!aOpenForInfo)
          iFileLength = iDecoder->TimeTotal() * 1000;
-
 } 
 
+void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration)
+{
+    PRINT("COggPlayController::MapdSetVolumeRampL");
+    if (!iAudioOutput) User::Leave(KErrNotReady);
+
+	iAudioOutput->SoundDevice().SetVolumeRamp(aRampDuration);
+}
+
+void COggPlayController::MapdSetBalanceL(TInt aBalance)
+{
+    PRINT("COggPlayController::MapdSetBalanceL");
+    if (!iAudioOutput) User::Leave(KErrNotReady);
+
+    if (aBalance < KMMFBalanceMaxLeft)
+		aBalance = KMMFBalanceMaxLeft;
+
+	if (aBalance > KMMFBalanceMaxRight)
+		aBalance = KMMFBalanceMaxRight;
+	
+	TInt balanceRange = KMMFBalanceMaxRight-KMMFBalanceMaxLeft;
+	TInt leftBalance = (100*(KMMFBalanceMaxRight - aBalance))/balanceRange;
+    iAudioOutput->SoundDevice().SetPlayBalanceL(leftBalance, 100-leftBalance);
+}
+
+void COggPlayController::MapdGetBalanceL(TInt& aBalance)
+{
+    PRINT("COggPlayController::MapdGetBalanceL");
+    if (!iAudioOutput) User::Leave(KErrNotReady);
+
+	// Initialise values to KMMFBalanceCenter
+	TInt leftBalance = 50;
+	TInt rightBalance = 50;
+
+	// Read the balance from devsound
+    iAudioOutput->SoundDevice().GetPlayBalanceL(leftBalance, rightBalance);
+
+	// Calculate the balance, assuming that leftBalance+rightBalance = 100
+	TInt balanceRange = KMMFBalanceMaxRight-KMMFBalanceMaxLeft;
+	aBalance = KMMFBalanceMaxLeft + (balanceRange*rightBalance)/100;
+}
 
 void COggPlayController::MapdSetVolumeL(TInt aVolume)
 {
     TRACEF(COggLog::VA(_L("COggPlayController::SetVolumeL %i"), aVolume ));
-   
     if (!iAudioOutput) User::Leave(KErrNotReady);
     
     TInt maxVolume = iAudioOutput->SoundDevice().MaxVolume();
@@ -633,12 +626,12 @@ void COggPlayController::MapdSetVolumeL(TInt aVolume)
 	    User::Leave(KErrArgument);
     
     iAudioOutput->SoundDevice().SetVolume(aVolume);
-
 }
 
 void COggPlayController::MapdGetMaxVolumeL(TInt& aMaxVolume)
 {
     PRINT("COggPlayController::MapdGetMaxVolumeL");
+    if (!iAudioOutput) User::Leave(KErrNotReady);
     
     aMaxVolume = iAudioOutput->SoundDevice().MaxVolume();
 }
@@ -646,12 +639,35 @@ void COggPlayController::MapdGetMaxVolumeL(TInt& aMaxVolume)
 void COggPlayController::MapdGetVolumeL(TInt& aVolume)
 {
     PRINT("COggPlayController::MapdGetVolumeL");
-   
     if (!iAudioOutput) User::Leave(KErrNotReady);
     
 	aVolume = iAudioOutput->SoundDevice().Volume();
 }
 
+void COggPlayController::MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& /*aStart*/,
+                            const TTimeIntervalMicroSeconds& /*aEnd*/)
+{
+    PRINT("COggPlayController::MapcSetPlaybackWindowL");
+
+    // No implementation
+    User::Leave(KErrNotSupported);
+}
+
+void COggPlayController::MapcDeletePlaybackWindowL()
+{   
+    PRINT("COggPlayController::MapcDeletePlaybackWindowL");
+ 
+    // No implementation
+    User::Leave(KErrNotSupported);
+}
+
+void COggPlayController::MapcGetLoadingProgressL(TInt& /*aPercentageComplete*/)
+{    
+    PRINT("COggPlayController::MapcGetLoadingProgressL");
+ 
+    // No implementation
+    User::Leave(KErrNotSupported);
+}
 
 TInt COggPlayController::GetNewSamples(TDes8 &aBuffer) 
 {
