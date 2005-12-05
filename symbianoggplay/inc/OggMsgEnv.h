@@ -20,17 +20,20 @@
 #ifndef OGGMSGENV_H
 #define OGGMSGENV_H
 
-//#include "OggPlay.h"
-class TOggplaySettings;
 
 const TInt KMaxNoteLength = 50;
 
+class TOggplaySettings;
 class COggMsgEnv : public CBase
 {
 public:
-    void ConstructL();
-    ~COggMsgEnv();
     COggMsgEnv(TOggplaySettings &aSettings);
+    ~COggMsgEnv();
+
+	void ConstructL();
+
+	// Warnings Enabled?
+	TBool WarningsEnabled();
 
     // Error Msg
     void OggWarningMsgL(const TDesC& aWarning);

@@ -4,7 +4,7 @@
 class MOggSampleRateFillBuffer 
 {
 public:
-   virtual TInt GetNewSamples(TDes8 &aBuffer) = 0;
+   virtual TInt GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins) = 0;
 };
 
 

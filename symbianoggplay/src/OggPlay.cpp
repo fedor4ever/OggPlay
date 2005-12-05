@@ -958,7 +958,7 @@ COggPlayAppUi::PlaySelect()
             return;
         }
 
-        if (iOggPlayback->State()==CAbsPlayback::EPlaying)
+        if ((iOggPlayback->State()==CAbsPlayback::EPaused) || (iOggPlayback->State()==CAbsPlayback::EPlaying))
 		{
             iOggPlayback->Stop();
             UpdateSoftkeys();

@@ -56,7 +56,7 @@ void CAdvancedStreaming::ConstructL() {
   iStream  = CMdaAudioOutputStream::NewL(*this);
   iStream->Open(&iSettings);
 
-  COggAudioCapabilityPoll pollingAudio;
+  TOggAudioCapabilityPoll pollingAudio;
   iAudioCaps = pollingAudio.PollL();
   
   TDes8* buffer;
@@ -451,7 +451,7 @@ void CAdvancedStreaming::SetVolumeGain(TGainType aGain)
 }
 
 
-TInt COggAudioCapabilityPoll::PollL()
+TInt TOggAudioCapabilityPoll::PollL()
     {
     iCaps=0;
     TInt oneSupportedRate = 0;
@@ -540,7 +540,7 @@ TInt COggAudioCapabilityPoll::PollL()
     }
 
 
-void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError) 
+void TOggAudioCapabilityPoll::MaoscOpenComplete(TInt aError) 
 {
     TRACEF(COggLog::VA(_L("SampleRa:%d"), aError ));
 
@@ -553,10 +553,10 @@ void COggAudioCapabilityPoll::MaoscOpenComplete(TInt aError)
     
 }
 
-void COggAudioCapabilityPoll::MaoscPlayComplete(TInt /*aError*/)
+void TOggAudioCapabilityPoll::MaoscPlayComplete(TInt /*aError*/)
     {
     }
 
-void COggAudioCapabilityPoll::MaoscBufferCopied(TInt /*aError*/, const TDesC8& /*aBuffer*/)
+void TOggAudioCapabilityPoll::MaoscBufferCopied(TInt /*aError*/, const TDesC8& /*aBuffer*/)
     {
     }

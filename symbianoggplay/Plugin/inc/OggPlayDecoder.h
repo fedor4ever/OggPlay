@@ -62,10 +62,10 @@ public:
   virtual void Setposition(TInt64 aPosition)=0;
   virtual TInt64 TimeTotal()=0;
   virtual TInt FileSize()=0;
+
   // Get frequency coefficients for analyzer
   virtual void GetFrequencyBins(TInt32* /*aBins*/,TInt /*aNumberOfBins*/)=0;
-
-
+  virtual TBool RequestingFrequencyBins() = 0;
 };
 
 #endif

@@ -137,6 +137,7 @@ IMPORTED long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int *bitstream);
 
 IMPORTED void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin);
+IMPORTED int ov_reqFreqBin(OggVorbis_File *vf);
 
 #ifdef __cplusplus
 }

@@ -148,12 +148,15 @@ public:
   virtual const void* GetDataChunk();
 #endif
 
-  virtual TInt GetNewSamples(TDes8 &aBuffer);
+  virtual TInt GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins);
   virtual void SetVolumeGain(TGainType aGain);
 
 private:
   void ParseComments(char** ptr);
+
+  TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
   TInt SetAudioCaps(TInt theChannels, TInt theRate);
+
   void GetString(TBuf<256>& aBuf, const char* aStr);
   void SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate, TBool aConvertChannel, TInt aNbOfChannels);
   MDecoder* GetDecoderL(const TDesC& aFileName);
@@ -182,9 +185,6 @@ private:
   void CancelTimers();
 
 #ifdef MDCT_FREQ_ANALYSER
-  TReal  iLatestPlayTime;
-  TReal  iTimeBetweenTwoSamples;
-
 class TFreqBins 
 {
 public:
@@ -194,10 +194,9 @@ public:
 
   TFixedArray<TFreqBins,KFreqArrayLength> iFreqArray;
   TInt iLastFreqArrayIdx;
-  TInt iTimeWithoutFreqCalculation;
-  TInt iTimeWithoutFreqCalculationLim;
 
   TInt64 iLastPlayTotalBytes;
+  TBool iRequestingFrequencyBins;
 #endif
 
   // Communication with the decoder
@@ -230,7 +229,6 @@ public:
 
 public:
   HBufC8* iBuffer[KMultiThreadBuffers];
-  TInt iAudioCaps;
 
 private:
   TInt AttachToFs();
@@ -278,30 +276,12 @@ private:
   HBufC8* iSent[KBuffers];
   TInt iMaxVolume;
   TInt iSentIdx;
-  TInt iAudioCaps;
 
   TBool iUnderflowing;
   TInt iFirstUnderflowBuffer;
   TInt iLastUnderflowBuffer;
 #endif
 };
-
-
-class TOggAudioCapabilityPoll : public MMdaAudioOutputStreamCallback
-    {
-    public:
-        TInt PollL();
-    private:
-        // these are abstract methods in MMdaAudioOutputStreamCallback:
-        void MaoscPlayComplete(TInt aError);
-        void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
-        void MaoscOpenComplete(TInt aError);
-        
-    private:
-        TMdaAudioDataSettings  iSettings;
-        TInt iCaps;
-        TInt iRate;
-    };
     
 #endif // !MOTOROLA
 #endif // _OggTremor_h

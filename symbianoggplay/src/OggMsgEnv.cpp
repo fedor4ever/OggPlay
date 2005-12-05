@@ -27,12 +27,16 @@ COggMsgEnv::COggMsgEnv( TOggplaySettings &aSettings) :  iSettings (aSettings)
 {
 }
 
+TBool COggMsgEnv::WarningsEnabled()
+{
+	return iSettings.iWarningsEnabled;
+}
+
 COggMsgEnv::~COggMsgEnv()
 {
 }
 
 #ifdef SERIES60
-
 void COggMsgEnv::OggWarningMsgL(const TDesC& aWarning)// const
 {
     if (iSettings.iWarningsEnabled)
@@ -60,7 +64,6 @@ void COggMsgEnv::OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId)// const
     OggErrorMsgL(buf1,buf2);
 }
 #else
-
 void COggMsgEnv::OggWarningMsgL(const TDesC& aWarning)// const
 {
     if (iSettings.iWarningsEnabled)
@@ -78,5 +81,4 @@ void COggMsgEnv::OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine)/
 {
     CEikonEnv::Static()->InfoWinL(aFirstLine, aSecondLine);
 }
-
 #endif

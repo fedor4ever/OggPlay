@@ -324,6 +324,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
           if (coef > max) max= coef; // Find max in the bin
 	    }
           vb->dctcoefs[j] = max;
+		  vb->performAnalysys = 0;
       }
   }
   

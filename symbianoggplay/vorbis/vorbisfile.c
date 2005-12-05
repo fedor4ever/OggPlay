@@ -1623,3 +1623,8 @@ EXPORTED void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin
     vf->vb.performAnalysys = active;
     vf->vb.dctcoefs = freqBin;
 }
+
+EXPORTED int ov_reqFreqBin(OggVorbis_File *vf)
+{
+    return vf->vb.performAnalysys;
+}

@@ -178,3 +178,8 @@ void CTremorDecoder::GetFrequencyBins(TInt32* aBins,TInt NumberOfBins)
   if(NumberOfBins) active=ETrue;
   ov_getFreqBin(&iVf, active, aBins);  
 }
+
+TBool CTremorDecoder::RequestingFrequencyBins()
+{
+	return ov_reqFreqBin(&iVf) ? ETrue : EFalse;
+}

@@ -46,6 +46,7 @@ public:
 
   void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
   void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
+  TBool RequestingFrequencyBins();
 
 private:
 

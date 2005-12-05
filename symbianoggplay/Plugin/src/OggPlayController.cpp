@@ -308,7 +308,7 @@ void COggPlayController::PrimeL()
     
     if ( iUsedRate == 0 )
     {
-        COggAudioCapabilityPoll pollingAudio;
+        TOggAudioCapabilityPoll pollingAudio;
         TInt audioCaps = pollingAudio.PollL();
         
         TMdaAudioDataSettings::TAudioCaps rt;

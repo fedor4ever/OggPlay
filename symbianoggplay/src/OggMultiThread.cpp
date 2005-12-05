@@ -359,20 +359,10 @@ CStreamingThreadPlaybackEngine::CStreamingThreadPlaybackEngine(TStreamingThreadD
 	iSharedData.iMaxBuffers = KNoBuffers;
 	iMaxStreamBuffers = KNoBuffers;
 	iBufferLowThreshold = KNoBuffers;
-
-    // These basic rates should be supported by all Symbian OS
-    // Higher quality might not be supported.
-    iSettings.iChannels  = TMdaAudioDataSettings::EChannelsMono;
-    iSettings.iSampleRate= TMdaAudioDataSettings::ESampleRate8000Hz;
-	iSettings.iFlags = TMdaAudioDataSettings::ENoNetworkRouting;
 }
 
 void CStreamingThreadPlaybackEngine::ConstructL()
 {
-	// Discover audio capabilities
-	TOggAudioCapabilityPoll pollingAudio;
-	iSharedData.iOggPlayback.iAudioCaps = pollingAudio.PollL();
-
 	// Open the stream
 	iStream = CMdaAudioOutputStream::NewL(*this);
 	iStream->Open(&iSettings);
@@ -513,9 +503,6 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 		iSharedData.iLastBuffer = NULL;
 		iSharedData.iBufferBytes = 0;
 
-		if (aResetPosition)
-			iSharedData.iTotalBufferBytes = 0;
-
 		// Reset the thread priorities
 		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
 		{
@@ -523,6 +510,9 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
 		}
 	}
+
+	if (aResetPosition)
+		iSharedData.iTotalBufferBytes = 0;
 }
 
 void CStreamingThreadPlaybackEngine::SetBufferingMode()
@@ -735,15 +725,24 @@ void CStreamingThreadPlaybackEngine::SendNextBuffer()
 
 void CStreamingThreadPlaybackEngine::MaoscOpenComplete(TInt aErr)
 { 
-	TRACEF(COggLog::VA(_L("MaoscOpenComplete:%d"), aErr));
-	TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
-	iSharedData.iUIThread.RequestComplete(status, aErr);
-
+	TRACEF(COggLog::VA(_L("MaoscOpenComplete: %d"), aErr));
 	if (aErr != KErrNone)
+	{
+		// Notify the UI thread
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		iSharedData.iUIThread.RequestComplete(status, aErr);
 		return;
+	}
 
+	// Determine the maximum volume
 	iMaxVolume = iStream->MaxVolume();
+
+	// Set our audio priority
 	iStream->SetPriority(KAudioPriority, EMdaPriorityPreferenceTimeAndQuality);
+
+	// Notify the UI thread
+	TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+	iSharedData.iUIThread.RequestComplete(status, KErrNone);
 }
 
 // MaoscBufferCopied does all of the work to manage the buffering

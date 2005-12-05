@@ -57,7 +57,7 @@ chSTR2(__LINE__) "):" #desc)
  #else
   #define KVersionMajor 1
   #define KVersionMinor 9
-  #define KVersionString "1.09a"
+  #define KVersionString "1.09b"
  #endif
 #endif
 #if defined(UIQ)
@@ -168,7 +168,9 @@ chSTR2(__LINE__) "):" #desc)
 
 // Phone UIDs
 // Used for determining the phone type (currently only used for the Sendo X)
-#define EMachineUid_SendoX 0x101FA031
+#define EMachineUid_SendoX  0x101FA031
+#define EMachineUid_NGage   0x101F8C19
+#define EMachineUid_NGageQD 0x101FB2B1
 
 
 // Playlist support
