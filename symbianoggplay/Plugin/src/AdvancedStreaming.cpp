@@ -455,6 +455,7 @@ TInt TOggAudioCapabilityPoll::PollL()
     {
     iCaps=0;
     TInt oneSupportedRate = 0;
+    CMdaAudioOutputStream* stream = NULL;
     for (TInt i=0; i<7; i++)
         {
         switch(i)
@@ -487,14 +488,14 @@ TInt TOggAudioCapabilityPoll::PollL()
         iSettings.iSampleRate= iRate;
         iSettings.iVolume = 0;
         
-        iStream  = CMdaAudioOutputStream::NewL(*this);
-        iStream->Open(&iSettings);
+        stream  = CMdaAudioOutputStream::NewL(*this);
+        stream->Open(&iSettings);
         CActiveScheduler::Start();
 
         if (iCaps & iRate){
             // We need to make sure, Nokia 6600 for example won't tell in the
             // Open() that the requested rate is not supported.
-            TRAPD(err,iStream->SetAudioPropertiesL(iRate,iSettings.iChannels););
+            TRAPD(err,stream->SetAudioPropertiesL(iRate,iSettings.iChannels););
             TRACEF(COggLog::VA(_L("SampleRate Supported:%d"), err ));
             if (err == KErrNone)
             {
@@ -508,8 +509,8 @@ TInt TOggAudioCapabilityPoll::PollL()
             }
         }
 
-        delete iStream; // This is rude...
-        iStream = NULL;
+        delete stream; // This is rude...
+        stream = NULL;
         
         }
     
@@ -518,15 +519,15 @@ TInt TOggAudioCapabilityPoll::PollL()
     iSettings.iSampleRate= oneSupportedRate;
     iSettings.iVolume = 0;
     
-    iStream  = CMdaAudioOutputStream::NewL(*this);
-    iStream->Open(&iSettings);
+    stream  = CMdaAudioOutputStream::NewL(*this);
+    stream->Open(&iSettings);
     iRate = TMdaAudioDataSettings::EChannelsStereo;
     CActiveScheduler::Start();
     
     if (iCaps & iRate){
        // We need to make sure, Nokia 6600 for example won't tell in the
        // Open() that the requested rate is not supported.
-       TRAPD(err,iStream->SetAudioPropertiesL(iSettings.iSampleRate,iSettings.iChannels););
+       TRAPD(err,stream->SetAudioPropertiesL(iSettings.iSampleRate,iSettings.iChannels););
        TRACEF(COggLog::VA(_L("Stereo Supported:%d"), err ));
        if (err != KErrNone)
        {
@@ -534,8 +535,8 @@ TInt TOggAudioCapabilityPoll::PollL()
           iCaps &= ~iRate;
        }
     }
-    delete iStream; // This is rude...
-    iStream = NULL;
+    delete stream; // This is rude...
+    stream = NULL;
     return iCaps;
     }
 
