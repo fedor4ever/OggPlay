@@ -90,7 +90,7 @@ void COggPlayback::ConstructL()
 
 #if defined(MULTI_THREAD_PLAYBACK)
   // Create at least one audio buffer
-  iBuffer[0] = HBufC8::NewL(KBufferSize);
+  iBuffer[0] = HBufC8::NewL(KBufferSize48K);
 
   // Open thread handles to the UI thread and the buffering thread
   // Currently the UI and buffering threads are the same (this thread)
@@ -468,8 +468,6 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 	if (err == KErrNotSupported)
 	{
 		// Frequency is not supported
-		TRACEF(COggLog::VA(_L("SetAudioCaps: Not supported, Rate: %d, Channels: %d"), usedRate, usedChannels));
-
 		// Try dropping the frequency
 		convertRate = GetNextLowerRate(usedRate, rt);
 
@@ -502,6 +500,9 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 	return err;
   }
 
+  // Trace the settings
+  TRACEF(COggLog::VA(_L("SetAudioCaps: theRate: %d, theChannels: %d, usedRate: %d, usedChannels: %d"), theRate, theChannels, usedRate, usedChannels));
+
   if ((convertRate || convertChannel) && iEnv->WarningsEnabled())
   {
 	  // Display a warning message
@@ -533,24 +534,24 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   {
 	case 48000:
 	case 44100:
-		bufferSize = 16384;
+		bufferSize = KBufferSize48K;
 		break;
 
 	case 32000:
-		bufferSize = 12288;
+		bufferSize = KBufferSize32K;
 		break;
 
 	case 22050:
-		bufferSize = 8192;
+		bufferSize = KBufferSize22K;
 		break;
 
 	case 16000:
-		bufferSize = 6144;
+		bufferSize = KBufferSize16K;
 		break;
 
 	case 11025:
 	case 8000:
-		bufferSize = 4096;
+		bufferSize = KBufferSize11K;
 		break;
 
 	default:
@@ -1299,7 +1300,7 @@ TInt COggPlayback::BufferingModeChanged()
 			// Allocate the buffers
 			for (i = 1 ; i<KSingleThreadBuffers ; i++)
 			{
-				iBuffer[i] = HBufC8::New(KBufferSize);
+				iBuffer[i] = HBufC8::New(KBufferSize48K);
 				if (!iBuffer[i])
 				{
 					allocError = KErrNoMemory;
@@ -1318,7 +1319,7 @@ TInt COggPlayback::BufferingModeChanged()
 			// The previous mode was EBufferStream so allocate some more buffers
 			for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
 			{
-				iBuffer[i] = HBufC8::New(KBufferSize);
+				iBuffer[i] = HBufC8::New(KBufferSize48K);
 				if (!iBuffer[i])
 				{
 					allocError = KErrNoMemory;
@@ -1331,7 +1332,7 @@ TInt COggPlayback::BufferingModeChanged()
 			// Allocate the buffers
 			for (i = 1 ; i<KMultiThreadBuffers ; i++)
 			{
-				iBuffer[i] = HBufC8::New(KBufferSize);
+				iBuffer[i] = HBufC8::New(KBufferSize48K);
 				if (!iBuffer[i])
 				{
 					allocError = KErrNoMemory;

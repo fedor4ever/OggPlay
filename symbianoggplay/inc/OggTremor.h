@@ -72,8 +72,13 @@
   const TInt KSingleThreadLowThreshold = 5;
   const TInt KMultiThreadLowThreshold = 16;
 
-  // Buffer size to use
-  const TInt KBufferSize = 16384;
+  // Buffer sizes to use
+  // (approx. 0.1s of audio per buffer)
+  const TInt KBufferSize48K = 16384;
+  const TInt KBufferSize32K = 12288;
+  const TInt KBufferSize22K = 8192;
+  const TInt KBufferSize16K = 6144;
+  const TInt KBufferSize11K = 4096;
 #else
   const TInt KBuffers= 2;
   const TInt KBufferSize = 4096;
