@@ -850,6 +850,11 @@ void COggPlayback::Play()
   iState = EPlaying;
 
 #if defined(DELAY_AUDIO_STREAMING_START)
+#ifdef MDCT_FREQ_ANALYSER
+  // Clear the frequency analyser
+  Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
+#endif
+
   iObserver->NotifyPlayStarted();
 #endif
 }
@@ -1039,13 +1044,7 @@ void COggPlayback::StartStreaming()
 #ifdef MDCT_FREQ_ANALYSER
   // Reset the frequency analyser
   iLastFreqArrayIdx = 0;
-  const TInt64 KMaxTInt64 = TInt64(0x7FFFFFFF, 0xFFFFFFFF);
-  for (TInt i=0; i<KFreqArrayLength; i++)
-  {
-	iFreqArray[i].iTime = KMaxTInt64;
-	for (TInt j = 0 ; j<KNumberOfFreqBins ; j++)
-		iFreqArray[i].iFreqCoefs[j] = 0;
-  }
+  Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
 
   iLastPlayTotalBytes = iSharedData.iTotalBufferBytes;
 #endif

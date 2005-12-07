@@ -193,11 +193,11 @@ private:
 class TFreqBins 
 {
 public:
-    TTimeIntervalMicroSeconds iTime;
+    TInt64 iTime;
     TInt32 iFreqCoefs[KNumberOfFreqBins];
 };
 
-  TFixedArray<TFreqBins,KFreqArrayLength> iFreqArray;
+  TFreqBins iFreqArray[KFreqArrayLength];
   TInt iLastFreqArrayIdx;
 
   TInt64 iLastPlayTotalBytes;
