@@ -768,9 +768,22 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	// Decrement the total number of buffers
 	iSharedData.iNumBuffers--;
 
+	// Ignore most of the error codes
+	if ((aErr == KErrAbort) || (aErr == KErrInUse) || (aErr == KErrDied)  || (aErr == KErrCancel))
+		return;
+
+	if ((aErr != KErrNone) && (aErr != KErrUnderflow))
+	{
+		// Notify the UI thread (unknown error)
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		if (status->Int() == KRequestPending)
+			iSharedData.iUIThread.RequestComplete(status, aErr);
+
+		return;
+	}
+
 	// If we have reached the last buffer, notify the UI thread
-	// but don't notify the UI thread if we are being stopped
-	if ((iSharedData.iLastBuffer == &aBuffer) && (aErr != KErrAbort))
+	if (iSharedData.iLastBuffer == &aBuffer)
 	{
 		// Notify the UI thread that we have copied the last buffer to the stream
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
@@ -803,18 +816,6 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 		}
 	}
  
-	// Ignore most of the error codes
-	if ((aErr == KErrAbort) || (aErr == KErrInUse) || (aErr == KErrDied)  || (aErr == KErrCancel))
-		return;
-
-	if ((aErr != KErrNone) && (aErr != KErrUnderflow))
-	{
-		// Notify the UI thread (unknown error)
-		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
-		iSharedData.iUIThread.RequestComplete(status, aErr);
-		return;
-	}
-
 	// Ignore underflow if there are stream buffers left
 	if ((aErr == KErrUnderflow) && iStreamBuffers)
 		return;
@@ -957,13 +958,16 @@ void CStreamingThreadPlaybackEngine::MaoscPlayComplete(TInt aErr)
 	if (aErr == KErrDied)
 	{
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
-		iSharedData.iUIThread.RequestComplete(status, EPlayInterrupted);
+		if (status->Int() == KRequestPending)
+			iSharedData.iUIThread.RequestComplete(status, EPlayInterrupted);
+
 		return;
 	}
 
 	// Unknown error (or KErrInUse)
 	TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
-	iSharedData.iUIThread.RequestComplete(status, aErr);
+	if (status->Int() == KRequestPending)
+		iSharedData.iUIThread.RequestComplete(status, aErr);
 }
 
 
