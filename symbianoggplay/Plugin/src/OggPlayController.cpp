@@ -158,12 +158,13 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
                 // Only the random_ringing_tone.ogg in that directory, leave
                 User::Leave(KErrNotFound);
             }
-            // Initialize the random seed
-            TTime t;
-            t.HomeTime();
-            TInt64 seed = t.DateTime().MicroSecond();
-            TReal rnd = Math::FRand(seed);
-            TInt picked= (int)(rnd * ( nbFound ) );
+
+			TInt64 rnd64 = TInt64(0, Math::Random());
+			TInt64 maxInt64 = TInt64(1, 0);
+			TInt64 nbFound64 = nbFound;
+			TInt64 picked64 = (rnd64 * nbFound64) / maxInt64;
+			TInt picked = picked64.Low();
+
             nbFound=-1;
             for (i=0;i<dirList->Count();i++)
             {

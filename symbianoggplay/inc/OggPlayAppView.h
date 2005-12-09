@@ -147,7 +147,6 @@ private:
   TInt       iSelected; 
 
   TInt iUserInactivityTickCount;
-  TInt64 iSeed; //Random seed
   
   //keyboard focus handling: 
   // do we do keyboard focus handling ?

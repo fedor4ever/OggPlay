@@ -2394,10 +2394,6 @@ COggRandomPlay::~COggRandomPlay ()
 void COggRandomPlay::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback)
 {
     COggSongList::ConstructL(aAppView, aOggPlayback);
-    // Initialize the random seed
-    TTime t;
-    t.HomeTime();
-    iSeed = t.DateTime().MicroSecond();
 }
 
 const TDesC & COggRandomPlay::GetNextSong()
@@ -2489,15 +2485,16 @@ const TDesC & COggRandomPlay::GetNextSong()
         return(KNullDesC);
     }
 
-	TInt64 rnd;
+	TInt64 rnd64;
 	TInt64 picked64;
-	TInt64 maxInt64 = KMaxTInt;
+	TInt64 maxInt64 = TInt64(1, 0);
 	TInt64 memCount = iRandomMemory.Count();
 	TInt nextPick;
 	if (iNewFileList)
 	{
-		rnd = Math::Rand(iSeed);
-		picked64 = (rnd * memCount) / maxInt64;
+		rnd64 = TInt64(0, Math::Random());
+
+		picked64 = (rnd64 * memCount) / maxInt64;
 		nextPick = picked64.Low();
 
 		iNewFileList = EFalse;
@@ -2507,8 +2504,8 @@ const TDesC & COggRandomPlay::GetNextSong()
 		// Avoid playing the same track (possible at the end of the track list when repeat is on)
 		do
 		{
-			rnd = Math::Rand(iSeed);
-			picked64 = (rnd * memCount) / maxInt64;
+			rnd64 = TInt64(0, Math::Random());
+			picked64 = (rnd64 * memCount) / maxInt64;
 			nextPick = picked64.Low();
 		} while (nextPick == picked);
 	}
@@ -2518,10 +2515,6 @@ const TDesC & COggRandomPlay::GetNextSong()
     
     iPlayingIdx = iRandomMemoryIdx[nextPick];
 	iRandomMemoryIdx.Remove(nextPick);
-
-    // Check that the file is still there (media hasn't been removed)
-    if( iOggPlayback->Info(*(file->iFileName), ETrue) == KErrOggFileNotFound )
-        iPlayingIdx = ENoFileSelected;
     
     if (iPlayingIdx != ENoFileSelected)
 		iAppView->SelectFile(iFileList[iPlayingIdx]);

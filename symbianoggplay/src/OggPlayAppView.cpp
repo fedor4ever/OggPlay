@@ -139,11 +139,6 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   //FIXME: only start timer once all initialization has been done
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(KCallBackPeriod),*iCallBack);
 
-  // Initialize the random seed
-  TTime t;
-  t.HomeTime();
-  iSeed = t.DateTime().MicroSecond();
-
   ActivateL();
 }
 
@@ -1164,9 +1159,13 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
           } else
           {
               // Select a random value for the first index
-              TReal rnd = Math::FRand(iSeed);
-              TInt pick= (int)(rnd*( GetTextArray()->Count() -1 ))+1;
-              SelectItem(pick);
+			  TInt64 rnd64 = TInt64(0, Math::Random());
+			  TInt64 maxInt64 = TInt64(1, 0);
+			  TInt64 nbEntries64 = GetTextArray()->Count()-1;
+			  TInt64 picked64 = (rnd64 * nbEntries64) / maxInt64;
+			  TInt picked = picked64.Low() + 1;
+
+              SelectItem(picked);
           }
       } else
       {

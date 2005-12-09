@@ -495,7 +495,6 @@ class COggRandomPlay : public COggSongList
     private:
         RPointerArray<TOggFile> iRandomMemory;
         RArray<TInt> iRandomMemoryIdx;
-        TInt64 iSeed;
 };
 
 
