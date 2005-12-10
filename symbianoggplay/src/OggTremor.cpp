@@ -1359,8 +1359,8 @@ void COggPlayback::NotifyStreamingStatus(TInt aErr)
   // Check for an error
   if (aErr < 0)
   {
-	// Stop the stream
-	StopStreaming();
+	// Pause the stream
+    FlushBuffers(EPlaybackPaused);
 	iStreamingErrorDetected = ETrue;
 
 	// Notify the user
