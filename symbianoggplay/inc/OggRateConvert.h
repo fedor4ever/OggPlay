@@ -36,7 +36,8 @@ public:
     void SetVolumeGain(TGainType aGain);
 private:
     void MixChannels( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
-    void ConvertRate( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
+    void ConvertRateMono( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
+    void ConvertRateStereo( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
     void ApplyGain( TDes8 &aInputBuffer, TInt shiftValue );
     void ApplyNegativeGain( TDes8 &aInputBuffer, TInt shiftValue );
     TInt  iMinimumSamplesInBuffer;
@@ -48,11 +49,14 @@ private:
     TUint32 iTime;
     TBool   iValidX1;
     TInt16  ix1;
+    TInt16  ix2;
     TGainType iGain;
 
     HBufC8 *iIntermediateBuffer;
     MOggSampleRateFillBuffer * iFillBufferProvider;
-    TReal  iSamplingRateFactor ;
+    TReal  iSamplingRateFactor;
+
+	void (COggSampleRateConverter::*iConvertRateFn)(TDes8& aInputBuffer, TDes8& aOutputBuffer);
 };
 
 #endif
