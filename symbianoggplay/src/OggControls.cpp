@@ -50,8 +50,8 @@ TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
  * TOggParser
  *
  ***********************************************************/
-
-TOggParser::TOggParser(const TFileName& aFileName)
+TOggParser::TOggParser(const TFileName& aFileName, TInt aScaleFactor)
+: iScaleFactor(aScaleFactor)
 {
   iLine= 1;
   iDebug= ETrue;
@@ -144,14 +144,57 @@ TOggParser::ReadToken(TInt& aValue)
   return success;
 }
 
+void ScaleBitmapL(CFbsBitmap* aDst, CFbsBitmap* aSrc, TInt aScaleFactor)
+{
+  TSize origSize = aSrc->SizeInPixels();
+  TDisplayMode origDM = aSrc->DisplayMode();
+  TSize dblSize = TSize(aScaleFactor*origSize.iWidth, aScaleFactor*origSize.iHeight);
+  User::LeaveIfError(aDst->Create(dblSize, origDM));
+
+  CFbsBitmapDevice* device = CFbsBitmapDevice::NewL(aDst);
+  CleanupStack::PushL(device);
+
+  CFbsBitGc *gc;
+  User::LeaveIfError(device->CreateContext(gc));
+  CleanupStack::PushL(gc);
+
+  gc->DrawBitmap(TRect(dblSize), aSrc, TRect(origSize));
+  CleanupStack::PopAndDestroy(2, device);
+}
+
 CGulIcon*
 TOggParser::ReadIcon(const TFileName& aBitmapFile)
 {
   TInt idxBitmap,idxMask;
-  //Debug(aBitmapFile);
   if (!ReadToken(idxBitmap)) return NULL;
   if (!ReadToken(idxMask)) return NULL;
-  CGulIcon* result= CEikonEnv::Static()->CreateIconL(aBitmapFile, idxBitmap, idxMask);
+
+  CGulIcon* result = NULL;
+  if (iScaleFactor == 1)
+	  result = CEikonEnv::Static()->CreateIconL(aBitmapFile, idxBitmap, idxMask);
+  else
+  {
+	CFbsBitmap* bitmap = new(ELeave) CFbsBitmap;
+	CleanupStack::PushL(bitmap);
+	User::LeaveIfError(bitmap->Load(aBitmapFile, idxBitmap));
+
+	CFbsBitmap* mask = new(ELeave) CFbsBitmap;
+	CleanupStack::PushL(mask);
+	User::LeaveIfError(mask->Load(aBitmapFile, idxMask));
+
+	CFbsBitmap* scaledBitmap = new(ELeave) CFbsBitmap;
+	CleanupStack::PushL(scaledBitmap);
+	ScaleBitmapL(scaledBitmap, bitmap, iScaleFactor);
+
+	CFbsBitmap* scaledMask = new(ELeave) CFbsBitmap;  
+	CleanupStack::PushL(scaledMask);
+	ScaleBitmapL(scaledMask, mask, iScaleFactor);
+
+	result= CGulIcon::NewL(scaledBitmap, scaledMask);
+	CleanupStack::Pop(2, scaledBitmap);
+	CleanupStack::PopAndDestroy(2, bitmap);
+  }
+
   if (!result) iState= EBitmapNotFound;
   return result;
 }
@@ -408,13 +451,14 @@ COggControl::ReadArguments(TOggParser& p)
   if (p.iToken==_L("Position")) {
     p.Debug(_L("Setting position."));
     TInt ax, ay, aw, ah;
-    if (p.ReadToken(ax) &&
-        p.ReadToken(ay) &&
-        p.ReadToken(aw) &&
-        p.ReadToken(ah)) {
+    if (p.ReadToken(ax) && p.ReadToken(ay) &&
+        p.ReadToken(aw) && p.ReadToken(ah))
+	{
+	  ax *= p.iScaleFactor ; ay *= p.iScaleFactor;
+	  aw *= p.iScaleFactor ; ah *= p.iScaleFactor;
       SetPosition(ax, ay, aw, ah);
       return ETrue;
-      }
+    }
     else
       return EFalse;
   } else if (p.iToken==_L("FocusIcon")) {
@@ -781,7 +825,6 @@ COggIcon::ReadArguments(TOggParser& p)
  * COggAnimation
  *
  ***********************************************************/
-
 COggAnimation::COggAnimation() :
   COggControl(),
   iBitmaps(10),
@@ -2229,13 +2272,8 @@ TBool COggListBox::ReadArguments(TOggParser& p)
  * COggCanvas
  *
  ***********************************************************/
-
 COggCanvas::COggCanvas() :
-//  if2bm(0),
-  iBackground(0),
-  iControls(10),
-  iGrabbed(0),
-  iFocused(0)
+  iControls(10)
 {
 }
 
@@ -2246,12 +2284,9 @@ COggCanvas::~COggCanvas()
     iBackground->Reset();
     delete iBackground;
   }
-//  if(if2bm) {
-//  if2bm->Close();
-//delete if2bm;  }
 }
 
-void COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
+TInt COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
 {
   if(iBackground) 
     {
@@ -2259,14 +2294,37 @@ void COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
     delete iBackground;
     }
 
-//  if2bm = CMdaImageFileToBitmapUtility::NewL(*this);
   iBackground = new(ELeave) CFbsBitmap;
+  TInt err = KErrNone;
+  TInt scaleFactor = 1;
 
-  //if2bm->OpenL(aFileName,new TMdaBmpClipFormat());
-  //CEikEnv::CreateBitmapL()
+#if defined (SERIES60)
+  TSize screenSize = CCoeEnv::Static()->ScreenDevice()->SizeInPixels();
+  if (screenSize == TSize(352, 416))
+  {
+	  // Double resolution screen, so scale the skin if necessary
+	  CFbsBitmap* bgBitmap = new(ELeave) CFbsBitmap;
+	  err = bgBitmap->Load(aFileName, iIdx);
+	  if (err == KErrNone)
+	  {
+		  TSize bgBitmapSize = bgBitmap->SizeInPixels();
+		  scaleFactor = screenSize.iWidth / bgBitmapSize.iWidth;
+		  if (scaleFactor != 1)
+		  {
+			TRAP(err, ScaleBitmapL(iBackground, bgBitmap, scaleFactor));
+		  }
+	  }
 
-  int err= iBackground->Load(aFileName,iIdx);
-  if (err!=KErrNone) {
+	  delete bgBitmap;
+  }
+  else
+	err = iBackground->Load(aFileName,iIdx);
+#else
+  err= iBackground->Load(aFileName,iIdx);
+#endif
+
+  if (err!=KErrNone)
+  {
     TBuf<256> buf;
     CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_21);
     buf.AppendNum(err);
@@ -2282,39 +2340,10 @@ void COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
   }
 
   EnableDragEvents();
-
   DrawControl();
+
+  return scaleFactor;
 }
-
-
-/*
-void COggCanvas::MiuoOpenComplete(TInt aError)
-{
-  if (aError==KErrNone) if2bm->ConvertL(*iBackground);
-  else {
-    TBuf<256> buf;
-    CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_21);
-    buf.AppendNum(aError);
-    User::InfoPrint(buf);
-    delete iBackground;
-    iBackground= 0;
-  }
-}
-
-void COggCanvas::MiuoConvertComplete(TInt aError)
-{
-  if (aError!=KErrNone) {
-    TBuf<256> buf;
-    CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_2);
-    buf.AppendNum(aError);
-    User::InfoPrint(buf);
-    delete iBackground;
-    iBackground= 0;
-  }
-}
-*/
-//void COggCanvas::MiuoCreateComplete(TInt /*aError*/) { }
-
 
 void
 COggCanvas::Refresh()

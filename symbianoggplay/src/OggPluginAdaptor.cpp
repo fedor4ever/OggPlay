@@ -463,9 +463,7 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
     
     if (iState != EPlaying)
       return NULL;
-    
-    //TRACEF(_L("COggPluginAdaptor::GetFrequencyBins()"));
-    
+
     iFreqBins[0] = 55;
     
     TMMFGetFreqsParams pckg;
@@ -480,8 +478,11 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
                                        EOggPlayControllerCCGetFrequencies, 
                                        freqConfig, 
                                        KNullDesC8, aDataFrom );
- 
-    TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
+
+	if (error != KErrNone)
+	{
+		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
+	}
     return iFreqBins;
 }
 

@@ -43,7 +43,6 @@ class MOggControlObserver {
   virtual void OggPointerEvent(COggControl* /*c*/, const TPointerEvent& /*p*/) {}
   virtual void OggControlEvent(COggControl* /*c*/, TInt /*aEventType*/, TInt /*aValue*/) {}
   virtual void AddControlToFocusList(COggControl* /*c*/) {}
-
 };
 
 
@@ -65,7 +64,6 @@ _LIT(KEndToken,"}");
 // TOggParser:
 // Read the skin defintion file
 // ----------------------------
-
 class TOggParser {
 
  public:
@@ -77,7 +75,7 @@ class TOggParser {
     EEndExpected, EBitmapNotFound, EIntegerExpected,
     EOutOfRange};
 
-  TOggParser(const TFileName& aFileName);
+  TOggParser(const TFileName& aFileName, TInt aScaleFactor = 1);
   ~TOggParser();
 
   TBool ReadSkin(COggCanvas* fo, COggCanvas* fc);
@@ -93,21 +91,19 @@ class TOggParser {
   CFont*    ReadFont();
 
   // protected:
-
   TBool     iDebug;
   FILE*     iFile;
   TState    iState;
   TInt      iLine;
   TBuf<128> iToken;
   TInt      iVersion;
-
+  TInt		iScaleFactor;
 };
 
 
 // COggControl:
 // Abstract base type for objects displayed on a COggCanvas
 // --------------------------------------------------------
-
 class COggControl : public CBase {
 
  public:
@@ -177,7 +173,6 @@ class COggControl : public CBase {
 // COggText:
 // A line of scrollable text
 //--------------------------
-
 class COggText : public COggControl {
 
  public:
@@ -231,8 +226,6 @@ class COggText : public COggControl {
    void CycleBorder(void);
    // ... and repeat by scrolling to the right
    void CycleBackAndForth(void);
-
-
 };
 
 
@@ -240,7 +233,6 @@ class COggText : public COggControl {
 // An icon (bitmap+mask) that can blink.
 // Ownership of the CGulIcon is taken!
 //--------------------------------------
-
 class COggIcon : public COggControl {
 
  public:
@@ -270,7 +262,6 @@ class COggIcon : public COggControl {
 // COggAnimation
 // Display a sequence of bitmaps.
 //-------------------------------
-
 class COggAnimation : public COggControl {
 
  public:
@@ -306,7 +297,6 @@ class COggAnimation : public COggControl {
 // COggDigits
 // Display numbers with custom bitmaps.
 //-------------------------------------
-
 class COggDigits : public COggControl {
 
  public:
@@ -346,7 +336,6 @@ class COggDigits : public COggControl {
 // - the pressed state + mask
 // Ownership of the bitmaps is taken!
 //-------------------
-
 class COggButton : public COggControl {
 
  public:
@@ -373,7 +362,6 @@ class COggButton : public COggControl {
   CGulIcon*   iNormalIcon;
   CGulIcon*   iPressedIcon;
   CGulIcon*   iDimmedIcon;
-  
 
   TInt        iState; // 0 = normal; 1= pressed
   TInt        iStyle; // 0 = action button; 1 = two state button
@@ -387,7 +375,6 @@ class COggButton : public COggControl {
 // style 2 -> the bitmap is moved from left to right
 // style 3 -> the bitmap is moved from bootom to top
 // ----------------------------------------------------------------
-
 class COggSlider : public COggControl {
 
  public:
@@ -423,7 +410,6 @@ class COggSlider : public COggControl {
 // COggScrollBar
 // A scrollbar that can have an associated control (e.g. a listbox)
 //---------------------------------
-
 class COggScrollBar : public COggControl
 {
 
@@ -470,7 +456,6 @@ class COggScrollBar : public COggControl
 // This is a simple list box which holds a visible text in each
 // line plus an invisible ("info") string.
 //------------------
-
 class COggListBox : public COggControl 
 {
 public:
@@ -546,7 +531,6 @@ public:
 // A frequency analyzer which does a discrete fourier transformation
 // and displays the amplitude in dB of 16 frequency bands.
 // --------------------
-
 class COggAnalyzer : public COggControl {
 
  public:
@@ -595,15 +579,13 @@ class COggAnalyzer : public COggControl {
 // A canvas that can display and manage several COggControls 
 // and which uses an off-screen bitmap for double buffering
 //----------------------------------------------------------
-
 class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
 {
-
  public:
 
   COggCanvas();
   virtual ~COggCanvas();
-  void LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
+  TInt LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
 
   void Refresh();
   void Invalidate();
@@ -639,9 +621,6 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
   void Draw(const TRect& aRect) const;
 
 protected:
-
-  //CMdaImageFileToBitmapUtility* if2bm;
-
   CFbsBitGc*         iBitmapContext;
   CFbsBitmap*	     iBitmap;
   CFbsBitmap*        iBackground;
@@ -651,7 +630,6 @@ protected:
 
   COggControl*       iGrabbed; // a control gets grabbed on a pointer button down event
   COggControl*       iFocused; // control that has input focus (UIQ does not need this)
-
 };
 
 #endif

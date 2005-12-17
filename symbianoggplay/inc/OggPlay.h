@@ -29,9 +29,6 @@
 #include <eikdoc.h>
 #include <stdio.h>
 
-const TInt KFullScreenWidth = 176;
-const TInt KFullScreenHeight = 188;
-
 #elif defined(SERIES80)
 #include <eikenv.h> 
 #include <eikappui.h>
@@ -39,16 +36,10 @@ const TInt KFullScreenHeight = 188;
 #include <eikdoc.h>
 #include <eikbtgpc.h> 
 
-#define KFullScreenWidth 640
-#define KFullScreenHeight 200
-
 #else
 #include <qikappui.h>
 #include <qikapplication.h>
 #include <qikdocument.h>
-
-const TInt KFullScreenWidth = 208;
-const TInt KFullScreenHeight = 320;
 
 #endif
 

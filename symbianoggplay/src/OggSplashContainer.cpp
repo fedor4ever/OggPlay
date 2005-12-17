@@ -73,7 +73,6 @@ CCoeControl* CSplashContainer::ComponentControl(TInt /*aIndex*/) const
 //
 void CSplashContainer::Draw(const TRect& /*aRect*/) const
 {
-
      TRAPD( newerMind, 
 
 	  RFbsSession::Connect();
@@ -89,9 +88,14 @@ void CSplashContainer::Draw(const TRect& /*aRect*/) const
 	  CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
 	  CleanupStack::PushL(iBitmap);
 	  User::LeaveIfError( iBitmap->Load( iSplashMbmFileName,0,EFalse));
-    
+
       CWindowGc& gc = SystemGc();
-	  gc.BitBlt(TPoint(0,0), iBitmap );
+	  TRect bitmapRect = TRect(iBitmap->SizeInPixels());
+	  TRect screenRect = TRect(CCoeEnv::Static()->ScreenDevice()->SizeInPixels());
+	  if (bitmapRect == screenRect)
+		gc.BitBlt(TPoint(0, 0), iBitmap);
+	  else
+		gc.DrawBitmap(screenRect, iBitmap, bitmapRect);
 
 	  CleanupStack::PopAndDestroy(2);  // appName iBitmap 
       

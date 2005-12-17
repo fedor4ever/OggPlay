@@ -38,9 +38,8 @@
 #include <stdlib.h>
 #include "OggAbsPlayback.h"
 
-// UIQ_?
-IFDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
-IFNDEF_S60(const TInt KCallBackPeriod = 75000;)  /** Time (usecs) between canvas Refresh() for graphics updating */
+// Time (usecs) between canvas Refresh() for graphics updating
+const TInt KCallBackPeriod = 75000;
 
 COggPlayAppView::COggPlayAppView() :
   CCoeControl(),
@@ -107,13 +106,23 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[0]->SetContainerWindowL(*this);
   iCanvas[0]->SetControlContext(this);
   iCanvas[0]->SetObserver(this);
-#ifdef SERIES80
+#if defined(SERIES80)
   TPoint pBM(0,0);
+  iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 200));
+#elif defined(SERIES60)
+  TPoint pBM(Position());
+  pBM.iY= 0;
+
+  if (CCoeEnv::Static()->ScreenDevice()->SizeInPixels() == TSize(352, 416))
+	iCanvas[0]->SetExtent(pBM, TSize(352, 376));
+  else
+	iCanvas[0]->SetExtent(pBM, TSize(176, 188));  
 #else
   TPoint pBM(Position());
   pBM.iY= 0;
+
+  iCanvas[0]->SetExtent(pBM, TSize(208, 320));
 #endif
-  iCanvas[0]->SetExtent(pBM,TSize(KFullScreenWidth,KFullScreenHeight));
 
   // flip-closed mode:
   iCanvas[1]= new(ELeave) COggCanvas;
@@ -122,7 +131,7 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[1]->SetControlContext(this);
   iCanvas[1]->SetObserver(this);
   pBM.iY= 0;
-  iCanvas[1]->SetExtent(pBM,TSize(208,144));
+  iCanvas[1]->SetExtent(pBM, TSize(208,144));
 
   // set up all the controls:
   
@@ -150,10 +159,16 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
 
   iIconFileName= aFileName.Left(aFileName.Length()-4);
   iIconFileName.Append(_L(".mbm"));
+
+#if defined(SERIES60)
+  TInt scaleFactor = iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
+  TOggParser p(aFileName, scaleFactor);
+#else
   iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
   iCanvas[1]->LoadBackgroundBitmapL(iIconFileName, 18);
-
   TOggParser p(aFileName);
+#endif
+
   if (p.iState!=TOggParser::ESuccess) {
     p.ReportError();
     User::Leave(-1);
@@ -204,7 +219,6 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   iFocusControlsIter.SetToFirst();
   COggControl* c=iFocusControlsIter;
   if(c) c->SetFocus(ETrue);
-  //OGGLOG.Write(_L("New skin installed."));
 }
 
 void 
