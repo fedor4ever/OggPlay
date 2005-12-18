@@ -53,7 +53,6 @@ _LIT(KTsyName,"erigsm.tsy");
 #include "OggDialogs.h" 
 #include "OggLog.h"
 
-#include <OggPlay.rsg>
 #include "OggFilesSearchDialogs.h"
 
 #if defined(UIQ)
@@ -585,7 +584,7 @@ COggPlayAppUi::NotifyUpdate()
 	
 	iAppView->UpdateClock();
 	
-	if ((iOggPlayback->State() == CAbsPlayback::EPlaying) && IsForeground())
+	if ((iOggPlayback->State() == CAbsPlayback::EPlaying) && iForeground)
 		iAppView->UpdateSongPosition();
 }
 
@@ -679,7 +678,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
   switch (aCommand) {
 
   case EOggAbout: {
-		COggAboutDialog *d = new COggAboutDialog();
+		COggAboutDialog *d = new(ELeave) COggAboutDialog();
 		TBuf<128> buf;
 		iEikonEnv->ReadResource(buf, R_OGG_VERSION);
 		d->SetVersion(buf);
@@ -729,14 +728,14 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		
 	case EOggOptions: {
 
-#ifdef UIQ
-		CHotkeyDialog *hk = new CHotkeyDialog(&iHotkey, &iAlarmActive, &iAlarmTime);
+#if defined(UIQ)
+		CHotkeyDialog *hk = new(ELeave) CHotkeyDialog(&iHotkey, &iAlarmActive, &iAlarmTime);
 		if (hk->ExecuteLD(R_DIALOG_HOTKEY)==EEikBidOk) {
 			SetHotKey();
 			iAppView->SetAlarm();
 		}
 #elif defined(SERIES80)
-        CSettingsS80Dialog *hk = new CSettingsS80Dialog(&iSettings);
+        CSettingsS80Dialog *hk = new(ELeave) CSettingsS80Dialog(&iSettings);
 		hk->ExecuteLD(R_DIALOG_OPTIONS) ;
 		UpdateSoftkeys(EFalse);
 #elif defined(SERIES60)
@@ -750,7 +749,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     case EOggCodecSelection:
         {
 #if defined(SERIES80)
-		CCodecsS80Dialog *cd = new CCodecsS80Dialog();
+		CCodecsS80Dialog *cd = new(ELeave) CCodecsS80Dialog();
 		cd->ExecuteLD(R_DIALOG_CODECS);
 #else
          ActivateOggViewL(KOggPlayUidCodecSelectionView);
@@ -793,7 +792,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		HandleCommandL(EOggStop);
 		iIsRunningEmbedded = EFalse;
 #ifdef SEARCH_OGGS_FROM_ROOT
-        COggFilesSearchDialog *d = new (ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
+        COggFilesSearchDialog *d = new(ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
         if(iSettings.iScanmode==TOggplaySettings::EMmcOgg) {
           iAppView->iOggFiles->SearchSingleDrive(KMmcSearchDir,d,R_DIALOG_FILES_SEARCH,iCoeEnv->FsSession());
         } 
@@ -850,6 +849,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     break;
   }
  #endif
+
   case EUserStopPlayingCBA : {
  		HandleCommandL(EOggStop);
     break;
@@ -1726,7 +1726,9 @@ COggPlayAppUi::WriteIniFile()
 void 
 COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
+	iForeground = aForeground;
 	CEikAppUi::HandleForegroundEventL(aForeground);
+
 	if (aForeground)
 		iAppView->RestartCallBack();
 	else
@@ -1953,12 +1955,14 @@ void COggPlayAppUi::SetThreadPriority(TStreamingThreadPriority aNewThreadPriorit
 // COggPlayDocument class
 //
 ///////////////////////////////////////////////////////////////
+#if defined(SERIES60)
 CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/)
-{
-#ifdef SERIES60
-	iAppUi->OpenFileL(aFilename);
 #else
-	aFilename; // To shut up the compiler warning
+CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& /* aFilename */, RFs& /*aFs*/)
+#endif
+{
+#if defined(SERIES60)
+	iAppUi->OpenFileL(aFilename);
 #endif
 
 	return NULL;

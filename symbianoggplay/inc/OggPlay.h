@@ -399,6 +399,8 @@ private:
   RArray<TInt> iViewHistoryStack;
   RArray<TInt> iRestoreStack;
   TInt iRestoreCurrent;
+
+  TBool iForeground;
 };
 
 class TOggPlayList;

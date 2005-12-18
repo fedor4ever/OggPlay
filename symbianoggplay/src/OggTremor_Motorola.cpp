@@ -75,7 +75,6 @@ COggPlayback::COggPlayback( COggMsgEnv* anEnv, MPlaybackObserver* anObserver )
 , iSentIdx( 0 )
 , iPlayWhenOpened( EFalse )
 , iFile( NULL )
-, iFileOpen( EFalse )
 , iEof( EFalse )
 , iDecoding( EFalse )
 , iDecoder( NULL )
@@ -93,18 +92,17 @@ COggPlayback::COggPlayback( COggMsgEnv* anEnv, MPlaybackObserver* anObserver )
 
 COggPlayback::~COggPlayback( void )
 {
-   if ( iFileOpen )
-   {
-      iDecoder->Close( iFile );
-      fclose( iFile );
-      iFileOpen = EFalse;
-   }
-   if ( iDecoder ) delete iDecoder;
-   if ( iStream  ) delete iStream;
-   if ( iDelete  ) delete iDelete;
+   __ASSERT_ALWAYS((iState == EClosed) || (iState == EFirstOpen), User::Panic(_L("~COggPlayback"), 0));
+	
+   delete iDecoder; 
+   delete iStream;
+   delete iDelete;
+ 
    iBuffer.ResetAndDestroy();
-   if ( iObserverAO ) delete iObserverAO;
-   if ( iOggSampleRateConverter ) delete iOggSampleRateConverter;
+   delete iObserverAO;
+   delete iOggSampleRateConverter;
+
+   iFs.Close();
 }
 
 // ConstructL
@@ -115,6 +113,9 @@ void COggPlayback::ConstructL( void )
 #ifdef _DEBUG
    RDebug::Print( _L("COggPlayback::ConstructL") );
 #endif
+
+   // Set up the session with the file server
+   User::LeaveIfError(iFs.Connect());
 
    CreateStreamApi();
 
@@ -143,22 +144,9 @@ void COggPlayback::ConstructL( void )
 TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 {
    if (aFileName.Length()==0) return -100;
-   
-   // Close any existing opened file
-   if ( iFileOpen )
-   {
-      iDecoder->Close( iFile ); 
-      fclose( iFile );
-      iFileOpen = EFalse;
-   }
 
-   FILE* f;
-   
-   // add a zero terminator
-   TBuf<512> myname(aFileName);
-   myname.Append((wchar_t)0);
-   
-   if ((f=wfopen((wchar_t*)myname.Ptr(),L"rb"))==NULL) 
+   RFile* f = new RFile;
+   if ((f->Open(iFs, aFileName, EFileShareReadersOnly)) != KErrNone) 
    {
       if (!silent) 
       {
@@ -166,15 +154,18 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
          CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_14);
          iEnv->OggErrorMsgL(buf,aFileName);
       }
+
       return KErrOggFileNotFound;
    }
 
-   SetDecoderL( aFileName );
-   if ( iDecoder->OpenInfo(f,myname) < 0 )
+   MDecoder* decoder = GetDecoderL( aFileName );
+   if ( decoder->OpenInfo(f, aFileName) < 0 )
    {
-      iDecoder->Close(f);
-      fclose(f);
-      iFileOpen = EFalse;
+      decoder->Close();
+	  delete decoder;
+
+      f->Close();
+      delete f;
 
       if (!silent)
       {
@@ -182,16 +173,18 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
       }
       return -102;
    }
-   
-   iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
+   decoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
+
    iFileName = aFileName;
    iRate     = iDecoder->Rate();
    iChannels = iDecoder->Channels();
    iBitRate  = iDecoder->Bitrate();
 
-   iDecoder->Close(f); 
-   fclose(f);
-   iFileOpen = EFalse;
+   decoder->Close();
+   delete decoder;
+
+   f->Close();
+   delete f;
 
    return KErrNone;
 }
@@ -218,11 +211,16 @@ TInt COggPlayback::Open( const TDesC& aFileName )
       just_created_api = ETrue;
    }
    
-   if ( iFileOpen ) 
+   if (iFile)
    {
-      iDecoder->Close(iFile);
-      fclose(iFile);
-      iFileOpen = EFalse;
+      iDecoder->Close();
+      iFile->Close();
+	
+	  delete iFile;
+	  iFile = NULL;
+
+	  delete iDecoder;
+ 	  iDecoder = NULL;
    }
    
    iTime = 0;
@@ -233,31 +231,31 @@ TInt COggPlayback::Open( const TDesC& aFileName )
       return -100;
    }
    
-   // add a zero terminator
-   TBuf<512> myname(aFileName);
-   myname.Append((wchar_t)0);
-   
-   if ( ( iFile = wfopen( (wchar_t*) myname.Ptr(), L"rb" ) ) == NULL ) 
+   iFile = new(ELeave) RFile;
+   if ((iFile->Open(iFs, aFileName, EFileShareReadersOnly)) != KErrNone)
    {
-      iFileOpen = EFalse;
-      iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
+      delete iFile;
+      iFile = NULL;
+
+	  iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_14);
       return KErrOggFileNotFound;
    }
    
-   iFileOpen = ETrue;
-   
-   SetDecoderL(aFileName);
-
-   if ( iDecoder->Open(iFile,myname) < 0 )
+   iDecoder = GetDecoderL(aFileName);
+   if(iDecoder->Open(iFile, aFileName) < 0)
    {
-      iDecoder->Close(iFile);
-      fclose(iFile);
-      iFileOpen = EFalse;
-      iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
+      iDecoder->Close();
+	  iFile->Close();
 
+      delete iFile;
+      iFile = NULL;
+    
+      delete iDecoder;
+      iDecoder = NULL;
+
+      iEnv->OggErrorMsgL(R_OGG_ERROR_20,R_OGG_ERROR_9);
       return -102;
    }
-   
    iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
 
    iFileName = aFileName;
@@ -270,16 +268,19 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    TInt err = SetAudioCaps( iDecoder->Channels(), iDecoder->Rate() );
    if ( err == KErrNone ) 
    {
-      unsigned int hi(0);
-      iBitRate.Set(hi,iDecoder->Bitrate());
-
-      if ( !just_created_api ) iState = EOpen;
+      if ( !just_created_api )
+		  iState = EOpen;
    }
    else
    {
-      iDecoder->Close(iFile);
-      fclose( iFile );
-      iFileOpen = EFalse;
+      iDecoder->Close();
+      iFile->Close();
+  
+      delete iFile;
+      iFile = NULL;
+
+      delete iDecoder;
+      iDecoder = NULL;
    }
 
    return err;
@@ -376,11 +377,17 @@ void COggPlayback::Stop()
    { 
       iStream->Stop();
       iState = EClosed;
-      if (iFileOpen)
+
+      if (iFile)
       {
-         iDecoder->Close(iFile);
-         fclose(iFile);
-         iFileOpen = EFalse;
+         iDecoder->Close();
+         iFile->Close();
+
+	     delete iFile;
+	     iFile = NULL;
+
+	     delete iDecoder;
+	     iDecoder = NULL;
       }
 
       for (TInt i = 0; i < KMotoBuffers; i++)
@@ -566,11 +573,17 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
             // All data has been played, so stop
             iStream->Stop();
             iState = EClosed;
-            if (iFileOpen)
+
+            if (iFile)
             {
-               iDecoder->Close(iFile);
-               fclose(iFile);
-               iFileOpen = EFalse;
+               iDecoder->Close();
+               iFile->Close();
+
+	           delete iFile;
+	           iFile = NULL;
+
+	           delete iDecoder;
+	           iDecoder = NULL;
             }
 
             ClearComments();
@@ -658,7 +671,7 @@ void COggPlayback::OnEvent
 // GetNewSamples
 ////////////////////////////////////////////////////////////////
 
-TInt COggPlayback::GetNewSamples( TDes8 &aBuffer )
+TInt COggPlayback::GetNewSamples( TDes8 &aBuffer, TBool aRequestFrequencyBins )
 {
    TInt cnt = 0;
    
@@ -894,27 +907,22 @@ TInt COggPlayback::SetAudioCaps(TInt aChannels, TInt aRate)
    return ( KErrNone );
 }
 
-// SetDecoderL
+// GetDecoderL
 ////////////////////////////////////////////////////////////////
-
-void COggPlayback::SetDecoderL( const TDesC& aFileName )
+MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 {
-  if( iDecoder )
-  { 
-    delete iDecoder; 
-    iDecoder = NULL; 
-  }
+  MDecoder* decoder = NULL;
 
   TParsePtrC p( aFileName);
-
   if( p.Ext().Compare( _L(".ogg"))==0 || p.Ext().Compare( _L(".OGG"))==0 )
   {
-      iDecoder=new(ELeave)CTremorDecoder;
-  } 
+      decoder=new(ELeave) CTremorDecoder(iFs);
+  }
+
 #if defined(MP3_SUPPORT)
   else if( p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0 )
   {
-    iDecoder=new(ELeave)CMadDecoder;
+    decoder=new(ELeave)CMadDecoder;
   }
 #endif
   else
@@ -923,6 +931,8 @@ void COggPlayback::SetDecoderL( const TDesC& aFileName )
     _LIT(KNotSupported,"File type not supported");
     iEnv->OggErrorMsgL(KPanic,KNotSupported);
   }
+
+  return decoder;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -930,10 +940,6 @@ void COggPlayback::SetDecoderL( const TDesC& aFileName )
 // CObserverCallback
 //
 ////////////////////////////////////////////////////////////////
-
-// CObserverCallback
-////////////////////////////////////////////////////////////////
-
 COggPlayback::CObserverCallback::CObserverCallback( COggPlayback *aParent )
 : CActive( EPriorityHigh ), iParent( aParent )
 {

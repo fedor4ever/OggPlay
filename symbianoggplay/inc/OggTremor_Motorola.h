@@ -31,7 +31,6 @@ const TInt KMotoBufferSize  = 1024 * 6;
 // An implementation of TAbsPlayback for the Ogg/Vorbis format:
 //
 ///////////////////////////////////////////////////////////////
-
 class COggPlayback : public MMAudioFBObserver, 
                      public MOggSampleRateFillBuffer,
 		               public CAbsPlayback
@@ -62,7 +61,7 @@ public:
 #endif
 
    // Other local methods
-   virtual TInt GetNewSamples( TDes8 &aBuffer );
+   virtual TInt GetNewSamples( TDes8 &aBuffer, TBool aRequestFrequencyBins );
    
 private:
    
@@ -76,7 +75,7 @@ private:
    void ResetStreamApi( void );
    void SendBufferL( TInt aIndex );
    TInt SetAudioCaps( TInt aChannels, TInt aRate );
-   void SetDecoderL( const TDesC& aFileName );
+   MDecoder* GetDecoderL( const TDesC& aFileName );
    
    COggMsgEnv              *iEnv;   
    COggSampleRateConverter *iOggSampleRateConverter;
@@ -94,11 +93,11 @@ private:
    
    // Communication with the tremor/ogg codec:
    //-----------------------------------------
-   FILE*                    iFile;
-   TBool                    iFileOpen;
+   RFile*                   iFile;
    TBool                    iEof;            // true after ov_read has encounted the eof
    TBool                    iDecoding;
    MDecoder*                iDecoder;
+   RFs iFs;
 
    TInt                     iApiRate;
    TInt                     iApiStereo;

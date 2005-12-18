@@ -88,7 +88,10 @@
 #else
 const TInt KBuffers= 12;
 const TInt KBufferSize = 4096*10;
+
+#if !defined(MOTOROLA)
 const TInt KAudioPriority = EMdaPriorityMax;
+#endif
 #endif
 
 

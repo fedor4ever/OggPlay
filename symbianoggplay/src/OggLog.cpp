@@ -72,9 +72,13 @@ void COggLog::Exit()
   }
 
 
-void COggLog::FilePrint(const TDesC& msg) 
+#if defined(SERIES60) || defined (SERIES80)
+void COggLog::FilePrint(const TDesC& msg)
+#else
+void COggLog::FilePrint(const TDesC& /* msg */)
+#endif
   {
-#if (defined( SERIES60) || defined (SERIES80) )
+#if defined(SERIES60) || defined (SERIES80)
   InstanceL()->iLog.WriteFormat(msg);
 #endif
   }
