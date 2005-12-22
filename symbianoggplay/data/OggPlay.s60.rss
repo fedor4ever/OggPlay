@@ -339,7 +339,6 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			associated_resource = r_oggplay_rsk_play_setting_item_list;
 			name = ogg_rsk_play;
 			}
-#ifndef PLUGIN_SYSTEM
 #if !defined(MULTI_THREAD_PLAYBACK)
         , AVKON_SETTING_ITEM
 			{
@@ -348,7 +347,6 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			associated_resource = r_oggplay_volume_boost_item_list;
 			name = ogg_volume_boost;
 			}
-#endif
 #endif
         };
     }

@@ -98,6 +98,8 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   TTimeIntervalMicroSeconds iLastPosition;
   TBool iInterrupted;
   TInt iVolume;
+
+  TGainType iGain;
 };
 
 #endif

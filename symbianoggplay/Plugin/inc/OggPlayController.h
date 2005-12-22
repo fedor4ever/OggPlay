@@ -208,6 +208,7 @@ class COggPlayController :	public CMMFController,
     private: // Internal Functions
         void OpenFileL(const TDesC& aFile, TBool aOpenForInfo);
         void GetFrequenciesL(TMMFMessage& aMessage );
+        void SetVolumeGainL(TMMFMessage& aMessage);
 
 	private: // Data
 
@@ -239,8 +240,8 @@ class COggPlayController :	public CMMFController,
         TBuf<KMaxStringLength>   iTrackNumber;
         TTimeIntervalMicroSeconds iFileLength;
 
-        MDecoder *iDecoder;
 		RFs* iFs;
+        MDecoder *iDecoder;
         
         CMMFOggPlayStreaming * iMMFStreaming;
         CMMFAudioOutput * iAudioOutput;
@@ -305,6 +306,7 @@ public:
     COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer);
     ~COggSource();
     void ConstructL(TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel);
+
     // from MDataSource:
     virtual TFourCC SourceDataTypeCode(TMediaId aMediaId);
     virtual void FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId aMediaId);
@@ -320,9 +322,12 @@ public:
     // Own functions
     void SetSink(MDataSink* aSink);
 
+	void SetVolumeGain(TGainType aGain);
 private:
     
     COggSampleRateConverter *iOggSampleRateConverter;
+	TGainType iGain;
+
     MDataSink * iSink;
     MOggSampleRateFillBuffer &iSampleRateFillBuffer;
 };

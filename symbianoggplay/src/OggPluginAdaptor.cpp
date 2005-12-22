@@ -162,7 +162,6 @@ CDesCArrayFlat * CPluginSupportedList::SupportedExtensions()
 
 TInt CPluginSupportedList::FindListL(const TDesC &anExtension)
 {
-    TBool found = EFalse;
     for (TInt i=0; i<iPlugins->Count(); i++)
     {
         if ( anExtension.CompareF( iPlugins->At(i)->extension ) == 0)
@@ -273,26 +272,31 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         TInt err = iPlayer->GetNumberOfMetaDataEntries(nbMetaData);
         if (err)
           nbMetaData = 0;
-        HBufC *metadataValue = HBufC::NewL(128);
-        CleanupStack::PushL(metadataValue);
+        HBufC *metadataValue = HBufC::NewLC(128);
+		TPtr metadataValueDes(metadataValue->Des());
         for (TInt i=0; i< nbMetaData; i++)
         {
             aMetaData = iPlayer->GetMetaDataEntryL(i);
-            ParseMetaDataValueL(*aMetaData,(TDes &) metadataValue->Des());
-            TRACEF(COggLog::VA(_L("MetaData %S : %S"), &aMetaData->Name(), &aMetaData->Value() ));
-            if ( aMetaData->Name()  == _L("title") )
+            ParseMetaDataValueL(*aMetaData, metadataValueDes);
+
+			const TDesC& name(aMetaData->Name());
+			const TDesC& value(aMetaData->Value());
+			TRACEF(COggLog::VA(_L("MetaData %S : %S"), &name, &value ));
+
+			if ( name  == _L("title") )
                 iTitle = *metadataValue;
-            if ( aMetaData->Name()  == _L("album") )
+            if ( name  == _L("album") )
                 iAlbum = *metadataValue;
-            if ( aMetaData->Name()  == _L("artist") )
+            if ( name  == _L("artist") )
                 iArtist = *metadataValue;
-            if ( aMetaData->Name()  == _L("genre") )
+            if ( name  == _L("genre") )
                 iGenre = *metadataValue;
-            if ( aMetaData->Name()  == _L("albumtrack") )
+            if ( name  == _L("albumtrack") )
                 iTrackNumber = *metadataValue;
-            // If it is not an OggPlay Plugin, there should be some handling here to guess
+
+			// If it is not an OggPlay Plugin, there should be some handling here to guess
             // title, trackname, ...
-            delete(aMetaData);
+            delete aMetaData;
         }
         
         CleanupStack::PopAndDestroy(metadataValue);
@@ -313,6 +317,9 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
     }
     else
         iState = oldState;
+
+	// Set the volume gain
+	SetVolumeGain(iGain);
 }
 
 void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &aDestinationBuffer )
@@ -336,6 +343,7 @@ void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &
   	first = EFalse;
 
   }
+
   // Crop to the final buffer
   aDestinationBuffer = tempBuf->Left(aDestinationBuffer.MaxLength());
   CleanupStack::PopAndDestroy(tempBuf);
@@ -469,7 +477,7 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
     TMMFGetFreqsParams pckg;
     pckg.iFreqBins = iFreqBins;
     TMMFGetFreqsConfig freqConfig(pckg); // Pack the config.
-    TPckg <TInt32 [16]> aDataFrom(iFreqBins); 
+    TPckg <TInt32 [16]> dataFrom(iFreqBins); 
     
     TMMFMessageDestination msg( iPluginControllerUID, KMMFObjectHandleController );
     TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
@@ -477,7 +485,7 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
     TInt error = iPlayer->PlayControllerCustomCommandSync( packedMsg, 
                                        EOggPlayControllerCCGetFrequencies, 
                                        freqConfig, 
-                                       KNullDesC8, aDataFrom );
+                                       KNullDesC8, dataFrom );
 
 	if (error != KErrNone)
 	{
@@ -486,9 +494,27 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
     return iFreqBins;
 }
 
-void COggPluginAdaptor::SetVolumeGain(TGainType /*aGain*/)
+void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
 {
-    // Not Implemented yet
+    TMMFSetVolumeGainParams pckg;
+    pckg.iGain = (TInt) aGain;
+    TMMFSetVolumeGainConfig gainConfig(pckg); // Pack the config.
+
+	TInt dummy;
+	TPckg <TInt> dataFrom(dummy); 
+    
+    TMMFMessageDestination msg(iPluginControllerUID, KMMFObjectHandleController);
+    TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
+    
+	TInt err = KErrNone;
+	iGain = aGain;
+	if (iPlayer)
+		err = iPlayer->PlayControllerCustomCommandSync(packedMsg, EOggPlayControllerCCSetVolumeGain, gainConfig, KNullDesC8, dataFrom);
+
+	if (err != KErrNone)
+	{
+		TRACEF(COggLog::VA(_L("COggPluginAdaptor::SetVolumeGain %i"), err));
+	}
 }
 
 void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode)

@@ -19,6 +19,7 @@ PRJ_EXPORTS
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
 ..\Plugin\Inc\OggPlayPlugin.h
+
 // Default skin
 ..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
 ..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
@@ -29,4 +30,3 @@ PRJ_MMPFILES
 ..\vorbis\group\oggvorbis.mmp
 OggPlay.mmp
 
-PRJ_TESTMMPFILES

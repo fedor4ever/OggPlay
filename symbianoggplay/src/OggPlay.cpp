@@ -641,8 +641,11 @@ COggPlayAppUi::SetHotKey()
 #endif
 }
 
-void
-COggPlayAppUi::UpdateSoftkeys(TBool aForce)
+#if defined(SERIES60) || defined(SERIES80) 
+void COggPlayAppUi::UpdateSoftkeys(TBool aForce)
+#else
+void COggPlayAppUi::UpdateSoftkeys(TBool /* aForce */)
+#endif
 {
 
 #if defined(SERIES60) || defined(SERIES80) 

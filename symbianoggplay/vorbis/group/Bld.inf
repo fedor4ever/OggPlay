@@ -8,7 +8,7 @@ PRJ_MMPFILES
 // This is for the non-MMF friendly plugin
 //oggvorbis.mmp
 // This is for the MMF friendly plugin
-OggPluginDecoder.mpp
+OggPluginDecoder.mmp
 
 PRJ_EXPORTS
 

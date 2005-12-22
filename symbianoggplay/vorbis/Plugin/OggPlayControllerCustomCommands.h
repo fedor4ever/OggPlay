@@ -22,21 +22,30 @@
 
 enum TOggPlayControllerCustomCommands
     {   
-    EOggPlayControllerCCGetFrequencies = 20503 // Random number
-                                               // Hopefully only OggPlay compatible
-                                               // plugins will support a custom
-                                               // command with this ID.
+    EOggPlayControllerCCGetFrequencies = 20503, // Random number
+                                                // Hopefully only OggPlay compatible
+                                                // plugins will support a custom
+                                                // command with this ID.
+
+    EOggPlayControllerCCSetVolumeGain = 20504   // Random number + 1
     };
 
 
 class TMMFGetFreqsParams
 	{
 public:
-	const TInt32 *iFreqBins ; //Pointer to the frequency bins
-	                          //to be updated.
+	const TInt32 *iFreqBins ; //Pointer to the frequency bins to be updated
 	} ;
 
 typedef TPckgBuf<TMMFGetFreqsParams>  TMMFGetFreqsConfig ;
+
+class TMMFSetVolumeGainParams
+	{
+public:
+	TInt iGain; // Volume gain to set
+	} ;
+
+typedef TPckgBuf<TMMFSetVolumeGainParams>  TMMFSetVolumeGainConfig ;
 
 #endif      // OGGPLAYCONTROLLERCUSTOMCOMMANDS_H
             

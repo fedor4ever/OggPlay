@@ -110,7 +110,7 @@ void COggPlayController::ConstructL()
                                                        // If DurationL is asked before we actually have the information,
                                                        // pretend length is 5 minutes.
     
-    iOggSource = new (ELeave) COggSource( *this);
+    iOggSource = new(ELeave) COggSource(*this);
 
     PRINT("COggPlayController::ConstructL() Out");
 }
@@ -424,7 +424,13 @@ void COggPlayController::CustomCommand( TMMFMessage& aMessage )
             break;
             }
 
-        default:
+        case EOggPlayControllerCCSetVolumeGain:
+            {
+            TRAP(error, SetVolumeGainL(aMessage));
+            break;
+			}
+
+		default:
             {
             error = KErrNotSupported;
             break;
@@ -709,6 +715,23 @@ void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage )
     CleanupStack::PopAndDestroy(buf);//buf
 }
 
+void  COggPlayController::SetVolumeGainL(TMMFMessage& aMessage)
+{
+   	// Get the size of the init data and create a buffer to hold it
+    TInt desLength = aMessage.SizeOfData1FromClient();
+    HBufC8* buf = HBufC8::NewLC(desLength);
+    TPtr8 ptr = buf->Des();
+    aMessage.ReadData1FromClientL(ptr);
+    
+    TMMFSetVolumeGainParams params;
+    TPckgC<TMMFSetVolumeGainParams> config(params);
+    config.Set(*buf);
+    params = config();
+    
+	iOggSource->SetVolumeGain((TGainType) params.iGain);
+    CleanupStack::PopAndDestroy(buf);//buf
+}
+
 /************************************************************************************
 *
 * COggSource
@@ -730,15 +753,23 @@ void COggSource::ConstructL(TInt aInputRate, TInt aOutputRate, TInt aInputChanne
 {
     // We use the Sample Rate converter only for the buffer filling and the gain settings,
     // sample rate conversion is done by MMF.
-
     PRINT("COggSource::ConstructL()");
-    iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
+    iOggSampleRateConverter = new(ELeave) COggSampleRateConverter;
     
     iOggSampleRateConverter->Init(&iSampleRateFillBuffer, 
         KBufferSize, (TInt) (0.75*KBufferSize), 
         aInputRate,  aOutputRate, 
         aInputChannel, aOutputChannel );
+
+	iOggSampleRateConverter->SetVolumeGain(iGain);
     PRINT("COggSource::ConstructL() Out");
+}
+
+void COggSource::SetVolumeGain(TGainType aGain)
+{
+	iGain = aGain;
+	if (iOggSampleRateConverter)
+		iOggSampleRateConverter->SetVolumeGain(aGain);
 }
 
 void COggSource::SetSink(MDataSink* aSink)
