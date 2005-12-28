@@ -487,7 +487,7 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
                                        freqConfig, 
                                        KNullDesC8, dataFrom );
 
-	if (error != KErrNone)
+	if ((error != KErrNone) && (error != KErrNotSupported))
 	{
 		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
 	}
