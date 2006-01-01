@@ -192,12 +192,12 @@ class COggText : public COggControl {
     EBackAndForth, 
     ERoundabout // not implemented
   };
+
   void SetScrollStyle(TInt aStyle);
   void SetScrollDelay(TInt aDelay);
   void SetScrollStep(TInt aStep);
 
  protected:
-
   virtual void Cycle();
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
@@ -207,6 +207,10 @@ class COggText : public COggControl {
   CFont* iFont;
   TBool  iOwnedByControl;
   TRgb   iFontColor;
+
+  TInt iFontHeight;
+  TInt iFontAscent;
+  TInt iLinePadding;
 
   TInt   iTextWidth;
   TBool  iNeedsScrolling;
@@ -219,13 +223,16 @@ class COggText : public COggControl {
  
  private:
    // scroll to the left off the textarea and repeat
-   void CycleOff(void);
+   void CycleOff();
+
    // ... don't repeat
-   void CycleOnce(void);
+   void CycleOnce();
+
    // only scroll until the right text border touches the textarea and repeat
-   void CycleBorder(void);
+   void CycleBorder();
+
    // ... and repeat by scrolling to the right
-   void CycleBackAndForth(void);
+   void CycleBackAndForth();
 };
 
 
@@ -479,7 +486,6 @@ public:
   void SetBarColorSelected(TRgb aColor);
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
 
-
   CColumnListBoxData* GetColumnListBoxData();
 
   void ClearText();
@@ -496,7 +502,6 @@ public:
   virtual void Redraw(TBool doRedraw = ETrue);
 
  protected:
-
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void Cycle();
   virtual void PointerEvent(const TPointerEvent& p);
@@ -518,6 +523,7 @@ public:
   TInt   iSelected;
 
   TInt   iFontHeight;
+  TInt   iFontAscent;
   TInt   iLineHeight;
   TInt   iLinePadding;
 

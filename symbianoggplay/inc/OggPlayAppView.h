@@ -89,7 +89,7 @@ public:
   TBool SetHotkeysFromSkin(TOggParser& p);
   TBool ReadHotkeyArgument(TOggParser& p);
 
-  void SetupListBox(COggListBox* aListBox);
+  void SetupListBox(COggListBox* aListBox, TInt aScaleFactor);
 
   // keyboard focus handling:
   void SetNextFocus();

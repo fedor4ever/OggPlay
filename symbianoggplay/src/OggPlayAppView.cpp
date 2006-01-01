@@ -491,7 +491,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 //      RDebug::Print(KAL,c);
       //OGGLOG.WriteFormat(KAL,c);
       iListBox[aCanvas]= (COggListBox*)c;
-      SetupListBox(iListBox[aCanvas]);
+	  SetupListBox(iListBox[aCanvas], p.iScaleFactor);
       if (iScrollBar[aCanvas]) {
 	      iScrollBar[aCanvas]->SetAssociatedControl(iListBox[aCanvas]);
 	      iListBox[aCanvas]->SetVertScrollBar(iScrollBar[aCanvas]);
@@ -600,15 +600,19 @@ TBool COggPlayAppView::ReadHotkeyArgument(TOggParser& p) {
 
 }
 
-void COggPlayAppView::SetupListBox(COggListBox* aListBox)
+void COggPlayAppView::SetupListBox(COggListBox* aListBox, TInt aScaleFactor)
 {
   // set up the layout of the listbox:
   CColumnListBoxData* cd= aListBox->GetColumnListBoxData(); 
   TInt w = Size().iWidth;
-  cd->SetColumnWidthPixelL(0,18);
+  TInt graphicsWidth = 18;
+  if ((w == 352) && (aScaleFactor == 1))
+	  graphicsWidth*= 2;
+
+  cd->SetColumnWidthPixelL(0, graphicsWidth);
   cd->SetGraphicsColumnL(0, ETrue);
   cd->SetColumnAlignmentL(0, CGraphicsContext::ECenter);
-  cd->SetColumnWidthPixelL(1, w-18);
+  cd->SetColumnWidthPixelL(1, w-graphicsWidth);
   cd->SetColumnAlignmentL(1, CGraphicsContext::ELeft);
   cd->SetColumnWidthPixelL(2, w);
   cd->SetColumnAlignmentL(2, CGraphicsContext::ELeft);

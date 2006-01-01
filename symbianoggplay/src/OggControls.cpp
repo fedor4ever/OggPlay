@@ -512,13 +512,9 @@ TBool COggControl::HighFrequency()
  * COggText
  *
  ***********************************************************/
-
 COggText::COggText() :
   COggControl(),
-  iText(0),
-  iFont(0),
   iFontColor(0,0,0),
-  iTextWidth(0),
   iNeedsScrolling(EFalse),
   iHasScrolled(EFalse),
   iScrollDelay(30),
@@ -528,19 +524,39 @@ COggText::COggText() :
 
 COggText::~COggText()
 {
-  if (iText) { delete iText; iText= 0; }
-  if ((iFont) && (iOwnedByControl)) { 
+  delete iText;
+
+  if (iFont && iOwnedByControl) 
       CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFont);
-      iFont = 0;
-  }
 }
 
 void 
-COggText::SetFont(CFont* aFont,TBool ownedByControl )
+COggText::SetFont(CFont* aFont, TBool ownedByControl)
 {
   iFont= aFont;
   iRedraw= ETrue;
   iOwnedByControl = ownedByControl;
+
+  iFontHeight = iFont->HeightInPixels();
+  iFontAscent = iFont->AscentInPixels();
+
+#if defined(SERIES60)
+  if (iFont->TypeUid() == KCFbsFontUid)
+  {
+	  CFbsFont* fbsFont = (CFbsFont *) iFont;
+	  if (fbsFont->IsOpenFont())
+	  {
+	    TOpenFontMetrics fontMetrics;
+		if (fbsFont->GetFontMetrics(fontMetrics))
+		{
+		  iFontHeight = fontMetrics.MaxHeight() + fontMetrics.MaxDepth() + 1;
+		  iFontAscent = fontMetrics.MaxHeight();
+		}
+	  }
+  }
+#endif
+
+  iLinePadding = (ih - iFontHeight) / 2;
 }
 
 void
@@ -618,14 +634,14 @@ void COggText::Cycle()
 
 }
 
-void COggText::CycleOnce(void)
+void COggText::CycleOnce()
 {
   if (iHasScrolled) return;
   CycleOff();
 
 }
 
-void COggText::CycleOff(void)
+void COggText::CycleOff()
 {
   iCycle++;
 
@@ -644,7 +660,7 @@ void COggText::CycleOff(void)
 
 }
 
-void COggText::CycleBorder(void)
+void COggText::CycleBorder()
 {
   iCycle++;
 
@@ -661,7 +677,7 @@ void COggText::CycleBorder(void)
 
 }
 
-void COggText::CycleBackAndForth(void)
+void COggText::CycleBackAndForth()
 {
   if(iScrollBackward) iCycle--;
     else iCycle++;
@@ -682,7 +698,6 @@ void COggText::CycleBackAndForth(void)
   
   if ((iw+(iCycle-iScrollDelay)*iScrollStep)>(iTextWidth+iScrollDelay*iScrollStep)) {
     iScrollBackward=ETrue;
-    
   }
 
 }
@@ -696,13 +711,13 @@ void COggText::Draw(CBitmapContext& aBitmapContext)
   aBitmapContext.SetPenColor(iFontColor);
   aBitmapContext.SetPenSize(TSize(2,2));
 
-  TRect	lineRect(TPoint(ix-iDrawOffset,iy), TSize(iw+iDrawOffset,ih));
+  TRect	lineRect(TPoint(ix-iDrawOffset,iy+iLinePadding), TSize(iw+iDrawOffset, iFontHeight));
   TPtrC	p(*iText);
 
   CGraphicsContext::TTextAlign a= CGraphicsContext::ECenter;
   if (iNeedsScrolling) a= CGraphicsContext::ELeft;
 
-  aBitmapContext.DrawText(p, lineRect, iFont->AscentInPixels(), a);
+  aBitmapContext.DrawText(p, lineRect, iFontAscent, a);
 }
 
 void COggText::PointerEvent(const TPointerEvent& p)
@@ -1969,6 +1984,24 @@ COggListBox::SetFont(CFont* aFont, TBool aOwnedByControl)
   iOwnedByControl = aOwnedByControl;
 
   iFontHeight = iFont->HeightInPixels();
+  iFontAscent = iFont->AscentInPixels();
+
+#if defined(SERIES60)
+  if (iFont->TypeUid() == KCFbsFontUid)
+  {
+	  CFbsFont* fbsFont = (CFbsFont *) iFont;
+	  if (fbsFont->IsOpenFont())
+	  {
+	    TOpenFontMetrics fontMetrics;
+		if (fbsFont->GetFontMetrics(fontMetrics))
+		{
+		  iFontHeight = fontMetrics.MaxHeight() + fontMetrics.MaxDepth() + 1;
+		  iFontAscent = fontMetrics.MaxHeight();
+		}
+	  }
+  }
+#endif
+
   iLinePadding = iFontHeight/6;
   iLineHeight = iFontHeight + 2*iLinePadding;
 
@@ -2206,8 +2239,8 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
       }
       else
 	  {
-			TRect lineRect(TPoint(x, y+iLinePadding-iOffset%iLineHeight), TSize(iData->ColumnWidthPixel(j), iLineHeight));
-			aBitmapContext.DrawText(p.Left(len), lineRect, iFontHeight - iLinePadding, iData->ColumnAlignment(j));
+			TRect lineRect(TPoint(x, y+iLinePadding-iOffset%iLineHeight), TSize(iData->ColumnWidthPixel(j), iFontHeight));
+			aBitmapContext.DrawText(p.Left(len), lineRect, iFontAscent, iData->ColumnAlignment(j));
       }
 
       p.Set(p.Mid(len+1));
