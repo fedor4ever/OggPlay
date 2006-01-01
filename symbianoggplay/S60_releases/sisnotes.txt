@@ -1,4 +1,4 @@
-    Welcome to OggPlay 1.6.4
+  Welcome to OggPlay 1.6.6
 
 Welcome to the Series 60
 version of OggPlay, the open
@@ -7,6 +7,9 @@ released under the GPL by
 Leif H. Wilden.
 
 New for this release:
-Winamp playlist
+More bug fixes
+Added volume boost
+Added support for double resolution (N90).
+This is untested (N90 beta testers required!)
 
 Enjoy!

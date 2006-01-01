@@ -116,19 +116,45 @@ TOggParser::ReadToken()
   // Read possible EOL characters if any.
   iToken.SetLength(0);
   int c;
-  TBool start(ETrue),stop(EFalse);
+  TBool start(ETrue), stop(EFalse), ignoreWS(EFalse);
   do {
-    c= fgetc(iFile);
-    //32 = Space
-    // 9 = Tab
-    if (start && (c==32 || c==9)) continue;
-    start= EFalse;
-    stop= c==32 || c == 9 || c==EOF || c==13 || c==10 || c==12;
-    if (!stop) iToken.Append((unsigned char)c);
+    c = fgetc(iFile);
+
+    // Skip initial white space (32 = Space, 9 = Tab)
+    if (start && ((c==32) || (c==9)))
+		continue;
+
+	// Check for opening "
+	if (start && (c==34))
+	{
+		ignoreWS = ETrue;
+		start = EFalse;
+		continue;
+	}
+
+	// Interpret the character 
+    start = EFalse;
+    stop = (c==EOF) || (c==13) || (c==10) || (c==12);
+	if (!stop)
+	{
+		// Check for closing " or white space
+		if (ignoreWS)
+			stop = (c==34);
+		else
+			stop = (c==32) || (c == 9);
+	}
+
+    if (!stop)
+		iToken.Append((unsigned char) c);
   } while (!stop);
-  TBool eol= c!=32;
-  if (c==13) c= fgetc(iFile);
-  if (eol) iLine++;
+
+  TBool eol = c!=32;
+  if (c==13)
+	  c = fgetc(iFile);
+
+  if (eol)
+	  iLine++;
+
   return iToken.Length()>0;
 }
 
@@ -1903,18 +1929,11 @@ COggAnalyzer::ReadArguments(TOggParser& p)
  * COggListBox
  *
  ***********************************************************/
-
 COggListBox::COggListBox() :
   COggControl(),
-  iFont(0),
   iFontColor(0,0,0),
   iFontColorSelected(255,0,0),
-  iTop(0),
-  iSelected(-1),
-  iScroll(0),
-  iOffset(0),
-  iText(0),
-  iScrollBar(0)
+  iSelected(-1)
 {
   iData= CColumnListBoxData::NewL();
   iLineHeight= 16;
@@ -1923,14 +1942,10 @@ COggListBox::COggListBox() :
 
 COggListBox::~COggListBox()
 {
-  if (iData) {
-    delete iData;
-    iData=0;
-  }
-  if ((iFont) && (iOwnedByControl)) {
+  delete iData;
+
+  if (iFont && iOwnedByControl)
       CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFont);
-      iFont = 0;
-  }
 }
 
 void
@@ -1952,6 +1967,14 @@ COggListBox::SetFont(CFont* aFont, TBool aOwnedByControl)
   iFont= aFont;
   iRedraw= ETrue;
   iOwnedByControl = aOwnedByControl;
+
+  iFontHeight = iFont->HeightInPixels();
+  iLinePadding = iFontHeight/6;
+  iLineHeight = iFontHeight + 2*iLinePadding;
+
+  iLinesVisible = ih/iLineHeight;
+  iOffset= iScroll*iLineHeight;
+  UpdateScrollBar();
 }
 
 void
@@ -1972,7 +1995,7 @@ void
 COggListBox::SetBarColorSelected(TRgb aColor)
 {
   iBarColorSelected= aColor;
-	iUseBarSelected=ETrue;
+  iUseBarSelected=ETrue;
   iRedraw= ETrue;
 }
 
@@ -2140,8 +2163,7 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
 				aBitmapContext.SetBrushColor(iBarColorSelected);
 				aBitmapContext.SetBrushStyle(CGraphicsContext::ESolidBrush);
 				aBitmapContext.SetPenColor(iBarColorSelected);
-				TRect lineRect(TPoint(x,y+iLineHeight/2-iFont->HeightInPixels()/2-iOffset%iLineHeight-(iLineHeight-iFont->HeightInPixels())/2), 
-					TSize(iw,iLineHeight));
+				TRect lineRect(TPoint(x, y-iOffset%iLineHeight), TSize(iw, iLineHeight));
 
 				aBitmapContext.DrawRect(lineRect);
 				aBitmapContext.SetBrushStyle(CGraphicsContext::ENullBrush);
@@ -2154,36 +2176,38 @@ COggListBox::Draw(CBitmapContext& aBitmapContext)
 
       len= p.Locate(KColumnListSeparator);
 
-      if (iData->ColumnIsGraphics(j) && iData->IconArray()) {
-				TLex lex(p.Left(len));
-				if (lex.Val(idx)==KErrNone) {
-				#ifdef PLAYLIST_SUPPORT
-					// Patch for V1 skins (they don't have a play list icon)
-					if (iData->IconArray()->Count() == idx)
-						idx = EFileName; // Use the file icon instead
-				#endif
+      if (iData->ColumnIsGraphics(j) && iData->IconArray())
+	  {
+			TLex lex(p.Left(len));
+			if (lex.Val(idx)==KErrNone)
+			{
+			#ifdef PLAYLIST_SUPPORT
+				// Patch for V1 skins (they don't have a play list icon)
+				if (iData->IconArray()->Count() == idx)
+					idx = EFileName; // Use the file icon instead
+			#endif
 
-					if ((idx == ETitle) || (idx == EFileName) || (idx == EPlayList))
-					{
-						// These items can be stopped, paused or playing
-						TLex lex(p.Right(1));
+				if ((idx == ETitle) || (idx == EFileName) || (idx == EPlayList))
+				{
+					// These items can be stopped, paused or playing
+					TLex lex(p.Right(1));
 
-						TInt playState(0);
-						lex.Val(playState);
-						if (playState)
-							idx = playState;
-					}
-
-					CGulIcon* icn= (*iData->IconArray())[idx];
-					TSize s(icn->Bitmap()->SizeInPixels());
-					TPoint pt(x+iData->ColumnWidthPixel(j)/2-s.iWidth/2,y+iLineHeight/2-s.iHeight/2-iOffset%iLineHeight);
-					aBitmapContext.BitBltMasked(pt,icn->Bitmap(), TRect(TPoint(0,0),s), icn->Mask(), ETrue);
+					TInt playState(0);
+					lex.Val(playState);
+					if (playState)
+						idx = playState;
 				}
+
+				CGulIcon* icn= (*iData->IconArray())[idx];
+				TSize s(icn->Bitmap()->SizeInPixels());
+				TPoint pt(x+iData->ColumnWidthPixel(j)/2-s.iWidth/2,y+iLineHeight/2-s.iHeight/2-iOffset%iLineHeight);
+				aBitmapContext.BitBltMasked(pt,icn->Bitmap(), TRect(TPoint(0,0),s), icn->Mask(), ETrue);
+			}
       }
-      else {
-				TRect lineRect(TPoint(x,y+iLineHeight/2-iFont->HeightInPixels()/2-iOffset%iLineHeight), 
-				  TSize(iData->ColumnWidthPixel(j),iLineHeight-1));
-				aBitmapContext.DrawText(p.Left(len), lineRect, iFont->AscentInPixels(), iData->ColumnAlignment(j));
+      else
+	  {
+			TRect lineRect(TPoint(x, y+iLinePadding-iOffset%iLineHeight), TSize(iData->ColumnWidthPixel(j), iLineHeight));
+			aBitmapContext.DrawText(p.Left(len), lineRect, iFontHeight - iLinePadding, iData->ColumnAlignment(j));
       }
 
       p.Set(p.Mid(len+1));
@@ -2309,8 +2333,14 @@ TInt COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
 	  {
 		  TSize bgBitmapSize = bgBitmap->SizeInPixels();
 		  scaleFactor = screenSize.iWidth / bgBitmapSize.iWidth;
-		  if (scaleFactor != 1)
+		  if (scaleFactor == 1)
 		  {
+			// Use the bitmap as it is
+			TRAP(err, iBackground->Duplicate(bgBitmap->Handle()));
+		  }
+		  else
+		  {
+			// Scale the bitmap to the correct size
 			TRAP(err, ScaleBitmapL(iBackground, bgBitmap, scaleFactor));
 		  }
 	  }

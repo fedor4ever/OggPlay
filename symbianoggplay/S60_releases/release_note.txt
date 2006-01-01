@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.6.4 of Oggplay for Series60.
+This is the Release Note for Release 1.6.6 of Oggplay for Series60.
 
 ******************************************************************************
 **** This release will NOT work on Nokia 7650, Nokia 3650, Nokia NGage,   ****
@@ -19,6 +19,18 @@ This release will only work on phones that supports MMF framework.
 
 History
 --------------------------------------------------------------------------------------------
+
+What's new in Release 1.6.6:
+--------------------------
+More bug fixes
+Added volume boost
+Added support for double resolution (N90).
+This is untested (N90 beta testers required!)
+
+What's new in Release 1.6.5:
+--------------------------
+WAV, AMR, M4a support.
+Several bug fixes.
 
 What's new in Release 1.6.4:
 --------------------------

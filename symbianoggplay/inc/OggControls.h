@@ -516,7 +516,11 @@ public:
   TRgb   iBarColorSelected;
   TInt   iTop;
   TInt   iSelected;
+
+  TInt   iFontHeight;
   TInt   iLineHeight;
+  TInt   iLinePadding;
+
   TInt   iLinesVisible;
   TInt   iScroll;
   TInt   iOffset;
