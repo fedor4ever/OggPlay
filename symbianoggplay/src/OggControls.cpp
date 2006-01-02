@@ -557,6 +557,8 @@ COggText::SetFont(CFont* aFont, TBool ownedByControl)
 #endif
 
   iLinePadding = (ih - iFontHeight) / 2;
+  if (iLinePadding<0)
+	  iLinePadding = 0;
 }
 
 void
