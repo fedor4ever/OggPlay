@@ -69,17 +69,16 @@ CSettingsS80Dialog::OkToExitL(int  /*aButtonId */)
 void
 CSettingsS80Dialog::ProcessCommandL(TInt aButtonId)
 {
-	if (aButtonId==ECbaSelectFolder) {
-	TBuf<255> temp; 
-	iScanDirControl->GetText(temp);
-	if (CCknTargetFolderDialog::RunSelectFolderDlgLD(temp)) {
-		iScanDirControl->SetTextL(&temp);
-	};
+	if (aButtonId==ECbaSelectFolder)
+	{
+		TBuf<255> temp; 
+		iScanDirControl->GetText(temp);
+		if (CCknTargetFolderDialog::RunSelectFolderDlgLD(temp))
+		{
+			iScanDirControl->SetTextL(&temp);
+		}
 	}
-	
 }
-
-
 
 void
 CSettingsS80Dialog::PreLayoutDynInitL()
@@ -96,7 +95,9 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iCbaControl[1][1] = static_cast <CEikChoiceList*> (Control(EOggSettingCba12));
   iCbaControl[1][2] = static_cast <CEikChoiceList*> (Control(EOggSettingCba13));
   iCbaControl[1][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba14));
-  CDesCArray *listboxArray=new (ELeave) CDesCArrayFlat(10);
+  iVolumeBoostControl = static_cast <CEikChoiceList*> (Control(EOggSettingVolumeBoost));
+
+  CDesCArray *listboxArray= new (ELeave) CDesCArrayFlat(10);
   listboxArray->AppendL(KFullScanString); 
   iScanDirControl->SetArray(listboxArray);
   iScanDirControl->SetTextL(&(iSettings->iCustomScanDir));
@@ -105,6 +106,8 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
   iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iRepeat));
   iRandomControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iRandom));
+  iVolumeBoostControl->SetCurrentItem(iSettings->iGainType);
+
   UpdateControlsFromSoftkeys();
 }
 
@@ -119,7 +122,6 @@ CSettingsS80Dialog::UpdateSoftkeysFromControls()
 	        COggUserHotkeysS80::MapRssListToCommand(iCbaControl[0][i]->CurrentItem());
         iSettings->iSoftKeysPlay[i] = 
 	        COggUserHotkeysS80::MapRssListToCommand(iCbaControl[1][i]->CurrentItem());
-
 	}
 }
 
@@ -128,7 +130,6 @@ CSettingsS80Dialog::UpdateControlsFromSoftkeys()
 {    
 	for (TInt i=0; i<4; i++)
 	{	
-	
 	   iCbaControl[0][i]->SetCurrentItem( 
 	      COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysIdle[i]) );
 	   iCbaControl[1][i]->SetCurrentItem( 
@@ -136,11 +137,11 @@ CSettingsS80Dialog::UpdateControlsFromSoftkeys()
 	}
 }
 
-void CSettingsS80Dialog::ShowFolderCommand(TBool show)
+void CSettingsS80Dialog::ShowFolderCommand(TBool aShow)
 {
 	CEikButtonGroupContainer* cba=&(ButtonGroupContainer());
 	TBool redrawCba=EFalse; 
-	if (show)
+	if (aShow)
 	{
 		if(cba->ControlOrNull(ECbaSelectFolder)==NULL)
 			{
@@ -174,6 +175,15 @@ void CSettingsS80Dialog::LineChangedL(TInt aControlId)
 	else 
 		{
 			ShowFolderCommand(EFalse);
+		}
+}
+
+void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
+{
+	if (aControlId==EOggSettingVolumeBoost)
+		{
+		COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
+		appUi->SetVolumeGainL((TGainType) iVolumeBoostControl->CurrentItem());
 		}
 }
 
@@ -228,8 +238,7 @@ CCodecsS80Dialog::PreLayoutDynInitL()
     cba.UpdateCommandObserverL(0,*this); // We will receive the commands for that button
     cba.DrawNow();
   }
-  
-  
+
 CCodecsS80Dialog::~CCodecsS80Dialog()
 {
 }
@@ -244,7 +253,6 @@ SEikControlInfo CCodecsS80Dialog::CreateCustomControlL(TInt aControlType)
     return info;
 }
 
-
 void CCodecsS80Dialog::ProcessCommandL(TInt aCommandId)
 {
 	if (aCommandId == EUserSelectCBA)
@@ -257,7 +265,6 @@ void CCodecsS80Dialog::ProcessCommandL(TInt aCommandId)
 	}
 }
 
-///
 void CCodecsLabel::ConstructFromResourceL(TResourceReader& aReader)
 {
     iCodecExtension = aReader.ReadTPtrC().AllocL();
@@ -323,6 +330,7 @@ void CCodecsS80Container::ConstructFromResourceL(TResourceReader& /*aReader*/)
 {
     ConstructL();
 }
+
 void CCodecsS80Container::ConstructL()
 {
     TSize aSize(402,155); // The maximal size of an S80 dialog
@@ -362,8 +370,7 @@ void CCodecsS80Container::ConstructL()
 
     iCurrentIndex = iListBox->CurrentItemIndex();
     
-    ///// Create the description pane
-    
+    ///// Create the description pane    
     iDescriptionBox = new (ELeave) CEikColumnListBox();
     iDescriptionBox->ConstructL(this);
     iDescriptionBox->SetContainerWindowL(*this);
@@ -375,6 +382,7 @@ void CCodecsS80Container::ConstructL()
     model->SetItemTextArray(new (ELeave) CDesCArrayFlat(10));
     model->SetOwnershipType(ELbmOwnsItemArray);
     RefreshListboxModel();
+
     // Set the listbox's first column to fill the listbox's whole width
     CColumnListBoxData* data = iDescriptionBox->ItemDrawer()->ColumnData();
     data->SetColumnWidthPixelL(0, 100);
@@ -383,8 +391,6 @@ void CCodecsS80Container::ConstructL()
     SetFocus(ETrue);
     ActivateL();	
 }
-
-
 
 void CCodecsS80Container::RefreshListboxModel()
 {
@@ -451,8 +457,7 @@ void CCodecsS80Container::HandleListBoxEventL(CEikListBox* /*aListBox*/,TListBox
 	{	
 	   iCurrentIndex = iListBox->CurrentItemIndex();
 	   RefreshListboxModel();
-	}
-	
+	}	
 }
 
 CCodecsS80Container* CCodecsS80Container::NewL( const TDesC & aCodecExtension,MEikCommandObserver* commandObserver)
@@ -461,12 +466,10 @@ CCodecsS80Container* CCodecsS80Container::NewL( const TDesC & aCodecExtension,ME
     return self;
     }
 
-
 TInt CCodecsS80Container::CountComponentControls() const
     {
     return 2;
     }
-
 
 CCoeControl* CCodecsS80Container::ComponentControl(TInt aIndex) const
 {
@@ -480,7 +483,6 @@ CCoeControl* CCodecsS80Container::ComponentControl(TInt aIndex) const
     return NULL;
 }
 
-
 void CCodecsS80Container::Draw(const TRect& aRect) const
     {    
     CWindowGc& gc = SystemGc();
@@ -489,13 +491,11 @@ void CCodecsS80Container::Draw(const TRect& aRect) const
     gc.DrawRect(aRect);
     }
 
-
-CCodecsS80Container::~CCodecsS80Container ()
+CCodecsS80Container::~CCodecsS80Container()
     {
     delete(iInputFrame);
     delete(iDescriptionBox);
     }
-
 
 TCoeInputCapabilities CCodecsS80Container::InputCapabilities() const
     {
@@ -519,25 +519,17 @@ void CCodecsS80Container::ProcessCommandL (TInt aCommandId)
 	 	iPluginList->SelectPluginL(iCodecExtension, TUid::Null());
 	 
 	 // Call the original process command (to dismiss the dialog)
-	 iCommandObserver->ProcessCommandL(EEikCmdCanceled);
-	 
+	 iCommandObserver->ProcessCommandL(EEikCmdCanceled);	 
 	}
 }
 
-TKeyResponse CCodecsS80Container::OfferKeyEventL(
-    const TKeyEvent& aKeyEvent,
-    TEventCode aType )
+TKeyResponse CCodecsS80Container::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   {
   return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
   
 
-////////////////////////////////////////////////////////////////
-//
 // class CCodecsS80Dialog
-//
-////////////////////////////////////////////////////////////////
-
 CCodecsSelectionS80Dialog::CCodecsSelectionS80Dialog(const TDesC &aCodecExtension) :
 iCodecExtension(aCodecExtension)
 {
@@ -545,16 +537,13 @@ iCodecExtension(aCodecExtension)
 
 void CCodecsSelectionS80Dialog::PreLayoutDynInitL()
 {
- // Set the CBA
-    	 
+	// Set the CBA    	 
     TBuf<50> tmp;
 	iEikonEnv->ReadResource(tmp, R_OGG_CBA_SELECT);
 	CEikButtonGroupContainer& cba = ButtonGroupContainer();
     cba.SetCommandL(0,EUserSelectCBA,tmp); 
     cba.UpdateCommandObserverL(0,*iContainer); // We will receive the commands for that button
     cba.DrawNow();
-    
-    
 }
 
 SEikControlInfo CCodecsSelectionS80Dialog::CreateCustomControlL(TInt aControlType)
@@ -563,7 +552,7 @@ SEikControlInfo CCodecsSelectionS80Dialog::CreateCustomControlL(TInt aControlTyp
     { 
         iContainer = CCodecsS80Container::NewL(iCodecExtension, ButtonCommandObserver()) ;
     } 
+
     SEikControlInfo info = {iContainer,0,0};
     return info;
 }
-

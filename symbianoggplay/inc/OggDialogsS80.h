@@ -54,16 +54,18 @@ class CSettingsS80Dialog : public CEikDialog,MEikCommandObserver
   void UpdateControlsFromSoftkeys();
   void ShowFolderCommand(TBool show);
   void LineChangedL(TInt aControlId);
+  void HandleControlStateChangeL(TInt aControlId);
   void PageChangedL(TInt aPageId);
 
   
  private:
   //data
-   CEikComboBox* iScanDirControl ;
+   CEikComboBox* iScanDirControl;
    CEikCheckBox*  iAutostartControl;
    CEikCheckBox* iRepeatControl;
    CEikCheckBox* iRandomControl;
-   CEikChoiceList* iCbaControl [2][4] ;
+   CEikChoiceList* iCbaControl [2][4];
+   CEikChoiceList* iVolumeBoostControl;
 };
 
 
