@@ -16,8 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
-
 #ifndef OGGPLAYCONTROLLER_H
 #define OGGPLAYCONTROLLER_H
 
@@ -39,16 +37,12 @@ class COggSource;
 class RFile;
 
 // CLASS DECLARATION
-
-
 class COggPlayController :	public CMMFController,
                             public MMMFAudioPlayDeviceCustomCommandImplementor,
                             public MMMFAudioPlayControllerCustomCommandImplementor,
                             public MAsyncEventHandler,
                             public MOggSampleRateFillBuffer
-
 	{
-
 	public:	 // Constructors and destructor
 
         /**
@@ -323,13 +317,13 @@ public:
     void SetSink(MDataSink* aSink);
 
 	void SetVolumeGain(TGainType aGain);
-private:
-    
-    COggSampleRateConverter *iOggSampleRateConverter;
-	TGainType iGain;
 
+private:
+    COggSampleRateConverter *iOggSampleRateConverter;
     MDataSink * iSink;
     MOggSampleRateFillBuffer &iSampleRateFillBuffer;
+
+	TGainType iGain;
 };
 
 #endif    

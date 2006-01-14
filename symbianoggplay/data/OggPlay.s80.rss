@@ -254,7 +254,7 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_pause; },
 	LBUF { txt = ogg_stop; },
 	LBUF { txt = ogg_boost_up; },
-	LBUF { txt = ogg_boost_down; },
+	LBUF { txt = ogg_boost_downS80; },
 	LBUF { txt = ogg_cba_exit; },
 	LBUF { txt = ogg_cba_back; },
 	LBUF { txt = ogg_format_text_volume_help; }

@@ -171,6 +171,7 @@
 // New Tags, not yet translated:
 #define ogg_boost_up                 "Volume boost up"
 #define ogg_boost_down               "Volume boost down"
+#define ogg_boost_downS80            "Volume boost dwn"
 #define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
 

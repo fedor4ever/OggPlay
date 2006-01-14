@@ -178,6 +178,7 @@ CHARACTER_SET UTF8
 
 #define ogg_boost_up                 "Увел. громкость"     
 #define ogg_boost_down               "Умен. громкость"   // To be Translated
+#define ogg_boost_downS80            "Volume boost dwn"
 #define ogg_playlist_entries         "Записи из плэйлиста:"
 #define ogg_cba_select_folder        "Папка"
 

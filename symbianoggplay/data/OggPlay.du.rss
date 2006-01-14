@@ -153,6 +153,7 @@ CHARACTER_SET UTF8
 #define ogg_volume_boost_12db        "12dB Gain"
 #define ogg_boost_up                 "Volume boost up"
 #define ogg_boost_down               "Volume boost down"
+#define ogg_boost_downS80            "Volume boost dwn"
 
 
 #define ogg_codec_selection          "Codecs"
