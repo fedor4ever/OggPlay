@@ -570,13 +570,19 @@ TBool COggPlayAppView::ReadHotkeyArgument(TOggParser& p) {
       iApp->iSettings.iUserHotkeys[TOggplaySettings::EPreviousSong]='0'+numkey;
       iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPreviousSong]=ETrue;
     }
-  } else if(p.iToken==_L("PauseResume")) {
-    if (p.ReadToken(numkey)) {
+  }
+#if !defined(SERIES80) 
+  else if(p.iToken==_L("PauseResume"))
+  {
+    if (p.ReadToken(numkey))
+	{
       iApp->iSettings.iUserHotkeys[TOggplaySettings::EPauseResume]='0'+numkey;
       iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPauseResume]=ETrue;
     }
 
-  } else if(p.iToken==_L("Play")) {
+  }
+#endif
+  else if(p.iToken==_L("Play")) {
     if (p.ReadToken(numkey)) {
       iApp->iSettings.iUserHotkeys[TOggplaySettings::EPlay]='0'+numkey;
       iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPlay]=ETrue;

@@ -52,8 +52,8 @@ chSTR2(__LINE__) "):" #desc)
 #if defined(SERIES60)
  #if defined(OS70S)
   #define KVersionMajor 1
-  #define KVersionMinor 66
-  #define KVersionString "1.66"
+  #define KVersionMinor 67
+  #define KVersionString "1.67"
  #else
   #define KVersionMajor 1
   #define KVersionMinor 10
@@ -67,8 +67,8 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 #if defined(SERIES80)
  #define KVersionMajor 1
- #define KVersionMinor 66
- #define KVersionString "1.66"
+ #define KVersionMinor 67
+ #define KVersionString "1.67"
 #endif
 
 // There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).

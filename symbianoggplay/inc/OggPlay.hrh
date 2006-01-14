@@ -138,6 +138,7 @@ enum TOggplayMiscSeries60 // Also used for Series80
   EOggUserHotkeys,
   EUserPauseCBA,
   EUserPlayCBA,
+  EUserPlayPauseCBA,
   EUserBackCBA,
   EUserSoftkeyOptions,
   EUserModifyCBA,
@@ -149,7 +150,8 @@ enum TOggplayMiscSeries60 // Also used for Series80
   EUserKeylock,
   EVolumeBoostDown,
   EVolumeBoostUp,
-  EUserVolumeHelp
+  EUserVolumeHelp,
+  ECbaSelectFolder
   };
 
 #endif      // OGGPLAY_HRH

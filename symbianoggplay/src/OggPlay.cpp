@@ -908,6 +908,24 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	User::InfoPrint(buf);
 	break;
   }
+
+  case EVolumeBoostUp:
+	  {
+		TGainType currentGain = (TGainType) iSettings.iGainType;
+		TInt newGain = currentGain + 1;
+		if (newGain<=EStatic12dB)
+			SetVolumeGainL((TGainType) newGain);
+		break;
+	  }
+
+  case EVolumeBoostDown:
+	  {
+	  	TGainType currentGain = (TGainType) iSettings.iGainType;
+		TInt newGain = currentGain - 1;
+		if (newGain>=EMinus24dB)
+			SetVolumeGainL((TGainType) newGain);
+		break;
+	  }
 #endif
 
 	case EEikCmdExit: {
@@ -1125,9 +1143,7 @@ COggPlayAppUi::ShowFileInfo()
 		d->SetFileSize(FileSize(fileName));
 		d->SetPlayListEntries(playList->Count());
 
-		#ifndef SERIES80 // To be removed when functionality has been implemented
 		d->ExecuteLD(R_DIALOG_PLAYLIST_INFO);
-		#endif
 	}
 	else
 	{
@@ -1146,9 +1162,7 @@ COggPlayAppUi::ShowFileInfo()
 		d->SetBitRate(iOggPlayback->BitRate()/1000);
 		if (!songPlaying) iOggPlayback->ClearComments();
 
-		#ifndef SERIES80 // To be removed when functionality has been implemented
 		d->ExecuteLD(R_DIALOG_INFO);
-		#endif
 	}
 }
 
@@ -1327,23 +1341,24 @@ COggPlayAppUi::ReadIniFile()
     RFile in;
     TInt err;
     
+    // Set some default values (for first time users)
 #if defined(SERIES60)
 	  iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyExit;
       iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyExit;
 #else
 #if defined(SERIES80)
 	  iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
-      iSettings.iSoftKeysIdle[1] = TOggplaySettings::EStop;
+      iSettings.iSoftKeysIdle[1] = TOggplaySettings::EHotKeyBack;
       iSettings.iSoftKeysIdle[2] = TOggplaySettings::EHotkeyVolumeHelp;
       iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit;
       iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
       iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong;
       iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
       iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit;
+	  iSettings.iCustomScanDir = KFullScanString;
 #endif
 #endif
  
-    // Default values
 	iSettings.iGainType = ENoGain;
 	iVolume = KMaxVolume;
 	iAlarmTime.Set(_L("20030101:120000.000000"));
@@ -1535,7 +1550,6 @@ COggPlayAppUi::IniRead64( TFileText& aFile, TInt64 aDefault )
    return ( val );
 }
 #ifdef SERIES80
-
 void COggPlayAppUi::IniReadDes( TFileText& aFile, TDes& value,const TDesC& defaultValue )
 {
    TBuf<255> line;
@@ -1550,7 +1564,6 @@ void COggPlayAppUi::IniReadDes( TFileText& aFile, TDes& value,const TDesC& defau
     	   
     }
 }
-
 #endif
 
 void
@@ -1591,11 +1604,7 @@ COggPlayAppUi::WriteIniFile()
     
     // this should do the trick for forward compatibility:
     TInt magic=0xdb;
-#ifdef SERIES80
-    TInt iniversion=9;
-#else
-    TInt iniversion=8;
-#endif    
+    TInt iniversion=10;
 
     num.Num(magic);
     tf.Write(num);
@@ -1983,7 +1992,6 @@ CEikAppUi* COggPlayDocument::CreateAppUiL(){
 // COggSongList class
 //
 ///////////////////////////////////////////////////////////////
-
 void COggSongList::ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback)
 {
 	iPlayingIdx = ENoFileSelected;

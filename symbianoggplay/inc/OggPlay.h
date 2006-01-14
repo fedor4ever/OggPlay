@@ -147,8 +147,10 @@ public:
     EPageDown,
     ENextSong,
     EPreviousSong,
+#if !defined(SERIES80)
     EKeylock,
     EPauseResume,
+#endif
     EPlay,
     EPause,
     EStop,
@@ -157,8 +159,13 @@ public:
     EHotKeyExit,
     EHotKeyBack,
     EHotkeyVolumeHelp,
+
     KFirstHotkeyIndex = EFastForward,
-    ENofHotkeysV4=EKeylock, 
+#if defined(SERIES80)
+	ENofHotkeysV4=EPlay,
+#else
+	ENofHotkeysV4=EKeylock,
+#endif
 	ENofHotkeysV5=EVolumeBoostUp,
 	ENofHotkeysV7=EHotKeyExit,
     ENofHotkeys=EHotkeyVolumeHelp+1
@@ -173,10 +180,9 @@ public:
 };
 
  
-static const TInt THotkeysActions[]  =
+static const TInt KHotkeysActions[]  =
   {
   	//Must be kept synchronized with the TOggplaySettings::THotkey enum !
-
   	EEikCmdCanceled,	// ENoHotkey,
     EUserFastForward,	// EFastForward,
     EUserRewind, 		// ERewind,
@@ -184,8 +190,10 @@ static const TInt THotkeysActions[]  =
     EUserListBoxPageDown,// EPageDown,
     EOggNextSong,		// ENextSong,
     EOggPrevSong,		// EPreviousSong,
+#if !defined(SERIES80)
     EUserKeylock,		// EKeylock,
-    NULL,				// EPauseResume,
+    EUserPlayPauseCBA,	// EPauseResume,
+#endif
     EUserPlayCBA,   	// EPlay,
     EUserPauseCBA,  	// EPause,
     EUserStopPlayingCBA,// EStop,
@@ -199,7 +207,6 @@ static const TInt THotkeysActions[]  =
  
 // Forward declarations:
 //----------------------
-
 class COggPlayAppUi;
 class COggPlayAppView;
 class COggFOView;
@@ -212,12 +219,10 @@ class COggSongList;
 // COggActive
 // A utility class monitoring the telephone line
 //----------------------------------------------
-
 #ifdef MONITOR_TELEPHONE_LINE
 class COggActive : public CBase
 {
  public:
-   
   COggActive();
   void ConstructL(COggPlayAppUi* theAppUi);
   ~COggActive();
@@ -251,7 +256,6 @@ class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver
 #endif
 {
 public:
-
   void ConstructL();
   void PostConstructL();
   ~COggPlayAppUi();
@@ -350,8 +354,7 @@ public:
   void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
 #endif
 
-private: 
-
+private:
   void ReadIniFile();
   TInt32 IniRead32( TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = 0x7FFFFFFF );
   TInt64 IniRead64( TFileText& aFile, TInt64 aDefault = 0 );

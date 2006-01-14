@@ -44,7 +44,10 @@ CSettingsS80Dialog::OkToExitL(int  /*aButtonId */)
  
   iScanDirControl->GetText(iSettings->iCustomScanDir);
   iSettings->iCustomScanDir.TrimAll();
-  if (iSettings->iCustomScanDir==KFullScanString || iSettings->iCustomScanDir==KNullDesC) {
+  if (iSettings->iCustomScanDir==KNullDesC)
+	  iSettings->iCustomScanDir = KFullScanString;
+
+  if (iSettings->iCustomScanDir==KFullScanString) {
 	iSettings->iScanmode = TOggplaySettings::EFullScan;    
   } else {  	
   	iSettings->iScanmode = TOggplaySettings::ECustomDir;    
@@ -106,8 +109,6 @@ CSettingsS80Dialog::PreLayoutDynInitL()
 }
 
 
-
-
 void 
 CSettingsS80Dialog::UpdateSoftkeysFromControls()
 {
@@ -135,10 +136,8 @@ CSettingsS80Dialog::UpdateControlsFromSoftkeys()
 	}
 }
 
-
 void CSettingsS80Dialog::ShowFolderCommand(TBool show)
 {
-
 	CEikButtonGroupContainer* cba=&(ButtonGroupContainer());
 	TBool redrawCba=EFalse; 
 	if (show)
@@ -155,7 +154,6 @@ void CSettingsS80Dialog::ShowFolderCommand(TBool show)
 			redrawCba=ETrue;
 			}
 	}
-
 	else if(cba->ControlOrNull(ECbaSelectFolder)!=NULL)
 		{
 		cba->SetCommandL(1,EEikBidBlank,KNullDesC);
@@ -165,40 +163,32 @@ void CSettingsS80Dialog::ShowFolderCommand(TBool show)
 
 	if(redrawCba) {
 		cba->DrawDeferred();}
-	
-	
 }
 
 void CSettingsS80Dialog::LineChangedL(TInt aControlId)
 {
-
 	if (aControlId==EOggSettingScanDir)
 		{
 			ShowFolderCommand(ETrue);
-		} else 
+		}
+	else 
 		{
 			ShowFolderCommand(EFalse);
-		};
+		}
 }
-
 
 void CSettingsS80Dialog::PageChangedL(TInt aPageId)
 {
-
 	if(aPageId!=0)
 		{
 			ShowFolderCommand(EFalse);
 		}
 }
 
-
-
-
 ///////////////////////////////////////////////
 
 CCodecsS80Dialog::CCodecsS80Dialog()
 {
-
 }
 
 TBool
@@ -208,6 +198,7 @@ CCodecsS80Dialog::OkToExitL(TInt /*aButtonId*/)
   {
   	  DeleteLine(555+i);
   }
+ 
   return(ETrue);
 }
 

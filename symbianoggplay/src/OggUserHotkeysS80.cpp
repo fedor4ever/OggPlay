@@ -21,7 +21,7 @@
 #include "OggUserHotkeys.h"
 
 #ifdef SERIES80
-static const TInt TMapRssListToCommand[]  =
+static const TInt KMapRssListToCommand[]  =
   {
     // Maps the "RESOURCE ARRAY r_user_hotkey_items" from the .rss file
     // to a corresponding index in the table THotkeys. 
@@ -38,8 +38,8 @@ static const TInt TMapRssListToCommand[]  =
     TOggplaySettings::EPlay,
     TOggplaySettings::EPause,
     TOggplaySettings::EStop,
-	// TOggplaySettings::EVolumeBoostUp,(not used in S80)
-	// TOggplaySettings::EVolumeBoostDown,(not used in S80)
+	TOggplaySettings::EVolumeBoostUp,
+	TOggplaySettings::EVolumeBoostDown,
     TOggplaySettings::EHotKeyExit,
     TOggplaySettings::EHotKeyBack,
     TOggplaySettings::EHotkeyVolumeHelp
@@ -48,7 +48,7 @@ static const TInt TMapRssListToCommand[]  =
 TInt 
 COggUserHotkeysS80::MapRssListToCommand(TInt aRSSIndex)  
   {
-    return TMapRssListToCommand[aRSSIndex];
+    return KMapRssListToCommand[aRSSIndex];
   };
   
   
@@ -58,7 +58,7 @@ COggUserHotkeysS80::MapCommandToRssList(TInt aCommandIndex)
   	TInt j;
   	TBool found = EFalse;
 	for ( j=0; j<TOggplaySettings::ENofHotkeys; j++ )
-	   if ( aCommandIndex == TMapRssListToCommand[j] )
+	   if ( aCommandIndex == KMapRssListToCommand[j] )
 	   {
 	       found = 1;
 	      break;
@@ -66,11 +66,11 @@ COggUserHotkeysS80::MapCommandToRssList(TInt aCommandIndex)
 	if (found)
 	   return j;
 	return 0; // Return NoHotkeys if not found
-  };
+  }
 
 void
-COggUserHotkeysS80::SetSoftkeys(TBool aPlaying) {
-
+COggUserHotkeysS80::SetSoftkeys(TBool aPlaying)
+{
   TBuf<50> buf;
   TInt action;
   CEikonEnv * eikonEnv = CEikonEnv::Static();
@@ -86,9 +86,7 @@ COggUserHotkeysS80::SetSoftkeys(TBool aPlaying) {
     if (aPlaying)
        hotkeyIndex = settings.iSoftKeysPlay[i];
     
-    TInt command = 0;
-    command = hotkeyIndex;
-    
+    TInt command = hotkeyIndex;
     switch (hotkeyIndex)
     {
     	case TOggplaySettings::ENoHotkey:
@@ -96,13 +94,12 @@ COggUserHotkeysS80::SetSoftkeys(TBool aPlaying) {
     	    buf.Zero();
     	    break;
     	default:
-  			action = THotkeysActions[hotkeyIndex]; 
+  			action = KHotkeysActions[hotkeyIndex]; 
        buf.Copy(array->MdcaPoint(MapCommandToRssList(command)));
     }
     Cba->SetCommandL(i,action, buf); 
   }
   CleanupStack::PopAndDestroy(array);
 }
-
 
 #endif /* SERIES80 */

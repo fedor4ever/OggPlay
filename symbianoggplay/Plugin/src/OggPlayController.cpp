@@ -736,11 +736,9 @@ void  COggPlayController::SetVolumeGainL(TMMFMessage& aMessage)
 *
 * COggSource
 *
-*************************************************************************************/
-   
-COggSource::COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer) : 
-  MDataSource(TUid::Uid(KOggTremorUidPlayFormatImplementation)),
-  iSampleRateFillBuffer(aSampleRateFillBuffer)
+*************************************************************************************/ 
+COggSource::COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer)
+: MDataSource(TUid::Uid(KOggTremorUidPlayFormatImplementation)), iSampleRateFillBuffer(aSampleRateFillBuffer), iGain(ENoGain)
 {
 }
 

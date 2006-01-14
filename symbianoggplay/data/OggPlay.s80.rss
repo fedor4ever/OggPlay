@@ -16,7 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*  Series 60 resource file
+/*  Series 80 resource file
  */
 
 NAME OGGP
@@ -107,10 +107,9 @@ RESOURCE DIALOG r_dialog_about {
     }
   };
 }
-#if 0
 
 RESOURCE DIALOG r_dialog_infowin {
-  buttons =  R_AVKON_SOFTKEYS_BACK;
+  buttons =  R_EIK_BUTTONS_CONTINUE;
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -124,11 +123,9 @@ RESOURCE DIALOG r_dialog_infowin {
   };
 }
 
-
-
 RESOURCE DIALOG r_dialog_info {
   title   = ogg_file_prop;
-  buttons = R_OGG_DIALOG_BUTTONS1;
+  buttons = R_EIK_BUTTONS_CONTINUE;
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -193,12 +190,56 @@ RESOURCE DIALOG r_dialog_info {
   };
 }
 
-#endif
+RESOURCE DIALOG r_dialog_playlist_info {
+  title   = ogg_file_prop;
+  buttons = R_EIK_BUTTONS_CONTINUE;
+  flags   = EEikDialogFlagWait;
+  items = {
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt = ogg_filename_txt;
+        id = EOggInfoDialog;
+	control = LABEL 
+	{
+		txt="";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+        id = EOggLabelFileName;
+	control = LABEL 
+	{
+		txt=ogg_filename_unknown;
+		horiz_align=EEikLabelAlignHLeft;
+	};	
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_filesize;
+	id= EOggLabelFileSize;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_playlist_entries;
+	id = EOggLabelPlayListEntries;
+	control = LABEL 
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    }
+  };
+}
 
 RESOURCE ARRAY r_user_hotkey_items
 {
   //Must be kept synchronized with the TOggplaySettings::THotkey enum !
-
   items = {
     LBUF { txt = ogg_hotkey_none; },
     LBUF { txt = ogg_format_text_fast_forward; },
@@ -212,22 +253,33 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_play; },
 	LBUF { txt = ogg_pause; },
 	LBUF { txt = ogg_stop; },
-//	LBUF { txt = ogg_boost_up; },
-//	LBUF { txt = ogg_boost_down; },
+	LBUF { txt = ogg_boost_up; },
+	LBUF { txt = ogg_boost_down; },
 	LBUF { txt = ogg_cba_exit; },
 	LBUF { txt = ogg_cba_back; },
 	LBUF { txt = ogg_format_text_volume_help; }
   };
 }
 
+RESOURCE ARRAY r_volume_boost_items
+    {
+    items = { 
+		LBUF { txt = ogg_volume_boost_m24db; },
+		LBUF { txt = ogg_volume_boost_m18db; },
+		LBUF { txt = ogg_volume_boost_m12db; },
+		LBUF { txt = ogg_volume_boost_none; },
+		LBUF { txt = ogg_volume_boost_6db; },
+		LBUF { txt = ogg_volume_boost_12db; }
+    };
+    }
 
 RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu
 {
-  items= {
-      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
-  };
+//  items= {
+//      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
+//  };
 }
 
 RESOURCE DIALOG r_dialog_files_search {
@@ -256,7 +308,6 @@ RESOURCE DIALOG r_dialog_files_search {
   };
 }
 
-
 RESOURCE DIALOG r_dialog_codec_selection {
   title   = ogg_codec_selection;
  // buttons =  r_codec_selection_cba;
@@ -273,7 +324,6 @@ RESOURCE DIALOG r_dialog_codec_selection {
 
 // Codec info items
 ///////////////////////////////////////////////////////////////////////////////
-
 RESOURCE ARRAY r_codec_info_items
 {
   items = {
@@ -353,8 +403,15 @@ RESOURCE ARRAY options_multipage1
               type = EEikCtCheckBox;
               prompt = ogg_autostart;
               id = EOggSettingAutoPlayId;
+             },
+    DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_volume_boost;
+              id = EOggSettingVolumeBoost;
+              control = CHOICELIST {
+                array_id= r_volume_boost_items;
+              };
              }
-	              
     };
 }
 

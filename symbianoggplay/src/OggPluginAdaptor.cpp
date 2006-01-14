@@ -216,12 +216,9 @@ void CPluginSupportedList::AddExtension(const TDesC &anExtension)
 // COggPluginAdaptor
 //
 ////////////////////////////////////////////////////////////////
-
-COggPluginAdaptor::COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver=0) :
-CAbsPlayback(anObserver),
-iEnv(anEnv)
+COggPluginAdaptor::COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver = 0)
+:CAbsPlayback(anObserver), iEnv(anEnv), iVolume(KMaxVolume), iGain(ENoGain)
 {
-    iVolume = KMaxVolume;
 }
 
 TInt COggPluginAdaptor::Info(const TDesC& aFileName, TBool /*silent*/)
@@ -332,7 +329,7 @@ void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &
   tempBuf->Des().Zero();
   TLex parse(aMetaData.Value() );
   TBool first=ETrue;
-  while (1)
+  for ( ; ; )
   {
  	TPtrC16 token = parse.NextToken();
   	if (token.Length() <=0 )
@@ -403,7 +400,6 @@ void COggPluginAdaptor::Stop()
 
 void   COggPluginAdaptor::SetVolume(TInt aVol)
 {
-    
     TRACEF(_L("COggPluginAdaptor::SetVolume()"));
     if ( (aVol <0) || (aVol >KMaxVolume) )
     {
