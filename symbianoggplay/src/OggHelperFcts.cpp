@@ -19,17 +19,29 @@
  
 #include "OggHelperFcts.h"
 
-COggTimer::COggTimer(TCallBack aCallBack) : CTimer(EPriorityStandard)
+COggTimer::COggTimer(const TCallBack& aCallBack)
+: CTimer(EPriorityStandard), iCallBack(aCallBack)
     {
-    iCallBack = aCallBack;
     CTimer::ConstructL();
     CActiveScheduler::Add(this);
-    iEnabled = ETrue;
+    }
+
+COggTimer::COggTimer(const TCallBack& aCallBack, const TCallBack& aErrorCallBack)
+: CTimer(EPriorityStandard), iCallBack(aCallBack)
+    {
+	iErrorCallBack = new(ELeave) TCallBack(aErrorCallBack);
+
+	CTimer::ConstructL();
+    CActiveScheduler::Add(this);
     }
 
 void COggTimer::RunL()
     {
-    iCallBack.CallBack();
+	TInt err = iStatus.Int();
+	if (err == KErrNone)
+		iCallBack.CallBack();
+	else if (iErrorCallBack)
+		iErrorCallBack->CallBack();
     }
 
 void COggTimer::Wait(TTimeIntervalMicroSeconds32 aInterval)

@@ -23,14 +23,16 @@
 class COggTimer : public CTimer
     {
     public:
-        COggTimer(TCallBack aCallBack);
-        void Wait(TTimeIntervalMicroSeconds32 interval);
+        COggTimer(const TCallBack& aCallBack);
+        COggTimer(const TCallBack& aCallBack, const TCallBack& aErrorCallBack);
+
+		void Wait(TTimeIntervalMicroSeconds32 interval);
 		void At(const TTime& aTime);
         void Cancel();
     private:
         void RunL();
         TCallBack iCallBack;
-        TBool iEnabled;
+		TCallBack* iErrorCallBack;
     };
 
 #endif

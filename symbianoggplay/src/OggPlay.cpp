@@ -1366,7 +1366,7 @@ COggPlayAppUi::ReadIniFile()
 	iVolume = KMaxVolume;
 
 	iSettings.iAlarmTime.Set(_L("20030101:120000.000000"));
-	iSettings.iAlarmVolume = 10;
+	iSettings.iAlarmVolume = 7;
 	iSettings.iAlarmGain = ENoGain;
 	iSettings.iAlarmSnooze = 1;
 

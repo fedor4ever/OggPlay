@@ -784,7 +784,7 @@ RESOURCE DIALOG r_oggplay_snooze_dlg
 			control = AVKON_CONFIRMATION_QUERY
 				{
 				layout = EConfirmationQueryLayout;
-				label = "Ogg Alarm!";
+				label = ogg_alarm_message;
 				animation = R_QGN_NOTE_INFO_ANIM;
 				};
 			}
@@ -798,12 +798,12 @@ RESOURCE CBA r_oggplay_snooze_buttons
 		CBA_BUTTON
 			{
 			id = EOggButtonSnooze;
-			txt = "Snooze";
+			txt = ogg_cba_snooze;
 			},
 		CBA_BUTTON
 			{
 			id = EOggButtonCancel;
-			txt = "Cancel";
+			txt = ogg_cba_cancel;
 			}
 		};
 	}

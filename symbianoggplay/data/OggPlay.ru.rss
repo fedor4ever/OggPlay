@@ -204,3 +204,6 @@ CHARACTER_SET UTF8
 #define ogg_alarm_snz2                   "10 min"
 #define ogg_alarm_snz3                   "20 min"
 #define ogg_alarm_snz4                   "30 min"
+
+#define ogg_alarm_message                "Ogg Alarm!"
+#define ogg_cba_snooze                   "Snooze"

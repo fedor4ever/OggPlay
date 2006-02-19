@@ -79,6 +79,7 @@ COggPlayAppView::~COggPlayAppView()
   if (iAlarmTimer) iAlarmTimer->Cancel();
   delete iAlarmTimer;
   delete iAlarmCallBack;
+  delete iAlarmErrorCallBack;
 
   if(iCanvas[1]) {
     delete iCanvas[1];
@@ -157,7 +158,8 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCallBack = new(ELeave) TCallBack(COggPlayAppView::CallBack, this);
 
   iAlarmCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmCallBack, this);
-  iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack);
+  iAlarmErrorCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmErrorCallBack, this);
+  iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack, *iAlarmErrorCallBack);
 
   // Only start timer once all initialization has been done
   iTimer->Start(TTimeIntervalMicroSeconds32(1000000), TTimeIntervalMicroSeconds32(KCallBackPeriod), *iCallBack);
@@ -1087,6 +1089,15 @@ TInt COggPlayAppView::AlarmCallBack(TAny* aPtr)
   return 1;
 }
 
+TInt COggPlayAppView::AlarmErrorCallBack(TAny* aPtr)
+{
+  // Our alarm has been cancelled / aborted, probably because the user changed the system time
+  COggPlayAppView* self = (COggPlayAppView*) aPtr;
+  self->SetAlarm();
+
+  return 1;
+}
+
 void COggPlayAppView::HandleAlarmCallBack()
 {
   // Set off an alarm when the alarm time has been reached
@@ -1105,8 +1116,8 @@ void COggPlayAppView::HandleAlarmCallBack()
 
   // Reset the alarm
   CAknQueryDialog* snoozeDlg = CAknQueryDialog::NewL();
-  TBool snooze = (snoozeDlg->ExecuteLD(R_OGGPLAY_SNOOZE_DLG) == EOggButtonSnooze);
-  if (snooze)
+  TInt snoozeCmd = snoozeDlg->ExecuteLD(R_OGGPLAY_SNOOZE_DLG);
+  if (snoozeCmd == EOggButtonSnooze)
   {
     // Pause playing
     iApp->Pause();
@@ -1114,11 +1125,16 @@ void COggPlayAppView::HandleAlarmCallBack()
 	// Set the alarm to fire again in five minutes
 	SnoozeAlarm();
   }
-  else
+  else if (snoozeCmd == EOggButtonCancel)
   {
     // Stop playing
     iApp->Stop();
 
+    // Set the alarm to fire again tomorrow 
+	SetAlarm();
+  }
+  else
+  {
     // Set the alarm to fire again tomorrow 
 	SetAlarm();
   }
@@ -1529,7 +1545,8 @@ void COggPlayAppView::SetAlarm()
 
   // Sync the alarm time to the current day
   iApp->iSettings.iAlarmTime += now.DaysFrom(iApp->iSettings.iAlarmTime);
-  iApp->iSettings.iAlarmTime += TTimeIntervalDays(1);
+  if (now>=iApp->iSettings.iAlarmTime)
+	iApp->iSettings.iAlarmTime += TTimeIntervalDays(1);
 
   if (iApp->iSettings.iAlarmActive)
   {

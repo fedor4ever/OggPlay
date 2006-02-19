@@ -108,6 +108,7 @@ public:
   void StopCallBack();
 
   static TInt AlarmCallBack(TAny* aPtr);
+  static TInt AlarmErrorCallBack(TAny* aPtr);
   void HandleAlarmCallBack();
 
   // from MCoeControlObserver:
@@ -142,6 +143,7 @@ private:
 
   COggTimer* iAlarmTimer;
   TCallBack* iAlarmCallBack;
+  TCallBack* iAlarmErrorCallBack;
 
   TInt       iActivateCount;
   TFileName  iIconFileName;
