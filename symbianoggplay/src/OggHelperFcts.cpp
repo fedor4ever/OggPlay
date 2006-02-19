@@ -38,6 +38,12 @@ void COggTimer::Wait(TTimeIntervalMicroSeconds32 aInterval)
     After(aInterval);
     }
 
+void COggTimer::At(const TTime& aTime)
+    {
+    Cancel(); // Cancel any pending timer operation
+	CTimer::At(aTime);
+    }
+
 void COggTimer::Cancel()
     {
     CTimer::Cancel(); // Cancel any pending timer operation

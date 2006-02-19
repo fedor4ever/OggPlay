@@ -181,5 +181,24 @@ private:
 };
 #endif
 
+class COggAlarmSettingsView : public COggViewBase
+{
+public:
+  COggAlarmSettingsView(COggPlayAppView&,  TUid aViewUid);
+  ~COggAlarmSettingsView();
+ 
+  virtual TVwsViewId ViewId() const;
+
+public:
+  COggSettingsContainer* iContainer;
+
+private:
+  // implements MCoeView:
+  virtual void ViewDeactivated();
+  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/);
+
+private:
+  TUid iUid;
+};
 #endif /* SERIES_60 */
 #endif

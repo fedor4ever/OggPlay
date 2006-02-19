@@ -12,8 +12,8 @@ mcNuOggPlay.mbm /c12bitmaps/file.bmp
 /1bitmaps/file.mask.bmp
 /c12bitmaps/goback.bmp
 /1bitmaps/goback.mask.bmp
-/c12bitmaps/playing.bmp
-/1bitmaps/playing.mask.bmp
+/c12bitmaps/file.bmp
+/1bitmaps/file.mask.bmp
 /c12bitmaps/paused.bmp
 /1bitmaps/paused.mask.bmp
 /1bitmaps/x.flipclosed.bmp
@@ -41,3 +41,5 @@ mcNuOggPlay.mbm /c12bitmaps/file.bmp
 /c12..\..\pausefocus.bmp
 /c12bitmaps/scrollbar.bmp
 /1bitmaps/scrollbar.mask.bmp
+/c12bitmaps/AlarmS.bmp
+/1bitmaps/AlarmSm.bmp

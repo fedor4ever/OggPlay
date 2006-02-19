@@ -384,6 +384,49 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_playback_options_item_list
     }
 #endif
 
+RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_alarm_s60_setting_item_list
+    {
+    flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
+    title = ogg_alarm_title_s60;
+    initial_number = 1;
+    items =
+        {
+	    AVKON_SETTING_ITEM
+	        {  
+	        identifier = EOggAlarmActive;
+			setting_page_resource = r_oggplay_binary_setting_page;
+			associated_resource = r_oggplay_popup_setting_binary_texts;
+			name = ogg_alarm_s60;
+	        }
+	    ,AVKON_SETTING_ITEM
+			{
+			identifier = EOggAlarmTime;
+			setting_page_resource = r_oggplay_alarm_time_page;
+			name = ogg_alarm_time_s60;
+			}
+	    ,AVKON_SETTING_ITEM
+			{
+			identifier = EOggAlarmSnooze;
+			setting_page_resource = r_oggplay_alarm_snooze_page;
+			associated_resource = r_oggplay_alarm_snooze_item_list;
+			name = ogg_alarm_snooze;
+			}
+	    ,AVKON_SETTING_ITEM
+			{
+			identifier = EOggAlarmVolume;
+			setting_page_resource = r_oggplay_alarm_volume_page;
+			name = ogg_alarm_volume;
+			}
+	    ,AVKON_SETTING_ITEM
+			{
+			identifier = EOggAlarmBoost;
+			setting_page_resource = r_oggplay_volume_boost;
+			associated_resource = r_oggplay_volume_boost_item_list;
+			name = ogg_alarm_boost;
+			}
+        };
+    }
+
 RESOURCE POPUP_SETTING_LIST r_oggplay_popup_setting_list_new_entry
     {
 //    flags = EAknPopupSettingListFlagAllowsUserDefinedEntry;
@@ -668,6 +711,102 @@ RESOURCE ARRAY r_oggplay_popped_up_thread_priority_texts
 	}
 #endif
 
+RESOURCE AVKON_SETTING_PAGE r_oggplay_alarm_time_page
+	{
+	label=ogg_alarm_time_s60;
+	type=EEikCtTimeEditor;
+    editor_resource_id = r_oggplay_alarm_time_editor;
+	}
+	
+RESOURCE TIME_EDITOR r_oggplay_alarm_time_editor
+	{
+	minTime = TIME { };
+	maxTime = TIME { };
+	flags = EEikTimeWithoutSecondsField;
+	}
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_alarm_volume_page
+	{
+	label=ogg_alarm_volume;
+	type=EAknCtVolumeControl;
+    editor_resource_id = r_oggplay_alarm_volume_editor;
+	}
+	
+RESOURCE VOLUME r_oggplay_alarm_volume_editor
+	{
+	flags = ESettingsVolumeControl;
+	value = 1;
+	}
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_alarm_snooze_page
+    {   
+    label = ogg_alarm_snooze;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_alarm_snooze_item_list
+    {
+    setting_texts_resource = r_oggplay_alarm_snooze_setting_page_list;
+    popped_up_texts_resource = r_oggplay_alarm_snooze_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_alarm_snooze_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { value = 0; text = ogg_alarm_snz1; },
+		AVKON_ENUMERATED_TEXT { value = 1; text = ogg_alarm_snz2; },
+		AVKON_ENUMERATED_TEXT { value = 2; text = ogg_alarm_snz3; },
+		AVKON_ENUMERATED_TEXT { value = 3; text = ogg_alarm_snz4; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_alarm_snooze_item_array
+    {
+    items = { 
+		LBUF { txt = ogg_alarm_snz1; },
+		LBUF { txt = ogg_alarm_snz2; },
+		LBUF { txt = ogg_alarm_snz3; },
+		LBUF { txt = ogg_alarm_snz4; }
+    };
+    }
+    
+RESOURCE DIALOG r_oggplay_snooze_dlg
+	{
+	flags = EAknGeneralQueryFlags;
+	buttons = r_oggplay_snooze_buttons;
+	items =
+		{
+		DLG_LINE
+			{
+			type = EAknCtQuery;
+			id = EOggAlarmTriggeredNote;
+			control = AVKON_CONFIRMATION_QUERY
+				{
+				layout = EConfirmationQueryLayout;
+				label = "Ogg Alarm!";
+				animation = R_QGN_NOTE_INFO_ANIM;
+				};
+			}
+		};
+	}
+
+RESOURCE CBA r_oggplay_snooze_buttons
+	{
+	buttons =
+		{
+		CBA_BUTTON
+			{
+			id = EOggButtonSnooze;
+			txt = "Snooze";
+			},
+		CBA_BUTTON
+			{
+			id = EOggButtonCancel;
+			txt = "Cancel";
+			}
+		};
+	}
 
 // Codec info items
 ///////////////////////////////////////////////////////////////////////////////
@@ -789,6 +928,7 @@ RESOURCE MENU_PANE r_options_menu
 #if defined(MULTI_THREAD_PLAYBACK)
 	, MENU_ITEM { command=EOggPlaybackOptions; txt=ogg_playback; }
 #endif
+	, MENU_ITEM { command=EOggAlarmSettings; txt=ogg_alarm_s60; }
   };
 }
 
@@ -872,3 +1012,4 @@ RESOURCE TBUF R_OGG_USE_NO_CODEC     { buf=ogg_hotkey_none;}
 RESOURCE TBUF r_ogg_disabled         { buf=ogg_popup_off;}
 
 RESOURCE TBUF r_ogg_playback { buf=ogg_playback; } // Playback options view title
+RESOURCE TBUF r_ogg_alarm_s60 { buf=ogg_alarm_s60; } // Alarm settings title

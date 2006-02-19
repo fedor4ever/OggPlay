@@ -134,5 +134,29 @@ private: //data
 	COggPlayAppUi& iAppUi;
 };
 
+class CAlarmSettingItem : public CAknBinaryPopupSettingItem
+{
+public:  // Constructors and destructor
+    CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private: // Functions from base classes
+    void EditItemL(TBool aCalledFromMenu);
+
+private: //data
+	COggPlayAppUi& iAppUi;
+};
+
+class CAlarmTimeSettingItem : public CAknTimeOrDateSettingItem
+{
+public:  // Constructors and destructor
+    CAlarmTimeSettingItem(TInt aIdentifier, COggPlayAppUi& aAppUi);
+
+private: // Functions from base classes
+    void EditItemL(TBool aCalledFromMenu);
+
+private: //data
+	COggPlayAppUi& iAppUi;
+};
+
 #endif /* SERIES60 */
 #endif

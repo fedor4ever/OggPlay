@@ -456,6 +456,54 @@ void COggPlaybackOptionsView::BufferingModeChangedL()
 	if (iContainer)
 		iContainer->BufferingModeChangedL();
 }
-
 #endif /* MULTI_THREAD_PLAYBACK */
+
+COggAlarmSettingsView::COggAlarmSettingsView(COggPlayAppView& aOggViewCtl, TUid aId)
+: COggViewBase(aOggViewCtl)
+{
+    iUid = aId;
+}
+
+COggAlarmSettingsView::~COggAlarmSettingsView()
+{
+}
+
+void COggAlarmSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+{
+  CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
+  if (Cba)
+  {
+    Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
+    Cba->DrawNow();
+  }
+
+  CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
+  COggS60Utility::DisplayStatusPane(R_OGG_PLAYBACK);
+
+  if (!iContainer)
+    {
+    iContainer = new (ELeave) COggSettingsContainer;
+    iContainer->ConstructL(((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect(), iUid);
+    ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->AddToStackL(*this, iContainer);
+    }
+}
+
+void COggAlarmSettingsView::ViewDeactivated()
+{
+  if (iContainer)
+  {
+	((CCoeAppUi*) CEikonEnv::Static()->AppUi())->RemoveFromViewStack(*this, iContainer);
+
+	delete iContainer;
+	iContainer = NULL;
+  }
+
+  COggS60Utility::RemoveStatusPane(); 
+}
+
+TVwsViewId COggAlarmSettingsView::ViewId() const
+{
+  return TVwsViewId(KOggPlayUid, iUid);
+}
+
 #endif /* SERIES60 */

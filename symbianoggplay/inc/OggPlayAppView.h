@@ -71,8 +71,9 @@ public:
   void ListBoxPageDown();
   void ListBoxPageUp();
   
-  void  SetAlarm();
-  void  ClearAlarm();
+  void SetAlarm();
+  void SnoozeAlarm();
+  void ClearAlarm();
 
   // Handle flip-closed and flip-open modes:
   TBool IsFlipOpen();
@@ -106,6 +107,8 @@ public:
   void RestartCallBack();
   void StopCallBack();
 
+  static TInt AlarmCallBack(TAny* aPtr);
+  void HandleAlarmCallBack();
 
   // from MCoeControlObserver:
   void         HandleControlEventL(CCoeControl* aControl, TCoeEvent aEventType);
@@ -122,7 +125,6 @@ public:
 
   TInt                  iPosChanged;
   TOggFiles*            iOggFiles;
-  TCallBack*            iCallBack;
 
 private:
   void  ReadCanvas(TInt aCanvas, TOggParser& p);
@@ -136,17 +138,15 @@ private:
   COggPlayAppUi* iApp;
 
   CPeriodic* iTimer;
-  TBool      iInCallBack;
+  TCallBack* iCallBack;
+
+  COggTimer* iAlarmTimer;
+  TCallBack* iAlarmCallBack;
 
   TInt       iActivateCount;
-  TTime      iMinTime;
-  TTime      iMaxTime;
   TFileName  iIconFileName;
-  //TFileName  iBackgroundFileName;
   CDesCArray* iTextArray;
   TInt       iSelected; 
-
-  TInt iUserInactivityTickCount;
   
   //keyboard focus handling: 
   // do we do keyboard focus handling ?
@@ -177,7 +177,6 @@ private:
   COggIcon*          iAlarmIcon[2];
   COggIcon*          iRepeatIcon[2];
   COggIcon*          iRandomIcon[2];
-  COggIcon*          iEye[2];
   COggIcon*          iPlaying[2];
   COggIcon*          iPaused[2];
 
@@ -201,7 +200,8 @@ private:
   COggAnimation*     iAnimation[2];
   COggAnimation*     iLogo[2];
 
-  TInt iCycleFrequencyDivider;
+  TInt iCycleFrequencyCounter;
+  TInt iCurrentClockMinute;
 };
 
 #endif

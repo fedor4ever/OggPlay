@@ -120,7 +120,7 @@ void ROggPlayListStack::Close()
 
 // COggActive class
 #ifdef MONITOR_TELEPHONE_LINE
-COggActive::COggActive():iServer(0),iPhone(0),iLine(0),iRequestStatusChange(),iTimer(0),iCallBack(0),  iInterrupted(0)
+COggActive::COggActive()
 {
 }
 
@@ -131,20 +131,20 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 #if !defined(__WINS__)  
 	// The destructor panics in emulator
 	iServer= new (ELeave) RTelServer;
-	User::LeaveIfError( iServer->Connect() );
-	User::LeaveIfError( iServer->LoadPhoneModule(KTsyName) );
+	User::LeaveIfError(iServer->Connect());
+	User::LeaveIfError(iServer->LoadPhoneModule(KTsyName));
 	
 	TInt nPhones;
-	User::LeaveIfError( iServer->EnumeratePhones(nPhones) );
+	User::LeaveIfError(iServer->EnumeratePhones(nPhones));
 	
-	RTelServer::TPhoneInfo PInfo;
-	User::LeaveIfError( iServer->GetPhoneInfo(0,PInfo) );
+	RTelServer::TPhoneInfo pInfo;
+	User::LeaveIfError(iServer->GetPhoneInfo(0, pInfo));
 	
 	iPhone= new (ELeave) RPhone;
-	User::LeaveIfError( iPhone->Open(*iServer,PInfo.iName) );
+	User::LeaveIfError(iPhone->Open(*iServer, pInfo.iName));
 	
 	TInt nofLines;
-	User::LeaveIfError( iPhone->EnumerateLines(nofLines) );
+	User::LeaveIfError(iPhone->EnumerateLines(nofLines));
 	
 	iLine= new (ELeave) RLine;
 	
@@ -154,136 +154,143 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 	iLineCallsReportedAtIdle = 0;
 #else
 	// Series 60 1.X reports 3 lines 0='Fax' 1='Data' and 2='VoiceLine1' 
-        // Series 60 2.0 reports 4 lines 0='Voice1' 1='Voice2' 2='Data' 3='Fax'
+    // Series 60 2.0 reports 4 lines 0='Voice1' 1='Voice2' 2='Data' 3='Fax'
 	// (and 'VoiceLine1' reports '1' in EnumerateCall() when in idle ?!?)
-
 
 	TInt linesToTest = nofLines;
 	
 	// S60: Why is 'iLineCallsReportedAtIdle' not '0' at idle as 
 	// should be expected ??? The voice line reports '1' ???
-	RPhone::TLineInfo LInfo;
+	RPhone::TLineInfo lInfo;
 	for (TInt i=0; i<linesToTest; i++) 
 	  {
-	    TInt ret= iPhone->GetLineInfo(i,LInfo); 
-	    if (ret!=KErrNone) 
-	      {
-		//TRACEF(COggLog::VA(_L("Line%d:Err%d"), i, ret ));
-		User::Leave(ret);
-	      }
-	    else
-	      {
-		// Test code, left here because this is likely to change between
-		// phone and it's nice to keep it in traces.
-		User::LeaveIfError( iLine->Open(*iPhone,LInfo.iName) );
-		TInt nCalls=-1;
-		iLine->EnumerateCall(nCalls);
-		iLine->Close();
-		TRACEF(COggLog::VA(_L("Line%d:%S=%d"), i, &LInfo.iName, nCalls ));
-		// End of test code
+		  User::LeaveIfError(iPhone->GetLineInfo(i, lInfo)); 
 
-		if (LInfo.iName.Match(_L("Voice*1")) != KErrNotFound)
-		  {
-                
+		  // Test code, left here because this is likely to change between
+		  // phone and it's nice to keep it in traces.
+		  User::LeaveIfError(iLine->Open(*iPhone, lInfo.iName));
+		  TInt nCalls=-1;
+		  iLine->EnumerateCall(nCalls);
+		  iLine->Close();
+		  TRACEF(COggLog::VA(_L("Line%d:%S=%d"), i, &lInfo.iName, nCalls ));
+		  // End of test code
+
+		  if (lInfo.iName.Match(_L("Voice*1")) != KErrNotFound)
+		  {      
 		    iLineToMonitor = i;
 		    iLineCallsReportedAtIdle = nCalls;
 		  }
-	      }
 	  }
 #endif
+#endif
+
+#if defined(SERIES60) || defined(SERIES80)
+  iTimer = CPeriodic::New(CActive::EPriorityStandard);
+  iCallBack = new (ELeave) TCallBack(COggActive::CallBack, this);
 #endif
 }
 
 TInt COggActive::CallBack(TAny* aPtr)
 {
-	COggActive* self= (COggActive*)aPtr;
-	self->CallBack();
+  COggActive* self= (COggActive*) aPtr;
+  TInt callBackAgain = self->CallBack();
+  if (!callBackAgain)
+	  self->CancelCallBack();
 
-	return 1;
+  return callBackAgain;
 }
 
-void COggActive::CallBack()
+TInt COggActive::CallBack()
 {	
-  if(iAppUi->iIsStartup)
+  if (iAppUi->iIsStartup)
     iAppUi->PostConstructL();
-	
+
   iAppUi->NotifyUpdate();
-	
-  if (iLine)
+
+#if !defined(__WINS__)  
+  RPhone::TLineInfo lInfo;		
+  iPhone->GetLineInfo(iLineToMonitor, lInfo);
+  iLine->Open(*iPhone, lInfo.iName);
+  
+  TInt nCalls=0;
+  iLine->EnumerateCall(nCalls);
+  iLine->Close();
+		
+  TBool isRinging = nCalls > iLineCallsReportedAtIdle;
+  TBool isIdle    = nCalls == iLineCallsReportedAtIdle;
+  if (isRinging && !iInterrupted) 
   {
-	RPhone::TLineInfo LInfo;
-		
-	iPhone->GetLineInfo(iLineToMonitor, LInfo);
-	iLine->Open(*iPhone, LInfo.iName);
-	TInt nCalls=0;
-	iLine->EnumerateCall(nCalls);
-	iLine->Close();
-		
-	TBool isRinging = nCalls > iLineCallsReportedAtIdle;
-	TBool isIdle    = nCalls == iLineCallsReportedAtIdle;
-	if (isRinging && !iInterrupted) 
+	// the phone is ringing or someone is making a call, pause the music if any
+	if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying)
 	{
-		// the phone is ringing or someone is making a call, pause the music if any
-		if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying)
-		{
-			TRACELF("GSM is active");
-			iInterrupted= ETrue;
-			iAppUi->HandleCommandL(EOggPauseResume);
-		}
-	}
-	else if (iInterrupted) 
-	{
-		// our music was interrupted by a phone call, now what
-		if (isIdle)
-		{
-			TRACELF("GSM is idle");
-			// okay, the phone is idle again, let's continue with the music
-			iInterrupted= EFalse;
-			if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
-				iAppUi->HandleCommandL(EOggPauseResume);
-		}
+		TRACELF("GSM is active");
+		iInterrupted= ETrue;
+		iAppUi->HandleCommandL(EOggPauseResume);
+
+		// Continue monitoring
+		return 1;
 	}
   }
+  else if (iInterrupted) 
+  {
+	// our music was interrupted by a phone call, now what
+	if (isIdle)
+	{
+		TRACELF("GSM is idle");
+
+		// okay, the phone is idle again, let's continue with the music
+		iInterrupted= EFalse;
+		if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPaused)
+			iAppUi->HandleCommandL(EOggPauseResume);
+	}
+  }
+#endif
+
+  // Continue monitoring if we have been interrupted or if we are now playing
+  return iInterrupted || (iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying) || iAppUi->iTryResume;
 }
 
-void
-COggActive::IssueRequest()
+void COggActive::IssueRequest()
 {
 #if defined(SERIES60) || defined(SERIES80)
-	iTimer= CPeriodic::New(CActive::EPriorityStandard);
-	iCallBack= new (ELeave) TCallBack(COggActive::CallBack,this);
-	iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(1000000),*iCallBack);
+  iTimer->Cancel();
+  iTimer->Start(TTimeIntervalMicroSeconds32(1000000), TTimeIntervalMicroSeconds32(1000000), *iCallBack);
 #endif
+}
+
+void COggActive::CancelCallBack()
+{
+	iTimer->Cancel();
 }
 
 COggActive::~COggActive()
 {
-	if (iLine) { 
-		iLine->Close();
-		delete iLine; 
-		iLine= NULL;
-	}
-	if (iPhone) { 
-		iPhone->Close();
-		delete iPhone; 
-		iPhone= NULL; 
-	}
-	if (iServer) { 
-		iServer->Close();
-		delete iServer; 
-		iServer= NULL;
-	}
+  if (iLine)
+  { 
+	iLine->Close();
+	delete iLine; 
+  }
+
+  if (iPhone)
+  { 
+	iPhone->Close();
+	delete iPhone; 
+  }
+
+  if (iServer)
+  { 
+	iServer->Close();
+	delete iServer; 
+  }
+
 #if defined(SERIES60) || defined(SERIES80)
-	// UIQ_?
-	if (iTimer) {
-		iTimer->Cancel();
-		delete iTimer;
-		iTimer = NULL;
-	}
-	if (iCallBack) {
-		delete iCallBack;
-		iCallBack = NULL;
-	}
+  if (iTimer)
+  {
+	iTimer->Cancel();
+	delete iTimer;
+  }
+
+  delete iCallBack;
 #endif
 }
 #endif // MONITOR_TELEPHONE_LINE
@@ -293,9 +300,7 @@ COggActive::~COggActive()
 // App UI class, COggPlayAppUi
 //
 ////////////////////////////////////////////////////////////////
-
-void
-COggPlayAppUi::ConstructL()
+void COggPlayAppUi::ConstructL()
 {
 #if defined(SERIES60_SPLASH)
   ShowSplash();
@@ -402,6 +407,9 @@ COggPlayAppUi::ConstructL()
 	iPlaybackOptionsView = new(ELeave) COggPlaybackOptionsView(*iAppView, KOggPlayUidPlaybackOptionsView);
 	RegisterViewL(*iPlaybackOptionsView);
 #endif
+
+	iAlarmSettingsView = new(ELeave) COggAlarmSettingsView(*iAppView, KOggPlayUidAlarmSettingsView);
+	RegisterViewL(*iAlarmSettingsView);
 #endif /* SERIES60 */
         
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -433,7 +441,6 @@ COggPlayAppUi::ConstructL()
 
 void COggPlayAppUi::PostConstructL()
 {
-
   if(iSettings.iAutoplay) {
     for(TInt i=0;i<iRestoreStack.Count();i++) {
       TRACEF(COggLog::VA(_L("Setting istack[%d]:%d"), i,iRestoreStack[i]));
@@ -548,51 +555,27 @@ void COggPlayAppUi::HandleApplicationSpecificEventL(TInt aType, const TWsEvent& 
 		CEikAppUi::HandleApplicationSpecificEventL(aType, aEvent);
 }
 
-TBool
-COggPlayAppUi::IsAlarmTime()
-{
-	TInt err;
-	TTimeIntervalSeconds deltaT;
-	TTime now;
-	now.HomeTime();
-	err= iAlarmTime.SecondsFrom(now, deltaT);
-	return (err==KErrNone && deltaT<TTimeIntervalSeconds(10));
-}
-
 void
 COggPlayAppUi::NotifyUpdate()
 {
-	// Set off an alarm if the alarm time has been reached
-	if (iAlarmActive && !iAlarmTriggered && IsAlarmTime()) {
-		iAlarmTriggered= 1;
-		iAlarmActive= 0;
-		TBuf<256> buf;
-		iEikonEnv->ReadResource(buf, R_OGG_STRING_3);
-		User::InfoPrint(buf);
-		iAppView->ClearAlarm();
-		NextSong();
-	}
-	
 	// Try to resume after sound device was stolen
-	if (iTryResume>0 && iOggPlayback->State()==CAbsPlayback::EPaused) {
-		if (iOggPlayback->State()!=CAbsPlayback::EPaused) iTryResume= 0;
-		else {
+	if (iTryResume>0 && iOggPlayback->State()==CAbsPlayback::EPaused)
+	{
+		if (iOggPlayback->State()!=CAbsPlayback::EPaused)
+			iTryResume= 0;
+		else
+		{
 			iTryResume--;
 			if (iTryResume==0 && iOggPlayback->State()==CAbsPlayback::EPaused) HandleCommandL(EOggPauseResume);
 		}
 	}
-	
-	iAppView->UpdateClock();
-	
-	if ((iOggPlayback->State() == CAbsPlayback::EPlaying) && iForeground)
-		iAppView->UpdateSongPosition();
 }
 
 void
 COggPlayAppUi::NotifyPlayInterrupted()
 {
-		HandleCommandL(EOggPauseResume);
-		iTryResume= 2;
+	HandleCommandL(EOggPauseResume);
+	iTryResume= 2;
 }
 
 void
@@ -615,6 +598,12 @@ void COggPlayAppUi::NotifyPlayStarted()
 	UpdateSoftkeys();
 }
 #endif
+
+void COggPlayAppUi::ResumeUpdates()
+{
+	if (iActive)
+		iActive->IssueRequest();
+}
 
 #if defined(MULTI_THREAD_PLAYBACK)
 void COggPlayAppUi::NotifyFatalPlayError()
@@ -764,6 +753,12 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 #if defined(MULTI_THREAD_PLAYBACK)
     case EOggPlaybackOptions:
 		ActivateOggViewL(KOggPlayUidPlaybackOptionsView);
+		break;
+#endif
+
+#if defined(SERIES60)
+	case EOggAlarmSettings:
+		ActivateOggViewL(KOggPlayUidAlarmSettingsView);
 		break;
 #endif
 
@@ -1005,8 +1000,7 @@ COggPlayAppUi::PlaySelect()
     return;
 }
 
-void
-COggPlayAppUi::PauseResume()
+void COggPlayAppUi::PauseResume()
 {
     
   TRACEF(_L("PauseResume"));
@@ -1029,8 +1023,17 @@ COggPlayAppUi::PauseResume()
     PlaySelect();
 }
 
-void
-COggPlayAppUi::Stop()
+void COggPlayAppUi::Pause()
+{
+  if (iOggPlayback->State()==CAbsPlayback::EPlaying)
+  {
+    iOggPlayback->Pause();
+    iAppView->Update();
+    UpdateSoftkeys();
+  }
+}
+
+void COggPlayAppUi::Stop()
 {
   if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
       iOggPlayback->State()==CAbsPlayback::EPaused) {
@@ -1361,7 +1364,11 @@ COggPlayAppUi::ReadIniFile()
  
 	iSettings.iGainType = ENoGain;
 	iVolume = KMaxVolume;
-	iAlarmTime.Set(_L("20030101:120000.000000"));
+
+	iSettings.iAlarmTime.Set(_L("20030101:120000.000000"));
+	iSettings.iAlarmVolume = 10;
+	iSettings.iAlarmGain = ENoGain;
+	iSettings.iAlarmSnooze = 1;
 
 #if (defined(SERIES60 ) || defined (SERIES80) )	
     iAnalyzerState = EDecay; 
@@ -1405,7 +1412,7 @@ COggPlayAppUi::ReadIniFile()
 	
    TInt64 tmp64 = IniRead64( tf );
    TTime t(tmp64);
-   iAlarmTime= t;
+   iSettings.iAlarmTime= t;
 
    iAnalyzerState = (int)  IniRead32( tf, 0, 3 );
    val            =        IniRead32( tf );  // For backward compatibility
@@ -1507,6 +1514,14 @@ COggPlayAppUi::ReadIniFile()
 	}
 #endif
 
+	if (ini_version>=11)
+		{
+		iSettings.iAlarmActive = IniRead32(tf);
+		iSettings.iAlarmVolume = IniRead32(tf);
+		iSettings.iAlarmGain = IniRead32(tf);
+		iSettings.iAlarmSnooze = IniRead32(tf);
+		}
+
    in.Close();
 	}
 
@@ -1604,7 +1619,7 @@ COggPlayAppUi::WriteIniFile()
     
     // this should do the trick for forward compatibility:
     TInt magic=0xdb;
-    TInt iniversion=10;
+    TInt iniversion=11;
 
     num.Num(magic);
     tf.Write(num);
@@ -1621,7 +1636,7 @@ COggPlayAppUi::WriteIniFile()
 	num.Num(iVolume);
 	tf.Write(num);
 
-	num.Num(iAlarmTime.Int64());
+	num.Num(iSettings.iAlarmTime.Int64());
 	tf.Write(num);
 	
 	num.Num(iAnalyzerState);
@@ -1710,11 +1725,25 @@ COggPlayAppUi::WriteIniFile()
     num.Num(iSettings.iGainType);
     tf.Write(num);
 
+#if defined(MULTI_THREAD_PLAYBACK)
     num.Num(iSettings.iBufferingMode);
     tf.Write(num);
 
 	num.Num(iSettings.iThreadPriority);
     tf.Write(num);
+#endif
+
+	num.Num(iSettings.iAlarmActive);
+	tf.Write(num);
+
+	num.Num(iSettings.iAlarmVolume);
+	tf.Write(num);
+
+	num.Num(iSettings.iAlarmGain);
+	tf.Write(num);
+
+	num.Num(iSettings.iAlarmSnooze);
+	tf.Write(num);
 
 	// Please increase ini_version when adding stuff
 	
@@ -1730,12 +1759,11 @@ COggPlayAppUi::WriteIniFile()
 			delete (fileMan);
 		}
 	}
-	
-	
+
      TRACEF(_L("Writing Inifile 10..."));
 }
 
-void 
+void
 COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
 	iForeground = aForeground;
@@ -1750,7 +1778,6 @@ COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 void
 COggPlayAppUi::SetRandomL(TBool aRandom)
 {
-
    // Toggle random
     if (iSongList)
      delete(iSongList);
@@ -1961,6 +1988,17 @@ void COggPlayAppUi::SetThreadPriority(TStreamingThreadPriority aNewThreadPriorit
 	iSettings.iThreadPriority = aNewThreadPriority;
 }
 #endif
+
+void COggPlayAppUi::SetAlarm(TBool aAlarmActive)
+{
+	iSettings.iAlarmActive = aAlarmActive;
+	iAppView->SetAlarm();
+}
+
+void COggPlayAppUi::SetAlarmTime()
+{
+	iAppView->SetAlarm();
+}
 
 ////////////////////////////////////////////////////////////////
 //

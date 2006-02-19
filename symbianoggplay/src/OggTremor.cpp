@@ -848,6 +848,7 @@ void COggPlayback::Play()
 #endif
 
   iState = EPlaying;
+  iObserver->ResumeUpdates();
 
 #if defined(DELAY_AUDIO_STREAMING_START)
 #ifdef MDCT_FREQ_ANALYSER

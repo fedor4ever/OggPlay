@@ -31,9 +31,12 @@
 #include "int_fft.c"
 
 const TInt KLengthFFT = 512;
-//UIQ_?
- IFDEF_S60(const TInt KListboxcycles=4;)
-IFNDEF_S60(const TInt KListboxcycles=5;)
+
+#if defined(SERIES60)
+const TInt KListboxcycles=4;
+#else
+const TInt KListboxcycles=5;
+#endif
 
 TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
 {
@@ -619,28 +622,29 @@ void COggText::Cycle()
   case EOnce:
     CycleOnce();
     break;
+
   case EEndless:
     CycleOff();
     break;
+
   case ETilBorder:
     CycleBorder();
     break;
+
   case EBackAndForth:
     CycleBackAndForth();
     break;
+
   default:
     CycleOff();
     break;
   }
-
-
 }
 
 void COggText::CycleOnce()
 {
   if (iHasScrolled) return;
   CycleOff();
-
 }
 
 void COggText::CycleOff()
@@ -659,7 +663,6 @@ void COggText::CycleOff()
     iCycle=0;
     iDrawOffset=0;
   }
-
 }
 
 void COggText::CycleBorder()
@@ -676,7 +679,6 @@ void COggText::CycleBorder()
   if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth) {
     iCycle=0;
   }
-
 }
 
 void COggText::CycleBackAndForth()
@@ -701,7 +703,6 @@ void COggText::CycleBackAndForth()
   if ((iw+(iCycle-iScrollDelay)*iScrollStep)>(iTextWidth+iScrollDelay*iScrollStep)) {
     iScrollBackward=ETrue;
   }
-
 }
 
 
@@ -2433,6 +2434,11 @@ COggCanvas::Refresh()
 	Window().BeginRedraw();
 
 	CWindowGc& gc=SystemGc();
+#if defined(SERIES90)
+	// Series 90 has a problem redrawing parts of the screen, so redraw everything
+	TRect rect = TRect(iBitmap->SizeInPixels());
+	gc.BitBlt(rect.iTl, iBitmap, rect);
+#else
 	for (i=0; i<iControls.Count(); i++)
 	{
 		if (iControls[i]->iRedraw)
@@ -2443,6 +2449,8 @@ COggCanvas::Refresh()
 		iControls[i]->iRedraw = EFalse;
 		}
 	}
+#endif
+
 	Window().EndRedraw();
 	DeactivateGc();
   }
@@ -2475,8 +2483,8 @@ void COggCanvas::ClearControls()
 
 void COggCanvas::DrawControl()
 {
-  if (iBitmap) {
-
+  if (iBitmap)
+  {
     iBitmapContext->SetClippingRect(Rect());
     if (iBackground) {
       iBitmapContext->BitBlt(TPoint(0,0),iBackground);

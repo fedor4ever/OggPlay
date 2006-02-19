@@ -77,6 +77,7 @@ const TUid KOggPlayUidCodecSelectionView = { KOggPlayApplicationUidValue+6 };
 const TUid KOggPlayUidPlaybackOptionsView = { KOggPlayApplicationUidValue+7 };
 #endif
 
+const TUid KOggPlayUidAlarmSettingsView = { KOggPlayApplicationUidValue+8 };
 
 struct TKeyCodes
 {
@@ -174,9 +175,16 @@ public:
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
   TBool iRepeat;
-// Multi thread playback settings
+  // Multi thread playback settings
   TInt iBufferingMode;
   TInt iThreadPriority;	
+
+  // Alarm clock settings
+  TBool iAlarmActive;
+  TTime iAlarmTime;
+  TInt iAlarmVolume;
+  TInt iAlarmGain;
+  TInt iAlarmSnooze;
 };
 
  
@@ -228,8 +236,10 @@ class COggActive : public CBase
   ~COggActive();
 
   void IssueRequest();
+  void CancelCallBack();
+
   static TInt CallBack(TAny* aPtr);
-  void CallBack();
+  TInt CallBack();
 
  private:
   RTelServer*    iServer;
@@ -279,12 +289,9 @@ public:
   TBool iRandom;          // 0=off; 1=on
   int iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
   TViews iViewBy;
-  TTime iAlarmTime;       // the alarm has been set to this time
 
   // global status:
   int iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
-  int iAlarmTriggered;    // did the alarm clock go off?
-  int iAlarmActive;       // has an alarm time been set?
 
   TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
   TBool iIsStartup;        // is true when just started, needed for autoplay
@@ -304,6 +311,7 @@ public:
   virtual void NotifyUpdate();
   virtual void NotifyPlayComplete();
   virtual void NotifyPlayInterrupted();
+  virtual void ResumeUpdates();
 
 #if defined(DELAY_AUDIO_STREAMING_START)
   virtual void NotifyPlayStarted();
@@ -316,6 +324,7 @@ public:
   // high level functions:
   void PlaySelect();
   void PauseResume();
+  void Pause();
   void Stop();
   void NextSong();
   void PreviousSong();
@@ -354,6 +363,9 @@ public:
   void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
 #endif
 
+  void SetAlarm(TBool aAlarmActive);
+  void SetAlarmTime();
+
 private:
   void ReadIniFile();
   TInt32 IniRead32( TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = 0x7FFFFFFF );
@@ -362,7 +374,6 @@ private:
   void IniReadDes( TFileText& aFile, TDes& value,const TDesC& defaultValue );
 #endif
   void SetHotKey();
-  TBool IsAlarmTime();
 
 #if !defined(MULTI_THREAD_PLAYBACK)
   void SetProcessPriority();
@@ -397,6 +408,8 @@ private:
 #if defined(MULTI_THREAD_PLAYBACK)
   COggPlaybackOptionsView* iPlaybackOptionsView;
 #endif
+
+  COggAlarmSettingsView* iAlarmSettingsView;
 #endif /* SERIES60 */
 
   RArray<TInt> iViewHistoryStack;

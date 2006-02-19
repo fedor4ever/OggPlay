@@ -31,11 +31,25 @@ OggPlay 1 {
       Step 1
     }
     ListBox {
-      Position 0 2 172 138
+      Position 0 2 172 126
       Font LatinPlain12 20 0
       FontColor 117 193 226
       FontColorSelected 255 255 255
       BarColorSelected 18 130 181
+    }
+    Clock {
+      Position 5 131 48 12
+      Font LatinPlain12 18 0
+      FontColor 255 255 255
+    }
+    Alarm {
+      Position 121 131 48 12
+      Font LatinPlain12 18 0
+      FontColor 255 255 255
+    }
+    AlarmIcon {
+      Position 107 130 13 15
+      Icon 43 44
     }
   }
 }

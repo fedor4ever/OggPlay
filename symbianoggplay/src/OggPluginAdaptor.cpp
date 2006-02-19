@@ -373,7 +373,6 @@ void COggPluginAdaptor::Resume()
     TInt min = (time%3600)/60;
     TInt sec = (time%3600%60);
     TRACEF(COggLog::VA(_L(" %i %i %i"),hours,min,sec));
-
 }
 
 void COggPluginAdaptor::Play()
@@ -384,8 +383,11 @@ void COggPluginAdaptor::Play()
         return;
     TRAPD(err,iPlayer->PlayL()); 
     if (err) return; // Silently ignore the problem :-(
-    iState = EPlaying;
-    TRACEF(_L("COggPluginAdaptor::Play() Out"));
+
+	iState = EPlaying;
+	iObserver->ResumeUpdates();
+	
+	TRACEF(_L("COggPluginAdaptor::Play() Out"));
 }
 
 void COggPluginAdaptor::Stop()
@@ -394,6 +396,7 @@ void COggPluginAdaptor::Stop()
     iPlayer->Stop();
     iFileName = KNullDesC;
     iState = EClosed;
+
     // The Stop is synchroneous within the MMF Framework.
     iObserver->NotifyUpdate();
 }

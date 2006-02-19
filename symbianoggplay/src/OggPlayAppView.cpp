@@ -19,6 +19,7 @@
 #include "OggPlayAppView.h"
 #include "OggOs.h"
 #include "OggLog.h"
+#include "OggHelperFcts.h"
 
 #include <eikclb.h>     // CEikColumnListbox
 #include <eikclbd.h>    // CEikColumnListBoxData
@@ -28,6 +29,7 @@
 #ifdef SERIES60
 #include <aknkeys.h>
 #include <aknkeylock.h>
+#include <aknquerydialog.h>
 #endif
 #ifdef SERIES80
 #include <eikenv.h>
@@ -39,15 +41,20 @@
 #include "OggAbsPlayback.h"
 
 // Time (usecs) between canvas Refresh() for graphics updating
-const TInt KCallBackPeriod = 75000;
+const TInt KCallBackPeriod = 71429; // 14Hz
+const TInt KOggControlFreq = 14;
 
-COggPlayAppView::COggPlayAppView() :
-  CCoeControl(),
-  MCoeControlObserver(),
-  MCoeControlContext(),
-  iFocusControlsPresent(EFalse),
-  iFocusControlsHeader(_FOFF(COggControl,iDlink)),
-  iFocusControlsIter(iFocusControlsHeader)
+// Literal for clock update
+_LIT(KDateString, "%-B%:0%J%:1%T%:3%+B");
+
+// Array of times for snooze
+const TInt KSnoozeTime[4] = { 5, 10, 20, 30 };
+
+COggPlayAppView::COggPlayAppView()
+: iFocusControlsPresent(EFalse),
+iFocusControlsHeader(_FOFF(COggControl,iDlink)),
+iFocusControlsIter(iFocusControlsHeader),
+iCycleFrequencyCounter(KOggControlFreq)
 {
   iControls= 0;
   iOggFiles= 0;
@@ -68,6 +75,10 @@ COggPlayAppView::~COggPlayAppView()
   if(iTimer) iTimer->Cancel();
   delete iTimer;
   delete iCallBack;
+
+  if (iAlarmTimer) iAlarmTimer->Cancel();
+  delete iAlarmTimer;
+  delete iAlarmCallBack;
 
   if(iCanvas[1]) {
     delete iCanvas[1];
@@ -143,11 +154,18 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 
   // Start the canvas refresh timer (KCallBackPeriod):
   iTimer = CPeriodic::NewL(CActive::EPriorityStandard);
-  iCallBack = new TCallBack(COggPlayAppView::CallBack, this);
+  iCallBack = new(ELeave) TCallBack(COggPlayAppView::CallBack, this);
 
-  //FIXME: only start timer once all initialization has been done
-  iTimer->Start(TTimeIntervalMicroSeconds32(1000000),TTimeIntervalMicroSeconds32(KCallBackPeriod),*iCallBack);
+  iAlarmCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmCallBack, this);
+  iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack);
 
+  // Only start timer once all initialization has been done
+  iTimer->Start(TTimeIntervalMicroSeconds32(1000000), TTimeIntervalMicroSeconds32(KCallBackPeriod), *iCallBack);
+
+  // Initialise alarm
+  SetAlarm();
+
+  // Activate the view
   ActivateL();
 }
 
@@ -245,7 +263,6 @@ COggPlayAppView::ResetControls() {
   iGenre[0]=0; iGenre[1]= 0;
   iTrackNumber[0]=0; iTrackNumber[1]= 0;
   iFileName[0]=0; iFileName[1]= 0;
-  iEye[0]= 0; iEye[1]= 0;
   iPosition[0]= 0; iPosition[1]= 0;
   iVolume[0]= 0; iVolume[1]= 0;
   iAnalyzer[0]= 0; iAnalyzer[1]= 0;
@@ -426,7 +443,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iAlarmIcon[aCanvas]= (COggIcon*)c;
-      iAlarmIcon[aCanvas]->Hide();
+      iAlarmIcon[aCanvas]->MakeVisible(iApp->iSettings.iAlarmActive);
     }
     else if (p.iToken==_L("RepeatIcon")) {
       _LIT(KAL,"Adding RepeadIcon");
@@ -990,7 +1007,7 @@ COggPlayAppView::UpdateRandom()
 TInt
 COggPlayAppView::CallBack(TAny* aPtr)
 {
-  COggPlayAppView* self= (COggPlayAppView*) aPtr;
+  COggPlayAppView* self = (COggPlayAppView*) aPtr;
   self->HandleCallBack();
 
   return 1;
@@ -1024,18 +1041,30 @@ void COggPlayAppView::HandleCallBack()
   iCanvas[iMode]->CycleHighFrequencyControls();
   iCanvas[iMode]->Refresh();
 #else
-  if (iCycleFrequencyDivider == 0)
+  if (iCycleFrequencyCounter % 2)
   {
 	if (iPosition[iMode] && iPosChanged<0) 
 		iPosition[iMode]->SetValue(iApp->iOggPlayback->Position().GetTInt());
     
 	iCanvas[iMode]->CycleLowFrequencyControls();
-	iCycleFrequencyDivider = 2; // Low frequency controls run slower by this factor
   }
 
   iCanvas[iMode]->CycleHighFrequencyControls();
   iCanvas[iMode]->Refresh();
-  iCycleFrequencyDivider--;
+
+  iCycleFrequencyCounter--;
+  if (iCycleFrequencyCounter == 0)
+  {
+	// 1Hz controls
+	iCycleFrequencyCounter = KOggControlFreq;
+
+	// Update the clock
+	UpdateClock();
+
+	// Update the song position
+	if (iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
+		UpdateSongPosition();
+  }
 #endif
 }
 
@@ -1050,14 +1079,57 @@ void COggPlayAppView::StopCallBack()
   iTimer->Cancel();
 }
 
-void
-COggPlayAppView::Invalidate()
+TInt COggPlayAppView::AlarmCallBack(TAny* aPtr)
+{
+  COggPlayAppView* self = (COggPlayAppView*) aPtr;
+  self->HandleAlarmCallBack();
+
+  return 1;
+}
+
+void COggPlayAppView::HandleAlarmCallBack()
+{
+  // Set off an alarm when the alarm time has been reached
+  if (iApp->iOggPlayback->State() != CAbsPlayback::EPlaying)
+  {
+	 // Set the volume and volume boost
+	iApp->iVolume = (iApp->iSettings.iAlarmVolume * KMaxVolume)/10;
+	iApp->SetVolumeGainL((TGainType) iApp->iSettings.iAlarmGain);
+
+	// Play the next song or unpause the current one
+	if (iApp->iOggPlayback->State() == CAbsPlayback::EPaused)
+		iApp->PauseResume();
+	else
+		iApp->NextSong();
+  }
+
+  // Reset the alarm
+  CAknQueryDialog* snoozeDlg = CAknQueryDialog::NewL();
+  TBool snooze = (snoozeDlg->ExecuteLD(R_OGGPLAY_SNOOZE_DLG) == EOggButtonSnooze);
+  if (snooze)
+  {
+    // Pause playing
+    iApp->Pause();
+
+	// Set the alarm to fire again in five minutes
+	SnoozeAlarm();
+  }
+  else
+  {
+    // Stop playing
+    iApp->Stop();
+
+    // Set the alarm to fire again tomorrow 
+	SetAlarm();
+  }
+}
+
+void COggPlayAppView::Invalidate()
 {
   iCanvas[iMode]->Invalidate();
 }
 
-void
-COggPlayAppView::InitView()
+void COggPlayAppView::InitView()
 {
   TRACELF("InitView");
   // fill the list box with some initial content:
@@ -1374,36 +1446,28 @@ COggPlayAppView::UpdateSongPosition()
 void
 COggPlayAppView::UpdateClock(TBool forceUpdate)
 {
-  // This is called every second
+  if (!iClock[iMode])
+	  return;
 
-  // Update the clock only every minute (or if forceUpdate is true):
+  // Update the clock
   TTime now;
   now.HomeTime();
   TDateTime dtNow(now.DateTime());
-  if (dtNow.Minute()==0 && dtNow.Second()==1 && iEye[iMode]) iEye[iMode]->Hide();
-  if (dtNow.Second()!=0 && !forceUpdate) return;
+  TInt clockMinute = dtNow.Minute();
+  TBool clockUpdateRequired = clockMinute != iCurrentClockMinute;
+  if (!clockUpdateRequired && !forceUpdate) return;
 
-  // Update the clock:
-  _LIT(KDateString,"%-B%:0%J%:1%T%:3%+B");
   TBuf<256> buf;
-  now.FormatL(buf,KDateString);
-  if (iClock[iMode]) iClock[iMode]->SetText(buf);
+  now.FormatL(buf, KDateString);
+  iClock[iMode]->SetText(buf);
+  iCurrentClockMinute = clockMinute;
 
-  // Update the alarm time:
-  if (iApp->iAlarmActive) {
-    TBuf<256> buft;
-    _LIT(KDateString,"%-B%:0%J%:1%T%:3%+B");
-    iApp->iAlarmTime.FormatL(buft,KDateString);
-    if (iAlarm[iMode]) iAlarm[iMode]->SetText(buft);
-    if (iAlarmIcon[iMode]) iAlarmIcon[iMode]->Show();
-  }
+  if (!forceUpdate || !iAlarm[iMode])
+	  return;
 
-  // It's not easy to find out what these code lines do (-;
-  if (iEye[iMode]) {
-    if (dtNow.Minute()==0 && dtNow.Second()==0) {
-      iEye[iMode]->Blink();
-    } else iEye[iMode]->Hide();
-  }
+  // Update alarm
+  iApp->iSettings.iAlarmTime.FormatL(buf, KDateString);
+  iAlarm[iMode]->SetText(buf);
 }
 
 void
@@ -1458,34 +1522,58 @@ void COggPlayAppView::UpdatePlaying()
     iLogo[iMode]->MakeVisible(iApp->iOggPlayback->FileName().Length()==0);
 }
 
-void 
-COggPlayAppView::SetAlarm()
+void COggPlayAppView::SetAlarm()
 {
-  iApp->iAlarmTriggered= 0;
   TTime now;
   now.HomeTime();
-  TDateTime dtAlarm(iApp->iAlarmTime.DateTime());
-  TDateTime dtNow(now.DateTime());
-  dtAlarm.SetDay(dtNow.Day());
-  dtAlarm.SetMonth(dtNow.Month());
-  dtAlarm.SetYear(dtNow.Year());
-  iApp->iAlarmTime= dtAlarm;
-  if (iApp->iAlarmTime<now) iApp->iAlarmTime+= TTimeIntervalDays(1);
-  if (iApp->iAlarmActive) {
+
+  // Sync the alarm time to the current day
+  iApp->iSettings.iAlarmTime += now.DaysFrom(iApp->iSettings.iAlarmTime);
+  iApp->iSettings.iAlarmTime += TTimeIntervalDays(1);
+
+  if (iApp->iSettings.iAlarmActive)
+  {
     TBuf<256> buft;
-    _LIT(KDateString,"%-B%:0%J%:1%T%:3%+B");
-    iApp->iAlarmTime.FormatL(buft,KDateString);
+    iApp->iSettings.iAlarmTime.FormatL(buft, KDateString);
     if (iAlarm[iMode]) iAlarm[iMode]->SetText(buft);
     if (iAlarmIcon[iMode]) iAlarmIcon[iMode]->Show();
-  } else {
+
+	iAlarmTimer->At(iApp->iSettings.iAlarmTime);
+  } 
+  else
+  {
     ClearAlarm();
+	iAlarmTimer->Cancel();
   }
 }
 
-void 
-COggPlayAppView::ClearAlarm()
+void COggPlayAppView::SnoozeAlarm()
 {
-  if (iAlarm[iMode]) iAlarm[iMode]->SetText(_L(""));
+  TTime now;
+  now.HomeTime();
+
+  // Add the snooze time to the current time
+  iApp->iSettings.iAlarmTime = now;
+  iApp->iSettings.iAlarmTime += TTimeIntervalMinutes(KSnoozeTime[iApp->iSettings.iAlarmSnooze]);
+
+  if (iApp->iSettings.iAlarmActive)
+  {
+    TBuf<256> buft;
+    iApp->iSettings.iAlarmTime.FormatL(buft, KDateString);
+    if (iAlarm[iMode]) iAlarm[iMode]->SetText(buft);
+    if (iAlarm[iMode]) iAlarm[iMode]->MakeVisible(ETrue);
+    if (iAlarmIcon[iMode]) iAlarmIcon[iMode]->Show();
+
+	iAlarmTimer->At(iApp->iSettings.iAlarmTime);
+  } 
+  else
+  {
+    ClearAlarm();
+	iAlarmTimer->Cancel();
+  }
+}
+void COggPlayAppView::ClearAlarm()
+{
   if (iAlarmIcon[iMode]) iAlarmIcon[iMode]->Hide();
 }
 
@@ -1510,9 +1598,7 @@ COggPlayAppView::HandleControlEventL(CCoeControl* /*aControl*/, TCoeEvent /*aEve
 TKeyResponse
 COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
-
 #if defined(SERIES60) || defined(SERIES80)
-
   enum EOggKeys {
     EOggConfirm=EKeyDevice3
   };
@@ -1528,7 +1614,6 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   TInt index = iListBox[iMode]->CurrentItemIndex();
 
   COggControl* c=iFocusControlsIter;
-  
   if (code==0 && aType==EEventKeyDown) { 
     TInt scanCode = aKeyEvent.iScanCode;
     switch (scanCode)

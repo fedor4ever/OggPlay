@@ -52,9 +52,9 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     SetSize(containerSize);
     
     // Prepare fonts.
-    TFontSpec fs(_L("LatinPlain12"), 0);
+    TFontSpec fs(_L("LatinPlain12"), 12);
     CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinPlain,fs);
-    TFontSpec fs2(_L("LatinBold12"), 0);
+    TFontSpec fs2(_L("LatinBold12"), 12);
     CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinBold12,fs2);
 
     

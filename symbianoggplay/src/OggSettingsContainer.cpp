@@ -37,9 +37,15 @@ void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
         iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_PLAYBACK_OPTIONS_ITEM_LIST);
 	}
+#endif
+	else if (aId == KOggPlayUidAlarmSettingsView)
+	{
+        COggS60Utility::DisplayStatusPane(R_OGG_ALARM_S60);
+        iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
+        iListBox->ConstructFromResourceL(R_OGGPLAY_ALARM_S60_SETTING_ITEM_LIST);
+	}
     else
         User::Leave(KErrNotSupported);
-#endif
     
     SetRect(aRect);
     ActivateL();
@@ -102,12 +108,9 @@ TKeyResponse COggSettingsContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,TE
   TKeyResponse response=EKeyWasNotConsumed;
   if (iListBox)
   {
-    if ((aKeyEvent.iCode == EKeyUpArrow) || (aKeyEvent.iCode == EKeyDownArrow) ||
-      (aKeyEvent.iCode == EKeyDevice3))
-    {
-      response = iListBox->OfferKeyEventL(aKeyEvent, aType);
-    }
+	response = iListBox->OfferKeyEventL(aKeyEvent, aType);
   }
+
   return response;
 }
 
@@ -168,6 +171,21 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   case EOggSettingThreadPriority:
     return new(ELeave) CThreadPrioritySettingItem(aIdentifier, iAppUi);
 #endif
+
+  case EOggAlarmActive:
+    return new(ELeave) CAlarmSettingItem(aIdentifier, iAppUi);
+
+  case EOggAlarmTime:
+    return new(ELeave) CAlarmTimeSettingItem(aIdentifier, iAppUi);
+
+  case EOggAlarmVolume:
+     return new(ELeave) CAknVolumeSettingItem(aIdentifier, iData.iAlarmVolume);
+
+  case EOggAlarmBoost:
+	return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmGain);
+
+  case EOggAlarmSnooze:
+	return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmSnooze);
 
   default:
     break;
@@ -230,11 +248,36 @@ CThreadPrioritySettingItem::CThreadPrioritySettingItem(TInt aIdentifier,  COggPl
 : CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iThreadPriority), iAppUi(aAppUi)
 {
 }
- 
+
 void  CThreadPrioritySettingItem::EditItemL(TBool aCalledFromMenu)
 {
   CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
   iAppUi.SetThreadPriority((TStreamingThreadPriority) InternalValue());
 }
 #endif
+
+CAlarmSettingItem::CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iAlarmActive), iAppUi(aAppUi)
+{
+}
+ 
+void CAlarmSettingItem::EditItemL(TBool aCalledFromMenu)
+{
+  CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+  iAppUi.SetAlarm(InternalValue());
+}
+
+CAlarmTimeSettingItem::CAlarmTimeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknTimeOrDateSettingItem(aIdentifier, CAknTimeOrDateSettingItem::ETime, aAppUi.iSettings.iAlarmTime), iAppUi(aAppUi)
+{
+}
+ 
+void CAlarmTimeSettingItem::EditItemL(TBool aCalledFromMenu)
+{
+  CAknTimeOrDateSettingItem::EditItemL(aCalledFromMenu);
+  StoreL();
+  
+  iAppUi.SetAlarmTime();
+}
+
 #endif /* SERIES60 */

@@ -2,7 +2,7 @@ OggPlay 1 {
   FlipOpen {
     Title {
       Position 28 123 300 16
-      Font LatinPlain12 1000 0
+      Font LatinPlain12 20 0
       FontColor 0 0 0
       Style 3
       ScrollDelay 10
@@ -10,7 +10,7 @@ OggPlay 1 {
     }
     Album {
       Position 28 157 300 16
-      Font LatinPlain12 1000 0
+      Font LatinPlain12 20 0
       FontColor 0 0 0
       Style 3
       ScrollDelay 10
@@ -18,7 +18,7 @@ OggPlay 1 {
     }
     Artist {
       Position 28 140 300 16
-      Font LatinPlain12 1000 0
+      Font LatinPlain12 20 0
       FontColor 0 0 0
       Style 3
       ScrollDelay 10
@@ -32,7 +32,7 @@ OggPlay 1 {
     }
     Played {
       Position 185 182 30 13
-      Font LatinPlain12 1 0
+      Font LatinPlain12 12 0
       FontColor 217 43 207
     }
     Volume {

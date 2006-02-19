@@ -78,8 +78,18 @@ enum {
 
   EOggCodecPresentationControl,// For S80 Codec selection dialog
   EOggCodecSelectionControl, 
-  EOggCodecName
+  EOggCodecName,
   
+  EOggAlarmSettings,
+  EOggAlarmActive,
+  EOggAlarmTime,
+  EOggAlarmVolume,
+  EOggAlarmBoost,
+  EOggAlarmSnooze,
+
+  EOggAlarmTriggeredNote,
+  EOggButtonSnooze,
+  EOggButtonCancel
 };
 
 enum TOggplayCommandIds
