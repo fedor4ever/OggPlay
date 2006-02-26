@@ -508,6 +508,12 @@ COggPlayAppUi::~COggPlayAppUi()
   		delete iPlaybackOptionsView;
 	}
 #endif
+
+	if (iAlarmSettingsView)
+	{
+		DeregisterView(*iAlarmSettingsView);
+  		delete iAlarmSettingsView;
+	}
 #endif /* SERIES60 */
 
 #ifdef MONITOR_TELEPHONE_LINE
@@ -826,12 +832,8 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		iCurrentSkin= aCommand-EOggSkinOne;
 		TBuf<256> buf(iSkinFileDir);
 		buf.Append((*iSkins)[iCurrentSkin]);
-#if defined(SERIES60)
-		// UIQ_?
-		if( iAppView->CanStop() )
-			HandleCommandL(EOggStop);
-#endif
-		iAppView->ReadSkin(buf); //FIXME
+
+		iAppView->ReadSkin(buf);
 		iAppView->Update();
 		iAppView->Invalidate();
 		break;

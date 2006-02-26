@@ -22,17 +22,19 @@
 #define OGGHELPERFCTS_H
 class COggTimer : public CTimer
     {
-    public:
-        COggTimer(const TCallBack& aCallBack);
-        COggTimer(const TCallBack& aCallBack, const TCallBack& aErrorCallBack);
+public:
+    COggTimer(const TCallBack& aCallBack);
+    COggTimer(const TCallBack& aCallBack, const TCallBack& aErrorCallBack);
+	~COggTimer();
 
-		void Wait(TTimeIntervalMicroSeconds32 interval);
-		void At(const TTime& aTime);
-        void Cancel();
-    private:
-        void RunL();
-        TCallBack iCallBack;
-		TCallBack* iErrorCallBack;
+	void Wait(TTimeIntervalMicroSeconds32 interval);
+	void At(const TTime& aTime);
+    void Cancel();
+
+private:
+    void RunL();
+    TCallBack iCallBack;
+	TCallBack* iErrorCallBack;
     };
 
 #endif

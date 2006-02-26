@@ -35,6 +35,11 @@ COggTimer::COggTimer(const TCallBack& aCallBack, const TCallBack& aErrorCallBack
     CActiveScheduler::Add(this);
     }
 
+COggTimer::~COggTimer()
+	{
+	delete iErrorCallBack;
+	}
+
 void COggTimer::RunL()
     {
 	TInt err = iStatus.Int();

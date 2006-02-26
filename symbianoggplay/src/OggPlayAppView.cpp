@@ -239,6 +239,9 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   iFocusControlsIter.SetToFirst();
   COggControl* c=iFocusControlsIter;
   if(c) c->SetFocus(ETrue);
+
+  if (iListBox[iMode])
+	iSelected = iListBox[iMode]->SetCurrentItemIndex(iSelected);
 }
 
 void 

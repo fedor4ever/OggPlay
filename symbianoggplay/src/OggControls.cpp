@@ -956,8 +956,10 @@ void COggAnimation::Cycle()
   if (iCycle<0) return;
   if (!iVisible) return;
 
-  // UIQ_?
-  IFDEF_S60( if( iBitmaps.Count() <= 1 ) return );
+#if defined(SERIES60)
+  if (iBitmaps.Count() <= 1)
+	  return;
+#endif
 
   iCycle++;
 
@@ -1842,7 +1844,10 @@ void COggAnalyzer::RenderWaveform(short int data[2][512])
 void COggAnalyzer::RenderWaveform(short int *data)
 #endif
 {
-  IFDEF_S60( if( !data ) return; )
+#if defined (SERIES60)
+  if (!data)
+	  return;
+#endif
 
   if (iStyle==0) return;
   for (int i=0; i<512; i++) {

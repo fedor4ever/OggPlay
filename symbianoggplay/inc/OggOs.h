@@ -55,12 +55,12 @@ chSTR2(__LINE__) "):" #desc)
 #if defined(SERIES60)
  #if defined(OS70S)
   #define KVersionMajor 1
-  #define KVersionMinor 68
-  #define KVersionString "1.68"
+  #define KVersionMinor 69
+  #define KVersionString "1.69"
  #else
   #define KVersionMajor 1
-  #define KVersionMinor 10
-  #define KVersionString "1.091"
+  #define KVersionMinor 11
+  #define KVersionString "1.092"
  #endif
 #endif
 #if defined(UIQ)
@@ -70,8 +70,8 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 #if defined(SERIES80)
  #define KVersionMajor 1
- #define KVersionMinor 68
- #define KVersionString "1.68"
+ #define KVersionMinor 69
+ #define KVersionString "1.69"
 #endif
 
 // There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
@@ -158,23 +158,11 @@ chSTR2(__LINE__) "):" #desc)
 // #define RGAIN_SUPPORT
 // #IMPROVE_MAD
 
-// OTHERS
-//
-#if defined SERIES60    // Alternative to #ifdef/#endif around Series 60 code
-#define IFDEF_S60(x)   x
-#define IFNDEF_S60(x)  ;
-#else
-#define IFDEF_S60(x)   ;
-#define IFNDEF_S60(x)  x
-#endif
-
-
 // Phone UIDs
 // Used for determining the phone type (currently only used for the Sendo X)
 #define EMachineUid_SendoX  0x101FA031
 #define EMachineUid_NGage   0x101F8C19
 #define EMachineUid_NGageQD 0x101FB2B1
-
 
 // Playlist support
 #define PLAYLIST_SUPPORT
