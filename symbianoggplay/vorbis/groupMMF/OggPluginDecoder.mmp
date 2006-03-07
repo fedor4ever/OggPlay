@@ -1,0 +1,71 @@
+/*
+ *  Copyright (c) 2004 
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+TARGET                                  OGGPLUGINDECODER.DLL 
+TARGETTYPE                              ECOMIIC
+UID                                     0x10009D8D 0x101FF683 
+TARGETPATH                              \System\Libs\Plugins 
+SOURCEPATH                              .. 
+SOURCE                                  mdct.c 
+SOURCE                                  block.c 
+SOURCE                                  window.c 
+SOURCE                                  synthesis.c 
+SOURCE                                  info.c 
+SOURCE                                  floor1.c 
+SOURCE                                  floor0.c 
+SOURCE                                  res012.c 
+SOURCE                                  mapping0.c 
+SOURCE                                  registry.c 
+SOURCE                                  codebook.c 
+SOURCE                                  sharedbook.c 
+SOURCE                                  framing.c 
+SOURCE                                  bitwise.c 
+SOURCE                                  vorbisfile.c 
+SOURCE                                  microsoftInternal.c 
+SOURCE                                  Symbian.cpp 
+
+SOURCEPATH                              ..\..\Plugin\src 
+SOURCE                                  OggHelperFcts.cpp 
+SOURCE                                  OggRateConvert.cpp 
+SOURCE                                  OggLog.cpp 
+SOURCE                                  OggPlayController.cpp 
+
+SOURCEPATH                              ..\Plugin 
+RESOURCE                                101FF683.RSS 
+SOURCE                                  OggTremorPluginFactory.cpp 
+SOURCE                                  TremorDecoder.cpp 
+
+USERINCLUDE                             .. 
+SYSTEMINCLUDE                           \epoc32\include 
+SYSTEMINCLUDE                           \epoc32\include\libc 
+USERINCLUDE                             ..\..\Plugin\inc 
+USERINCLUDE                             ..\..\inc 
+SYSTEMINCLUDE                           \epoc32\include\ecom 
+SYSTEMINCLUDE                           \epoc32\include\mmf\common 
+SYSTEMINCLUDE                           \epoc32\include\mmf\server 
+LIBRARY                                 mmfcontrollerframework.lib 
+LIBRARY                                 mmfstandardcustomcommands.lib 
+LIBRARY                                 MMFDevSound.lib 
+LIBRARY                                 mmfserverbaseclasses.lib 
+LIBRARY                                 ecom.lib 
+LIBRARY                                 euser.lib 
+LIBRARY                                 estlib.lib 
+LIBRARY                                 charconv.lib 
+LIBRARY                                 MediaClientAudioStream.lib 
+LIBRARY                                 flogger.lib 
+LIBRARY                                 efsrv.lib 
+/* [+] */ MACRO                         OGGPLAYPLUGIN
