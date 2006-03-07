@@ -1,0 +1,32 @@
+/*
+* ============================================================================
+*  Name     : bld.inf
+*  Part of  : OggPlay
+*  Created  : 19.07.2003 by 
+*  Description:
+*	 This file provides the information required for building the UI for OggPlay.
+*        Make sure that SERIES60 and OS70S are defined in \inc\OggOs.h
+*        The vorbis plugin must also be built.
+*  Version  :
+*  Copyright: 
+* ============================================================================
+*/
+
+
+PRJ_PLATFORMS
+WINS WINSCW ARMI
+
+PRJ_EXPORTS
+..\Inc\OggPlayUid.h
+..\Inc\OggOs.h
+..\Plugin\Inc\OggPlayPlugin.h
+
+// Default skin
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
+
+PRJ_MMPFILES
+OggPlay.mmp
+
