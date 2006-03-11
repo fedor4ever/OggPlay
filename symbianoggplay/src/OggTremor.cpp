@@ -562,12 +562,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
   if (usedChannels == 1)
 	  bufferSize /= 2;
 
-#if defined(MULTI_THREAD_PLAYBACK)
   iOggSampleRateConverter->Init(this, bufferSize, bufferSize-1024, theRate, usedRate, theChannels, usedChannels);
-#else
-  iOggSampleRateConverter->Init(this, bufferSize, bufferSize-1024, theRate, usedRate, theChannels, usedChannels);
-#endif
-
   return KErrNone;
 }
 

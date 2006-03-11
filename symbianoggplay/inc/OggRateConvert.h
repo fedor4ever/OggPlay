@@ -1,6 +1,9 @@
 #ifndef OGGRATECONVERT_H
 #define OGGRATECONVERT_H
 
+const TInt KFreqArrayLength = 100; // Length of the memory of the previous freqs bin
+const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making same changes to vorbis library!
+
 class MOggSampleRateFillBuffer 
 {
 public:

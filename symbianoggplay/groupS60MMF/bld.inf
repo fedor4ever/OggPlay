@@ -29,4 +29,5 @@ PRJ_EXPORTS
 
 PRJ_MMPFILES
 OggPlay.mmp
+..\vorbis\groupS60MMF\OggPluginDecoder.mmp
 

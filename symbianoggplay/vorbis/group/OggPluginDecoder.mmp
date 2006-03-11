@@ -46,7 +46,7 @@ SYSTEMINCLUDE   \epoc32\include\libc
 USERINCLUDE   ..\..\Plugin\inc
 USERINCLUDE   ..\..\inc
 SOURCEPATH    ..\..\Plugin\src
-SOURCE        AdvancedStreaming.cpp OggHelperFcts.cpp OggRateConvert.cpp OggLog.cpp
+SOURCE        OggHelperFcts.cpp OggRateConvert.cpp OggLog.cpp
 SOURCE        OggPlayController.cpp
 
 SOURCEPATH    ..\Plugin

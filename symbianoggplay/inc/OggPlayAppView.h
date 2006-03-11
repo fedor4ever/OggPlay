@@ -29,6 +29,7 @@
 const TInt KFfRwdStep=20000;
 
 class CCoeControl;
+class COggTimer;
 class COggPlayAppView : public CCoeControl,
 			public MCoeControlObserver,
 			public MCoeControlContext,

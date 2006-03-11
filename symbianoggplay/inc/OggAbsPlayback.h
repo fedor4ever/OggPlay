@@ -28,10 +28,6 @@ const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
 
 const TInt KErrOggFileNotFound = -101;
-const TInt KFreqArrayLength = 100; // Length of the memory of the previous freqs bin
-const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making same changes
-                                   // to vorbis library !
-
 
 #ifdef PLUGIN_SYSTEM
 
@@ -98,13 +94,10 @@ class CPluginSupportedList: public CBase
         CArrayPtrFlat <TExtensionList> * iPlugins; // Plugins that have been selected
 
 };
-
-
 #endif
 
-//
+
 // MPlaybackObserver class
-//------------------------------------------------------
 class MPlaybackObserver 
 {
  public:
@@ -217,7 +210,8 @@ class CAbsPlayback : public CBase {
    TBuf<KMaxStringLength>   iGenre;
    TBuf<KMaxStringLength>   iTitle;
    TBuf<KMaxStringLength>   iTrackNumber;
- #ifdef PLUGIN_SYSTEM
+
+#ifdef PLUGIN_SYSTEM
    CPluginSupportedList iPluginSupportedList;
  #endif
 };

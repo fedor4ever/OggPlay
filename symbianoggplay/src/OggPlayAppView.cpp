@@ -1118,6 +1118,7 @@ void COggPlayAppView::HandleAlarmCallBack()
   }
 
   // Reset the alarm
+#if defined(SERIES60)
   CAknQueryDialog* snoozeDlg = CAknQueryDialog::NewL();
   TInt snoozeCmd = snoozeDlg->ExecuteLD(R_OGGPLAY_SNOOZE_DLG);
   if (snoozeCmd == EOggButtonSnooze)
@@ -1141,6 +1142,7 @@ void COggPlayAppView::HandleAlarmCallBack()
     // Set the alarm to fire again tomorrow 
 	SetAlarm();
   }
+#endif
 }
 
 void COggPlayAppView::Invalidate()

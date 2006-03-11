@@ -309,7 +309,6 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         iBitRate = 0;
 #endif
         iState = EOpen;
-        iTime = 5; // FIXME!
         SetVolume(iVolume);
     }
     else
@@ -434,7 +433,6 @@ void COggPluginAdaptor::SetPosition(TInt64 aPos)
 
 TInt64 COggPluginAdaptor::Position()
 {
-    
     TTimeIntervalMicroSeconds aPos(0);
     if (iState == EPaused)
         aPos = iLastPosition;
@@ -462,15 +460,8 @@ TInt COggPluginAdaptor::Volume()
     return(0);
 }
 
-const TInt32 * COggPluginAdaptor::GetFrequencyBins()
+const TInt32* COggPluginAdaptor::GetFrequencyBins()
 {
-    // Not Implemented yet
-    // Use custom command interface of Video Recorder to get the frequency.
-    // TODO: Check if the custom interface is supported !
-    
-    if (iState != EPlaying)
-      return NULL;
-
     iFreqBins[0] = 55;
     
     TMMFGetFreqsParams pckg;
@@ -490,7 +481,8 @@ const TInt32 * COggPluginAdaptor::GetFrequencyBins()
 	{
 		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
 	}
-    return iFreqBins;
+
+	return iFreqBins;
 }
 
 void COggPluginAdaptor::SetVolumeGain(TGainType aGain)

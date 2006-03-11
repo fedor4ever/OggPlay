@@ -172,7 +172,9 @@ void TOggPlayList::ScanPlayListL(RFs& aFs, TOggFiles* aFiles)
 	// Construct the filename (add the playlist path if the filename is relative)
 	TFileName fileName;
 	fileName.Copy(bufPtr.Mid(i, (j-i) + 1));
-	if (fileName[1] != ':')
+	if (fileName[0] == '\\')
+		fileName.Insert(0, TPtrC(iFileName->Ptr(), 2));
+	else if (fileName[1] != ':')
 		fileName.Insert(0, TPtrC(iFileName->Ptr(), iFileName->Length()-(iShortName->Length()+4)));
 
 	// Search for the file and add it to the list (if found)

@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include "OggLog.h"
 #include "Plugin\ImplementationUIDs.hrh"
-#include "AdvancedStreaming.h"
 #include "Plugin\OggPlayControllerCustomCommands.h"
 
 #if 1
@@ -33,6 +32,14 @@
 #else
 #define PRINT()
 #endif
+
+// Buffer sizes to use
+// (approx. 0.1s of audio per buffer)
+const TInt KBufferSize48K = 16384;
+const TInt KBufferSize32K = 12288;
+const TInt KBufferSize22K = 8192;
+const TInt KBufferSize16K = 6144;
+const TInt KBufferSize11K = 4096;
 
 COggPlayController* COggPlayController::NewL(RFs* aFs, MDecoder *aDecoder)
 {
@@ -57,18 +64,23 @@ COggPlayController* COggPlayController::NewL(RFs* aFs, MDecoder *aDecoder)
 }
 
 COggPlayController::COggPlayController(RFs* aFs, MDecoder *aDecoder)
-: iFs(aFs), iDecoder(aDecoder)
+: iFs(aFs), iDecoder(aDecoder), iStreamError(KErrNotReady)
 {
 }
 
 COggPlayController::~COggPlayController()
 {
-    iState = EStateDestroying;
     PRINT("COggPlayController::~COggPlayController In");
+
+	iState = EStateDestroying;
+
+	delete iStream;
     if (iOwnSinkBuffer) 
         delete iSinkBuffer;
-    delete iOggSource;
-    if (iAudioOutput)
+
+	delete iOggSource;
+
+	if (iAudioOutput)
         iAudioOutput->SinkThreadLogoff();
 
 	iDecoder->Clear();
@@ -112,7 +124,11 @@ void COggPlayController::ConstructL()
     
     iOggSource = new(ELeave) COggSource(*this);
 
-    PRINT("COggPlayController::ConstructL() Out");
+	// Open an audio stream (used for determining audio capabilities)
+	iStream = CMdaAudioOutputStream::NewL(*this);
+	iStream->Open(&iSettings);
+
+	PRINT("COggPlayController::ConstructL() Out");
 }
 
 _LIT(KRandomRingingToneFileName, "random_ringing_tone.ogg");
@@ -237,12 +253,10 @@ void COggPlayController::RemoveDataSinkL(MDataSink&  aDataSink)
 
     if (iAudioOutput==&aDataSink) 
         iAudioOutput=NULL;
-
 }
 
 void COggPlayController::SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings)
-{
-    
+{   
     PRINT("COggPlayController::SetPrioritySettingsL");
     // Not implemented yet
     iMMFPrioritySettings = aPrioritySettings;
@@ -279,9 +293,238 @@ void COggPlayController::ResetL()
 	iState= EStateNotOpened;
 }
 
+TBool COggPlayController::GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt)
+{
+  TBool retValue = ETrue;
+  switch (usedRate)
+  {
+	case 48000:
+		usedRate = 44100;
+		rt = TMdaAudioDataSettings::ESampleRate44100Hz;
+		break;
+
+	case 44100:
+		usedRate = 32000;
+		rt = TMdaAudioDataSettings::ESampleRate32000Hz;
+		break;
+
+	case 32000:
+		usedRate = 22050;
+		rt = TMdaAudioDataSettings::ESampleRate22050Hz;
+		break;
+
+	case 22050:
+		usedRate = 16000;
+		rt = TMdaAudioDataSettings::ESampleRate16000Hz;
+		break;
+
+	case 16000:
+		usedRate = 11025;
+		rt = TMdaAudioDataSettings::ESampleRate11025Hz;
+		break;
+
+	case 11025:
+		usedRate = 8000;
+		rt = TMdaAudioDataSettings::ESampleRate8000Hz;
+		break;
+
+	default:
+		retValue = EFalse;
+		break;
+  }
+
+  return retValue;
+}
+
+void COggPlayController::SetAudioCapsL(TInt theRate, TInt theChannels)
+{
+  TMdaAudioDataSettings::TAudioCaps ac(TMdaAudioDataSettings::EChannelsMono);
+  TMdaAudioDataSettings::TAudioCaps rt(TMdaAudioDataSettings::ESampleRate8000Hz);
+  TBool convertChannel = EFalse;
+  TBool convertRate = EFalse;
+
+  iUsedRate = theRate;
+  if (theRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
+  else if (theRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
+  else if (theRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
+  else if (theRate==22050) rt= TMdaAudioDataSettings::ESampleRate22050Hz;
+  else if (theRate==32000) rt= TMdaAudioDataSettings::ESampleRate32000Hz;
+  else if (theRate==44100) rt= TMdaAudioDataSettings::ESampleRate44100Hz;
+  else if (theRate==48000) rt= TMdaAudioDataSettings::ESampleRate48000Hz;
+  else
+  {
+      // Rate not supported by the phone
+	  TRACEF(COggLog::VA(_L("SetAudioCaps: Non standard rate: %d"), theRate));
+
+	  // Convert to nearest rate
+      convertRate = ETrue;
+	  if (theRate>48000)
+	  {
+		  iUsedRate = 48000;
+	      rt = TMdaAudioDataSettings::ESampleRate48000Hz;
+	  }
+	  else if (theRate>44100)
+	  {
+		  iUsedRate = 44100;
+	      rt = TMdaAudioDataSettings::ESampleRate44100Hz;
+	  }
+	  else if (theRate>32000)
+	  {
+		  iUsedRate = 32000;
+	      rt = TMdaAudioDataSettings::ESampleRate32000Hz;
+	  }
+	  else if (theRate>22050)
+	  {
+		  iUsedRate = 22050;
+	      rt = TMdaAudioDataSettings::ESampleRate22050Hz;
+	  }
+	  else if (theRate>16000)
+	  {
+		  iUsedRate = 16000;
+	      rt = TMdaAudioDataSettings::ESampleRate16000Hz;
+	  }
+	  else if (theRate>11025)
+	  {
+		  iUsedRate = 11025;
+	      rt = TMdaAudioDataSettings::ESampleRate11025Hz;
+	  }
+	  else if (theRate>8000)
+	  {
+		  iUsedRate = 8000;
+	      rt = TMdaAudioDataSettings::ESampleRate8000Hz;
+	  }
+	  else
+	  {
+		  // Frequencies less than 8KHz are not supported
+	      // iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_12);
+		  User::Leave(KErrNotSupported);
+	  }
+  }
+
+  iUsedChannels = theChannels;
+  if (iUsedChannels == 1)
+	  ac = TMdaAudioDataSettings::EChannelsMono;
+  else if (iUsedChannels == 2)
+	  ac = TMdaAudioDataSettings::EChannelsStereo;
+  else
+  {
+    // iEnv->OggErrorMsgL(R_OGG_ERROR_12, R_OGG_ERROR_10);
+	User::Leave(KErrNotSupported);
+  }
+
+  // Note current settings
+  TInt bestRate = iUsedRate;
+  TInt convertingRate = convertRate;
+  TMdaAudioDataSettings::TAudioCaps bestRT = rt;
+
+  // Try the current settings.
+  // Adjust sample rate and channels if necessary
+  TInt err = KErrNotSupported;
+  while (err == KErrNotSupported)
+  {
+	TRAP(err, iStream->SetAudioPropertiesL(rt, ac));
+	if (err == KErrNotSupported)
+	{
+		// Frequency is not supported
+		// Try dropping the frequency
+		convertRate = GetNextLowerRate(iUsedRate, rt);
+
+		// If that doesn't work, try changing stereo to mono
+		if (!convertRate && (iUsedChannels == 2))
+		{
+			// Reset the sample rate
+			convertRate = convertingRate;
+			iUsedRate = bestRate;
+			rt = bestRT;
+
+			// Drop channels to 1
+			iUsedChannels = 1;
+			ac = TMdaAudioDataSettings::EChannelsMono;
+			convertChannel = ETrue;
+		}
+		else if (!convertRate)
+			break; // Give up, nothing supported :-(
+	}
+  }
+
+  // TBuf<256> buf,tbuf;
+  if (err != KErrNone)
+  {
+	/* CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
+	CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_12);
+	buf.AppendNum(err);
+	iEnv->OggErrorMsgL(tbuf,buf); */
+
+	User::Leave(err);
+  }
+
+  // Trace the settings
+  TRACEF(COggLog::VA(_L("SetAudioCaps: theRate: %d, theChannels: %d, usedRate: %d, usedChannels: %d"), theRate, theChannels, iUsedRate, iUsedChannels));
+
+  /* if ((convertRate || convertChannel) && iEnv->WarningsEnabled())
+  {
+	  // Display a warning message
+      SamplingRateSupportedMessage(convertRate, theRate, convertChannel, theChannels);
+
+	  // Put the audio properties back the way they were 
+	  #if defined(MULTI_THREAD_PLAYBACK)
+	  err = SetAudioProperties(usedRate, usedChannels);
+	  #else
+	  TRAP(err, iStream->SetAudioPropertiesL(rt, ac));
+	  #endif
+
+	  // Check that it worked (it should have)
+	  if (err != KErrNone)
+	  {
+		CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
+		CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_12);
+		buf.AppendNum(err);
+		iEnv->OggErrorMsgL(tbuf,buf);
+
+		return err;
+	  }
+  } */
+
+  // Determine buffer sizes so that we make approx 10-15 calls to the mediaserver per second
+  // + another 10-15 calls for position if the frequency analyzer is on screen
+  TInt bufferSize = 0;
+  switch (iUsedRate)
+  {
+	case 48000:
+	case 44100:
+		bufferSize = KBufferSize48K;
+		break;
+
+	case 32000:
+		bufferSize = KBufferSize32K;
+		break;
+
+	case 22050:
+		bufferSize = KBufferSize22K;
+		break;
+
+	case 16000:
+		bufferSize = KBufferSize16K;
+		break;
+
+	case 11025:
+	case 8000:
+		bufferSize = KBufferSize11K;
+		break;
+
+	default:
+		User::Panic(_L("COggControl:SAC"), 0);
+		break;
+  }
+
+  if (iUsedChannels == 1)
+	  bufferSize /= 2;
+
+  iOggSource->ConstructL(bufferSize, theRate, iUsedRate, theChannels, iUsedChannels);
+}
+
 void COggPlayController::PrimeL()
 {
-    
     PRINT("COggPlayController::PrimeL");
     if (iState == EStatePrimed) 
           return; // Nothing to do
@@ -306,79 +549,38 @@ void COggPlayController::PrimeL()
     OpenFileL(iFileName,EFalse);
 
     // Do our own rate conversion, some firmware do it very badly.
-    
-    if ( iUsedRate == 0 )
-    {
-        TOggAudioCapabilityPoll pollingAudio;
-        TInt audioCaps = pollingAudio.PollL();
-        
-        TMdaAudioDataSettings::TAudioCaps rt;
-        rt= TMdaAudioDataSettings::ESampleRate8000Hz; // Used to silence the compiler
+    if (iUsedRate == 0 && (iStreamError == KErrNone))
+		SetAudioCapsL(iDecoder->Rate(), iDecoder->Channels());
+	else if (iStreamError != KErrNone)
+		User::Leave(iStreamError);
 
-        iUsedChannels = iDecoder->Channels();
-        
-        iUsedRate = iDecoder->Rate();
-        
-        if (iUsedRate==8000) rt= TMdaAudioDataSettings::ESampleRate8000Hz;
-        else if (iUsedRate==11025) rt= TMdaAudioDataSettings::ESampleRate11025Hz;
-        else if (iUsedRate==16000) rt= TMdaAudioDataSettings::ESampleRate16000Hz;
-        else if (iUsedRate==22050) rt= TMdaAudioDataSettings::ESampleRate22050Hz;
-        else if (iUsedRate==32000) rt= TMdaAudioDataSettings::ESampleRate32000Hz;
-        else if (iUsedRate==44100) rt= TMdaAudioDataSettings::ESampleRate44100Hz;
-        else if (iUsedRate==48000) rt= TMdaAudioDataSettings::ESampleRate48000Hz;
-        else {
-            // Rate not supported by the phone
-            User::Leave(KErrNotSupported);
-        }
-        
-        if ( !(rt & audioCaps) )
-        {
-            // Rate not supported by this phone.
-            iUsedRate = 16000; //That rate should be 
-            //supported by all phones
-        }
-        
-        if (!(audioCaps & TMdaAudioDataSettings::EChannelsStereo) && iDecoder->Channels() )
-        {
-            // Only Mono is supported by this phone, we need to mix the 2 channels together
-            iUsedChannels = 1; // Use 1 channel
-        }
-        
-
-        iOggSource->ConstructL(iDecoder->Rate(),iUsedRate, iDecoder->Channels(), iUsedChannels);
-        
-    }
     iAudioOutput->SinkPrimeL();
-    
     if (!iSinkBuffer)
     {
         if (!iAudioOutput->CanCreateSinkBuffer())
         {
-            iSinkBuffer = CMMFDescriptorBuffer::NewL(0x4000);
+            iSinkBuffer = CMMFDescriptorBuffer::NewL(KBufferSize48K);
             iOwnSinkBuffer = ETrue;
         }
         else
         {
             iSinkBuffer = iAudioOutput->CreateSinkBufferL(TMediaId(KUidMediaTypeAudio), iOwnSinkBuffer);
-        }
-        
+        }    
     }
     
     iState=EStatePrimed;
-
-
     PRINT("COggPlayController::PrimeL Out");
-
 }
 
 void COggPlayController::PlayL()
 {
-    
     PRINT("COggPlayController::PlayL In");
 
     if (iState!=EStatePrimed)
         User::Leave(KErrNotReady);
     
+	// Clear the frequency analyser
+	Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
 
     CFakeFormatDecode* fake = CFakeFormatDecode::NewL(
     			TFourCC(' ', 'P', '1', '6'),
@@ -392,24 +594,20 @@ void COggPlayController::PlayL()
     // indeed, it looks to be pretty useless if the source if not a CMMFFormatDecode. So use a 
     // fake CMMFFormatDecode class that just reports the configuration info (see CFakeFormatDecode)
 	iAudioOutput->NegotiateL(*fake);
- 
 	CleanupStack::PopAndDestroy();
     
     iAudioOutput->SinkPlayL();
     
-    // send first buffer to sink - sending a NULL buffer prompts it to request some data
-    // the usual way
-
+    // send first buffer to sink - sending a NULL buffer prompts it to request some data the usual way
     iOggSource->SetSink(iAudioOutput);
     iAudioOutput->EmptyBufferL(NULL, iOggSource, TMediaId(KUidMediaTypeAudio));
 
     iState=EStatePlaying;
-    PRINT("COggPlayController:: PlayL ok");   
+    PRINT("COggPlayController:: PlayL ok");
 }
 
 void COggPlayController::CustomCommand( TMMFMessage& aMessage )
-    {
-    
+    {   
     if ( aMessage.Destination().InterfaceId().iUid != KOggTremorUidControllerImplementation )
         {
         aMessage.Complete(KErrNotSupported);    
@@ -475,32 +673,36 @@ void COggPlayController::StopL()
 
 TTimeIntervalMicroSeconds COggPlayController::PositionL() const
 {
-    //PRINT("COggPlayController::PositionL");
-    
     if(iDecoder && (iState != EStateNotOpened) )
         return( TTimeIntervalMicroSeconds(iDecoder->Position( ) * 1000) );
     else
-    return TTimeIntervalMicroSeconds(0);
+	 return TTimeIntervalMicroSeconds(0);
 }
 
 void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition)
 {
-    
     PRINT("COggPlayController::SetPositionL");
-   
-    if(iDecoder) iDecoder->Setposition( aPosition.Int64() / 1000.0);
+
+	// const TInt64 KConst500 = TInt64(500);
+	TInt64 positionMilliseconds = aPosition.Int64() / 1000.0;
+    if (iDecoder)
+		iDecoder->Setposition(positionMilliseconds);
+
+	if (iOggSource)
+		{
+		// iOggSource->iTotalBufferBytes = (positionMilliseconds*TInt64(iUsedRate*iUsedChannels))/KConst500;
+		iOggSource->iTotalBufferBytes = 0;
+		}
 }
 
 TTimeIntervalMicroSeconds  COggPlayController::DurationL() const
 {
-    
     //PRINT("COggPlayController::DurationL");
     return (iFileLength);
 }
 
 void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries)
-{
-    
+{   
     PRINT("COggPlayController::GetNumberOfMetaDataEntriesL");
     aNumberOfEntries = 5;
 }
@@ -676,23 +878,50 @@ void COggPlayController::MapcGetLoadingProgressL(TInt& /*aPercentageComplete*/)
     User::Leave(KErrNotSupported);
 }
 
-TInt COggPlayController::GetNewSamples(TDes8 &aBuffer) 
+TInt COggPlayController::GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins) 
 {
     if (iState != EStatePlaying)
-        return(0);
+        return 0;
 
-    TInt len = aBuffer.Length();
+	if (aRequestFrequencyBins && !iRequestingFrequencyBins)
+	{
+		// Make a request for frequency data
+		iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].iFreqCoefs, KNumberOfFreqBins);
+
+		// Mark that we have issued the request
+		iRequestingFrequencyBins = ETrue;
+	}
+
+	TInt len = aBuffer.Length();
     TInt ret=iDecoder->Read(aBuffer, len);
     if (ret >0)
     {
         aBuffer.SetLength(len + ret);
-    }
-    if (ret == 0)
+
+		if (iRequestingFrequencyBins)
+		{
+			// Determine the status of the request
+			TInt requestingFrequencyBins = iDecoder->RequestingFrequencyBins();
+			if (!requestingFrequencyBins)
+			{
+				iLastFreqArrayIdx++;
+				if (iLastFreqArrayIdx >= KFreqArrayLength)
+					iLastFreqArrayIdx = 0;
+
+				// The frequency request has completed
+				iFreqArray[iLastFreqArrayIdx].iTime = iOggSource->iTotalBufferBytes;
+				iRequestingFrequencyBins = EFalse;
+			}
+		}
+	}
+
+	if (ret == 0)
     {
         iState = EStateOpen;
-        return(KErrCompletion);
+        return KErrCompletion;
     }
-    return (ret);
+
+	return ret;
 }
 
 void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage )
@@ -707,12 +936,23 @@ void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage )
     TPckgC<TMMFGetFreqsParams> config(params);
     config.Set(*buf);
     params = config();
-    
-	TPckg<TInt32 [16]> binsPckg(iFrequencyBins);
-    iDecoder->GetFrequencyBins(iFrequencyBins,16);
+
+	TInt64 positionBytes = 2*iUsedChannels*iAudioOutput->SoundDevice().SamplesPlayed();
+	TInt idx = iLastFreqArrayIdx;
+	for (TInt i=0; i<KFreqArrayLength; i++)
+    {
+		if (iFreqArray[idx].iTime <= positionBytes)
+			break;
+      
+		idx--;
+		if (idx < 0)
+			idx = KFreqArrayLength-1;
+    }
+
+	TPckg<TInt32[16]> binsPckg(iFreqArray[idx].iFreqCoefs);
     aMessage.WriteDataToClient(binsPckg);
 
-    CleanupStack::PopAndDestroy(buf);//buf
+    CleanupStack::PopAndDestroy(buf);
 }
 
 void  COggPlayController::SetVolumeGainL(TMMFMessage& aMessage)
@@ -732,11 +972,20 @@ void  COggPlayController::SetVolumeGainL(TMMFMessage& aMessage)
     CleanupStack::PopAndDestroy(buf);//buf
 }
 
-/************************************************************************************
-*
-* COggSource
-*
-*************************************************************************************/ 
+void COggPlayController::MaoscOpenComplete(TInt aError)
+{
+	iStreamError = aError;
+}
+
+void COggPlayController::MaoscBufferCopied(TInt /* aError */, const TDesC8& /* aBuffer */)
+{
+}
+
+void COggPlayController::MaoscPlayComplete(TInt /* aError */)
+{
+}
+
+// COggSource
 COggSource::COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer)
 : MDataSource(TUid::Uid(KOggTremorUidPlayFormatImplementation)), iSampleRateFillBuffer(aSampleRateFillBuffer), iGain(ENoGain)
 {
@@ -744,20 +993,18 @@ COggSource::COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer)
 
 COggSource::~COggSource()
 {
-    delete (iOggSampleRateConverter);
+    delete iOggSampleRateConverter;
 }
 
-void COggSource::ConstructL(TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel)
+void COggSource::ConstructL(TInt aBufferSize, TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel)
 {
     // We use the Sample Rate converter only for the buffer filling and the gain settings,
     // sample rate conversion is done by MMF.
     PRINT("COggSource::ConstructL()");
     iOggSampleRateConverter = new(ELeave) COggSampleRateConverter;
     
-    iOggSampleRateConverter->Init(&iSampleRateFillBuffer, 
-        KBufferSize, (TInt) (0.75*KBufferSize), 
-        aInputRate,  aOutputRate, 
-        aInputChannel, aOutputChannel );
+    iOggSampleRateConverter->Init(&iSampleRateFillBuffer, aBufferSize, aBufferSize-1024,
+	aInputRate,  aOutputRate, aInputChannel, aOutputChannel);
 
 	iOggSampleRateConverter->SetVolumeGain(iGain);
     PRINT("COggSource::ConstructL() Out");
@@ -794,16 +1041,17 @@ TFourCC COggSource::SourceDataTypeCode(TMediaId aMediaId)
     {
     if (aMediaId.iMediaType==KUidMediaTypeAudio)
         {
-        return 1; // only support 1st stream for now
+		// only support 1st stream for now
+        return 1;
         }
-    else return 0;
+    else
+		return 0;
     }
 
 void COggSource::FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId aMediaId)
-    {
-    
+    {   
     if ((aMediaId.iMediaType==KUidMediaTypeAudio)&&(aBuffer->Type()==KUidMmfDescriptorBuffer))
-        {
+    {
         //BufferEmptiedL(aBuffer);
         CMMFDataBuffer* db = static_cast<CMMFDataBuffer*>(aBuffer);
         if (iOggSampleRateConverter->FillBuffer(db->Data()) == KErrCompletion)
@@ -811,10 +1059,13 @@ void COggSource::FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId 
             PRINT("COggSource::FillBufferL LastBuffer");
             db->SetLastBuffer(ETrue);
         }
-        SetSink(aConsumer);
+		iTotalBufferBytes += db->Data().Length();
+
+		SetSink(aConsumer);
         aConsumer->BufferFilledL(db);
-        }
-    else User::Leave(KErrNotSupported);
+    }
+    else
+		User::Leave(KErrNotSupported);
     }
 
 
@@ -828,18 +1079,15 @@ void COggSource::BufferEmptiedL(CMMFBuffer* aBuffer)
             PRINT("COggSource::BufferEmptiedL Last Buffer");
             db->SetLastBuffer(ETrue);
         }
+
+		iTotalBufferBytes += db->Data().Length();
         iSink->EmptyBufferL(db, this, TMediaId(KUidMediaTypeAudio));
     }
     else User::Leave(KErrNotSupported);
 }
 
 
-/************************************************************************************
-*
-* CFakeFormatDecode
-*
-*************************************************************************************/
-
+// CFakeFormatDecode
 CFakeFormatDecode* CFakeFormatDecode::NewL(TFourCC aFourCC, TUint aChannels, TUint aSampleRate, TUint aBitRate)
 	{
 	CFakeFormatDecode* self = new(ELeave) CFakeFormatDecode;
@@ -849,7 +1097,7 @@ CFakeFormatDecode* CFakeFormatDecode::NewL(TFourCC aFourCC, TUint aChannels, TUi
 	self->iBitRate = aBitRate;
 	return self;
 	}
-	
+
 CFakeFormatDecode::CFakeFormatDecode()
 	{
 	}

@@ -29,19 +29,27 @@
 #include <mmf\server\mmfformat.h>
 #include <MmfAudioOutput.h>
 #include <MmfFile.h>
-#include "Plugin\MMFOggPlayStreaming.h"
+
+#include <mdaaudiooutputstream.h>
+#include <mda/common/audio.h>
+
+#include "OggRateConvert.h"
 #include "OggPlayDecoder.h"
 
 // FORWARD DECLARATIONS
 class COggSource;
 class RFile;
 
+// Literals
+_LIT(KFakeFormatDecodePanic, "FakeFormatDecode");
+
 // CLASS DECLARATION
 class COggPlayController :	public CMMFController,
                             public MMMFAudioPlayDeviceCustomCommandImplementor,
                             public MMMFAudioPlayControllerCustomCommandImplementor,
                             public MAsyncEventHandler,
-                            public MOggSampleRateFillBuffer
+                            public MOggSampleRateFillBuffer,
+							public MMdaAudioOutputStreamCallback
 	{
 	public:	 // Constructors and destructor
 
@@ -63,6 +71,11 @@ class COggPlayController :	public CMMFController,
         * Symbian 2nd phase constructor.
         */
 		void ConstructL();
+
+		// From MMdaAudioOutputStreamCallback
+		void MaoscPlayComplete(TInt aError);
+		void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
+		void MaoscOpenComplete(TInt aError);
 
 	public:	// Functions from base classes
 
@@ -197,12 +210,15 @@ class COggPlayController :	public CMMFController,
         void MapcGetLoadingProgressL(TInt& aPercentageComplete);
         
         //From MOggSampleRateFillBuffer
-        TInt GetNewSamples(TDes8 &aBuffer);
+        TInt GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins);
 
     private: // Internal Functions
         void OpenFileL(const TDesC& aFile, TBool aOpenForInfo);
         void GetFrequenciesL(TMMFMessage& aMessage );
         void SetVolumeGainL(TMMFMessage& aMessage);
+
+		TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
+		void SetAudioCapsL(TInt theChannels, TInt theRate);
 
 	private: // Data
 
@@ -237,7 +253,6 @@ class COggPlayController :	public CMMFController,
 		RFs* iFs;
         MDecoder *iDecoder;
         
-        CMMFOggPlayStreaming * iMMFStreaming;
         CMMFAudioOutput * iAudioOutput;
         CMMFBuffer * iSinkBuffer;
         TBool iOwnSinkBuffer;
@@ -246,7 +261,22 @@ class COggPlayController :	public CMMFController,
         TBool iRandomRingingTone;
         TInt iUsedRate;
         TInt iUsedChannels;
-        TInt32 iFrequencyBins[16];
+
+		CMdaAudioOutputStream* iStream;
+		TMdaAudioDataSettings iSettings;
+		TBool iStreamError;
+
+		class TFreqBins 
+		{
+		public:
+			TInt64 iTime;
+			TInt32 iFreqCoefs[KNumberOfFreqBins];
+		};
+
+		TFreqBins iFreqArray[KFreqArrayLength];
+		TInt iLastFreqArrayIdx;
+
+		TBool iRequestingFrequencyBins;
 	};
 
     enum {
@@ -291,15 +321,13 @@ private:
 	TUint iBitRate;
 	};
 
-_LIT(KFakeFormatDecodePanic, "FakeFormatDecode");
-
 
 class COggSource: public CBase, public MDataSource
 {
 public:
     COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer);
     ~COggSource();
-    void ConstructL(TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel);
+    void ConstructL(TInt aBufferSize, TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel);
 
     // from MDataSource:
     virtual TFourCC SourceDataTypeCode(TMediaId aMediaId);
@@ -309,14 +337,14 @@ public:
     virtual CMMFBuffer* CreateSourceBufferL(TMediaId aMediaId, TBool &aReference);
     virtual void ConstructSourceL(  const TDesC8& aInitData );
     
-    
     // From MOggSampleRateFillBuffer 
-    TInt GetNewSamples(TDes8 &aBuffer) ;
+    TInt GetNewSamples(TDes8 &aBuffer);
 
     // Own functions
     void SetSink(MDataSink* aSink);
-
 	void SetVolumeGain(TGainType aGain);
+
+	TInt64 iTotalBufferBytes;
 
 private:
     COggSampleRateConverter *iOggSampleRateConverter;
@@ -327,5 +355,3 @@ private:
 };
 
 #endif    
-            
-// End of File
