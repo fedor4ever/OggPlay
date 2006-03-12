@@ -520,6 +520,11 @@ void COggPlayController::SetAudioCapsL(TInt theRate, TInt theChannels)
   if (iUsedChannels == 1)
 	  bufferSize /= 2;
 
+  // We are finished with the stream, so delete it
+  delete iStream;
+  iStream = NULL;
+
+  // Set up the source with the used rate and channels
   iOggSource->ConstructL(bufferSize, theRate, iUsedRate, theChannels, iUsedChannels);
 }
 
@@ -547,12 +552,6 @@ void COggPlayController::PrimeL()
   
     iState = EStateOpen;
     OpenFileL(iFileName,EFalse);
-
-    // Do our own rate conversion, some firmware do it very badly.
-    if (iUsedRate == 0 && (iStreamError == KErrNone))
-		SetAudioCapsL(iDecoder->Rate(), iDecoder->Channels());
-	else if (iStreamError != KErrNone)
-		User::Leave(iStreamError);
 
     iAudioOutput->SinkPrimeL();
     if (!iSinkBuffer)
@@ -582,7 +581,13 @@ void COggPlayController::PlayL()
 	// Clear the frequency analyser
 	Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
 
-    CFakeFormatDecode* fake = CFakeFormatDecode::NewL(
+    // Do our own rate conversion, some firmware do it very badly.
+    if (iUsedRate == 0 && (iStreamError == KErrNone))
+		SetAudioCapsL(iDecoder->Rate(), iDecoder->Channels());
+	else if (iStreamError != KErrNone)
+		User::Leave(iStreamError);
+
+	CFakeFormatDecode* fake = CFakeFormatDecode::NewL(
     			TFourCC(' ', 'P', '1', '6'),
     			iUsedChannels, 
                 iUsedRate,

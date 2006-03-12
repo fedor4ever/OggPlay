@@ -510,11 +510,9 @@ void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
 
 void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode)
 {
-    
     TRACEF(COggLog::VA(_L("MoscoStateChange :%d %d %d "), aPreviousState,  aCurrentState,  aErrorCode));
     
 #ifdef MMF_AVAILABLE
-    
     if (iWait.IsStarted())
     {   
         // We should be in wait state only when opening a file.       
@@ -534,7 +532,7 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
     
 #endif
 
-    if ( (aCurrentState == CMdaAudioClipUtility::EPlaying) && aErrorCode)
+    if ((aCurrentState == CMdaAudioClipUtility::EPlaying) && aErrorCode)
     {
         // From opened to Playing
         // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
@@ -561,6 +559,12 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
             iObserver->NotifyPlayComplete();
         }
     }
+
+   if ((aPreviousState == CMdaAudioClipUtility::EOpen) && (aCurrentState == CMdaAudioClipUtility::EOpen) && (aErrorCode == KErrNotReady))
+	{
+		// The plugin isn't ready so try again
+	    TRAP(aErrorCode,iPlayer->PlayL()); 
+	}
 }
  
 
