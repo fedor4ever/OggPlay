@@ -1359,7 +1359,7 @@ COggPlayAppView::UpdateListbox()
 TBool
 COggPlayAppView::CanPlay()
 {
-  return (iApp->iOggPlayback->State()==CAbsPlayback::EReady ||
+  return (iApp->iOggPlayback->State()==CAbsPlayback::EStreamOpen ||
 	      iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
 	      iApp->iOggPlayback->State()==CAbsPlayback::EStopped);
 }

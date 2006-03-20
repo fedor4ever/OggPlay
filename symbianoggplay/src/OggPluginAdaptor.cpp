@@ -258,7 +258,7 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         }
 #endif
         User::LeaveIfError(iError);
-		iState = EReady;
+		iState = EStreamOpen;
 
         iFileName = aFileName;
         TInt nbMetaData;
@@ -311,7 +311,7 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
 		// Clear the frequency analyser
 		Mem::FillZ(&iFreqBins, sizeof(iFreqBins));
 
-		iState = EOpen;
+		iState = EStopped;
         SetVolume(iVolume);
 	}
 
@@ -378,8 +378,8 @@ void COggPluginAdaptor::Play()
 {
     TRACEF(_L("COggPluginAdaptor::Play() In"));
     iInterrupted = EFalse;
-    if ((iState == EClosed) || (iState == EReady))
-        return;
+    if ((iState == EClosed) || (iState == EStreamOpen))
+        return; // Cannot play if we haven't opened a file
 
     TRAPD(err, iPlayer->PlayL()); 
     if (err) return; // Silently ignore the problem :-(

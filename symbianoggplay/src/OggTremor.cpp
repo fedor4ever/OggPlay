@@ -275,7 +275,7 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   
   TInt err= SetAudioCaps(iDecoder->Channels(), iDecoder->Rate());
   if (err == KErrNone)
-	iState= EOpen;
+	iState= EStopped;
   else
   {
 	iDecoder->Close();
@@ -803,12 +803,15 @@ TInt COggPlayback::Info(const TDesC& aFileName, TBool silent)
 void COggPlayback::Play() 
 {
     TRACEF(COggLog::VA(_L("PLAY %i "), iState ));
-    switch(iState) {
+    switch(iState)
+	{
     case EPaused:
         break;
-    case EOpen:  
+
+    case EStopped:  
         iEof=0;
         break;
+
     default:
         iEnv->OggErrorMsgL(R_OGG_ERROR_20, R_OGG_ERROR_15);
         RDebug::Print(_L("Oggplay: Tremor - State not Open"));
@@ -1246,7 +1249,7 @@ void COggPlayback::NotifyOpenComplete(TInt aErr)
 {
   // Called by the streaming thread listener when CMdaAudioOutputStream::Open() completes
   if (aErr == KErrNone)
-	iState = EReady;
+	iState = EStreamOpen;
   else
   {
     TBuf<32> buf;

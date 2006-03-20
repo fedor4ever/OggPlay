@@ -269,7 +269,7 @@ TInt COggPlayback::Open( const TDesC& aFileName )
    if ( err == KErrNone ) 
    {
       if ( !just_created_api )
-		  iState = EOpen;
+		  iState = EStopped;
    }
    else
    {
@@ -325,7 +325,7 @@ void COggPlayback::Play()
 
    switch (iState)
    {
-   case EOpen:  
+   case EStopped:  
       iEof = EFalse;
       // Intentionally fall-thru
       
@@ -545,7 +545,7 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
    switch ( aState )
    {
    case EMAudioFBCallbackStateReady:
-      iState = EOpen;
+      iState = EStopped;
       iMaxVolume = iStream->GetMaxVolume();
       if ( iPlayWhenOpened )
       {

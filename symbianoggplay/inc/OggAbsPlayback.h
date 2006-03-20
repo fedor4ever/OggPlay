@@ -119,13 +119,14 @@ class CAbsPlayback : public CBase {
 
  public:
 
-  enum TState {
-    EClosed,
-	EReady,
-    EOpen,
-    EStopped,
-    EPaused,
-    EPlaying
+  // Playback states
+  enum TState
+  {
+    EClosed,        // The playback engine is closed (playback is not possible)
+	EStreamOpen,    // The playback engine is open, but not ready (playback is not possible)
+    EStopped,       // The playback engine is ready to play
+    EPaused,        // The playback engine is paused
+    EPlaying        // The playback engine is playing 
   };
 
   CAbsPlayback(MPlaybackObserver* anObserver=NULL);
