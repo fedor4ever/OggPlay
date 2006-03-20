@@ -33,9 +33,7 @@
 
 class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObserver
 {
-  
- public:
-  
+ public: 
   COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver);
   virtual ~COggPluginAdaptor();
   void ConstructL();
@@ -61,19 +59,21 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   virtual void SetVolumeGain(TGainType aGain);
   
    virtual CPluginSupportedList & GetPluginListL(); 
-  private:
-      // From MMdaObjectStateChangeObserver
+
+private:
+  // From MMdaObjectStateChangeObserver
   virtual void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
- private:
-      // New Functions
+
+  // New Functions
   void SearchPluginsL(const TDesC &aName, TBool isEnabled);
   void OpenL(const TDesC& aFileName);
   void ConstructAPlayerL(const TDesC &aFileName);
   void ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes & aDestinationBuffer);
-  
+
+private:
   COggMsgEnv*               iEnv;
   
-  TBuf<100> iFilename;
+  TFileName iFilename;
   TInt iError;
 
 #ifdef MMF_AVAILABLE
@@ -84,7 +84,6 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   CActiveSchedulerWait iWait;
   TUid iPluginControllerUID;
   TInt32 iFreqBins[16];
-  
 #else
   CPseudoMMFController * iPlayer;
   

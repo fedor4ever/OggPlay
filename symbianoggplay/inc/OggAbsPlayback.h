@@ -121,10 +121,11 @@ class CAbsPlayback : public CBase {
 
   enum TState {
     EClosed,
-    EFirstOpen,
+	EReady,
     EOpen,
-    EPlaying,
-    EPaused
+    EStopped,
+    EPaused,
+    EPlaying
   };
 
   CAbsPlayback(MPlaybackObserver* anObserver=NULL);

@@ -262,9 +262,18 @@ class COggPlayController :	public CMMFController,
         TInt iUsedRate;
         TInt iUsedChannels;
 
+		enum TStreamState
+		{
+			EStreamNotOpen,
+			EStreamStateRequested,
+			EStreamOpened
+		};
+
 		CMdaAudioOutputStream* iStream;
 		TMdaAudioDataSettings iSettings;
 		TBool iStreamError;
+		TStreamState iStreamState;
+		TMMFMessage* iStreamMessage;
 
 		class TFreqBins 
 		{
@@ -279,12 +288,13 @@ class COggPlayController :	public CMMFController,
 		TBool iRequestingFrequencyBins;
 	};
 
-    enum {
-        KOggPlayPluginErrNotReady = -200,
-        KOggPlayPluginErrNotSupported,
-        KOggPlayPluginErrFileNotFound,
-        KOggPlayPluginErrOpeningFile
-    };
+enum
+{
+    KOggPlayPluginErrNotReady = -200,
+    KOggPlayPluginErrNotSupported,
+    KOggPlayPluginErrFileNotFound,
+    KOggPlayPluginErrOpeningFile
+};
 
 
     

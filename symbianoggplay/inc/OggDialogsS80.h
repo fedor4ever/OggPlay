@@ -33,10 +33,10 @@
 #include <eiktxlbm.h>
 #include <ckninfrm.h>
 #include <eikclb.h>
+#include <eikmfne.h>
 
 
 class CCodecsLabel;
-     
 class CSettingsS80Dialog : public CEikDialog,MEikCommandObserver
 {
  public:
@@ -66,6 +66,9 @@ class CSettingsS80Dialog : public CEikDialog,MEikCommandObserver
    CEikCheckBox* iRandomControl;
    CEikChoiceList* iCbaControl [2][4];
    CEikChoiceList* iVolumeBoostControl;
+
+   CEikCheckBox* iAlarmActive;
+   CEikTimeEditor* iAlarmTime;
 };
 
 

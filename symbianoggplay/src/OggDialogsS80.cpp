@@ -97,6 +97,9 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iCbaControl[1][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba14));
   iVolumeBoostControl = static_cast <CEikChoiceList*> (Control(EOggSettingVolumeBoost));
 
+  iAlarmActive = static_cast<CEikCheckBox*> (Control(EOggAlarmActive));
+  iAlarmTime = static_cast<CEikTimeEditor*> (Control(EOggAlarmTime));
+
   CDesCArray *listboxArray= new (ELeave) CDesCArrayFlat(10);
   listboxArray->AppendL(KFullScanString); 
   iScanDirControl->SetArray(listboxArray);
@@ -107,6 +110,9 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iRepeat));
   iRandomControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iRandom));
   iVolumeBoostControl->SetCurrentItem(iSettings->iGainType);
+
+  iAlarmActive->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iAlarmActive));
+  iAlarmTime->SetTime(appUi->iSettings.iAlarmTime);
 
   UpdateControlsFromSoftkeys();
 }
@@ -180,10 +186,19 @@ void CSettingsS80Dialog::LineChangedL(TInt aControlId)
 
 void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
 {
-	if (aControlId==EOggSettingVolumeBoost)
+	COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
+	if (aControlId == EOggSettingVolumeBoost)
 		{
-		COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
 		appUi->SetVolumeGainL((TGainType) iVolumeBoostControl->CurrentItem());
+		}
+	else if(aControlId == EOggAlarmActive)
+		{
+		appUi->SetAlarm(static_cast <TBool> (iAlarmActive->State()));
+		}
+	else if(aControlId == EOggAlarmTime)
+		{
+		appUi->iSettings.iAlarmTime = iAlarmTime->Time();
+		appUi->SetAlarmTime();
 		}
 }
 

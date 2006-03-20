@@ -33,13 +33,24 @@
 #define PRINT()
 #endif
 
+// Nokia phones don't seem to like large buffers, so just use one size (4K)
+#define USE_FIXED_SIZE_BUFFERS
+
 // Buffer sizes to use
 // (approx. 0.1s of audio per buffer)
+#if defined(USE_FIXED_SIZE_BUFFERS)
+const TInt KBufferSize48K = 4096;
+const TInt KBufferSize32K = 4096;
+const TInt KBufferSize22K = 4096;
+const TInt KBufferSize16K = 4096;
+const TInt KBufferSize11K = 4096;
+#else
 const TInt KBufferSize48K = 16384;
 const TInt KBufferSize32K = 12288;
 const TInt KBufferSize22K = 8192;
 const TInt KBufferSize16K = 6144;
 const TInt KBufferSize11K = 4096;
+#endif
 
 COggPlayController* COggPlayController::NewL(RFs* aFs, MDecoder *aDecoder)
 {
@@ -71,10 +82,11 @@ COggPlayController::COggPlayController(RFs* aFs, MDecoder *aDecoder)
 COggPlayController::~COggPlayController()
 {
     PRINT("COggPlayController::~COggPlayController In");
-
 	iState = EStateDestroying;
 
 	delete iStream;
+	delete iStreamMessage;
+
     if (iOwnSinkBuffer) 
         delete iSinkBuffer;
 
@@ -517,8 +529,10 @@ void COggPlayController::SetAudioCapsL(TInt theRate, TInt theChannels)
 		break;
   }
 
+#if !defined(USE_FIXED_SIZE_BUFFERS)
   if (iUsedChannels == 1)
 	  bufferSize /= 2;
+#endif
 
   // We are finished with the stream, so delete it
   delete iStream;
@@ -611,35 +625,50 @@ void COggPlayController::PlayL()
     PRINT("COggPlayController:: PlayL ok");
 }
 
-void COggPlayController::CustomCommand( TMMFMessage& aMessage )
+void COggPlayController::CustomCommand(TMMFMessage& aMessage)
     {   
-    if ( aMessage.Destination().InterfaceId().iUid != KOggTremorUidControllerImplementation )
+    if (aMessage.Destination().InterfaceId().iUid != KOggTremorUidControllerImplementation)
         {
         aMessage.Complete(KErrNotSupported);    
         return;
         }
-    TInt error = KErrNone;
-    switch ( aMessage.Function() )
+    TInt err = KErrNone;
+    switch (aMessage.Function())
         {
+		case EOggPlayControllerStreamWait:
+			// Complete now if the stream is open, otherwise mark that we have received the request
+			if (iStreamState == EStreamOpened)
+				aMessage.Complete(iStreamError);
+			else
+			{
+				iStreamState = EStreamStateRequested;
+				iStreamMessage = new TMMFMessage(aMessage);
+				if (!iStreamMessage)
+					aMessage.Complete(KErrNoMemory);
+			}
+			break;
+
         case EOggPlayControllerCCGetFrequencies:
             {
-            TRAP( error, GetFrequenciesL( aMessage ) );
+            TRAP(err, GetFrequenciesL(aMessage) );
+		    aMessage.Complete(err);  
             break;
             }
 
         case EOggPlayControllerCCSetVolumeGain:
             {
-            TRAP(error, SetVolumeGainL(aMessage));
+            TRAP(err, SetVolumeGainL(aMessage));
+		    aMessage.Complete(err);  
             break;
 			}
 
 		default:
             {
-            error = KErrNotSupported;
+            err = KErrNotSupported;
+		    aMessage.Complete(err);  
             break;
             }
         }
-    aMessage.Complete(error);  
     }
 
 void COggPlayController::PauseL()
@@ -979,6 +1008,15 @@ void  COggPlayController::SetVolumeGainL(TMMFMessage& aMessage)
 
 void COggPlayController::MaoscOpenComplete(TInt aError)
 {
+	if (iStreamState == EStreamStateRequested)
+	{
+		iStreamMessage->Complete(aError);
+
+		delete iStreamMessage;
+		iStreamMessage = NULL;
+	}
+
+	iStreamState = EStreamOpened;
 	iStreamError = aError;
 }
 

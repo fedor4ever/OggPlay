@@ -373,7 +373,8 @@ RESOURCE ARRAY options_multipage_array
     items = {
        PAGE { id=0;text =ogg_settings; lines = options_multipage1;},
        PAGE { id=1;text =ogg_softkeys_idle; lines = options_multipage2;},
-       PAGE { id=2;text =ogg_softkeys_play; lines = options_multipage3;}
+       PAGE { id=2;text =ogg_softkeys_play; lines = options_multipage3;},
+       PAGE { id=3;text =ogg_alarm_s60; lines = options_multipage4;}
     };
 }
 
@@ -490,6 +491,82 @@ RESOURCE ARRAY options_multipage3
              }
    };
 }
+
+RESOURCE ARRAY options_multipage4
+{
+   items = {
+    DLG_LINE {
+              type = EEikCtCheckBox;
+              prompt = ogg_alarm_s60;
+              id = EOggAlarmActive;
+             },
+    DLG_LINE {
+			type = EEikCtTimeEditor;
+            prompt = ogg_alarm_time_s60;
+			id = EOggAlarmTime;
+			control = TIME_EDITOR
+				{
+				minTime = TIME { };
+				maxTime = TIME { second = 59; minute = 59; hour = 23; };
+				flags = EEikTimeWithoutSecondsField;
+				};
+             },
+    DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_alarm_snooze;
+              id = EOggAlarmSnooze;
+              control = CHOICELIST
+				{
+                array_id= r_alarm_snooze_items;
+                };
+             },
+    DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_alarm_volume;
+              id = EOggAlarmVolume;
+              control = CHOICELIST
+				{
+                array_id= r_alarm_volume_items;
+                };
+             },
+    DLG_LINE {
+              type = EEikCtChoiceList;
+              prompt = ogg_alarm_boost;
+              id = EOggAlarmBoost;
+              control = CHOICELIST {
+                array_id= r_volume_boost_items;
+              };
+             }
+   };
+}
+
+RESOURCE ARRAY r_alarm_snooze_items
+	{
+	items =
+		{
+		LBUF { txt = ogg_alarm_snz1; },
+		LBUF { txt = ogg_alarm_snz2; },
+		LBUF { txt = ogg_alarm_snz3; },
+		LBUF { txt = ogg_alarm_snz4; }
+		};
+	}
+
+RESOURCE ARRAY r_alarm_volume_items
+	{
+	items =
+		{
+		LBUF { txt = "1"; },
+		LBUF { txt = "2"; },
+		LBUF { txt = "3"; },
+		LBUF { txt = "4"; },
+		LBUF { txt = "5"; },
+		LBUF { txt = "6"; },
+		LBUF { txt = "7"; },
+		LBUF { txt = "8"; },
+		LBUF { txt = "9"; },
+		LBUF { txt = "10"; }
+		};
+	}
 
 RESOURCE ARRAY r_oggplay_scandir_item_array
     {

@@ -1359,9 +1359,9 @@ COggPlayAppView::UpdateListbox()
 TBool
 COggPlayAppView::CanPlay()
 {
-  return (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
-	  iApp->iOggPlayback->State()==CAbsPlayback::EClosed ||
-	  iApp->iOggPlayback->State()==CAbsPlayback::EFirstOpen);
+  return (iApp->iOggPlayback->State()==CAbsPlayback::EReady ||
+	      iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
+	      iApp->iOggPlayback->State()==CAbsPlayback::EStopped);
 }
 
 TBool
@@ -1374,7 +1374,7 @@ TBool
 COggPlayAppView::CanStop()
 {
   return (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
-	  iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+	      iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
 }
 
 TBool
@@ -1414,13 +1414,13 @@ COggPlayAppView::UpdateControls()
 void
 COggPlayAppView::UpdateSongPosition()
 {
-#if defined(SERIES60)
+#if defined(SERIES60) || defined(SERIES80)
   // Only show "Played" time component when not stopped, i.e. only show 
   // when artist, title etc is displayed.
-  if( iPlayed[iMode] )
+  if (iPlayed[iMode])
     {
     TBool playedControlIsVisible = (iApp->iOggPlayback->State() != CAbsPlayback::EClosed) &&
-                                   (iApp->iOggPlayback->State() != CAbsPlayback::EFirstOpen);
+                                   (iApp->iOggPlayback->State() != CAbsPlayback::EStopped);
     iPlayed[iMode]->MakeVisible( playedControlIsVisible );
     if( !playedControlIsVisible )
       return;
@@ -1431,7 +1431,6 @@ COggPlayAppView::UpdateSongPosition()
   // Update the song position displayed in the menubar (flip open) 
   // or in the TOggCanvas (flip closed):
   //------------------------------------
-
   TBuf<64> mbuf;
   TInt sec= iApp->iOggPlayback->Position().GetTInt()/1000;
   TInt min= sec/60;
@@ -1461,7 +1460,6 @@ COggPlayAppView::UpdateSongPosition()
   if (iTotalDigits[iMode]) iTotalDigits[iMode]->SetText(mbuf.Right(5));
 #endif
   SetTime(iApp->iOggPlayback->Time());
-
 }
 
 void

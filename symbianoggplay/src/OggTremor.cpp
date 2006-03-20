@@ -145,7 +145,7 @@ void COggPlayback::ConstructL()
 
 COggPlayback::~COggPlayback()
 {
-  __ASSERT_ALWAYS((iState == EClosed) || (iState == EFirstOpen), User::Panic(_L("~COggPlayback"), 0));
+  __ASSERT_ALWAYS((iState == EClosed) || (iState == EStopped), User::Panic(_L("~COggPlayback"), 0));
 	
   delete iDecoder; 
   delete iStartAudioStreamingTimer;
@@ -880,10 +880,10 @@ void COggPlayback::Resume()
 void COggPlayback::Stop()
 {
   TRACEF(COggLog::VA(_L("STOP") ));
-  if (iState == EClosed)
+  if ((iState == EStopped) || (iState == EClosed))
     return;
 
-  iState = EClosed;
+  iState = EStopped;
   CancelTimers();
 
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -1246,7 +1246,7 @@ void COggPlayback::NotifyOpenComplete(TInt aErr)
 {
   // Called by the streaming thread listener when CMdaAudioOutputStream::Open() completes
   if (aErr == KErrNone)
-	iState = EFirstOpen;
+	iState = EReady;
   else
   {
     TBuf<32> buf;
@@ -1471,7 +1471,7 @@ void COggPlayback::MaoscPlayComplete(TInt aErr)
 
     
   TRACEF(COggLog::VA(_L("MaoscPlayComplete:%d"), aErr ));
-  if (iState==EPaused || iState==EClosed) return;
+  if (iState==EPaused || iState==EStopped) return;
 
   if (aErr == KErrUnderflow) 
       return;
@@ -1586,7 +1586,7 @@ void COggPlayback::MaoscOpenComplete(TInt aErr)
     _LIT(tit,"MaoscOpenComplete");
     iEnv->OggErrorMsgL(tit,buf);
   } else {
-    iState = EFirstOpen;
+    iState = EStopped;
     iStream->SetPriority(KAudioPriority, EMdaPriorityPreferenceTimeAndQuality);
   }
 }

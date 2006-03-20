@@ -24,16 +24,12 @@
 #include "OggLog.h"
 #include "f32file.h"
 #ifdef MMF_AVAILABLE
+#include "ImplementationUIDs.hrh"
 #include "OggPlayControllerCustomCommands.h"
 #endif /* MMF_AVAILABLE */
 
 
-////////////////////////////////////////////////////////////////
-//
 // CPluginInfo
-//
-////////////////////////////////////////////////////////////////
-
 CPluginInfo::CPluginInfo()
   {
   }
@@ -231,19 +227,17 @@ TInt COggPluginAdaptor::Info(const TDesC& aFileName, TBool /*silent*/)
 
 void COggPluginAdaptor::OpenL(const TDesC& aFileName)
 {
-    TState oldState = iState;
-    iState = EClosed;
     if (aFileName != iFileName)
     {
         TRACEF(COggLog::VA(_L("OpenL %S"), &aFileName ));
-        
+
         iTitle  = KNullDesC;
         iAlbum  = KNullDesC;
         iArtist = KNullDesC;
         iGenre  = KNullDesC;
         iTrackNumber = KNullDesC;
 
-        ConstructAPlayerL( aFileName );
+        ConstructAPlayerL(aFileName);
   
         // Find the selected plugin, corresponding to file type
         TParsePtrC p( aFileName);
@@ -251,8 +245,9 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         CPluginInfo * info = GetPluginListL().GetSelectedPluginInfo(pp);
         if (info == NULL)
         	User::Leave(KErrNotFound);
+
         iPluginControllerUID = info->iControllerUid;
-        iPlayer->OpenFileL(aFileName, KNullUid , iPluginControllerUID );
+        iPlayer->OpenFileL(aFileName, KNullUid, iPluginControllerUID);
        
         // Wait for the init completed callback
         iError = KErrNone;
@@ -263,12 +258,15 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         }
 #endif
         User::LeaveIfError(iError);
+		iState = EReady;
+
         iFileName = aFileName;
         TInt nbMetaData;
         CMMFMetaDataEntry * aMetaData;
         TInt err = iPlayer->GetNumberOfMetaDataEntries(nbMetaData);
-        if (err)
+        if (err != KErrNone)
           nbMetaData = 0;
+
         HBufC *metadataValue = HBufC::NewLC(128);
 		TPtr metadataValueDes(metadataValue->Des());
         for (TInt i=0; i< nbMetaData; i++)
@@ -297,6 +295,7 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         }
         
         CleanupStack::PopAndDestroy(metadataValue);
+
 #if 0
         // Currently the MMF Plugin doesn't give access to these.
         // This could be added in the future as a custom command. 
@@ -308,11 +307,13 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
         iChannels = 0;
         iBitRate = 0;
 #endif
-        iState = EOpen;
+
+		// Clear the frequency analyser
+		Mem::FillZ(&iFreqBins, sizeof(iFreqBins));
+
+		iState = EOpen;
         SetVolume(iVolume);
-    }
-    else
-        iState = oldState;
+	}
 
 	// Set the volume gain
 	SetVolumeGain(iGain);
@@ -320,9 +321,8 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
 
 void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &aDestinationBuffer )
 {
- // Try to remove all TABs, CR and LF
- // having those around is screwing up the SW. 
- 
+  // Try to remove all TABs, CR and LF
+  // having those around is screwing up the SW
   HBufC * tempBuf = aMetaData.Value().AllocL();
   CleanupStack::PushL(tempBuf);
   tempBuf->Des().Zero();
@@ -378,9 +378,10 @@ void COggPluginAdaptor::Play()
 {
     TRACEF(_L("COggPluginAdaptor::Play() In"));
     iInterrupted = EFalse;
-    if (iState == EClosed)
+    if ((iState == EClosed) || (iState == EReady))
         return;
-    TRAPD(err,iPlayer->PlayL()); 
+
+    TRAPD(err, iPlayer->PlayL()); 
     if (err) return; // Silently ignore the problem :-(
 
 	iState = EPlaying;
@@ -393,8 +394,7 @@ void COggPluginAdaptor::Stop()
 {
     TRACEF(_L("COggPluginAdaptor::Stop()"));
     iPlayer->Stop();
-    iFileName = KNullDesC;
-    iState = EClosed;
+    iState = EStopped;
 
     // The Stop is synchroneous within the MMF Framework.
     iObserver->NotifyUpdate();
@@ -457,27 +457,28 @@ TInt64 COggPluginAdaptor::Time()
 TInt COggPluginAdaptor::Volume()
 {
     // Not Implemented yet
-    return(0);
+    return 0;
 }
 
 const TInt32* COggPluginAdaptor::GetFrequencyBins()
 {
-    iFreqBins[0] = 55;
-    
+	if (iPluginControllerUID.iUid != KOggTremorUidControllerImplementation)
+		return iFreqBins;
+
     TMMFGetFreqsParams pckg;
     pckg.iFreqBins = iFreqBins;
     TMMFGetFreqsConfig freqConfig(pckg); // Pack the config.
     TPckg <TInt32 [16]> dataFrom(iFreqBins); 
     
-    TMMFMessageDestination msg( iPluginControllerUID, KMMFObjectHandleController );
+    TMMFMessageDestination msg(iPluginControllerUID, KMMFObjectHandleController);
     TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
     
-    TInt error = iPlayer->PlayControllerCustomCommandSync( packedMsg, 
+    TInt error = iPlayer->PlayControllerCustomCommandSync(packedMsg, 
                                        EOggPlayControllerCCGetFrequencies, 
-                                       freqConfig, 
-                                       KNullDesC8, dataFrom );
+                                       freqConfig,
+                                       KNullDesC8, dataFrom);
 
-	if ((error != KErrNone) && (error != KErrNotSupported))
+	if (error != KErrNone)
 	{
 		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
 	}
@@ -499,7 +500,7 @@ void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
     
 	TInt err = KErrNone;
 	iGain = aGain;
-	if (iPlayer)
+	if (iPlayer && (iPluginControllerUID.iUid == KOggTremorUidControllerImplementation))
 		err = iPlayer->PlayControllerCustomCommandSync(packedMsg, EOggPlayControllerCCSetVolumeGain, gainConfig, KNullDesC8, dataFrom);
 
 	if (err != KErrNone)
@@ -519,8 +520,21 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
         // From not opened to opened
         TRACEF(COggLog::VA(_L("MoscoStateChange : InitComplete %d"), aErrorCode ));
         iError = aErrorCode;
-        iWait.AsyncStop(); // Gives back the control to the waiting OpenL()
-    }
+
+		if (iError == KErrNone)
+		{
+			if (iPluginControllerUID.iUid == KOggTremorUidControllerImplementation)
+			{
+				// Wait until the controller has opened the audio output stream
+				TMMFMessageDestination msg(iPluginControllerUID, KMMFObjectHandleController);
+				TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
+
+				iError = iPlayer->PlayControllerCustomCommandSync(packedMsg, EOggPlayControllerStreamWait, KNullDesC8, KNullDesC8);
+			}
+		}
+
+		iWait.AsyncStop(); // Gives back the control to the waiting OpenL()
+	}
 #else
     if ((aPreviousState == CMdaAudioClipUtility::ENotReady) 
         && (aCurrentState == CMdaAudioClipUtility::EOpen))
@@ -536,8 +550,8 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
     {
         // From opened to Playing
         // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
-            iInterrupted = ETrue;
-            iObserver->NotifyPlayInterrupted();
+        iInterrupted = ETrue;
+        iObserver->NotifyPlayInterrupted();
     }
     
     if ((aPreviousState == CMdaAudioClipUtility::EPlaying) 
@@ -552,19 +566,16 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
             iInterrupted = ETrue;
             iObserver->NotifyPlayInterrupted();
             break;
-        case KErrUnderflow:
-            iState = EClosed;
+
+		case KErrUnderflow:
+            iState = EStopped;
             break;
+
         default:
             iObserver->NotifyPlayComplete();
+			break;
         }
     }
-
-   if ((aPreviousState == CMdaAudioClipUtility::EOpen) && (aCurrentState == CMdaAudioClipUtility::EOpen) && (aErrorCode == KErrNotReady))
-	{
-		// The plugin isn't ready so try again
-	    TRAP(aErrorCode,iPlayer->PlayL()); 
-	}
 }
  
 
@@ -589,29 +600,25 @@ CPluginSupportedList & COggPluginAdaptor::GetPluginListL()
 
 
 #ifdef MMF_AVAILABLE
-////////////////////////////////////////////////////
 // Interface using the MMF
-////////////////////////////////////////////////////
-
-
 COggPluginAdaptor::~COggPluginAdaptor()
 {
-    delete (iPlayer);
+    delete iPlayer;
 }
 
 void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
 {
     // Stupid, but true, we must delete the player when loading a new file
     // Otherwise, will panic with -15 on some HW   
-    delete(iPlayer);
-    iPlayer=NULL;
-    iPlayer = CMdaAudioRecorderUtility::NewL(
-        *this);
+    delete iPlayer;
+    iPlayer = NULL;
+	iState = EClosed;
+
+    iPlayer = CMdaAudioRecorderUtility::NewL(*this);
 }
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension, TBool isEnabled)
 {
-  
 	iPluginSupportedList.AddExtension(anExtension); // Add this extension to the selected list
     CMMFControllerPluginSelectionParameters * cSelect = CMMFControllerPluginSelectionParameters::NewLC();
     CMMFFormatSelectionParameters * fSelect = CMMFFormatSelectionParameters::NewLC();
@@ -676,12 +683,7 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension, TBool isEnabled
 }
 
 #else
-
-////////////////////////////////////////////////////
 // Interface when MMF is not available
-////////////////////////////////////////////////////
-
-
 COggPluginAdaptor::~COggPluginAdaptor()
 {
      delete (iOggPlayer);
@@ -693,7 +695,6 @@ COggPluginAdaptor::~COggPluginAdaptor()
      iPluginInfos->ResetAndDestroy();
      delete (iPluginInfos);
 }
-
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension)
 {

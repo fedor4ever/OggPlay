@@ -92,7 +92,7 @@ COggPlayback::COggPlayback( COggMsgEnv* anEnv, MPlaybackObserver* anObserver )
 
 COggPlayback::~COggPlayback( void )
 {
-   __ASSERT_ALWAYS((iState == EClosed) || (iState == EFirstOpen), User::Panic(_L("~COggPlayback"), 0));
+   __ASSERT_ALWAYS((iState == EClosed) || (iState == EStopped), User::Panic(_L("~COggPlayback"), 0));
 	
    delete iDecoder; 
    delete iStream;
@@ -346,7 +346,7 @@ void COggPlayback::Play()
       }
       break;
       
-   case EClosed:
+   case EStopped:
       if ( iStream )
       {
          iState = EPlaying;
@@ -376,7 +376,7 @@ void COggPlayback::Stop()
    if ( (iState == EPlaying && !iPlayWhenOpened) || iState == EPaused)
    { 
       iStream->Stop();
-      iState = EClosed;
+      iState = EStopped;
 
       if (iFile)
       {
@@ -572,7 +572,7 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
          {
             // All data has been played, so stop
             iStream->Stop();
-            iState = EClosed;
+            iState = EStopped;
 
             if (iFile)
             {
@@ -616,7 +616,7 @@ void COggPlayback::OnEvent( TMAudioFBCallbackState aState, TInt aError )
          // Setup the API to be deleted outside of the callback
          iDelete = iStream;
          iStream = NULL;
-         iState  = EClosed;
+         iState  = EStopped;
          if ( iObserverAO ) iObserverAO->NotifyPlayInterrupted();
          break;
 
@@ -826,7 +826,7 @@ void COggPlayback::ResetStreamApi( void )
    }
 
    iDecoding = EFalse;
-   iState    = EClosed;
+   iState    = EStopped;
    for (TInt i = 0; i < KMotoBuffers; i++)
    {
       iBufferFlag[i] = EBufferFree;
