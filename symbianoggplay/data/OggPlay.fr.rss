@@ -166,6 +166,7 @@
 #define ogg_cba_4                    "Softkey #4"
 
 #define ogg_cba_select               "Select."    
+#define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel."    
 
 // New Tags, not yet translated:
@@ -198,5 +199,6 @@
 #define ogg_alarm_snz3                   "20 min"
 #define ogg_alarm_snz4                   "30 min"
 
+#define ogg_alarm_title                  "OggPlay Alarm"
 #define ogg_alarm_message                "Ogg Alarm!"
 #define ogg_cba_snooze                   "Snooze"

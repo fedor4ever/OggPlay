@@ -174,6 +174,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_4                    "Softkey #4" // To be Translated 
 
 #define ogg_cba_select               "Выбор"     
+#define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Отмена"    
 
 #define ogg_boost_up                 "Увел. громкость"     
@@ -205,5 +206,6 @@ CHARACTER_SET UTF8
 #define ogg_alarm_snz3                   "20 min"
 #define ogg_alarm_snz4                   "30 min"
 
+#define ogg_alarm_title                  "OggPlay Alarm"
 #define ogg_alarm_message                "Ogg Alarm!"
 #define ogg_cba_snooze                   "Snooze"

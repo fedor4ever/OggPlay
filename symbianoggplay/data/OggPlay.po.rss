@@ -173,6 +173,7 @@
 #define ogg_cba_4                    "Softkey #4" // To be Translated 
 
 #define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
 
 #define ogg_boost_up                 "Volume boost up"     // To be Translated
@@ -204,5 +205,6 @@
 #define ogg_alarm_snz3                   "20 min"
 #define ogg_alarm_snz4                   "30 min"
 
+#define ogg_alarm_title                  "OggPlay Alarm"
 #define ogg_alarm_message                "Ogg Alarm!"
 #define ogg_cba_snooze                   "Snooze"

@@ -174,6 +174,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_4                    "Softkey #4" // To be Translated 
 
 #define ogg_cba_select               "Select"     // To be Translated
+#define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"     // To be Translated
 #define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
@@ -201,5 +202,6 @@ CHARACTER_SET UTF8
 #define ogg_alarm_snz3                   "20 min"
 #define ogg_alarm_snz4                   "30 min"
 
+#define ogg_alarm_title                  "OggPlay Alarm"
 #define ogg_alarm_message                "Ogg Alarm!"
 #define ogg_cba_snooze                   "Snooze"
