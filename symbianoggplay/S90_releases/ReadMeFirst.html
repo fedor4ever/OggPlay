@@ -1,0 +1,535 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="user.nokia.com">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en]C-CCK-MCD   (Windows NT 5.0; U) [Netscape]">
+  <title>OggPlay for Series60</title>
+</head>
+<body>
+<center>
+<h1>OggPlay</h1>
+</center>
+<center>
+<h1>For Series60 phones</h1>
+</center>
+<center>
+<h2>Supplementary Information</h2>
+</center>
+<p><br>
+This document covers the following topics:
+</p>
+<ol>
+  <ul>
+    <li> <a href="#Versions">OggPlay Versions</a></li>
+    <li> <a href="#File%20Format">File Format Supported</a></li>
+    <li> <a href="#Audio%20Format">Audio Format Supported</a></li>
+    <li><a href="#Random_Ringing_Tone">Random Ringing Tones</a><br>
+    </li>
+  </ul>
+</ol>
+<h3>
+<a name="Versions"></a>OggPlay Version</h3>
+<blockquote>
+  <div class="11BodyText">OggPlay is a music player for phones running
+on
+the Symbian Operating system. Latest versions comes bundled with a .ogg
+file format decoder, but it detects and uses MMF plugings which may
+come built-in your phone or that might have been installed later on.</div>
+</blockquote>
+<blockquote>
+  <div class="11BodyText">OggPlay comes in several flavors, depending
+on
+HW and Operating System version of the phone it is running on. This
+text
+concentrates on Series60 MMF versions. Please consult <a
+ href="http://symbianoggplay.sourceforge.net/">Oggplay
+webpage</a> for the other versions, new releases and much more details
+about OggPlay.</div>
+  <div class="11BodyText">For Series60 phones, two different versions
+of
+OggPlay co-exists. One version for phones supporting the MMF, the other
+one for phones that do not support it.</div>
+  <div class="11BodyText" style="margin-left: 65.2pt;">Technical
+mambo-jambo:
+(skip to next paragraph if you&#8217;re not interested)</div>
+  <blockquote>
+    <div class="11BodyText" style="margin-left: 90pt;">MMF (Multimedia
+Framework)
+is a feature of Symbian Operating System (SOS) that allows (among other
+things) 3<sup>rd</sup> parties to use audio decoder plugins. With MMF,
+Oggplay can use the phone built-in audio decoders (MP3, AAC, MP4), as
+well
+as
+decoders installed by users. The MMF comes bundled together with the
+SOS
+7.0S and above, in the phone firmware, and can't be installed in phones
+afterwards.</div>
+  </blockquote>
+The user should carefully select which package to install on their
+phones,
+depending on their phone type. The table below shows which package you
+should install depending on your phone model. It is suggested, but not
+mandatory, to install the MMF Version, if your HW supports the MMF: <br>
+&nbsp;
+  <center>
+  <table border="1" cols="3">
+    <tbody>
+      <tr>
+        <td>
+        <center>Phone Model</center>
+        </td>
+        <td width="100">
+        <center>OggPlay&nbsp; <br>
+MMF&nbsp; <br>
+Version</center>
+        </td>
+        <td width="100">
+        <center>OggPlay Non-MMF Version</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 3650</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 3660</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 6600</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 6620</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 7610</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 7650</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia N-Gage</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia N-Gage QD</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+        <center>X<br>
+        </center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Siemens SX-1</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+        <center>X</center>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </center>
+</blockquote>
+<h3 class="11BodyText">
+<a name="File Format"></a>File Format Supported</h3>
+<blockquote>
+  <div class="11BodyText">For phones running Symbian OS 7.0S and over,
+Oggplay
+is able to use standard Symbian MMF plugins. These plugins can be
+either
+built-in your phone or installed afterward. Since Oggplay is able to
+both
+built-in and downloadable plugins, the file formats supported by
+Oggplay
+differs from phones to phones. The version of Oggplay that runs on a
+Symbian
+OS older than 7.0S does not currently support plugins. This might
+change
+in future releases. Next table shows the properties of each phone:</div>
+  <center>
+  <table style="width: 553px; height: 344px;" border="1" cols="4">
+    <tbody>
+      <tr>
+        <td>
+        <center>Phone Model</center>
+        </td>
+        <td width="100">
+        <center>Ogg</center>
+        </td>
+        <td align="center" width="100">
+        <center>MP3 <br>
+Built-in Plugin</center>
+        </td>
+        <td width="100">
+        <center>AAC Built-in Plugin</center>
+        </td>
+        <td style="vertical-align: top; text-align: center;">MP4 (m4a) <br>
+Built-in Plugin<br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 3650</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td style="vertical-align: top;"><br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 3660</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td style="vertical-align: top;"><br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 6600</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td style="vertical-align: top;"><br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 6620</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td style="vertical-align: top; text-align: center;">X<br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 7610</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td style="vertical-align: top; text-align: center;">X<br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 7650</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td style="vertical-align: top;"><br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia N-Gage</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>(1)</center>
+        </td>
+        <td>
+        <center>(1)</center>
+        </td>
+        <td style="vertical-align: top;"><br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia N-Gage QD</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>
+        <center>?</center>
+        </td>
+        <td>
+        <center>?</center>
+        </td>
+        <td style="vertical-align: top; text-align: center;">?<br>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Siemens SX-1</center>
+        </td>
+        <td>
+        <center>X</center>
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td style="vertical-align: top;"><br>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </center>
+  <p class="00BodyText"
+ style="margin: 0cm 0cm 0.0001pt 54pt; text-indent: -18pt;">(1):
+This phone does have built-in MP3/AAC reader, but it doesn&#8217;t allow 3<sup>rd</sup>
+party developers to use it, thus Oggplay cannot use the built-in
+decoder </p>
+  <p class="MsoNormal" style="margin-left: 36pt;">An MP3 Downloadable
+plugin
+is currently under development. Keep an eye on OggPlay webpage for
+release
+announcements! <br>
+&nbsp;<br>
+Apple's iTunes format (M4A) can be decoded by OggPlay. However, you
+must rename the extension of each files to MP4.<br>
+  </p>
+</blockquote>
+<h3 class="MsoNormal" style="margin-left: 36pt;">
+<a name="Audio Format"></a>Audio Format supported</h3>
+<blockquote>
+  <div class="MsoNormal" style="margin-left: 36pt;">OggPlay uses the
+highest
+audio quality provided by the phone. As a reference, CD sampling rate
+is
+44100 Hz.</div>
+  <br>
+&nbsp;
+  <center>
+  <table border="1" cols="3">
+    <tbody>
+      <tr>
+        <td>
+        <center>Phone Model</center>
+        </td>
+        <td width="100">
+        <center>Highest Sampling Rate&nbsp; <br>
+(Hz)</center>
+        </td>
+        <td width="100">
+        <center>Stereo</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 3650</center>
+        </td>
+        <td>
+        <center>16000</center>
+        </td>
+        <td>
+        <center>No</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 3660</center>
+        </td>
+        <td>
+        <center>16000</center>
+        </td>
+        <td>
+        <center>No</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 6600</center>
+        </td>
+        <td>
+        <center>16000</center>
+        </td>
+        <td>
+        <center>No</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 6620</center>
+        </td>
+        <td>
+        <center>44100</center>
+        </td>
+        <td>
+        <center>Yes</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 7610</center>
+        </td>
+        <td>
+        <center>44100</center>
+        </td>
+        <td>
+        <center>No</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia 7650</center>
+        </td>
+        <td>
+        <center>16000</center>
+        </td>
+        <td>
+        <center>No</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia N-Gage</center>
+        </td>
+        <td>
+        <center>16000 (1)</center>
+        </td>
+        <td>
+        <center>No (1)</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Nokia N-Gage QD</center>
+        </td>
+        <td>
+        <center>?</center>
+        </td>
+        <td>
+        <center>?</center>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <center>Siemens SX-1</center>
+        </td>
+        <td>
+        <center>44100</center>
+        </td>
+        <td>
+        <center>Yes</center>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </center>
+  <p class="00BodyText" style="margin: 0cm 0cm 0.0001pt 36pt;">(1): The
+buit-in
+audio player of this phone supports 44100Hz in Stereo, but it doesn&#8217;t
+allow
+3<sup>rd</sup> party developers to use it, thus Oggplay is restricted
+to
+use 16000Hz in Mono.<br>
+  </p>
+</blockquote>
+<h3 class="MsoNormal" style="margin-left: 36pt;"><a
+ name="Random_Ringing_Tone"></a>Random Ringing Tone</h3>
+<div style="margin-left: 80px;" class="11BodyText">The .ogg plugin
+provided with this release can be used as a random ringing tone :
+everytime a phone call is received, the ringing tone played will be
+randomly choosen from the list of available .ogg files in the device.
+To enable this random ringing tone, the following must be done:<br>
+<ul>
+  <li>Copy the file <span style="font-style: italic;">random_ringing_tone.ogg&nbsp;</span>
+provided in the release package to your phone, in the
+same directory where the file you wish to use as random ringing tones.
+The random ringing tone will be choosen only from that directory. <span
+ style="font-style: italic;"></span><br>
+  </li>
+  <li>Select the file <span style="font-style: italic;">random_ringing_tone.ogg
+    </span>to be your ringing tone. The way to do this depends on your
+device. But it's usually from the <span style="font-style: italic;">profile</span>
+menu, or from the phone's <span style="font-style: italic;">music
+player</span>. <br>
+  </li>
+  <li>When you will receive a phone call, the tone will be selected
+from the .ogg files found in same directory than&nbsp; the <span
+ style="font-style: italic;">random_ringing_tone.ogg. </span>The song
+played should be different everytime you get a call.<span
+ style="font-style: italic;"><br>
+    </span></li>
+</ul>
+A word of warning... This feature relies a lot on your HW Firmware. It
+might not work, and there are no guarantees that it will work in all
+situations. <br>
+</div>
+<blockquote> <br>
+</blockquote>
+<blockquote>&nbsp;</blockquote>
+</body>
+</html>

@@ -1,0 +1,46 @@
+
+This is the Release Note for Release 1.6.7 of Oggplay for Series90.
+
+******************************************************************************
+**** This release will only work on Series90 phones (eg. Nokia 7710)      ****
+****                                                                      ****
+****                                                                      ****
+******************************************************************************
+
+OggPlay is a music player for phones running on the Symbian Operating system. 
+It comes bundled with a .ogg file format decoder, but it detects and uses MMF 
+plugins which may come built-in your phone or that might have been installed
+later on. MP3, AAC, MP4, M4A plugins are supported.
+
+See the ReadMeFirst.html to see which file formats your phone supports.
+
+This release will only work on phones that supports MMF framework.
+         
+
+History
+--------------------------------------------------------------------------------------------
+
+What's new in Release 1.6.7:
+--------------------------
+First release for S90.
+
+
+What's missing:
+---------------
+Some features present in the non-MMF version have been dropped, since quite a lot of work is required to
+make them work in a MMF plugin. They will be reintroduced in future releases.
+These features are:
+  - Frequency analyzer
+
+
+
+Links:
+---------------------------------------------------------------------------------------------
+For more information about Oggplay, please see the webpage at
+http://symbianoggplay.sourceforge.net/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+
+-the S60 Oggplay developers.
