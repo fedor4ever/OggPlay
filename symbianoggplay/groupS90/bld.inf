@@ -1,0 +1,32 @@
+/*
+* ============================================================================
+*  Name     : bld.inf
+*  Part of  : OggPlay
+*  Created  : 19.07.2003 by 
+*  Description:
+*	 This file provides the information required for building the UI for OggPlay.
+*        Make sure that SERIES80, SERIES90 and OS70S are defined in \inc\OggOs.h
+*        The vorbis plugin must also be built.
+*  Version  :
+*  Copyright: 
+* ============================================================================
+*/
+
+
+PRJ_PLATFORMS
+WINS ARMI
+
+PRJ_EXPORTS
+..\Inc\OggPlayUid.h
+..\Inc\OggOs.h
+..\Plugin\Inc\OggPlayPlugin.h
+
+// Default skin
+..\bitmaps\skins\icyS90\icyS90.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\icyS90.skn
+..\bitmaps\skins\icyS90\icyS90.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\icyS90.skn
+..\bitmaps\skins\icyS90\icyS90.mbm \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\icyS90.mbm
+..\bitmaps\skins\icyS90\icyS90.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\icyS90.mbm
+
+PRJ_MMPFILES
+OggPlayS90.mmp
+
