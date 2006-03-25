@@ -97,8 +97,11 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iCbaControl[1][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba14));
   iVolumeBoostControl = static_cast <CEikChoiceList*> (Control(EOggSettingVolumeBoost));
 
-  iAlarmActive = static_cast<CEikCheckBox*> (Control(EOggAlarmActive));
-  iAlarmTime = static_cast<CEikTimeEditor*> (Control(EOggAlarmTime));
+  iAlarmActiveControl = static_cast<CEikCheckBox*> (Control(EOggAlarmActive));
+  iAlarmTimeControl = static_cast<CEikTimeEditor*> (Control(EOggAlarmTime));
+  iAlarmSnoozeControl = static_cast<CEikChoiceList*> (Control(EOggAlarmSnooze));
+  iAlarmVolumeControl = static_cast<CEikChoiceList*> (Control(EOggAlarmVolume));
+  iAlarmBoostControl = static_cast<CEikChoiceList*> (Control(EOggAlarmBoost));
 
   CDesCArray *listboxArray= new (ELeave) CDesCArrayFlat(10);
   listboxArray->AppendL(KFullScanString); 
@@ -106,17 +109,18 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iScanDirControl->SetTextL(&(iSettings->iCustomScanDir));
   iAutostartControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iAutoplay));
   
-  COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
-  iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iRepeat));
-  iRandomControl->SetState(static_cast <CEikButtonBase::TState>(appUi->iRandom));
+  iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iRepeat));
+  iRandomControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iRandom));
   iVolumeBoostControl->SetCurrentItem(iSettings->iGainType);
 
-  iAlarmActive->SetState(static_cast <CEikButtonBase::TState>(appUi->iSettings.iAlarmActive));
-  iAlarmTime->SetTime(appUi->iSettings.iAlarmTime);
+  iAlarmActiveControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iAlarmActive));
+  iAlarmTimeControl->SetTime(iSettings->iAlarmTime);
+  iAlarmSnoozeControl->SetCurrentItem(iSettings->iAlarmSnooze);
+  iAlarmVolumeControl->SetCurrentItem(iSettings->iAlarmVolume - 1);
+  iAlarmBoostControl->SetCurrentItem(iSettings->iAlarmGain);
 
   UpdateControlsFromSoftkeys();
 }
-
 
 void 
 CSettingsS80Dialog::UpdateSoftkeysFromControls()
@@ -191,14 +195,27 @@ void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
 		{
 		appUi->SetVolumeGainL((TGainType) iVolumeBoostControl->CurrentItem());
 		}
-	else if(aControlId == EOggAlarmActive)
+	else if (aControlId == EOggAlarmActive)
 		{
-		appUi->SetAlarm(static_cast <TBool> (iAlarmActive->State()));
+		appUi->SetAlarm(static_cast <TBool> (iAlarmActiveControl->State()));
 		}
-	else if(aControlId == EOggAlarmTime)
+	else if (aControlId == EOggAlarmTime)
 		{
-		appUi->iSettings.iAlarmTime = iAlarmTime->Time();
+		appUi->iSettings.iAlarmTime = iAlarmTimeControl->Time();
 		appUi->SetAlarmTime();
+		}
+	else if (aControlId == EOggAlarmSnooze)
+		{
+		appUi->iSettings.iAlarmSnooze = iAlarmSnoozeControl->CurrentItem();
+		appUi->SetAlarmTime();
+		}
+	else if (aControlId == EOggAlarmVolume)
+		{
+		appUi->iSettings.iAlarmVolume = iAlarmVolumeControl->CurrentItem() + 1;
+		}
+	else if (aControlId == EOggAlarmBoost)
+		{
+		appUi->iSettings.iAlarmGain = iAlarmBoostControl->CurrentItem();
 		}
 }
 

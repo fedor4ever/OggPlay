@@ -353,7 +353,7 @@ void COggPlayAppUi::ConstructL()
 	iAppView=new(ELeave) COggPlayAppView;
 	iAppView->ConstructL(this, ClientRect());
 
-	SetRandomL(iRandom);
+	SetRandomL(iSettings.iRandom);
 	SetRepeat(iSettings.iRepeat);
 
 	HandleCommandL(EOggSkinOne+iCurrentSkin);
@@ -704,17 +704,10 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		break;
 				   }
 		
-	case EOggShuffle: {
-     
+	case EOggShuffle: {     
 		HandleCommandL(EOggStop);
-        if (iRandom)
-        {
-            SetRandomL(EFalse);
-        }
-        else
-        {
-            SetRandomL(ETrue);
-        }
+
+		SetRandomL(!iSettings.iRandom);
         iSongList->SetRepeat(iSettings.iRepeat);
 		break;
 					  }
@@ -1269,8 +1262,8 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 #elif defined(SERIES60)
     // FIXIT - Should perhaps be in the options menu instead ??
     TBuf<50> buf;
-    iEikonEnv->ReadResource(buf, (iRandom) ? R_OGG_RANDOM_ON : R_OGG_RANDOM_OFF );
-    aMenuPane->SetItemTextL( EOggShuffle, buf );
+	iEikonEnv->ReadResource(buf, iSettings.iRandom ? R_OGG_RANDOM_OFF : R_OGG_RANDOM_ON);
+    aMenuPane->SetItemTextL(EOggShuffle, buf);
 #endif
 		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName) || (iViewBy == EPlayList));
 		aMenuPane->SetItemDimmed(EOggInfo   , (!iSongList->AnySongPlaying()) && (iAppView->GetSelectedIndex()<0 || !isSongList));
@@ -1475,7 +1468,7 @@ COggPlayAppUi::ReadIniFile()
       iSettings.iSoftKeysIdle[3]      = (TInt)  IniRead32( tf );
       iSettings.iSoftKeysPlay[3]      = (TInt)  IniRead32( tf );
  #endif
-      iRandom                    = (TBool) IniRead32( tf, 0, 1 );
+      iSettings.iRandom                    = (TBool) IniRead32( tf, 0, 1 );
 
    } // version 2 onwards
 
@@ -1697,7 +1690,7 @@ COggPlayAppUi::WriteIniFile()
         tf.Write(num);
     }
     
-    num.Num(iRandom);
+    num.Num(iSettings.iRandom);
     tf.Write(num);
 
 #ifdef PLUGIN_SYSTEM
@@ -1785,8 +1778,8 @@ COggPlayAppUi::SetRandomL(TBool aRandom)
      delete(iSongList);
     iSongList = NULL;
         
-    iRandom = aRandom;
-    if (iRandom)
+    iSettings.iRandom = aRandom;
+    if (iSettings.iRandom)
         iSongList = new(ELeave) COggRandomPlay();
     else
     	iSongList = new(ELeave) COggNormalPlay();

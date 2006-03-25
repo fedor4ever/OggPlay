@@ -92,6 +92,7 @@ RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
 
 
 RESOURCE DIALOG r_dialog_about {
+  title = ogg_about_oggplay;
   buttons =  R_EIK_BUTTONS_CONTINUE; 
   flags   = EEikDialogFlagWait;
   items = {
@@ -102,7 +103,6 @@ RESOURCE DIALOG r_dialog_about {
 	{
 	  width = 300;
 	  height = 150;
-
 	};
     }
   };
@@ -582,6 +582,75 @@ RESOURCE DIALOG r_dialog_codecs {
   buttons =  R_EIK_BUTTONS_CONTINUE;
   flags   = EEikDialogFlagWait;
 }
+
+RESOURCE DIALOG r_oggplay_snooze_dlg
+	{
+	title = ogg_alarm_title;
+	buttons = r_oggplay_snooze_buttons;
+	flags = EEikDialogFlagWait;
+	margins = r_oggplay_snooze_dlg_margins;
+ 
+	items =
+		{
+		DLG_LINE
+			{
+			type = EEikCtLabel;
+			control = LABEL
+				{
+				txt = ogg_alarm_message;
+				horiz_align = EEikLabelAlignHCenter;
+				standard_font = EEikLabelFontLegend;
+				};
+			}
+		};
+	}
+
+RESOURCE DLG_MARGINS r_oggplay_snooze_dlg_margins
+	{
+	Left = 20;
+	Right = 20;
+	Top = 20;
+	Bottom = 20;
+	}
+
+RESOURCE DLG_BUTTONS r_oggplay_snooze_buttons
+	{
+	buttons =
+		{
+		DLG_BUTTON
+			{
+			id = EOggButtonSnooze;
+			button = CMBUT
+				{
+				txt = ogg_cba_snooze;
+				};
+			},
+		DLG_BUTTON
+			{
+			id = EOggButtonCancel;
+			button = CMBUT
+				{
+				txt = ogg_cba_cancel;
+				};
+			},
+		DLG_BUTTON
+			{
+			id = EEikBidBlank;
+			button = CMBUT
+				{
+				txt = "";
+				};
+			},
+		DLG_BUTTON
+			{
+			id = EEikBidOk;
+			button = CMBUT
+				{
+				txt = ogg_cba_continue;
+				};
+			}
+		};
+	}
 
 
 RESOURCE TBUF r_ogg_error_1 { buf=ogg_text_error_1; }

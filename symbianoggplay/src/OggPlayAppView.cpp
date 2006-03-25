@@ -118,7 +118,10 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[0]->SetContainerWindowL(*this);
   iCanvas[0]->SetControlContext(this);
   iCanvas[0]->SetObserver(this);
-#if defined(SERIES80)
+#if defined(SERIES90)
+  TPoint pBM(0,0);
+  iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 320));
+#elif defined(SERIES80)
   TPoint pBM(0,0);
   iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 200));
 #elif defined(SERIES60)
@@ -180,7 +183,7 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
   iIconFileName= aFileName.Left(aFileName.Length()-4);
   iIconFileName.Append(_L(".mbm"));
 
-#if defined(SERIES60)
+#if defined(SERIES60) || defined(SERIES80) || defined(SERIES90)
   TInt scaleFactor = iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
   TOggParser p(aFileName, scaleFactor);
 #else
@@ -464,7 +467,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	    p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iRandomIcon[aCanvas]= (COggIcon*)c;
-      iRandomIcon[aCanvas]->MakeVisible(iApp->iRandom);
+      iRandomIcon[aCanvas]->MakeVisible(iApp->iSettings.iRandom);
     }
     else if (p.iToken==_L("RepeatButton")) { 
       _LIT(KAL,"Adding RepeadButton");
@@ -1002,7 +1005,7 @@ COggPlayAppView::UpdateRepeat()
 void
 COggPlayAppView::UpdateRandom()
 {
-  if (iApp->iRandom) {
+  if (iApp->iSettings.iRandom) {
     if (iRandomIcon[iMode]) iRandomIcon[iMode]->Show();
   } else {
     if (iRandomIcon[iMode]) iRandomIcon[iMode]->Hide();
@@ -1120,6 +1123,10 @@ void COggPlayAppView::HandleAlarmCallBack()
   // Reset the alarm
 #if defined(SERIES60)
   CAknQueryDialog* snoozeDlg = CAknQueryDialog::NewL();
+#else
+  CEikDialog* snoozeDlg = new(ELeave) CEikDialog;
+#endif
+
   TInt snoozeCmd = snoozeDlg->ExecuteLD(R_OGGPLAY_SNOOZE_DLG);
   if (snoozeCmd == EOggButtonSnooze)
   {
@@ -1142,7 +1149,6 @@ void COggPlayAppView::HandleAlarmCallBack()
     // Set the alarm to fire again tomorrow 
 	SetAlarm();
   }
-#endif
 }
 
 void COggPlayAppView::Invalidate()
@@ -1266,7 +1272,7 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
       SelectItem(0);
   } else
   {
-      if (iApp->iRandom)
+      if (iApp->iSettings.iRandom)
       {
           if ( iApp->iSongList->AnySongPlaying() )
           {
@@ -1408,7 +1414,7 @@ COggPlayAppView::UpdateControls()
  
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iSettings.iRepeat);
-  if (iRandomIcon[iMode]) iRandomIcon[iMode]->MakeVisible(iApp->iRandom);
+  if (iRandomIcon[iMode]) iRandomIcon[iMode]->MakeVisible(iApp->iSettings.iRandom);
 }
 
 void

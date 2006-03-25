@@ -404,14 +404,17 @@ void   COggPluginAdaptor::SetVolume(TInt aVol)
 {
     TRACEF(_L("COggPluginAdaptor::SetVolume()"));
     if ( (aVol <0) || (aVol >KMaxVolume) )
-    {
-    return;
-    }
+	    return;
+
     iVolume = aVol;
-    TInt max = iPlayer->MaxVolume();
-    TReal relative = ((TReal) aVol)/KMaxVolume;
-    TInt vol = (TInt) (relative*max);
-    iPlayer->SetVolume(vol) ;
+
+	if (iPlayer)
+		{
+		TInt max = iPlayer->MaxVolume();
+		TReal relative = ((TReal) aVol)/KMaxVolume;
+		TInt vol = (TInt) (relative*max);
+		iPlayer->SetVolume(vol);
+		}
 }
 
 void COggPluginAdaptor::SetPosition(TInt64 aPos)

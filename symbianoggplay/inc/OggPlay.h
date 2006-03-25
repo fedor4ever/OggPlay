@@ -175,6 +175,8 @@ public:
   TInt iUserHotkeys[ENofHotkeys];
   TBool iLockedHotkeys[ENofHotkeys];
   TBool iRepeat;
+  TBool iRandom;
+
   // Multi thread playback settings
   TInt iBufferingMode;
   TInt iThreadPriority;	
@@ -285,8 +287,6 @@ public:
   // through the settings view
   int iHotkey;
   int iVolume;            // [0...100]
-  int iRepeat;            // 0=off; 1=on
-  TBool iRandom;          // 0=off; 1=on
   int iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
   TViews iViewBy;
 

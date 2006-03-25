@@ -67,10 +67,12 @@ class CSettingsS80Dialog : public CEikDialog,MEikCommandObserver
    CEikChoiceList* iCbaControl [2][4];
    CEikChoiceList* iVolumeBoostControl;
 
-   CEikCheckBox* iAlarmActive;
-   CEikTimeEditor* iAlarmTime;
+   CEikCheckBox* iAlarmActiveControl;
+   CEikTimeEditor* iAlarmTimeControl;
+   CEikChoiceList* iAlarmSnoozeControl;
+   CEikChoiceList* iAlarmVolumeControl;
+   CEikChoiceList* iAlarmBoostControl;
 };
-
 
 
 class CCodecsS80Dialog : public CEikDialog, public MEikCommandObserver
