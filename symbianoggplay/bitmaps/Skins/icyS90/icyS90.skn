@@ -1,0 +1,62 @@
+OggPlay 1 {
+  FlipOpen {
+    Title {
+      Position 40 180 300 16
+      Font SwissA 18 0
+      FontColor 0 0 0
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    Album {
+      Position 40 220 300 16
+      Font SwissA 18 0
+      FontColor 0 0 0
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    Artist {
+      Position 40 200 300 16
+      Font SwissA 18 0
+      FontColor 0 0 0
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    ListBox {
+      Position 28 22 300 117
+      Font SwissA 20 0
+      FontColor 0 0 0
+      FontColorSelected 217 43 207
+    }
+    Played {
+      Position 200 251 36 18
+      Font SwissA 14 0
+      FontColor 217 43 207
+    }
+    Volume {
+      Position 392 50 104 27
+      Style 0
+      KnobIcon 22 44
+    }
+    Position {
+      Position 13 251 168 14
+      Style 0
+      KnobIcon 26 27
+    }
+    RepeatIcon {
+      Icon 43 44
+      Position 396 25 31 13
+    }
+    RandomIcon {
+      Icon 45 44
+      Position 450 24 40 13
+    }
+    Analyzer {
+      Position 392 140 120 70
+      BarIcon  46 47
+    }
+  }
+}
+
