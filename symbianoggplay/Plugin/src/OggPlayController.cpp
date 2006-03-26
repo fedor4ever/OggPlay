@@ -648,9 +648,23 @@ void COggPlayController::CustomCommand(TMMFMessage& aMessage)
 			}
 			break;
 
-        case EOggPlayControllerCCGetFrequencies:
+		case EOggPlayControllerCCGetAudioProperties:
+			{
+			TInt audioProperties[4];
+			audioProperties[0] = iRate;
+			audioProperties[1] = iChannels;
+			audioProperties[2] = iBitRate;
+			audioProperties[3] = iFileSize;
+
+			TPckg<TInt [4]> dataTo(audioProperties);
+			aMessage.WriteDataToClient(dataTo);
+			aMessage.Complete(KErrNone);
+			break;
+			}
+		
+		case EOggPlayControllerCCGetFrequencies:
             {
-            TRAP(err, GetFrequenciesL(aMessage) );
+            TRAP(err, GetFrequenciesL(aMessage));
 		    aMessage.Complete(err);  
             break;
             }
@@ -674,7 +688,7 @@ void COggPlayController::CustomCommand(TMMFMessage& aMessage)
 void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
-    
+
     if (iState!=EStatePlaying)
         User::Leave(KErrNotReady);
 
@@ -807,6 +821,11 @@ void COggPlayController::OpenFileL(const TDesC& aFile, TBool aOpenForInfo)
     // Parse tag information and put it in the provided buffers.
     iDecoder->ParseTags(iTitle, iArtist, iAlbum, iGenre, iTrackNumber);
 
+	// Save the audio properties
+	iRate = iDecoder->Rate();
+	iChannels = iDecoder->Channels();
+	iBitRate = iDecoder->Bitrate();
+
     // Change the title, to let know the client that we have a random ringing tone
     if (iRandomRingingTone)
     {
@@ -815,7 +834,10 @@ void COggPlayController::OpenFileL(const TDesC& aFile, TBool aOpenForInfo)
 
     TRACEF(COggLog::VA(_L("Tags: %S %S %S %S"), &iTitle, &iArtist, &iAlbum, &iGenre ));
     if (!aOpenForInfo)
-         iFileLength = iDecoder->TimeTotal() * 1000;
+		{
+        iFileLength = iDecoder->TimeTotal() * 1000;
+		iFileSize = iDecoder->FileSize();
+		}
 } 
 
 void COggPlayController::MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration)

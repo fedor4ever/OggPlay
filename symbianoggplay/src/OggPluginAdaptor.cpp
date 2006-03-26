@@ -292,21 +292,11 @@ void COggPluginAdaptor::OpenL(const TDesC& aFileName)
 			// If it is not an OggPlay Plugin, there should be some handling here to guess
             // title, trackname, ...
             delete aMetaData;
-        }
-        
+        }        
         CleanupStack::PopAndDestroy(metadataValue);
 
-#if 0
-        // Currently the MMF Plugin doesn't give access to these.
-        // This could be added in the future as a custom command. 
-        iRate= iPlayer->Rate();
-        iChannels=iPlayer->Channels();
-        iBitRate=iPlayer->Bitrate();
-#else
-        iRate= 0;
-        iChannels = 0;
-        iBitRate = 0;
-#endif
+		// Get additional audio properties (using a custom command)
+		GetAudioProperties();
 
 		// Clear the frequency analyser
 		Mem::FillZ(&iFreqBins, sizeof(iFreqBins));
@@ -476,14 +466,12 @@ const TInt32* COggPluginAdaptor::GetFrequencyBins()
     TMMFMessageDestination msg(iPluginControllerUID, KMMFObjectHandleController);
     TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
     
-    TInt error = iPlayer->PlayControllerCustomCommandSync(packedMsg, 
-                                       EOggPlayControllerCCGetFrequencies, 
-                                       freqConfig,
-                                       KNullDesC8, dataFrom);
+    TInt err = iPlayer->PlayControllerCustomCommandSync(packedMsg, 
+    EOggPlayControllerCCGetFrequencies, freqConfig, KNullDesC8, dataFrom);
 
-	if (error != KErrNone)
+	if (err != KErrNone)
 	{
-		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), error ));
+		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetFrequencyBins %i"), err));
 	}
 
 	return iFreqBins;
@@ -510,6 +498,31 @@ void COggPluginAdaptor::SetVolumeGain(TGainType aGain)
 	{
 		TRACEF(COggLog::VA(_L("COggPluginAdaptor::SetVolumeGain %i"), err));
 	}
+}
+
+void COggPluginAdaptor::GetAudioProperties()
+{
+	if (iPluginControllerUID.iUid != KOggTremorUidControllerImplementation)
+		return;
+
+    TPckgBuf<TInt [4]> dataFrom;    
+    TMMFMessageDestination msg(iPluginControllerUID, KMMFObjectHandleController);
+    TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
+    
+    TInt err = iPlayer->PlayControllerCustomCommandSync(packedMsg, 
+    EOggPlayControllerCCGetAudioProperties, KNullDesC8, KNullDesC8, dataFrom);
+
+	if (err == KErrNone)
+		{
+		iRate= dataFrom()[0];
+        iChannels = dataFrom()[1];
+        iBitRate = dataFrom()[2];
+		iFileSize = dataFrom()[3];
+		}
+	else
+		{
+		TRACEF(COggLog::VA(_L("COggPluginAdaptor::GetAudioProperties %i"), err));
+		}
 }
 
 void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode)
@@ -549,12 +562,20 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
     
 #endif
 
-    if ((aCurrentState == CMdaAudioClipUtility::EPlaying) && aErrorCode)
+    if (aCurrentState == CMdaAudioClipUtility::EPlaying)
     {
-        // From opened to Playing
-        // The sound device was stolen by somebody else. (A SMS arrival notice, for example).
-        iInterrupted = ETrue;
-        iObserver->NotifyPlayInterrupted();
+		if (aErrorCode == KErrNone)
+			{
+			// Update the audio properties (get the file size)
+			GetAudioProperties();
+			}
+		else
+			{
+			// From opened to Playing
+			// The sound device was stolen by somebody else. (A SMS arrival notice, for example).
+			iInterrupted = ETrue;
+			iObserver->NotifyPlayInterrupted();
+			}
     }
     
     if ((aPreviousState == CMdaAudioClipUtility::EPlaying) 

@@ -145,7 +145,7 @@ void COggPlayback::ConstructL()
 
 COggPlayback::~COggPlayback()
 {
-  __ASSERT_ALWAYS((iState == EClosed) || (iState == EStopped), User::Panic(_L("~COggPlayback"), 0));
+  __ASSERT_ALWAYS((iState <= EStopped), User::Panic(_L("~COggPlayback"), 0));
 	
   delete iDecoder; 
   delete iStartAudioStreamingTimer;

@@ -286,6 +286,11 @@ class COggPlayController :	public CMMFController,
 		TInt iLastFreqArrayIdx;
 
 		TBool iRequestingFrequencyBins;
+
+		TInt iRate;
+		TInt iChannels;
+		TInt iBitRate;
+		TInt iFileSize;
 	};
 
 enum

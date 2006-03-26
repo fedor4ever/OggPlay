@@ -57,8 +57,9 @@ class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObs
   virtual const void* GetDataChunk();
 #endif
   virtual void SetVolumeGain(TGainType aGain);
+  virtual void GetAudioProperties();
   
-   virtual CPluginSupportedList & GetPluginListL(); 
+  virtual CPluginSupportedList& GetPluginListL(); 
 
 private:
   // From MMdaObjectStateChangeObserver

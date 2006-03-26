@@ -1365,22 +1365,20 @@ COggPlayAppView::UpdateListbox()
 TBool
 COggPlayAppView::CanPlay()
 {
-  return (iApp->iOggPlayback->State()==CAbsPlayback::EStreamOpen ||
-	      iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
-	      iApp->iOggPlayback->State()==CAbsPlayback::EStopped);
+  CAbsPlayback::TState playState = iApp->iOggPlayback->State();
+  return (playState >= CAbsPlayback::EStreamOpen) && (playState != CAbsPlayback::EPlaying);
 }
 
 TBool
 COggPlayAppView::CanPause()
 {
-  return (iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+  return iApp->iOggPlayback->State() == CAbsPlayback::EPlaying;
 }
 
 TBool
 COggPlayAppView::CanStop()
 {
-  return (iApp->iOggPlayback->State()==CAbsPlayback::EPaused || 
-	      iApp->iOggPlayback->State()==CAbsPlayback::EPlaying);
+  return iApp->iOggPlayback->State() >= CAbsPlayback::EPaused;
 }
 
 TBool
@@ -1425,8 +1423,7 @@ COggPlayAppView::UpdateSongPosition()
   // when artist, title etc is displayed.
   if (iPlayed[iMode])
     {
-    TBool playedControlIsVisible = (iApp->iOggPlayback->State() != CAbsPlayback::EClosed) &&
-                                   (iApp->iOggPlayback->State() != CAbsPlayback::EStopped);
+    TBool playedControlIsVisible = (iApp->iOggPlayback->State() > CAbsPlayback::EStopped);
     iPlayed[iMode]->MakeVisible( playedControlIsVisible );
     if( !playedControlIsVisible )
       return;

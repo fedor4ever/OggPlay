@@ -28,8 +28,9 @@ enum TOggPlayControllerCustomCommands
                                                 // command with this ID.
 
 
-	EOggPlayControllerCCGetFrequencies = 20504, // Random number + 1
-	EOggPlayControllerCCSetVolumeGain = 20505   // Random number + 2
+	EOggPlayControllerCCGetAudioProperties = 20504, // Random number + 1
+	EOggPlayControllerCCGetFrequencies = 20505,     // Random number + 2
+	EOggPlayControllerCCSetVolumeGain = 20506       // Random number + 3
     };
 
 
