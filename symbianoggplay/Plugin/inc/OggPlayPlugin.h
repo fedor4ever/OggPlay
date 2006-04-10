@@ -27,7 +27,7 @@
 #include <E32Base.h>
 #include <e32std.h>
 #include <MdaAudioSamplePlayer.h>
-#include "OggOs.h"
+#include <OggOs.h>
 
 #ifndef MMF_AVAILABLE
 /**
