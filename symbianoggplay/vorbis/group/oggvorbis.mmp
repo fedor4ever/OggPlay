@@ -1,6 +1,4 @@
 // oggvorbis.mmp
-//
-
 TARGET        libvorbisidec.dll
 TARGETTYPE    dll
 UID 0x1000008d 0x101FD21D
@@ -11,14 +9,13 @@ SOURCE        mdct.c block.c window.c \
               synthesis.c info.c \
               floor1.c floor0.c \
               res012.c mapping0.c registry.c codebook.c \
-		      sharedbook.c framing.c bitwise.c \
-	          vorbisfile.c
+              sharedbook.c framing.c bitwise.c \
+              vorbisfile.c \
+              utf8Fix.c
 
 SOURCE        microsoftInternal.c
 SOURCE        Symbian.cpp
 
-USERINCLUDE   .
 SYSTEMINCLUDE \Epoc32\include
-SYSTEMINCLUDE \Epoc32\include\libc
 
-LIBRARY       euser.lib estlib.lib efsrv.lib
+LIBRARY       euser.lib efsrv.lib

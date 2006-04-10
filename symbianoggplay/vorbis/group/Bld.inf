@@ -5,15 +5,4 @@ PRJ_PLATFORMS
 WINS WINSCW ARMI
 
 PRJ_MMPFILES
-// This is for the non-MMF friendly plugin
-//oggvorbis.mmp
-// This is for the MMF friendly plugin
-OggPluginDecoder.mmp
-
-PRJ_EXPORTS
-
-// API Headers
-..\ivorbiscodec.h
-..\ivorbisfile.h
-..\ogg.h
-..\os_types.h
+oggvorbis.mmp
