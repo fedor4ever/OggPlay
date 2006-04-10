@@ -1,5 +1,5 @@
 #include <aiftool.rh>
-#include "OggOs.h"
+#include <OggOs.h>
 
 RESOURCE AIF_DATA
 {
