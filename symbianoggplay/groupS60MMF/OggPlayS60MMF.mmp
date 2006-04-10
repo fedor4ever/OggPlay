@@ -1,4 +1,3 @@
-
 TARGET                                  OggPlay.app 
 TARGETTYPE                              app 
 TARGETPATH                              \system\apps\Oggplay 
@@ -10,13 +9,21 @@ USERINCLUDE                             ..\data
 USERINCLUDE                             ..\vorbis\plugin 
 USERINCLUDE                             ..\plugin\inc 
 SYSTEMINCLUDE                           \Epoc32\Include 
-SYSTEMINCLUDE                           \Epoc32\Include\libc 
-/* [+] */ SOURCEPATH                              ..\aif 
-/* [+] */ RESOURCE                      OggPlayaif.s60.rss 
+
+SOURCEPATH                              ..\aif
+START RESOURCE                          OggPlayaif.s60.rss
+TARGETPATH                              \system\apps\Oggplay 
+END 
 
 SOURCEPATH                              ..\data 
-RESOURCE                                OggPlay.rss 
-RESOURCE                                OggPlay_caption.rss 
+START RESOURCE                          OggPlay.rss 
+HEADER
+TARGETPATH                              \system\apps\Oggplay 
+END
+
+START RESOURCE                          OggPlay_caption.rss
+TARGETPATH                              \system\apps\Oggplay 
+END
 
 SOURCEPATH                              ..\src 
 SOURCE                                  OggLog.cpp 
@@ -51,7 +58,6 @@ LIBRARY                                 fbscli.lib
 LIBRARY                                 bitgdi.lib 
 LIBRARY                                 apgrfx.lib 
 LIBRARY                                 egul.lib 
-LIBRARY                                 estlib.lib 
 LIBRARY                                 charconv.lib 
 LIBRARY                                 flogger.lib 
 LIBRARY                                 hal.lib 
@@ -64,6 +70,7 @@ LIBRARY                                 etel.lib
 LIBRARY                                 mediaclientaudiostream.lib 
 LIBRARY                                 MediaClientAudio.lib 
 LIBRARY                                 MMFControllerFramework.lib 
+
 START BITMAP S60default.mbm 
   TARGETPATH                              \system\apps\OggPlay 
   HEADER                                   
@@ -114,7 +121,6 @@ START BITMAP S60default.mbm
 
   SOURCEPATH                              ..\bitmaps\symbian 
   SOURCE                                  c12 oggplaylogo.bmp 
-
 END  
 
 START BITMAP S60classic.mbm 
@@ -167,7 +173,6 @@ START BITMAP S60classic.mbm
 
   SOURCEPATH                              ..\bitmaps\symbian 
   SOURCE                                  c12 oggplaylogo.bmp 
-
 END  
 
 START BITMAP S60splash.mbm 
@@ -175,7 +180,6 @@ START BITMAP S60splash.mbm
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
   SOURCE                                  c12 s60splash_unstable.bmp 
-
 END  
 
 START BITMAP fish.mbm 
@@ -184,6 +188,5 @@ START BITMAP fish.mbm
   SOURCEPATH                              ..\bitmaps 
   SOURCE                                  c12 fish0.bmp 
   SOURCE                                  1 fishmask.bmp 
-
 END  
 

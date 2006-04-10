@@ -4,9 +4,7 @@
 *  Part of  : OggPlay
 *  Created  : 19.07.2003 by 
 *  Description:
-*	 This file provides the information required for building the UI for OggPlay.
-*        Make sure that SERIES60 and OS70S are defined in \inc\OggOs.h
-*        The vorbis plugin must also be built.
+*	 This file provides the information required for building OggPlay.
 *  Version  :
 *  Copyright: 
 * ============================================================================
@@ -17,6 +15,7 @@ PRJ_PLATFORMS
 WINS WINSCW ARMI
 
 PRJ_EXPORTS
+..\Inc\OggS60MMF.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
 ..\Plugin\Inc\OggPlayPlugin.h
@@ -28,6 +27,6 @@ PRJ_EXPORTS
 ..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
 
 PRJ_MMPFILES
-OggPlay.mmp
-..\vorbis\groupS60MMF\OggPluginDecoder.mmp
+OggPlayS60MMF.mmp
+..\vorbis\groupS60MMF\OggPluginDecoderS60MMF.mmp
 
