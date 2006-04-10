@@ -1,0 +1,26 @@
+/*
+* ============================================================================
+*  Name     : bld.inf
+*  Part of  : OggPlay
+*  Created  : 19.07.2003 by 
+*  Description:
+*	 This file provides the information required for building OggPlay.
+*  Version  :
+*  Copyright: 
+* ============================================================================
+*/
+
+
+PRJ_PLATFORMS
+WINS WINSCW ARMI
+
+PRJ_EXPORTS
+..\Inc\OggUIQSony.h \epoc32\include\OggPlatform.h
+..\Inc\OggPlayUid.h
+..\Inc\OggOs.h
+..\Plugin\Inc\OggPlayPlugin.h
+
+PRJ_MMPFILES
+..\vorbis\groupUIQ\OggvorbisUIQSony.mmp
+OggPlayUIQSony.mmp
+
