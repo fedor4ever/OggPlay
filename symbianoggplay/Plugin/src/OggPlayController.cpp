@@ -19,8 +19,6 @@
 #include "OggPlayController.h"
 #include <charconv.h>
 #include <utf.h>
-#include <string.h>
-#include <stdlib.h>
 #include "OggLog.h"
 #include "Plugin\ImplementationUIDs.hrh"
 #include "Plugin\OggPlayControllerCustomCommands.h"
@@ -105,7 +103,6 @@ COggPlayController::~COggPlayController()
 	iFs->Close();
 	delete iFs;
 
-    CloseSTDLIB();    	// Just in case
     PRINT("COggPlayController::~COggPlayController Out");
     COggLog::Exit();  // MUST BE AFTER LAST TRACE, otherwise will leak memory
 }

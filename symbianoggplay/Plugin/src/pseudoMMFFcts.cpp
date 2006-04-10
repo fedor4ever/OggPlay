@@ -16,10 +16,14 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include "OggOs.h"
-#include "OggPlayPlugin.h"
+// Platform settings
+#include <OggOs.h>
 
-#ifndef MMF_AVAILABLE
+// This file is for PLUGIN_SYSTEM, non MMF only
+#if defined(PLUGIN_SYSTEM) && !defined(MMF_AVAILABLE)
+
+#include <OggPlayPlugin.h>
+
 ///////////////////////////////////////////////////////////////////
 // Implementation of the MMFMetaDataEntry for pre 7.0s
 ///////////////////////////////////////////////////////////////////
@@ -64,4 +68,6 @@ void CMMFMetaDataEntry::ConstructL(const TDesC& aName, const TDesC& aValue)
     iName = aName.AllocL();
     iValue = aValue.AllocL();
 }
-#endif /*MMF_AVAILABLE*/
+
+#endif /* PLUGIN_SYSTEM && !MMF_AVAILABLE */
+
