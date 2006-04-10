@@ -1,0 +1,32 @@
+/*
+* ============================================================================
+*  Name     : bld.inf
+*  Part of  : OggPlay
+*  Created  : 19.07.2003 by 
+*  Description:
+*	 This file provides the information required for building OggPlay.
+*  Version  :
+*  Copyright: 
+* ============================================================================
+*/
+
+
+PRJ_PLATFORMS
+WINSCW GCCE
+
+PRJ_EXPORTS
+..\Inc\OggS60V3.h \epoc32\include\OggPlatform.h
+..\Inc\OggPlayUid.h
+..\Inc\OggOs.h
+..\Plugin\Inc\OggPlayPlugin.h
+
+// Default skin
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\wins\udeb\z\private\A000017F\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\private\A000017F\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\wins\udeb\z\\private\A000017F\mcNuOggPlay.mbm
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\private\A000017F\mcNuOggPlay.mbm
+
+PRJ_MMPFILES
+OggPlayS60V3.mmp
+..\vorbis\groupS60V3\OggvorbisS60V3.mmp
+
