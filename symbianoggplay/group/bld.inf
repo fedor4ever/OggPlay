@@ -4,8 +4,7 @@
 *  Part of  : OggPlay
 *  Created  : 19.07.2003 by 
 *  Description:
-*	 This file provides the information required for building the
-*    whole of a OggPlay.
+*	 This file provides the information required for building OggPlay.
 *  Version  :
 *  Copyright: 
 * ============================================================================
@@ -16,6 +15,7 @@ PRJ_PLATFORMS
 WINS WINSCW ARMI
 
 PRJ_EXPORTS
+..\Inc\OggS60.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
 ..\Plugin\Inc\OggPlayPlugin.h
