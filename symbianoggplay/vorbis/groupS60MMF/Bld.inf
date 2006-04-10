@@ -5,4 +5,4 @@ PRJ_PLATFORMS
 WINS WINSCW ARMI
 
 PRJ_MMPFILES
-OggPluginDecoder.mmp
+OggPluginDecoderS60MMF.mmp
