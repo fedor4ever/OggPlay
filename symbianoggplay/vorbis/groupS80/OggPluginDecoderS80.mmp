@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+MACRO                                   OGGPLAYPLUGIN 
 TARGET                                  OGGPLUGINDECODER.DLL 
 TARGETTYPE                              DLL
 UID                                     0x10009D8D 0x101FF683 
@@ -37,21 +38,22 @@ SOURCE                                  bitwise.c
 SOURCE                                  vorbisfile.c 
 SOURCE                                  microsoftInternal.c 
 SOURCE                                  Symbian.cpp 
+SOURCE                                  TremorDecoder.cpp 
 
-SOURCEPATH                              ..\..\Plugin\src
+SOURCEPATH                              ..\..\src
 SOURCE                                  OggHelperFcts.cpp
 SOURCE                                  OggRateConvert.cpp
+
+SOURCEPATH                              ..\..\Plugin\src
 SOURCE                                  OggLog.cpp
 SOURCE                                  OggPlayController.cpp
 
 SOURCEPATH                              ..\Plugin
 RESOURCE                                101FF683.RSS 
 SOURCE                                  OggTremorPluginFactory.cpp 
-SOURCE                                  TremorDecoder.cpp 
 
 USERINCLUDE                             ..
 SYSTEMINCLUDE                           \epoc32\include 
-SYSTEMINCLUDE                           \epoc32\include\libc 
 USERINCLUDE                             ..\..\Plugin\inc 
 USERINCLUDE                             ..\..\inc 
 SYSTEMINCLUDE                           \epoc32\include\ecom 
@@ -64,10 +66,8 @@ LIBRARY                                 MMFDevSound.lib
 LIBRARY                                 mmfserverbaseclasses.lib 
 LIBRARY                                 ecom.lib 
 LIBRARY                                 euser.lib 
-LIBRARY                                 estlib.lib 
 LIBRARY                                 charconv.lib 
 LIBRARY                                 MediaClientAudioStream.lib 
 LIBRARY                                 flogger.lib 
 LIBRARY                                 efsrv.lib 
 
-MACRO                                   OGGPLAYPLUGIN 
