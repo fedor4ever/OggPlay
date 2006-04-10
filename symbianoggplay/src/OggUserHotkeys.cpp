@@ -16,7 +16,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// $CVSHeader$
+// Platform settings
+#include <OggOs.h>
+
+// This file is for Series 60 only
+#if defined(SERIES60)
 
 #include <w32std.h>
 #include <aknlists.h> 
@@ -98,7 +102,6 @@ TOggplaySettings::THotkeys COggUserHotkeysControl::Hotkey( const TKeyEvent& aKey
   return TOggplaySettings::ENoHotkey;
   }
 
-
 void COggUserHotkeysControl::RefreshListboxModel()
   {
 	TBuf<64> keyBuf,listboxBuf;
@@ -138,18 +141,15 @@ void COggUserHotkeysControl::RefreshListboxModel()
   delete array;
   }
 
-
 TInt COggUserHotkeysControl::CountComponentControls() const
   {
   return 1;
   }
 
-
 CCoeControl* COggUserHotkeysControl::ComponentControl(TInt /*aIndex*/) const
   {
   return iListBox;
   }
-
 
 TKeyResponse COggUserHotkeysControl::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
@@ -177,7 +177,6 @@ TKeyResponse COggUserHotkeysControl::OfferKeyEventL(
   else
 		return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
-
 
 void
 COggUserHotkeysS60::SetSoftkeys(TBool aPlaying) {
@@ -212,4 +211,5 @@ COggUserHotkeysS60::SetSoftkeys(TBool aPlaying) {
   }
 }
 
-// End of File  
+#endif /* SERIES60 */
+

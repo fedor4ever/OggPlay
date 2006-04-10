@@ -16,21 +16,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include "OggPluginSelectionDialogS60.h"
+// Platform settings
+#include <OggOs.h>
+
+// This file is for Series 60 and MMF only
+#if defined(SERIES60) && defined(MMF_AVAILABLE)
+
 #include <aknlists.h>
 #include <aknutils.h>
 #include <aknPopup.h> 
+#include "OggPluginSelectionDialogS60.h"
 
-
-#ifdef SERIES60 
-#ifdef MMF_AVAILABLE 
-///////////////////////////////////////////////////////////////////////////////////////////////
-// 
 // Plugin Selection Dialogs
-// 
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-
 COggplayCodecSelectionSettingItemList ::COggplayCodecSelectionSettingItemList ( ) 
   {
   }
@@ -60,14 +57,12 @@ void COggplayCodecSelectionSettingItemList ::ConstructL(const TRect& aRect)
               
   }
 
-
 COggplayCodecSelectionSettingItemList::~COggplayCodecSelectionSettingItemList ()
   {
   delete iListBox;
   delete iExtensionList;
   delete iWaitTimer;
   }
-
 
 void COggplayCodecSelectionSettingItemList::RefreshListboxModel()
   {
@@ -102,18 +97,15 @@ void COggplayCodecSelectionSettingItemList::RefreshListboxModel()
   DrawDeferred();
   }
 
-
 TInt COggplayCodecSelectionSettingItemList ::CountComponentControls() const
   {
   return 1;
   }
 
-
 CCoeControl* COggplayCodecSelectionSettingItemList::ComponentControl(TInt /*aIndex*/) const
   {
   return iListBox;
   }
-
 
 void COggplayCodecSelectionSettingItemList::ProcessCommandL (TInt /*aCommandId*/)
 {
@@ -217,13 +209,7 @@ TKeyResponse COggplayCodecSelectionSettingItemList::OfferKeyEventL(
   }
 
 
-
-/////////////////////////////////////
-// 
 // Display the plugin information
-// 
-/////////////////////////////////////
-
 CCodecInfoList::CCodecInfoList( CPluginInfo& aPluginInfo ) 
 : iPluginInfo(aPluginInfo)
   {
@@ -337,12 +323,10 @@ TInt CCodecInfoList::CountComponentControls() const
   return 1;
   }
 
-
 CCoeControl* CCodecInfoList::ComponentControl(TInt /*aIndex*/) const
   {
   return iListBox;
   }
-
 
 TKeyResponse CCodecInfoList::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
@@ -351,7 +335,4 @@ TKeyResponse CCodecInfoList::OfferKeyEventL(
   return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
   
-
-#endif /* MMF_AVAILABLE */
-
-#endif /* SERIES60 */
+#endif /* SERIES60 && MMF_AVAILABLE */

@@ -16,9 +16,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+// Platform settings
+#include <OggOs.h>
+
+// This file is for Series 60 only
+#if defined(SERIES60)
+
 #include "OggSettingsContainer.h"
 #include <aknlists.h>
 #include <aknutils.h>
+
 
 void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
 {
@@ -128,9 +135,7 @@ void COggSettingsContainer::BufferingModeChangedL()
 }
 #endif
 
-// ---------------------------------------------------------
 
-#if defined(SERIES60)
 COggplayDisplaySettingItemList::COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi)
 : iData(aAppUi.iSettings), iAppUi(aAppUi)
 {
@@ -214,11 +219,7 @@ void COggplayDisplaySettingItemList::BufferingModeChangedL()
 }
 #endif
 
-/////////////////////////////////////
-// 
 // Overload of the Gain setting, so that change will take place right away
-// 
-/////////////////////////////////////
 CGainSettingItem::CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iGainType), iAppUi(aAppUi)
 {

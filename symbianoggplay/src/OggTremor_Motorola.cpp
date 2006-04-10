@@ -16,11 +16,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// Platform settings
+#include <OggOs.h>
+
+// This file is for non PLUGIN_SYSTEM and MOTOROLA only
+#if !defined(PLUGIN_SYSTEM) && defined(MOTOROLA)
+
 #ifdef __VC32__
 #pragma warning( disable : 4244 ) // conversion from __int64 to unsigned int: Possible loss of data
 #endif
 
-#include "OggOs.h"
 #include "OggLog.h"
 #include "OggTremor.h"
 #include "TremorDecoder.h"
@@ -37,21 +42,10 @@
 #include <eikon.hrh>
 #include <eikon.rsg>
 #include <charconv.h>
-
-#include <utf.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <OggPlay.rsg>
 
 #include "ivorbiscodec.h"
 #include "ivorbisfile.h"
-
-#if !defined(__VC32__)
-#include "Utf8Fix.h"
-#endif
-
-#include <OggPlay.rsg>
 
 ////////////////////////////////////////////////////////////////
 //
@@ -752,57 +746,6 @@ void COggPlayback::CreateStreamApi( void )
    }
 }
 
-// GetString
-////////////////////////////////////////////////////////////////
-
-void COggPlayback::GetString( TBuf<256>& aBuf, const char* aStr )
-{
-   // according to ogg vorbis specifications, the text should be UTF8 encoded
-   TPtrC8 p((const unsigned char *)aStr);
-   CnvUtfConverter::ConvertToUnicodeFromUtf8(aBuf,p);
-   
-   // in the real world there are all kinds of coding being used!
-   // so we try to find out what it is:
-#if !defined(__VC32__)
-   TInt i= j_code((char*)aStr,strlen(aStr));
-   if (i==BIG5_CODE) 
-   {
-      CCnvCharacterSetConverter* conv= CCnvCharacterSetConverter::NewL();
-      RFs theRFs;
-      theRFs.Connect();
-      CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, theRFs);
-      if (a==CCnvCharacterSetConverter::EAvailable)
-      {
-         TInt theState= CCnvCharacterSetConverter::KStateDefault;
-         conv->ConvertToUnicode(aBuf, p, theState);
-      }
-      theRFs.Close();
-      delete conv;
-   }
-#endif
-}
-
-// ParseComments
-////////////////////////////////////////////////////////////////
-
-void COggPlayback::ParseComments(char** ptr)
-{
-   ClearComments();
-   while (*ptr) 
-   {
-      char *s = *ptr;
-      TBuf<256> buf;
-      GetString(buf,s);
-      buf.UpperCase();
-           if (buf.Find(_L("ARTIST="))      == 0) GetString(iArtist,      s + 7); 
-      else if (buf.Find(_L("TITLE="))       == 0) GetString(iTitle,       s + 6);
-      else if (buf.Find(_L("ALBUM="))       == 0) GetString(iAlbum,       s + 6);
-      else if (buf.Find(_L("GENRE="))       == 0) GetString(iGenre,       s + 6);
-      else if (buf.Find(_L("TRACKNUMBER=")) == 0) GetString(iTrackNumber, s + 12);
-      ++ptr;
-   }
-}
-
 
 // ResetStreamApi
 ////////////////////////////////////////////////////////////////
@@ -1032,3 +975,4 @@ void COggPlayback::CObserverCallback::DoCancel( void )
 {
 }
    
+#endif /* !PLUGIN_SYSTEM && MOTOROLA

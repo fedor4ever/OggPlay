@@ -10,11 +10,17 @@
 * ============================================================================
 */
 
-// INCLUDE FILES
+// Platform settings
+#include <OggOs.h>
+
+// This file is for Series 60 only
+#if defined(SERIES60)
+
 #include <eikdef.h>
 #include <eikenv.h>
 #include "OggSplashContainer.h"
 #include "OggPlay.h"
+
 // ================= MEMBER FUNCTIONS =======================
 // ---------------------------------------------------------
 // CSplashContainer::ConstructL(const TRect& aRect)
@@ -104,7 +110,6 @@ void CSplashContainer::Draw(const TRect& /*aRect*/) const
 
 }
 
-
 TInt  CSplashContainer::TimerExpired(TAny* aPtr)
 {
   
@@ -119,5 +124,4 @@ TInt  CSplashContainer::TimerExpired(TAny* aPtr)
   return 0;
 }
 
-
-// End of File  
+#endif /* SERIES60 */

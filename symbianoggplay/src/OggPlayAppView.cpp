@@ -16,8 +16,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <OggOs.h>
 #include "OggPlayAppView.h"
-#include "OggOs.h"
 #include "OggLog.h"
 #include "OggHelperFcts.h"
 
@@ -27,7 +27,6 @@
 #include <eikmenub.h>   // CEikMenuBar
 #include <apgtask.h>    // TApaTask
 #ifdef SERIES60
-#include <aknkeys.h>
 #include <aknkeylock.h>
 #include <aknquerydialog.h>
 #endif
@@ -37,7 +36,6 @@
 #ifdef UIQ
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 #endif
-#include <stdlib.h>
 #include "OggAbsPlayback.h"
 
 // Time (usecs) between canvas Refresh() for graphics updating
@@ -185,11 +183,11 @@ COggPlayAppView::ReadSkin(const TFileName& aFileName)
 
 #if defined(SERIES60) || defined(SERIES80) || defined(SERIES90)
   TInt scaleFactor = iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
-  TOggParser p(aFileName, scaleFactor);
+  TOggParser p(iCoeEnv->FsSession(), aFileName, scaleFactor);
 #else
   iCanvas[0]->LoadBackgroundBitmapL(iIconFileName, 19);
   iCanvas[1]->LoadBackgroundBitmapL(iIconFileName, 18);
-  TOggParser p(aFileName);
+  TOggParser p(iCoeEnv->FsSession(), aFileName);
 #endif
 
   if (p.iState!=TOggParser::ESuccess) {
@@ -987,7 +985,11 @@ COggPlayAppView::ListBoxPageUp()
 void
 COggPlayAppView::SetTime(TInt64 aTime)
 {
+#if defined(SERIES60V3)
+  if (iPosition[iMode]) iPosition[iMode]->SetMaxValue(aTime);
+#else
   if (iPosition[iMode]) iPosition[iMode]->SetMaxValue(aTime.GetTInt());
+#endif
 }
 
 void
@@ -1051,8 +1053,13 @@ void COggPlayAppView::HandleCallBack()
 #else
   if (iCycleFrequencyCounter % 2)
   {
+#if defined(SERIES60V3)
+	if (iPosition[iMode] && iPosChanged<0) 
+		iPosition[iMode]->SetValue(iApp->iOggPlayback->Position());
+#else
 	if (iPosition[iMode] && iPosChanged<0) 
 		iPosition[iMode]->SetValue(iApp->iOggPlayback->Position().GetTInt());
+#endif
     
 	iCanvas[iMode]->CycleLowFrequencyControls();
   }
@@ -1160,7 +1167,7 @@ void COggPlayAppView::InitView()
 {
   TRACELF("InitView");
   // fill the list box with some initial content:
-  if (!iOggFiles->ReadDb(iApp->iDbFileName,iCoeEnv->FsSession())) {
+  if (!iOggFiles->ReadDb(iApp->iDbFileName, iCoeEnv->FsSession())) {
     iOggFiles->CreateDb(iCoeEnv->FsSession());
     iOggFiles->WriteDbL(iApp->iDbFileName, iCoeEnv->FsSession());
   }
@@ -1282,11 +1289,22 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
           } else
           {
               // Select a random value for the first index
+#if defined(SERIES60V3)
+			  TInt64 rnd64 = Math::Random();
+			  TInt64 maxInt64 = MAKE_TINT64(1, 0);
+#else
 			  TInt64 rnd64 = TInt64(0, Math::Random());
 			  TInt64 maxInt64 = TInt64(1, 0);
+#endif
+
 			  TInt64 nbEntries64 = GetTextArray()->Count()-1;
 			  TInt64 picked64 = (rnd64 * nbEntries64) / maxInt64;
+
+#if defined(SERIES60V3)
+			  TInt picked = I64LOW(picked64) + 1;
+#else
 			  TInt picked = picked64.Low() + 1;
+#endif
 
               SelectItem(picked);
           }
@@ -1435,10 +1453,20 @@ COggPlayAppView::UpdateSongPosition()
   // or in the TOggCanvas (flip closed):
   //------------------------------------
   TBuf<64> mbuf;
+#if defined(SERIES60V3)
+  TInt sec= iApp->iOggPlayback->Position()/1000;
+#else
   TInt sec= iApp->iOggPlayback->Position().GetTInt()/1000;
+#endif
+
   TInt min= sec/60;
   sec-= min*60;
+#if defined(SERIES60V3)
+  TInt sectot= iApp->iOggPlayback->Time()/1000;
+#else
   TInt sectot= iApp->iOggPlayback->Time().GetTInt()/1000;
+#endif
+
   TInt mintot= sectot/60;
   sectot-= mintot*60;
   mbuf.Format(_L("%02d:%02d / %02d:%02d"), min, sec, mintot, sectot);
@@ -1511,16 +1539,15 @@ void COggPlayAppView::UpdatePlaying()
             iTitle[iMode]->SetText( p.NameAndExt() );
         #endif
         }
-      
     else if(!iArtist[iMode]) { // smelly code ahead
       _LIT(KSeparator," - ");
       TInt length=KSeparator().Length()+iApp->iOggPlayback->Title().Length()+iApp->iOggPlayback->Artist().Length();
-      HBufC* iText = HBufC::NewL(length);
-      iText->Des().Copy(iApp->iOggPlayback->Artist());
-      iText->Des().Append(KSeparator);
-      iText->Des().Append(iApp->iOggPlayback->Title());
-      iTitle[iMode]->SetText(*iText);
-      free(iText);
+      HBufC* text = HBufC::NewL(length);
+      text->Des().Copy(iApp->iOggPlayback->Artist());
+      text->Des().Append(KSeparator);
+      text->Des().Append(iApp->iOggPlayback->Title());
+      iTitle[iMode]->SetText(*text);
+      delete text;
     } else {
       iTitle[iMode]->SetText(iApp->iOggPlayback->Title());
     }
@@ -1743,17 +1770,29 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   // S60 User Hotkeys
   switch(COggUserHotkeysControl::Hotkey(aKeyEvent,aType,&iApp->iSettings)) {
     case TOggplaySettings::EFastForward : {
-      TInt64 pos=iApp->iOggPlayback->Position()+=KFfRwdStep;
+      TInt64 pos=iApp->iOggPlayback->Position() + KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
+
+#if defined(SERIES60V3)
+  	  iPosition[iMode]->SetValue(pos);
+#else
   	  iPosition[iMode]->SetValue(pos.GetTInt());
+#endif
+
 	  UpdateSongPosition();
 	  iCanvas[iMode]->Refresh();
 	  return EKeyWasConsumed;
       }
     case TOggplaySettings::ERewind : {
-      TInt64 pos=iApp->iOggPlayback->Position()-=KFfRwdStep;
+      TInt64 pos=iApp->iOggPlayback->Position() - KFfRwdStep;
       iApp->iOggPlayback->SetPosition(pos);
+
+#if defined(SERIES60V3)
+  	  iPosition[iMode]->SetValue(pos);
+#else
   	  iPosition[iMode]->SetValue(pos.GetTInt());
+#endif
+
 	  UpdateSongPosition();
 	  iCanvas[iMode]->Refresh();
       return EKeyWasConsumed;

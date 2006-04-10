@@ -16,11 +16,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// Platform settings
+#include <OggOs.h>
+
+// This file is for non PLUGIN_SYSTEM
+#if !defined(PLUGIN_SYSTEM)
+
 #ifdef __VC32__
 #pragma warning( disable : 4244 ) // conversion from __int64 to unsigned int: Possible loss of data
 #endif
 
-#include "OggOs.h"
 #include "OggLog.h"
 #include "OggTremor.h"
 #include "TremorDecoder.h"
@@ -39,18 +44,8 @@
 #include <charconv.h>
 #include <hal.h>
 
-#include <utf.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "ivorbiscodec.h"
 #include "ivorbisfile.h"
-
-#if !defined(__VC32__)
-#include "Utf8Fix.h"
-#endif
 
 #include <OggPlay.rsg>
 
@@ -84,7 +79,12 @@ void COggPlayback::ConstructL()
   User::LeaveIfError(iFs.Connect());
 
 #if defined(MULTI_THREAD_PLAYBACK)
+#if defined(SERIES60V3)
+  User::LeaveIfError(iFs.ShareAuto());
+#else
   User::LeaveIfError(iFs.Share());
+#endif
+
   User::LeaveIfError(AttachToFs());
 #endif
 
@@ -289,45 +289,6 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   }
 
   return err;
-}
-
-void COggPlayback::GetString(TBuf<256>& aBuf, const char* aStr)
-{
-  // according to ogg vorbis specifications, the text should be UTF8 encoded
-  TPtrC8 p((const unsigned char *)aStr);
-  CnvUtfConverter::ConvertToUnicodeFromUtf8(aBuf,p);
-
-  // in the real world there are all kinds of coding being used!
-  // so we try to find out what it is:
-#if !defined(__VC32__)
-  TInt i= j_code((char*)aStr,strlen(aStr));
-  if (i==BIG5_CODE) {
-    CCnvCharacterSetConverter* conv= CCnvCharacterSetConverter::NewL();
-    CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, iFs);
-    if (a==CCnvCharacterSetConverter::EAvailable) {
-      TInt theState= CCnvCharacterSetConverter::KStateDefault;
-      conv->ConvertToUnicode(aBuf, p, theState);
-    }
-    delete conv;
-  }
-#endif
-}
-
-void COggPlayback::ParseComments(char** ptr)
-{
-  ClearComments();
-  while (*ptr) {
-    char* s= *ptr;
-    TBuf<256> buf;
-    GetString(buf,s);
-    buf.UpperCase();
-    if (buf.Find(_L("ARTIST="))==0) GetString(iArtist, s+7); 
-    else if (buf.Find(_L("TITLE="))==0) GetString(iTitle, s+6);
-    else if (buf.Find(_L("ALBUM="))==0) GetString(iAlbum, s+6);
-    else if (buf.Find(_L("GENRE="))==0) GetString(iGenre, s+6);
-    else if (buf.Find(_L("TRACKNUMBER="))==0) GetString(iTrackNumber,s+12);
-    ++ptr;
-  }
 }
 
 TBool COggPlayback::GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt)
@@ -1028,7 +989,11 @@ TInt COggPlayback::StopAudioStreamingCallBack(TAny* aPtr)
 #if defined(MULTI_THREAD_PLAYBACK)
 TInt COggPlayback::AttachToFs()
 {
+#if defined(SERIES60V3)
+  return KErrNone;
+#else
   return iFs.Attach();
+#endif
 }
 
 TInt COggPlayback::SetAudioProperties(TInt aSampleRate, TInt aChannels)
@@ -1614,4 +1579,6 @@ void COggPlayback::RestartAudioStreamingCallBack()
 		SendBuffer(*(iBuffer[i]));
   }
 }
+
 #endif
+#endif /* !PLUGIN_SYSTEM */

@@ -16,7 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "OggOs.h"
+#include <OggOs.h>
 #include "OggLog.h"
 #include "OggControls.h"
 #include "OggMsgEnv.h"
@@ -24,9 +24,7 @@
 #include <OggPlay.rsg>
 
 #include <eikenv.h>
-#include <math.h>
 #include <flogger.h>
-#include <reent.h>
 
 #include "int_fft.c"
 
@@ -48,29 +46,41 @@ TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
   return w;
 }
 
-/***********************************************************
- *
- * TOggParser
- *
- ***********************************************************/
-TOggParser::TOggParser(const TFileName& aFileName, TInt aScaleFactor)
+ // TOggParser
+TOggParser::TOggParser(RFs& aFs, const TFileName& aFileName, TInt aScaleFactor)
 : iScaleFactor(aScaleFactor)
 {
   iLine= 1;
   iDebug= ETrue;
-  TFileName buf(aFileName);
-  buf.Append(0);
-  if ((iFile=wfopen((wchar_t*)buf.Ptr(),L"rb"))==NULL) {
-    iState= EFileNotFound;
-    return;
-  }
+  iBufferPos = 0;
 
-  iState= ESuccess;
+  RFile file;
+  TInt err = file.Open(aFs, aFileName, EFileShareReadersOnly);
+  if (err == KErrNone)
+	{
+	TInt size;
+	err = file.Size(size);
+	if (err == KErrNone)
+		{
+		iBuffer = HBufC8::New(size);
+		if (iBuffer)
+			{
+			TPtr8 bufDes(iBuffer->Des());
+			err = file.Read(bufDes);
+			}
+		else
+			err = KErrNoMemory;
+		}
+
+	file.Close();
+	}
+
+  iState = (err == KErrNone) ? ESuccess : EFileNotFound;
 }
 
 TOggParser::~TOggParser()
 {
-  fclose(iFile);
+  delete iBuffer;
 }
 
 TBool
@@ -95,33 +105,22 @@ TOggParser::ReadHeader()
 }
 
 TBool
-TOggParser::ReadEOL()
-{
-  if (feof(iFile)) return ETrue;
-  int c= fgetc(iFile);
-  if (c==EOF) return ETrue;
-  if (c==12) return ETrue;
-  if (c==13) {
-    c=fgetc(iFile);
-    if (c==10) return ETrue;
-    fseek(iFile,-1,SEEK_CUR);
-    return EFalse;
-  }
-  if (c==10) return ETrue;
-  fseek(iFile,-1,SEEK_CUR);
-  return EFalse;
-}
-
-TBool
 TOggParser::ReadToken()
 {
   // Read next token. Skip any white space at the beginning.
   // Read possible EOL characters if any.
   iToken.SetLength(0);
-  int c;
+
+  TInt c;
+  TInt bufferLength = iBuffer->Length();
   TBool start(ETrue), stop(EFalse), ignoreWS(EFalse);
   do {
-    c = fgetc(iFile);
+	c = -1;
+	if (iBufferPos == bufferLength)
+		break;
+
+    c = (*iBuffer)[iBufferPos];
+	iBufferPos++;
 
     // Skip initial white space (32 = Space, 9 = Tab)
     if (start && ((c==32) || (c==9)))
@@ -137,7 +136,7 @@ TOggParser::ReadToken()
 
 	// Interpret the character 
     start = EFalse;
-    stop = (c==EOF) || (c==13) || (c==10) || (c==12);
+    stop = (c==13) || (c==10) || (c==12);
 	if (!stop)
 	{
 		// Check for closing " or white space
@@ -153,7 +152,10 @@ TOggParser::ReadToken()
 
   TBool eol = c!=32;
   if (c==13)
-	  c = fgetc(iFile);
+	{
+	  c = (*iBuffer)[iBufferPos];
+	  iBufferPos++;
+	}
 
   if (eol)
 	  iLine++;
@@ -283,10 +285,10 @@ TOggParser::ReportError()
   buf.Append(_L("Last token: <"));
   buf.Append(iToken);
   buf.Append(_L(">"));
+
   //CCoeEnv::Static()->InfoWinL(_L("Error reading skin file"),buf);
   User::InfoPrint(buf);
   //OGGLOG.Write(buf);
-
 }
 
 void TOggParser::Debug(const TDesC& txt, TInt level)
@@ -307,11 +309,7 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
 }
 
 
-/***********************************************************
- *
- * COggControl
- *
- ***********************************************************/
+// COggControl
 COggControl::COggControl()
 : iRedraw(ETrue), iVisible(ETrue)
 {
@@ -2332,11 +2330,7 @@ TBool COggListBox::ReadArguments(TOggParser& p)
 }
 
 
-/***********************************************************
- *
- * COggCanvas
- *
- ***********************************************************/
+// COggCanvas
 COggCanvas::COggCanvas() :
   iControls(10)
 {

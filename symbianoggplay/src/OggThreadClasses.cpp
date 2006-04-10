@@ -16,9 +16,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// Platform settings
+#include <OggOs.h>
+
+// This file is for MULTI_THREAD_PLAYBACK only
+#if defined(MULTI_THREAD_PLAYBACK)
+
 #include <e32std.h>
 #include <e32base.h>
-#include "OggOs.h"
 #include "OggLog.h"
 #include "OggThreadClasses.h"
 
@@ -177,3 +182,4 @@ void CThreadCommandHandler::RequestComplete(TInt err)
 	iCommandThread.RequestComplete(commandStatus, err);
 }
 
+#endif /* MULTI_THREAD_PLAYBACK */

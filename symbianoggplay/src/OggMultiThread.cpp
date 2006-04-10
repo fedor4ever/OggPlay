@@ -16,8 +16,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// Platform settings
+#include <OggOs.h>
+
+// This file is for MULTI_THREAD_PLAYBACK only
+#if defined(MULTI_THREAD_PLAYBACK)
+
 #include <e32std.h>
-#include "OggOs.h"
 #include "OggLog.h"
 #include "OggTremor.h"
 #include "OggMultiThread.h"
@@ -1017,3 +1022,5 @@ void CStreamingThreadListener::DoCancel()
 	TRequestStatus* status = &iStatus;
 	User::RequestComplete(status, KErrCancel);
 }
+
+#endif /* MULTI_THREAD_PLAYBACK */

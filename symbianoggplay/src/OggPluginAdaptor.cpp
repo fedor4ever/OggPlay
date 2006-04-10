@@ -16,6 +16,12 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+// Platform settings
+#include <OggOs.h>
+
+// This file is for PLUGIN_SYSTEM only
+#if defined(PLUGIN_SYSTEM)
+
 #include <e32base.h>
 #include "OggAbsPlayback.h"
 #include "OggPluginAdaptor.h"
@@ -505,7 +511,8 @@ void COggPluginAdaptor::GetAudioProperties()
 	if (iPluginControllerUID.iUid != KOggTremorUidControllerImplementation)
 		return;
 
-    TPckgBuf<TInt [4]> dataFrom;    
+	TInt audioData[4];
+    TPckg<TInt [4]> dataFrom(audioData);    
     TMMFMessageDestination msg(iPluginControllerUID, KMMFObjectHandleController);
     TPckgBuf<TMMFMessageDestination> packedMsg(msg); // Pack the destination
     
@@ -514,10 +521,10 @@ void COggPluginAdaptor::GetAudioProperties()
 
 	if (err == KErrNone)
 		{
-		iRate= dataFrom()[0];
-        iChannels = dataFrom()[1];
-        iBitRate = dataFrom()[2];
-		iFileSize = dataFrom()[3];
+		iRate = audioData[0];
+        iChannels = audioData[1];
+        iBitRate = audioData[2];
+		iFileSize = audioData[3];
 		}
 	else
 		{
@@ -796,3 +803,5 @@ void COggPluginAdaptor::ConstructAPlayerL(const TDesC &anExtension)
 }
 
 #endif
+
+#endif /* PLUGIN_SYSTEM */

@@ -16,7 +16,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "OggOs.h"
+// Platform settings
+#include <OggOs.h>
+
+// This file is for Series 80 only
+#if defined(SERIES80)
+
 #include "OggDialogsS80.h"
 #include "OggPlay.h"
 #include <eiklabel.h>
@@ -588,3 +593,5 @@ SEikControlInfo CCodecsSelectionS80Dialog::CreateCustomControlL(TInt aControlTyp
     SEikControlInfo info = {iContainer,0,0};
     return info;
 }
+
+#endif /* SERIES80 */

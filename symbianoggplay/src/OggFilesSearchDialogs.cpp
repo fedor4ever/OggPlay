@@ -100,8 +100,15 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     // Copy back only drive and path
     fileName.Copy(parse.DriveAndPath());
     fileName.Append(_L("fish.mbm"));
-    ifish1 = iEikonEnv->CreateBitmapL(fileName, 0) ; 
-    ifishmask = iEikonEnv->CreateBitmapL(fileName, 1) ;
+
+#if defined (SERIES60V3)
+	ifish1 = iEikonEnv->CreateBitmapL(_L("Z:\\resource\\apps\\fish.mbm"), 0); 
+    ifishmask = iEikonEnv->CreateBitmapL(_L("Z:\\resource\\apps\\fish.mbm"), 1);
+#else
+	ifish1 = iEikonEnv->CreateBitmapL(fileName, 0); 
+    ifishmask = iEikonEnv->CreateBitmapL(fileName, 1);
+#endif
+
     iFishPosition = 40;
 
     ActivateL();	

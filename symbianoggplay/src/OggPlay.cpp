@@ -16,11 +16,10 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include "OggOs.h"
+#include <OggOs.h>
 #include <e32std.h>
 #include <hal.h>
 #ifdef SERIES60
-#include <aknkeys.h>	// EStdQuartzKeyConfirm etc.
 #include <akndialog.h>   // for about
 _LIT(KTsyName,"phonetsy.tsy");
 #endif
@@ -41,7 +40,6 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <apgwgnam.h>	// CApaWindowGroupName
 #include <eikmenup.h>	// CEikMenuPane
 #include <barsread.h>
-#include <reent.h>
 
 #include "OggControls.h"
 #ifdef PLUGIN_SYSTEM
@@ -70,11 +68,19 @@ NewApplication()
 	return new COggPlayApplication;
 }
 
-GLDEF_C int
+#if defined(SERIES60V3)
+#include <eikstart.h>
+GLDEF_C TInt E32Main()
+{
+	return EikStart::RunApplication(NewApplication);
+}
+#else
+GLDEF_C TInt
 E32Dll(TDllReason)
 {
 	return KErrNone;
 }
+#endif
 
 void ROggPlayListStack::Reset()
 {
@@ -323,8 +329,12 @@ void COggPlayAppUi::ConstructL()
   iDbFileName.SetLength(iDbFileName.Length() - 3);
   iDbFileName.Append(_L("db"));
 
-	iSkinFileDir.Copy(Application()->AppFullName());
-	iSkinFileDir.SetLength(iSkinFileDir.Length() - 11);
+#if defined(SERIES60V3)
+  iSkinFileDir.Copy(_L("Z:\\private\\A000017F\\"));
+#else
+  iSkinFileDir.Copy(Application()->AppFullName());
+  iSkinFileDir.SetLength(iSkinFileDir.Length() - 11);
+#endif
 
 #if defined(__WINS__)
   // The emulator doesn't like to write to the Z: drive, avoid that.
@@ -530,8 +540,6 @@ COggPlayAppUi::~COggPlayAppUi()
     iViewHistoryStack.Close();
     iRestoreStack.Close();
 	COggLog::Exit();  
-	
-	CloseSTDLIB();
 }
 
 
@@ -875,13 +883,13 @@ COggPlayAppUi::HandleCommandL(int aCommand)
     break;
     
   case EUserFastForward : {
-    TInt64 pos= iOggPlayback->Position()+=KFfRwdStep;
+    TInt64 pos= iOggPlayback->Position() + KFfRwdStep;
     iOggPlayback->SetPosition(pos);
 	iAppView->UpdateSongPosition();
     }
     break;
   case EUserRewind : {
-    TInt64 pos= iOggPlayback->Position()-=KFfRwdStep;
+    TInt64 pos= iOggPlayback->Position() - KFfRwdStep;
     iOggPlayback->SetPosition(pos);
 	iAppView->UpdateSongPosition();
     }
@@ -1156,7 +1164,13 @@ COggPlayAppUi::ShowFileInfo()
 		d->SetRate(iOggPlayback->Rate());
 		d->SetChannels(iOggPlayback->Channels());
 		d->SetFileSize(fileSize);
+
+#if defined(SERIES60V3)
+		d->SetTime(iOggPlayback->Time());
+#else
 		d->SetTime(iOggPlayback->Time().GetTInt());
+#endif
+
 		d->SetBitRate(iOggPlayback->BitRate()/1000);
 		if (!songPlaying) iOggPlayback->ClearComments();
 
@@ -2535,15 +2549,30 @@ const TDesC & COggRandomPlay::GetNextSong()
 
 	TInt64 rnd64;
 	TInt64 picked64;
+
+#if defined(SERIES60V3)
+	TInt64 maxInt64 = MAKE_TINT64(1, 0);
+#else
 	TInt64 maxInt64 = TInt64(1, 0);
+#endif
+
 	TInt64 memCount = iRandomMemory.Count();
 	TInt nextPick;
 	if (iNewFileList)
 	{
+#if defined(SERIES60V3)
+		rnd64 = Math::Random();
+#else
 		rnd64 = TInt64(0, Math::Random());
+#endif
 
 		picked64 = (rnd64 * memCount) / maxInt64;
+
+#if defined(SERIES60V3)
+		nextPick = I64LOW(picked64);
+#else
 		nextPick = picked64.Low();
+#endif
 
 		iNewFileList = EFalse;
 	}
@@ -2552,9 +2581,20 @@ const TDesC & COggRandomPlay::GetNextSong()
 		// Avoid playing the same track (possible at the end of the track list when repeat is on)
 		do
 		{
+#if defined(SERIES60V3)
+			rnd64 = Math::Random();
+#else
 			rnd64 = TInt64(0, Math::Random());
+#endif
+
 			picked64 = (rnd64 * memCount) / maxInt64;
-			nextPick = picked64.Low();
+
+#if defined(SERIES60V3)
+		nextPick = I64LOW(picked64);
+#else
+		nextPick = picked64.Low();
+#endif
+
 		} while (nextPick == picked);
 	}
   

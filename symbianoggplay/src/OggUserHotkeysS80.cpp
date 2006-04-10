@@ -16,11 +16,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "OggOs.h"
+// Platform settings
+#include <OggOs.h>
+
+// This file is for Series 80 only
+#if defined(SERIES80)
+
 #include "OggPlay.h"
 #include "OggUserHotkeys.h"
 
-#ifdef SERIES80
 static const TInt KMapRssListToCommand[]  =
   {
     // Maps the "RESOURCE ARRAY r_user_hotkey_items" from the .rss file
