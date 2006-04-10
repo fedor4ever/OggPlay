@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden.
+ *  Copyright (c) 2006 S. Fisher
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,27 +16,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _UTF8FIX_H
-#define _UTF8FIX_H
+#ifndef __OggPlatform_h
+#define __OggPlatform_h
 
-// j_code() function return type
-// 0x0 means set code by hand
-#define GB_CODE      0x0001
-#define BIG5_CODE    0x0002
-#define HZ_CODE      0x0004
-#define UNI_CODE     0x0010
-#define UTF7_CODE    0x0020
-#define UTF8_CODE    0x0040
-#define OTHER_CODE   0x8000
+//  Build targets for S90
+#define SERIES80
+#define SERIES90
+#define OS70S
 
-#ifdef __cplusplus
-extern "C" {
 #endif
-
-extern int j_code(const char * buff,int count);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // _UTF8FIX_H

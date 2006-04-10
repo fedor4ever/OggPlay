@@ -19,15 +19,14 @@
 #ifndef __OggPlay_h
 #define __OggPlay_h
 
-#include "OggOs.h"
-#include "OggPlayUid.h"
+#include <OggOs.h>
+#include <OggPlayUid.h>
 #include <e32math.h> // For Random
 
 #if defined(SERIES60)
 #include <aknappui.h>
 #include <aknapp.h>
 #include <eikdoc.h>
-#include <stdio.h>
 
 #elif defined(SERIES80)
 #include <eikenv.h> 

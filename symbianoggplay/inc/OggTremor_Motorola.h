@@ -70,8 +70,6 @@ private:
    void OnEvent( TMAudioFBCallbackState aState, TInt aError, TDes8 *aBuffer );
 
    void CreateStreamApi( void );
-   void GetString( TBuf<256>& aBuf, const char* aStr );
-   void ParseComments( char** ptr );
    void ResetStreamApi( void );
    void SendBufferL( TInt aIndex );
    TInt SetAudioCaps( TInt aChannels, TInt aRate );

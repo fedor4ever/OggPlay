@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2003 L. H. Wilden.
+ *  Copyright (c) 2006 S. Fisher
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,34 +16,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
- // UIDs used for OggPlay
+#ifndef __OggPlatform_h
+#define __OggPlatform_h
+ 
+//  Build targets for UIQ
+#define UIQ
 
-
-#ifndef __OggPlayUid_h
-#define __OggPlayUid_h
-
-#if defined(__GCC32__) || defined(__VC32__)
-  #include <e32std.h>
-
-#if defined(SERIES60V3)
-  const TInt KOggPlayApplicationUidValue = 0xA000017F;
-#else
-  const TInt KOggPlayApplicationUidValue = 0x1000A661;
-#endif
-
-  const TInt KOggPlayRecognizerUidValue  = 0x101FF67C;
-
-  // Not sure this is correct mime.
-  #define KOggMimeType "application/ogg"
-#else
-  // For .AIF file inclusion
-#if defined(SERIES60V3)
-  #define KOggPlayApplicationUidValue 0xA000017F
-#else
-  #define KOggPlayApplicationUidValue 0x1000A661
-#endif
-
-  #define KOggPlayRecognizerUidValue  0x101FF67C
-#endif
+// Define the type of UIQ platform
+#define SONYERICSSON
 
 #endif

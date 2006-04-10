@@ -19,23 +19,21 @@
 #ifndef OggControls_h
 #define OggControls_h
 
-#include "OggOs.h"
+#include <OggOs.h>
 
+#include <e32base.h>
 #include <coecntrl.h>
 #include <eikclbd.h>
-#include <mdaimageconverter.h>
 #include <gulicon.h>
 #include <badesca.h>
 #include <flogger.h>
-
-#include <stdio.h>
+#include <f32file.h>
 
 // MOggControlObserver:
 // Observe mouse pointer down/drag/up events for COggControls
 
 class COggControl;
 class COggCanvas;
-
 class MOggControlObserver {
 
  public:
@@ -75,7 +73,7 @@ class TOggParser {
     EEndExpected, EBitmapNotFound, EIntegerExpected,
     EOutOfRange};
 
-  TOggParser(const TFileName& aFileName, TInt aScaleFactor = 1);
+  TOggParser(RFs& aFs, const TFileName& aFileName, TInt aScaleFactor = 1);
   ~TOggParser();
 
   TBool ReadSkin(COggCanvas* fo, COggCanvas* fc);
@@ -83,7 +81,6 @@ class TOggParser {
   void  Debug(const TDesC& txt, TInt level=0);
 
   TBool ReadHeader();
-  TBool ReadEOL();
   TBool ReadToken();
   TBool ReadToken(TInt& aValue);
   CGulIcon* ReadIcon(const TFileName& aBitmapFile);
@@ -92,12 +89,14 @@ class TOggParser {
 
   // protected:
   TBool     iDebug;
-  FILE*     iFile;
   TState    iState;
   TInt      iLine;
   TBuf<128> iToken;
   TInt      iVersion;
   TInt		iScaleFactor;
+
+  HBufC8*   iBuffer;
+  TInt      iBufferPos;
 };
 
 
@@ -609,8 +608,6 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
 
   void CycleHighFrequencyControls();
   void CycleLowFrequencyControls();
-
-  void Read(FILE* tf);
 
  protected:
 

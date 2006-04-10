@@ -19,6 +19,9 @@
 #ifndef __OggOs_h
 #define __OggOs_h
 
+// Platform defines
+#include <OggPlatform.h>
+
 #undef chmsg // Not particularily clever, but hides useless warning msg.
 #if defined( __WINS__ )  && defined(__VC32__)
 #define chSTR(x)           #x
@@ -30,26 +33,9 @@ chSTR2(__LINE__) "):" #desc)
 #define chmsg(desc)
 #endif
 
-
-#define MULTI_LINGUAL_INSTALLER
-
 // DEBUGGING
-//
 #define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
 
-
-// BUILD TARGETS
-// Enable this line to enforce the platform target.
-#define SERIES60
-
-//#define SERIES80
-//#define SERIES90
-
-//#define UIQ
-
-
-// Enable this line to choose the OS OggPlay will run on.
-#define OS70S
 
 //# Version String
 #if defined(SERIES60)
@@ -74,40 +60,24 @@ chSTR2(__LINE__) "):" #desc)
  #define KVersionString "1.69"
 #endif
 
-// There is a prize to the first to get rid of this. Switches '/' and '\' in path(s).
-#define DOS
-
-// Switches at least the splash bitmap
-#define UNSTABLE_RELEASE
-
-#if defined(UIQ)
-// Define the type of UIQ platform
-#define MOTOROLA
-//#define SONYERICSSON
-#endif
-
-
 #ifdef OS70S
-
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
 #define PLUGIN_SYSTEM
+
 // This flag is only for SOS 7.0S and over, should never be set for older SOS
 #define MMF_AVAILABLE 
-
 #else
 // PLUGIN_SYSTEM on the SOS 6.1 is experimental at the moment. 
 //#define PLUGIN_SYSTEM 
 // support for legacy audio codec (-:
 // this is experimental at the moment.
 //#define MP3_SUPPORT
-
 #endif /* OS70S */
 
 
 // NEW CODE ENABLERS
-
 #if defined(SERIES60)
 #ifdef OS70S
 // The splash screen is using S60 window server
@@ -152,11 +122,6 @@ chSTR2(__LINE__) "):" #desc)
 #if !defined(MOTOROLA)
 #define MONITOR_TELEPHONE_LINE 
 #endif
-
-
-// other tags:
-// #define RGAIN_SUPPORT
-// #IMPROVE_MAD
 
 // Phone UIDs
 // Used for determining the phone type (currently only used for the Sendo X)

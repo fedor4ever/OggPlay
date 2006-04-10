@@ -15,14 +15,14 @@
 *  along with this program; if not, write to the Free Software
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-#include "OggOs.h"
-#include <badesca.h>
-#include "OggRateConvert.h"
 
 
 #ifndef OGGABSPLAYBACK_H
 #define OGGABSPLAYBACK_H
 
+#include <badesca.h>
+#include <OggOs.h>
+#include "OggRateConvert.h"
 
 const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;

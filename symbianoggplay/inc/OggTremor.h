@@ -21,7 +21,6 @@
 
 #include "e32des8.h"
 #include "eikenv.h"
-#include "stdio.h"
 #include "ivorbisfile.h"
 #include "OggMsgEnv.h"
 #include "OggHelperFcts.h"
@@ -160,12 +159,9 @@ public:
   virtual void SetVolumeGain(TGainType aGain);
 
 private:
-  void ParseComments(char** ptr);
-
   TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
   TInt SetAudioCaps(TInt theChannels, TInt theRate);
 
-  void GetString(TBuf<256>& aBuf, const char* aStr);
   void SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate, TBool aConvertChannel, TInt aNbOfChannels);
   MDecoder* GetDecoderL(const TDesC& aFileName);
 

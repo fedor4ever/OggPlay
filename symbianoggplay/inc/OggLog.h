@@ -19,8 +19,8 @@
 #ifndef _OGGLOG_H
 #define _OGGLOG_H
 
-#include "OggOs.h"
 #include <flogger.h>
+#include <OggOs.h>
 
 #define OGGLOG COggLog::InstanceL()->iLog
 #define OGGPANIC(msg,reason) COggLog::InstanceL()->Panic(msg,reason)
