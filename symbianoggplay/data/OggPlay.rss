@@ -1,9 +1,5 @@
 
-#if defined(DOS)
-#include "..\inc\OggOs.h"
-#else
-#include "../inc/OggOs.h"
-#endif
+#include <OggOs.h>
 
 #if defined(UIQ)
 #include "OggPlay.uiq.rss"
