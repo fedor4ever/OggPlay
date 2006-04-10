@@ -30,4 +30,5 @@ EXPORTS
 	ov_time_total @ 29 NONAME
 	ov_getFreqBin @ 30 NONAME
 	ov_reqFreqBin @ 31 NONAME
+	jcode @ 32 NONAME
 

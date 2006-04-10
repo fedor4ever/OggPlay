@@ -24,4 +24,5 @@ EXPORTS
 	ov_bitrate @ 23 NONAME R3UNUSED ; (null)
 	ov_getFreqBin @ 24 NONAME R3UNUSED ; (null)
 	ov_reqFreqBin @ 25 NONAME R3UNUSED ; (null)
+	jcode @ 26 NONAME R3UNUSED ; (null)
 
