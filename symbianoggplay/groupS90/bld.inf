@@ -4,9 +4,7 @@
 *  Part of  : OggPlay
 *  Created  : 19.07.2003 by 
 *  Description:
-*	 This file provides the information required for building the UI for OggPlay.
-*        Make sure that SERIES80, SERIES90 and OS70S are defined in \inc\OggOs.h
-*        The vorbis plugin must also be built.
+*	 This file provides the information required for building OggPlay.
 *  Version  :
 *  Copyright: 
 * ============================================================================
@@ -17,6 +15,7 @@ PRJ_PLATFORMS
 WINS ARMI
 
 PRJ_EXPORTS
+..\Inc\OggS90.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
 ..\Plugin\Inc\OggPlayPlugin.h
@@ -29,4 +28,5 @@ PRJ_EXPORTS
 
 PRJ_MMPFILES
 OggPlayS90.mmp
+..\vorbis\groupS90\OggPluginDecoderS90.mmp
 
