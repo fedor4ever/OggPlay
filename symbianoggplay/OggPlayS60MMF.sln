@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OggPlayS60MMF", "OggPlayS60MMF.vcproj", "{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C} = {DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OggPluginDecoderS60MMF", "vorbis\OggPluginDecoderS60MMF.vcproj", "{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Deb_S60_23_WINSCW = Deb_S60_23_WINSCW
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}.Deb_S60_23_WINSCW.ActiveCfg = Deb_S60_23_WINSCW|Win32
+		{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}.Deb_S60_23_WINSCW.Build.0 = Deb_S60_23_WINSCW|Win32
+		{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}.Debug.ActiveCfg = Debug|Win32
+		{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}.Debug.Build.0 = Debug|Win32
+		{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}.Release.ActiveCfg = Release|Win32
+		{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}.Release.Build.0 = Release|Win32
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}.Deb_S60_23_WINSCW.ActiveCfg = Deb_S60_23_WINSCW|Win32
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}.Deb_S60_23_WINSCW.Build.0 = Deb_S60_23_WINSCW|Win32
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}.Debug.ActiveCfg = Debug|Win32
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}.Debug.Build.0 = Debug|Win32
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}.Release.ActiveCfg = Release|Win32
+		{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

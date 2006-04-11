@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="OggPlay"
-	ProjectGUID="{A3042E30-F0B5-48C5-93A2-9A3208FCA2B6}"
+	Name="OggPlayS60MMF"
+	ProjectGUID="{44EE2DE9-EFFB-4AD1-80FA-D022365B8C8A}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform
@@ -78,7 +78,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/QIfist /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_23"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\OggPlay\symbianoggplay\inc;C:\OggPlay\symbianoggplay\vorbis;C:\OggPlay\symbianoggplay\data;C:\OggPlay\symbianoggplay\vorbis\plugin;C:\OggPlay\symbianoggplay\plugin\inc;C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\Include;C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\Include\libc;"
+				AdditionalIncludeDirectories="C:\OggPlay\symbianoggplay\inc;C:\OggPlay\symbianoggplay\vorbis;C:\OggPlay\symbianoggplay\data;C:\OggPlay\symbianoggplay\vorbis\plugin;C:\OggPlay\symbianoggplay\plugin\inc;C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\Include;"
 				PreprocessorDefinitions="__SYMBIAN32__;__SERIES60_23__;__SERIES60_2X__;__DLL__;__WINSCW__;__WINS__;__CW32__;_DEBUG;_UNICODE;"
 				IgnoreStandardIncludePath="TRUE"
 				StringPooling="TRUE"
@@ -95,7 +95,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_23"
-				AdditionalDependencies="euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib eikctl.lib gdi.lib ws32.lib bafl.lib fbscli.lib bitgdi.lib apgrfx.lib egul.lib estlib.lib charconv.lib flogger.lib hal.lib avkon.lib MediaClientImage.lib etext.lib form.lib estor.lib etel.lib mediaclientaudiostream.lib MediaClientAudio.lib MMFControllerFramework.lib edll.lib "
+				AdditionalDependencies="euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib eikctl.lib gdi.lib ws32.lib bafl.lib fbscli.lib bitgdi.lib apgrfx.lib egul.lib charconv.lib flogger.lib hal.lib avkon.lib MediaClientImage.lib etext.lib form.lib estor.lib etel.lib mediaclientaudiostream.lib MediaClientAudio.lib MMFControllerFramework.lib edll.lib "
 				OutputFile="C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\release\winscw\udeb\z\\system\apps\Oggplay\OggPlay.app"
 				AdditionalLibraryDirectories="C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\release\winscw\udeb"
 				IgnoreAllDefaultLibraries="TRUE"
@@ -126,15 +126,6 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
-		<Configuration
-			Name="Rel_S60_23_ARMI|Win32"
-			ConfigurationType="0">
-			<Tool
-				Name="VCNMakeTool"
-				BuildCommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S60_23 ARMI UREL build"
-				ReBuildCommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S60_23 ARMI UREL rebuild"
-				CleanCommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S60_23 ARMI UREL clean"/>
-		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -143,93 +134,48 @@
 			Name="src">
 			<File
 				RelativePath=".\src\OggControls.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggDialogs.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggFiles.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggFilesSearchDialogs.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggHelperFcts.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggLog.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggMsgEnv.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggPlay.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggPlayAppView.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggPluginAdaptor.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggPluginSelectionDialogS60.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggSettingsContainer.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggSplashContainer.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggUserHotkeys.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\OggViews.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -243,9 +189,6 @@
 						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_23 WINSCW UDEB
 "
 						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlayaif.s60.rsg;"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
 				</FileConfiguration>
 			</File>
 		</Filter>
@@ -261,9 +204,6 @@
 "
 						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlay.rsg;"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\data\OggPlay_caption.rss">
@@ -275,329 +215,185 @@
 "
 						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlay_caption.rsg;"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="inc">
 			<File
 				RelativePath=".\inc\OggAbsPlayback.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggControls.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggDialogs.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggDialogs.rh">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggDialogsS80.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggFiles.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggFilesSearchDialogs.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggHelperFcts.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggLog.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggMsgEnv.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggMultiThread.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggOs.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPlay.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPlay.hrh">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPlay.loc">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPlayAppView.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPlayUid.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPluginAdaptor.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggPluginSelectionDialogS60.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggRateConvert.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\inc\OggS60.h">
+			</File>
+			<File
+				RelativePath=".\inc\OggS60MMF.h">
+			</File>
+			<File
+				RelativePath=".\inc\OggS60V3.h">
+			</File>
+			<File
+				RelativePath=".\inc\OggS80.h">
+			</File>
+			<File
+				RelativePath=".\inc\OggS90.h">
 			</File>
 			<File
 				RelativePath=".\inc\OggSettingsContainer.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggSplashContainer.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggThreadClasses.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggTremor.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\inc\OggTremor_dummy.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggTremor_Motorola.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\inc\OggUIQMoto.h">
+			</File>
+			<File
+				RelativePath=".\inc\OggUIQSony.h">
 			</File>
 			<File
 				RelativePath=".\inc\OggUserHotkeys.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\OggViews.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\inc\Utf8Fix.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="vorbis">
 			<File
 				RelativePath=".\vorbis\asm_arm.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\backends.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\block.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\codebook.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\codec_internal.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\config_types.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\ivorbiscodec.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\ivorbisfile.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\lsp_lookup.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\mdct.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\mdct_lookup.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\misc.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\ogg.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\os.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\os_types.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\registry.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\TremorDecoder.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\window.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vorbis\window_lookup.h">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<Filter
 				Name="plugin">
 				<File
 					RelativePath=".\vorbis\Plugin\ImplementationUIDs.hrh">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\vorbis\Plugin\MMFOggPlayStreaming.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\vorbis\Plugin\OggPlayControllerCustomCommands.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\vorbis\Plugin\TremorDecoder.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 			</Filter>
 			<Filter
@@ -606,9 +402,6 @@
 					Name="MMFPluginTests">
 					<File
 						RelativePath=".\vorbis\tscr\MMFPluginTests\MMFPluginTest.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
@@ -618,46 +411,13 @@
 			<Filter
 				Name="inc">
 				<File
-					RelativePath=".\Plugin\inc\AdvancedStreaming.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Plugin\inc\OggHelperFcts.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Plugin\inc\OggLog.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath=".\Plugin\inc\OggPlayController.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\Plugin\inc\OggPlayDecoder.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\Plugin\inc\OggPlayPlugin.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Plugin\inc\OggRateConvert.h">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
@@ -667,303 +427,156 @@
 		<Filter
 			Name="groupS60MMF">
 			<File
-				RelativePath=".\groupS60MMF\OggPlay.mmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
+				RelativePath=".\groupS60MMF\OggPlayS60MMF.mmp">
 			</File>
 			<File
-				RelativePath=".\groupS60MMF\oggplay.uid.cpp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
+				RelativePath=".\groupS60MMF\oggplays60mmf.uid.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="bitmaps">
 			<File
 				RelativePath=".\bitmaps\back.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\backm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\cdicon.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\cdiconm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\file.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\filem.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\fish0.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\fishmask.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\flipclosed.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\flipopen_steel_s60.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\folder.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\folderm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\genre.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\genrem.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\listboxfocus.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\listboxfocusm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\micicon.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\miciconm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\pause.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\paused.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\pausedm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\pausefocus.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\pausem.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\play.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\play_dimmed.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\playfocus.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\playing.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\playingm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\playm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\repeat.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\repeatm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\s60splash_unstable.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\slider.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\sliderfocus.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\sliderfocusm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\sliderm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\stop.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\stop_dimmed.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\stopfocus.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\stopm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\title.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\titlem.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\volume.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\volumefocus.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\volumefocusm.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\bitmaps\volumem.bmp">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<Filter
 				Name="symbian">
 				<File
 					RelativePath=".\bitmaps\symbian\OggPlayLogo.bmp">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 			</Filter>
 			<Filter
@@ -972,54 +585,36 @@
 					Name="amber">
 					<File
 						RelativePath=".\bitmaps\Skins\amber\amber.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
 					Name="AnalyzerTest1">
 					<File
 						RelativePath=".\bitmaps\Skins\AnalyzerTest1\AnalyzerTest.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
 					Name="FullSteel">
 					<File
 						RelativePath=".\bitmaps\Skins\FullSteel\FullSteel.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
 					Name="GreyZone">
 					<File
 						RelativePath=".\bitmaps\Skins\GreyZone\GreyZone.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
 					Name="mcNuOggPlay">
 					<File
 						RelativePath=".\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
 					Name="mcNuOggPlayN90">
 					<File
 						RelativePath=".\bitmaps\Skins\mcNuOggPlayN90\mcNuOggPlayN90.pkg">
-						<FileConfiguration
-							Name="Rel_S60_23_ARMI|Win32">
-						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
@@ -1030,9 +625,6 @@
 				Name="Plugin">
 				<File
 					RelativePath=".\mad\Plugin\ImplementationUIDs.hrh">
-					<FileConfiguration
-						Name="Rel_S60_23_ARMI|Win32">
-					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
@@ -1040,58 +632,31 @@
 			Name="install">
 			<File
 				RelativePath=".\install\OggPlay.a920.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\OggPlay.s60.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\OggPlay.uiq.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\OggPlay_lang.uiq.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\OggPlayMMF.s60.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\OggPlayMMF.s80.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\OggPlayMMF.s90.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\install\Recognizer.s60.pkg">
-				<FileConfiguration
-					Name="Rel_S60_23_ARMI|Win32">
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<File
 			RelativePath=".\OggPlay.pkg">
-			<FileConfiguration
-				Name="Rel_S60_23_ARMI|Win32">
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

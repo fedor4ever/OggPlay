@@ -3,9 +3,9 @@
   <activeMmpFile>groupS80\OggPlayS80.mmp</activeMmpFile>
   <updateMmpFile>true</updateMmpFile>
   <updateUidCppFile>true</updateUidCppFile>
-  <pkgFile />
-  <pkgUpdate>false</pkgUpdate>
-  <pkgGeneration>false</pkgGeneration>
+  <pkgFile>OggPlay.pkg</pkgFile>
+  <pkgUpdate>true</pkgUpdate>
+  <pkgGeneration>true</pkgGeneration>
   <projectProperty name="uid3" label="Application UID" value="0x1000A661" description="Application UID. Development time UIDs between 0x00000000 - 0x0fffffff. Release UIDs provided by Symbian." type="input" pattern="UID" role="UID" persistedAs="project.uid3" />
   <projectProperty name="basename" label="Base Name" value="OggPlayS80" description="Base name for files and classes" type="input" pattern="VariableName" role="ProjectName" persistedAs="project.basename" />
   <lang>EN</lang>
