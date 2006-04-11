@@ -22,8 +22,6 @@
 #pragma warning( disable : 4514 ) // unreferenced inline function has been removed
 
 #include <e32def.h>
-#include <stdlib.h>
-#include <string.h>
 #include "ogg.h"
 #include "codebook.h"
 #include "misc.h"
@@ -76,7 +74,7 @@ static void _ogg_buffer_destroy(ogg_buffer_state *bs){
     else
         {
         /* This should never happen ?*/
-        exit(-1);
+        _ogg_exit(-1);
         }
   }
 }
@@ -370,7 +368,7 @@ static void _positionF(oggbyte_buffer *b,int pos){
 }
 
 static int oggbyte_init(oggbyte_buffer *b,ogg_reference *or){
-  memset(b,0,sizeof(*b));
+  _ogg_memset(b,0,sizeof(*b));
   if(or){
     b->ref=b->baseref=or;
     b->pos=0;
@@ -576,7 +574,7 @@ static const ogg_uint32_t crc_lookup[256]={
 
 ogg_sync_state *ogg_sync_create(void){
   ogg_sync_state *oy=_ogg_calloc(1,sizeof(*oy));
-  memset(oy,0,sizeof(*oy));
+  _ogg_memset(oy,0,sizeof(*oy));
   oy->bufferpool=ogg_buffer_create();
   return oy;
 }
@@ -585,7 +583,7 @@ int ogg_sync_destroy(ogg_sync_state *oy){
   if(oy){
     ogg_sync_reset(oy);
     ogg_buffer_destroy(oy->bufferpool);
-    memset(oy,0,sizeof(*oy));
+    _ogg_memset(oy,0,sizeof(*oy));
     _ogg_free(oy);
   }
   return OGG_SUCCESS;
@@ -754,7 +752,7 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
   while(oy->fifo_tail){
     /* invariant: fifo_cursor points to a position in fifo_tail */
     unsigned char *now=oy->fifo_tail->buffer->data+oy->fifo_tail->begin;
-    unsigned char *next=memchr(now, 'O', oy->fifo_tail->length);
+    unsigned char *next= _ogg_memchr(now, 'O', oy->fifo_tail->length);
       
     if(next){
       /* possible capture in this segment */
@@ -987,7 +985,7 @@ int ogg_stream_pagein(ogg_stream_state *os, ogg_page *og){
     os->header_head=ogg_buffer_cat(os->header_head,og->header);
   }
 
-  memset(og,0,sizeof(*og));
+  _ogg_memset(og,0,sizeof(*og));
   return OGG_SUCCESS;
 }
 
@@ -1111,7 +1109,7 @@ int ogg_stream_packetpeek(ogg_stream_state *os,ogg_packet *op){
 int ogg_packet_release(ogg_packet *op) {
   if(op){
     ogg_buffer_release(op->packet);
-    memset(op, 0, sizeof(*op));
+    _ogg_memset(op, 0, sizeof(*op));
   }
   return OGG_SUCCESS;
 }
@@ -1120,7 +1118,7 @@ int ogg_page_release(ogg_page *og) {
   if(og){
     ogg_buffer_release(og->header);
     ogg_buffer_release(og->body);
-    memset(og, 0, sizeof(*og));
+    _ogg_memset(og, 0, sizeof(*og));
   }
   return OGG_SUCCESS;
 }

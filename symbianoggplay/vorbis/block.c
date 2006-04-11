@@ -16,9 +16,6 @@
  ********************************************************************/
 
 #include <e32def.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codec_internal.h"
@@ -83,7 +80,7 @@ static int ilog(unsigned int v){
 #endif
 
 int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
-  memset(vb,0,sizeof(*vb));
+  _ogg_memset(vb,0,sizeof(*vb));
   vb->vd=v;
   vb->localalloc=0;
   vb->localstore=NULL;
@@ -121,7 +118,7 @@ void _vorbis_block_ripcord(vorbis_block *vb){
   while(reap){
     struct alloc_chain *next=reap->next;
     _ogg_free(reap->ptr);
-    memset(reap,0,sizeof(*reap));
+    _ogg_memset(reap,0,sizeof(*reap));
     _ogg_free(reap);
     reap=next;
   }
@@ -141,7 +138,7 @@ int vorbis_block_clear(vorbis_block *vb){
   _vorbis_block_ripcord(vb);
   if(vb->localstore)_ogg_free(vb->localstore);
 
-  memset(vb,0,sizeof(*vb));
+  _ogg_memset(vb,0,sizeof(*vb));
   return(0);
 }
 
@@ -150,7 +147,7 @@ static int _vds_init(vorbis_dsp_state *v,vorbis_info *vi){
   codec_setup_info *ci=(codec_setup_info *)vi->codec_setup;
   private_state *b=NULL;
 
-  memset(v,0,sizeof(*v));
+  _ogg_memset(v,0,sizeof(*v));
   b=(private_state *)(v->backend_state=_ogg_calloc(1,sizeof(*b)));
 
   v->vi=vi;
@@ -248,7 +245,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       _ogg_free(b);
     }
     
-    memset(v,0,sizeof(*v));
+    _ogg_memset(v,0,sizeof(*v));
   }
 }
 

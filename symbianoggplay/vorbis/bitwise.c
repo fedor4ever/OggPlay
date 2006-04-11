@@ -19,8 +19,6 @@
    then we'll read the lsb first */
 
 #include <e32def.h>
-#include <string.h>
-#include <stdlib.h>
 #include "ogg.h"
 
 static const unsigned long mask[]=
@@ -63,7 +61,7 @@ static void _span(oggpack_buffer *b){
 }
 
 void oggpack_readinit(oggpack_buffer *b,ogg_reference *r){
-  memset(b,0,sizeof(*b));
+  _ogg_memset(b,0,sizeof(*b));
 
   b->tail=b->head=r;
   b->count=0;

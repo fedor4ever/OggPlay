@@ -16,9 +16,6 @@
  ********************************************************************/
 
 #include <e32def.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codec_internal.h"
@@ -46,7 +43,7 @@ typedef struct {
 void res0_free_info(vorbis_info_residue *i){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)i;
   if(info){
-    memset(info,0,sizeof(*info));
+    _ogg_memset(info,0,sizeof(*info));
     _ogg_free(info);
   }
 }
@@ -64,7 +61,7 @@ void res0_free_look(vorbis_look_residue *i){
       _ogg_free(look->decodemap[j]);
     _ogg_free(look->decodemap);
 
-    memset(look,0,sizeof(*look));
+    _ogg_memset(look,0,sizeof(*look));
     _ogg_free(look);
   }
 }

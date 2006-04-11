@@ -16,8 +16,6 @@
  ********************************************************************/
 
 #include <e32def.h>
-#include <stdlib.h>
-#include <math.h>
 #include "os.h"
 #include "codebook.h"
 #include "misc.h"

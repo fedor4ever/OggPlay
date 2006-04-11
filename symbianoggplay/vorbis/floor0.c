@@ -17,9 +17,6 @@
 #pragma warning( disable : 4706 ) // Assignment within conditional expression
 
 #include <e32def.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codec_internal.h"
@@ -164,7 +161,7 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 
     /* safeguard against a malicious stream */
     if(val<0 || (val>>COS_LOOKUP_I_SHIFT)>=COS_LOOKUP_I_SZ){
-      memset(curve,0,sizeof(*curve)*n);
+      _ogg_memset(curve,0,sizeof(*curve)*n);
       return;
     }
 
@@ -206,15 +203,15 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 #else
     int j=map[i];
     ogg_int32_t shift;
-    qi*=labs(ilsp[0]-wi);
-    pi*=labs(ilsp[1]-wi);
+    qi*=_ogg_labs(ilsp[0]-wi);
+    pi*=_ogg_labs(ilsp[1]-wi);
 
     for(j=3;j<m;j+=2){
       if(!(shift=MLOOP_1[(pi|qi)>>25]))
 	if(!(shift=MLOOP_2[(pi|qi)>>19]))
 	  shift=MLOOP_3[(pi|qi)>>16];
-      qi=(qi>>shift)*labs(ilsp[j-1]-wi);
-      pi=(pi>>shift)*labs(ilsp[j]-wi);
+      qi=(qi>>shift)*_ogg_labs(ilsp[j-1]-wi);
+      pi=(pi>>shift)*_ogg_labs(ilsp[j]-wi);
       qexp+=shift;
     }
     if(!(shift=MLOOP_1[(pi|qi)>>25]))
@@ -226,7 +223,7 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
     if(m&1){
       /* odd order filter; slightly assymetric */
       /* the last coefficient */
-      qi=(qi>>shift)*labs(ilsp[j-1]-wi);
+      qi=(qi>>shift)*_ogg_labs(ilsp[j-1]-wi);
       pi=(pi>>shift)<<14;
       qexp+=shift;
 
@@ -297,7 +294,7 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 static void floor0_free_info(vorbis_info_floor *i){
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
   if(info){
-    memset(info,0,sizeof(*info));
+    _ogg_memset(info,0,sizeof(*info));
     _ogg_free(info);
   }
 }
@@ -308,7 +305,7 @@ static void floor0_free_look(vorbis_look_floor *i){
 
     if(look->linearmap)_ogg_free(look->linearmap);
     if(look->lsp_look)_ogg_free(look->lsp_look);
-    memset(look,0,sizeof(*look));
+    _ogg_memset(look,0,sizeof(*look));
     _ogg_free(look);
   }
 }
@@ -434,7 +431,7 @@ static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
 			lsp,look->m,amp,info->ampdB,look->lsp_look);
     return(1);
   }
-  memset(out,0,sizeof(*out)*look->n);
+  _ogg_memset(out,0,sizeof(*out)*look->n);
   return(0);
 }
 

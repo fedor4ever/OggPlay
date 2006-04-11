@@ -33,7 +33,6 @@
  ********************************************************************/
 
 #include <e32def.h>
-#include <stdlib.h>
 #include "ivorbiscodec.h"
 #include "os.h"
 #include "codebook.h"

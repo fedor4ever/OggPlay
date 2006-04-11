@@ -17,11 +17,16 @@
 
  ********************************************************************/
 
-#include <math.h>
 #include "os_types.h"
 
 #ifndef _V_IFDEFJAIL_H_
 #  define _V_IFDEFJAIL_H_
+
+// Make sure i386 is defined for WINS builds (this used to be done by including math.h)
+// For some reason audio doesn't play properly on wins (but not winscw) emulators without this
+#if defined(__WINS__) && !defined(__i386__)
+#define __i386__
+#endif
 
 #  ifdef __GNUC__
 #    define STIN static __inline__

@@ -30,8 +30,6 @@
 #ifndef  _LOW_ACCURACY_
 /* 64 bit multiply */
 
-#include <sys/types.h>
-
 #ifdef LITTLE_ENDIAN
 //? inserted typedef
 typedef union magic {
@@ -210,7 +208,7 @@ static inline ogg_int32_t VFLOAT_MULTI(ogg_int32_t a,ogg_int32_t ap,
 				      ogg_int32_t i,
 				      ogg_int32_t *p){
 
-  int ip=_ilog(abs(i))-31;
+  int ip=_ilog(_ogg_abs(i))-31;
   return VFLOAT_MULT(a,ap,i<<-ip,ip,p);
 }
 

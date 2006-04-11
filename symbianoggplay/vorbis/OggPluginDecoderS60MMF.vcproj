@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="OggPluginDecoderS80"
-	ProjectGUID="{F454DDE1-B2CD-44C9-A691-81BFCFE6B232}"
+	Name="OggPluginDecoderS60MMF"
+	ProjectGUID="{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform
@@ -71,15 +71,15 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Deb_S80_20_WINS|Win32"
+			Name="Deb_S60_23_WINSCW|Win32"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/QIfist"
+				AdditionalOptions="/QIfist /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_23"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\OggPlay\symbianoggplay\vorbis;C:\OggPlay\symbianoggplay\Plugin\inc;C:\OggPlay\symbianoggplay\inc;C:\Symbian\7.0s\S80_DP2_0_SDK\\epoc32\include;C:\Symbian\7.0s\S80_DP2_0_SDK\\epoc32\include\ecom;C:\Symbian\7.0s\S80_DP2_0_SDK\\epoc32\include\mmf\common;C:\Symbian\7.0s\S80_DP2_0_SDK\\epoc32\include\mmf\server;"
-				PreprocessorDefinitions="__SYMBIAN32__;__SERIES80_20__;__SERIES80_2X__;__SERIES80_2ND_DP2__;__SERIES80_2DP2__;__DLL__;__WINS__;__VC32__;_DEBUG;_UNICODE;OGGPLAYPLUGIN;"
+				AdditionalIncludeDirectories="C:\OggPlay\symbianoggplay\vorbis;C:\OggPlay\symbianoggplay\Plugin\inc;C:\OggPlay\symbianoggplay\inc;C:\Symbian\8.1a\S60_2nd_FP3\\epoc32\include;C:\Symbian\8.1a\S60_2nd_FP3\\epoc32\include\ecom;C:\Symbian\8.1a\S60_2nd_FP3\\epoc32\include\mmf\common;C:\Symbian\8.1a\S60_2nd_FP3\\epoc32\include\mmf\server;"
+				PreprocessorDefinitions="__SYMBIAN32__;__SERIES60_23__;__SERIES60_2X__;__DLL__;__WINSCW__;__WINS__;__CW32__;_DEBUG;_UNICODE;OGGPLAYPLUGIN;"
 				IgnoreStandardIncludePath="TRUE"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
@@ -95,9 +95,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
+				AdditionalOptions=" /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_23"
 				AdditionalDependencies="mmfcontrollerframework.lib mmfstandardcustomcommands.lib MMFDevSound.lib mmfserverbaseclasses.lib ecom.lib euser.lib charconv.lib MediaClientAudioStream.lib flogger.lib efsrv.lib edll.lib "
-				OutputFile="C:\Symbian\7.0s\S80_DP2_0_SDK\\Epoc32\release\wins\udeb\z\\System\Libs\Plugins\OGGPLUGINDECODER.DLL"
-				AdditionalLibraryDirectories="C:\Symbian\7.0s\S80_DP2_0_SDK\\Epoc32\release\wins\udeb"
+				OutputFile="C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\release\winscw\udeb\z\\System\Libs\Plugins\OGGPLUGINDECODER.DLL"
+				AdditionalLibraryDirectories="C:\Symbian\8.1a\S60_2nd_FP3\\Epoc32\release\winscw\udeb"
 				IgnoreAllDefaultLibraries="TRUE"
 				ForceSymbolReferences="?_E32Dll@@YGHPAXI0@Z"
 				GenerateDebugInformation="TRUE"
@@ -110,7 +111,7 @@
 				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S80_20 WINS UDEB"/>
+				CommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S60_23 WINSCW UDEB"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -135,10 +136,10 @@
 			<File
 				RelativePath=".\Plugin\101FF683.rss">
 				<FileConfiguration
-					Name="Deb_S80_20_WINS|Win32">
+					Name="Deb_S60_23_WINSCW|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S80_20 WINS UDEB
+						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_23 WINSCW UDEB
 "
 						Outputs="C:\OggPlay\symbianoggplay\vorbis\101FF683.rsg;"/>
 				</FileConfiguration>
@@ -280,12 +281,12 @@
 			Name="group">
 		</Filter>
 		<Filter
-			Name="groupS80">
+			Name="groupS60MMF">
 			<File
-				RelativePath=".\groupS80\OggPluginDecoderS80.mmp">
+				RelativePath=".\groupS60MMF\OggPluginDecoderS60MMF.mmp">
 			</File>
 			<File
-				RelativePath=".\groupS80\oggplugindecoders80.uid.cpp">
+				RelativePath=".\groupS60MMF\oggplugindecoders60mmf.uid.cpp">
 			</File>
 		</Filter>
 		<Filter

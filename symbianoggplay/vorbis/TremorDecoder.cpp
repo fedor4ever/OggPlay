@@ -16,15 +16,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+
+#include <charconv.h>
+#include <utf.h>
+#include <f32file.h>
+
+// Platform settings
+#include <OggOs.h>
+
 #include "TremorDecoder.h"
 #include "OggLog.h"
 #include "Utf8Fix.h"
-
-#include <charconv.h>
-#include <limits.h>
-#include <string.h>
-#include <utf.h>
-#include <f32file.h>
 
 CTremorDecoder::CTremorDecoder(RFs& aFs)
 : iFs(aFs)
@@ -104,8 +106,9 @@ void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)
   // in the real world there are all kinds of coding being used!
   // so we try to find out what it is:
 
-#if ! ( defined(__VC32__) || defined(__WINSCW__) )
-  TInt i= j_code((char*)aStr,strlen(aStr));
+#if !(defined(__VC32__) || defined(__WINSCW__))
+#if !defined(MMF_AVAILABLE) // Doesn't work when used in MMF Framework. Absolutely no clue why.
+  TInt i= jcode((char*) aStr);
   if (i==BIG5_CODE) {
     CCnvCharacterSetConverter* conv= CCnvCharacterSetConverter::NewL();
     CCnvCharacterSetConverter::TAvailability a= conv->PrepareToConvertToOrFromL(KCharacterSetIdentifierBig5, iFs);
@@ -115,6 +118,7 @@ void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)
     }
     delete conv;
   }
+#endif
 #endif
 }
 
@@ -143,28 +147,39 @@ TInt64 CTremorDecoder::Position()
 #endif
 
   ogg_int64_t pos= ov_time_tell(&iVf);
+
+#if defined(SERIES60V3)
+  return pos;
+#else
   unsigned int hi(0);
-  return TInt64(hi,(TInt)pos);
+  return TInt64(hi, (TInt) pos);
+#endif
 }
 
 void CTremorDecoder::Setposition(TInt64 aPosition)
 { 
+#if defined(SERIES60V3)
+  ov_time_seek(&iVf, aPosition);
+#else
   ogg_int64_t pos= aPosition.GetTInt();
-  ov_time_seek( &iVf, pos);
-
+  ov_time_seek(&iVf, pos);
+#endif
 }
 
 TInt64 CTremorDecoder::TimeTotal()
 {
-  TInt64 iTime;
-
   ogg_int64_t pos(0);
   pos= ov_time_total(&iVf,-1);
+
+#if defined(SERIES60V3)
+  return pos;
+#else
+  TInt64 time;
   unsigned int hi(0);
-  iTime.Set(hi,(TInt)pos);
+  time.Set(hi, (TInt) pos);
 
-  return iTime;
-
+  return time;
+#endif
 }
 
 TInt CTremorDecoder::FileSize()

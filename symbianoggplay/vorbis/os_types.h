@@ -29,17 +29,29 @@
 typedef unsigned int size_t;
 #endif
 
-void* OggPlayAlloc(size_t);
-void* OggPlayCalloc(size_t, size_t);
-void* OggPlayReAlloc(void*, size_t);
-void OggPlayFree(void*);
+// Lib C replacements
+void* _ogg_malloc(size_t);
+void* _ogg_calloc(size_t, size_t);
+void* _ogg_realloc(void *, size_t);
+void _ogg_free(void *);
 
-/* make it easy on the folks that want to compile the libs with a
-   different malloc than stdlib */
-#define _ogg_malloc  OggPlayAlloc
-#define _ogg_calloc  OggPlayCalloc
-#define _ogg_realloc OggPlayReAlloc
-#define _ogg_free    OggPlayFree
+int _ogg_abs(int aVal);
+long _ogg_labs(long aVal);
+
+void* _ogg_memchr(const void *, int, size_t);
+void* _ogg_memset(void *, int, size_t);
+void* _ogg_memcpy(void *aDst, const void *aSrc, size_t aNumBytes);
+int _ogg_memcmp(const void *aBuf1, const void *aBuf2, size_t aNumBytes);
+
+size_t _ogg_strlen(const char *aStr);
+char* _ogg_strcpy(char *aDst, const char *aSrc);
+char*_ogg_strcat(char *aDst, const char *aSrc);
+char* _ogg_strstr(const char* str1, const char* str2);
+int _ogg_strncmp(const char* str1, const char* str2, size_t num);
+
+int _ogg_toupper(int c);
+void _ogg_qsort(void *, size_t, size_t, int (*compare)(const void *, const void *));
+void _ogg_exit(int aVal);
 
 
 #ifndef chmsg
@@ -61,7 +73,6 @@ typedef TUint32 ogg_uint32_t;
 #elif defined (__MARM__)
 #pragma chmsg(compiling for marm)
 
-#  include <sys/types.h>
  typedef long long ogg_int64_t;
 
 #define BIG_ENDIAN

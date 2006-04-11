@@ -16,9 +16,6 @@
  ********************************************************************/
 
 #include <e32def.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
 #include "ogg.h"
 #include "os.h"
 #include "codebook.h"
@@ -73,7 +70,7 @@ ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
   long i,j,count=0;
   ogg_uint32_t marker[33];
   ogg_uint32_t *r=(ogg_uint32_t *)_ogg_malloc((sparsecount?sparsecount:n)*sizeof(*r));
-  memset(marker,0,sizeof(marker));
+  _ogg_memset(marker,0,sizeof(marker));
 
   for(i=0;i<n;i++){
     long length=l[i];
@@ -213,8 +210,7 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 	  for(k=0;k<b->dim;k++){
 	    int index= (j/indexdiv)%quantvals;
 	    ogg_int32_t point;
-	    int val=VFLOAT_MULTI(delta,delpoint,
-				 abs(b->quantlist[index]),&point);
+	    int val=VFLOAT_MULTI(delta,delpoint,_ogg_abs(b->quantlist[index]),&point);
 
 	    val=VFLOAT_ADD(mindel,minpoint,val,point,&point);
 	    val=VFLOAT_ADD(last,lastpoint,val,point,&point);
@@ -247,8 +243,7 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 
 	  for(k=0;k<b->dim;k++){
 	    ogg_int32_t point;
-	    int val=VFLOAT_MULTI(delta,delpoint,
-				 abs(b->quantlist[j*b->dim+k]),&point);
+	    int val=VFLOAT_MULTI(delta,delpoint,_ogg_abs(b->quantlist[j*b->dim+k]),&point);
 
 	    val=VFLOAT_ADD(mindel,minpoint,val,point,&point);
 	    val=VFLOAT_ADD(last,lastpoint,val,point,&point);
@@ -286,7 +281,7 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 void vorbis_staticbook_clear(static_codebook *b){
   if(b->quantlist)_ogg_free(b->quantlist);
   if(b->lengthlist)_ogg_free(b->lengthlist);
-  memset(b,0,sizeof(*b));
+  _ogg_memset(b,0,sizeof(*b));
 
 }
 
@@ -305,7 +300,7 @@ void vorbis_book_clear(codebook *b){
   if(b->dec_codelengths)_ogg_free(b->dec_codelengths);
   if(b->dec_firsttable)_ogg_free(b->dec_firsttable);
 
-  memset(b,0,sizeof(*b));
+  _ogg_memset(b,0,sizeof(*b));
 }
 
 static ogg_uint32_t bitreverse(ogg_uint32_t x){
@@ -325,7 +320,7 @@ static int sort32a(const void *a,const void *b){
 int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   int i,j,n=0,tabn;
   int *sortindex;
-  memset(c,0,sizeof(*c));
+  _ogg_memset(c,0,sizeof(*c));
   
   /* count actually used entries */
   for(i=0;i<s->entries;i++)
@@ -361,7 +356,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       codep[i]=codes+i;
     }
 
-    qsort(codep,n,sizeof(*codep),sort32a);
+    _ogg_qsort(codep,n,sizeof(*codep),sort32a);
 
     sortindex=(int *)alloca(n*sizeof(*sortindex));
     c->codelist=(ogg_uint32_t *)_ogg_malloc(n*sizeof(*c->codelist));

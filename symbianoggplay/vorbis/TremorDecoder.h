@@ -49,7 +49,6 @@ public:
   TBool RequestingFrequencyBins();
 
 private:
-
   void GetString(TDes& aBuf, const char* aStr);
 
 public: 
