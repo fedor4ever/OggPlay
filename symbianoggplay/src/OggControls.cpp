@@ -52,7 +52,7 @@ TOggParser::TOggParser(RFs& aFs, const TFileName& aFileName, TInt aScaleFactor)
 {
   iLine= 1;
   iDebug= ETrue;
-  iBufferPos = 0;
+  iBuffer = NULL;
 
   RFile file;
   TInt err = file.Open(aFs, aFileName, EFileShareReadersOnly);
@@ -67,6 +67,8 @@ TOggParser::TOggParser(RFs& aFs, const TFileName& aFileName, TInt aScaleFactor)
 			{
 			TPtr8 bufDes(iBuffer->Des());
 			err = file.Read(bufDes);
+
+			iBufferPtr = iBuffer->Ptr();
 			}
 		else
 			err = KErrNoMemory;
@@ -113,14 +115,15 @@ TOggParser::ReadToken()
 
   TInt c;
   TInt bufferLength = iBuffer->Length();
+  const TUint8* bufferBase = iBuffer->Ptr();
   TBool start(ETrue), stop(EFalse), ignoreWS(EFalse);
   do {
 	c = -1;
-	if (iBufferPos == bufferLength)
+	if ((iBufferPtr - bufferBase) == bufferLength)
 		break;
 
-    c = (*iBuffer)[iBufferPos];
-	iBufferPos++;
+    c = *iBufferPtr;
+	iBufferPtr++;
 
     // Skip initial white space (32 = Space, 9 = Tab)
     if (start && ((c==32) || (c==9)))
@@ -150,11 +153,12 @@ TOggParser::ReadToken()
 		iToken.Append((unsigned char) c);
   } while (!stop);
 
-  TBool eol = c!=32;
-  if (c==13)
+  TBool eol = c != 32;
+  if (c == 13)
 	{
-	  c = (*iBuffer)[iBufferPos];
-	  iBufferPos++;
+	// Skip the next character
+	if ((iBufferPtr - bufferBase) != bufferLength)
+		iBufferPtr++;
 	}
 
   if (eol)

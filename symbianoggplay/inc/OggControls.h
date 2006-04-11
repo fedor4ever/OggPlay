@@ -96,7 +96,7 @@ class TOggParser {
   TInt		iScaleFactor;
 
   HBufC8*   iBuffer;
-  TInt      iBufferPos;
+  const TUint8* iBufferPtr;
 };
 
 
