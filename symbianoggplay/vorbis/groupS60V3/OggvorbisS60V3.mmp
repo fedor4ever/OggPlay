@@ -21,6 +21,7 @@ SOURCE                                  bitwise.c
 SOURCE                                  vorbisfile.c 
 SOURCE                                  microsoftInternal.c 
 SOURCE                                  Symbian.cpp 
+SOURCE                                  utf8Fix.c
 
 SYSTEMINCLUDE                           \Epoc32\include 
 LIBRARY                                 euser.lib 

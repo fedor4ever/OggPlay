@@ -28,49 +28,48 @@ COggLog* COggLog::InstanceL()
 #if defined(UIQ)
     return 0;
 #else
-  COggLog* iInstance =(COggLog*) Dll::Tls();
+  COggLog* instance =(COggLog*) Dll::Tls();
 
-  if( !iInstance ) 
+  if (!instance) 
     {
-    iInstance=new(ELeave) COggLog;
-    Dll::SetTls(iInstance);
+    instance=new(ELeave) COggLog;
+    Dll::SetTls(instance);
 
-    TInt ret=iInstance->iLog.Connect();
+    TInt ret=instance->iLog.Connect();
     if (ret==KErrNone)	
       {
-		  iInstance->iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
-		  iInstance->iLog.SetDateAndTime(EFalse,ETrue);
+		  instance->iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
+		  instance->iLog.SetDateAndTime(EFalse,ETrue);
+
 		  _LIT(KS,"OggLog started...");
-		  iInstance->iLog.WriteFormat(KS);
+		  instance->iLog.WriteFormat(KS);
 	    } 
     else 
       {
       User::Panic(_L("OggLog"),11);	
       }
     }
-	return iInstance;
+	return instance;
 #endif
   }
-
-
 
 void COggLog::Exit() 
   {
 #if defined(UIQ)
   return;
 #else
-  COggLog* iInstance =(COggLog*) Dll::Tls();
-  if( iInstance )
+  COggLog* instance =(COggLog*) Dll::Tls();
+  if (instance)
     {
-	  iInstance->iLog.WriteFormat(_L("OggLog closed.."));
-    iInstance->iLog.CloseLog();
-    iInstance->iLog.Close();
-    delete iInstance;
+	instance->iLog.WriteFormat(_L("OggLog closed.."));
+    instance->iLog.CloseLog();
+    instance->iLog.Close();
+	delete instance;
+
     Dll::SetTls(NULL);
     }
 #endif
   }
-
 
 #if defined(SERIES60) || defined (SERIES80)
 void COggLog::FilePrint(const TDesC& msg)
@@ -83,8 +82,6 @@ void COggLog::FilePrint(const TDesC& /* msg */)
 #endif
   }
 
-
-
 void COggLog::Panic(const TDesC& msg,TInt aReason) 
   {
 #if (defined( SERIES60) || defined (SERIES80) )
@@ -93,7 +90,6 @@ void COggLog::Panic(const TDesC& msg,TInt aReason)
 #endif
   User::Panic(_L("OggPlay"),aReason);	
   }
-
 
 const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   {
@@ -111,7 +107,6 @@ const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   // right after this...).
   // Change all % into %%
   // This code stinks. Can't find a better way to do that search and replace
-  
   TUint16* bufStart = (TUint16*)InstanceL()->iBuf.Ptr();
   TInt len = InstanceL()->iBuf.Length();
   TPtr16 descriptor( bufStart,len, 1024);
@@ -134,5 +129,3 @@ const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   return COggLog::InstanceL()->iBuf;
 #endif
   }
-
-

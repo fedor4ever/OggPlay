@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPlayS60V3"
-	ProjectGUID="{AB921F73-599F-4058-8006-19875B3895D0}"
+	ProjectGUID="{B17890E4-3DBE-4459-B995-05884A21865B}"
 	Keyword="SymbianOS_2.Symbian9">
 	<Platforms>
 		<Platform
@@ -186,9 +186,6 @@
 			<File
 				RelativePath=".\src\OggViews.cpp">
 			</File>
-			<File
-				RelativePath=".\src\Utf8Fix.c">
-			</File>
 		</Filter>
 		<Filter
 			Name="vorbis">
@@ -245,6 +242,9 @@
 			</File>
 			<File
 				RelativePath=".\vorbis\TremorDecoder.h">
+			</File>
+			<File
+				RelativePath=".\vorbis\Utf8Fix.h">
 			</File>
 			<File
 				RelativePath=".\vorbis\window.h">
@@ -413,9 +413,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\OggViews.h">
-			</File>
-			<File
-				RelativePath=".\inc\Utf8Fix.h">
 			</File>
 		</Filter>
 		<Filter

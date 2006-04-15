@@ -30,7 +30,6 @@ SOURCE OggSettingsContainer.cpp
 SOURCE OggSplashContainer.cpp
 SOURCE OggUserHotkeys.cpp
 SOURCE OggPluginSelectionDialogS60.cpp
-SOURCE Utf8Fix.c
 SOURCE OggTremor.cpp
 SOURCE OggMultiThread.cpp
 SOURCE OggThreadClasses.cpp

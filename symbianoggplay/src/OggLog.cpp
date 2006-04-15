@@ -22,55 +22,76 @@
 _LIT(KLogFolder,"Oggplay");
 _LIT(KLogFileName,"Oggplay.log");
 
+#if defined(SERIES60V3)
+COggLog* Instance;
+#endif
 
 COggLog* COggLog::InstanceL() 
   {
 #if defined(UIQ)
     return 0;
 #else
-  COggLog* iInstance =(COggLog*) Dll::Tls();
 
-  if( !iInstance ) 
+#if defined(SERIES60V3)
+  COggLog* instance = Instance;
+#else
+  COggLog* instance =(COggLog*) Dll::Tls();
+#endif
+
+  if (!instance) 
     {
-    iInstance=new(ELeave) COggLog;
-    Dll::SetTls(iInstance);
+    instance=new(ELeave) COggLog;
 
-    TInt ret=iInstance->iLog.Connect();
+#if defined(SERIES60V3)
+	Instance = instance;
+#else
+    Dll::SetTls(instance);
+#endif
+
+    TInt ret=instance->iLog.Connect();
     if (ret==KErrNone)	
       {
-		  iInstance->iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
-		  iInstance->iLog.SetDateAndTime(EFalse,ETrue);
+		  instance->iLog.CreateLog(KLogFolder, KLogFileName,EFileLoggingModeOverwrite);
+		  instance->iLog.SetDateAndTime(EFalse,ETrue);
+
 		  _LIT(KS,"OggLog started...");
-		  iInstance->iLog.WriteFormat(KS);
+		  instance->iLog.WriteFormat(KS);
 	    } 
     else 
       {
       User::Panic(_L("OggLog"),11);	
       }
     }
-	return iInstance;
+	return instance;
 #endif
   }
-
-
 
 void COggLog::Exit() 
   {
 #if defined(UIQ)
   return;
 #else
-  COggLog* iInstance =(COggLog*) Dll::Tls();
-  if( iInstance )
+#if defined(SERIES60V3)
+  COggLog* instance =Instance;
+#else
+  COggLog* instance =(COggLog*) Dll::Tls();
+#endif
+
+  if (instance)
     {
-	  iInstance->iLog.WriteFormat(_L("OggLog closed.."));
-    iInstance->iLog.CloseLog();
-    iInstance->iLog.Close();
-    delete iInstance;
-    Dll::SetTls(NULL);
+	instance->iLog.WriteFormat(_L("OggLog closed.."));
+    instance->iLog.CloseLog();
+    instance->iLog.Close();
+    delete instance;
+
+#if defined(SERIES60V3)
+	Instance = NULL;
+#else
+	Dll::SetTls(NULL);
+#endif
     }
 #endif
   }
-
 
 #if defined(SERIES60) || defined (SERIES80)
 void COggLog::FilePrint(const TDesC& msg)
@@ -83,17 +104,15 @@ void COggLog::FilePrint(const TDesC& /* msg */)
 #endif
   }
 
-
-
 void COggLog::Panic(const TDesC& msg,TInt aReason) 
   {
 #if (defined( SERIES60) || defined (SERIES80) )
   iLog.Write(_L("** Fatal: **"));
   iLog.Write(msg);
 #endif
+
   User::Panic(_L("OggPlay"),aReason);	
   }
-
 
 const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   {
@@ -110,8 +129,7 @@ const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   // whole thing going to panic (typically another format is called
   // right after this...).
   // Change all % into %%
-  // This code stinks. Can't find a better way to do that search and replace
-  
+  // This code stinks. Can't find a better way to do that search and replace  
   TUint16* bufStart = (TUint16*)InstanceL()->iBuf.Ptr();
   TInt len = InstanceL()->iBuf.Length();
   TPtr16 descriptor( bufStart,len, 1024);
@@ -134,5 +152,3 @@ const TDesC& COggLog::VA( TRefByValue<const TDesC> aLit,... )
   return COggLog::InstanceL()->iBuf;
 #endif
   }
-
-
