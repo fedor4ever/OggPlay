@@ -27,21 +27,21 @@ char* _ogg_strstr(const char* str1, const char* str2)
 	const char *resStr, *str2b;
 	char chr1, chr2;
 	if ((str1 == NULL) || (str2 == NULL))
-		return NULL;
+		return (char *) str1;
 
 	chr2 = *str2;
 	if (chr2 == 0)
-		return NULL;
+		return (char*) str1;
 
 	chr1 = *str1;
 	while (chr1)
 	{
 		if (chr1 == chr2)
-			{
+		{
 			resStr = str1;
 			str2b = str2;
 			do
-				{
+			{
 				str2b++;
 				chr2 = *str2b;
 				if (chr2 == 0)
@@ -49,13 +49,15 @@ char* _ogg_strstr(const char* str1, const char* str2)
 
 				str1++;
 				chr1 = *str1;
-				if (chr1 == 0)
-					return NULL;
-				} while (chr1 == chr2);
-			}
+			} while (chr1 == chr2);
 
-		str1++;
-		chr1 = *str1;
+			chr2 = *str2;
+		}
+		else
+		{
+			str1++;
+			chr1 = *str1;
+		}
 	}
 
 	return NULL;
@@ -71,14 +73,8 @@ int _ogg_strncmp(const char* str1, const char* str2, size_t num)
 	for (i = 0 ; i<num ; i++)
 		{
 		chr1 = str1[i];
-		if (chr1 == 0)
-			return 0;
-
 		chr2 = str2[i];
-		if (chr2 == 0)
-			return 0;
-
-		if (chr1 != chr2)
+		if ((chr1 != chr2) || !chr1)
 			break;
 		}
 
@@ -99,16 +95,7 @@ char *_ogg_strcat(char *aDst, const char *aSrc)
 		aDst++;
 
 	// Copy the source
-	char srcChar = *aSrc;
-	while(srcChar)
-	{
-		*aDst = srcChar;
-		aSrc++ ; aDst++;
-
-		srcChar = *aSrc;
-	}
-
-	*aDst = 0;
+	while((*aDst++ = *aSrc++) != 0);
 	return retPtr;
 }
 
@@ -120,59 +107,248 @@ int _ogg_toupper(int c)
 	return  c;
 }
 
-class TQKey : public TKey
+void _ogg_sort(void *base, size_t num, size_t width, int (*compare)(const void *, const void *))
 {
-public:
-	TQKey(int (*aCompare)(const void *, const void *), TUint8* aBase, TInt aWidth);
-	TInt Compare(TInt aLeft, TInt aRight) const;
+	// Implement an efficient quick sort
+	// (based upon the version in Numrical Recipies in Pascal)
+	const TInt insertionNum = width * 11;
+	TInt8* arrayStack[64];
+	TInt stackIndex;
+	TInt halfWidth = width >> 1;
 
-public:
-	int (*iCompare)(const void *, const void *);
-	TUint8* iBase;
-	TInt iWidth;
-};
+	TInt8* iElement;
+	TInt8* jElement;
+	TInt8* kElement;
+	TInt8* leftElement;
+	TInt8* rightElement;
+	TInt8* elementVal = (TInt8*) User::Alloc(width);
 
-TQKey::TQKey(int (*aCompare)(const void *, const void *), TUint8* aBase, TInt aWidth)
-: iCompare(aCompare), iBase(aBase), iWidth(aWidth)
-{
+	stackIndex = 0;
+	leftElement = (TInt8 *) base;
+	rightElement = leftElement + width*(num-1);
+	for ( ; ; )
+	{
+		if ((rightElement-leftElement)<insertionNum)
+		{
+			// Insertion sort the sub-array
+			for (jElement = leftElement+width ; jElement<=rightElement ; jElement += width)
+			{
+				Mem::Copy(elementVal, jElement, width);
+				for (iElement = leftElement ; iElement<jElement ; iElement += width)
+				{
+					if (compare(jElement, iElement) < 0)
+					{
+						Mem::Copy(iElement+width, iElement, jElement-iElement);
+						Mem::Copy(iElement, elementVal, width);
+						break;
+					}
+				}
+			}
+
+			// Pop the stack
+			if (!stackIndex)
+				break; // Job done
+
+			leftElement = arrayStack[--stackIndex];
+			rightElement = arrayStack[--stackIndex];
+		}
+		else
+		{
+			// Choose partitioning element
+			// (median of left, middle and right elements of the current subarray)
+			iElement = leftElement + width;
+			jElement = rightElement;
+			kElement = (TInt8 *) ((((TInt) leftElement) + ((TInt) rightElement)) >> 1);
+			if (((TInt) (kElement - leftElement)) % width)
+				kElement -= halfWidth;
+
+			// Move the middle element to be after the left element
+			Mem::Swap(iElement, kElement, width);
+
+			// Arrange the three values in the correct order
+			if (compare(leftElement, rightElement) > 0)
+				Mem::Swap(leftElement, rightElement, width);
+
+			if (compare(iElement, rightElement) > 0)
+				Mem::Swap(iElement, rightElement, width);
+
+			if (compare(leftElement, iElement) > 0)
+				Mem::Swap(leftElement, iElement, width);
+
+			// Do the partitioning
+			kElement = iElement;
+			for ( ; ; )
+			{
+				do
+				{
+					iElement += width;
+				} while (compare(iElement, kElement) < 0);
+
+				do
+				{
+					jElement -= width;
+				} while (compare(jElement, kElement) > 0);
+
+				if (jElement<iElement)
+					break; // Partitioning done
+
+				Mem::Swap(iElement, jElement, width);
+			}
+
+			// Move the partitioning element to it's correct place
+			Mem::Swap(kElement, jElement, width);
+
+			// Push the larger of the subarrays, process the other one
+			if ((rightElement - (iElement+width)) > (jElement - leftElement))
+			{
+				arrayStack[stackIndex++] = rightElement;
+				arrayStack[stackIndex++] = iElement;
+				rightElement = jElement - width;
+			}
+			else
+			{
+				arrayStack[stackIndex++] = jElement - width;
+				arrayStack[stackIndex++] = leftElement;
+				leftElement = iElement;
+			}
+		}
+	}
+
+	User::Free(elementVal);
 }
 
-TInt TQKey::Compare(TInt aLeft, TInt aRight) const
+void _ogg_aligned_sort(void *base, size_t num, int (*compare)(const void *, const void *))
 {
-	TUint8* leftPtr = iBase + aLeft*iWidth; 
-	TUint8* rightPtr = iBase + aRight*iWidth; 
-	return (*iCompare)(leftPtr, rightPtr);
-}
+	// Implement an efficient quick sort
+	// (based upon the version in Numrical Recipies in Pascal)
+	const TInt insertionNum = 11;
+	TInt* arrayStack[64];
+	TInt stackIndex;
 
-class TQSwap : public TSwap
-{
-public:
-	TQSwap(TUint8* aBase, TInt aWidth);
-	void Swap(TInt aLeft, TInt aRight) const;
+	TInt* iElement;
+	TInt* jElement;
+	TInt* kElement;
+	TInt* leftElement;
+	TInt* rightElement;
+	TInt elementVal;
 
-public:
-	TUint8* iBase;
-	TInt iWidth;
-};
+	stackIndex = 0;
+	leftElement = (TInt *) base;
+	rightElement = leftElement + (num-1);
+	for ( ; ; )
+	{
+		if ((rightElement-leftElement)<insertionNum)
+		{
+			// Insertion sort the sub-array
+			for (jElement = leftElement+1 ; jElement<=rightElement ; jElement++)
+			{
+				elementVal = *jElement;
+				for (iElement = leftElement ; iElement<jElement ; iElement++)
+				{
+					if (compare(jElement, iElement) < 0)
+					{
+						Mem::Move(iElement+1, iElement, 4*(jElement-iElement));
+						*iElement = elementVal;
+						break;
+					}
+				}
+			}
 
-TQSwap::TQSwap(TUint8* aBase, TInt aWidth)
-: iBase(aBase), iWidth(aWidth)
-{
-}
+			// Pop the stack
+			if (!stackIndex)
+				break; // Job done
 
-void TQSwap::Swap(TInt aLeft, TInt aRight) const
-{
-	TUint8* leftPtr = iBase + aLeft*iWidth;
-	TUint8* rightPtr = iBase + aRight*iWidth;
-	Mem::Swap(leftPtr, rightPtr, iWidth);
+			leftElement = arrayStack[--stackIndex];
+			rightElement = arrayStack[--stackIndex];
+		}
+		else
+		{
+			// Choose partitioning element
+			// (median of left, middle and right elements of the current subarray)
+			iElement = leftElement + 1;
+			jElement = rightElement;
+			kElement = (TInt *) (((((TInt) leftElement) + ((TInt) rightElement)) >> 1) & 0xFFFFFFF0);
+
+			// Move the middle element to be after the left element
+			elementVal = *kElement;
+			*kElement = *iElement;
+			*iElement = elementVal;
+
+			// Arrange the three values in the correct order
+			if (compare(leftElement, rightElement) > 0)
+			{
+				elementVal = *leftElement;
+				*leftElement = *rightElement;
+				*rightElement = elementVal;
+			}
+
+			if (compare(iElement, rightElement) > 0)
+			{
+				elementVal = *iElement;
+				*iElement = *rightElement;
+				*rightElement = elementVal;
+			}
+
+			if (compare(leftElement, iElement) > 0)
+			{
+				elementVal = *leftElement;
+				*leftElement = *iElement;
+				*iElement = elementVal;
+			}
+
+			// Do the partitioning
+			kElement = iElement;
+			for ( ; ; )
+			{
+				do
+				{
+					iElement++;
+				} while (compare(iElement, kElement) < 0);
+
+				do
+				{
+					jElement--;
+				} while (compare(jElement, kElement) > 0);
+
+				if (jElement<iElement)
+					break; // Partitioning done
+
+				elementVal = *iElement;
+				*iElement = *jElement;
+				*jElement = elementVal;
+			}
+
+			// Move the partitioning element to it's correct place
+			elementVal = *kElement;
+			*kElement = *jElement;
+			*jElement = elementVal;
+
+			// Push the larger of the subarrays, process the other one
+			if ((rightElement - (iElement+1)) > (jElement - leftElement))
+			{
+				arrayStack[stackIndex++] = rightElement;
+				arrayStack[stackIndex++] = iElement;
+				rightElement = jElement - 1;
+			}
+			else
+			{
+				arrayStack[stackIndex++] = jElement - 1;
+				arrayStack[stackIndex++] = leftElement;
+				leftElement = iElement;
+			}
+		}
+	}
 }
 
 void _ogg_qsort(void *base, size_t num, size_t width, int (*compare)(const void *, const void *))
 { 
-	TUint8* base8 = (TUint8 *) base;
-	TQKey key(compare, base8, width);
-	TQSwap swap(base8, width);
-	User::QuickSort(num, key, swap);
+	if (num == 0)
+		return;
+
+	if ((width == 4) && !(((TInt) base) & 0x03)) // likely
+		_ogg_aligned_sort(base, num, compare);
+	else
+		_ogg_sort(base, num, width, compare);
 }
 
 int _ogg_memcmp(const void* aBuf1, const void* aBuf2, size_t aNumBytes)
