@@ -3,47 +3,51 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
-%{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-   "OggPlay" }
+%{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+"OggPlay"}
 
 :"OggPlay"
 
-#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-   "OggPlay" },(0xF000A661),1,0,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+"OggPlay"},(0xF000A661),1,0,1
+
+;Supports Series 60 v 3.0
+[0x101F7961],0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"
+,"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
 
 ;
 ; Display Release notes
 ;
 "..\S60V3_releases\sisnotes.txt" - "",FT,TC
 ;
-"\epoc32\release\gcce\urel\libvorbisidec.dll"-"!:\sys\bin\libvorbisidec.dll"
-"\epoc32\release\gcce\urel\OggPlay.exe"-"!:\sys\bin\OggPlay.exe"
-"\epoc32\data\z\private\10003A3F\apps\OggPlay_reg.rsc"-"!:\private\10003A3F\import\apps\OggPlay_reg.rsc"
-{ "\epoc32\data\z\resource\apps\OggPlay.ren"
-  "\epoc32\data\z\resource\apps\OggPlay.rfr"
-  "\epoc32\data\z\resource\apps\OggPlay.rge"
-  "\epoc32\data\z\resource\apps\OggPlay.rdu"
-  "\epoc32\data\z\resource\apps\OggPlay.rit"
-  "\epoc32\data\z\resource\apps\OggPlay.rsp"
-  "\epoc32\data\z\resource\apps\OggPlay.rsw" 
-  "\epoc32\data\z\resource\apps\OggPlay.rtu" 
-  "\epoc32\data\z\resource\apps\OggPlay.rda"
-  "\epoc32\data\z\resource\apps\OggPlay.rpo"
-  "\epoc32\data\z\resource\apps\OggPlay.rru" } -"!:\resource\apps\OggPlay.rsc"
-{ "\epoc32\data\z\resource\apps\OggPlay_loc.ren"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rfr"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rge"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rdu"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rit"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rsp"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rsw" 
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rtu" 
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rda"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rpo"
-  "\epoc32\data\z\resource\apps\OggPlay_loc.rru" } -"!:\resource\apps\OggPlay_loc.rsc"
-"\epoc32\data\z\resource\apps\OggPlay\fish.mbm"-"!:\resource\apps\OggPlay\fish.mbm"
+"C:\Symbian\9.1\S60_3rd\epoc32\release\gcce\urel\libvorbisidec.dll"-"!:\sys\bin\libvorbisidec.dll"
+"C:\Symbian\9.1\S60_3rd\epoc32\release\gcce\urel\OggPlay.exe"-"!:\sys\bin\OggPlay.exe"
+"C:\Symbian\9.1\S60_3rd\epoc32\data\z\private\10003A3F\apps\OggPlay_reg.rsc"-"!:\private\10003A3F\import\apps\OggPlay_reg.rsc"
+{ "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.ren"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rfr"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rge"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rdu"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rit"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rsp"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rsw" 
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rtu" 
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rda"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rpo"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay.rru" } -"!:\resource\apps\OggPlay.rsc"
+{ "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.ren"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rfr"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rge"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rdu"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rit"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rsp"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rsw" 
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rtu" 
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rda"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rpo"
+  "C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay_loc.rru" } -"!:\resource\apps\OggPlay_loc.rsc"
+"C:\Symbian\9.1\S60_3rd\epoc32\data\z\resource\apps\OggPlay\fish.mbm"-"!:\resource\apps\OggPlay\fish.mbm"
 
-"\epoc32\data\z\private\F000A661\s60splash.mbm"-"!:\private\F000A661\import\s60splash.mbm"
+"C:\Symbian\9.1\S60_3rd\epoc32\data\z\private\F000A661\import\s60splash.mbm"-"!:\private\F000A661\import\s60splash.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\private\F000A661\import\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\private\F000A661\import\mcNuOggPlay.mbm"
 
