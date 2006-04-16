@@ -21,10 +21,8 @@ PRJ_EXPORTS
 ..\Plugin\Inc\OggPlayPlugin.h
 
 // Default skin
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\wins\udeb\z\private\A000017F\mcNuOggPlay.skn
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\private\A000017F\mcNuOggPlay.skn
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\wins\udeb\z\\private\A000017F\mcNuOggPlay.mbm
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\private\A000017F\mcNuOggPlay.mbm
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\private\F000A661\import\mcNuOggPlay.skn
+..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\private\F000A661\import\mcNuOggPlay.mbm
 
 PRJ_MMPFILES
 OggPlayS60V3.mmp

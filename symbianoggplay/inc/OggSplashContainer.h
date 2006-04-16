@@ -48,6 +48,7 @@ class CSplashContainer :public CCoeControl, MCoeControlObserver
 
     private: // New Functions
      static TInt TimerExpired(TAny* aPtr);
+	 void DrawL() const;
 
 
     private: // Functions from base classes

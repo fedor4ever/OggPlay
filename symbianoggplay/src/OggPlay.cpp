@@ -315,30 +315,41 @@ void COggPlayAppUi::ConstructL()
   CEikonEnv::Static()->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNeverAtFront);
 #endif
 	
-	BaseConstructL();
-	
-	TParsePtrC aP(Application()->AppFullName());
-  _LIT(KiIniFileNameExtension,".ini");
-	const TUint KExtLength=4;
-	iIniFileName=HBufC::NewL(aP.Drive().Length()+aP.Path().Length()+aP.Name().Length()+KExtLength);
-  iIniFileName->Des().Copy(Application()->AppFullName());
-  iIniFileName->Des().SetLength(iIniFileName->Length() - KExtLength);
-  iIniFileName->Des().Append( KiIniFileNameExtension );
+  BaseConstructL();
 
-  iDbFileName.Copy(Application()->AppFullName());
+  TFileName fileName(Application()->AppFullName());
+  TParsePtr parse(fileName);
+
+#if defined(SERIES60V3)
+  TFileName privatePath;
+  User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
+
+  iIniFileName.Copy(parse.Drive());
+  iIniFileName.Append(privatePath);
+  iIniFileName.Append(_L("OggPlay.ini"));
+ 
+  iDbFileName.Copy(parse.Drive());
+  iDbFileName.Append(privatePath);
+  iDbFileName.Append(_L("OggPlay.db"));
+
+  iSkinFileDir.Copy(parse.Drive());
+  iSkinFileDir.Append(privatePath);
+  iSkinFileDir.Append(_L("import\\"));
+#else
+  iIniFileName.Copy(fileName);
+  iIniFileName.SetLength(iIniFileName.Length() - 3);
+  iIniFileName.Append(_L("ini"));
+
+  iDbFileName.Copy(fileName);
   iDbFileName.SetLength(iDbFileName.Length() - 3);
   iDbFileName.Append(_L("db"));
 
-#if defined(SERIES60V3)
-  iSkinFileDir.Copy(_L("Z:\\private\\A000017F\\"));
-#else
-  iSkinFileDir.Copy(Application()->AppFullName());
-  iSkinFileDir.SetLength(iSkinFileDir.Length() - 11);
+  iSkinFileDir.Copy(parse.DriveAndPath());
 #endif
 
 #if defined(__WINS__)
   // The emulator doesn't like to write to the Z: drive, avoid that.
-  *iIniFileName = _L("C:\\oggplay.ini");
+  iIniFileName = _L("C:\\oggplay.ini");
   iDbFileName = _L("C:\\oggplay.db");
 #endif
 
@@ -430,7 +441,6 @@ void COggPlayAppUi::ConstructL()
 	// Change the process priority to EPriorityForeground
 	RProcess process;
 	process.SetPriority(EPriorityForeground);
-	// process.Close(); (Don't close the handle because it causes a panic)
 
 #else
 	SetProcessPriority();
@@ -533,7 +543,6 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iOggPlayback;
 	iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
 	
-	delete iIniFileName;
 	delete iSkins;
 	delete iOggMsgEnv ;
     delete iSongList;
@@ -1321,7 +1330,7 @@ COggPlayAppUi::FindSkins()
 	}
 
 	CDir* c = NULL;	
-	HBufC* fullname = HBufC::NewLC(512);
+	TFileName fullname;
 	for(;;) {
 		ds->NextL(c);
 		if (!c)
@@ -1331,11 +1340,10 @@ COggPlayAppUi::FindSkins()
 		{
 			const TEntry e= (*c)[i];
 			
-			fullname->Des().Copy(ds->FullPath());
-			fullname->Des().Append(e.iName);
-			
-			TParsePtrC p(fullname->Des());
-			
+			fullname.Copy(ds->FullPath());
+			fullname.Append(e.iName);
+
+			TParsePtrC p(fullname);			
 			if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN")) {
 				iSkins->AppendL(p.NameAndExt());
 				if (iSkins->Count()==10) break;
@@ -1344,7 +1352,7 @@ COggPlayAppUi::FindSkins()
 		delete c; c=NULL;
     }
 	
-	CleanupStack::PopAndDestroy(2, ds);
+	CleanupStack::PopAndDestroy(ds);
 }
 
 void
@@ -1389,7 +1397,7 @@ COggPlayAppUi::ReadIniFile()
 #endif
 
     // Open the file
-    if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName->Des(), EFileRead | EFileStreamText)) != KErrNone )
+    if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileRead | EFileStreamText)) != KErrNone )
     {
         TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
         return;
@@ -1595,15 +1603,15 @@ COggPlayAppUi::WriteIniFile()
 {
     RFile out;
     
-    TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), iIniFileName ));
+    TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), &iIniFileName ));
     
     // Accessing the MMC , using the TFileText is extremely slow. 
     // We'll do everything using the C:\ drive then move the file to it's final destination
     // in MMC.
     
-    TParsePtrC p(iIniFileName->Des());
+    TParsePtrC p(iIniFileName);
 	TBool useTemporaryFile = EFalse;
-	TFileName fileName = iIniFileName->Des();
+	TFileName fileName = iIniFileName;
     if (p.Drive() != _L("C:"))
     {
     	useTemporaryFile = ETrue;
@@ -1764,7 +1772,7 @@ COggPlayAppUi::WriteIniFile()
 	    TRAPD(err2, fileMan = CFileMan::NewL(iCoeEnv->FsSession()));
 		if (err2 == KErrNone)
 		{
-			fileMan->Move( fileName, *iIniFileName,CFileMan::EOverWrite);
+			fileMan->Move( fileName, iIniFileName,CFileMan::EOverWrite);
 			delete (fileMan);
 		}
 	}
@@ -1825,43 +1833,48 @@ COggPlayAppUi::SetRepeat(TBool aRepeat)
 void 
 COggPlayAppUi::ShowSplash()
 {
-	// This is a so-called pre Symbian OS v6.1 direct screen drawing routine
-	// based on CFbsScreenDevice. The inherent problem with this method is that
-	// the window server is unaware of the direct screen access and is likely
-	// to 'refresh' whatever invalidated regions it might think it manages....
+  // This is a so-called pre Symbian OS v6.1 direct screen drawing routine
+  // based on CFbsScreenDevice. The inherent problem with this method is that
+  // the window server is unaware of the direct screen access and is likely
+  // to 'refresh' whatever invalidated regions it might think it manages....
 	
-	// http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
-	//   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
+  // http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
+  //   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
 	
-  TRAPD( newerMind, 
+  User::LeaveIfError(RFbsSession::Connect());
 
-	  RFbsSession::Connect();
+  // Check if there is a splash mbm available, if not splash() will make a silent leave
+  TFileName fileName(Application()->AppFullName());
+  TParsePtr parse(fileName);
 
-    // Check if there is a splash mbm available, if not splash() will make a silent leave
-	  TFileName *appName = new (ELeave) TFileName(Application()->AppFullName());
-	  CleanupStack::PushL(appName);
-	  TParsePtrC p(*appName);
-    TBuf<100> iSplashMbmFileName(p.DriveAndPath());
-	  iSplashMbmFileName.Append( _L("s60splash.mbm") );  // Magic string :-(
+#if defined(SERIES60V3)
+  TFileName privatePath;
+  User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
+
+  fileName.Copy(parse.Drive());
+  fileName.Append(privatePath);
+  fileName.Append(_L("import\\s60splash.mbm"));
+#else
+  fileName.Copy(parse.DriveAndPath());
+  fileName.Append(_L("s60splash.mbm"));
+#endif
 	  
-	  CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
-	  CleanupStack::PushL(iBitmap);
-	  User::LeaveIfError( iBitmap->Load( iSplashMbmFileName,0,EFalse));
+  CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
+  CleanupStack::PushL(bitmap);
+  User::LeaveIfError(bitmap->Load(fileName, 0, EFalse));
     
-	  CFbsScreenDevice *iDevice = NULL;
-
-	  TDisplayMode dispMode = CCoeEnv::Static()->ScreenDevice()->DisplayMode();
-	  iDevice = CFbsScreenDevice::NewL(_L("scdv"),dispMode);
-	  CleanupStack::PushL(iDevice);
+  CFbsScreenDevice *device = NULL;
+  TDisplayMode dispMode = CCoeEnv::Static()->ScreenDevice()->DisplayMode();
+  device = CFbsScreenDevice::NewL(_L("scdv"), dispMode);
+  CleanupStack::PushL(device);
 	  
-	  CFbsBitGc *iGc = NULL;
-	  User::LeaveIfError( iDevice->CreateContext(iGc));
-	  CleanupStack::PushL(iGc);
-	  iGc->BitBlt(TPoint(0,0), iBitmap );
+  CFbsBitGc *gc = NULL;
+  User::LeaveIfError(device->CreateContext(gc));
+  CleanupStack::PushL(gc);
+  gc->BitBlt(TPoint(0, 0), bitmap);
 
-	  iDevice->Update();
-	  CleanupStack::PopAndDestroy(4);  // appName iBitmap iGc iDevice;
-  );
+  device->Update();
+  CleanupStack::PopAndDestroy(3, bitmap);
 
   RFbsSession::Disconnect();
 }

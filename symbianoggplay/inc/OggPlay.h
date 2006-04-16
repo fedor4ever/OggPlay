@@ -294,7 +294,9 @@ public:
 
   TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
   TBool iIsStartup;        // is true when just started, needed for autoplay
+
   TFileName iDbFileName;
+  TFileName iIniFileName;
   
   COggPlayAppView* iAppView;
   CAbsPlayback*    iOggPlayback;
@@ -385,7 +387,6 @@ private:
 #endif
 
   int iCapturedKeyHandle;
-  HBufC* iIniFileName;
   TFileName iSkinFileDir;
   TInt iCurrentSkin;
   CDesCArray* iSkins;

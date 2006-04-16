@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPluginDecoderS80"
-	ProjectGUID="{F454DDE1-B2CD-44C9-A691-81BFCFE6B232}"
+	ProjectGUID="{AFAB9A2E-5FA2-4C14-B3A8-2E7714904566}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform
@@ -272,9 +272,6 @@
 			<File
 				RelativePath="..\inc\OggViews.h">
 			</File>
-			<File
-				RelativePath="..\inc\Utf8Fix.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="group">
@@ -395,6 +392,9 @@
 		</File>
 		<File
 			RelativePath=".\TremorDecoder.h">
+		</File>
+		<File
+			RelativePath=".\Utf8Fix.h">
 		</File>
 		<File
 			RelativePath=".\vorbisfile.c">

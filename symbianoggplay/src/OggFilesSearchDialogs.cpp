@@ -92,23 +92,20 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     }
 
      //Load bitmaps
-
-    TFileName fileName;
-    fileName.Copy(CEikonEnv::Static()->EikAppUi()->Application()->AppFullName());
-    // Parse and strip the application name
-    TParsePtr parse(fileName);
-    // Copy back only drive and path
-    fileName.Copy(parse.DriveAndPath());
-    fileName.Append(_L("fish.mbm"));
+	TFileName fileName(iEikonEnv->EikAppUi()->Application()->AppFullName());
+	TParsePtr parse(fileName);
 
 #if defined (SERIES60V3)
-	ifish1 = iEikonEnv->CreateBitmapL(_L("Z:\\resource\\apps\\fish.mbm"), 0); 
-    ifishmask = iEikonEnv->CreateBitmapL(_L("Z:\\resource\\apps\\fish.mbm"), 1);
+	fileName.Copy(parse.Drive());
+	fileName.Append(_L("\\resource\\apps\\OggPlay\\fish.mbm"));
 #else
-	ifish1 = iEikonEnv->CreateBitmapL(fileName, 0); 
-    ifishmask = iEikonEnv->CreateBitmapL(fileName, 1);
+	// Copy back only drive and path
+    fileName.Copy(parse.DriveAndPath());
+    fileName.Append(_L("fish.mbm"));
 #endif
 
+	ifish1 = iEikonEnv->CreateBitmapL(fileName, 0); 
+    ifishmask = iEikonEnv->CreateBitmapL(fileName, 1);
     iFishPosition = 40;
 
     ActivateL();	

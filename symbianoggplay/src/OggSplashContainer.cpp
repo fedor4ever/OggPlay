@@ -79,40 +79,44 @@ CCoeControl* CSplashContainer::ComponentControl(TInt /*aIndex*/) const
 //
 void CSplashContainer::Draw(const TRect& /*aRect*/) const
 {
-     TRAPD( newerMind, 
-
-	  RFbsSession::Connect();
-
-      // Check if there is a splash mbm available, if not splash() will make a silent leave
-      COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
-	  TFileName *appName = new (ELeave) TFileName(appUi->Application()->AppFullName());
-	  CleanupStack::PushL(appName);
-	  TParsePtrC p(*appName);
-      TBuf<100> iSplashMbmFileName(p.DriveAndPath());
-	  iSplashMbmFileName.Append( _L("s60splash.mbm") );  // Magic string :-(
-	  
-	  CFbsBitmap* iBitmap = new (ELeave) CFbsBitmap;
-	  CleanupStack::PushL(iBitmap);
-	  User::LeaveIfError( iBitmap->Load( iSplashMbmFileName,0,EFalse));
-
-      CWindowGc& gc = SystemGc();
-	  TRect bitmapRect = TRect(iBitmap->SizeInPixels());
-	  TRect screenRect = TRect(CCoeEnv::Static()->ScreenDevice()->SizeInPixels());
-	  if (bitmapRect == screenRect)
-		gc.BitBlt(TPoint(0, 0), iBitmap);
-	  else
-		gc.DrawBitmap(screenRect, iBitmap, bitmapRect);
-
-	  CleanupStack::PopAndDestroy(2);  // appName iBitmap 
-      
-      RFbsSession::Disconnect();
-  );
-
+	TRAPD(neverMind, DrawL());
 }
 
-TInt  CSplashContainer::TimerExpired(TAny* aPtr)
+void CSplashContainer::DrawL() const
 {
+  // Check if there is a splash mbm available, if not splash() will make a silent leave
+  TFileName fileName(CEikonEnv::Static()->EikAppUi()->Application()->AppFullName());
+  TParsePtr parse(fileName);
+
+#if defined(SERIES60V3)
+  TFileName privatePath;
+  User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
+
+  fileName.Copy(parse.Drive());
+  fileName.Append(privatePath);
+  fileName.Append(_L("import\\s60splash.mbm"));
+#else
+  fileName.Copy(parse.DriveAndPath());
+  fileName.Append(_L("s60splash.mbm"));
+#endif
+	  
+  CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
+  CleanupStack::PushL(bitmap);
+  User::LeaveIfError(bitmap->Load(fileName, 0, EFalse));
   
+  CWindowGc& gc = SystemGc();
+  TRect bitmapRect = TRect(bitmap->SizeInPixels());
+  TRect screenRect = TRect(CCoeEnv::Static()->ScreenDevice()->SizeInPixels());
+  if (bitmapRect == screenRect)
+	gc.BitBlt(TPoint(0, 0), bitmap);
+  else
+	gc.DrawBitmap(screenRect, bitmap, bitmapRect);
+
+  CleanupStack::PopAndDestroy(bitmap);  
+}
+
+TInt CSplashContainer::TimerExpired(TAny* aPtr)
+{
   CSplashContainer* self= ( CSplashContainer*) aPtr;
   COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
   TUid prevViewUid = self->iPrevViewId.iViewUid;

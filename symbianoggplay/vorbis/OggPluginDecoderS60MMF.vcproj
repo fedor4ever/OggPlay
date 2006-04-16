@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPluginDecoderS60MMF"
-	ProjectGUID="{DFA3D0E9-D76C-4732-A1B0-BFBF5DAD286C}"
+	ProjectGUID="{5C318E35-9576-492D-9484-AB3AB9E352B8}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform
@@ -72,6 +72,7 @@
 		</Configuration>
 		<Configuration
 			Name="Deb_S60_23_WINSCW|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2">
 			<Tool
@@ -273,9 +274,6 @@
 			<File
 				RelativePath="..\inc\OggViews.h">
 			</File>
-			<File
-				RelativePath="..\inc\Utf8Fix.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="group">
@@ -396,6 +394,9 @@
 		</File>
 		<File
 			RelativePath=".\TremorDecoder.h">
+		</File>
+		<File
+			RelativePath=".\Utf8Fix.h">
 		</File>
 		<File
 			RelativePath=".\vorbisfile.c">

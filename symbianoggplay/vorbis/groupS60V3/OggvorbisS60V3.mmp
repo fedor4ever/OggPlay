@@ -1,7 +1,7 @@
 // oggvorbis.mmp
 TARGET                                  libvorbisidec.dll 
 TARGETTYPE                              dll 
-UID                                     0x1000008d 0xE0000180 
+UID                                     0x1000008d 0xF01FD21D 
 CAPABILITY                              NONE 
 SOURCEPATH                              .. 
 SOURCE                                  mdct.c 

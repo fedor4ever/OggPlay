@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggvorbisS60V3"
-	ProjectGUID="{4543503C-3AD7-429D-80D9-8080B1AC13A9}"
+	ProjectGUID="{EBB56F51-73C6-4358-ACED-ECB58A849376}"
 	Keyword="SymbianOS_2.Symbian9">
 	<Platforms>
 		<Platform
@@ -72,6 +72,7 @@
 		</Configuration>
 		<Configuration
 			Name="Deb_S60_30_WINSCW|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2">
 			<Tool
@@ -94,6 +95,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				IgnoreImportLibrary="TRUE"
 				AdditionalOptions=" /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_30"
 				AdditionalDependencies="euser.lib efsrv.lib edll.lib "
 				OutputFile="C:\Symbian\9.1\S60_3rd\\Epoc32\release\winscw\udeb\libvorbisidec.dll"

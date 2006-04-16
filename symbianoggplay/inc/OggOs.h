@@ -84,9 +84,13 @@ chSTR2(__LINE__) "):" #desc)
 // Much slower, but works with all phones.
 #define SERIES60_SPLASH_WINDOW_SERVER
 #else
+#if defined(SERIES60V3)
+#define SERIES60_SPLASH_WINDOW_SERVER
+#else
 // The splash screen is using direct screen access. 
 // Much faster, but depends on phone refresh decision: Doesn't work with all phones.
 #define SERIES60_SPLASH
+#endif /* SERIES60V3 */
 #endif /*OS70S*/
 #endif /*SERIES60*/
 

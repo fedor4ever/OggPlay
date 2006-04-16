@@ -103,9 +103,9 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
  
   iControls = new(ELeave)CArrayPtrFlat<CCoeControl>(10);
 
-  iIconFileName.Copy(iApp->Application()->AppFullName());
-  iIconFileName.SetLength(iIconFileName.Length() - 3);
-  iIconFileName.Append(_L("mbm"));
+  // iIconFileName.Copy(iApp->Application()->AppFullName());
+  // iIconFileName.SetLength(iIconFileName.Length() - 3);
+  // iIconFileName.Append(_L("mbm"));
 
   // construct the two canvases for flip-open and closed mode:
   //----------------------------------------------------------

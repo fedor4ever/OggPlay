@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPlayS80"
-	ProjectGUID="{5FF87B08-B9E9-427E-985D-16E49A846FA9}"
+	ProjectGUID="{96109094-D51E-4A8C-81CF-32CC129E031E}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform
@@ -309,10 +309,10 @@
 				RelativePath=".\inc\OggUIQSony.h">
 			</File>
 			<File
-				RelativePath=".\inc\OggViews.h">
+				RelativePath=".\inc\OggUserHotkeys.h">
 			</File>
 			<File
-				RelativePath=".\inc\Utf8Fix.h">
+				RelativePath=".\inc\OggViews.h">
 			</File>
 		</Filter>
 		<Filter
@@ -357,9 +357,6 @@
 				RelativePath=".\vorbis\ogg.h">
 			</File>
 			<File
-				RelativePath=".\inc\OggUserHotkeys.h">
-			</File>
-			<File
 				RelativePath=".\vorbis\os.h">
 			</File>
 			<File
@@ -370,6 +367,9 @@
 			</File>
 			<File
 				RelativePath=".\vorbis\TremorDecoder.h">
+			</File>
+			<File
+				RelativePath=".\vorbis\Utf8Fix.h">
 			</File>
 			<File
 				RelativePath=".\vorbis\window.h">
@@ -429,149 +429,14 @@
 		<Filter
 			Name="bitmaps">
 			<File
-				RelativePath=".\bitmaps\back.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\backm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\cdicon.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\cdiconm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\file.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\filem.bmp">
-			</File>
-			<File
 				RelativePath=".\bitmaps\fish0.bmp">
 			</File>
 			<File
 				RelativePath=".\bitmaps\fishmask.bmp">
 			</File>
 			<File
-				RelativePath=".\bitmaps\flipclosed.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\flipopen_steel_s60.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\folder.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\folderm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\genre.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\genrem.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\listboxfocus.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\listboxfocusm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\micicon.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\miciconm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\pause.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\paused.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\pausedm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\pausefocus.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\pausem.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\play.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\play_dimmed.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\playfocus.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\playing.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\playingm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\playm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\repeat.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\repeatm.bmp">
-			</File>
-			<File
 				RelativePath=".\bitmaps\s60splash_unstable.bmp">
 			</File>
-			<File
-				RelativePath=".\bitmaps\slider.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\sliderfocus.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\sliderfocusm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\sliderm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\stop.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\stop_dimmed.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\stopfocus.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\stopm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\title.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\titlem.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\volume.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\volumefocus.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\volumefocusm.bmp">
-			</File>
-			<File
-				RelativePath=".\bitmaps\volumem.bmp">
-			</File>
-			<Filter
-				Name="symbian">
-				<File
-					RelativePath=".\bitmaps\symbian\OggPlayLogo.bmp">
-				</File>
-			</Filter>
 			<Filter
 				Name="Skins">
 				<Filter
@@ -628,6 +493,9 @@
 			</File>
 			<File
 				RelativePath=".\install\OggPlay.s60.pkg">
+			</File>
+			<File
+				RelativePath=".\install\OggPlay.s60V3.pkg">
 			</File>
 			<File
 				RelativePath=".\install\OggPlay.uiq.pkg">

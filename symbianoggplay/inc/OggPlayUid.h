@@ -26,7 +26,7 @@
   #include <e32std.h>
 
 #if defined(SERIES60V3)
-  const TInt KOggPlayApplicationUidValue = 0xA000017F;
+  const TInt KOggPlayApplicationUidValue = 0xF000A661;
 #else
   const TInt KOggPlayApplicationUidValue = 0x1000A661;
 #endif
@@ -38,7 +38,7 @@
 #else
   // For .AIF file inclusion
 #if defined(SERIES60V3)
-  #define KOggPlayApplicationUidValue 0xA000017F
+  #define KOggPlayApplicationUidValue 0xF000A661
 #else
   #define KOggPlayApplicationUidValue 0x1000A661
 #endif

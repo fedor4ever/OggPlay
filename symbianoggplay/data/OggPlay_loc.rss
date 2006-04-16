@@ -9,6 +9,6 @@ RESOURCE LOCALISABLE_APP_INFO r_helloworldbasic_localisable_app_info
         caption = "OggPlay";
 
         number_of_icons = 1;
-	   	icon_file = "\\resource\\apps\\fish.mbm";
+	   	icon_file = "\\resource\\apps\\OggPlay\\fish.mbm";
 	    };
     }
