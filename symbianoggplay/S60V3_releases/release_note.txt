@@ -1,0 +1,104 @@
+
+This is the Release Note for Release 1.091 of Oggplay for Series60.
+
+*******************************************************************
+ This release is only experimental and hasn't been thoroughly tested.
+ Please use the official release 1.0.0 , unless you are willing to
+ beta test our new features.
+ 
+ If you experiment problems please report them to our public forums
+ and remember to include the version number.
+*******************************************************************
+
+What's new in Release 1.091:
+--------------------------
+Added alarm clock
+Some internal changes / one very minor bug fix
+
+Notes:
+In order to use the alarm clock you must leave OggPlay running.
+It is best to move OggPlay to the background as less processing power is used when OggPlay runs in the background.
+
+To select a particular track for the alarm:
+1. Make sure OggPlay is not currently in the middle of a track (paused)
+2. Leave the track highlight on the track you want to play as the alarm
+
+If you want a random alarm:
+1. Make sure OggPlay is not currently in the middle of a track (paused)
+2. Turn on "Shuffle play"
+3. Leave the track highlight on "(titles)" 
+
+
+What's new in Release 1.0.9b:
+--------------------------
+Bug fixes:
+1. Support 8KHz mono playback (this should also allow streaming over bluetooth)
+2. Fix audio skips and "slow motion" on NGage
+3. Fix pause / play not updating position
+4. Frequency analyzer now works for all supported oggs (8KHz-48KHz, mono/stereo)
+5. Support stereo down sampling (e.g 48KHz stereo -> 44.1KHz stereo)
+6. Fix "Not so random" random playback
+
+
+What's new in Release 1.0.9a:
+--------------------------
+Fixed start from shortcut crash
+
+
+What's new in Release 1.0.9:
+--------------------------
+Working frequency analyzer
+Some bug fixes
+
+
+What's new in Release 1.0.8:
+--------------------------
+Experimental new playback engine (see Options->Playback)
+3 buffering modes:
+No buffering - best for multi-tasking but unresponsive OggPlay UI
+Single thread - Fewer audio dropouts but still unresponsive OggPlay UI (needs an extra 256K free memory)
+Multi thread - Fewest number of audio dropouts, responsive OggPlay UI (needs an extra 1MB free memory)
+
+2 thread priorities:
+Normal - the default value, best for multi-tasking
+High - Fewer audio dropouts, but not so good for multi-tasking
+
+-24dB volume boost added
+
+
+What's new in Release 1.0.7:
+--------------------------
+Fix for new Sendo X firmware 1.198.8.2
+
+
+What's new in Release 1.0.5:
+--------------------------
+Support for playlists within playlist.
+Plenty of bug fixes.
+
+
+What's new in Release 1.0.4:
+--------------------------
+Misceleaneous bugfixes. Ogg decoder fix for very bass-heavy music.
+Playlist support added (WinAmp format). For now they can be read only.
+Added Portuguese and Russian languages.
+Further SendoX audio level adjustments.
+
+What's in Release 1.0.1:
+--------------------------
+All the features of 1.0.0 plus:
+  + New shortcut option for next/previous song
+  + 'Dynamic' random play. No need to shuffle the playlist anymore.
+  + Quite a lot of internal changes. 
+  + New shortcut option for engaging keylock
+
+Links:
+------
+For more information about Oggplay, please see the webpage at
+http://symbianoggplay.sourceforge.net/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+
+-the S60 Oggplay developers.

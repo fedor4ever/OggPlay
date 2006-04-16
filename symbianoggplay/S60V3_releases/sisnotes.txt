@@ -1,0 +1,12 @@
+  Welcome to OggPlay 1.0.92
+
+Welcome to the Series 60
+version of OggPlay, the open
+source media player on Symbian,
+released under the GPL by 
+Leif H. Wilden.
+
+New for this release:
+First release of OggPlay 1.0.92 compiled for S60 V3
+
+Enjoy!
