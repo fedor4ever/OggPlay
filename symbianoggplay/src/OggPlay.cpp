@@ -722,10 +722,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 				   }
 		
 	case EOggShuffle: {     
-		HandleCommandL(EOggStop);
-
 		SetRandomL(!iSettings.iRandom);
-        iSongList->SetRepeat(iSettings.iRepeat);
 		break;
 					  }
 		
@@ -1792,21 +1789,30 @@ COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 		iAppView->StopCallBack();
 }
 
+void COggPlayAppUi::ToggleRandom()
+{
+	if (iSettings.iRandom)
+	      SetRandomL(EFalse);
+	    else
+	      SetRandomL(ETrue);
+}
+
 void
 COggPlayAppUi::SetRandomL(TBool aRandom)
 {
    // Toggle random
-    if (iSongList)
-     delete(iSongList);
+    delete iSongList;
     iSongList = NULL;
         
     iSettings.iRandom = aRandom;
     if (iSettings.iRandom)
-        iSongList = new(ELeave) COggRandomPlay();
+        iSongList = new(ELeave) COggRandomPlay;
     else
-    	iSongList = new(ELeave) COggNormalPlay();
+    	iSongList = new(ELeave) COggNormalPlay;
     
     iSongList->ConstructL(iAppView, iOggPlayback);
+    iSongList->SetRepeat(iSettings.iRepeat);
+
     iAppView->UpdateRandom();
 }
 
@@ -1817,14 +1823,13 @@ COggPlayAppUi::ToggleRepeat()
 	      SetRepeat(EFalse);
 	    else
 	      SetRepeat(ETrue);
-	    
-	iAppView->UpdateRepeat();
 }
 
 void
 COggPlayAppUi::SetRepeat(TBool aRepeat)
 {
     iSettings.iRepeat = aRepeat;
+
     iSongList->SetRepeat(aRepeat);
     iAppView->UpdateRepeat();
 }

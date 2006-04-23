@@ -194,6 +194,7 @@ private:
   COggButton*        iNextSongButton[2];
   COggButton*        iPrevSongButton[2];
   COggButton*        iRepeatButton[2];
+  COggButton*        iRandomButton[2];
 
   COggAnalyzer*      iAnalyzer[2];
 

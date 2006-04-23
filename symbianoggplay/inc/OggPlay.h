@@ -351,6 +351,7 @@ public:
   void SetRandomL(TBool aRandom);
   void SetRepeat(TBool aRepeat);
   void ToggleRepeat();
+  void ToggleRandom();
   
 #ifdef SERIES80
   CEikButtonGroupContainer * Cba()  

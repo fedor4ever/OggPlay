@@ -24,8 +24,14 @@ OggPlay 1 {
       ScrollDelay 10
       ScrollStep 4
     }
+    ScrollBar {
+      Position 364 14 12 128
+      KnobIcon 41 42
+      Style 1
+      Step 1
+    }
     ListBox {
-      Position 28 22 300 117
+      Position 28 22 330 117
       Font SwissA 20 0
       FontColor 0 0 0
       FontColorSelected 217 43 207
@@ -45,12 +51,12 @@ OggPlay 1 {
       Style 0
       KnobIcon 26 27
     }
-    RepeatIcon {
-      Icon 43 44
+    RepeatButton {
+      PressedIcon 43 44
       Position 396 25 31 13
     }
-    RandomIcon {
-      Icon 45 44
+    RandomButton {
+      PressedIcon 45 44
       Position 450 24 40 13
     }
     Analyzer {

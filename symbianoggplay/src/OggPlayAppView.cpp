@@ -275,6 +275,7 @@ COggPlayAppView::ResetControls() {
   iRepeatIcon[0]= 0; iRepeatIcon[1]= 0;
   iRepeatButton[0]= 0; iRepeatButton[1]= 0;
   iRandomIcon[0]=0; iRandomIcon[1]=0;
+  iRandomButton[0]=0; iRandomButton[1]=0;
   iScrollBar[0]= 0; iScrollBar[1]= 0;
   iAnimation[0]= 0; iAnimation[1]= 0;
   iLogo[0]= 0; iLogo[1]= 0;
@@ -468,12 +469,20 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
       iRandomIcon[aCanvas]->MakeVisible(iApp->iSettings.iRandom);
     }
     else if (p.iToken==_L("RepeatButton")) { 
-      _LIT(KAL,"Adding RepeadButton");
+      _LIT(KAL,"Adding RepeatButton");
 //	    RDebug::Print(KAL);
 	    p.Debug(KAL);
       c= new (ELeave) COggButton();
       iRepeatButton[aCanvas]= (COggButton*)c;
       iRepeatButton[aCanvas]->SetStyle(1);
+    }
+    else if (p.iToken==_L("RandomButton")) { 
+      _LIT(KAL,"Adding RandomButton");
+//	    RDebug::Print(KAL);
+	    p.Debug(KAL);
+      c= new (ELeave) COggButton();
+      iRandomButton[aCanvas]= (COggButton*)c;
+      iRandomButton[aCanvas]->SetStyle(1);
     }
     else if (p.iToken==_L("Analyzer")) {
       _LIT(KAL,"Adding Analyzer");
@@ -1009,8 +1018,10 @@ COggPlayAppView::UpdateRandom()
 {
   if (iApp->iSettings.iRandom) {
     if (iRandomIcon[iMode]) iRandomIcon[iMode]->Show();
+    if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(1);
   } else {
     if (iRandomIcon[iMode]) iRandomIcon[iMode]->Hide();
+    if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(0);
   }
 }
 
@@ -1429,6 +1440,7 @@ COggPlayAppView::UpdateControls()
   if (iPosition[iMode]) iPosition[iMode]->SetDimmed( !CanStop() );
  
   if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
+  if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(iApp->iSettings.iRandom);
   if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iSettings.iRepeat);
   if (iRandomIcon[iMode]) iRandomIcon[iMode]->MakeVisible(iApp->iSettings.iRandom);
 }
@@ -1668,15 +1680,28 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     TInt scanCode = aKeyEvent.iScanCode;
     switch (scanCode)
     {
-    	case EStdKeyDevice6 : scanCode = EOggLeft; //S80 joystick
+    	case EStdKeyDevice6:
+			scanCode = EOggLeft; //S80 joystick
     	    break;
-    	case EStdKeyDevice7 : scanCode = EOggRight;//S80 joystick
+
+    	case EStdKeyDevice7:
+#if defined(SERIES90)
+			code = EOggConfirm; // S90 joystick, apparently!
+#else
+			scanCode = EOggRight; // S80 joystick
+#endif
     	    break;
-    	case EStdKeyDevice8 : scanCode = EOggUp;   //S80 joystick
+
+    	case EStdKeyDevice8:
+			scanCode = EOggUp;   //S80 joystick
     	    break;
-    	case EStdKeyDevice9 : scanCode = EOggDown; //S80 joystick
+
+    	case EStdKeyDevice9:
+			scanCode = EOggDown; //S80 joystick
     		break;
-    	case EStdKeyDeviceA : code = EOggConfirm;//S80 joystick
+
+    	case EStdKeyDeviceA:
+			code = EOggConfirm; //S80 joystick
     	    break;
     }
     if(iFocusControlsPresent && scanCode==EOggLeft) {
@@ -2110,6 +2135,7 @@ COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt /*aValue*
   if (c==iNextSongButton[iMode]) iApp->NextSong();
   if (c==iPrevSongButton[iMode]) iApp->PreviousSong();
   if (c==iRepeatButton[iMode]) iApp->ToggleRepeat();
+  if (c==iRandomButton[iMode]) iApp->ToggleRandom();
 }
 
 void 
