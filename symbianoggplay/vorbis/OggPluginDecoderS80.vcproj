@@ -72,6 +72,7 @@
 		</Configuration>
 		<Configuration
 			Name="Deb_S80_20_WINS|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2">
 			<Tool

@@ -220,6 +220,9 @@ class COggPlayController :	public CMMFController,
 		TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
 		void SetAudioCapsL(TInt theChannels, TInt theRate);
 
+		void PlayNowL();
+		void PlayDeferred();
+
 	private: // Data
 
 		/**
@@ -274,6 +277,7 @@ class COggPlayController :	public CMMFController,
 		TBool iStreamError;
 		TStreamState iStreamState;
 		TMMFMessage* iStreamMessage;
+		TBool iPlayRequestPending;
 
 		class TFreqBins 
 		{

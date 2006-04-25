@@ -62,11 +62,7 @@ CSettingsS80Dialog::OkToExitL(int  /*aButtonId */)
   }
   
   iSettings->iAutoplay = static_cast <TInt> (iAutostartControl->State());
-  
-  COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
-  appUi->SetRepeat( static_cast <TInt> (iRepeatControl->State()) );
-  appUi->SetRandomL( static_cast <TInt> (iRandomControl->State()) );
-  
+
   UpdateSoftkeysFromControls();
   return ETrue;
 }
@@ -196,6 +192,14 @@ void CSettingsS80Dialog::LineChangedL(TInt aControlId)
 void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
 {
 	COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
+	if (aControlId == EOggSettingRepeatId)
+		{
+		appUi->SetRepeat(iRepeatControl->State());
+		}
+	else if (aControlId == EOggSettingRandomId)
+		{
+		appUi->SetRandomL(iRandomControl->State());
+		}
 	if (aControlId == EOggSettingVolumeBoost)
 		{
 		appUi->SetVolumeGainL((TGainType) iVolumeBoostControl->CurrentItem());

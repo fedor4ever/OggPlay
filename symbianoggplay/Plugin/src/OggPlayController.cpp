@@ -73,7 +73,7 @@ COggPlayController* COggPlayController::NewL(RFs* aFs, MDecoder *aDecoder)
 }
 
 COggPlayController::COggPlayController(RFs* aFs, MDecoder *aDecoder)
-: iFs(aFs), iDecoder(aDecoder), iStreamError(KErrNotReady)
+: iFs(aFs), iDecoder(aDecoder)
 {
 }
 
@@ -593,11 +593,31 @@ void COggPlayController::PlayL()
 	Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
 
     // Do our own rate conversion, some firmware do it very badly.
-    if (iUsedRate == 0 && (iStreamError == KErrNone))
+    if (iUsedRate == 0 && (iStreamState == EStreamOpened) && (iStreamError == KErrNone))
 		SetAudioCapsL(iDecoder->Rate(), iDecoder->Channels());
+	else if (iStreamState == EStreamNotOpen)
+	{
+		// The audio stream isn't ready, so start playing later
+		PlayDeferred();
+		return;
+	}
 	else if (iStreamError != KErrNone)
+	{
+		// There is a stream error, we can't play
 		User::Leave(iStreamError);
+	}
 
+	// Start playing now 
+	PlayNowL();
+}
+
+void COggPlayController::PlayDeferred()
+{
+	iPlayRequestPending = ETrue;
+}
+
+void COggPlayController::PlayNowL()
+{
 	CFakeFormatDecode* fake = CFakeFormatDecode::NewL(
     			TFourCC(' ', 'P', '1', '6'),
     			iUsedChannels, 
@@ -619,7 +639,6 @@ void COggPlayController::PlayL()
     iAudioOutput->EmptyBufferL(NULL, iOggSource, TMediaId(KUidMediaTypeAudio));
 
     iState=EStatePlaying;
-    PRINT("COggPlayController:: PlayL ok");
 }
 
 void COggPlayController::CustomCommand(TMMFMessage& aMessage)
@@ -686,6 +705,12 @@ void COggPlayController::PauseL()
 {
     PRINT("COggPlayController::PauseL");
 
+	if (iPlayRequestPending)
+	{
+		iPlayRequestPending = EFalse;
+		return;
+	}
+
     if (iState!=EStatePlaying)
         User::Leave(KErrNotReady);
 
@@ -698,7 +723,13 @@ void COggPlayController::StopL()
 {
     PRINT("COggPlayController::StopL");
     
-    if ((iState!=EStatePrimed)&&(iState!=EStatePlaying)) 
+	if (iPlayRequestPending)
+	{
+		iPlayRequestPending = EFalse;
+		return;
+	}
+
+	if ((iState!=EStatePrimed)&&(iState!=EStatePlaying)) 
         User::Leave(KErrNotReady);
 
     iAudioOutput->SinkStopL();
@@ -1037,6 +1068,14 @@ void COggPlayController::MaoscOpenComplete(TInt aError)
 
 	iStreamState = EStreamOpened;
 	iStreamError = aError;
+
+	if (iPlayRequestPending && (iStreamError == KErrNone))
+	{
+		// Start playing now (ignore error)
+		TRAPD(err, 	{ SetAudioCapsL(iDecoder->Rate(), iDecoder->Channels()); PlayNowL(); });
+	}
+
+	iPlayRequestPending = EFalse;
 }
 
 void COggPlayController::MaoscBufferCopied(TInt /* aError */, const TDesC8& /* aBuffer */)
