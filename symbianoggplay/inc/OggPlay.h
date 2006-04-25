@@ -457,54 +457,61 @@ private:
 class TOggFile;
 class COggSongList : public CBase
 {
-    public:
-     virtual void ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
-     virtual const TDesC & GetNextSong()=0;    
-     virtual const TDesC & GetPreviousSong()=0;
-     void  SetPlayingFromListBox(TInt aPlaying);
-     const TDesC& GetPlaying();
-     const TOggFile* GetPlayingFile();
-     const TBool AnySongPlaying();
-     void  SetRepeat(TBool aRepeat);
-     const TBool IsSelectedFromListBoxCurrentlyPlaying();
-     ~COggSongList();
-    protected:
-        
-     void  SetPlaying(TInt aPlaying, TBool aPreviousSong = EFalse);
-     TInt iPlayingIdx;           // index of the file which is currently being played
-     RPointerArray<TOggFile> iFileList;
-     COggPlayAppView* iAppView; 
-     CAbsPlayback*    iOggPlayback;
-     TBool iRepeat;
-     TBool iNewFileList;
+public:
+    virtual const TDesC & GetNextSong()=0;    
+    virtual const TDesC & GetPreviousSong()=0;
+    void  SetPlayingFromListBox(TInt aPlaying);
+    const TDesC& GetPlaying();
+    const TOggFile* GetPlayingFile();
+    const TBool AnySongPlaying();
+    void  SetRepeat(TBool aRepeat);
+    const TBool IsSelectedFromListBoxCurrentlyPlaying();
+    ~COggSongList();
 
-	 ROggPlayListStack iPlayListStack;
-	 TOggPlayList* iPlayList;
-	 TInt iPlayListIdx;
+protected:
+	COggSongList(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
+    void ConstructL(COggSongList* aSongList);
+
+	void  SetPlaying(TInt aPlaying, TBool aPreviousSong = EFalse);
+    TInt iPlayingIdx;           // index of the file which is currently being played
+    RPointerArray<TOggFile> iFileList;
+    COggPlayAppView* iAppView; 
+    CAbsPlayback*    iOggPlayback;
+    TBool iRepeat;
+    TBool iNewFileList;
+
+	ROggPlayListStack iPlayListStack;
+	TOggPlayList* iPlayList;
+	TInt iPlayListIdx;
 };
 
 class COggNormalPlay : public COggSongList
 {
-    public:     
-        void ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
-        const TDesC & GetNextSong();  
-        const TDesC & GetPreviousSong();
-        ~COggNormalPlay();
-        COggNormalPlay();
-    private:
+public:     
+	static COggNormalPlay* NewL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback, COggSongList* aSongList = NULL);
+	const TDesC& GetNextSong();  
+	const TDesC& GetPreviousSong();
+	~COggNormalPlay();
+
+private:
+    COggNormalPlay(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
 };
 
 class COggRandomPlay : public COggSongList
 {
-    public:     
-        void ConstructL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
-        virtual const TDesC & GetNextSong();  
-        virtual const TDesC & GetPreviousSong();
-        ~COggRandomPlay(); 
-        COggRandomPlay();
-    private:
-        RPointerArray<TOggFile> iRandomMemory;
-        RArray<TInt> iRandomMemoryIdx;
+public:
+	static COggRandomPlay* NewL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback, COggSongList* aSongList = NULL);
+	virtual const TDesC & GetNextSong();  
+	virtual const TDesC & GetPreviousSong();
+	~COggRandomPlay();
+
+private:
+	COggRandomPlay(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
+    void ConstructL(COggSongList* aSongList);
+
+private:
+    RPointerArray<TOggFile> iRandomMemory;
+    RArray<TInt> iRandomMemoryIdx;
 };
 
 

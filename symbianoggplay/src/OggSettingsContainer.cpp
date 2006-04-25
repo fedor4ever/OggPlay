@@ -146,7 +146,7 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   switch (aIdentifier)
   {
   case EOggRepeat:
-    return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iRepeat);
+    return new(ELeave) CRepeatSettingItem(aIdentifier, iAppUi);
 
   case EOggSettingScanDir:
     return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iScanmode);
@@ -198,6 +198,19 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
 
   return NULL;
 }
+
+// CRepeatItem
+CRepeatSettingItem::CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iRepeat), iAppUi(aAppUi)
+{
+}
+ 
+void CRepeatSettingItem::EditItemL(TBool aCalledFromMenu)
+{
+  CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+  iAppUi.SetRepeat(InternalValue());
+}
+
 
 void COggplayDisplaySettingItemList::VolumeGainChangedL()
 {

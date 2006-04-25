@@ -97,6 +97,18 @@ private:
 #endif
 };
 
+class CRepeatSettingItem : public CAknBinaryPopupSettingItem
+{
+public:  // Constructors and destructor
+    CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private: // Functions from base classes
+    void EditItemL(TBool aCalledFromMenu);
+
+private: //data
+	COggPlayAppUi& iAppUi;
+};
+
 class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 
 {
 public:  // Constructors and destructor
