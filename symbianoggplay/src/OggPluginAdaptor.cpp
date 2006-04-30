@@ -393,6 +393,7 @@ void COggPluginAdaptor::Stop()
     iState = EStopped;
 
     // The Stop is synchroneous within the MMF Framework.
+	ClearComments();
     iObserver->NotifyUpdate();
 }
 
