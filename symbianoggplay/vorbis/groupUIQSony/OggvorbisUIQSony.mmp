@@ -2,7 +2,7 @@
 //
 
 // Platform settings
-#include <OggOs.h>
+//#include <OggOs.h>
 
 TARGET        libvorbisidec.dll
 TARGETTYPE    dll
@@ -16,7 +16,7 @@ SOURCE        mdct.c block.c window.c \
               res012.c mapping0.c registry.c codebook.c \
 		      sharedbook.c framing.c bitwise.c \
 	          vorbisfile.c
-
+SOURCE        Utf8Fix.c
 SOURCE        microsoftInternal.c
 SOURCE        Symbian.cpp
 

@@ -1139,6 +1139,7 @@ void COggPlayAppView::HandleAlarmCallBack()
   }
 
   // Reset the alarm
+#ifndef UIQ
 #if defined(SERIES60)
   CAknQueryDialog* snoozeDlg = CAknQueryDialog::NewL();
 #else
@@ -1163,6 +1164,7 @@ void COggPlayAppView::HandleAlarmCallBack()
 	SetAlarm();
   }
   else
+#endif
   {
     // Set the alarm to fire again tomorrow 
 	SetAlarm();
@@ -1980,7 +1982,7 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
       return EKeyWasConsumed;
     }
     else if (aKeyEvent.iScanCode==127) { // "#"
-      ToggleRepeat();
+      iApp->ToggleRepeat();
       return EKeyWasConsumed;
     }
     // 48..57 == "0"..."9"

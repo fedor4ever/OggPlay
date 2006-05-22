@@ -21,6 +21,6 @@ PRJ_EXPORTS
 ..\Plugin\Inc\OggPlayPlugin.h
 
 PRJ_MMPFILES
-..\vorbis\groupUIQ\OggvorbisUIQMoto.mmp
+..\vorbis\groupUIQMoto\OggvorbisUIQMoto.mmp
 OggPlayUIQMoto.mmp
 

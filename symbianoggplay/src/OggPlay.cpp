@@ -738,7 +738,7 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	case EOggOptions: {
 
 #if defined(UIQ)
-		CHotkeyDialog *hk = new(ELeave) CHotkeyDialog(&iHotkey, &iAlarmActive, &iAlarmTime);
+		CHotkeyDialog *hk = new(ELeave) CHotkeyDialog(&iHotkey, &(iSettings.iAlarmActive), &(iSettings.iAlarmTime));
 		if (hk->ExecuteLD(R_DIALOG_HOTKEY)==EEikBidOk) {
 			SetHotKey();
 			iAppView->SetAlarm();

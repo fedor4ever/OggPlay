@@ -21,6 +21,7 @@
 
 #include "e32des8.h"
 #include "eikenv.h"
+#include "bassnd.h"
 #include "ivorbisfile.h"
 #include "OggMsgEnv.h"
 #include "OggHelperFcts.h"
@@ -78,13 +79,6 @@
   const TInt KSingleThreadLowThreshold = 5;
   const TInt KMultiThreadLowThreshold = 16;
 
-  // Buffer sizes to use
-  // (approx. 0.1s of audio per buffer)
-  const TInt KBufferSize48K = 16384;
-  const TInt KBufferSize32K = 12288;
-  const TInt KBufferSize22K = 8192;
-  const TInt KBufferSize16K = 6144;
-  const TInt KBufferSize11K = 4096;
 #else
   const TInt KBuffers= 2;
   const TInt KBufferSize = 4096;
@@ -100,6 +94,16 @@ const TInt KAudioPriority = EMdaPriorityMax;
 #endif
 #endif
 
+  // Buffer sizes to use
+  // (approx. 0.1s of audio per buffer)
+  const TInt KBufferSize48K = 16384;
+  const TInt KBufferSize32K = 12288;
+  const TInt KBufferSize22K = 8192;
+  const TInt KBufferSize16K = 6144;
+  const TInt KBufferSize11K = 4096;
+
+// frequency of canvas Refresh() for graphics updating - need to get FreqBin
+const TInt KOggControlFreq = 14;
 
 // Stream start delays
 // Avoid buffer underflows at stream startup and stop multiple starts when the user moves quickly between tracks
@@ -196,23 +200,31 @@ private:
   void CancelTimers();
 
 #ifdef MDCT_FREQ_ANALYSER
+#if ! defined(MULTI_THREAD_PLAYBACK)
+   TReal  iLatestPlayTime;
+   TReal  iTimeBetweenTwoSamples;
+#endif
+   
 class TFreqBins 
 {
 public:
-    TInt64 iTime;
+    TInt64 iPcmByte;
     TInt32 iFreqCoefs[KNumberOfFreqBins];
 };
 
   TFreqBins iFreqArray[KFreqArrayLength];
   TInt iLastFreqArrayIdx;
 
-  TInt64 iLastPlayTotalBytes;
+  TInt64 iLastPlayTotalBytes, iLastPlayBufferBytes;
   TBool iRequestingFrequencyBins;
+  TInt iBytesSinceLastFrequencyBin, iMaxBytesBetweenFrequencyBins;
 #endif
 
   // Communication with the decoder
   // ------------------------------
   RFile*                   iFile;
+
+  TInt iOutStreamByteRate;  // for converting time/position in buffers
   TBool                     iEof; // true after ov_read has encounted the eof
 
   MDecoder*             iDecoder;

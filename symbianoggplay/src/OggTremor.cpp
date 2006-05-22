@@ -524,6 +524,9 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 	  bufferSize /= 2;
 
   iOggSampleRateConverter->Init(this, bufferSize, bufferSize-1024, theRate, usedRate, theChannels, usedChannels);
+
+  iOutStreamByteRate= usedChannels * usedRate * sizeof(short);
+  iMaxBytesBetweenFrequencyBins= iOutStreamByteRate / KOggControlFreq;
   return KErrNone;
 }
 
@@ -687,17 +690,13 @@ const TInt32 * COggPlayback::GetFrequencyBins()
   TInt64 streamPositionBytes = (iSharedData.iStreamingPosition.Int64()*TInt64(iSharedData.iSampleRate*iSharedData.iChannels))/KConst500000;
   TInt64 positionBytes = iLastPlayTotalBytes + streamPositionBytes;
 #else
-  TTimeIntervalMicroSeconds currentPos = TInt64(1000)*Position();
+  TInt64 positionBytes= iStream->Position().Int64() * iOutStreamByteRate / 1000000; // convert usec to pcm bytes
 #endif
 
   TInt idx = iLastFreqArrayIdx;
   for (TInt i=0; i<KFreqArrayLength; i++)
     {
-#if defined(MULTI_THREAD_PLAYBACK)
-      if (iFreqArray[idx].iTime <= positionBytes)
-#else
-      if (iFreqArray[idx].iTime <= currentPos)
-#endif
+      if (iFreqArray[idx].iPcmByte <= positionBytes)
           break;
       
         idx--;
@@ -779,6 +778,14 @@ void COggPlayback::Play()
         return;
   }
 
+  iLastPlayBufferBytes= 0;
+#ifdef MDCT_FREQ_ANALYSER
+  iLastFreqArrayIdx= 0;
+  iBytesSinceLastFrequencyBin= 0;
+  // Clear the frequency analyser
+  Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
+#endif
+
   // There is something wrong how Nokia audio streaming handles the
   // first buffers. They are somehow swallowed.
   // To avoid that, send few (4) almost empty buffers
@@ -810,11 +817,6 @@ void COggPlayback::Play()
   iObserver->ResumeUpdates();
 
 #if defined(DELAY_AUDIO_STREAMING_START)
-#ifdef MDCT_FREQ_ANALYSER
-  // Clear the frequency analyser
-  Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
-#endif
-
   iObserver->NotifyPlayStarted();
 #endif
 }
@@ -886,13 +888,13 @@ void COggPlayback::CancelTimers()
   iStopAudioStreamingTimer->Cancel();
 }
 
-TInt COggPlayback::GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins)
+TInt COggPlayback::GetNewSamples(TDes8 &aBuffer, TBool /*aRequestFrequencyBins*/)
 {
     if (iEof)
         return(KErrNotReady);
 
 #ifdef MDCT_FREQ_ANALYSER
-	if (aRequestFrequencyBins && !iRequestingFrequencyBins)
+	if ((iBytesSinceLastFrequencyBin >= iMaxBytesBetweenFrequencyBins) && !iRequestingFrequencyBins)
 	{
 		// Make a request for frequency data
 		iDecoder->GetFrequencyBins(iFreqArray[iLastFreqArrayIdx].iFreqCoefs, KNumberOfFreqBins);
@@ -908,22 +910,27 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins)
     {
         aBuffer.SetLength(len + ret);
 
+        iLastPlayBufferBytes+= ret;
+
 #ifdef MDCT_FREQ_ANALYSER
+  iBytesSinceLastFrequencyBin+= ret;
 	if (iRequestingFrequencyBins)
 	{
 		// Determine the status of the request
 		TInt requestingFrequencyBins = iDecoder->RequestingFrequencyBins();
 		if (!requestingFrequencyBins)
 		{
-			iLastFreqArrayIdx++;
+			// The frequency request has completed
+      iBytesSinceLastFrequencyBin= 0;
+
+      iLastFreqArrayIdx++;
 			if (iLastFreqArrayIdx >= KFreqArrayLength)
 				iLastFreqArrayIdx = 0;
 
-			// The frequency request has completed
 			#if defined(MULTI_THREAD_PLAYBACK)
-			iFreqArray[iLastFreqArrayIdx].iTime = iSharedData.iTotalBufferBytes;
+			iFreqArray[iLastFreqArrayIdx].iPcmByte= iSharedData.iTotalBufferBytes;
 			#else
-			iFreqArray[iLastFreqArrayIdx].iTime = TInt64(iLatestPlayTime);
+			iFreqArray[iLastFreqArrayIdx].iPcmByte= iLastPlayBufferBytes;
 			#endif
 
 			iRequestingFrequencyBins = EFalse;
@@ -1397,12 +1404,10 @@ void COggPlayback::SendBuffer(HBufC8& buf)
   TInt cnt = 0;
   TPtr8 bufPtr(buf.Des());
   if (iFirstBuffers)  {
-      bufPtr.FillZ(4000);
       cnt = 4000;
-      ret = 4000;
-#ifdef MDCT_FREQ_ANALYSER
-      iLatestPlayTime += ret*iTimeBetweenTwoSamples;
-#endif
+      bufPtr.FillZ(cnt);
+      ret = cnt;
+      iLastPlayBufferBytes+= cnt;
       iFirstBuffers--;
   
   } else {
