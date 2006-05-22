@@ -175,11 +175,12 @@ TKeyResponse COggUserHotkeysControl::OfferKeyEventL(
     return EKeyWasConsumed;
     }
   else
-		return iListBox->OfferKeyEventL( aKeyEvent, aType );
+	return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
 
 void
-COggUserHotkeysS60::SetSoftkeys(TBool aPlaying) {
+COggUserHotkeysS60::SetSoftkeys(TBool aPlaying)
+{
   CEikonEnv * eikonEnv = CEikonEnv::Static();
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi *> ( eikonEnv->AppUi() ) ;
   CEikButtonGroupContainer * Cba = appUi->Cba();  

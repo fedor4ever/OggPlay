@@ -59,24 +59,25 @@ const TInt KThreadPriority = EPriorityAbsoluteHigh;
 const TInt KThreadPriority = EPriorityAbsoluteBackground;
 #endif
 
-//
-// EXPORTed functions
-//
-EXPORT_C CApaApplication*
-NewApplication()
+// Application entry point
+#if defined(SERIES60V3)
+#include <eikstart.h>
+static CApaApplication* NewApplication()
 {
 	return new COggPlayApplication;
 }
 
-#if defined(SERIES60V3)
-#include <eikstart.h>
 GLDEF_C TInt E32Main()
 {
 	return EikStart::RunApplication(NewApplication);
 }
 #else
-GLDEF_C TInt
-E32Dll(TDllReason)
+EXPORT_C CApaApplication* NewApplication()
+{
+	return new COggPlayApplication;
+}
+
+GLDEF_C TInt E32Dll(TDllReason)
 {
 	return KErrNone;
 }
@@ -304,8 +305,11 @@ COggActive::~COggActive()
 ////////////////////////////////////////////////////////////////
 //
 // App UI class, COggPlayAppUi
-//
-////////////////////////////////////////////////////////////////
+COggPlayAppUi::COggPlayAppUi()
+: iViewBy(ETop), iIsStartup(ETrue)
+{
+}
+
 void COggPlayAppUi::ConstructL()
 {
 #if defined(SERIES60_SPLASH)
@@ -356,9 +360,6 @@ void COggPlayAppUi::ConstructL()
 	iSkins= new(ELeave) CDesCArrayFlat(3);
 	FindSkins();
 	
-	iViewBy= ETop;
-    iIsStartup=ETrue;
-    iSettings.iWarningsEnabled = ETrue;
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings);
 
 #ifdef PLUGIN_SYSTEM
@@ -625,8 +626,10 @@ void COggPlayAppUi::NotifyPlayStarted()
 
 void COggPlayAppUi::ResumeUpdates()
 {
+#if defined(MONITOR_TELEPHONE_LINE)
 	if (iActive)
 		iActive->IssueRequest();
+#endif
 }
 
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -660,7 +663,6 @@ void COggPlayAppUi::UpdateSoftkeys(TBool aForce)
 void COggPlayAppUi::UpdateSoftkeys(TBool /* aForce */)
 #endif
 {
-
 #if defined(SERIES60) || defined(SERIES80) 
   // Return if somebody else than main view has taken focus, 
   // except if we override this check.
@@ -691,14 +693,15 @@ void COggPlayAppUi::UpdateSoftkeys(TBool /* aForce */)
 void
 COggPlayAppUi::HandleCommandL(int aCommand)
 {
-  switch (aCommand) {
-
-  case EOggAbout: {
+  switch (aCommand)
+  {
+  case EOggAbout:
+	{
 		COggAboutDialog *d = new(ELeave) COggAboutDialog();
 		TBuf<128> buf;
 		iEikonEnv->ReadResource(buf, R_OGG_VERSION);
 		d->SetVersion(buf);
-		d->ExecuteLD(R_DIALOG_ABOUT);	
+		d->ExecuteLD(R_DIALOG_ABOUT);
 		break;
 	}
 
@@ -1309,8 +1312,7 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 #endif
 }
 
-void
-COggPlayAppUi::FindSkins()
+void COggPlayAppUi::FindSkins()
 {
 	iSkins->Reset();
 		
@@ -1353,27 +1355,25 @@ COggPlayAppUi::FindSkins()
 void
 COggPlayAppUi::ReadIniFile()
 {
-    RFile in;
-    TInt err;
-    
     // Set some default values (for first time users)
 #if defined(SERIES60)
-	  iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyExit;
-      iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyExit;
+	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyExit;
+    iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyExit;
 #else
 #if defined(SERIES80)
-	  iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
-      iSettings.iSoftKeysIdle[1] = TOggplaySettings::EHotKeyBack;
-      iSettings.iSoftKeysIdle[2] = TOggplaySettings::EHotkeyVolumeHelp;
-      iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit;
-      iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
-      iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong;
-      iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
-      iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit;
-	  iSettings.iCustomScanDir = KFullScanString;
+	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
+    iSettings.iSoftKeysIdle[1] = TOggplaySettings::EHotKeyBack;
+    iSettings.iSoftKeysIdle[2] = TOggplaySettings::EHotkeyVolumeHelp;
+    iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit;
+    iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
+    iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong;
+    iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
+    iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit;
+	iSettings.iCustomScanDir = KFullScanString;
 #endif
 #endif
  
+    iSettings.iWarningsEnabled = ETrue;
 	iSettings.iGainType = ENoGain;
 	iVolume = KMaxVolume;
 
@@ -1392,7 +1392,9 @@ COggPlayAppUi::ReadIniFile()
 #endif
 
     // Open the file
-    if ( (err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileRead | EFileStreamText)) != KErrNone )
+    RFile in;
+    TInt err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileRead | EFileStreamText);    
+    if (err != KErrNone)
     {
         TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
         return;

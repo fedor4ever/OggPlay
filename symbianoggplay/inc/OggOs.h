@@ -123,7 +123,7 @@ chSTR2(__LINE__) "):" #desc)
 #define MDCT_FREQ_ANALYSER 
 
 // Some phones require direct TSY access for phone call notification
-#if !defined(MOTOROLA)
+#if !defined(MOTOROLA) && !defined(SERIES60V3)
 #define MONITOR_TELEPHONE_LINE 
 #endif
 

@@ -45,9 +45,16 @@
   const TInt KMultiThreadBuffers = 64;
 
   // The actual number of buffers to use
-  // Set to one less than KBuffers (there seems to be a bug in the buffering code that I don't understand)
+#if defined(SERIES60V3)
+  const TInt KSingleThreadBuffersToUse = 16;
+  const TInt KMultiThreadBuffersToUse = 64;
+#else
+  // Set to one less than KBuffers
+  // This is a workaround for a bug in Symbian's buffering code
+  // MaoscBufferCopied gets called before it has actually copied the buffer
   const TInt KSingleThreadBuffersToUse = 15;
   const TInt KMultiThreadBuffersToUse = 63;
+#endif
 
   // Number of buffers to fetch before starting playback (one seems to be enough)
   const TInt KPreBuffers = 1;

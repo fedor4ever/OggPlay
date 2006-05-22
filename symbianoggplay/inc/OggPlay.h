@@ -267,6 +267,7 @@ class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver
 #endif
 {
 public:
+  COggPlayAppUi();
   void ConstructL();
   void PostConstructL();
   ~COggPlayAppUi();

@@ -162,9 +162,9 @@ void COggFilesSearchContainer::Draw(const TRect& aRect) const
 void COggFilesSearchContainer::UpdateCba()
 {
 #if defined(SERIES60)
-	iCba->SetCommandSetL(  R_AVKON_SOFTKEYS_OK_EMPTY );
+	iCba->SetCommandSetL(R_AVKON_SOFTKEYS_OK_EMPTY);
 #elif defined(SERIES80)
-    iCba->SetCommandSetL(  R_EIK_BUTTONS_CONTINUE );
+    iCba->SetCommandSetL(R_EIK_BUTTONS_CONTINUE);
 #endif
 
     iCba->DrawNow();
