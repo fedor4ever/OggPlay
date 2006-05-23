@@ -91,7 +91,7 @@ typedef TUint32 ogg_uint32_t;
    typedef unsigned __int32 ogg_uint32_t;
    typedef __int16 ogg_int16_t;
 #  else
-   #pragma chmsg(_win32 defined, __GNUC__ as well ??)
+   #pragma chmsg(_win32 defined, __GNUC__ as well ?)
    /* Cygwin */
    #include <_G_config.h>
 
