@@ -1,0 +1,25 @@
+&EN
+#{"OggPlay"},(0x1000A661),1,31,0
+(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID"}
+(0x101F617B), 2, 0, 0, {"UIQ20ProductID"}
+"\epoc32\release\armi\urel\oggplay.app"-"!:\system\apps\oggplay\oggplay.app"
+"\epoc32\data\z\system\apps\oggplay\oggplay.aif"-"!:\system\apps\oggplay\oggplay.aif"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rsc"-"!:\system\apps\oggplay\oggplay.rsc"
+"\epoc32\data\z\system\apps\oggplay\oggplay.ren"-"!:\system\apps\oggplay\oggplay.ren"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rfr"-"!:\system\apps\oggplay\oggplay.rfr"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rge"-"!:\system\apps\oggplay\oggplay.rge"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rdu"-"!:\system\apps\oggplay\oggplay.rdu"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rit"-"!:\system\apps\oggplay\oggplay.rit"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rsp"-"!:\system\apps\oggplay\oggplay.rsp"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rsw"-"!:\system\apps\oggplay\oggplay.rsw"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rtu"-"!:\system\apps\oggplay\oggplay.rtu"
+"\epoc32\data\z\system\apps\oggplay\oggplay.rda"-"!:\system\apps\oggplay\oggplay.rda"
+"\epoc32\release\armi\urel\libvorbisidec.dll"-"!:\system\apps\oggplay\libvorbisidec.dll"
+"\epoc32\data\z\system\apps\oggplay\oggplay.mbm"-"!:\system\apps\oggplay\oggplay.mbm"
+"\epoc32\release\wins\udeb\z\system\apps\oggplay\oggplay.skn"-"!:\system\apps\oggplay\oggplay.skn"
+;"\epoc32\data\z\system\apps\oggplay\symbian.mbm"-"!:\system\apps\oggplay\symbian.mbm"
+;"\epoc32\release\wins\udeb\z\system\apps\oggplay\symbian.skn"-"!:\system\apps\oggplay\symbian.skn"
+
+
+
+
