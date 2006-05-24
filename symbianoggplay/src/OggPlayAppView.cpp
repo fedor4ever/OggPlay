@@ -144,7 +144,11 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[1]->SetControlContext(this);
   iCanvas[1]->SetObserver(this);
   pBM.iY= 0;
+#ifdef UIQ
+  iCanvas[1]->SetExtent(pBM, TSize(208,208));
+#else
   iCanvas[1]->SetExtent(pBM, TSize(208,144));
+#endif
 
   // set up all the controls:
   
