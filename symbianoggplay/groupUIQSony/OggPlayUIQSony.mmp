@@ -84,8 +84,8 @@ SOURCE       c12 playing.bmp           // 14 (playing - not used ???)
 SOURCE       1   playingm.bmp
 SOURCE       c12 paused.bmp            // 16 (paused)           
 SOURCE       1   pausedm.bmp
-SOURCE       c12 flipclosed.bmp        // 18 (flip opened)
-SOURCE       c12 flipopen_steel.bmp    // 19 (flip closed)
+SOURCE       c12 flipclosed_p900.bmp   // 18 (flip closed)
+SOURCE       c12 flipopen_steel.bmp    // 19 (flip opened)
 // Skin Dependent Icons
 SOURCE       c12 volume.bmp            // 20 (volume knob)
 SOURCE       1   volumem.bmp     
@@ -133,8 +133,8 @@ SOURCE       c12 playing.bmp           // 14 (playing - not used ???)
 SOURCE       1   playingm.bmp
 SOURCE       c12 paused.bmp            // 16 (paused)           
 SOURCE       1   pausedm.bmp
-SOURCE       c12 flipclosed.bmp        // 18 (flip opened)
-SOURCE       c12 symbian\flipopen.bmp  // 19 (flip closed)
+SOURCE       c12 flipclosed_p900.bmp   // 18 (flip closed)
+SOURCE       c12 symbian\flipopen.bmp  // 19 (flip opened)
 // Skin Dependent Icons
 SOURCE       c12 volume.bmp            // 20 (volume knob)
 SOURCE       1   volumem.bmp     
