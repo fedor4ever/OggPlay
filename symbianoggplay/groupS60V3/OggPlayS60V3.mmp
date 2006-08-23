@@ -1,11 +1,14 @@
 //  Basics
 TARGET        OggPlay.exe
 TARGETTYPE    EXE
-TARGETPATH    \system\apps\Oggplay
 UID           0x100039CE 0xF000A661
-CAPABILITY    NONE
-EPOCSTACKSIZE 16000
 
+CAPABILITY    NONE
+SECUREID      0xF000A661
+VENDORID      0
+
+EPOCSTACKSIZE 0x8000
+EPOCHEAPSIZE 0x20000 0x400000
 
 //  Source Files
 USERINCLUDE ..\inc
@@ -50,10 +53,6 @@ START RESOURCE OggPlay_reg.rss
 TARGETPATH \private\10003A3F\apps
 END
 
-START RESOURCE OggPlay_loc.rss
-TARGETPATH \resource\apps
-END
-
 LANG SC EN FR GE DU IT SP SW TU DA PO RU
 
 // Library Files
@@ -86,7 +85,20 @@ LIBRARY estor.lib
 
 LIBRARY etel.lib
 LIBRARY mediaclientaudiostream.lib
-LIBRARY libvorbisidec.lib
+LIBRARY OggplayVorbis.lib
+
+START BITMAP OggPlayIcon.mbm
+TARGETPATH   \resource\apps
+HEADER
+SOURCEPATH   ..\aif
+SOURCE       c16 context_pane_fish.bmp
+SOURCE       1   context_pane_fish_mask.bmp
+SOURCE       c16 list_icon_fish.bmp
+SOURCE       1   list_icon_fish_mask.bmp
+SOURCE       c16 list_icon_fish_24x24.bmp
+SOURCE       1   list_icon_fish_mask_24x24.bmp
+END
+
 
 START BITMAP fish.mbm
 TARGETPATH   \resource\apps\OggPlay
@@ -96,7 +108,7 @@ SOURCE       c12 fish0.bmp
 SOURCE       1   fishmask.bmp
 END
 
-START BITMAP S60splash.mbm
+START BITMAP OggSplash.mbm
 TARGETPATH   \private\F000A661\import
 HEADER
 SOURCEPATH   ..\bitmaps
