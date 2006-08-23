@@ -19,18 +19,19 @@
 #include <OggOs.h>
 #include <e32std.h>
 #include <hal.h>
-#ifdef SERIES60
+#if defined(SERIES60)
 #include <akndialog.h>   // for about
+#include <aknnotewrappers.h>
 _LIT(KTsyName,"phonetsy.tsy");
 #endif
 
-#ifdef SERIES80
+#if defined(SERIES80)
 #include <eikEnv.h>
 #include "OggDialogsS80.h"
 _LIT(KTsyName,"phonetsy.tsy");
 #endif
 
-#ifdef UIQ
+#if defined(UIQ)
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
 _LIT(KTsyName,"erigsm.tsy");
 #endif
@@ -42,7 +43,7 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <barsread.h>
 
 #include "OggControls.h"
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
 #include "OggPluginAdaptor.h"
 #else
 #include "OggTremor.h"
@@ -82,6 +83,47 @@ GLDEF_C TInt E32Dll(TDllReason)
 	return KErrNone;
 }
 #endif
+
+CApaDocument* COggPlayApplication::CreateDocumentL()
+{
+	return new (ELeave)COggPlayDocument(*this);
+}
+
+TUid COggPlayApplication::AppDllUid() const
+{
+	TUid id = { KOggPlayApplicationUidValue };
+	return id;
+}
+
+// COggPlayDocument class
+#if defined(SERIES60)
+CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/)
+#else
+CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& /* aFilename */, RFs& /*aFs*/)
+#endif
+{
+#if defined(SERIES60)
+	iAppUi->OpenFileL(aFilename);
+#endif
+
+	return NULL;
+}
+
+#if defined(SERIES60)
+COggPlayDocument::COggPlayDocument(CAknApplication& aApp)
+#else
+COggPlayDocument::COggPlayDocument(CEikApplication& aApp)
+#endif
+: CEikDocument(aApp)
+{
+}
+
+CEikAppUi* COggPlayDocument::CreateAppUiL()
+{
+    CEikAppUi* appUi = new (ELeave) COggPlayAppUi;
+    return appUi;
+}
+
 
 void ROggPlayListStack::Reset()
 {
@@ -156,7 +198,6 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 	iLine= new (ELeave) RLine;
 	
 #if defined(UIQ)
-	TInt linesToTest = 1;
 	iLineToMonitor = 0;
 	iLineCallsReportedAtIdle = 0;
 #else
@@ -209,9 +250,6 @@ TInt COggActive::CallBack(TAny* aPtr)
 
 TInt COggActive::CallBack()
 {	
-  if (iAppUi->iIsStartup)
-    iAppUi->PostConstructL();
-
   iAppUi->NotifyUpdate();
 
 #if !defined(__WINS__)  
@@ -230,7 +268,7 @@ TInt COggActive::CallBack()
 	// the phone is ringing or someone is making a call, pause the music if any
 	if (iAppUi->iOggPlayback->State()==CAbsPlayback::EPlaying)
 	{
-		TRACELF("GSM is active");
+		TRACEF(_L("GSM is active"));
 		iInterrupted= ETrue;
 		iAppUi->HandleCommandL(EOggPauseResume);
 
@@ -243,7 +281,7 @@ TInt COggActive::CallBack()
 	// our music was interrupted by a phone call, now what
 	if (isIdle)
 	{
-		TRACELF("GSM is idle");
+		TRACEF(_L("GSM is idle"));
 
 		// okay, the phone is idle again, let's continue with the music
 		iInterrupted= EFalse;
@@ -302,59 +340,238 @@ COggActive::~COggActive()
 }
 #endif // MONITOR_TELEPHONE_LINE
 
-////////////////////////////////////////////////////////////////
-//
-// App UI class, COggPlayAppUi
-COggPlayAppUi::COggPlayAppUi()
-: iViewBy(ETop), iIsStartup(ETrue)
+
+COggStartUpAO::COggStartUpAO(COggPlayAppUi& aAppUi)
+: CActive(EPriorityHigh), iAppUi(aAppUi)
+{
+	CActiveScheduler::Add(this);
+}
+
+COggStartUpAO::~COggStartUpAO()
 {
 }
 
+void COggStartUpAO::NextStartUpState()
+{
+	TRequestStatus* status = &iStatus;
+	User::RequestComplete(status, KErrNone);
+
+	SetActive();
+}
+
+void COggStartUpAO::RunL()
+{
+	iAppUi.NextStartUpState();
+}
+
+void COggStartUpAO::DoCancel()
+{
+}
+
+
+// App UI class, COggPlayAppUi
+COggPlayAppUi::COggPlayAppUi()
+: iViewBy(ETop)
+{
+}
+
+_LIT(KLogFile,"C:\\Logs\\OggPlay\\OggPlay.log");
 void COggPlayAppUi::ConstructL()
 {
-#if defined(SERIES60_SPLASH)
-  ShowSplash();
-
-  // Otherwise BaseConstructL() clears screen when launched via recognizer (?!)
-  CEikonEnv::Static()->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNeverAtFront);
-#endif
-	
-  BaseConstructL();
-
-  TFileName fileName(Application()->AppFullName());
-  TParsePtr parse(fileName);
+	iCoeEnv->FsSession().Delete(KLogFile);
+	TRACEF(_L("COggPlayAppUi::ConstructL()"));
 
 #if defined(SERIES60V3)
-  TFileName privatePath;
-  User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
-
-  iIniFileName.Copy(parse.Drive());
-  iIniFileName.Append(privatePath);
-  iIniFileName.Append(_L("OggPlay.ini"));
- 
-  iDbFileName.Copy(parse.Drive());
-  iDbFileName.Append(privatePath);
-  iDbFileName.Append(_L("OggPlay.db"));
-
-  iSkinFileDir.Copy(parse.Drive());
-  iSkinFileDir.Append(privatePath);
-  iSkinFileDir.Append(_L("import\\"));
+	BaseConstructL(EAknEnableSkin);
 #else
-  iIniFileName.Copy(fileName);
-  iIniFileName.SetLength(iIniFileName.Length() - 3);
-  iIniFileName.Append(_L("ini"));
+	BaseConstructL();
+#endif
 
-  iDbFileName.Copy(fileName);
-  iDbFileName.SetLength(iDbFileName.Length() - 3);
-  iDbFileName.Append(_L("db"));
+	// Construct the splash view
+	TRACEF(_L("COggPlayAppUi::ConstructL(): Construct Splash views..."));
 
-  iSkinFileDir.Copy(parse.DriveAndPath());
+    iSplashFOView = new(ELeave) COggSplashView(KOggPlayUidSplashFOView);
+	iSplashFOView->ConstructL();
+	RegisterViewL(*iSplashFOView);
+
+#if defined(UIQ) && !defined(MOTOROLA)
+    iSplashFCView = new(ELeave) COggSplashView(KOggPlayUidSplashFCView);
+	iSplashFCView->ConstructL();
+	RegisterViewL(*iSplashFCView);
+#endif
+
+	// Construct required startup objects
+	TRACEF(_L("COggPlayAppUi::ConstructL(): Construct StartUp objects..."));
+	iStartUpAO = new(ELeave) COggStartUpAO(*this);
+
+#if defined(SERIES60)
+	iStartUpErrorDlg = new(ELeave) CAknErrorNote(ETrue);
+#endif
+
+	iEikonEnv->ReadResource(iStartUpErrorTxt1, R_OGG_ERROR_31);
+	iEikonEnv->ReadResource(iStartUpErrorTxt2, R_OGG_ERROR_32);
+
+	// Wait for the view server to activate the splash
+	// view before completing the startup process
+	iStartUpState = EActivateSplashView;
+}
+
+void COggPlayAppUi::NextStartUpState(TInt aErr)
+{
+	if (iStartUpState == EStartUpFailed)
+		return;
+
+	if (aErr == KErrNone)
+		iStartUpAO->NextStartUpState();
+	else
+		StartUpError(aErr);
+}
+
+void COggPlayAppUi::NextStartUpState()
+{
+	switch(iStartUpState)
+	{
+	case EActivateSplashView:
+		iStartUpState = EStartOggPlay;
+		StartOggPlay();
+		break;
+
+	case EStartOggPlay:
+		iStartUpState = EActivateStartUpView;
+		ActivateStartUpView();
+		break;
+
+	case EActivateStartUpView:
+		iStartUpState = EPostConstruct;
+		PostConstruct();
+		break;
+
+	case EPostConstruct:
+		iStartUpState = EStartUpComplete;
+
+		// Delete the startup AO, we have finished with it now
+		delete iStartUpAO;
+		iStartUpAO = NULL;
+
+#if defined(SERIES60)
+		// Delete the startup error dialog, we have finished with that too
+		delete iStartUpErrorDlg;
+		iStartUpErrorDlg = NULL;
+#endif
+		break;
+
+	default:
+		User::Panic(_L("COPAUi::NSUS"), 0);
+		break;
+	}
+}
+
+void COggPlayAppUi::StartOggPlay()
+{
+	TRAPD(err, StartOggPlayL());
+
+#if defined(OS70S)
+	NextStartUpState(err);
+#else
+	if (err != KErrNone)
+		StartUpError(err);
+#endif
+}
+
+void COggPlayAppUi::ActivateStartUpView()
+{
+	TRAPD(err, ActivateStartUpViewL());
+	NextStartUpState(err);
+}
+
+void COggPlayAppUi::ActivateStartUpViewL()
+{
+	iFOView = new(ELeave) COggFOView(*iAppView);
+	RegisterViewL(*iFOView);  
+
+#if defined(SERIES60)
+	iSettingsView = new(ELeave) COggSettingsView(*iAppView, KOggPlayUidSettingsView);
+	RegisterViewL(*iSettingsView);
+
+	iUserHotkeysView = new(ELeave) COggUserHotkeysView(*iAppView);
+	RegisterViewL(*iUserHotkeysView);
+
+#ifdef PLUGIN_SYSTEM
+    iCodecSelectionView = new(ELeave) COggPluginSettingsView(*iAppView);
+    RegisterViewL(*iCodecSelectionView);
+#endif
+
+#if defined(MULTI_THREAD_PLAYBACK)
+	iPlaybackOptionsView = new(ELeave) COggPlaybackOptionsView(*iAppView, KOggPlayUidPlaybackOptionsView);
+	RegisterViewL(*iPlaybackOptionsView);
+#endif
+
+	iAlarmSettingsView = new(ELeave) COggAlarmSettingsView(*iAppView, KOggPlayUidAlarmSettingsView);
+	RegisterViewL(*iAlarmSettingsView);
+#else
+	iFCView = new(ELeave) COggFCView(*iAppView);
+	RegisterViewL(*iFCView);
+#endif
+
+	ActivateOggViewL();
+}
+
+void COggPlayAppUi::StartUpError(TInt aErr)
+{
+	// Format a string with the state and error code
+	TBuf<128> errorTxt;
+	errorTxt.Format(iStartUpErrorTxt2, iStartUpState, aErr);
+
+	// Mark that the startup has failed
+	iStartUpState = EStartUpFailed;
+
+	// Display an error dialog and exit
+#if defined(SERIES60)
+	TRAPD(err, iStartUpErrorDlg->ExecuteLD(errorTxt));
+	iStartUpErrorDlg = NULL;
+#else
+	TRAPD(err, iEikonEnv->InfoWinL(iStartUpErrorTxt1, errorTxt));
+#endif
+
+	Exit();
+}
+
+void COggPlayAppUi::StartOggPlayL()
+{
+	TFileName fileName(Application()->AppFullName());
+	TParsePtr parse(fileName);
+
+#if defined(SERIES60V3)
+	TFileName privatePath;
+	User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
+
+	iIniFileName.Copy(parse.Drive());
+	iIniFileName.Append(privatePath);
+	iIniFileName.Append(_L("OggPlay.ini"));
+ 
+	iDbFileName.Copy(parse.Drive());
+	iDbFileName.Append(privatePath);
+	iDbFileName.Append(_L("OggPlay.db"));
+
+	iSkinFileDir.Copy(parse.Drive());
+	iSkinFileDir.Append(privatePath);
+	iSkinFileDir.Append(_L("import\\"));
+#else
+	iIniFileName.Copy(fileName);
+	iIniFileName.SetLength(iIniFileName.Length() - 3);
+	iIniFileName.Append(_L("ini"));
+
+	iDbFileName.Copy(fileName);
+	iDbFileName.SetLength(iDbFileName.Length() - 3);
+	iDbFileName.Append(_L("db"));
+
+	iSkinFileDir.Copy(parse.DriveAndPath());
 #endif
 
 #if defined(__WINS__)
-  // The emulator doesn't like to write to the Z: drive, avoid that.
-  iIniFileName = _L("C:\\oggplay.ini");
-  iDbFileName = _L("C:\\oggplay.db");
+	// The emulator doesn't like to write to the Z: drive, avoid that.
+	iIniFileName = _L("C:\\oggplay.ini");
+	iDbFileName = _L("C:\\oggplay.db");
 #endif
 
 	iSkins= new(ELeave) CDesCArrayFlat(3);
@@ -367,12 +584,12 @@ void COggPlayAppUi::ConstructL()
 #else
 	iOggPlayback= new(ELeave) COggPlayback(iOggMsgEnv, this);
 #endif
-	
+
 	iOggPlayback->ConstructL();
 
 	ReadIniFile();
-	
-	iAppView=new(ELeave) COggPlayAppView;
+
+ 	iAppView = new(ELeave) COggPlayAppView();
 	iAppView->ConstructL(this, ClientRect());
 
 	SetRandomL(iSettings.iRandom);
@@ -381,59 +598,16 @@ void COggPlayAppUi::ConstructL()
 	HandleCommandL(EOggSkinOne+iCurrentSkin);
 	
 	AddToStackL(iAppView); // Receiving Keyboard Events 
-	
 	iAppView->InitView();
-	
+
 	SetHotKey();
-	iIsRunningEmbedded = EFalse;
-	
+
 #ifdef MONITOR_TELEPHONE_LINE
 	iActive= new (ELeave) COggActive();
 	iActive->ConstructL(this);
 	iActive->IssueRequest();
 #endif
-	
-	if (iAppView->IsFlipOpen()) {
-		// Create and activate the view
-		iFOView=new(ELeave) COggFOView(*iAppView);
-		RegisterViewL(*iFOView);  
-		iFCView=new(ELeave) COggFCView(*iAppView);
-		RegisterViewL(*iFCView);
-	}
-	else {
-		iFCView=new(ELeave) COggFCView(*iAppView);
-		RegisterViewL(*iFCView);
-		// Create and activate the view
-		iFOView=new(ELeave) COggFOView(*iAppView);
-		RegisterViewL(*iFOView);
-	}
 
-#if defined(SERIES60)
-	iSettingsView=new(ELeave) COggSettingsView(*iAppView,KOggPlayUidSettingsView);
-	RegisterViewL(*iSettingsView);
-
-	iUserHotkeysView = new(ELeave) COggUserHotkeysView(*iAppView);
-	RegisterViewL(*iUserHotkeysView);
-
-#ifdef SERIES60_SPLASH_WINDOW_SERVER
-    iSplashView=new(ELeave) COggSplashView(*iAppView);
-    RegisterViewL(*iSplashView);
-#endif /*SERIES60_SPLASH_WINDOW_SERVER*/
-
-#ifdef PLUGIN_SYSTEM
-    iCodecSelectionView=new(ELeave) COggPluginSettingsView(*iAppView);
-    RegisterViewL(*iCodecSelectionView);
-#endif
-
-#if defined(MULTI_THREAD_PLAYBACK)
-	iPlaybackOptionsView = new(ELeave) COggPlaybackOptionsView(*iAppView, KOggPlayUidPlaybackOptionsView);
-	RegisterViewL(*iPlaybackOptionsView);
-#endif
-
-	iAlarmSettingsView = new(ELeave) COggAlarmSettingsView(*iAppView, KOggPlayUidAlarmSettingsView);
-	RegisterViewL(*iAlarmSettingsView);
-#endif /* SERIES60 */
-        
 #if defined(MULTI_THREAD_PLAYBACK)
 	// Resist any attempts by the OS to give us anything other than foreground priority
 	// Disable process priority changes
@@ -447,80 +621,121 @@ void COggPlayAppUi::ConstructL()
 	SetProcessPriority();
 	SetThreadPriority();
 #endif
-	
+}
 
-#if defined(SERIES60_SPLASH_WINDOW_SERVER)
-	ActivateOggViewL(KOggPlayUidSplashView);
-#else
-	ActivateOggViewL();
-#endif
-
-#if defined(SERIES60_SPLASH)
-	iEikonEnv->RootWin().SetOrdinalPosition(0,ECoeWinPriorityNormal);
-#endif
+void COggPlayAppUi::PostConstruct()
+{
+	TRAPD(err, PostConstructL());
+	NextStartUpState(err);
 }
 
 void COggPlayAppUi::PostConstructL()
 {
-  if(iSettings.iAutoplay) {
-    for(TInt i=0;i<iRestoreStack.Count();i++) {
-      TRACEF(COggLog::VA(_L("Setting istack[%d]:%d"), i,iRestoreStack[i]));
-      iAppView->SelectItem(iRestoreStack[i]);
-      HandleCommandL(EOggPlay);
-    }
-    iAppView->SelectItem(iRestoreCurrent);
-  }
+	// Delete the splash view. We won't be seeing it again
+	DeregisterView(*iSplashFOView);
 
-  if ( iIsRunningEmbedded || (iSettings.iAutoplay && iIsStartup) 
-      && iOggPlayback->State()!=CAbsPlayback::EPlaying ) {
-		iIsStartup=EFalse; // this is not redundant - needed if there's an error in NextSong()
-    NextSong();
+	delete iSplashFOView;
+	iSplashFOView = NULL;
+
+#if defined(UIQ) && !defined(MOTOROLA)
+	// In FC mode the splash view is also used to launch
+	// the main FC view, so we can't de-register it here
+	// DeregisterView(*iSplashFCView);
+
+	// delete iSplashFCView;
+	// iSplashFCView = NULL;
+#endif
+
+	if (iSettings.iAutoplay && !iIsRunningEmbedded)
+	{
+		// Restore the view
+		for(TInt i=0;i<iRestoreStack.Count();i++)
+		{
+			iAppView->SelectItem(iRestoreStack[i]);
+			HandleCommandL(EOggPlay);
+		}
+
+		iAppView->SelectItem(iRestoreCurrent);
+
+		// Start playing
+		NextSong();
 	}
-  if ( iIsRunningEmbedded )
-  {
-      // No repeat when running in embedded mode, override the default iSettings.iRepeat
-      iSongList->SetRepeat(EFalse);
-  }
+	else if (iIsRunningEmbedded)
+	{
+		if (iAppView->iOggFiles->CreateDbWithSingleFile(iEmbeddedFileName))
+		{
+			// No repeat when running in embedded mode, override the default iSettings.iRepeat
+			iSongList->SetRepeat(EFalse);
 
-  iIsStartup=EFalse;
-  iIsRunningEmbedded=EFalse;
+			// Start playing
+			NextSong();
+		}
+		else
+			iIsRunningEmbedded = EFalse;
+	}
+
+	// Restart display updates
+	iAppView->RestartCallBack();
+
+	// Initialise the alarm
+	iAppView->SetAlarm();
 }
 
 COggPlayAppUi::~COggPlayAppUi()
 {
-	if(iAppView) RemoveFromStack(iAppView);
-	
-	delete iAppView;
-	if (iFOView) {
+	if (iStartUpAO)
+		iStartUpAO->Cancel();
+	delete iStartUpAO;
+
+#if defined (SERIES60)
+	delete iStartUpErrorDlg;
+#endif
+
+	if (iSplashFOView)
+	{
+		DeregisterView(*iSplashFOView);
+		delete iSplashFOView;
+	}
+
+	if (iFOView)
+	{
 		DeregisterView(*iFOView);
 		delete iFOView;
 	}
-	if (iFCView) {
+
+#if defined(UIQ) && !defined(MOTOROLA)
+	if (iSplashFCView)
+	{
+		DeregisterView(*iSplashFCView);
+		delete iSplashFCView;
+	}
+
+	if (iFCView)
+	{
 		DeregisterView(*iFCView);
 		delete iFCView;
 	}
-#if defined(SERIES60)
-	if (iSettingsView) {
-		DeregisterView(*iSettingsView);
-  	delete iSettingsView;
-	}
-
-  if( iUserHotkeysView ) {
-    DeregisterView(*iUserHotkeysView);
-    delete iUserHotkeysView;
-    }
-#ifdef SERIES60_SPLASH_WINDOW_SERVER
-  if (iSplashView) {
-    DeregisterView(*iSplashView);
-    delete iSplashView;
-  }
 #endif
 
+#if defined(SERIES60)
+	if (iSettingsView)
+	{
+		DeregisterView(*iSettingsView);
+		delete iSettingsView;
+	}
+
+	if (iUserHotkeysView)
+	{
+		DeregisterView(*iUserHotkeysView);
+		delete iUserHotkeysView;
+	}
+
 #ifdef PLUGIN_SYSTEM
-  if (iCodecSelectionView) {
-    DeregisterView(*iCodecSelectionView);
-    delete iCodecSelectionView;
-  }
+	if (iCodecSelectionView)
+	{
+	DeregisterView(*iCodecSelectionView);
+	delete iCodecSelectionView;
+	}
 #endif
 
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -536,7 +751,10 @@ COggPlayAppUi::~COggPlayAppUi()
 		DeregisterView(*iAlarmSettingsView);
   		delete iAlarmSettingsView;
 	}
-#endif /* SERIES60 */
+#endif // SERIES60
+
+	if(iAppView) RemoveFromStack(iAppView);
+	delete iAppView;
 
 #ifdef MONITOR_TELEPHONE_LINE
 	delete iActive;
@@ -548,17 +766,19 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iSkins;
 	delete iOggMsgEnv ;
     delete iSongList;
-    iViewHistoryStack.Close();
+
+	iViewHistoryStack.Close();
     iRestoreStack.Close();
+
 	COggLog::Exit();  
 }
 
 
 void COggPlayAppUi::ActivateOggViewL()
 {
-  TUid iViewUid;
-  iViewUid = iAppView->IsFlipOpen() ? KOggPlayUidFOView : KOggPlayUidFCView;
-  ActivateOggViewL(iViewUid);
+  TUid viewUid;
+  viewUid = iAppView->IsFlipOpen() ? KOggPlayUidFOView : KOggPlayUidFCView;
+  ActivateOggViewL(viewUid);
 }
 
 void COggPlayAppUi::ActivateOggViewL(const TUid aViewId)
@@ -567,21 +787,25 @@ void COggPlayAppUi::ActivateOggViewL(const TUid aViewId)
 	viewId.iAppUid = KOggPlayUid;
 	viewId.iViewUid = aViewId;
 	
-	TRAPD(err, ActivateViewL(viewId));
-	if (err) ActivateTopViewL();
+	ActivateViewL(viewId);
 }
 
 void COggPlayAppUi::HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent)
 {
-	if (aType == EEventUser+1) {
-		ActivateViewL(TVwsViewId(KOggPlayUid, KOggPlayUidFOView));
-	}
+	if (aType == EEventUser+1)
+		ActivateOggViewL();
 	else 
 		CEikAppUi::HandleApplicationSpecificEventL(aType, aEvent);
 }
 
-void
-COggPlayAppUi::NotifyUpdate()
+#if !defined(OS70S)
+void COggPlayAppUi::NotifyStreamOpen(TInt aErr)
+{
+	NextStartUpState(aErr);
+}
+#endif
+
+void COggPlayAppUi::NotifyUpdate()
 {
 	// Try to resume after sound device was stolen
 	if (iTryResume>0 && iOggPlayback->State()==CAbsPlayback::EPaused)
@@ -596,15 +820,13 @@ COggPlayAppUi::NotifyUpdate()
 	}
 }
 
-void
-COggPlayAppUi::NotifyPlayInterrupted()
+void COggPlayAppUi::NotifyPlayInterrupted()
 {
 	HandleCommandL(EOggPauseResume);
 	iTryResume= 2;
 }
 
-void
-COggPlayAppUi::NotifyPlayComplete()
+void COggPlayAppUi::NotifyPlayComplete()
 {
 	if (iSongList->AnySongPlaying() <0) {
         // Does this really happens?
@@ -736,7 +958,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 					 }
 		
 	case EOggOptions: {
-
 #if defined(UIQ)
 		CHotkeyDialog *hk = new(ELeave) CHotkeyDialog(&iHotkey, &(iSettings.iAlarmActive), &(iSettings.iAlarmTime));
 		if (hk->ExecuteLD(R_DIALOG_HOTKEY)==EEikBidOk) {
@@ -803,8 +1024,9 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 		}
 		
 	case EOggViewRebuild: {
-		HandleCommandL(EOggStop);
 		iIsRunningEmbedded = EFalse;
+
+		HandleCommandL(EOggStop);
 #ifdef SEARCH_OGGS_FROM_ROOT
         COggFilesSearchDialog *d = new(ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
         if(iSettings.iScanmode==TOggplaySettings::EMmcOgg) {
@@ -838,11 +1060,26 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	case EOggSkinSeven:
 	case EOggSkinEight:
 	case EOggSkinNine:
-	case EOggSkinTen: {
-		iCurrentSkin= aCommand-EOggSkinOne;
-		TBuf<256> buf(iSkinFileDir);
-		buf.Append((*iSkins)[iCurrentSkin]);
+	case EOggSkinTen:
+		{
+		iCurrentSkin = aCommand-EOggSkinOne;
+		TFileName buf(iSkinFileDir);
 
+		if (iCurrentSkin >= iSkins->MdcaCount())
+		{
+			if (iCurrentSkin == 0)
+			{
+				// There are no skins at all, so leave with KErrNotFound
+				User::Leave(KErrNotFound);
+			}
+			else
+			{
+				// The index is out of range, so reset to the first skin
+				iCurrentSkin = 0;
+			}
+		}
+
+		buf.Append((*iSkins)[iCurrentSkin]);
 		iAppView->ReadSkin(buf);
 		iAppView->Update();
 		iAppView->Invalidate();
@@ -850,16 +1087,6 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	  }
 		
 #if defined(SERIES60) || defined(SERIES80)
-#if defined(SERIES60)
-  case EAknSoftkeyBack:
-  {
-	HandleCommandL(EOggStop);
-	WriteIniFile();
-    Exit();
-    break;
-  }
- #endif
-
   case EUserStopPlayingCBA : {
  		HandleCommandL(EOggStop);
     break;
@@ -935,9 +1162,18 @@ COggPlayAppUi::HandleCommandL(int aCommand)
 	  }
 #endif
 
-	case EEikCmdExit: {
-		HandleCommandL(EOggStop);
-		WriteIniFile();
+#if defined(SERIES60)
+	case EAknSoftkeyBack:
+#endif
+	case EEikCmdExit:
+	{
+		// Only do exit operations if we have actually finished starting up
+		if (iStartUpState == EStartUpComplete)
+		{
+			HandleCommandL(EOggStop);
+			WriteIniFile();
+		}
+		
 		Exit();
 		break;
     }
@@ -1011,9 +1247,7 @@ COggPlayAppUi::PlaySelect()
 }
 
 void COggPlayAppUi::PauseResume()
-{
-    
-  TRACEF(_L("PauseResume"));
+{  
   if (iOggPlayback->State()==CAbsPlayback::EPlaying)
   {
     iOggPlayback->Pause();
@@ -1045,14 +1279,15 @@ void COggPlayAppUi::Pause()
 
 void COggPlayAppUi::Stop()
 {
-  if (iOggPlayback->State()==CAbsPlayback::EPlaying ||
-      iOggPlayback->State()==CAbsPlayback::EPaused) {
-    iOggPlayback->Stop();
-    UpdateSoftkeys();
-    iSongList->SetPlayingFromListBox(ENoFileSelected); // calls iAppview->Update
-  }
-}
+	if ((iOggPlayback->State()==CAbsPlayback::EPlaying) || (iOggPlayback->State()==CAbsPlayback::EPaused))
+	{
+		iOggPlayback->Stop();
 
+		UpdateSoftkeys();
+
+		iSongList->SetPlayingFromListBox(ENoFileSelected); // calls iAppview->Update
+	}
+}
 
 void
 COggPlayAppUi::SelectPreviousView()
@@ -1150,7 +1385,7 @@ COggPlayAppUi::ShowFileInfo()
 		else
 			playList = (TOggPlayList*) iSongList->GetPlayingFile();
 
-		COggPlayListInfoDialog *d = new COggPlayListInfoDialog();
+		COggPlayListInfoDialog *d = new(ELeave) COggPlayListInfoDialog();
 		const TDesC& fileName = *(playList->iFileName);
 		d->SetFileName(fileName);
 		d->SetFileSize(FileSize(fileName));
@@ -1166,7 +1401,7 @@ COggPlayAppUi::ShowFileInfo()
 		else
 			fileSize = FileSize(iOggPlayback->FileName());
 
-		COggInfoDialog *d = new COggInfoDialog();
+		COggInfoDialog *d = new(ELeave) COggInfoDialog();
 		d->SetFileName(iOggPlayback->FileName());
 		d->SetRate(iOggPlayback->Rate());
 		d->SetChannels(iOggPlayback->Channels());
@@ -1275,6 +1510,13 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 {
 	if (aMenuId==R_FILE_MENU) 
 	{
+		// If the splash screen is still visible we can't do anything other than exit
+		if (iStartUpState != EStartUpComplete)
+		{
+			aMenuPane->DeleteBetweenMenuItems(0, 4);
+			return;
+		}
+
         // "Repeat" on/off entry, UIQ uses check box, Series 60 uses variable argument string.
 #if defined(UIQ)
         if (iSettings.iRepeat) 
@@ -1290,8 +1532,10 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 		aMenuPane->SetItemDimmed(EOggInfo   , (!iSongList->AnySongPlaying()) && (iAppView->GetSelectedIndex()<0 || !isSongList));
 	}
 	
-	if (aMenuId==R_SKIN_MENU) {
-		for (TInt i=0; i<iSkins->Count(); i++) {
+	if (aMenuId==R_SKIN_MENU)
+	{
+		for (TInt i=0; i<iSkins->Count(); i++)
+		{
 			CEikMenuPaneItem::SData item;
 			item.iText.Copy((*iSkins)[i]);
 			item.iText.SetLength(item.iText.Length()-4);
@@ -1302,8 +1546,9 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 		}
 	}
 
-#ifdef UIQ
-	if (aMenuId==R_POPUP_MENU) {
+#if defined(UIQ)
+	if (aMenuId==R_POPUP_MENU)
+	{
 		if (iSettings.iRepeat) aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
 		aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());
 		aMenuPane->SetItemDimmed(EOggPlay, !iAppView->CanPlay());
@@ -1436,9 +1681,7 @@ COggPlayAppUi::ReadIniFile()
    {
       TInt restore_stack_count = (TInt) IniRead32( tf );      
       for( TInt i = 0; i < restore_stack_count; i++ )
-      {
-         iRestoreStack.Append( (TInt) IniRead32( tf ) );
-	}
+         iRestoreStack.Append((TInt) IniRead32( tf ));
 	
       iRestoreCurrent            = (TInt) IniRead32( tf );
       iSettings.iScanmode        = (TInt) IniRead32( tf );
@@ -1600,7 +1843,7 @@ COggPlayAppUi::WriteIniFile()
 {
     RFile out;
     
-    TRACE(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S"), &iIniFileName ));
+    TRACEF(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S, %d"), &iIniFileName, iIsRunningEmbedded));
     
     // Accessing the MMC , using the TFileText is extremely slow. 
     // We'll do everything using the C:\ drive then move the file to it's final destination
@@ -1664,18 +1907,34 @@ COggPlayAppUi::WriteIniFile()
 	tf.Write(num);
 	
     // from iniversion 2 onwards:
-    num.Num(iViewHistoryStack.Count());
-    tf.Write(num);
+	if (iIsRunningEmbedded)
+	{
+	    num.Num(iRestoreStack.Count());
+		tf.Write(num);
     
-    for ( TInt i = 0; i < iViewHistoryStack.Count(); i++ )
-    {
-        num.Num(iViewHistoryStack[i]);
-        TRACEF(COggLog::VA(_L("iViewHistoryStack[%d]= %d"),i,iViewHistoryStack[i]));
-        tf.Write(num);
-    }
+		for ( TInt i = 0; i < iRestoreStack.Count(); i++ )
+		{
+			num.Num(iRestoreStack[i]);
+			tf.Write(num);
+		}
     
-    num.Num(iAppView->GetSelectedIndex());
-	tf.Write(num);
+		num.Num(iRestoreCurrent);
+		tf.Write(num);
+	}
+	else
+	{
+	    num.Num(iViewHistoryStack.Count());
+		tf.Write(num);
+    
+		for ( TInt i = 0; i < iViewHistoryStack.Count(); i++ )
+		{
+			num.Num(iViewHistoryStack[i]);
+			tf.Write(num);
+		}
+    
+	    num.Num(iAppView->GetSelectedIndex());
+		tf.Write(num);
+	}
 	
 	num.Num(iSettings.iScanmode);
 	tf.Write(num);
@@ -1781,10 +2040,28 @@ void
 COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 {
 	iForeground = aForeground;
+
+#if defined(SERIES60)
+	CAknAppUi::HandleForegroundEventL(aForeground);
+#elif defined(UIQ)
+	CQikAppUi::HandleForegroundEventL(aForeground);
+#else
 	CEikAppUi::HandleForegroundEventL(aForeground);
+#endif
+
+	if (iStartUpState != EStartUpComplete)
+		return;
 
 	if (aForeground)
+		{
+#if defined(UIQ)
+		// UIQ deactivates our view when we are moved to the background
+		// Consequently we need to re-activate it when we are moved back into the foreground
+		ActivateOggViewL();
+#endif
+
 		iAppView->RestartCallBack();
+		}
 	else
 		iAppView->StopCallBack();
 }
@@ -1832,58 +2109,6 @@ COggPlayAppUi::SetRepeat(TBool aRepeat)
     iSongList->SetRepeat(aRepeat);
     iAppView->UpdateRepeat();
 }
-
-#if defined(SERIES60_SPLASH)
-void 
-COggPlayAppUi::ShowSplash()
-{
-  // This is a so-called pre Symbian OS v6.1 direct screen drawing routine
-  // based on CFbsScreenDevice. The inherent problem with this method is that
-  // the window server is unaware of the direct screen access and is likely
-  // to 'refresh' whatever invalidated regions it might think it manages....
-	
-  // http://www.symbian.com/developer/techlib/v70docs/SDL_v7.0/doc_source/
-  //   ... BasePorting/PortingTheBase/BitgdiAndGraphics/HowBitGdiWorks.guide.html
-	
-  User::LeaveIfError(RFbsSession::Connect());
-
-  // Check if there is a splash mbm available, if not splash() will make a silent leave
-  TFileName fileName(Application()->AppFullName());
-  TParsePtr parse(fileName);
-
-#if defined(SERIES60V3)
-  TFileName privatePath;
-  User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
-
-  fileName.Copy(parse.Drive());
-  fileName.Append(privatePath);
-  fileName.Append(_L("import\\s60splash.mbm"));
-#else
-  fileName.Copy(parse.DriveAndPath());
-  fileName.Append(_L("s60splash.mbm"));
-#endif
-	  
-  CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
-  CleanupStack::PushL(bitmap);
-  User::LeaveIfError(bitmap->Load(fileName, 0, EFalse));
-    
-  CFbsScreenDevice *device = NULL;
-  TDisplayMode dispMode = CCoeEnv::Static()->ScreenDevice()->DisplayMode();
-  device = CFbsScreenDevice::NewL(_L("scdv"), dispMode);
-  CleanupStack::PushL(device);
-	  
-  CFbsBitGc *gc = NULL;
-  User::LeaveIfError(device->CreateContext(gc));
-  CleanupStack::PushL(gc);
-  gc->BitBlt(TPoint(0, 0), bitmap);
-
-  device->Update();
-  CleanupStack::PopAndDestroy(3, bitmap);
-
-  RFbsSession::Disconnect();
-}
-#endif // #if defined(SERIES60_SPLASH)
-
 
 #if !defined(MULTI_THREAD_PLAYBACK)
 void COggPlayAppUi::SetProcessPriority()
@@ -1951,16 +2176,13 @@ TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand /*aCommand*/, TFileNa
 }
 
 
-void COggPlayAppUi::OpenFileL(const TDesC& aFileName){
-	
-	if (iAppView->iOggFiles->CreateDbWithSingleFile(aFileName)) {
-		iAppView->SelectItem(0);
-		iIsRunningEmbedded = ETrue;
-	}
-	if (iDoorObserver) {
-		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
-	}
+void COggPlayAppUi::OpenFileL(const TDesC& aFileName)
+{	
+	iEmbeddedFileName = aFileName;
+	iIsRunningEmbedded = ETrue;
 
+	if (iDoorObserver)
+		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
 }
 
 TInt COggPlayAppUi::FileSize(const TDesC& aFileName)
@@ -2024,29 +2246,6 @@ void COggPlayAppUi::SetAlarm(TBool aAlarmActive)
 void COggPlayAppUi::SetAlarmTime()
 {
 	iAppView->SetAlarm();
-}
-
-////////////////////////////////////////////////////////////////
-//
-// COggPlayDocument class
-//
-///////////////////////////////////////////////////////////////
-#if defined(SERIES60)
-CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/)
-#else
-CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& /* aFilename */, RFs& /*aFs*/)
-#endif
-{
-#if defined(SERIES60)
-	iAppUi->OpenFileL(aFilename);
-#endif
-
-	return NULL;
-}
-
-CEikAppUi* COggPlayDocument::CreateAppUiL(){
-    iAppUi = new (ELeave) COggPlayAppUi;
-    return iAppUi;	
 }
 
 

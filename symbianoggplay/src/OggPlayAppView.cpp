@@ -49,42 +49,36 @@ _LIT(KDateString, "%-B%:0%J%:1%T%:3%+B");
 const TInt KSnoozeTime[4] = { 5, 10, 20, 30 };
 
 COggPlayAppView::COggPlayAppView()
-: iFocusControlsPresent(EFalse),
-iFocusControlsHeader(_FOFF(COggControl,iDlink)),
-iFocusControlsIter(iFocusControlsHeader),
-iCycleFrequencyCounter(KOggControlFreq)
+: iPosChanged(-1), iFocusControlsPresent(EFalse), iFocusControlsHeader(_FOFF(COggControl, iDlink)),
+iFocusControlsIter(iFocusControlsHeader), iCycleFrequencyCounter(KOggControlFreq)
 {
-  iControls= 0;
-  iOggFiles= 0;
-  iActivateCount= 0;
-  iPosChanged= -1;
-  iApp= 0;
-  ResetControls();
 }
 
 COggPlayAppView::~COggPlayAppView()
 {
-  //if (iControls) { delete iControls; iControls= 0; }
-  if (iControls) { iControls->Reset(); delete iControls; iControls= 0; }
-  if (iTextArray) { delete iTextArray; iTextArray=0; }
+  if (iControls)
+	  iControls->Reset();
+
+  delete iControls;
+  delete iTextArray;
 
   ClearCanvases();
 
-  if(iTimer) iTimer->Cancel();
+  if (iTimer)
+	  iTimer->Cancel();
+
   delete iTimer;
   delete iCallBack;
 
-  if (iAlarmTimer) iAlarmTimer->Cancel();
+  if (iAlarmTimer)
+	  iAlarmTimer->Cancel();
+
   delete iAlarmTimer;
   delete iAlarmCallBack;
   delete iAlarmErrorCallBack;
 
-  if(iCanvas[1]) {
-    delete iCanvas[1];
-  }
-  if(iCanvas[0]) {
-    delete iCanvas[0];
-  }
+  delete iCanvas[1];
+  delete iCanvas[0];
 
   delete iOggFiles;
 }
@@ -99,23 +93,18 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   SetRect(aRect);
 
   SetComponentsToInheritVisibility(EFalse);
-  iOggFiles= new TOggFiles(iApp->iOggPlayback);
+  iOggFiles= new(ELeave) TOggFiles(iApp->iOggPlayback);
  
   iControls = new(ELeave)CArrayPtrFlat<CCoeControl>(10);
 
-  // iIconFileName.Copy(iApp->Application()->AppFullName());
-  // iIconFileName.SetLength(iIconFileName.Length() - 3);
-  // iIconFileName.Append(_L("mbm"));
-
-  // construct the two canvases for flip-open and closed mode:
-  //----------------------------------------------------------
-
-  // flip-open mode:
+  // Construct the two canvases for flip-open and closed mode
+  // Flip-open mode:
   iCanvas[0]= new(ELeave) COggCanvas;
   iControls->AppendL(iCanvas[0]);
   iCanvas[0]->SetContainerWindowL(*this);
   iCanvas[0]->SetControlContext(this);
   iCanvas[0]->SetObserver(this);
+
 #if defined(SERIES90)
   TPoint pBM(0,0);
   iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 320));
@@ -137,40 +126,25 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[0]->SetExtent(pBM, TSize(208, 320));
 #endif
 
-  // flip-closed mode:
+  // Flip-closed mode:
+#if defined(UIQ)
   iCanvas[1]= new(ELeave) COggCanvas;
   iControls->AppendL(iCanvas[1]);
   iCanvas[1]->SetContainerWindowL(*this);
   iCanvas[1]->SetControlContext(this);
   iCanvas[1]->SetObserver(this);
   pBM.iY= 0;
-#ifdef UIQ
   iCanvas[1]->SetExtent(pBM, TSize(208,208));
-#else
-  iCanvas[1]->SetExtent(pBM, TSize(208,144));
 #endif
 
-  // set up all the controls:
-  
-  //iCanvas[0]->ConstructL(iIconFileName, 19);
-  //iCanvas[1]->ConstructL(iIconFileName, 18);
-  //CreateDefaultSkin();
-
-  iCanvas[0]->SetFocus(ETrue);
-
-  // Start the canvas refresh timer (KCallBackPeriod):
+  // Set up all the other components:
+  // Create the canvas refresh timer (KCallBackPeriod):
   iTimer = CPeriodic::NewL(CActive::EPriorityStandard);
   iCallBack = new(ELeave) TCallBack(COggPlayAppView::CallBack, this);
 
   iAlarmCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmCallBack, this);
   iAlarmErrorCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmErrorCallBack, this);
   iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack, *iAlarmErrorCallBack);
-
-  // Only start timer once all initialization has been done
-  iTimer->Start(TTimeIntervalMicroSeconds32(1000000), TTimeIntervalMicroSeconds32(KCallBackPeriod), *iCallBack);
-
-  // Initialise alarm
-  SetAlarm();
 
   // Activate the view
   ActivateL();
@@ -290,12 +264,18 @@ COggPlayAppView::ClearCanvases()
   {
   COggControl* oggControl;
   iFocusControlsIter.SetToFirst();
-  while ((oggControl = iFocusControlsIter++) != NULL) {
+  while ((oggControl = iFocusControlsIter++) != NULL)
+  {
     oggControl->iDlink.Deque();
-    };
+  }
 
-  iCanvas[0]->ClearControls();
-  iCanvas[1]->ClearControls();
+  if (iCanvas[0])
+	iCanvas[0]->ClearControls();
+
+#if defined(UIQ)
+  if (iCanvas[1])
+	iCanvas[1]->ClearControls();
+#endif
   }
 
 
@@ -752,14 +732,18 @@ COggPlayAppView::IsFlipOpen()
 
 void COggPlayAppView::Activated()
 {
-  if (iActivateCount == 0) MakeVisible(ETrue);
+  if (iActivateCount == 0)
+	  MakeVisible(ETrue);
+
   iActivateCount++;
 }
 
 void COggPlayAppView::Deactivated()
 {
   iActivateCount--;
-  if (iActivateCount == 0) MakeVisible(EFalse);
+
+  if (iActivateCount == 0)
+	  MakeVisible(EFalse);
 }
 
 void COggPlayAppView::ChangeLayout(TBool aSmall)
@@ -769,20 +753,26 @@ void COggPlayAppView::ChangeLayout(TBool aSmall)
     rect = static_cast<CEikAppUi*>(iEikonEnv->AppUi())->ClientRect();
   SetRect(rect);
 
-  if (aSmall) {
-    iMode=1;  
+  if (aSmall)
+  {
+    iMode=1;
     GotoFlipClosed();
+
     Update();
     iCanvas[1]->DrawControl();
     iCanvas[1]->MakeVisible(ETrue);
     iCanvas[0]->MakeVisible(EFalse);
-  } else {
+  } else
+  {
     iMode= 0;
     GotoFlipOpen();
     Update();
     iCanvas[0]->DrawControl();
     iCanvas[0]->MakeVisible(ETrue);
+
+#if defined(UIQ)
     iCanvas[1]->MakeVisible(EFalse);
+#endif
   }
 }
 
@@ -1057,15 +1047,6 @@ void COggPlayAppView::HandleCallBack()
     }
   }
 
-#if defined(UIQ)
-  // Leave UIQ behaviour unchanged (for now)
-  if (iPosition[iMode] && iPosChanged<0) 
-	iPosition[iMode]->SetValue(iApp->iOggPlayback->Position().GetTInt());
-
-  iCanvas[iMode]->CycleLowFrequencyControls();
-  iCanvas[iMode]->CycleHighFrequencyControls();
-  iCanvas[iMode]->Refresh();
-#else
   if (iCycleFrequencyCounter % 2)
   {
 #if defined(SERIES60V3)
@@ -1095,7 +1076,6 @@ void COggPlayAppView::HandleCallBack()
 	if (iApp->iOggPlayback->State() == CAbsPlayback::EPlaying)
 		UpdateSongPosition();
   }
-#endif
 }
 
 void COggPlayAppView::RestartCallBack()
@@ -1182,23 +1162,21 @@ void COggPlayAppView::Invalidate()
 
 void COggPlayAppView::InitView()
 {
-  TRACELF("InitView");
   // fill the list box with some initial content:
-  if (!iOggFiles->ReadDb(iApp->iDbFileName, iCoeEnv->FsSession())) {
+  if (!iOggFiles->ReadDb(iApp->iDbFileName, iCoeEnv->FsSession()))
+  {
     iOggFiles->CreateDb(iCoeEnv->FsSession());
     iOggFiles->WriteDbL(iApp->iDbFileName, iCoeEnv->FsSession());
   }
 
   const TBuf<16> dummy;
-  //iApp->iViewBy= COggPlayAppUi::ETop;
   FillView(COggPlayAppUi::ETop, COggPlayAppUi::ETop, dummy);
 
   if (iAnalyzer[0]) iAnalyzer[0]->SetStyle(iApp->iAnalyzerState);
   if (iAnalyzer[1]) iAnalyzer[1]->SetStyle(iApp->iAnalyzerState);
 }
 
-void
-COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TViews thePreviousView, const TDesC& aSelection)
+void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TViews thePreviousView, const TDesC& aSelection)
 {
   TBuf<32> buf;
   TBuf<16> dummy;
@@ -1282,16 +1260,15 @@ COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TView
     }
   }
 
-  iApp->iViewBy= theNewView;
-
+  iApp->iViewBy = theNewView;
   UpdateListbox();
+
   // Choose the selected item.
   // If random is turned off: First of the list, unless it is a "back" icon, in that case 2nd
   // If random is turned on: 
   //   When playing a file, do as if random wasn't turned on
   //   If not playing a file, choose a random file
-
-  if (theNewView==COggPlayAppUi::ETop) 
+  if (theNewView == COggPlayAppUi::ETop) 
   {
       SelectItem(0);
   } else
@@ -1488,17 +1465,22 @@ COggPlayAppView::UpdateSongPosition()
   TInt mintot= sectot/60;
   sectot-= mintot*60;
   mbuf.Format(_L("%02d:%02d / %02d:%02d"), min, sec, mintot, sectot);
+
 #if defined(UIQ)
-  if (IsFlipOpen()) {
+  if (IsFlipOpen())
+  {
     CEikMenuBar* mb = iEikonEnv->AppUiFactory()->MenuBar();
     if (!mb) return;
-    // As we cannot officially get the TitleArray, we have to steal it (hack)
+
+	// As we cannot officially get the TitleArray, we have to steal it (hack)
     CEikMenuBar::CTitleArray *ta;
     ta = *(CEikMenuBar::CTitleArray**)((char*)mb + sizeof(*mb) - 4*sizeof(void*));
     ta->At(1)->iData.iText.Copy(mbuf);
     mb->SetSize(mb->Size());
     mb->DrawNow();
-  } else {
+  }
+  else
+  {
     if (iPlayed[iMode]) iPlayed[iMode]->SetText(mbuf);
     if (iPlayedDigits[iMode]) iPlayedDigits[iMode]->SetText(mbuf.Left(5));
     if (iTotalDigits[iMode]) iTotalDigits[iMode]->SetText(mbuf.Right(5));
@@ -1508,6 +1490,7 @@ COggPlayAppView::UpdateSongPosition()
   if (iPlayedDigits[iMode]) iPlayedDigits[iMode]->SetText(mbuf.Left(5));
   if (iTotalDigits[iMode]) iTotalDigits[iMode]->SetText(mbuf.Right(5));
 #endif
+  
   SetTime(iApp->iOggPlayback->Time());
 }
 
@@ -1601,7 +1584,7 @@ void COggPlayAppView::SetAlarm()
 
   if (iApp->iSettings.iAlarmActive)
   {
-    TBuf<256> buft;
+    TBuf<128> buft;
     iApp->iSettings.iAlarmTime.FormatL(buft, KDateString);
     if (iAlarm[iMode]) iAlarm[iMode]->SetText(buft);
     if (iAlarmIcon[iMode]) iAlarmIcon[iMode]->Show();
@@ -1923,18 +1906,9 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
     }
   }
 
-
   return EKeyWasNotConsumed;
-
-
-
-
 #else // UIQ keyhandling
-
 #if !defined( MOTOROLA )
-
-
-
   enum EOggKeys {
       EOggConfirm=EQuartzKeyConfirm,
   };
@@ -2171,12 +2145,9 @@ void COggPlayAppView::AddControlToFocusList(COggControl* c) {
   COggControl* currentitem = iFocusControlsIter; 
   if (currentitem) {
     iFocusControlsPresent=ETrue;
-    //OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList adding 0x%x"),c);
     c->iDlink.Enque(&currentitem->iDlink);
     iFocusControlsIter.Set(*c);
   } else {
-    TRACEL("COggPlayAppView::AddControlToFocusList, iFocusControlsHeader.AddFirst");
-    //OGGLOG.WriteFormat(_L("COggPlayAppView::AddControlToFocusList - Setting up focus list adding 0x%x"),c);
     iFocusControlsHeader.AddFirst(*c);
     iFocusControlsIter.SetToFirst(); 
   }

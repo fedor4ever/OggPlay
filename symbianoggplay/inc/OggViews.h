@@ -21,13 +21,10 @@
 
 #include <coecntrl.h>
 
-#if defined(SERIES60_SPLASH_WINDOW_SERVER)
 #include "OggSplashCOntainer.h"
-#endif
 
 class COggPlayAppView;
 class COggUserHotkeysControl;
-
 class COggViewBase : public CBase, public MCoeView
 {
  public:
@@ -37,14 +34,32 @@ class COggViewBase : public CBase, public MCoeView
   
  protected:		
 
-  // implements MCoeView:
-  virtual void ViewDeactivated();
-  virtual void ViewConstructL();
-  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			      const TDesC8& /*aCustomMessage*/);
-  
+  // From MCoeView
+  void ViewDeactivated();
+  void ViewConstructL();
+  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+
   COggPlayAppView& iOggViewCtl;
 };
+
+class COggSplashView : public CBase, public MCoeView
+	{
+public:
+	COggSplashView(const TUid& aViewId);
+	void ConstructL();
+
+	~COggSplashView();
+
+	// From MCoeView
+	TVwsViewId ViewId() const;
+	TBool ViewScreenModeCompatible(TInt aScreenMode);
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	void ViewDeactivated();
+
+private:
+	TUid iViewId;
+	CSplashContainer *iSplashContainer;
+	};
 
 class COggFOView : public COggViewBase
 {
@@ -139,23 +154,6 @@ class COggPluginSettingsView : public COggViewBase
 	};
 	
 #endif
-	
-#ifdef SERIES60_SPLASH_WINDOW_SERVER
-class COggSplashView : public COggViewBase
-	{
-	public:
-		COggSplashView(COggPlayAppView& aOggViewCtl);
-		~COggSplashView();
-		virtual TVwsViewId ViewId() const;
-		virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			const TDesC8& /*aCustomMessage*/);
-    void ViewDeactivated();
-
-  private:
-        COggPlayAppView& iOggViewCtl;
-        CSplashContainer *iSplashContainer;
-	};
-#endif /*SERIES60_SPLASH_WINDOW_SERVER*/
 
 #if defined(MULTI_THREAD_PLAYBACK)
 class COggPlaybackOptionsView : public COggViewBase

@@ -39,16 +39,12 @@
 
 enum
 {
-  EScreenModeFlipOpen = 0,
+  EScreenModeFlipOpen,
   EScreenModeFlipClosed
 };
 
 
-////////////////////////////////////////////////////////////////
-//
-// class COggViewBase
-//
-////////////////////////////////////////////////////////////////
+// Class COggViewBase
 COggViewBase::COggViewBase(COggPlayAppView& aOggViewCtl)
   : iOggViewCtl(aOggViewCtl)
 {
@@ -61,15 +57,19 @@ COggViewBase::~COggViewBase()
 void COggViewBase::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
 				  const TDesC8& /*aCustomMessage*/)
 {
-  TPixelsAndRotation sizeAndRotation;
-  CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
-  CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
-  iOggViewCtl.Activated();
+#if defined(UIQ)
+	// On UIQ, in FC mode, we need to manually re-configure the screen device
+	TPixelsAndRotation sizeAndRotation;
+	CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
+	CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
+#endif
+
+	iOggViewCtl.Activated();
 }
 
 void COggViewBase::ViewDeactivated()
 {
-  iOggViewCtl.Deactivated();
+	iOggViewCtl.Deactivated();
 }
 
 void COggViewBase::ViewConstructL()
@@ -77,11 +77,59 @@ void COggViewBase::ViewConstructL()
 }
 
 
-////////////////////////////////////////////////////////////////
-//
-// class COggFOView
-//
-////////////////////////////////////////////////////////////////
+// Class COggSplashView
+COggSplashView::COggSplashView(const TUid& aViewId)
+: iViewId(aViewId)
+{
+}
+
+void COggSplashView::ConstructL()
+{
+    iSplashContainer = new(ELeave) CSplashContainer();
+	iSplashContainer->ConstructL();
+}
+
+COggSplashView::~COggSplashView()
+{
+	delete iSplashContainer;
+}
+
+TVwsViewId COggSplashView::ViewId() const
+{
+	return TVwsViewId(KOggPlayUid, iViewId);
+}
+
+TBool COggSplashView::ViewScreenModeCompatible(TInt /* aScreenMode */)
+{
+  return ETrue;
+}
+
+void COggSplashView::ViewActivatedL(const TVwsViewId& /* aPrevViewId */, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+{
+#if defined(UIQ)
+	// On UIQ, in FC mode, the splash view is activated by the FC app launcher
+	// If the application is starting we display the splash screen, otherwise we do nothing
+	// (In the latter case the main FC view will be activated by COggPlayAppUi::HandleForegroundEvent())
+	COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
+	if (appUi->iStartUpState != COggPlayAppUi::EActivateSplashView)
+		return;
+
+	// On UIQ, in FC mode, we need to manually re-configure the screen device
+	TPixelsAndRotation sizeAndRotation;
+	CEikonEnv::Static()->ScreenDevice()->GetDefaultScreenSizeAndRotation(sizeAndRotation);
+	CEikonEnv::Static()->ScreenDevice()->SetScreenSizeAndRotation(sizeAndRotation);
+#endif
+
+	iSplashContainer->ShowSplashL();
+}
+
+void COggSplashView::ViewDeactivated()
+{
+	delete iSplashContainer;
+    iSplashContainer = NULL;
+}
+
+// Class COggFOView
 COggFOView::COggFOView(COggPlayAppView& aOggViewCtl)
   : COggViewBase(aOggViewCtl)
 {
@@ -110,22 +158,21 @@ void COggFOView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
 {
   COggViewBase::ViewActivatedL(aPrevViewId, aCustomMessageId, aCustomMessage);
   CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(ETrue);
+
 #if defined(SERIES60)
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(EFalse);
 #endif
-  
-#if defined(SERIES60) || defined (SERIES80)
-  ((COggPlayAppUi*) CEikonEnv::Static()->AppUi())->UpdateSoftkeys(ETrue); // we KNOW we're the right view!
-#endif
+
   iOggViewCtl.ChangeLayout(EFalse);
+ 
+#if defined(SERIES60) || defined (SERIES80)
+  COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
+  appUi->UpdateSoftkeys(ETrue);
+#endif
 }
 
 
-////////////////////////////////////////////////////////////////
-//
-// class COggFCView
-//
-////////////////////////////////////////////////////////////////
+// Class COggFCView
 COggFCView::COggFCView(COggPlayAppView& aOggViewCtl)
   : COggViewBase(aOggViewCtl)
 {
@@ -158,23 +205,19 @@ void COggFCView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
 }
 
 #if defined(SERIES60)
-////////////////////////////////////////////////////////////////
-//
-// class COggS60Utility
-//
-////////////////////////////////////////////////////////////////
-void COggS60Utility::DisplayStatusPane( TInt aTitleID )
+void COggS60Utility::DisplayStatusPane(TInt aTitleID)
 {
   // Enable statuspane
   CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
   statusPane->SwitchLayoutL(R_AVKON_STATUS_PANE_LAYOUT_USUAL);
   if( aTitleID )
     {
-    CAknTitlePane* titlePane=(CAknTitlePane*)statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
+    CAknTitlePane* titlePane = (CAknTitlePane*)statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
     TBuf<32> buf;
-    CEikonEnv::Static()->ReadResource(buf,aTitleID);
+    CEikonEnv::Static()->ReadResource(buf, aTitleID);
     titlePane->SetTextL(buf);
     }
+
   statusPane->MakeVisible(ETrue);
 }
 
@@ -183,16 +226,13 @@ void COggS60Utility::RemoveStatusPane()
   CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
   CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
   statusPane->MakeVisible(EFalse);
-    // Restore softkeys
+
+  // Restore softkeys
   ((COggPlayAppUi*) appUi)->UpdateSoftkeys();
 }
 
 
-////////////////////////////////////////////////////////////////
-//
-// class COggSettingsView
-//
-////////////////////////////////////////////////////////////////
+// Class COggSettingsView
 COggSettingsView::COggSettingsView(COggPlayAppView& aOggViewCtl,TUid aId )
 : COggViewBase(aOggViewCtl)
 {
@@ -203,34 +243,31 @@ COggSettingsView::~COggSettingsView()
 {
 }
 
-void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-				  const TDesC8& /*aCustomMessage*/)
+void COggSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 {
-  CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
-  if(Cba) {
-    Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
-    Cba->DrawNow();
-  }
-  CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
+  CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();
+  cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
+  cba->DrawNow();
 
+  CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
   COggS60Utility::DisplayStatusPane(R_OGG_SETTINGS);
 
   if (!iContainer)
     {
     iContainer = new (ELeave) COggSettingsContainer;
-    iContainer->ConstructL( ((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect(),
-       iUid);
+    iContainer->ConstructL( ((CEikAppUi*)CEikonEnv::Static()->AppUi())->ClientRect(), iUid);
     ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->AddToStackL( *this, iContainer );
     }
 }
 
 void COggSettingsView::ViewDeactivated()
 {
-  if ( iContainer )
+  if (iContainer)
   {
-    ((CCoeAppUi*)CEikonEnv::Static()->AppUi())->RemoveFromViewStack( *this, iContainer );
-     delete iContainer;
-     iContainer = NULL;
+	((CCoeAppUi*)CEikonEnv::Static()->AppUi())->RemoveFromViewStack(*this, iContainer);
+
+	delete iContainer;
+	iContainer = NULL;
   }
 
   COggS60Utility::RemoveStatusPane(); 
@@ -251,11 +288,7 @@ TVwsViewId COggSettingsView::ViewId() const
 
 
 #ifdef PLUGIN_SYSTEM
-////////////////////////////////////////////////////////////////
-//
-// class COggPluginSettingsView
-//
-////////////////////////////////////////////////////////////////
+// Class COggPluginSettingsView
 COggPluginSettingsView::COggPluginSettingsView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
@@ -271,24 +304,21 @@ TVwsViewId COggPluginSettingsView::ViewId() const
 	return TVwsViewId(KOggPlayUid, KOggPlayUidCodecSelectionView);
 	}
 
-void COggPluginSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, 
-                            TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+void COggPluginSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
   {
-  COggS60Utility::DisplayStatusPane( R_OGG_CODEC_SELECTION);
+  COggS60Utility::DisplayStatusPane(R_OGG_CODEC_SELECTION);
 
   COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
-  iCodecSelection = new (ELeave) COggplayCodecSelectionSettingItemList(  );
+  iCodecSelection = new (ELeave) COggplayCodecSelectionSettingItemList();
   iCodecSelection->SetMopParent(appUi);
   iCodecSelection->ConstructL( appUi->ClientRect() );
   appUi->AddToStackL(*this, iCodecSelection);
 
   // Push new softkeys
-  appUi->Cba()->AddCommandSetToStackL( R_USER_SELECT_BACK_CBA );
+  appUi->Cba()->AddCommandSetToStackL(R_USER_SELECT_BACK_CBA);
+
   // Transfert the softkey command ("select") to iCodecSelect
   appUi->Cba()->UpdateCommandObserverL(0,*iCodecSelection); 
- 
-  // Added in order to get the CBA drawn
-  iOggViewCtl.SetRect( appUi->ApplicationRect() );
   }
 
 void COggPluginSettingsView::ViewDeactivated()
@@ -303,11 +333,7 @@ void COggPluginSettingsView::ViewDeactivated()
 #endif /*PLUGIN_SYSTEM*/
 
   
-////////////////////////////////////////////////////////////////
-//
-// class COggUserHotkeysView
-//
-////////////////////////////////////////////////////////////////
+// Class COggUserHotkeysView
 COggUserHotkeysView::COggUserHotkeysView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
@@ -325,22 +351,18 @@ TVwsViewId COggUserHotkeysView::ViewId() const
 	}
 
 
-void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, 
-                            TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+void COggUserHotkeysView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 	{
-  COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
+	COggS60Utility::DisplayStatusPane(R_OGG_USER_HOTKEYS);
 
-  COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
+	COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
 	iUserHotkeysContainer = new (ELeave) COggUserHotkeysControl( appUi->iSettings );
 	iUserHotkeysContainer->SetMopParent(appUi);
 	iUserHotkeysContainer->ConstructL( appUi->ClientRect() );
-  appUi->AddToStackL(*this, iUserHotkeysContainer);
+	appUi->AddToStackL(*this, iUserHotkeysContainer);
 
-  // Push new softkeys
-  appUi->Cba()->AddCommandSetToStackL(R_USER_CLEAR_BACK_CBA);
-
-  // Added in order to get the CBA drawn
-  iOggViewCtl.SetRect( appUi->ApplicationRect() );
+	// Push new softkeys
+	appUi->Cba()->AddCommandSetToStackL(R_USER_CLEAR_BACK_CBA);
 	}
 
 void COggUserHotkeysView::ViewDeactivated()
@@ -351,49 +373,7 @@ void COggUserHotkeysView::ViewDeactivated()
   appUi->RemoveFromStack(iUserHotkeysContainer);
   delete iUserHotkeysContainer;
   iUserHotkeysContainer = NULL;
-
   }
-
-
-#ifdef SERIES60_SPLASH_WINDOW_SERVER
-////////////////////////////////////////////////////////////////
-//
-// class COggSplashView
-//
-////////////////////////////////////////////////////////////////
-COggSplashView::COggSplashView(COggPlayAppView& aOggViewCtl )
-: COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
-	{
-	}
-
-COggSplashView::~COggSplashView()
-	{
-	}
-
-TVwsViewId COggSplashView::ViewId() const
-	{
-	return TVwsViewId(KOggPlayUid, KOggPlayUidSplashView);
-	}
-
-void COggSplashView::ViewActivatedL(const TVwsViewId& aPrevViewId, 
-                                    TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
-{
-    COggPlayAppUi* appUi = (COggPlayAppUi*)CEikonEnv::Static()->AppUi();
-    iSplashContainer = new (ELeave) CSplashContainer();
-    iSplashContainer->SetMopParent(appUi);
-    iSplashContainer->ConstructL( appUi->ApplicationRect(), aPrevViewId );
-    appUi->AddToStackL(*this, iSplashContainer);
-}
-
-void COggSplashView::ViewDeactivated()
-{
-    CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
-    appUi->RemoveFromStack(iSplashContainer);
-    delete iSplashContainer;
-    iSplashContainer = NULL;
-    
-}
-#endif /* SERIES60_SPLASH_WINDOW_SERVER */
 
 
 #if defined(MULTI_THREAD_PLAYBACK)
@@ -409,12 +389,9 @@ COggPlaybackOptionsView::~COggPlaybackOptionsView()
 
 void COggPlaybackOptionsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 {
-  CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
-  if (Cba)
-  {
-    Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
-    Cba->DrawNow();
-  }
+  CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();
+  cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
+  cba->DrawNow();
 
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
   COggS60Utility::DisplayStatusPane(R_OGG_PLAYBACK);
@@ -470,15 +447,12 @@ COggAlarmSettingsView::~COggAlarmSettingsView()
 
 void COggAlarmSettingsView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 {
-  CEikButtonGroupContainer* Cba=CEikButtonGroupContainer::Current();
-  if (Cba)
-  {
-    Cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
-    Cba->DrawNow();
-  }
+  CEikButtonGroupContainer* cba=CEikButtonGroupContainer::Current();
+  cba->AddCommandSetToStackL(R_USER_EMPTY_BACK_CBA);
+  cba->DrawNow();
 
   CEikonEnv::Static()->AppUiFactory()->StatusPane()->MakeVisible(ETrue);
-  COggS60Utility::DisplayStatusPane(R_OGG_PLAYBACK);
+  COggS60Utility::DisplayStatusPane(R_OGG_ALARM_S60);
 
   if (!iContainer)
     {

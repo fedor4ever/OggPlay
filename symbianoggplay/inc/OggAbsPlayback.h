@@ -106,6 +106,10 @@ class MPlaybackObserver
   virtual void NotifyPlayInterrupted() = 0;
   virtual void ResumeUpdates() = 0;
 
+#if !defined(OS70S)
+  virtual void NotifyStreamOpen(TInt aErr) = 0;
+#endif
+
 #if defined (DELAY_AUDIO_STREAMING_START)
   virtual void NotifyPlayStarted() = 0;
 #endif

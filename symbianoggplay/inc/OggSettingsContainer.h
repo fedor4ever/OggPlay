@@ -28,22 +28,11 @@
 #endif
 
 
-/**
-*  COggSettingsContainer  container control class.
-*  
-*/
+// COggSettingsContainer  container control class.
 class COggSettingsContainer : public CCoeControl, MCoeControlObserver
     {
     public: // Constructors and destructor
-        
-        /**
-        * EPOC default constructor.
-        * @param aRect Frame rectangle for container.
-        */
         void ConstructL(const TRect& aRect, TUid aId);
-        /**
-        * Destructor.
-        */
         ~COggSettingsContainer();
 
     public: // New functions

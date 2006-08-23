@@ -798,7 +798,7 @@ TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& sessio
           TRAP(err, session.DriveToChar(driveNumber,driveLetter));
           if (err) break;
           TBuf <10> driveName;
-          driveName.Format(_L("%c:\\"), driveLetter);
+          driveName.Format(_L("%c:\\"), ((TUint) driveLetter));
           err = AddDirectoryStart(driveName,session);
           if (err) break;
       }
@@ -844,9 +844,8 @@ TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
 	if (IsSupportedAudioFile(p)) {
 		
 		ClearFiles();
-#if defined(SERIES60)  
 		AddFile(aFile);
-#endif
+
 		if (iFiles->Count()) {
 			return ETrue;
 		}

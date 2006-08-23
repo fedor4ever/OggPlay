@@ -41,23 +41,23 @@ chSTR2(__LINE__) "):" #desc)
 #if defined(SERIES60)
  #if defined(OS70S)
   #define KVersionMajor 1
-  #define KVersionMinor 69
-  #define KVersionString "1.69"
+  #define KVersionMinor 70
+  #define KVersionString "1.70"
  #else
   #define KVersionMajor 1
-  #define KVersionMinor 11
-  #define KVersionString "1.092"
+  #define KVersionMinor 12
+  #define KVersionString "1.093"
  #endif
 #endif
 #if defined(UIQ)
  #define KVersionMajor 1
- #define KVersionMinor 31
- #define KVersionString "1.31"
+ #define KVersionMinor 32
+ #define KVersionString "1.32"
 #endif
 #if defined(SERIES80)
  #define KVersionMajor 1
- #define KVersionMinor 69
- #define KVersionString "1.69"
+ #define KVersionMinor 70
+ #define KVersionString "1.70"
 #endif
 
 #ifdef OS70S
@@ -75,24 +75,6 @@ chSTR2(__LINE__) "):" #desc)
 // this is experimental at the moment.
 //#define MP3_SUPPORT
 #endif /* OS70S */
-
-
-// NEW CODE ENABLERS
-#if defined(SERIES60)
-#ifdef OS70S
-// The splash screen is using S60 window server
-// Much slower, but works with all phones.
-#define SERIES60_SPLASH_WINDOW_SERVER
-#else
-#if defined(SERIES60V3)
-#define SERIES60_SPLASH_WINDOW_SERVER
-#else
-// The splash screen is using direct screen access. 
-// Much faster, but depends on phone refresh decision: Doesn't work with all phones.
-#define SERIES60_SPLASH
-#endif /* SERIES60V3 */
-#endif /*OS70S*/
-#endif /*SERIES60*/
 
 // Force filling the buffer to at least 75% of their capacity before sending them to
 // the audio streaming device

@@ -31,8 +31,8 @@
 // Shared data class
 TStreamingThreadData::TStreamingThreadData(COggPlayback& aOggPlayback, RThread& aUIThread, RThread& aBufferingThread)
 : iOggPlayback(aOggPlayback), iUIThread(aUIThread), iBufferingThread(aBufferingThread),
-iNumBuffers(0), iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL),
-iBufferBytes(0), iTotalBufferBytes(0), iSampleRate(8000), iChannels(1), iBufferingMode(ENoBuffering)
+iNumBuffersRead(0), iNumBuffersPlayed(0), iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL),
+iBufferBytesRead(0), iBufferBytesPlayed(0), iTotalBufferBytes(0), iSampleRate(8000), iChannels(1), iBufferingMode(ENoBuffering)
 {
 }
 
@@ -53,9 +53,10 @@ void CBufferingAO::PrimeNextBuffer()
 {
 	TBool lastBuffer = iSharedData.iOggPlayback.PrimeBuffer(*(iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]));
 	TInt bufferBytes = iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum]->Length();
-	iSharedData.iBufferBytes += bufferBytes;
 	iSharedData.iTotalBufferBytes += bufferBytes;
-	iSharedData.iNumBuffers++;
+
+	iSharedData.iBufferBytesRead += bufferBytes;
+	iSharedData.iNumBuffersRead++;
 
 	if (lastBuffer)
 		iSharedData.iLastBuffer = iSharedData.iOggPlayback.iBuffer[iSharedData.iPrimeBufNum];
@@ -90,7 +91,7 @@ void CBufferingThreadAO::RunL()
 	PrimeNextBuffer();
 
 	// Stop buffering if we have filled all the buffers (or if we have got to the last buffer)
-	if ((iSharedData.iNumBuffers == iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
+	if ((iSharedData.NumBuffers() == iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
 	{
 	  // Listen for the next buffering request
 	  iStatus = KRequestPending;
@@ -165,7 +166,7 @@ void CStreamingThreadAO::RunL()
 	PrimeNextBuffer();
 
 	// If we've got enough buffers and more buffering is required, transfer the buffering to the buffering thread
-	if ((iSharedData.iNumBuffers > KPrimeBuffers) && !iSharedData.iLastBuffer && (iSharedData.iBufferingMode == EBufferThread))
+	if ((iSharedData.NumBuffers() > KPrimeBuffers) && !iSharedData.iLastBuffer && (iSharedData.iBufferingMode == EBufferThread))
 	{
 		// We can't transfer the buffering if there is a buffer flush pending, so simply return
 		if (iBufferFlushPending)
@@ -182,7 +183,7 @@ void CStreamingThreadAO::RunL()
 		TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
 		iSharedData.iBufferingThread.RequestComplete(status, KErrNone);
 	}
-	else if ((iSharedData.iNumBuffers < iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
+	else if ((iSharedData.NumBuffers() < iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
 	{
 		// Self complete (keep buffering)
 		TRequestStatus* status = &iStatus;
@@ -503,10 +504,14 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 		iBufferFlushPending = EFalse;
 
 		// Reset shared data
-		iSharedData.iNumBuffers = 0;
+		iSharedData.iNumBuffersRead = 0;
+		iSharedData.iNumBuffersPlayed = 0;
+
 		iSharedData.iPrimeBufNum = 0;
 		iSharedData.iLastBuffer = NULL;
-		iSharedData.iBufferBytes = 0;
+
+		iSharedData.iBufferBytesRead = 0;
+		iSharedData.iBufferBytesPlayed = 0;
 
 		// Reset the thread priorities
 		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
@@ -617,9 +622,10 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 		case EBufferingModeChanged:
 		{
 			// Flush all of the data
-			if (iSharedData.iBufferBytes)
+			TInt bufferBytes = iSharedData.BufferBytes();
+			if (bufferBytes)
 			{
-				iSharedData.iTotalBufferBytes-= iSharedData.iBufferBytes;
+				iSharedData.iTotalBufferBytes-= bufferBytes;
 				TInt64 newPositionMillisecs = (KConst500*iSharedData.iTotalBufferBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
 				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
 			}
@@ -633,10 +639,10 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 		{
 			// Calculate how much data needs to be flushed
 			// Don't flush buffers that are already in the stream and leave another KPreBuffers unflushed
-			TInt availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+			TInt availBuffers = iSharedData.NumBuffers() - iStreamBuffers;
 			TBool buffersToFlush = availBuffers>KPreBuffers;
 			TInt numFlushBuffers = (buffersToFlush) ? availBuffers-KPreBuffers : 0;
-			iSharedData.iNumBuffers -= numFlushBuffers;
+			iSharedData.iNumBuffersRead -= numFlushBuffers;
 
 			TInt bytesFlushed = 0;
 			if (buffersToFlush)
@@ -653,7 +659,7 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 					if (bufNum == iSharedData.iMaxBuffers)
 						bufNum = 0;
 				}
-				iSharedData.iBufferBytes -= bytesFlushed;
+				iSharedData.iBufferBytesRead-= bytesFlushed;
 			}
 
 			// Reset the decoder position
@@ -768,10 +774,10 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	iStreamBuffers--;
 
 	// Adjust the number of bytes we have in buffers
-	iSharedData.iBufferBytes -= aBuffer.Length();
+	iSharedData.iBufferBytesPlayed += aBuffer.Length();
 
-	// Decrement the total number of buffers
-	iSharedData.iNumBuffers--;
+	// Increment the total number of buffers played
+	iSharedData.iNumBuffersPlayed++;
 
 	// Ignore most of the error codes
 	if ((aErr == KErrAbort) || (aErr == KErrInUse) || (aErr == KErrDied)  || (aErr == KErrCancel))
@@ -800,7 +806,8 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	TBool streamingThreadActive = iStreamingThreadAO->IsActive();
 	if (iSharedData.iBufferingMode == EBufferThread)
 	{
-		if (iSharedData.iNumBuffers < KBufferThreadLowThreshold)
+		TInt numBuffers = iSharedData.NumBuffers();
+		if (numBuffers < KBufferThreadLowThreshold)
 		{
 			if ((iBufferingThreadPriority != EPriorityMore) && (iBufferingThreadPriority != EPriorityAbsoluteHigh))
 			{
@@ -811,7 +818,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 				}
 			}
 		}
-		else if (iSharedData.iNumBuffers > KBufferThreadHighThreshold)
+		else if (numBuffers > KBufferThreadHighThreshold)
 		{
 			if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
 			{
@@ -826,7 +833,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 		return;
 
 	// Check if we have available buffers
-	TInt availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+	TInt availBuffers = iSharedData.NumBuffers() - iStreamBuffers;
 	if (!availBuffers)
 	{
 		// If the streaming thread is doing the buffering, prime another buffer now 
@@ -848,7 +855,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	// Stream the next buffer
 	SendNextBuffer();
 
-	availBuffers = iSharedData.iNumBuffers - iStreamBuffers;
+	availBuffers = iSharedData.NumBuffers() - iStreamBuffers;
 	if ((iStreamBuffers<iMaxStreamBuffers) && availBuffers)
 	{
 		// Try to catch up by writing another buffer
@@ -856,7 +863,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	}
 
 	// If the number of buffers has dropped below a certain threshold, request the buffering thread to start buffering
-	if (iSharedData.iNumBuffers<iBufferLowThreshold) 
+	if (iSharedData.NumBuffers()<iBufferLowThreshold) 
 	{
 		// Nothing to do if the streaming thread is already buffering
 		// If a buffer flush is pending we don't want to start any more buffering

@@ -33,21 +33,18 @@ void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
         
     if (aId ==  KOggPlayUidSettingsView)
     {
-        COggS60Utility::DisplayStatusPane(R_OGG_SETTINGS);
         iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_SETTING_ITEM_LIST);
     }
 #if defined(MULTI_THREAD_PLAYBACK)
 	else if (aId == KOggPlayUidPlaybackOptionsView)
 	{
-        COggS60Utility::DisplayStatusPane(R_OGG_PLAYBACK);
         iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_PLAYBACK_OPTIONS_ITEM_LIST);
 	}
 #endif
 	else if (aId == KOggPlayUidAlarmSettingsView)
 	{
-        COggS60Utility::DisplayStatusPane(R_OGG_ALARM_S60);
         iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
         iListBox->ConstructFromResourceL(R_OGGPLAY_ALARM_S60_SETTING_ITEM_LIST);
 	}

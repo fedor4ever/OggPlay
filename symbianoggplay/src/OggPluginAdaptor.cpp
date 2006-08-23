@@ -614,13 +614,19 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* /*aObject*/, TInt aPrevious
 void COggPluginAdaptor::ConstructL()
 {
 	iPluginSupportedList.ConstructL();
-    // iPluginInfos will be updated, if required plugin has been found
+
+	// iPluginInfos will be updated, if required plugin has been found
     SearchPluginsL(_L("ogg"), ETrue);
     SearchPluginsL(_L("mp3"), ETrue);
     SearchPluginsL(_L("aac"), ETrue);
     SearchPluginsL(_L("mp4"), ETrue);
     SearchPluginsL(_L("m4a"), ETrue);
-    SearchPluginsL(_L("mid"), EFalse); // Disabled by default
+
+#if defined(SERIES60V3)
+	SearchPluginsL(_L("wma"), ETrue);
+#endif
+
+	SearchPluginsL(_L("mid"), EFalse); // Disabled by default
     SearchPluginsL(_L("amr"), EFalse); // Disabled by default
 }
 

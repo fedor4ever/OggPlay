@@ -766,12 +766,7 @@ TBool COggText::ReadArguments(TOggParser& p)
 }
 
 
-/***********************************************************
- *
- * COggIcon
- *
- ***********************************************************/
-
+// COggIcon
 COggIcon::COggIcon() :
   COggControl(),
   iIcon(0),
@@ -1787,9 +1782,6 @@ COggAnalyzer::Cycle()
   }
 }
 
-
-
-
 void
 COggAnalyzer::Draw(CBitmapContext& aBitmapContext)
 {
@@ -1866,7 +1858,6 @@ void COggAnalyzer::RenderWaveform(short int *data)
 
   RenderFrequencies(iFFTAbs);
 }
-
 
 void COggAnalyzer::RenderWaveformFromMDCT(const TInt32* aFreqBins)
 {
@@ -2101,7 +2092,6 @@ COggListBox::NofVisibleLines()
 {
   return iLinesVisible;
 }
-
 
 TInt 
 COggListBox::SetCurrentItemIndex(TInt idx)
@@ -2435,8 +2425,8 @@ COggCanvas::Refresh()
 	Window().Invalidate();
 	ActivateGc();
 	Window().BeginRedraw();
-
 	CWindowGc& gc=SystemGc();
+
 #if defined(SERIES90)
 	// Series 90 has a problem redrawing parts of the screen, so redraw everything
 	TRect rect = TRect(iBitmap->SizeInPixels());

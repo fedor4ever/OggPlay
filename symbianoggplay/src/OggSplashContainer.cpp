@@ -13,119 +13,80 @@
 // Platform settings
 #include <OggOs.h>
 
-// This file is for Series 60 only
-#if defined(SERIES60)
-
 #include <eikdef.h>
 #include <eikenv.h>
 #include "OggSplashContainer.h"
 #include "OggPlay.h"
+#include "OggLog.h"
 
-// ================= MEMBER FUNCTIONS =======================
-// ---------------------------------------------------------
-// CSplashContainer::ConstructL(const TRect& aRect)
-// EPOC two phased constructor
-// ---------------------------------------------------------
-//
-void CSplashContainer::ConstructL(const TRect& aRect, const TVwsViewId& aPrevViewId)
+
+void CSplashContainer::ConstructL()
 {
-  //  if (aPrevViewId <KOggPlayApplicationUidValue )
-    iPrevViewId = aPrevViewId;
-    //
-    // Create and activate the main window
-    //
-    CreateWindowL();
-    // The splash takes all space available, 
-    SetRect(aRect);
-    ActivateL();
-
-  // Show the splash screen for 3 seconds.
-    iDisplayTimer = new (ELeave) COggTimer(
-    TCallBack( TimerExpired ,this ) );
-    iDisplayTimer->Wait(TInt(3E6));
-}
-
-// Destructor
-CSplashContainer::~CSplashContainer()
-{
-    delete (iDisplayTimer);
-}
-
-// ---------------------------------------------------------
-// CSplashContainer::CountComponentControls() const
-// ---------------------------------------------------------
-//
-TInt CSplashContainer::CountComponentControls() const
-    {
-    return 0; // return nbr of controls inside this container
-    }
-
-// ---------------------------------------------------------
-// CSplashContainer::ComponentControl(TInt aIndex) const
-// ---------------------------------------------------------
-//
-CCoeControl* CSplashContainer::ComponentControl(TInt /*aIndex*/) const
-    {
-
-    return NULL;
-
-    }
-
-// ---------------------------------------------------------
-// CSplashContainer::DrawSplash(const TRect& aRect) const
-// Equivalent of the CCoeControl Draw function while in Splash
-// mode (i.e. until a call to SetState(<new mode>))
-// ---------------------------------------------------------
-//
-void CSplashContainer::Draw(const TRect& /*aRect*/) const
-{
-	TRAPD(neverMind, DrawL());
-}
-
-void CSplashContainer::DrawL() const
-{
-  // Check if there is a splash mbm available, if not splash() will make a silent leave
-  TFileName fileName(CEikonEnv::Static()->EikAppUi()->Application()->AppFullName());
-  TParsePtr parse(fileName);
+	// Check if there is a splash mbm available
+	TFileName fileName(CEikonEnv::Static()->EikAppUi()->Application()->AppFullName());
+	TParsePtr parse(fileName);
+	TInt err;
 
 #if defined(SERIES60V3)
-  TFileName privatePath;
-  User::LeaveIfError(iCoeEnv->FsSession().PrivatePath(privatePath));
+	TFileName privatePath;
+	err = iCoeEnv->FsSession().PrivatePath(privatePath);
+	if (err != KErrNone)
+	{
+		TRACEF(COggLog::VA(_L("Error getting private path: %d"), err ));
+		User::Leave(err);
+	}
 
-  fileName.Copy(parse.Drive());
-  fileName.Append(privatePath);
-  fileName.Append(_L("import\\s60splash.mbm"));
+	fileName.Copy(parse.Drive());
+	fileName.Append(privatePath);
+	fileName.Append(_L("import\\OggSplash.mbm"));
 #else
-  fileName.Copy(parse.DriveAndPath());
-  fileName.Append(_L("s60splash.mbm"));
+	fileName.Copy(parse.DriveAndPath());
+	fileName.Append(_L("OggSplash.mbm"));
 #endif
-	  
-  CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
-  CleanupStack::PushL(bitmap);
-  User::LeaveIfError(bitmap->Load(fileName, 0, EFalse));
-  
+
+	iBitmap = new (ELeave) CFbsBitmap;
+	err = iBitmap->Load(fileName, 0, EFalse);
+	if (err != KErrNone)
+	{
+		TRACEF(COggLog::VA(_L("Error loading splash bitmap: %d"), err ));
+		User::Leave(err);
+	}
+}
+
+void CSplashContainer::ShowSplashL()
+{
+	// Create and activate the main window
+	CreateWindowL();
+	SetExtentToWholeScreen();
+    ActivateL();
+
+	// Show the splash screen for 1 second and then load the app.
+	iDisplayTimer = new (ELeave) COggTimer(TCallBack(TimerExpired, this));
+	iDisplayTimer->Wait(1000000);
+}
+
+CSplashContainer::~CSplashContainer()
+{
+    delete iDisplayTimer;
+	delete iBitmap;
+}
+
+void CSplashContainer::Draw(const TRect& /*aRect*/) const
+{
   CWindowGc& gc = SystemGc();
-  TRect bitmapRect = TRect(bitmap->SizeInPixels());
+  TRect bitmapRect = TRect(iBitmap->SizeInPixels());
   TRect screenRect = TRect(CCoeEnv::Static()->ScreenDevice()->SizeInPixels());
   if (bitmapRect == screenRect)
-	gc.BitBlt(TPoint(0, 0), bitmap);
+	gc.BitBlt(TPoint(0, 0), iBitmap);
   else
-	gc.DrawBitmap(screenRect, bitmap, bitmapRect);
-
-  CleanupStack::PopAndDestroy(bitmap);  
+	gc.DrawBitmap(screenRect, iBitmap, bitmapRect);
 }
 
-TInt CSplashContainer::TimerExpired(TAny* aPtr)
+
+TInt CSplashContainer::TimerExpired(TAny* /* aPtr */)
 {
-  CSplashContainer* self= ( CSplashContainer*) aPtr;
+  // Signal that the startup should continue
   COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
-  TUid prevViewUid = self->iPrevViewId.iViewUid;
-  TUid notAnOggPlayView = {0x1}; // I'm not sure if it's 0x1 all the time. At least in SDK 2.0
-  if ( prevViewUid != notAnOggPlayView)
-     appUi->ActivateOggViewL(prevViewUid);
-  else
-     appUi->ActivateOggViewL();
+  appUi->NextStartUpState(KErrNone);
   return 0;
 }
-
-#endif /* SERIES60 */

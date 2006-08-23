@@ -663,7 +663,7 @@ TInt64 COggPlayback::Position()
 #if defined(MULTI_THREAD_PLAYBACK)
   // Approximate position will do here
   const TInt64 KConst500 = TInt64(500);
-  TInt64 positionBytes = iSharedData.iTotalBufferBytes - iSharedData.iBufferBytes;
+  TInt64 positionBytes = iSharedData.iTotalBufferBytes - iSharedData.BufferBytes();
   TInt64 positionMillisecs = (KConst500*positionBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
 
   return positionMillisecs;
@@ -1222,15 +1222,8 @@ void COggPlayback::NotifyOpenComplete(TInt aErr)
   // Called by the streaming thread listener when CMdaAudioOutputStream::Open() completes
   if (aErr == KErrNone)
 	iState = EStreamOpen;
-  else
-  {
-    TBuf<32> buf;
-	CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_19);
-	buf.AppendNum(aErr);
 
-	_LIT(tit, "MaoscOpenComplete");
-	iEnv->OggErrorMsgL(tit, buf);
-  }
+  iObserver->NotifyStreamOpen(aErr);
 }
 
 TInt COggPlayback::BufferingModeChanged()
@@ -1539,7 +1532,6 @@ void COggPlayback::MaoscBufferCopied(TInt aErr, const TDesC8& aBuffer)
   }
   else {
     // An unknown error condition. This should never ever happen.
-	RDebug::Print(_L("Oggplay: MaoscBufferCopied unknown error (Error18 Error16)"));
 	TBuf<256> buf,tbuf;
     CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
     CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);
@@ -1550,18 +1542,15 @@ void COggPlayback::MaoscBufferCopied(TInt aErr, const TDesC8& aBuffer)
 
 void COggPlayback::MaoscOpenComplete(TInt aErr) 
 { 
-  TRACEF(COggLog::VA(_L("MaoscOpenComplete:%d"), aErr ));
-  iMaxVolume=iStream->MaxVolume();
-  if (aErr != KErrNone) {
-    TBuf<32> buf;
-    CEikonEnv::Static()->ReadResource(buf,R_OGG_ERROR_19);
-    buf.AppendNum(aErr);
-    _LIT(tit,"MaoscOpenComplete");
-    iEnv->OggErrorMsgL(tit,buf);
-  } else {
-    iState = EStopped;
+  if (aErr == KErrNone)
+  {
+    iState = EStreamOpen;
+
+	iMaxVolume=iStream->MaxVolume();
     iStream->SetPriority(KAudioPriority, EMdaPriorityPreferenceTimeAndQuality);
   }
+
+  iObserver->NotifyStreamOpen(aErr);
 }
 
 void COggPlayback::RestartAudioStreamingCallBack()

@@ -126,6 +126,12 @@ class TStreamingThreadData
 public:
 	TStreamingThreadData(COggPlayback& aOggPlayback, RThread& aUIThread, RThread& aBufferingThread);
 
+	inline TInt NumBuffers()
+	{ return iNumBuffersRead - iNumBuffersPlayed; }
+
+	inline TInt BufferBytes()
+	{ return iBufferBytesRead - iBufferBytesPlayed; }
+
 public:
 	// Ref to the COggPlayback object (provides access to the sample rate converter for decoding ogg data)
 	COggPlayback& iOggPlayback;
@@ -145,14 +151,17 @@ public:
 
 	// Shared data
 	// Used by the buffering AOs and by the playback engine
-	// The numbers of buffers to use (this shouldn't be required, there is a bug somewhere)
+
+	// The numbers of buffers to use
+	// (this shouldn't be required, there is a bug in some versions of CMdaAudioOutputStream)
 	TInt iBuffersToUse;
 
 	// The max number of buffers (depends upon the buffering mode)
 	TInt iMaxBuffers;
 
 	// The number of decoded buffers (increases when a buffer is deocded, decreases when MaoscBufferCopied is called)
-	TInt iNumBuffers;
+	TInt iNumBuffersRead;
+	TInt iNumBuffersPlayed;
 
 	// Index of the next buffer to be decoded 
 	TInt iPrimeBufNum;
@@ -164,7 +173,8 @@ public:
 	TDesC8* iLastBuffer;
 
 	// The number of audio PCM bytes currently in buffers (changes whenever iNumBuffers changes)
-    TInt iBufferBytes;
+	TInt iBufferBytesRead;
+	TInt iBufferBytesPlayed;
 
 	// The number of audio PCM bytes currently read from the file (used to work out the position)
 	TInt64 iTotalBufferBytes;

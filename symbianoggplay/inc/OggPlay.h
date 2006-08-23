@@ -39,7 +39,6 @@
 #include <qikappui.h>
 #include <qikapplication.h>
 #include <qikdocument.h>
-
 #endif
 
 const TInt ENoFileSelected = -1;
@@ -57,26 +56,20 @@ const TInt ENoFileSelected = -1;
 #include "OggMsgEnv.h"
 #include "OggMultiThread.h"
 
-// some global constants:
-//-----------------------
-//FIXME
-
+// Some global constants
 const TUid KOggPlayUid1 = { 0x1000007a };
 const TUid KOggPlayUid2 = { 0x100039ce };
 const TUid KOggPlayUid  = { KOggPlayApplicationUidValue }; 
 
-const TUid KOggPlayUidFOView = { KOggPlayApplicationUidValue +1 };
-const TUid KOggPlayUidFCView = { KOggPlayApplicationUidValue +2 };
-const TUid KOggPlayUidSettingsView = { KOggPlayApplicationUidValue +3 };
-const TUid KOggPlayUidUserView = { KOggPlayApplicationUidValue+4 };
-const TUid KOggPlayUidSplashView = { KOggPlayApplicationUidValue+5 };
-const TUid KOggPlayUidCodecSelectionView = { KOggPlayApplicationUidValue+6 };
-
-#if defined(MULTI_THREAD_PLAYBACK)
-const TUid KOggPlayUidPlaybackOptionsView = { KOggPlayApplicationUidValue+7 };
-#endif
-
-const TUid KOggPlayUidAlarmSettingsView = { KOggPlayApplicationUidValue+8 };
+const TUid KOggPlayUidSplashFOView = { 1 };
+const TUid KOggPlayUidSplashFCView = { 2 };
+const TUid KOggPlayUidFOView = { 3 };
+const TUid KOggPlayUidFCView = { 4 };
+const TUid KOggPlayUidSettingsView = { 5 };
+const TUid KOggPlayUidUserView = { 6 };
+const TUid KOggPlayUidCodecSelectionView = { 7 };
+const TUid KOggPlayUidPlaybackOptionsView = { 8 };
+const TUid KOggPlayUidAlarmSettingsView = { 9 };
 
 struct TKeyCodes
 {
@@ -258,7 +251,26 @@ class COggActive : public CBase
 };
 #endif
 
+class COggPlayAppUi;
+class COggStartUpAO : public CActive
+{
+public:
+	COggStartUpAO(class COggPlayAppUi& aAppUi);
+	~COggStartUpAO();
+
+	void NextStartUpState();
+
+private:
+	// From CActive
+	void RunL();
+	void DoCancel();
+
+private:
+	COggPlayAppUi& iAppUi;
+};
+
 #ifdef SERIES60
+class CAknErrorNote;
 class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver
 #elif defined(SERIES80)
 class COggPlayAppUi : public CEikAppUi, public MPlaybackObserver
@@ -267,9 +279,17 @@ class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver
 #endif
 {
 public:
+	enum TStartUpState
+	{ EAppUiConstruct, EActivateSplashView, EStartOggPlay, EActivateStartUpView, EPostConstruct, EStartUpComplete, EStartUpFailed };
+
+public:
   COggPlayAppUi();
   void ConstructL();
-  void PostConstructL();
+
+  void StartUpError(TInt aErr);
+  void NextStartUpState(TInt aErr);
+  void NextStartUpState();
+
   ~COggPlayAppUi();
 
   // the views supported by the listbox:
@@ -285,20 +305,20 @@ public:
   // backwards compatibility - deprecated
   // as long as these are not part of TOggplaySettings, they can't be set 
   // through the settings view
-  int iHotkey;
-  int iVolume;            // [0...100]
-  int iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
+  TInt iHotkey;
+  TInt iVolume;            // [0...100]
+  TInt iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
   TViews iViewBy;
 
   // global status:
-  int iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
+  TInt iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
 
   TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
-  TBool iIsStartup;        // is true when just started, needed for autoplay
 
   TFileName iDbFileName;
   TFileName iIniFileName;
-  
+  TFileName iEmbeddedFileName;
+
   COggPlayAppView* iAppView;
   CAbsPlayback*    iOggPlayback;
 
@@ -314,6 +334,10 @@ public:
   virtual void NotifyPlayComplete();
   virtual void NotifyPlayInterrupted();
   virtual void ResumeUpdates();
+
+#if !defined(OS70S)
+  virtual void NotifyStreamOpen(TInt aErr);
+#endif
 
 #if defined(DELAY_AUDIO_STREAMING_START)
   virtual void NotifyPlayStarted();
@@ -370,6 +394,15 @@ public:
   void SetAlarmTime();
 
 private:
+  void StartOggPlay();
+  void StartOggPlayL();
+
+  void ActivateStartUpView();
+  void ActivateStartUpViewL();
+
+  void PostConstruct();
+  void PostConstructL();
+
   void ReadIniFile();
   TInt32 IniRead32( TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = 0x7FFFFFFF );
   TInt64 IniRead64( TFileText& aFile, TInt64 aDefault = 0 );
@@ -384,24 +417,23 @@ private:
 #endif
 
   void FindSkins();
-#if defined(SERIES60_SPLASH)
-  void ShowSplash();
-#endif
 
   int iCapturedKeyHandle;
   TFileName iSkinFileDir;
   TInt iCurrentSkin;
   CDesCArray* iSkins;
 
+  COggSplashView* iSplashFOView;
   COggFOView* iFOView;
+
+#if defined(UIQ) && !defined(MOTOROLA)
+  COggSplashView* iSplashFCView;
   COggFCView* iFCView;
+#endif
+
 #if defined(SERIES60)
   COggSettingsView* iSettingsView;
   COggUserHotkeysView* iUserHotkeysView;
-
-#ifdef SERIES60_SPLASH_WINDOW_SERVER
-  COggSplashView* iSplashView;
-#endif
 
 #ifdef PLUGIN_SYSTEM
    COggPluginSettingsView* iCodecSelectionView;
@@ -419,6 +451,17 @@ private:
   TInt iRestoreCurrent;
 
   TBool iForeground;
+
+  COggStartUpAO* iStartUpAO;
+  TBuf<128> iStartUpErrorTxt1;
+  TBuf<128> iStartUpErrorTxt2;
+
+#if defined(SERIES60)
+  CAknErrorNote* iStartUpErrorDlg;
+#endif
+
+public:
+  TStartUpState iStartUpState;
 };
 
 class TOggPlayList;
@@ -519,17 +562,17 @@ private:
 class COggPlayDocument : public CEikDocument
 {
 public:
-#ifdef SERIES60
-  COggPlayDocument(CAknApplication& aApp) : CEikDocument(aApp) {}
+#if defined(SERIES60)
+  COggPlayDocument(CAknApplication& aApp);
 #else
-  COggPlayDocument(CEikApplication& aApp) : CEikDocument(aApp) {}
+  COggPlayDocument(CEikApplication& aApp);
 #endif
 
   CFileStore*  OpenFileL(TBool aDoOpen ,const TDesC& aFilename, RFs& aFs);
   CEikAppUi* CreateAppUiL() ;
 };
 
-#ifdef SERIES60
+#if defined(SERIES60)
 class COggPlayApplication : public CAknApplication
 #elif defined(SERIES80)
 class COggPlayApplication : public CEikApplication
@@ -539,8 +582,8 @@ class COggPlayApplication : public CQikApplication
 {
 private: 
   // from CApaApplication
-  CApaDocument* CreateDocumentL() { return new (ELeave)COggPlayDocument(*this); }
-  TUid AppDllUid() const { TUid id = { KOggPlayApplicationUidValue }; return id; }
+  CApaDocument* CreateDocumentL();
+  TUid AppDllUid() const;
 };
 
 

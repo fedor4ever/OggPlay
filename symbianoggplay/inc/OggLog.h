@@ -32,56 +32,55 @@
 // You do not have to use these macros, it is always possible to access the
 // OggLog static methods directly.
 // 
-#ifdef TRACE_ON
-/// Print simple descriptor to console and file. Ex TRACEF( COggLog::VA(_L("1+1=%d"),2));
-#define TRACEF(x)  RDebug::Print(x); COggLog::FilePrint(x)
-/// Print simple descriptor to console only. Ex TRACE( COggLog::VA(_L("1+1=%d"),2));
+#if defined(TRACE_ON)
+#if defined(_DEBUG)
+// Print simple descriptor to file. Ex TRACEF( COggLog::VA(_L("1+1=%d"),2));
+#define TRACEF(x)  RDebug::Print(x); COggLog::FilePrint(x);
+
+// Print simple descriptor to console only. Ex TRACE( COggLog::VA(_L("1+1=%d"),2));
 #define TRACE(x)   RDebug::Print(x);
-/// Print simple text to console only. Ex TRACEL("Hi there");
-#define TRACEL(x)  TRACE(COggLog::VA(_L(x)))
-/// Print simple text to console and file. Ex TRACELF("Hi there");
-#define TRACELF(x) TRACEF(COggLog::VA(_L(x)))
+#else
+// Print simple descriptor to file. Ex TRACEF( COggLog::VA(_L("1+1=%d"),2));
+#define TRACEF(x)  COggLog::FilePrint(x);
+
+// Traces in a release build are now disabled
+#define TRACE(x)   ;
+#endif
 #else
 #define TRACEF(x)  ;
 #define TRACE(x)  ;
-#define TRACEL(x)  ;
-#define TRACELF(x) ;
 #endif
 
-/// OggLog is a class giving access to the RFileLogger facility for all OggPlay classes.
+// OggLog is a class giving access to the RFileLogger facility for all OggPlay classes.
 /** It's implemented closely to the singleton pattern 
 ...with a twist due to Symbian not allowing global storage.<BR>
 Remember to manually create "C:\Logs\OggPlay\" to get disk logging.
 */
 class COggLog : public CBase
 {
+public: 
+	static void FilePrint(const TDesC& msg);
 
-public:
-  
-  /// Prints to file. No initializations are needed beforehand.
-  /**
-  \sa Exit(), KLogFileName
-  */
-  static void FilePrint(const TDesC& msg);
+	// Not up-to-date
+	void Panic(const TDesC& msg,TInt aReason);
 
-  /// Not up-to-date
-  void Panic(const TDesC& msg,TInt aReason);
+	// Must be called explicitly. Somebody fix this :-)
+	static void Exit();
 
-  /// Must be called explicitly. Somebody fix this :-)
-  static void Exit();
-
-  /// Variable list argument formatting. I.e. TRACE(COggLog::VA(_L("1+1=%d"), 2 )
-  static const TDesC& VA( TRefByValue<const TDesC> aLit,... );
-  
-protected:
-
-  RFileLogger iLog;
-  TBuf<0x400> iBuf;
+	// Variable list argument formatting. I.e. TRACE(COggLog::VA(_L("1+1=%d"), 2 )
+	static const TDesC& VA(TRefByValue<const TDesC> aLit, ...);
 
 private:
+	static COggLog* Instance();
+	static COggLog* InstanceL();
 
-  static COggLog* InstanceL();
+private:
+	RFileLogger iLog;
+	TBuf<1024> iBuf;
 
+#if defined(SERIES60V3)
+	TThreadId iThreadId;
+#endif
 };
 
 
