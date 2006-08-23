@@ -332,7 +332,7 @@ RESOURCE MENU_PANE r_popup_menu
       MENU_ITEM { command=EOggNextSong;	txt=ogg_next_song; },
       MENU_ITEM { command=EOggPrevSong; txt=ogg_prev_song; },
       MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
-      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat;
+      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat2;
                   flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggPlay; txt=ogg_play; },
       MENU_ITEM { command=EOggPauseResume; txt=ogg_pause; },
@@ -369,6 +369,8 @@ RESOURCE TBUF r_ogg_error_27 { buf=ogg_text_error_27; }
 RESOURCE TBUF r_ogg_error_28 { buf=ogg_text_error_28; }
 RESOURCE TBUF r_ogg_error_29 { buf=ogg_text_error_29; }
 RESOURCE TBUF r_ogg_error_30 { buf=ogg_text_error_30; }
+RESOURCE TBUF r_ogg_error_31 { buf=ogg_text_error_31; }
+RESOURCE TBUF r_ogg_error_32 { buf=ogg_text_error_32; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }

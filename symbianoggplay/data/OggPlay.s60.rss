@@ -34,8 +34,6 @@ NAME OGGP
 #include "OggPlay.hrh" 
 #include "OggDialogs.rh"
 
-#define R_OGG_DIALOG_BUTTONS1 R_AVKON_SOFTKEYS_OPTIONS_BACK 
-
 RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf=""; }
 
@@ -155,7 +153,7 @@ RESOURCE DIALOG r_dialog_files_search {
 
 RESOURCE DIALOG r_dialog_info {
   title   = ogg_file_prop;
-  buttons = R_OGG_DIALOG_BUTTONS1;
+  buttons = R_AVKON_SOFTKEYS_OPTIONS_BACK;
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -222,7 +220,7 @@ RESOURCE DIALOG r_dialog_info {
 
 RESOURCE DIALOG r_dialog_playlist_info {
   title   = ogg_file_prop;
-  buttons = R_OGG_DIALOG_BUTTONS1;
+  buttons = R_AVKON_SOFTKEYS_OPTIONS_BACK;
   flags   = EEikDialogFlagWait;
   items = {
     DLG_LINE {
@@ -280,14 +278,9 @@ RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu 
 {
-  // items= {
-  //   MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
-  // };
 }
 
 // Settings resources
-///////////////////////////////////////////////////////////////////////////////
-
 RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
     {
     flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
@@ -943,6 +936,23 @@ RESOURCE MENU_PANE r_file_menu
       MENU_ITEM { command=EEikCmdExit;	    txt=ogg_exit_label; }
   };
 }
+
+
+#if defined(SERIES60V3)
+#include <appinfo.rh>
+RESOURCE LOCALISABLE_APP_INFO r_oggplay_localisable_app_info
+    {
+    short_caption = "OggPlay";
+    caption_and_icon = 
+    CAPTION_AND_ICON_INFO
+        {
+        caption = "OggPlay";
+
+        number_of_icons = 3;
+	   	icon_file = "\\resource\\apps\\OggPlayIcon.mbm";
+	    };
+    }
+#endif
 	
 
 RESOURCE TBUF r_ogg_error_1 { buf=ogg_text_error_1; }
@@ -974,6 +984,8 @@ RESOURCE TBUF r_ogg_error_27 { buf=ogg_text_error_27; }
 RESOURCE TBUF r_ogg_error_28 { buf=ogg_text_error_28; }
 RESOURCE TBUF r_ogg_error_29 { buf=ogg_text_error_29; }
 RESOURCE TBUF r_ogg_error_30 { buf=ogg_text_error_30; }
+RESOURCE TBUF r_ogg_error_31 { buf=ogg_text_error_31; }
+RESOURCE TBUF r_ogg_error_32 { buf=ogg_text_error_32; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }
