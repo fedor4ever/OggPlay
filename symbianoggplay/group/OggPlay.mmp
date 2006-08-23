@@ -77,7 +77,7 @@ LIBRARY mediaclientaudiostream.lib
 LIBRARY libvorbisidec.lib
 
 //  Build the AIF & MBM files
-START BITMAP S60splash.mbm
+START BITMAP OggSplash.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
 SOURCEPATH   ..\bitmaps

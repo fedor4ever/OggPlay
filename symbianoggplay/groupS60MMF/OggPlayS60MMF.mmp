@@ -2,7 +2,7 @@ TARGET                                  OggPlay.app
 TARGETTYPE                              app 
 TARGETPATH                              \system\apps\Oggplay 
 UID                                     0x100039CE 0x1000A661 
-EPOCSTACKSIZE                           16000 
+EPOCSTACKSIZE                           0x8000 
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\data 
@@ -10,20 +10,16 @@ USERINCLUDE                             ..\vorbis\plugin
 USERINCLUDE                             ..\plugin\inc 
 SYSTEMINCLUDE                           \Epoc32\Include 
 
-SOURCEPATH                              ..\aif
-START RESOURCE                          OggPlayaif.s60.rss
-TARGETPATH                              \system\apps\Oggplay 
-END 
-
 SOURCEPATH                              ..\data 
-START RESOURCE                          OggPlay.rss 
-HEADER
-TARGETPATH                              \system\apps\Oggplay 
-END
+START RESOURCE OggPlay.rss 
+  TARGETPATH                              \system\apps\Oggplay 
+  HEADER                                   
+END  
 
-START RESOURCE                          OggPlay_caption.rss
-TARGETPATH                              \system\apps\Oggplay 
-END
+START RESOURCE OggPlay_caption.rss 
+  TARGETPATH                              \system\apps\Oggplay 
+END  
+
 
 SOURCEPATH                              ..\src 
 SOURCE                                  OggLog.cpp 
@@ -71,7 +67,7 @@ LIBRARY                                 mediaclientaudiostream.lib
 LIBRARY                                 MediaClientAudio.lib 
 LIBRARY                                 MMFControllerFramework.lib 
 
-START BITMAP S60splash.mbm 
+START BITMAP OggSplash.mbm 
   TARGETPATH                              \system\apps\OggPlay 
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
