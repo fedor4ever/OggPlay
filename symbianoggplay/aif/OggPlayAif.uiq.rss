@@ -9,7 +9,7 @@ RESOURCE AIF_DATA
 		CAPTION { code=ELangEnglish; caption="OggPlay"; }
 	};
 	num_icons=2;
-	embeddability=KAppNotEmbeddable;
+	embeddability=KAppEmbeddable;
 	newfile=KAppDoesNotSupportNewFile;
 	datatype_list=
 	{
@@ -21,20 +21,21 @@ RESOURCE AIF_DATA
 	{
 		VIEW_DATA
 		{
-			view_uid = 0x1000A662;
+			view_uid = 1;
 			screen_mode = 0;
 			caption_list =
 			{
-				CAPTION { code= ELangEnglish; caption="FO view"; }
+				CAPTION { code= ELangEnglish; caption="FO Splash View"; }
 			};
 		},
+
 		VIEW_DATA
 		{
-			view_uid = 0x1000A663;
+			view_uid = 2;
 			screen_mode = 1;
 			caption_list =
 			{
-				CAPTION { code= ELangEnglish; caption="FC view"; }
+				CAPTION { code= ELangEnglish; caption="FC Launch View"; }
 			};
 		}
 	};
