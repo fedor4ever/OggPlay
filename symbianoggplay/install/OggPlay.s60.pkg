@@ -30,10 +30,11 @@
   "\epoc32\release\armi\urel\OggPlay.rpo"
   "\epoc32\release\armi\urel\OggPlay.rru" } -"!:\system\apps\OggPlay\OggPlay.rsc"
 "\epoc32\release\armi\urel\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
-"\epoc32\release\armi\urel\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\epoc32\release\armi\urel\OggSplash.mbm"-"!:\system\apps\OggPlay\OggSplash.mbm"
 "\epoc32\release\armi\urel\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ini",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN
