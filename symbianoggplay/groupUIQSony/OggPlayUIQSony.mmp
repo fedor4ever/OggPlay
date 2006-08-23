@@ -22,6 +22,7 @@ SOURCE OggHelperFcts.cpp
 SOURCE OggFilesSearchDialogs.cpp
 SOURCE OggTremor.cpp
 SOURCE OggRateConvert.cpp
+SOURCE OggSplashContainer.cpp
 
 SOURCEPATH ..\vorbis
 SOURCE TremorDecoder.cpp
@@ -84,8 +85,8 @@ SOURCE       c12 playing.bmp           // 14 (playing - not used ???)
 SOURCE       1   playingm.bmp
 SOURCE       c12 paused.bmp            // 16 (paused)           
 SOURCE       1   pausedm.bmp
-SOURCE       c12 flipclosed_p900.bmp   // 18 (flip closed)
-SOURCE       c12 flipopen_steel.bmp    // 19 (flip opened)
+SOURCE       c12 flipclosed.bmp        // 18 (flip opened)
+SOURCE       c12 flipopen_steel.bmp    // 19 (flip closed)
 // Skin Dependent Icons
 SOURCE       c12 volume.bmp            // 20 (volume knob)
 SOURCE       1   volumem.bmp     
@@ -110,7 +111,7 @@ SOURCE       c12 alarm.bmp             //    (alarm - flip closed)
 SOURCE       1   alarmm.bmp            // 40
 END
 
-START BITMAP Symbian.mbm
+START BITMAP OggPlayP900.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
 SOURCEPATH   ..\bitmaps
@@ -133,16 +134,16 @@ SOURCE       c12 playing.bmp           // 14 (playing - not used ???)
 SOURCE       1   playingm.bmp
 SOURCE       c12 paused.bmp            // 16 (paused)           
 SOURCE       1   pausedm.bmp
-SOURCE       c12 flipclosed_p900.bmp   // 18 (flip closed)
-SOURCE       c12 symbian\flipopen.bmp  // 19 (flip opened)
+SOURCE       c12 flipclosed_p900.bmp   // 18 (flip opened)
+SOURCE       c12 flipopen_steel.bmp    // 19 (flip closed)
 // Skin Dependent Icons
 SOURCE       c12 volume.bmp            // 20 (volume knob)
 SOURCE       1   volumem.bmp     
 SOURCE       1   volumem.bmp           // 22 (not used ???)
 SOURCE       c12 repeat.bmp            //    (repeat - flip closed)
 SOURCE       1   repeatm.bmp           // 24 
-SOURCE       c12 symbian\slider.bmp    //    (position knob)
-SOURCE       1   symbian\sliderm.bmp   // 26
+SOURCE       c12 slider.bmp            //    (position knob)
+SOURCE       1   sliderm.bmp           // 26
 SOURCE       c12 knob.bmp              //    (scroll bar knob)
 SOURCE       1   knobm.bmp             // 28
 SOURCE       c12 bar.bmp               //    (analyzer bar)
@@ -157,7 +158,14 @@ SOURCE       c12 pause.bmp             //    (pause normal)
 SOURCE       1   pausem.bmp            // 38
 SOURCE       c12 alarm.bmp             //    (alarm - flip closed)
 SOURCE       1   alarmm.bmp            // 40
-SOURCE       c12 symbian\OggPlayLogo.bmp // 41
 END
+
+START BITMAP OggSplash.mbm
+TARGETPATH   \system\apps\OggPlay
+HEADER
+SOURCEPATH   ..\bitmaps
+SOURCE       c12 UIQSplash_unstable.bmp
+END
+
 
 AIF OggPlay.aif ..\aif OggPlayAif.uiq.rss c16 cdicon_20x16.bmp cdicon_20x16_mask.bmp cdicon_32x32.bmp cdicon_32x32_mask.bmp

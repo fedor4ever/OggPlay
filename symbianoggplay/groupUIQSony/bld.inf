@@ -21,7 +21,8 @@ PRJ_EXPORTS
 ..\Plugin\Inc\OggPlayPlugin.h
 
 // Default skin
-..\OggPlayP900.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\OGGPLAY.SKN
+..\OggPlay.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\OGGPLAY.SKN
+..\OggPlayP900.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\OGGPLAYP900.SKN
 
 PRJ_MMPFILES
 ..\vorbis\groupUIQSony\OggvorbisUIQSony.mmp
