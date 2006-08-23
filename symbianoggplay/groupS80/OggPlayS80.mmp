@@ -10,11 +10,6 @@ USERINCLUDE                             ..\vorbis\plugin
 USERINCLUDE                             ..\plugin\inc 
 SYSTEMINCLUDE                           \Epoc32\Include 
 
-SOURCEPATH                              ..\aif
-START RESOURCE                          OggPlayaif.s60.rss
-TARGETPATH                              \system\apps\Oggplay 
-END 
-
 SOURCEPATH                              ..\data 
 START RESOURCE                          OggPlay.rss 
 HEADER
@@ -39,6 +34,7 @@ SOURCE                                  OggFilesSearchDialogs.cpp
 SOURCE                                  OggDialogsS80.cpp 
 SOURCE                                  OggUserHotkeysS80.cpp 
 SOURCE                                  OggPluginAdaptor.cpp 
+SOURCE                                  OggSplashContainer.cpp
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 euser.lib 
@@ -69,11 +65,11 @@ LIBRARY                                 MMFControllerFramework.lib
 LIBRARY                                 cknctl.lib 
 LIBRARY                                 ckndlg.lib 
 
-START BITMAP S60splash.mbm 
+START BITMAP OggSplash.mbm 
   TARGETPATH                              \system\apps\OggPlay 
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
-  SOURCE                                  c12 s60splash_unstable.bmp 
+  SOURCE                                  c12 s80splash_unstable.bmp 
 END  
 
 START BITMAP fish.mbm 
