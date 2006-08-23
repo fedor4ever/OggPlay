@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPlayS60V3"
-	ProjectGUID="{49772D58-71CE-4F77-AB80-483BDBF2FAB4}"
+	ProjectGUID="{C4F00B45-FFA6-45C1-B20C-7F28BD45A7E4}"
 	Keyword="SymbianOS_2.Symbian9">
 	<Platforms>
 		<Platform
@@ -71,14 +71,14 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Deb_S60_30_WINSCW|Win32"
+			Name="Deb_S60_30M_WINSCW|Win32"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/QIfist /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_30"
+				AdditionalOptions="/QIfist /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_30M"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\OggPlay\symbianoggplay\inc;C:\OggPlay\symbianoggplay\vorbis;C:\OggPlay\symbianoggplay\data;C:\OggPlay\symbianoggplay\vorbis\plugin;C:\OggPlay\symbianoggplay\plugin\inc;C:\Symbian\9.1\S60_3rd\\Epoc32\Include;"
+				AdditionalIncludeDirectories="C:\OggPlay\symbianoggplay\inc;C:\OggPlay\symbianoggplay\vorbis;C:\OggPlay\symbianoggplay\data;C:\OggPlay\symbianoggplay\vorbis\plugin;C:\OggPlay\symbianoggplay\plugin\inc;C:\Symbian\9.1\S60_3rd_MR\\Epoc32\Include;"
 				PreprocessorDefinitions="__SYMBIAN32__;__SERIES60_30__;__SERIES60_3X__;__SUPPORT_CPP_EXCEPTIONS__;__EXE__;__WINSCW__;__WINS__;__CW32__;_DEBUG;_UNICODE;"
 				IgnoreStandardIncludePath="TRUE"
 				StringPooling="TRUE"
@@ -94,10 +94,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_30"
-				AdditionalDependencies="euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib eikctl.lib gdi.lib ws32.lib bafl.lib fbscli.lib bitgdi.lib apgrfx.lib egul.lib charconv.lib flogger.lib hal.lib avkon.lib MediaClientImage.lib etext.lib form.lib estor.lib etel.lib mediaclientaudiostream.lib libvorbisidec.lib edll.lib "
-				OutputFile="C:\Symbian\9.1\S60_3rd\\Epoc32\release\winscw\udeb\OggPlay.exe"
-				AdditionalLibraryDirectories="C:\Symbian\9.1\S60_3rd\\Epoc32\release\winscw\udeb"
+				AdditionalOptions=" /NDSProjectFile &quot;$(ProjectPath)&quot; /NDSSDKShortName S60_30M"
+				AdditionalDependencies="euser.lib apparc.lib cone.lib efsrv.lib eikcore.lib eikdlg.lib eikcoctl.lib eikctl.lib gdi.lib ws32.lib bafl.lib fbscli.lib bitgdi.lib apgrfx.lib egul.lib charconv.lib flogger.lib hal.lib avkon.lib MediaClientImage.lib etext.lib form.lib estor.lib etel.lib mediaclientaudiostream.lib OggplayVorbis.lib edll.lib "
+				OutputFile="C:\Symbian\9.1\S60_3rd_MR\\Epoc32\release\winscw\udeb\OggPlay.exe"
+				AdditionalLibraryDirectories="C:\Symbian\9.1\S60_3rd_MR\\Epoc32\release\winscw\udeb"
 				IgnoreAllDefaultLibraries="TRUE"
 				ForceSymbolReferences="?_E32Bootstrap@@YGXXZ"
 				GenerateDebugInformation="TRUE"
@@ -110,7 +110,7 @@
 				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S60_30 WINSCW UDEB"/>
+				CommandLine="RCMake.exe &quot;$(ProjectPath)&quot; S60_30M WINSCW UDEB"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -279,32 +279,21 @@
 			<File
 				RelativePath=".\data\OggPlay.rss">
 				<FileConfiguration
-					Name="Deb_S60_30_WINSCW|Win32">
+					Name="Deb_S60_30M_WINSCW|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_30 WINSCW UDEB
+						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_30M WINSCW UDEB
 "
 						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlay.rsg;"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\data\OggPlay_loc.rss">
-				<FileConfiguration
-					Name="Deb_S60_30_WINSCW|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_30 WINSCW UDEB
-"
-						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlay_loc.rsg;"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\data\OggPlay_reg.rss">
 				<FileConfiguration
-					Name="Deb_S60_30_WINSCW|Win32">
+					Name="Deb_S60_30M_WINSCW|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_30 WINSCW UDEB
+						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_30M WINSCW UDEB
 "
 						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlay_reg.rsg;"/>
 				</FileConfiguration>
@@ -440,6 +429,27 @@
 			</File>
 			<File
 				RelativePath=".\groupS60V3\oggplays60v3.uid.cpp">
+			</File>
+		</Filter>
+		<Filter
+			Name="aif">
+			<File
+				RelativePath=".\aif\context_pane_fish.bmp">
+			</File>
+			<File
+				RelativePath=".\aif\context_pane_fish_mask.bmp">
+			</File>
+			<File
+				RelativePath=".\aif\list_icon_fish.bmp">
+			</File>
+			<File
+				RelativePath=".\aif\list_icon_fish_24x24.bmp">
+			</File>
+			<File
+				RelativePath=".\aif\list_icon_fish_mask.bmp">
+			</File>
+			<File
+				RelativePath=".\aif\list_icon_fish_mask_24x24.bmp">
 			</File>
 		</Filter>
 		<Filter
