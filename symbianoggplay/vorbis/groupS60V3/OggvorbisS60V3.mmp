@@ -1,8 +1,12 @@
 // oggvorbis.mmp
-TARGET                                  libvorbisidec.dll 
+TARGET                                  OggPlayVorbis.dll 
 TARGETTYPE                              dll 
-UID                                     0x1000008d 0xF01FD21D 
+UID                                     0x1000008d 0xF01FD21D
+
 CAPABILITY                              NONE 
+SECUREID                                0xF01FD21D
+VENDORID                                0
+
 SOURCEPATH                              .. 
 SOURCE                                  mdct.c 
 SOURCE                                  block.c 
