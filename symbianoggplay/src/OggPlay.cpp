@@ -378,7 +378,10 @@ COggPlayAppUi::COggPlayAppUi()
 _LIT(KLogFile,"C:\\Logs\\OggPlay\\OggPlay.log");
 void COggPlayAppUi::ConstructL()
 {
+	// Delete the existing log
 	iCoeEnv->FsSession().Delete(KLogFile);
+
+	// Trace that we have at least reached the start of the code
 	TRACEF(_L("COggPlayAppUi::ConstructL()"));
 
 #if defined(SERIES60V3)
@@ -631,15 +634,21 @@ void COggPlayAppUi::PostConstruct()
 
 void COggPlayAppUi::PostConstructL()
 {
-	// Delete the splash view. We won't be seeing it again
-	DeregisterView(*iSplashFOView);
+	// Ideally we just de-register (and delete) the splash view now that we are done with it. 
+	// However, we can't do this if OggPlay is running embedded: for some reason we get a CONE 30 panic
+	// if the apps key is pressed (the app that embeds us must try to access the splash view I guess)
+	if (!iIsRunningEmbedded)
+	{
+		// Delete the splash view. We won't be seeing it again
+		DeregisterView(*iSplashFOView);
 
-	delete iSplashFOView;
-	iSplashFOView = NULL;
+		delete iSplashFOView;
+		iSplashFOView = NULL;
+	}
 
 #if defined(UIQ) && !defined(MOTOROLA)
 	// In FC mode the splash view is also used to launch
-	// the main FC view, so we can't de-register it here
+	// the main FC view, so we can't de-register it here, :-(
 	// DeregisterView(*iSplashFCView);
 
 	// delete iSplashFCView;
@@ -683,6 +692,9 @@ void COggPlayAppUi::PostConstructL()
 
 COggPlayAppUi::~COggPlayAppUi()
 {
+	if (iDoorObserver)
+		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
+
 	if (iStartUpAO)
 		iStartUpAO->Cancel();
 	delete iStartUpAO;
@@ -765,10 +777,10 @@ COggPlayAppUi::~COggPlayAppUi()
 	
 	delete iSkins;
 	delete iOggMsgEnv ;
-    delete iSongList;
+	delete iSongList;
 
 	iViewHistoryStack.Close();
-    iRestoreStack.Close();
+	iRestoreStack.Close();
 
 	COggLog::Exit();  
 }
@@ -2180,9 +2192,6 @@ void COggPlayAppUi::OpenFileL(const TDesC& aFileName)
 {	
 	iEmbeddedFileName = aFileName;
 	iIsRunningEmbedded = ETrue;
-
-	if (iDoorObserver)
-		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
 }
 
 TInt COggPlayAppUi::FileSize(const TDesC& aFileName)

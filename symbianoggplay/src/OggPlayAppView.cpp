@@ -86,7 +86,7 @@ COggPlayAppView::~COggPlayAppView()
 void
 COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 {
-  iTextArray= new(ELeave) CDesCArrayFlat(10);
+  iTextArray = new(ELeave) CDesCArrayFlat(10);
 
   iApp = aApp;
   CreateWindowL();
@@ -105,6 +105,9 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   iCanvas[0]->SetControlContext(this);
   iCanvas[0]->SetObserver(this);
 
+  // This must be fixed at some point.
+  // Can't we just do set to full screen!?
+  // We have to support landscape too...
 #if defined(SERIES90)
   TPoint pBM(0,0);
   iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 320));
@@ -117,6 +120,8 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 
   if (CCoeEnv::Static()->ScreenDevice()->SizeInPixels() == TSize(352, 416))
 	iCanvas[0]->SetExtent(pBM, TSize(352, 376));
+  else if (CCoeEnv::Static()->ScreenDevice()->SizeInPixels() == TSize(240, 320))
+	iCanvas[0]->SetExtent(pBM, TSize(240, 293));
   else
 	iCanvas[0]->SetExtent(pBM, TSize(176, 188));  
 #else

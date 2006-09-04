@@ -2,7 +2,8 @@ TARGET                                  OggPlay.app
 TARGETTYPE                              app 
 TARGETPATH                              \system\apps\Oggplay 
 UID                                     0x100039CE 0x1000A661 
-EPOCSTACKSIZE                           16000 
+EPOCSTACKSIZE                           0x8000
+
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\data 

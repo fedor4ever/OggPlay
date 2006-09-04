@@ -95,7 +95,6 @@ COggLog* COggLog::InstanceL()
 
 void COggLog::Exit() 
 {
-	TInt i;
 	COggLog* instance = Instance();
 	if (instance)
 	{
@@ -103,6 +102,7 @@ void COggLog::Exit()
 		instance->iLog.Close();
 
 #if defined(SERIES60V3)
+		TInt i;
 		for (i = 0 ; i<KLoggingThreads ; i++)
 		{
 			if (instance == InstanceArray[i])

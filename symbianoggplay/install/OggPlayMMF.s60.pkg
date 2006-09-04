@@ -14,29 +14,30 @@
 ;
 ; Display Release notes
 ;
-"..\S60_releases\sisnotes.txt" - "",FT,TC
+"..\S60MMF_releases\sisnotes.txt" - "",FT,TC
 
-"\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
-"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
-{ "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.ren" 
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rfr" 
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rge"   
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rdu"
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rit"
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsp"
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsw" 
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rtu" 
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rda"
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rpo"
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rru" } -"!:\system\apps\OggPlay\OggPlay.rsc"
-  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
-"\Epoc32\data\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
-"\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
+{ "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.ren" 
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rfr" 
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rge"   
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rdu"
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rit"
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsp"
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsw" 
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rtu" 
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rda"
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rpo"
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rru" } -"!:\system\apps\OggPlay\OggPlay.rsc"
+  "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.ren"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\OggSplash.mbm"-"!:\system\apps\OggPlay\OggSplash.mbm"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
+
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ini",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN
-
-"\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
-"\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"

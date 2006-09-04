@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPluginDecoderS60MMF"
-	ProjectGUID="{5C318E35-9576-492D-9484-AB3AB9E352B8}"
+	ProjectGUID="{6FBAFE56-A484-4664-92C4-5045D7763E4E}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform

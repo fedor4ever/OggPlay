@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="OggPlayS60MMF"
-	ProjectGUID="{602FD4E9-9A3E-4A9D-8E54-F34C1B24AB6B}"
+	ProjectGUID="{ED4981A1-427F-45C4-A9FD-8EB33F4866F2}"
 	Keyword="SymbianOS_2.Classic">
 	<Platforms>
 		<Platform
@@ -176,20 +176,6 @@
 			</File>
 			<File
 				RelativePath=".\src\OggViews.cpp">
-			</File>
-		</Filter>
-		<Filter
-			Name="aif">
-			<File
-				RelativePath=".\aif\OggPlayaif.s60.rss">
-				<FileConfiguration
-					Name="Deb_S60_23_WINSCW|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="RCmake.exe &quot;$(ProjectPath)&quot; S60_23 WINSCW UDEB
-"
-						Outputs="C:\OggPlay\symbianoggplay\inc\OggPlayaif.s60.rsg;"/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -442,7 +428,7 @@
 				RelativePath=".\bitmaps\fishmask.bmp">
 			</File>
 			<File
-				RelativePath=".\bitmaps\s60splash_unstable.bmp">
+				RelativePath=".\bitmaps\S60MMFsplash_unstable.bmp">
 			</File>
 			<Filter
 				Name="Skins">
@@ -481,6 +467,27 @@
 					<File
 						RelativePath=".\bitmaps\Skins\mcNuOggPlayN90\mcNuOggPlayN90.pkg">
 					</File>
+				</Filter>
+				<Filter
+					Name="S60V3">
+					<Filter
+						Name="mcNuOggPlayDR">
+						<File
+							RelativePath=".\bitmaps\Skins\S60v3\mcNuOggPlayDR\mcNuOggPlayDR.pkg">
+						</File>
+					</Filter>
+					<Filter
+						Name="mcNuOggPlayLR">
+						<File
+							RelativePath=".\bitmaps\Skins\S60v3\mcNuOggPlayLR\mcNuOggPlayLR.pkg">
+						</File>
+					</Filter>
+					<Filter
+						Name="mcNuOggPlayQVGA">
+						<File
+							RelativePath=".\bitmaps\Skins\S60v3\mcNuOggPlayQVGA\mcNuOggPlayQVGA.pkg">
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 		</Filter>

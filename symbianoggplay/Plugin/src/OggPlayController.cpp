@@ -284,7 +284,8 @@ TInt COggPlayController::SendEventToClient(const TMMFEvent& aEvent)
 
     if (aEvent.iErrorCode == KErrDied)
         iState = EStateInterrupted;
-    return DoSendEventToClient( myEvent );
+
+	return DoSendEventToClient( myEvent );
     }
 
 void COggPlayController::ResetL()
@@ -545,7 +546,7 @@ void COggPlayController::PrimeL()
     if (iState == EStatePrimed) 
           return; // Nothing to do
     
-    if (iState == EStateInterrupted) 
+    if ((iState == EStateInterrupted) || (iState == EStateOpen)) 
     {
         iDecoder->Clear();
 
@@ -558,7 +559,7 @@ void COggPlayController::PrimeL()
 		iState = EStateNotOpened;
     }
 
-    if ( (iAudioOutput==NULL) || (iState!=EStateNotOpened) )
+    if ((iAudioOutput == NULL) || (iState != EStateNotOpened))
         User::Leave(KErrNotReady);
   
     iState = EStateOpen;
@@ -578,7 +579,7 @@ void COggPlayController::PrimeL()
         }    
     }
     
-    iState=EStatePrimed;
+    iState = EStatePrimed;
     PRINT("COggPlayController::PrimeL Out");
 }
 
@@ -1184,7 +1185,8 @@ void COggSource::BufferEmptiedL(CMMFBuffer* aBuffer)
 		iTotalBufferBytes += db->Data().Length();
         iSink->EmptyBufferL(db, this, TMediaId(KUidMediaTypeAudio));
     }
-    else User::Leave(KErrNotSupported);
+    else
+		User::Leave(KErrNotSupported);
 }
 
 

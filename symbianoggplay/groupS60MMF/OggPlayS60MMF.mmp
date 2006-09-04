@@ -3,6 +3,7 @@ TARGETTYPE                              app
 TARGETPATH                              \system\apps\Oggplay 
 UID                                     0x100039CE 0x1000A661 
 EPOCSTACKSIZE                           0x8000 
+
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\data 
@@ -71,7 +72,7 @@ START BITMAP OggSplash.mbm
   TARGETPATH                              \system\apps\OggPlay 
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
-  SOURCE                                  c12 s60splash_unstable.bmp 
+  SOURCE                                  c12 S60MMFSplash_unstable.bmp 
 END  
 
 START BITMAP fish.mbm 
