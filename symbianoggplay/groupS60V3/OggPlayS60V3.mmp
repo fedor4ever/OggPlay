@@ -112,6 +112,6 @@ START BITMAP OggSplash.mbm
 TARGETPATH   \private\F000A661\import
 HEADER
 SOURCEPATH   ..\bitmaps
-SOURCE       c12 s60splash_unstable.bmp
+SOURCE       c12 s60V3splash_unstable.bmp
 END
 

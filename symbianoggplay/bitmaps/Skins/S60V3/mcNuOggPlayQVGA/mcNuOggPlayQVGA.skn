@@ -19,7 +19,7 @@ OggPlay 1 {
       KnobIcon 22 23
     }
     Position {
-      Position 18 328 316 12
+      Position 12 256 216 9
       Style 0
       KnobIcon 26 27
     }
