@@ -118,7 +118,7 @@ IF MachineUID=0x20000602
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
 ENDIF
 
-; Fonts for the skins
+; Fonts for the mcNuOggPlay skin
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\teen____.ttf"-"!:\resource\fonts\teen____.ttf"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\teenlite.ttf"-"!:\resource\fonts\teenlite.ttf"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\ProFontWindows.ttf"-"!:\resource\fonts\ProFontWindows.ttf"

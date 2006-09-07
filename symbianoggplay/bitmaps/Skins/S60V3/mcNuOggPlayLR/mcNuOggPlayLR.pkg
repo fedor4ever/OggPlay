@@ -1,10 +1,7 @@
 %{"OggPlay"}
 :"OggPlay"
-#{"S60 mcNuOggPlayLR skin"},(0xF01FF682),1,0,0
+#{"mcNuOggPlayLR skin"},(0xF000A661),1,0,0,TYPE=SP
 [0x101F7961],0,0,0,{"Series60ProductID"}
 
 "mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
 "mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
-"teen____.ttf"-"!:\resource\fonts\teen____.ttf"
-"teenlite.ttf"-"!:\resource\fonts\teenlite.ttf"
-"ProFontWindows.ttf"-"!:\resource\fonts\ProFontWindows.ttf"
