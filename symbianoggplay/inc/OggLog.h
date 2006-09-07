@@ -56,6 +56,14 @@
 ...with a twist due to Symbian not allowing global storage.<BR>
 Remember to manually create "C:\Logs\OggPlay\" to get disk logging.
 */
+
+class TOggLogOverflow : public TDesOverflow
+{
+	private:
+		// From TDesOverflow
+		void Overflow(TDes& aDes);
+};
+
 class COggLog : public CBase
 {
 public: 
@@ -77,6 +85,7 @@ private:
 private:
 	RFileLogger iLog;
 	TBuf<1024> iBuf;
+	TOggLogOverflow iOverflowHandler;
 
 #if defined(SERIES60V3)
 	TThreadId iThreadId;

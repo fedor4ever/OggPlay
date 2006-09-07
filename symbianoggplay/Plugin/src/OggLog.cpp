@@ -22,6 +22,11 @@
 _LIT(KLogFolder,"Oggplay");
 _LIT(KLogFileName,"OggTremor.log");
 
+
+void TOggLogOverflow::Overflow(TDes& /* aDes */)
+{
+}
+
 COggLog* COggLog::InstanceL() 
 {
 	COggLog* instance = (COggLog*) Dll::Tls();
@@ -59,10 +64,10 @@ void COggLog::Exit()
 
 void COggLog::FilePrint(const TDesC& msg)
 {
-	InstanceL()->iLog.WriteFormat(msg);
+	InstanceL()->iLog.Write(msg);
 }
 
-void COggLog::Panic(const TDesC& msg,TInt aReason) 
+void COggLog::Panic(const TDesC& msg, TInt aReason)
 {
 	iLog.Write(_L("** Fatal: **"));
 	iLog.Write(msg);
@@ -76,31 +81,7 @@ const TDesC& COggLog::VA(TRefByValue<const TDesC> aLit, ...)
 	VA_START(list, aLit);
 	COggLog* instance = InstanceL();
 	instance->iBuf.Zero();
-	instance->iBuf.AppendFormatList(aLit,list);
-
-	// There can't be at this point any % left, otherwise
-	// whole thing going to panic (typically another format is called
-	// right after this...).
-	// Change all % into %%
-	// This code stinks. Can't find a better way to do that search and replace
-	TUint16* bufStart = (TUint16*) instance->iBuf.Ptr();
-	TInt len = instance->iBuf.Length();
-	TPtr16 descriptor(bufStart, len, 1024);
-
-	TInt nbFound = 0; 
-	TInt found = descriptor.Locate('%');
-	while (found != KErrNotFound)
-	{
-		nbFound++;
-		descriptor.Replace(found, 1, _L("%%"));
-		bufStart = bufStart + found + 2;
-		len = len - (found + 2) + 1;
-		descriptor.Set(bufStart, len, 1024 - nbFound);
-		found = descriptor.Locate('%');
-	}
-
-	descriptor.Set((TUint16*) instance->iBuf.Ptr(), instance->iBuf.Length()+nbFound, 1024);
-	instance->iBuf = descriptor;
+	instance->iBuf.AppendFormatList(aLit, list, &instance->iOverflowHandler);
 
 	return instance->iBuf;
 }
