@@ -1,0 +1,11 @@
+%{"OggPlay"}
+:"OggPlay"
+#{"mcNuOggPlaySQ skin"},(0xF000A661),1,0,0,TYPE=SP
+[0x101F7961],0,0,0,{"Series60ProductID"}
+
+; Requires OggPlay
+(0xF000A661),1,0,0,{"OggPlay"}
+
+
+"mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
+"mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"

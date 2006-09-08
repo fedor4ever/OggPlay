@@ -122,6 +122,10 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
 	iCanvas[0]->SetExtent(pBM, TSize(352, 376));
   else if (CCoeEnv::Static()->ScreenDevice()->SizeInPixels() == TSize(240, 320))
 	iCanvas[0]->SetExtent(pBM, TSize(240, 293));
+  else if (CCoeEnv::Static()->ScreenDevice()->SizeInPixels() == TSize(320, 240))
+	iCanvas[0]->SetExtent(pBM, TSize(320, 220));
+  else if (CCoeEnv::Static()->ScreenDevice()->SizeInPixels() == TSize(208, 208))
+	iCanvas[0]->SetExtent(pBM, TSize(208, 188));
   else
 	iCanvas[0]->SetExtent(pBM, TSize(176, 188));  
 #else

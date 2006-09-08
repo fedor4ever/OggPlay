@@ -104,18 +104,16 @@ ENDIF
 
 ; Landscape QVGA (320x240)
 ; E61
-; Not currently supported (use LR skin)
 IF MachineUID=0x20001858
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVLS.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVLS.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVLS.skn"-"!:\private\F000A661\import\mcNuOggPlayQVLS.skn"
 ENDIF
 
 ; Square resolution (208x208)
 ; 5500
-; Not currently supported (use LR skin)
 IF MachineUID=0x20000602
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
 ENDIF
 
 ; Fonts for the mcNuOggPlay skin

@@ -1,0 +1,7 @@
+%{"OggPlay"}
+:"OggPlay"
+#{"mcNuOggPlayQVLS skin"},(0xF000A661),1,0,0,TYPE=SP
+[0x101F7961],0,0,0,{"Series60ProductID"}
+
+"mcNuOggPlayQVLS.skn"-"!:\private\F000A661\import\mcNuOggPlayQVLS.skn"
+"mcNuOggPlayQVLS.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVLS.mbm"
