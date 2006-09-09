@@ -60,7 +60,8 @@ COggPlayController* NewOggTremorControllerL()
 
 const TImplementationProxy ImplementationTable[] =
 	{
-		{{KOggTremorUidControllerImplementation}, NewOggTremorControllerL}
+//FL		{{KOggTremorUidControllerImplementation}, NewOggTremorControllerL}
+		IMPLEMENTATION_PROXY_ENTRY(KOggTremorUidControllerImplementation, NewOggTremorControllerL)
 	};
 
 // -----------------------------------------------------------------------------
@@ -108,6 +109,7 @@ EXPORT_C COggPlayController* NewOggTremorControllerL()
     }
 #endif
 
+#if !defined(EKA2)
 // -----------------------------------------------------------------------------
 // E32Dll DLL Entry point
 // -----------------------------------------------------------------------------
@@ -117,5 +119,5 @@ GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
 	return(KErrNone);
 	}
 
-
+#endif // EKA2
 //  End of File

@@ -363,7 +363,12 @@ void COggPluginAdaptor::Resume()
     TRACEF(_L("COggPluginAdaptor::Resume()"));
     iPlayer->SetPosition(iLastPosition);
     Play();
-    TInt time = TInt(iLastPosition.Int64().GetTInt() /1E6);
+
+#if defined (SERIES60V3)
+    TInt time = TInt(I64INT(iLastPosition.Int64()) / 1000000);
+#else
+    TInt time = TInt(iLastPosition.Int64().GetTInt() / 1000000);
+#endif
     TInt hours = time/3600;
     TInt min = (time%3600)/60;
     TInt sec = (time%3600%60);

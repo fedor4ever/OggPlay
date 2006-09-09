@@ -37,6 +37,8 @@
 #include <eikenv.h>
 #endif
 
+#include <OggPlay.rsg>
+
 enum
 {
   EScreenModeFlipOpen,

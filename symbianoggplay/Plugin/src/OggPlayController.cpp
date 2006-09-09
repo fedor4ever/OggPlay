@@ -126,11 +126,10 @@ void COggPlayController::ConstructL()
 
     iState = EStateNotOpened;
      
-    iFileLength = TTimeIntervalMicroSeconds(5*60*1E6); // We do not want to look at file duration when
-                                                       //discovering the file: it takes too long
-                                                       // If DurationL is asked before we actually have the information,
-                                                       // pretend length is 5 minutes.
-    
+	// We do not want to look at file duration when	discovering the file: it takes too long
+	// If DurationL is asked before we actually have the information, pretend length is 5 minutes.
+	iFileLength = TTimeIntervalMicroSeconds(5*60*1000000);
+
     iOggSource = new(ELeave) COggSource(*this);
 
 	// Open an audio stream (used for determining audio capabilities)
@@ -183,12 +182,20 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
                 // Only the random_ringing_tone.ogg in that directory, leave
                 User::Leave(KErrNotFound);
             }
-
+#if defined(SERIES60V3)
+			TInt64 rnd64 = Math::Random();
+			TInt64 maxInt64 = MAKE_TINT64(1, 0);
+			TInt64 nbFound64 = nbFound;
+			TInt64 picked64 = (rnd64 * nbFound64) / maxInt64;
+			TInt picked = I64LOW(picked64);
+#else //2.x
 			TInt64 rnd64 = TInt64(0, Math::Random());
 			TInt64 maxInt64 = TInt64(1, 0);
 			TInt64 nbFound64 = nbFound;
 			TInt64 picked64 = (rnd64 * nbFound64) / maxInt64;
 			TInt picked = picked64.Low();
+#endif
+			
 
             nbFound=-1;
             for (i=0;i<dirList->Count();i++)
@@ -285,7 +292,7 @@ TInt COggPlayController::SendEventToClient(const TMMFEvent& aEvent)
     if (aEvent.iErrorCode == KErrDied)
         iState = EStateInterrupted;
 
-	return DoSendEventToClient( myEvent );
+	return DoSendEventToClient(myEvent);
     }
 
 void COggPlayController::ResetL()
@@ -761,7 +768,7 @@ void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition
     PRINT("COggPlayController::SetPositionL");
 
 	// const TInt64 KConst500 = TInt64(500);
-	TInt64 positionMilliseconds = aPosition.Int64() / 1000.0;
+	TInt64 positionMilliseconds = aPosition.Int64() / 1000;
     if (iDecoder)
 		iDecoder->Setposition(positionMilliseconds);
 
@@ -1173,7 +1180,7 @@ void COggSource::FillBufferL(CMMFBuffer* aBuffer, MDataSink* aConsumer,TMediaId 
 
 void COggSource::BufferEmptiedL(CMMFBuffer* aBuffer)
 {
-    if ( (aBuffer->Type()==KUidMmfDescriptorBuffer) || (aBuffer->Type()==KUidMmfTransferBuffer))
+    if ( (aBuffer->Type()==KUidMmfDescriptorBuffer) || (aBuffer->Type()==KUidMmfTransferBuffer) || (aBuffer->Type()==KUidMmfPtrBuffer))
     {    
         CMMFDataBuffer* db = static_cast<CMMFDataBuffer*>(aBuffer);
         if (iOggSampleRateConverter->FillBuffer(db->Data()) == KErrCompletion)
