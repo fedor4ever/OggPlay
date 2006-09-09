@@ -18,7 +18,7 @@
 ;
 ; Display Release notes
 ;
-"..\S60V3_releases\sisnotes.txt" - "",FT,TC
+"..\S60V3MMF_releases\sisnotes.txt" - "",FT,TC
 ;
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggPlay.exe"-"!:\sys\bin\OggPlay.exe"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\10003A3F\apps\OggPlay_reg.rsc"-"!:\private\10003A3F\import\apps\OggPlay_reg.rsc"
@@ -36,7 +36,7 @@
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay\Fish.mbm"-"!:\resource\apps\OggPlay\Fish.mbm"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlayIcon.mbm"-"!:\resource\apps\OggPlayIcon.mbm"
 
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\OggSplash.mbm"-"!:\private\F000A661\import\OggSplash.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\OggSplash.mbm"-"!:\private\F000A661\OggSplash.mbm"
 
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OGGPLAYVORBIS.DLL"-"!:\sys\bin\OggPlayVorbis.DLL"
 "C:\Symbian\9.1\S60_3rd_MR\Epoc32\data\z\resource\Plugins\OggPlayVorbis.RSC"-"!:\Resource\Plugins\OggPlayVorbis.RSC"

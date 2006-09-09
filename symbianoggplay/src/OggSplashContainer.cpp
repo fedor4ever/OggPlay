@@ -38,13 +38,35 @@ void CSplashContainer::ConstructL()
 
 	fileName.Copy(parse.Drive());
 	fileName.Append(privatePath);
-	fileName.Append(_L("import\\OggSplash.mbm"));
+	fileName.Append(_L("import\\CustomSplash.mbm"));
+#else
+	fileName.Copy(parse.DriveAndPath());
+	fileName.Append(_L("CustomSplash.mbm"));
+#endif
+
+	iBitmap = new (ELeave) CFbsBitmap;
+	err = iBitmap->Load(fileName, 0, EFalse);
+	if (err == KErrNone)
+	{
+		// Custom splash successfully loaded
+		return;
+	}
+	else if (err != KErrNotFound)
+	{
+		// Something went wrong loading it
+		User::Leave(err);
+	}
+
+	// There's no custom splash, so load the default
+#if defined(SERIES60V3)
+	fileName.Copy(parse.Drive());
+	fileName.Append(privatePath);
+	fileName.Append(_L("OggSplash.mbm"));
 #else
 	fileName.Copy(parse.DriveAndPath());
 	fileName.Append(_L("OggSplash.mbm"));
 #endif
 
-	iBitmap = new (ELeave) CFbsBitmap;
 	err = iBitmap->Load(fileName, 0, EFalse);
 	if (err != KErrNone)
 	{

@@ -7,7 +7,13 @@ released under the GPL by
 Leif H. Wilden.
 
 New for this release:
-Internal changes only
-(Some minor bug fixes)
+Fixed ringtone playing only once
+Fixed Find new files crash with some mp3s
+
+Changed the handling of splash screens
+(skins with splash screens will need updating)
+
+Some internal changes
+(Minor tweaks and bug fixes)
 
 Enjoy!

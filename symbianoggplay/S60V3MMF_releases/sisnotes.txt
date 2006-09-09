@@ -1,4 +1,4 @@
-  Welcome to OggPlay 1.093
+  Welcome to OggPlay 1.70
 
 Welcome to the Series 60
 version of OggPlay, the open
@@ -7,7 +7,7 @@ released under the GPL by
 Leif H. Wilden.
 
 This is a beta release:
-First working version of OggPlay 1.093 compiled for S60 V3
+First working version of OggPlay 1.70 compiled for S60 V3
 
 Please restart the phone before running OggPlay.
 You will also need to restart the phone before uninstalling.

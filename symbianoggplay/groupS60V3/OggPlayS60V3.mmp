@@ -109,7 +109,7 @@ SOURCE       1   fishmask.bmp
 END
 
 START BITMAP OggSplash.mbm
-TARGETPATH   \private\F000A661\import
+TARGETPATH   \private\F000A661
 HEADER
 SOURCEPATH   ..\bitmaps
 SOURCE       c12 s60V3splash_unstable.bmp
