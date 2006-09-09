@@ -1,0 +1,130 @@
+;
+; Series 60 multilingual installer - GCCE urel
+;
+&EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
+;
+%{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+"OggPlay"}
+
+:"OggPlay"
+
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+"OggPlay"},(0xF000A661),1,0,1
+
+;Supports Series 60 v 3.0
+[0x101F7961],0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"
+,"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
+
+;
+; Display Release notes
+;
+"..\S60V3_releases\sisnotes.txt" - "",FT,TC
+;
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggPlay.exe"-"!:\sys\bin\OggPlay.exe"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\10003A3F\apps\OggPlay_reg.rsc"-"!:\private\10003A3F\import\apps\OggPlay_reg.rsc"
+{ "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.ren"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rfr"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rge"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rdu"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rit"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rsp"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rsw" 
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rtu" 
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rda"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rpo"
+  "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.rru" } -"!:\resource\apps\OggPlay.rsc"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay\Fish.mbm"-"!:\resource\apps\OggPlay\Fish.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlayIcon.mbm"-"!:\resource\apps\OggPlayIcon.mbm"
+
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\OggSplash.mbm"-"!:\private\F000A661\import\OggSplash.mbm"
+
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OGGPLAYVORBIS.DLL"-"!:\sys\bin\OggPlayVorbis.DLL"
+"C:\Symbian\9.1\S60_3rd_MR\Epoc32\data\z\resource\Plugins\OggPlayVorbis.RSC"-"!:\Resource\Plugins\OggPlayVorbis.RSC"
+
+
+; Double resolution (352x416)
+; E60
+IF MachineUID=0x20001856
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
+ENDIF
+
+; E70
+IF MachineUID=0x20001857
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
+ENDIF
+
+; N80
+IF MachineUID=0x200005F9
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
+ENDIF
+
+; QVGA (240x320)
+; E50
+; IF MachineUID=0xXXXXXXXX
+; "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+; "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+; ENDIF
+
+; N71
+IF MachineUID=0x200005FF
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+ENDIF
+
+; N73
+IF MachineUID=0x200005FB
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+ENDIF
+
+; N92
+IF MachineUID=0x200005FA
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+ENDIF
+
+; N93
+IF MachineUID=0x20000600
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+ENDIF
+
+; Low resolution (176x208)
+; 3250
+IF MachineUID=0x200005F8
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
+ENDIF
+
+; N91
+IF MachineUID=0x200005FC
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
+ENDIF
+
+; Landscape QVGA (320x240)
+; E61
+IF MachineUID=0x20001858
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVLS.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVLS.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVLS.skn"-"!:\private\F000A661\import\mcNuOggPlayQVLS.skn"
+ENDIF
+
+; Square resolution (208x208)
+; 5500
+IF MachineUID=0x20000602
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
+ENDIF
+
+; Fonts for the mcNuOggPlay skin
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\teen____.ttf"-"!:\resource\fonts\teen____.ttf"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\teenlite.ttf"-"!:\resource\fonts\teenlite.ttf"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\ProFontWindows.ttf"-"!:\resource\fonts\ProFontWindows.ttf"
+
+
+; we try to be nice and uninstall our configuration files
+""-"!:\private\F000A661\oggplay.ini",FN
+""-"!:\private\F000A661\oggplay.db",FN

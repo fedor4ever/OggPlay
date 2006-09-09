@@ -1,0 +1,69 @@
+// oggvorbis.mmp
+MACRO                                   OGGPLAYPLUGIN 
+TARGET                                  OggPlayVorbis.dll 
+TARGETTYPE                              plugin 
+UID                                     0x10009d8d 0xF01FD21D
+
+CAPABILITY                              NONE 
+SECUREID                                0xF01FD21D
+VENDORID                                0
+
+SOURCEPATH                              .. 
+SOURCE                                  mdct.c 
+SOURCE                                  block.c 
+SOURCE                                  window.c 
+SOURCE                                  synthesis.c 
+SOURCE                                  info.c 
+SOURCE                                  floor1.c 
+SOURCE                                  floor0.c 
+SOURCE                                  res012.c 
+SOURCE                                  mapping0.c 
+SOURCE                                  registry.c 
+SOURCE                                  codebook.c 
+SOURCE                                  sharedbook.c 
+SOURCE                                  framing.c 
+SOURCE                                  bitwise.c 
+SOURCE                                  vorbisfile.c 
+SOURCE                                  microsoftInternal.c 
+SOURCE                                  Symbian.cpp 
+SOURCE                                  utf8Fix.c
+
+SOURCE                                  TremorDecoder.cpp 
+
+SOURCEPATH                              ..\..\src 
+SOURCE                                  OggHelperFcts.cpp 
+SOURCE                                  OggRateConvert.cpp 
+
+SOURCEPATH                              ..\..\Plugin\src 
+SOURCE                                  OggLog.cpp 
+SOURCE                                  OggPlayController.cpp 
+
+SOURCEPATH                              ..\Plugin 
+SOURCE                                  OggTremorPluginFactory.cpp 
+
+START RESOURCE OggPlayVorbis.rss 
+TARGET OggPlayVorbis.rsc
+END
+
+
+
+
+USERINCLUDE                             .. 
+SYSTEMINCLUDE                           \epoc32\include 
+USERINCLUDE                             ..\..\Plugin\inc 
+USERINCLUDE                             ..\..\inc 
+SYSTEMINCLUDE                           \epoc32\include\ecom 
+SYSTEMINCLUDE                           \epoc32\include\mmf\common 
+SYSTEMINCLUDE                           \epoc32\include\mmf\server 
+SYSTEMINCLUDE                           \epoc32\include\mmf\plugin 
+LIBRARY                                 mmfcontrollerframework.lib 
+LIBRARY                                 mmfstandardcustomcommands.lib 
+LIBRARY                                 MMFDevSound.lib 
+LIBRARY                                 mmfserverbaseclasses.lib 
+LIBRARY                                 ecom.lib 
+LIBRARY                                 euser.lib 
+LIBRARY                                 charconv.lib 
+LIBRARY                                 MediaClientAudioStream.lib 
+LIBRARY                                 flogger.lib 
+LIBRARY                                 efsrv.lib 
+
