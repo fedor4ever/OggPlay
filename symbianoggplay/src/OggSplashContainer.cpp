@@ -51,9 +51,10 @@ void CSplashContainer::ConstructL()
 		// Custom splash successfully loaded
 		return;
 	}
-	else if (err != KErrNotFound)
+	else if ((err != KErrNotFound) && (err != KErrPathNotFound))
 	{
 		// Something went wrong loading it
+		TRACEF(COggLog::VA(_L("Error loading custom splash: %d"), err ));
 		User::Leave(err);
 	}
 
