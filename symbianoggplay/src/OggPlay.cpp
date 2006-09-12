@@ -1522,12 +1522,14 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 {
 	if (aMenuId==R_FILE_MENU) 
 	{
+#if !defined(UIQ)
 		// If the splash screen is still visible we can't do anything other than exit
 		if (iStartUpState != EStartUpComplete)
 		{
 			aMenuPane->DeleteBetweenMenuItems(0, 4);
 			return;
 		}
+#endif
 
         // "Repeat" on/off entry, UIQ uses check box, Series 60 uses variable argument string.
 #if defined(UIQ)
