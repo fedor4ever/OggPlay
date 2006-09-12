@@ -78,6 +78,8 @@
 #define ogg_text_error_28 "Impossible d'explorer le repertoire" 
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
+#define ogg_text_error_31 "Startup Error"
+#define ogg_text_error_32 "Ogg error: %d, %d"
 
 #define ogg_text_string_1 "Mise à jour de la liste de fichiers..."
 #define ogg_text_string_2 "Ecriture de la base de données des fichiers..."

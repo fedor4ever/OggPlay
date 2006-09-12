@@ -80,6 +80,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_28 "Cannot open directory" // To be translated
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
+#define ogg_text_error_31 "Startup Error"
+#define ogg_text_error_32 "Ogg error: %d, %d"
 
 #define ogg_text_string_1 "Actualizando lista de archivos..."
 #define ogg_text_string_2 "escribiendo el archivo de la base de datos..."
