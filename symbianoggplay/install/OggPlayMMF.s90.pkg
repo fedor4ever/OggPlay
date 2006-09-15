@@ -17,7 +17,7 @@
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsc" -"!:\system\apps\OggPlay\OggPlay.rsc"
 ;"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.rsc"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
-"\Epoc32\data\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\Epoc32\data\z\system\apps\OGGPLAY\Oggsplash.mbm"-"!:\system\apps\OggPlay\Oggsplash.mbm"
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\icys90\icys90.skn"-"!:\system\apps\oggplay\icys90.skn"
 "..\bitmaps\Skins\icys90\icys90.mbm"-"!:\system\apps\oggplay\icys90.mbm"

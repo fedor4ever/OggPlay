@@ -1,4 +1,4 @@
-    Welcome to OggPlay 1.6.9
+    Welcome to OggPlay 1.70
 
 Welcome to the Series 90
 version of OggPlay, the open
@@ -7,9 +7,7 @@ released under the GPL by
 Leif H. Wilden.
 
 New for this release:
-Added Alarm clock
-Fixed File info
-Fixed Skin size
-Some minor internal changes
+Fixed crashes with some mp3s
+Some internal changes
 
 Enjoy!

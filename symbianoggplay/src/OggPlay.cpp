@@ -499,7 +499,7 @@ void COggPlayAppUi::ActivateStartUpViewL()
 	iUserHotkeysView = new(ELeave) COggUserHotkeysView(*iAppView);
 	RegisterViewL(*iUserHotkeysView);
 
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
     iCodecSelectionView = new(ELeave) COggPluginSettingsView(*iAppView);
     RegisterViewL(*iCodecSelectionView);
 #endif
@@ -511,7 +511,7 @@ void COggPlayAppUi::ActivateStartUpViewL()
 
 	iAlarmSettingsView = new(ELeave) COggAlarmSettingsView(*iAppView, KOggPlayUidAlarmSettingsView);
 	RegisterViewL(*iAlarmSettingsView);
-#else
+#elif defined(UIQ)
 	iFCView = new(ELeave) COggFCView(*iAppView);
 	RegisterViewL(*iFCView);
 #endif
@@ -635,8 +635,10 @@ void COggPlayAppUi::PostConstruct()
 void COggPlayAppUi::PostConstructL()
 {
 	// Ideally we just de-register (and delete) the splash view now that we are done with it. 
-	// However, we can't do this if OggPlay is running embedded: for some reason we get a CONE 30 panic
+	// However, on S60 V1 we can't do this if OggPlay is running embedded: for some reason we get a CONE 30 panic
 	// if the apps key is pressed (the app that embeds us must try to access the splash view I guess)
+	// Similarly S90 doesn't like us de-registering the splash view either :-(
+#if !defined(SERIES90)
 	if (!iIsRunningEmbedded)
 	{
 		// Delete the splash view. We won't be seeing it again
@@ -645,6 +647,7 @@ void COggPlayAppUi::PostConstructL()
 		delete iSplashFOView;
 		iSplashFOView = NULL;
 	}
+#endif
 
 #if defined(UIQ) && !defined(MOTOROLA)
 	// In FC mode the splash view is also used to launch
@@ -1522,7 +1525,7 @@ COggPlayAppUi::DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane)
 {
 	if (aMenuId==R_FILE_MENU) 
 	{
-#if !defined(UIQ)
+#if defined(SERIES60)
 		// If the splash screen is still visible we can't do anything other than exit
 		if (iStartUpState != EStartUpComplete)
 		{

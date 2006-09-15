@@ -78,6 +78,13 @@ void CSplashContainer::ConstructL()
 
 void CSplashContainer::ShowSplashL()
 {
+#if defined(SERIES90)
+	// For some reason on S90 the splash view gets activated twice,
+	// so we must avoid creating the window twice (otherwise we get a CONE 10 panic)
+	if (iDisplayTimer)
+		return;
+#endif
+
 	// Create and activate the main window
 	CreateWindowL();
 	SetExtentToWholeScreen();

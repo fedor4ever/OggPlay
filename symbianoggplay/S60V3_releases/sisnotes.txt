@@ -8,8 +8,6 @@ Leif H. Wilden.
 
 This is a beta release:
 First working version of OggPlay 1.093 compiled for S60 V3
-
-Please restart the phone before running OggPlay.
-You will also need to restart the phone before uninstalling.
+Please read the release notes as there are some issues
 
 Enjoy!

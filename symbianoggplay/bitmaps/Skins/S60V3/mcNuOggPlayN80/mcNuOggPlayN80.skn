@@ -1,0 +1,55 @@
+OggPlay 1 {
+  FlipOpen {
+    Played {
+      Position 18 298 50 26
+      Font "Series 60 ZDigi" 20 0
+      FontColor 255 255 255
+    }
+    Title {
+      Position 18 344 316 32
+      Font "Series 60 Sans SemiBold" 24 0
+      FontColor 255 255 255
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    Volume {
+      Position 256 302 78 16
+      Style 0
+      KnobIcon 22 23
+    }
+    Position {
+      Position 18 328 316 12
+      Style 0
+      KnobIcon 26 27
+    }
+    ScrollBar {
+      Position 344 0 8 324
+      KnobIcon 41 42
+      Style 1
+      ScrollerSize 20
+      Step 1
+    }
+    ListBox {
+      Position 0 4 344 252
+      Font "Series 60 Sans Regular" 21 0
+      FontColor 117 193 226
+      FontColorSelected 255 255 255
+      BarColorSelected 18 130 181
+    }
+    Clock {
+      Position 10 262 76 24
+      Font "Series 60 Sans Regular" 18 0
+      FontColor 255 255 255
+    }
+    Alarm {
+      Position 256 262 76 24
+      Font "Series 60 Sans Regular" 18 0
+      FontColor 255 255 255
+    }
+    AlarmIcon {
+      Position 234 264 26 30
+      Icon 43 44
+    }
+  }
+}

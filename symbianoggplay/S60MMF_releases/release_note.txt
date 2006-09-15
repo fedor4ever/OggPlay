@@ -22,8 +22,36 @@ History
 
 What's new in Release 1.70:
 --------------------------
+Fixed ringtone playing only once
+Fixed Find new files crash with some mp3s
+
+Changed the handling of splash screens
+(skins with splash screens will need updating)
+
 Internal changes only
 (Some minor bug fixes)
+
+
+What's new in Release 1.6.9:
+--------------------------
+Added support for drive relative paths in Playlists
+Selecting Shuffle Play from the menu now enables random playback
+Changing between Normal Play and Shuffle Play no longer stops playback
+Some internal changes (hopefully I've not broken anything)
+Added alarm clock
+
+Notes:
+In order to use the alarm clock you must leave OggPlay running.
+It is best to move OggPlay to the background as less processing power is used when OggPlay runs in the background.
+
+To select a particular track for the alarm:
+1. Make sure OggPlay is not currently in the middle of a track (paused)
+2. Leave the track highlight on the track you want to play as the alarm
+
+If you want a random alarm:
+1. Make sure OggPlay is not currently in the middle of a track (paused)
+2. Turn on "Shuffle play"
+3. Leave the track highlight on "(titles)" 
 
 
 What's new in Release 1.6.7:

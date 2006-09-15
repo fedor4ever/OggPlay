@@ -109,10 +109,8 @@ COggPlayAppView::ConstructL(COggPlayAppUi *aApp, const TRect& aRect)
   // Can't we just do set to full screen!?
   // We have to support landscape too...
 #if defined(SERIES90)
-  TPoint pBM(0,0);
   iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 320));
 #elif defined(SERIES80)
-  TPoint pBM(0,0);
   iCanvas[0]->SetExtent(TPoint(0, 0), TSize(640, 200));
 #elif defined(SERIES60)
   TPoint pBM(Position());

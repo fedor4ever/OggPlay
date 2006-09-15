@@ -60,8 +60,12 @@ COggPlayController* NewOggTremorControllerL()
 
 const TImplementationProxy ImplementationTable[] =
 	{
+#if defined(SERIES60)
 //FL		{{KOggTremorUidControllerImplementation}, NewOggTremorControllerL}
 		IMPLEMENTATION_PROXY_ENTRY(KOggTremorUidControllerImplementation, NewOggTremorControllerL)
+#else
+		{{KOggTremorUidControllerImplementation}, NewOggTremorControllerL}
+#endif
 	};
 
 // -----------------------------------------------------------------------------
