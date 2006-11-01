@@ -1309,9 +1309,7 @@ COggPlayAppUi::SelectPreviousView()
 {
   if(iViewHistoryStack.Count()==0) return;
 
-#if defined(SERIES60) || defined(SERIES80)
   TInt previousListboxLine = (TInt&) (iViewHistoryStack[iViewHistoryStack.Count()-1]);
-#endif
 
   iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
 
@@ -1324,11 +1322,8 @@ COggPlayAppUi::SelectPreviousView()
   else 
 	  HandleCommandL(EOggViewByTitle+previousView);
 
-  #if defined(SERIES60) || defined(SERIES80)
-  // UIQ_?
   // Select the entry which were left.
   iAppView->SelectItem(previousListboxLine);
-  #endif
 
   return;
 }
