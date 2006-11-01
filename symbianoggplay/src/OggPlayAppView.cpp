@@ -1515,7 +1515,7 @@ COggPlayAppView::UpdateClock(TBool forceUpdate)
   TBool clockUpdateRequired = clockMinute != iCurrentClockMinute;
   if (!clockUpdateRequired && !forceUpdate) return;
 
-  TBuf<256> buf;
+  TBuf<32> buf;
   now.FormatL(buf, KDateString);
   iClock[iMode]->SetText(buf);
   iCurrentClockMinute = clockMinute;
@@ -1524,8 +1524,11 @@ COggPlayAppView::UpdateClock(TBool forceUpdate)
 	  return;
 
   // Update alarm
-  iApp->iSettings.iAlarmTime.FormatL(buf, KDateString);
-  iAlarm[iMode]->SetText(buf);
+  TBuf<32> bufAlarm;
+  if (iApp->iSettings.iAlarmActive) {
+    iApp->iSettings.iAlarmTime.FormatL(bufAlarm, KDateString);
+  }
+  iAlarm[iMode]->SetText(bufAlarm);
 }
 
 void
