@@ -1,6 +1,7 @@
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 
-#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay" },(0x1000A661),1,032,1
+#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
+   "OggPlay" },(0x1000A661),1,032,1
 
 (0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID",
                     "SonyEricssonP80xPlatformProductID",
@@ -26,7 +27,7 @@
                     "UIQ20ProductID",
                     "UIQ20ProductID"}
 
-"C:\Symbian\UIQ_21\epoc32\release\armi\urel\oggplay.app"-"!:\system\apps\OggPlay\OggPlay.app"
+"C:\Symbian\UIQ_21\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
 
 IF MachineUID=0x101F408B
