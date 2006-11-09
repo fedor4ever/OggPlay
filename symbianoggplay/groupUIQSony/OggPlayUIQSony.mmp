@@ -20,9 +20,13 @@ SOURCE OggViews.cpp
 SOURCE OggFiles.cpp
 SOURCE OggHelperFcts.cpp
 SOURCE OggFilesSearchDialogs.cpp
-SOURCE OggTremor.cpp
-SOURCE OggRateConvert.cpp
+//SOURCE OggSettingsContainer.cpp
 SOURCE OggSplashContainer.cpp
+//SOURCE OggUserHotkeys.cpp
+SOURCE OggTremor.cpp
+SOURCE OggMultiThread.cpp
+SOURCE OggThreadClasses.cpp
+SOURCE OggRateConvert.cpp
 
 SOURCEPATH ..\vorbis
 SOURCE TremorDecoder.cpp
