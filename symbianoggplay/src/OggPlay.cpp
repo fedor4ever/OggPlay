@@ -96,15 +96,9 @@ TUid COggPlayApplication::AppDllUid() const
 }
 
 // COggPlayDocument class
-#if defined(SERIES60)
 CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/)
-#else
-CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& /* aFilename */, RFs& /*aFs*/)
-#endif
 {
-#if defined(SERIES60)
 	iAppUi->OpenFileL(aFilename);
-#endif
 
 	return NULL;
 }
@@ -1639,9 +1633,7 @@ COggPlayAppUi::ReadIniFile()
 	iSettings.iAlarmGain = ENoGain;
 	iSettings.iAlarmSnooze = 1;
 
-#if (defined(SERIES60 ) || defined (SERIES80) )	
     iAnalyzerState = EDecay; 
-#endif
 
 #if defined(MULTI_THREAD_PLAYBACK)
 	iSettings.iBufferingMode = ENoBuffering;
@@ -2235,7 +2227,9 @@ void COggPlayAppUi::SetBufferingModeL(TBufferingMode aNewBufferingMode)
 		iEikonEnv->ReadResource(buf, R_OGG_ERROR_29);		
 		iOggMsgEnv->OggErrorMsgL(tbuf, buf);		
 
+#if defined(SERIES60)
 		iPlaybackOptionsView->BufferingModeChangedL();
+#endif
 	}
 }
 
