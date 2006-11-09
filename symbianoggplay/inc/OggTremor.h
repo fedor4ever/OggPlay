@@ -37,7 +37,6 @@
 #include "OggMultiThread.h"
 
 
-#if defined(SERIES60)
 #if defined(MULTI_THREAD_PLAYBACK)
 
   // Total number of buffers
@@ -79,19 +78,22 @@
   const TInt KSingleThreadLowThreshold = 5;
   const TInt KMultiThreadLowThreshold = 16;
 
-#else
+#else // ! MULTI_THREAD_PLAYBACK
+
+#if defined(SERIES60)
   const TInt KBuffers= 2;
   const TInt KBufferSize = 4096;
-#endif
-
-  const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
 #else
-const TInt KBuffers= 12;
-const TInt KBufferSize = 4096*10;
-
-#if !defined(MOTOROLA)
-const TInt KAudioPriority = EMdaPriorityMax;
+  const TInt KBuffers= 12;
+  const TInt KBufferSize = 4096*10;
 #endif
+
+#endif // ! MULTI_THREAD_PLAYBACK
+
+#if defined(SERIES60)
+  const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.
+#elif !defined(MOTOROLA)
+  const TInt KAudioPriority = EMdaPriorityMax;
 #endif
 
   // Buffer sizes to use
