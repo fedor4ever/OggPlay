@@ -77,7 +77,6 @@ LIBRARY flogger.lib
 LIBRARY hal.lib
 
 LIBRARY avkon.lib
-LIBRARY MediaClientImage.lib 
 
 LIBRARY etext.lib
 LIBRARY form.lib
