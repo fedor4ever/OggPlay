@@ -13,11 +13,21 @@ public:
 
 typedef enum {
     EMinus24dB,
+    EMinus21dB,
     EMinus18dB,
+    EMinus15dB,
     EMinus12dB,
+    EMinus9dB,
+    EMinus6dB,
+    EMinus3dB,
     ENoGain,
-    EStatic6dB,  // A static gain of 6dB, with saturation
-    EStatic12dB   // A static gain of 12 dB, with saturation
+	EStatic1dB, // Static gain with staturation
+	EStatic2dB,
+	EStatic4dB,
+    EStatic6dB,
+    EStatic8dB,
+    EStatic10dB,
+    EStatic12dB
 } TGainType;
 
 
@@ -35,15 +45,18 @@ public:
         TInt aInputChannel,
         TInt aOutputChannel);
         
-    TInt FillBuffer( TDes8 &aBuffer);
+    TInt FillBuffer(TDes8 &aBuffer);
     void SetVolumeGain(TGainType aGain);
 private:
-    void MixChannels( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
-    void ConvertRateMono( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
-    void ConvertRateStereo( TDes8 &aInputBuffer, TDes8 &aOutputBuffer );
-    void ApplyGain( TDes8 &aInputBuffer, TInt shiftValue );
-    void ApplyNegativeGain( TDes8 &aInputBuffer, TInt shiftValue );
-    TInt  iMinimumSamplesInBuffer;
+    void MixChannels(TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
+    void ConvertRateMono(TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
+    void ConvertRateStereo( TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
+    void ApplyGain(TDes8 &aInputBuffer, TInt shiftValue);
+    void ApplyGain(TDes8 &aInputBuffer, TInt multiplier, TInt shiftValue);
+    void ApplyNegativeGain(TDes8 &aInputBuffer, TInt shiftValue);
+    void ApplyNegativeGain(TDes8 &aInputBuffer, TInt multiplier, TInt shiftValue);
+
+	TInt  iMinimumSamplesInBuffer;
     TBool iRateConvertionNeeded;
     TBool iChannelMixingNeeded;
 

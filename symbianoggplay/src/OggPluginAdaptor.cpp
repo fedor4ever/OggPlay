@@ -73,12 +73,7 @@ CPluginInfo::~CPluginInfo()
 }
 
 
-////////////////////////////////////////////////////////////////
-//
 // CPluginSupportedList
-//
-////////////////////////////////////////////////////////////////
-
 CPluginSupportedList::CPluginSupportedList()
 {}
 
@@ -98,12 +93,9 @@ CPluginSupportedList::~CPluginSupportedList()
     delete(iPlugins);
 }
 
-void CPluginSupportedList::AddPluginL(
-		   const TDesC &anExtension,
-           const CMMFFormatImplementationInformation &aFormatInfo,
-           const TUid aControllerUid)
+void CPluginSupportedList::AddPluginL(const TDesC &anExtension,
+const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid)
 {
-
     CPluginInfo* info = CPluginInfo::NewL(anExtension, aFormatInfo, aControllerUid);
     CleanupStack::PushL(info);
     
@@ -116,7 +108,6 @@ void CPluginSupportedList::AddPluginL(
     
     CleanupStack::Pop(info);
 }
-
 
 void CPluginSupportedList::SelectPluginL(const TDesC& anExtension, TUid aSelectedUid)
 { 
@@ -196,6 +187,7 @@ CArrayPtrFlat <CPluginInfo> * CPluginSupportedList::GetPluginInfoList(const TDes
     return (list->listPluginInfos);
 		
 }
+
 void CPluginSupportedList::AddExtension(const TDesC &anExtension)
 {
 	TInt index = FindListL(anExtension);
@@ -213,11 +205,7 @@ void CPluginSupportedList::AddExtension(const TDesC &anExtension)
 }
 	
 
-////////////////////////////////////////////////////////////////
-//
 // COggPluginAdaptor
-//
-////////////////////////////////////////////////////////////////
 COggPluginAdaptor::COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver = 0)
 :CAbsPlayback(anObserver), iEnv(anEnv), iVolume(KMaxVolume), iGain(ENoGain)
 {
@@ -397,7 +385,7 @@ void COggPluginAdaptor::Stop()
     iPlayer->Stop();
     iState = EStopped;
 
-    // The Stop is synchroneous within the MMF Framework.
+    // The Stop is synchronous within the MMF Framework.
 	ClearComments();
     iObserver->NotifyUpdate();
 }
@@ -651,13 +639,19 @@ COggPluginAdaptor::~COggPluginAdaptor()
 
 void COggPluginAdaptor::ConstructAPlayerL(const TDesC & /*anExtension*/)
 {
+	iState = EClosed;
+
+#if defined(SERIES60V3)
+	if (!iPlayer)
+		iPlayer = CMdaAudioRecorderUtility::NewL(*this);
+#else
     // Stupid, but true, we must delete the player when loading a new file
     // Otherwise, will panic with -15 on some HW   
     delete iPlayer;
     iPlayer = NULL;
-	iState = EClosed;
 
-    iPlayer = CMdaAudioRecorderUtility::NewL(*this);
+	iPlayer = CMdaAudioRecorderUtility::NewL(*this);
+#endif
 }
 
 void COggPluginAdaptor::SearchPluginsL(const TDesC &anExtension, TBool isEnabled)

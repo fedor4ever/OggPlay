@@ -51,6 +51,7 @@ public:
   void UpdateSongPosition();
   void UpdateClock(TBool forceUpdate=EFalse);
   void UpdateVolume();
+  void UpdateVolumeBoost();
   void UpdatePlaying();
   void UpdateAnalyzer();
 
@@ -184,6 +185,7 @@ private:
   COggIcon*          iPaused[2];
 
   COggSlider*        iVolume[2];
+  COggSlider*        iVolumeBoost[2];
   COggSlider*        iPosition[2];
 
   COggButton*        iPlayButton[2];

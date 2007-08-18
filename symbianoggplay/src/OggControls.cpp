@@ -1319,43 +1319,33 @@ COggButton::ReadArguments(TOggParser& p)
 }
 
 
-/***********************************************************
- *
- * COggSlider
- *
- ***********************************************************/
-
-COggSlider::COggSlider() :
-  COggControl(),
-  iKnobIcon(0),
-  iStyle(0),
-  iValue(0),
-  iMaxValue(100),
-  iIsMoving(EFalse),
-  iPos(0)
+// COggSlider
+COggSlider::COggSlider()
+: COggControl(), iKnobIcon(0), iStyle(0), iValue(0),
+  iMaxValue(100), iIsMoving(EFalse), iPos(0)
 {
 }
 
-COggSlider::~COggSlider() {
+COggSlider::~COggSlider()
+{
     delete iKnobIcon;
 }
-void
-COggSlider::SetKnobIcon(CGulIcon* anIcon)
+void COggSlider::SetKnobIcon(CGulIcon* anIcon)
 {
-  if (iKnobIcon) delete iKnobIcon;
-  iKnobIcon= anIcon;
-  iRedraw= ETrue;
+  if (iKnobIcon)
+	  delete iKnobIcon;
+
+  iKnobIcon = anIcon;
+  iRedraw = ETrue;
 }
 
-void
-COggSlider::SetStyle(TInt aStyle)
+void COggSlider::SetStyle(TInt aStyle)
 {
-  iStyle= aStyle;
-  iRedraw= ETrue; 
+  iStyle = aStyle;
+  iRedraw = ETrue; 
 }
 
-void
-COggSlider::SetValue(TInt aValue)
+void COggSlider::SetValue(TInt aValue)
 {
   if (aValue==iValue) return;
 
@@ -1366,56 +1356,82 @@ COggSlider::SetValue(TInt aValue)
   iRedraw= (GetPosFromValue(iValue)!=iPos); 
 }
 
-void
-COggSlider::SetMaxValue(TInt aMaxValue)
+void COggSlider::SetMaxValue(TInt aMaxValue)
 {
   iMaxValue= aMaxValue;
+  if (iStyle == 4)
+	  iMaxValue++;
+
   iRedraw= ETrue;
 }
 
-TInt
-COggSlider::CurrentValue()
+TInt COggSlider::CurrentValue()
 {
   return iValue;
 }
 
-void 
-COggSlider::Draw(CBitmapContext& aBitmapContext)
+void COggSlider::Draw(CBitmapContext& aBitmapContext)
 {
   if (!iKnobIcon) return;
   DrawFocus(aBitmapContext);
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
-  TRect r(TPoint(0,0),s);
-  TPoint p(ix,iy);
+  TRect r(TPoint(0,0), s);
+  TPoint p(ix, iy);
 
   iPos= GetPosFromValue(iValue);
+  switch (iStyle)
+  {
+	case 0:
+		r.iBr.iX= iPos;
+		break;
 
-  switch (iStyle) {
-  case 0: r.iBr.iX= iPos; break;
-  case 1: r.iTl.iY= iPos; break;
-  case 2: p.iX= iPos; break;
-  case 3: p.iY= iPos; break;
+	case 1:
+		r.iTl.iY= iPos;
+		break;
+
+	case 2:
+		p.iX= iPos;
+		break;
+
+	case 3:
+		p.iY= iPos;
+		break;
+
+	case 4:
+		p.iX= ix+iPos;
+		r = TRect(TPoint(iPos, 0), TSize(6, ih)); // Fix me (this should not be hard-coded)
+		break;
   }
 
-  aBitmapContext.BitBltMasked
-    (p,
-     iKnobIcon->Bitmap(),
-     r,
-     iKnobIcon->Mask(),
-     ETrue);
+  aBitmapContext.BitBltMasked(p, iKnobIcon->Bitmap(), r, iKnobIcon->Mask(), ETrue);
 }
 
 TInt COggSlider::GetPosFromValue(TInt aValue)
 {
-  if (!iKnobIcon) return 0;
+  if (!iKnobIcon || (iMaxValue<=0))
+	  return 0;
+
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
-  if (iMaxValue <= 0) return 0;
-  switch (iStyle) {
-  case 0: return (TInt)((float)iw/iMaxValue*aValue); break;
-  case 1: return (TInt)((float)ih/iMaxValue*aValue); break;
-  case 2: return ix+(TInt)((float)(iw-s.iWidth)/iMaxValue*aValue); break;
-  case 3: return iy+(ih-s.iHeight) - TInt((float)(ih-s.iHeight)/iMaxValue*aValue); break;
+  switch (iStyle)
+  {
+	case 0:
+	case 4:
+		return (iw*aValue)/iMaxValue;
+		break;
+	
+	case 1:
+		return (ih*aValue)/iMaxValue;
+		break;
+
+	case 2:
+		return ix + ((iw-s.iWidth)*aValue)/iMaxValue;
+		break;
+
+	case 3:
+		return iy+ (ih-s.iHeight) - ((ih-s.iHeight)*aValue)/iMaxValue;
+		break;
   }
+
   return 0;
 }
 
@@ -1454,8 +1470,7 @@ void COggSlider::PointerEvent(const TPointerEvent& p)
   COggControl::PointerEvent(p);
 }
 
-TBool
-COggSlider::ReadArguments(TOggParser& p)
+TBool COggSlider::ReadArguments(TOggParser& p)
 {
   TBool success= ETrue;
   if (p.iToken==_L("KnobIcon")) {
@@ -1474,12 +1489,7 @@ COggSlider::ReadArguments(TOggParser& p)
 }
 
 
-/***********************************************************
- *
- * COggScrollBar
- *
- ***********************************************************/
-
+// COggScrollBar
 COggScrollBar::COggScrollBar() :
   COggControl(),
   iStyle(0),

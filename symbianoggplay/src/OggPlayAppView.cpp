@@ -256,6 +256,7 @@ COggPlayAppView::ResetControls() {
   iFileName[0]=0; iFileName[1]= 0;
   iPosition[0]= 0; iPosition[1]= 0;
   iVolume[0]= 0; iVolume[1]= 0;
+  iVolumeBoost[0]= 0; iVolumeBoost[1]= 0;
   iAnalyzer[0]= 0; iAnalyzer[1]= 0;
   iRepeatIcon[0]= 0; iRepeatIcon[1]= 0;
   iRepeatButton[0]= 0; iRepeatButton[1]= 0;
@@ -294,62 +295,55 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
   iFocusControlsPresent=EFalse;
   bool stop(EFalse);
 
-  while (!stop) {
+  while (!stop)
+  {
     stop= !p.ReadToken() || p.iToken==KEndToken;
-
-    COggControl* c=NULL;
+    COggControl* c = NULL;
 
     if (p.iToken==_L("Clock")) { 
       _LIT(KAL,"Adding Clock");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggText();
       iClock[aCanvas]= (COggText*)c; 
       iClock[aCanvas]->SetFont(iFont); 
     }
     else if (p.iToken==_L("Alarm")) { 
       _LIT(KAL,"Adding Alarm");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggText();
       iAlarm[aCanvas]= (COggText*)c;
       iAlarm[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Title")) { 
       _LIT(KAL,"Adding Title");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggText();
       iTitle[aCanvas]= (COggText*)c;
       iTitle[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Album")) { 
       _LIT(KAL,"Adding Album");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggText();
       iAlbum[aCanvas]= (COggText*)c;
       iAlbum[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Artist")) { 
       _LIT(KAL,"Adding Artist");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggText();
       iArtist[aCanvas]= (COggText*)c;
       iArtist[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Genre")) { 
       _LIT(KAL,"Adding Genre");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggText();
       iGenre[aCanvas]= (COggText*)c;
       iGenre[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("TrackNumber")) { 
       _LIT(KAL,"Adding TrackNumber");
-//      RDebug::Print(KAL);
       p.Debug(KAL);
       c= new(ELeave) COggText();
       iTrackNumber[aCanvas]= (COggText*)c;
@@ -358,14 +352,12 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     else if (p.iToken==_L("FileName")) {
       c= new COggText();
       _LIT(KAL,"Adding FileName");
-//      RDebug::Print(KAL);
 	  p.Debug(KAL);
       iFileName[aCanvas]= (COggText*)c;
       iFileName[aCanvas]->SetFont(iFont);
     }
     else if (p.iToken==_L("Played")) { 
       _LIT(KAL,"Adding Played");
-//      RDebug::Print(KAL);
       p.Debug(KAL);
       c= new(ELeave) COggText();
       iPlayed[aCanvas]= (COggText*)c;
@@ -384,21 +376,16 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("StopButton")) { 
       c= new(ELeave) COggButton();
-//      _LIT(KAL,"Adding StopButton at 0x%x");
-//      RDebug::Print(KAL,c);
-      //OGGLOG.WriteFormat(KAL,c);
       iStopButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PlayButton")) { 
       _LIT(KAL,"Adding PlayButton");
-//      RDebug::Print(KAL);
       p.Debug(KAL);
       c= new(ELeave) COggButton();
       iPlayButton[aCanvas]= (COggButton*)c;
     }
     else if (p.iToken==_L("PauseButton")) { 
       _LIT(KAL,"Adding PauseButton");
-//      RDebug::Print(KAL);
       p.Debug(KAL);
       c= new(ELeave) COggButton();
       iPauseButton[aCanvas]= (COggButton*)c;
@@ -422,85 +409,82 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("PlayingIcon")) { 
       _LIT(KAL,"Adding PlayingIcon");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iPlaying[aCanvas]= (COggIcon*)c;
     }
     else if (p.iToken==_L("PausedIcon")) { 
       _LIT(KAL,"Adding PausedIcon");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iPaused[aCanvas]= (COggIcon*)c;
       iPaused[aCanvas]->Hide();
     }
     else if (p.iToken==_L("AlarmIcon")) { 
       _LIT(KAL,"Adding AlarmIcon");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iAlarmIcon[aCanvas]= (COggIcon*)c;
       iAlarmIcon[aCanvas]->MakeVisible(iApp->iSettings.iAlarmActive);
     }
     else if (p.iToken==_L("RepeatIcon")) {
       _LIT(KAL,"Adding RepeadIcon");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iRepeatIcon[aCanvas]= (COggIcon*)c;
       iRepeatIcon[aCanvas]->MakeVisible(iApp->iSettings.iRepeat);
     }    
     else if (p.iToken==_L("RandomIcon")) {
       _LIT(KAL,"Adding RandomIcon");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggIcon();
       iRandomIcon[aCanvas]= (COggIcon*)c;
       iRandomIcon[aCanvas]->MakeVisible(iApp->iSettings.iRandom);
     }
     else if (p.iToken==_L("RepeatButton")) { 
       _LIT(KAL,"Adding RepeatButton");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new (ELeave) COggButton();
       iRepeatButton[aCanvas]= (COggButton*)c;
       iRepeatButton[aCanvas]->SetStyle(1);
     }
     else if (p.iToken==_L("RandomButton")) { 
       _LIT(KAL,"Adding RandomButton");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new (ELeave) COggButton();
       iRandomButton[aCanvas]= (COggButton*)c;
       iRandomButton[aCanvas]->SetStyle(1);
     }
     else if (p.iToken==_L("Analyzer")) {
       _LIT(KAL,"Adding Analyzer");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggAnalyzer();
       iAnalyzer[aCanvas]= (COggAnalyzer*)c;
       if (iAnalyzer[aCanvas]) iAnalyzer[aCanvas]->SetStyle(iApp->iAnalyzerState);
     }
     else if (p.iToken==_L("Position")) {
       _LIT(KAL,"Adding Position");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggSlider();
       iPosition[aCanvas]= (COggSlider*)c;
     }
     else if (p.iToken==_L("Volume")) {
       _LIT(KAL,"Adding Volume");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggSlider();
       iVolume[aCanvas]= (COggSlider*)c;
     }
+	else if (p.iToken==_L("VolumeBoost"))
+	{
+      _LIT(KAL,"Adding VolumeBoost");
+	  p.Debug(KAL);
+      c= new(ELeave) COggSlider();
+      iVolumeBoost[aCanvas]= (COggSlider*) c;
+	  iVolumeBoost[aCanvas]->SetMaxValue(EStatic12dB);
+	}
     else if (p.iToken==_L("ScrollBar")) {
       _LIT(KAL,"Adding ScrollBar");
-//	    RDebug::Print(KAL);
-	    p.Debug(KAL);
+	  p.Debug(KAL);
       c= new(ELeave) COggScrollBar();
       iScrollBar[aCanvas]= (COggScrollBar*)c;
       if (iListBox[aCanvas]) {
@@ -510,9 +494,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     }
     else if (p.iToken==_L("ListBox")) {
       c= new(ELeave) COggListBox();
-//      _LIT(KAL,"Adding Listbox at 0x%x");
-//      RDebug::Print(KAL,c);
-      //OGGLOG.WriteFormat(KAL,c);
       iListBox[aCanvas]= (COggListBox*)c;
 	  SetupListBox(iListBox[aCanvas], p.iScaleFactor);
       if (iScrollBar[aCanvas]) {
@@ -527,7 +508,7 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
     else if (p.iToken==_L("Logo")) {
       c= new(ELeave) COggAnimation();
       iLogo[aCanvas]= (COggAnimation*)c;
-    } 
+    }
     else if(p.iToken==_L("HotKeys")||p.iToken==_L("Hotkeys")) {
       SetHotkeysFromSkin(p);
     }
@@ -541,7 +522,6 @@ COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
   }
 
   p.Debug(_L("Canvas read."));
-
 }
 
 TBool COggPlayAppView::SetHotkeysFromSkin(TOggParser& p) {
@@ -1325,6 +1305,7 @@ COggPlayAppView::Update()
   UpdateSongPosition();
   UpdateClock(ETrue);
   UpdateVolume();
+  UpdateVolumeBoost();
   UpdatePlaying();
 }
 
@@ -1531,10 +1512,14 @@ COggPlayAppView::UpdateClock(TBool forceUpdate)
   iAlarm[iMode]->SetText(bufAlarm);
 }
 
-void
-COggPlayAppView::UpdateVolume()
+void COggPlayAppView::UpdateVolume()
 {
   if (iVolume[iMode]) iVolume[iMode]->SetValue(iApp->iVolume);
+}
+
+void COggPlayAppView::UpdateVolumeBoost()
+{
+  if (iVolumeBoost[iMode]) iVolumeBoost[iMode]->SetValue(iApp->iSettings.iGainType);
 }
 
 void COggPlayAppView::UpdatePlaying()
@@ -1868,7 +1853,10 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 		TGainType currentGain = (TGainType) iApp->iSettings.iGainType;
 		TInt newGain = currentGain + 1;
 		if (newGain<=EStatic12dB)
+		{
 			iApp->SetVolumeGainL((TGainType) newGain);
+			UpdateVolumeBoost();
+		}
 
 		return EKeyWasConsumed;
 		}
@@ -1877,7 +1865,10 @@ COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 		TGainType currentGain = (TGainType) iApp->iSettings.iGainType;
 		TInt newGain = currentGain - 1;
 		if (newGain>=EMinus24dB)
+		{
 			iApp->SetVolumeGainL((TGainType) newGain);
+			UpdateVolumeBoost();
+		}
 
 		return EKeyWasConsumed;
 		}

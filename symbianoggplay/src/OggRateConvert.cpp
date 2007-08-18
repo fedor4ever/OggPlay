@@ -169,23 +169,72 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
     case ENoGain:
         break;
 
-    case EMinus12dB:
+    case EMinus3dB:
+		// 11/16 = -3.25dB
+        ApplyNegativeGain(aBuffer, 11, 4);
+        break;
+
+	case EMinus6dB:
+        ApplyNegativeGain(aBuffer, 1);
+        break;
+
+	case EMinus9dB:
+		// 11/32 = -9.28dB
+        ApplyNegativeGain(aBuffer, 11, 5);
+        break;
+
+	case EMinus12dB:
         ApplyNegativeGain(aBuffer, 2);
+        break;
+
+	case EMinus15dB:
+		// 11/64 = -15.3dB
+        ApplyNegativeGain(aBuffer, 11, 6);
         break;
 
 	case EMinus18dB:
         ApplyNegativeGain(aBuffer, 3);
         break;
 
+	case EMinus21dB:
+		// 11/128 = -21.3dB
+        ApplyNegativeGain(aBuffer, 11, 7);
+        break;
+
 	case EMinus24dB:
         ApplyNegativeGain(aBuffer, 4);
         break;
 
-    case EStatic6dB:
+	case EStatic1dB:
+		// 9/8 = +1.02dB
+		ApplyGain(aBuffer, 9, 3);
+		break;
+
+	case EStatic2dB:
+		// 5/4 = +1.94dB
+		ApplyGain(aBuffer, 5, 2);
+		break;
+
+	case EStatic4dB:
+		// 25/16 = +3.88dB
+		ApplyGain(aBuffer, 25, 4);
+		break;
+
+	case EStatic6dB:
         ApplyGain(aBuffer, 1);
         break;
 
-    case EStatic12dB:   
+	case EStatic8dB:
+		// 20/8 = +7.96dB
+        ApplyGain(aBuffer, 20, 3);
+        break;
+
+	case EStatic10dB:
+		// 25/8 = +9.90dB
+        ApplyGain(aBuffer, 25, 3);
+        break;
+
+	case EStatic12dB:   
         ApplyGain(aBuffer, 2);
         break;
     }
@@ -363,16 +412,13 @@ void COggSampleRateConverter::MixChannels( TDes8 &aInputBuffer, TDes8 &aOutputBu
     aOutputBuffer.SetLength(aInputBuffer.Length()>>1) ;
 }
 
-void COggSampleRateConverter::ApplyGain( TDes8 &aInputBuffer, TInt shiftValue )
+void COggSampleRateConverter::ApplyGain(TDes8 &aInputBuffer, TInt shiftValue)
 {
-    
     TInt16 *ptr = (TInt16 *) aInputBuffer.Ptr();
-    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); /* Divided by 2
-                                              because of Int8 to Int16 cast */
+    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); // Divided by 2 because of Int8 to Int16 cast
     if (length <= 0) return;
     
 #ifdef __WINS__
-    
     TInt max = 32767;
     TInt min = -32768;
     TInt tmp,i; 
@@ -384,23 +430,20 @@ void COggSampleRateConverter::ApplyGain( TDes8 &aInputBuffer, TInt shiftValue )
         if (tmp <min) tmp = min; 
         *ptr++ = (TInt16) ((0xFFFF) & tmp);
     }
-    
 #else
-    /* Compiler is lousy, better do it in assembly */
-    
-    asm (
-        
+    /* Compiler is lousy, better do it in assembly */    
+    asm (        
         "ldr   r1, 3333f;"      /* r1 = Max value : 0x7FFF */
         "ldr   r2, 3333f + 4;"  /* r2 = Min value : 0x8000 */
         "mov   r3, %1;"         /* r3 = loop index */
         "1:" /* Loop Begins here */
         "ldrsh   r0, [%0];"
         "mov   r0, r0, lsl %2;"
-        "cmp   r0 , r1 ;"
-        "movgt r0 , r1 ;"
-        "cmp   r0 , r2 ;"
-        "movlt r0 , r2 ;"
-        "strh   r0, [%0], #2 ;"
+        "cmp   r0 , r1;"
+        "movgt r0 , r1;"
+        "cmp   r0 , r2;"
+        "movlt r0 , r2;"
+        "strh   r0, [%0], #2;"
         "subs   r3, r3, #1;"
         "bne  1b;"
         "b   2f;"
@@ -416,27 +459,79 @@ void COggSampleRateConverter::ApplyGain( TDes8 &aInputBuffer, TInt shiftValue )
 #endif
 }
 
-void COggSampleRateConverter::ApplyNegativeGain( TDes8 &aInputBuffer, TInt shiftValue )
-{
+void COggSampleRateConverter::ApplyGain(TDes8 &aInputBuffer, TInt multiplier, TInt shiftValue)
+{    
     TInt16 *ptr = (TInt16 *) aInputBuffer.Ptr();
-    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); /* Divided by 2
-                                              because of Int8 to Int16 cast */
+    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); // Divided by 2 because of Int8 to Int16 cast */
     if (length <= 0) return;
     
 #ifdef __WINS__
-TInt tmp,i; 
-for (i=0; i<length; i++)
-{
-    tmp = *ptr;
-    tmp = tmp >> shiftValue;
-    *ptr++ = (TInt16) ((0xFFFF) & tmp);
+    TInt max = 32767;
+    TInt min = -32768;
+    TInt tmp,i; 
+    for (i=0; i<length; i++)
+    {
+        tmp = *ptr;
+		tmp *= multiplier;
+        tmp = tmp >> shiftValue;
+        if (tmp>max) tmp = max;
+        if (tmp<min) tmp = min; 
+        *ptr++ = (TInt16) ((0xFFFF) & tmp);
+    }
+#else
+    /* Compiler is lousy, better do it in assembly */    
+    asm (      
+		"mov   r1, %2;"         /* Multiplier */
+        "ldr   r2, 3333f;"      /* r1 = Max value : 0x7FFF */
+        "ldr   r3, 3333f + 4;"  /* r2 = Min value : 0x8000 */
+        "mov   r4, %1;"         /* r3 = loop index */
+
+		"1:" /* Loop Begins here */
+        "ldrsh   r0, [%0];"
+		"mul   r0, r1, r0;"
+        "mov   r0, r0, asr %3;"
+        "cmp   r0 , r2;"
+        "movgt r0 , r2;"
+        "cmp   r0 , r3;"
+        "movlt r0 , r3;"
+        "strh  r0, [%0], #2;"
+        "subs  r4, r4, #1;"
+        "bne  1b;"
+        "b   2f;"
+
+		"3333:" /* Constant table */
+        ".align 0;"
+        ".word 32767;"
+        ".word -32768;"
+
+		"2:" /* End of the game */
+    :  /* no output registers */
+    : "r"(ptr), "r"(length), "r"(multiplier), "r"(shiftValue) /* Input */
+    : "r0", "r1", "r2", "r3", "r4", "cc", "memory" /* Clobbered */
+        );
+#endif
 }
+
+void COggSampleRateConverter::ApplyNegativeGain(TDes8 &aInputBuffer, TInt shiftValue)
+{
+    TInt16 *ptr = (TInt16 *) aInputBuffer.Ptr();
+    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); // Divided by 2 because of Int8 to Int16 cast
+    if (length <= 0) return;
+    
+#ifdef __WINS__
+	TInt tmp, i; 
+	for (i=0; i<length; i++)
+	{
+	    tmp = *ptr;
+		tmp = tmp >> shiftValue;
+	    *ptr++ = (TInt16) ((0xFFFF) & tmp);
+	}
 #else
     /* Compiler is lousy, better do it in assembly */
-    asm (
-        
+    asm (        
         "mov   r1, %1;"         /* r1 = loop index */
-        "1:" /* Loop Begins here */
+
+		"1:" /* Loop Begins here */
         "ldrsh   r0, [%0];"
         "mov   r0, r0, asr %2;"
         "strh   r0, [%0], #2 ;"
@@ -445,6 +540,41 @@ for (i=0; i<length; i++)
     :  /* no output registers */
     : "r"(ptr), "r"(length), "r"(shiftValue) /* Input */
     : "r0", "r1", "cc", "memory" /* Clobbered */
+        );
+#endif
+}
+
+void COggSampleRateConverter::ApplyNegativeGain(TDes8 &aInputBuffer, TInt multiplier, TInt shiftValue)
+{
+    TInt16 *ptr = (TInt16 *) aInputBuffer.Ptr();
+    TInt16 length = (TInt16) (aInputBuffer.Length() >>1); // Divided by 2 because of Int8 to Int16 cast
+    if (length <= 0) return;
+    
+#ifdef __WINS__
+	TInt tmp, i; 
+	for (i=0; i<length; i++)
+	{
+	    tmp = *ptr;
+		tmp *= multiplier;
+		tmp = tmp >> shiftValue;
+	    *ptr++ = (TInt16) ((0xFFFF) & tmp);
+	}
+#else
+    /* Compiler is lousy, better do it in assembly */
+    asm (
+		"mov   r1, %2;"         /* multiplier */
+        "mov   r2, %1;"         /* r1 = loop index */
+
+		"1:" /* Loop Begins here */
+        "ldrsh   r0, [%0];"
+		"mul   r0, r1, r0;"
+        "mov   r0, r0, asr %3;"
+        "strh   r0, [%0], #2 ;"
+        "subs   r2, r2, #1;"
+        "bne  1b;"
+    :  /* no output registers */
+    : "r"(ptr), "r"(length), "r"(multiplier), "r"(shiftValue) /* Input */
+    : "r0", "r1", "r2", "cc", "memory" /* Clobbered */
         );
 #endif
 }
