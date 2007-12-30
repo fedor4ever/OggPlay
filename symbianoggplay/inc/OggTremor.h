@@ -21,7 +21,6 @@
 
 #include "e32des8.h"
 #include "eikenv.h"
-#include "bassnd.h"
 #include "ivorbisfile.h"
 #include "OggMsgEnv.h"
 #include "OggHelperFcts.h"
@@ -96,13 +95,13 @@
   const TInt KAudioPriority = EMdaPriorityMax;
 #endif
 
-  // Buffer sizes to use
-  // (approx. 0.1s of audio per buffer)
-  const TInt KBufferSize48K = 16384;
-  const TInt KBufferSize32K = 12288;
-  const TInt KBufferSize22K = 8192;
-  const TInt KBufferSize16K = 6144;
-  const TInt KBufferSize11K = 4096;
+// Buffer sizes to use
+// (approx. 0.1s of audio per buffer)
+const TInt KBufferSize48K = 16384;
+const TInt KBufferSize32K = 12288;
+const TInt KBufferSize22K = 8192;
+const TInt KBufferSize16K = 6144;
+const TInt KBufferSize11K = 4096;
 
 // frequency of canvas Refresh() for graphics updating - need to get FreqBin
 const TInt KOggControlFreq = 14;

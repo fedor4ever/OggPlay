@@ -354,7 +354,9 @@ public:
   void Stop();
   void NextSong();
   void PreviousSong();
+
   void ShowFileInfo();
+
   void SelectPreviousView();
   void SelectNextView();
 

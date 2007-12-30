@@ -525,7 +525,7 @@ TInt COggPlayback::SetAudioCaps(TInt theChannels, TInt theRate)
 
   iOggSampleRateConverter->Init(this, bufferSize, bufferSize-1024, theRate, usedRate, theChannels, usedChannels);
 
-  iOutStreamByteRate= usedChannels * usedRate * sizeof(short);
+  iOutStreamByteRate= usedChannels * usedRate * 2;
   iMaxBytesBetweenFrequencyBins= iOutStreamByteRate / KOggControlFreq;
   return KErrNone;
 }
@@ -768,7 +768,7 @@ void COggPlayback::Play()
     case EPaused:
         break;
 
-    case EStopped:  
+    case EStopped:
         iEof=0;
         break;
 
@@ -921,9 +921,9 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer, TBool /*aRequestFrequencyBins*/
 		if (!requestingFrequencyBins)
 		{
 			// The frequency request has completed
-      iBytesSinceLastFrequencyBin= 0;
+			iBytesSinceLastFrequencyBin= 0;
 
-      iLastFreqArrayIdx++;
+			iLastFreqArrayIdx++;
 			if (iLastFreqArrayIdx >= KFreqArrayLength)
 				iLastFreqArrayIdx = 0;
 

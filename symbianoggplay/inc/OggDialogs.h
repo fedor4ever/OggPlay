@@ -63,15 +63,15 @@ class COggInfoDialog : public CEikDialog
 
 class COggPlayListInfoDialog : public CEikDialog
 {
- public:
+public:
 
   void SetFileName(const TDesC& aFileName);
   void SetFileSize(TInt aFileSize);
   void SetPlayListEntries(TInt aPlayListEntries);
 
   void PreLayoutDynInitL();
- private:
 
+private:
   TFileName iFileName;
   TInt      iFileSize;
   TInt      iPlayListEntries;

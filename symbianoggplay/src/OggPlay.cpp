@@ -1357,8 +1357,7 @@ COggPlayAppUi::SelectNextView()
 		iAppView->FillView(ETitle, iViewBy, filter);
 }
 
-void
-COggPlayAppUi::ShowFileInfo()
+void COggPlayAppUi::ShowFileInfo()
 {
     TBool songPlaying = iSongList->AnySongPlaying();
 	TInt selectedIndex = iAppView->GetSelectedIndex();

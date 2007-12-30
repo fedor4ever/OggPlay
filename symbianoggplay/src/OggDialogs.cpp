@@ -159,12 +159,12 @@ void COggPlayListInfoDialog::SetFileName(const TDesC& aFileName)
 
 void COggPlayListInfoDialog::SetFileSize(TInt aFileSize)
 {
-  iFileSize= aFileSize;
+  iFileSize = aFileSize;
 }
 
 void COggPlayListInfoDialog::SetPlayListEntries(TInt aPlayListEntries)
 {
-  iPlayListEntries= aPlayListEntries;
+  iPlayListEntries = aPlayListEntries;
 }
 
 
@@ -228,8 +228,7 @@ COggInfoWinDialog::PreLayoutDynInitL()
   UpdateModelL(iRichText);
 }
 
-void
-COggInfoWinDialog::SetInfoWinL(const TDesC& msg1, const TDesC& msg2 )
+void COggInfoWinDialog::SetInfoWinL(const TDesC& msg1, const TDesC& msg2 )
 {
     if (iMsg1)
     {
@@ -245,21 +244,17 @@ COggInfoWinDialog::SetInfoWinL(const TDesC& msg1, const TDesC& msg2 )
     iMsg2= msg2.AllocL();
 }
 
-
 COggInfoWinDialog::~COggInfoWinDialog()
 {
-    
     delete iRichText; // contained text object
     delete iCharFormatLayer; // character format layer
     delete iParaFormatLayer; // and para format layer
     delete iMsg1;
     delete iMsg2;
-
 }
 
 
-void
-COggAboutDialog::PreLayoutDynInitL()
+void COggAboutDialog::PreLayoutDynInitL()
 {
   // Create an empty rich text object
   TCharFormat charFormat;
@@ -279,10 +274,9 @@ COggAboutDialog::PreLayoutDynInitL()
   
   iRichText->AppendParagraphL(7);
 
-  TBuf<128> buf;
-
   // Now add the text
   // Center-align
+  TBuf<256> buf;
   paraFormatMask.SetAttrib(EAttAlignment); // interested in alignment
   paraFormat->iHorizontalAlignment=CParaFormat::ECenterAlign; 
   pos = iRichText->CharPosOfParagraph(len,0); // get start of first para
@@ -291,7 +285,6 @@ COggAboutDialog::PreLayoutDynInitL()
   iRichText->InsertL(0,_L("OggPlay "));
 
   // One paragraph to add some space.
-
   pos = iRichText->CharPosOfParagraph(len,2); // get start of 2nd para
   CEikonEnv::Static()->ReadResource(buf, R_OGG_ABOUT_LINE_2);
   iRichText->InsertL(pos,buf);
@@ -323,28 +316,23 @@ COggAboutDialog::PreLayoutDynInitL()
   UpdateModelL(iRichText);
 }
 
-void
-COggAboutDialog::SetVersion(const TDesC& aVersion)
+void COggAboutDialog::SetVersion(const TDesC& aVersion)
 {
   iVersion.Copy(aVersion);
 }
 
-
 COggAboutDialog::~COggAboutDialog()
 {
-    
     delete iRichText; // contained text object
     delete iCharFormatLayer; // character format layer
     delete iParaFormatLayer; // and para format layer
-
 }
 
-void
-CScrollableTextDialog::UpdateModelL(CRichText * aRichText)
+
+void CScrollableTextDialog::UpdateModelL(CRichText * aRichText)
 {
     iScrollableControl->UpdateModelL(aRichText);
 }
-
 
 SEikControlInfo CScrollableTextDialog::CreateCustomControlL(TInt aControlType) 
     { 
@@ -375,33 +363,27 @@ CScrollableRichTextControl ::~CScrollableRichTextControl()
     delete iSBFrame;  // Scroll bar
 }
 
-void CScrollableRichTextControl::UpdateModelL(CRichText * aRichText)
+void CScrollableRichTextControl::UpdateModelL(CRichText* aRichText)
 {
     iRichText = aRichText;
     
     // Create text view and layout.
-    
-    
     // prerequisites for view - viewing rectangle
-    iViewRect=Rect();
-    iViewRect.Shrink(3,3);
-    // context and device
-    CWindowGc& gc=SystemGc(); // get graphics context
-    CBitmapDevice *device=(CBitmapDevice*) (gc.Device()); // device
-    // Create the text layout, (required by text view),
+    iViewRect = Rect();
+    iViewRect.Shrink(3, 3);
+
+	// context and device
+    CWindowGc& gc = SystemGc();
+    CBitmapDevice* device = (CBitmapDevice*) gc.Device();
+
+	// Create the text layout, (required by text view),
     // with the text object and a wrap width (=width of view rect)
-    iLayout=CTextLayout::NewL(iRichText,iViewRect.Width());
-    // Create text view
-    iTextView=CTextView::NewL(iLayout, iViewRect,
-        device,
-        device,
-        &Window(),
-        0, // no window group
-        &iCoeEnv->WsSession()
-        ); // new view
-    
-    CleanupStack::PopAndDestroy();
-    
+    iLayout = CTextLayout::NewL(iRichText, iViewRect.Width());
+
+	// Create text view
+    iTextView = CTextView::NewL(iLayout, iViewRect, device, device, &Window(), NULL, &iCoeEnv->WsSession());
+	CleanupStack::PopAndDestroy();
+
     iTextView->FormatTextL();
     UpdateScrollIndicatorL();
     DrawNow();
@@ -411,7 +393,7 @@ void CScrollableRichTextControl::Draw(const TRect& /*aRect*/) const
 {
     // draw surround
     CGraphicsContext& gc=SystemGc(); // context to draw into
-    
+
     TRect rect=Rect(); // screen boundary
     gc.DrawRect(rect); // outline screen boundary
     rect.Shrink(1,1);

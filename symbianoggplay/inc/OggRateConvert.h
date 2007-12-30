@@ -50,7 +50,7 @@ public:
 private:
     void MixChannels(TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
     void ConvertRateMono(TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
-    void ConvertRateStereo( TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
+    void ConvertRateStereo(TDes8 &aInputBuffer, TDes8 &aOutputBuffer);
     void ApplyGain(TDes8 &aInputBuffer, TInt shiftValue);
     void ApplyGain(TDes8 &aInputBuffer, TInt multiplier, TInt shiftValue);
     void ApplyNegativeGain(TDes8 &aInputBuffer, TInt shiftValue);

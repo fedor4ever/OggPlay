@@ -94,8 +94,8 @@ RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
 
 
 RESOURCE DIALOG r_dialog_about {
-  buttons =  R_AVKON_SOFTKEYS_CANCEL; 
-  flags   = EEikDialogFlagWait;
+  buttons =  R_AVKON_SOFTKEYS_BACK; 
+  flags = EEikDialogFlagWait;
   items = {
     DLG_LINE {
 	type =  EOggScrollableTextControl;
@@ -232,7 +232,8 @@ RESOURCE DIALOG r_dialog_playlist_info {
 		txt="";
 		horiz_align=EEikLabelAlignHLeft;
 	};
-    } ,
+    },
+    
     DLG_LINE {
 	type = EEikCtLabel;
         id = EOggLabelFileName;
@@ -241,29 +242,32 @@ RESOURCE DIALOG r_dialog_playlist_info {
 		txt=ogg_filename_unknown;
 		horiz_align=EEikLabelAlignHLeft;
 	};	
-    } ,
+    },
+
     DLG_LINE {
 	type = EEikCtLabel;
 	prompt= ogg_filesize;
 	id= EOggLabelFileSize;
 	control = LABEL 
 	{
-		txt="0";
+		txt="000000";
 		horiz_align=EEikLabelAlignHLeft;
 	};
-    } ,
+    },
+
     DLG_LINE {
 	type = EEikCtLabel;
 	prompt= ogg_playlist_entries;
 	id = EOggLabelPlayListEntries;
 	control = LABEL 
 	{
-		txt="0";
+		txt="000000";
 		horiz_align=EEikLabelAlignHLeft;
 	};
     }
   };
 }
+
 RESOURCE ARRAY r_hotkey_array {
   items= {
     LBUF { txt=ogg_hotkey_none; },
