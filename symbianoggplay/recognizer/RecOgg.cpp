@@ -59,12 +59,31 @@ void CApaOggRecognizer::DoRecognizeL( const TDesC& aFileName, const TDesC8& /*aB
     return;
 
   // Assuming here that if its a .ogg then its a .ogg 
-  if( aFileName.Right(4).CompareF(_L(".ogg")) != 0 )
-    return;
+  if( aFileName.Right(4).CompareF(_L(".ogg")) == 0 )
+	{
+	// Success
+	iDataType = TDataType(KOggMimeTypeLiteral);
+	iConfidence = EProbable;
+	return;
+	}
 
-  // Success
-  iDataType = TDataType(KOggMimeTypeLiteral);
-  iConfidence = EProbable;
+  // Assuming here that if its a .oga then its a .oga 
+  if( aFileName.Right(4).CompareF(_L(".oga")) == 0 )
+	{
+	// Success
+	iDataType = TDataType(KOggMimeTypeLiteral);
+	iConfidence = EProbable;
+ 	return;
+	}
+
+  // Assuming here that if its a .flac then its a .flac 
+  if( aFileName.Right(5).CompareF(_L(".flac")) == 0 )
+	{
+	// Success
+	iDataType = TDataType(KOggMimeTypeLiteral);
+	iConfidence = EProbable;
+ 	return;
+	}
   }
 
 
