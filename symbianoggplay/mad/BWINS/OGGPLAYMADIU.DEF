@@ -1,0 +1,17 @@
+EXPORTS
+	mad_frame_decode @ 1 NONAME
+	mad_frame_finish @ 2 NONAME
+	mad_frame_init @ 3 NONAME
+	mad_frame_mute @ 4 NONAME
+	mad_stream_buffer @ 5 NONAME
+	mad_stream_finish @ 6 NONAME
+	mad_stream_init @ 7 NONAME
+	mad_stream_skip @ 8 NONAME
+	mad_synth_frame @ 9 NONAME
+	mad_synth_init @ 10 NONAME
+	mad_synth_mute @ 11 NONAME
+	mad_timer_add @ 12 NONAME
+	mad_timer_compare @ 13 NONAME
+	mad_timer_count @ 14 NONAME
+	mad_timer_set @ 15 NONAME
+

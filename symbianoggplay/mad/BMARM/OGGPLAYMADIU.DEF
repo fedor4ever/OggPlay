@@ -1,0 +1,17 @@
+EXPORTS
+	mad_timer_set @ 1 NONAME ; (null)
+	mad_frame_finish @ 2 NONAME R3UNUSED ; (null)
+	mad_frame_init @ 3 NONAME R3UNUSED ; (null)
+	mad_frame_mute @ 4 NONAME R3UNUSED ; (null)
+	mad_stream_buffer @ 5 NONAME R3UNUSED ; (null)
+	mad_stream_finish @ 6 NONAME R3UNUSED ; (null)
+	mad_stream_init @ 7 NONAME R3UNUSED ; (null)
+	mad_stream_skip @ 8 NONAME R3UNUSED ; (null)
+	mad_synth_frame @ 9 NONAME R3UNUSED ; (null)
+	mad_synth_init @ 10 NONAME R3UNUSED ; (null)
+	mad_synth_mute @ 11 NONAME R3UNUSED ; (null)
+	mad_timer_add @ 12 NONAME ; (null)
+	mad_timer_compare @ 13 NONAME ; (null)
+	mad_timer_count @ 14 NONAME ; (null)
+	mad_frame_decode @ 15 NONAME R3UNUSED ; (null)
+
