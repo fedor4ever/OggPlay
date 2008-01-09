@@ -1,0 +1,25 @@
+EXPORTS
+	_ogg_abs @ 1 NONAME ; CODE
+	_ogg_calloc @ 2 NONAME ; CODE
+	_ogg_close @ 3 NONAME ; CODE
+	_ogg_free @ 4 NONAME ; CODE
+	_ogg_labs @ 5 NONAME ; CODE
+	_ogg_malloc @ 6 NONAME ; CODE
+	_ogg_memchr @ 7 NONAME ; CODE
+	_ogg_memcmp @ 8 NONAME ; CODE
+	_ogg_memcpy @ 9 NONAME ; CODE
+	_ogg_memmove @ 10 NONAME ; CODE
+	_ogg_memset @ 11 NONAME ; CODE
+	_ogg_qsort @ 12 NONAME ; CODE
+	_ogg_read @ 13 NONAME ; CODE
+	_ogg_realloc @ 14 NONAME ; CODE
+	_ogg_seek @ 15 NONAME ; CODE
+	_ogg_strcat @ 16 NONAME ; CODE
+	_ogg_strcpy @ 17 NONAME ; CODE
+	_ogg_strlen @ 18 NONAME ; CODE
+	_ogg_strncmp @ 19 NONAME ; CODE
+	_ogg_strstr @ 20 NONAME ; CODE
+	_ogg_tell @ 21 NONAME ; CODE
+	_ogg_toupper @ 22 NONAME ; CODE
+	jcode @ 23 NONAME ; CODE
+

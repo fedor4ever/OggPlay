@@ -1,0 +1,11 @@
+// BLD.INF
+// Component description file
+
+PRJ_PLATFORMS 
+WINS WINSCW ARMI
+
+PRJ_EXPORTS
+..\OggShared.h
+
+PRJ_MMPFILES
+oggshared.mmp

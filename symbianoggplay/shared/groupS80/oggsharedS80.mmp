@@ -1,0 +1,16 @@
+// oggshared.mmp
+TARGET        OggPlayshared.dll
+TARGETTYPE    dll
+UID 0x1000008d 0x1020202C
+
+SOURCEPATH    ..
+SOURCE        dllentry.cpp
+
+SOURCE        utf8fix.c
+SOURCE        MicrosoftInternal.c
+SOURCE        Symbian.cpp
+
+USERINCLUDE ..
+SYSTEMINCLUDE \Epoc32\include
+
+LIBRARY       euser.lib efsrv.lib
