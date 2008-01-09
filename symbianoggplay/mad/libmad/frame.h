@@ -108,11 +108,11 @@ void mad_header_init(struct mad_header *);
 
 int mad_header_decode(struct mad_header *, struct mad_stream *);
 
-void mad_frame_init(struct mad_frame *);
-void mad_frame_finish(struct mad_frame *);
+IMPORT_C void mad_frame_init(struct mad_frame *);
+IMPORT_C void mad_frame_finish(struct mad_frame *);
 
-int mad_frame_decode(struct mad_frame *, struct mad_stream *);
+IMPORT_C int mad_frame_decode(struct mad_frame *, struct mad_stream *);
 
-void mad_frame_mute(struct mad_frame *);
+IMPORT_C void mad_frame_mute(struct mad_frame *);
 
 # endif

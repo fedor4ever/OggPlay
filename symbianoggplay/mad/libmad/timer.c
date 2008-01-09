@@ -19,13 +19,13 @@
  * $Id$
  */
 
+#include <OggShared.h>
+
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
 
 # include "global.h"
-
-# include <stdio.h>
 
 # ifdef HAVE_ASSERT_H
 #  include <assert.h>
@@ -33,13 +33,13 @@
 
 # include "timer.h"
 
-mad_timer_t const mad_timer_zero = { 0, 0 };
+const mad_timer_t mad_timer_zero = { 0, 0 };
 
 /*
  * NAME:	timer->compare()
  * DESCRIPTION:	indicate relative order of two timers
  */
-int mad_timer_compare(mad_timer_t timer1, mad_timer_t timer2)
+EXPORT_C int mad_timer_compare(mad_timer_t timer1, mad_timer_t timer2)
 {
   signed long diff;
 
@@ -124,7 +124,7 @@ void reduce_rational(unsigned long *numer, unsigned long *denom)
 
   factor = gcd(*numer, *denom);
 
-  assert(factor != 0);
+  // assert(factor != 0);
 
   *numer /= factor;
   *denom /= factor;
@@ -141,7 +141,7 @@ unsigned long scale_rational(unsigned long numer, unsigned long denom,
   reduce_rational(&numer, &denom);
   reduce_rational(&scale, &denom);
 
-  assert(denom != 0);
+  // assert(denom != 0);
 
   if (denom < scale)
     return numer * (scale / denom) + numer * (scale % denom) / denom;
@@ -155,7 +155,7 @@ unsigned long scale_rational(unsigned long numer, unsigned long denom,
  * NAME:	timer->set()
  * DESCRIPTION:	set timer to specific (positive) value
  */
-void mad_timer_set(mad_timer_t *timer, unsigned long seconds,
+EXPORT_C void mad_timer_set(mad_timer_t *timer, unsigned long seconds,
 		   unsigned long numer, unsigned long denom)
 {
   timer->seconds = seconds;
@@ -227,7 +227,7 @@ void mad_timer_set(mad_timer_t *timer, unsigned long seconds,
  * NAME:	timer->add()
  * DESCRIPTION:	add one timer to another
  */
-void mad_timer_add(mad_timer_t *timer, mad_timer_t incr)
+EXPORT_C void mad_timer_add(mad_timer_t *timer, mad_timer_t incr)
 {
   timer->seconds  += incr.seconds;
   timer->fraction += incr.fraction;
@@ -267,7 +267,7 @@ void mad_timer_multiply(mad_timer_t *timer, signed long scalar)
  * NAME:	timer->count()
  * DESCRIPTION:	return timer value in selected units
  */
-signed long mad_timer_count(mad_timer_t timer, enum mad_units units)
+EXPORT_C signed long mad_timer_count(mad_timer_t timer, enum mad_units units)
 {
   switch (units) {
   case MAD_UNITS_HOURS:
@@ -342,6 +342,7 @@ unsigned long mad_timer_fraction(mad_timer_t timer, unsigned long denom)
  * NAME:	timer->string()
  * DESCRIPTION:	write a string representation of a timer using a template
  */
+#if 0
 void mad_timer_string(mad_timer_t timer,
 		      char *dest, char const *format, enum mad_units units,
 		      enum mad_units fracunits, unsigned long subparts)
@@ -483,3 +484,4 @@ void mad_timer_string(mad_timer_t timer,
     break;
   }
 }
+#endif

@@ -19,16 +19,14 @@
 
 // INCLUDE FILES
 #include <OggOs.h>
+
+#if defined(PLUGIN_SYSTEM)
 #include "OggPlayController.h"
 #include "MadDecoder.h"
-#ifdef MMF_AVAILABLE
 #include "ImplementationUIDs.hrh"
 
-// -----------------------------------------------------------------------------
 // ImplementationTable
 // Exported proxy for instantiation method resolution.
-// -----------------------------------------------------------------------------
-//
 COggPlayController* NewMadControllerL()
     {
     CMadDecoder * decoder = new (ELeave) CMadDecoder;
@@ -37,39 +35,21 @@ COggPlayController* NewMadControllerL()
 
 const TImplementationProxy ImplementationTable[] =
 	{
-		{{KMadUidControllerImplementation}, NewMadControllerL}
+	{{KMadUidControllerImplementation}, NewMadControllerL}
 	};
 
-// -----------------------------------------------------------------------------
 // ImplementationGroupProxy 
 // Returns implementation table and count to ECOM
 // Returns: ImplementationTable: pointer to implementation table
-// -----------------------------------------------------------------------------
-//
 EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
-	TInt& aTableCount)	// reference used to return implementation count
+TInt& aTableCount)	// reference used to return implementation count
 	{
 	aTableCount = sizeof(ImplementationTable) / sizeof(TImplementationProxy);
 	return ImplementationTable;
 	}
 
-
-#else
-EXPORT_C COggPlayController* NewMadControllerL()
-    {
-    CMadDecoder * decoder = new (ELeave) CMadDecoder;
-    return COggPlayController::NewL(decoder);
-    }
-#endif
-
-// -----------------------------------------------------------------------------
 // E32Dll DLL Entry point
-// -----------------------------------------------------------------------------
-//
 GLDEF_C TInt E32Dll(TDllReason /*aReason*/)
 	{
 	return(KErrNone);
 	}
-
-
-//  End of File

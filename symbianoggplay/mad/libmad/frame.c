@@ -19,13 +19,13 @@
  * $Id$
  */
 
+#include <OggShared.h>
+
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
 
 # include "global.h"
-
-# include <stdlib.h>
 
 # include "bit.h"
 # include "stream.h"
@@ -88,7 +88,7 @@ void mad_header_init(struct mad_header *header)
  * NAME:	frame->init()
  * DESCRIPTION:	initialize frame struct
  */
-void mad_frame_init(struct mad_frame *frame)
+EXPORT_C void mad_frame_init(struct mad_frame *frame)
 {
   mad_header_init(&frame->header);
 
@@ -102,12 +102,12 @@ void mad_frame_init(struct mad_frame *frame)
  * NAME:	frame->finish()
  * DESCRIPTION:	deallocate any dynamic memory associated with frame
  */
-void mad_frame_finish(struct mad_frame *frame)
+EXPORT_C void mad_frame_finish(struct mad_frame *frame)
 {
   mad_header_finish(&frame->header);
 
   if (frame->overlap) {
-    free(frame->overlap);
+    _ogg_free(frame->overlap);
     frame->overlap = 0;
   }
 }
@@ -435,7 +435,7 @@ int mad_header_decode(struct mad_header *header, struct mad_stream *stream)
  * NAME:	frame->decode()
  * DESCRIPTION:	decode a single frame from a bitstream
  */
-int mad_frame_decode(struct mad_frame *frame, struct mad_stream *stream)
+EXPORT_C int mad_frame_decode(struct mad_frame *frame, struct mad_stream *stream)
 {
   frame->options = stream->options;
 
@@ -481,7 +481,7 @@ int mad_frame_decode(struct mad_frame *frame, struct mad_stream *stream)
  * NAME:	frame->mute()
  * DESCRIPTION:	zero all subband values so the frame becomes silent
  */
-void mad_frame_mute(struct mad_frame *frame)
+EXPORT_C void mad_frame_mute(struct mad_frame *frame)
 {
   unsigned int s, sb;
 

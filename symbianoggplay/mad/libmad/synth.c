@@ -19,6 +19,8 @@
  * $Id$
  */
 
+#include <OggShared.h>
+
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
@@ -33,7 +35,7 @@
  * NAME:	synth->init()
  * DESCRIPTION:	initialize synth struct
  */
-void mad_synth_init(struct mad_synth *synth)
+EXPORT_C void mad_synth_init(struct mad_synth *synth)
 {
   mad_synth_mute(synth);
 
@@ -48,7 +50,7 @@ void mad_synth_init(struct mad_synth *synth)
  * NAME:	synth->mute()
  * DESCRIPTION:	zero all polyphase filterbank values, resetting synthesis
  */
-void mad_synth_mute(struct mad_synth *synth)
+EXPORT_C void mad_synth_mute(struct mad_synth *synth)
 {
   unsigned int ch, s, v;
 
@@ -829,7 +831,7 @@ void synth_half(struct mad_synth *synth, struct mad_frame const *frame,
  * NAME:	synth->frame()
  * DESCRIPTION:	perform PCM synthesis of frame subband samples
  */
-void mad_synth_frame(struct mad_synth *synth, struct mad_frame const *frame)
+EXPORT_C void mad_synth_frame(struct mad_synth *synth, struct mad_frame const *frame)
 {
   unsigned int nch, ns;
   void (*synth_frame)(struct mad_synth *, struct mad_frame const *,

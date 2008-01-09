@@ -1,13 +1,15 @@
-//FIXMAD: this is kind of dangerous -- for WINS both FPM_INTEL
-// and FPM_ARM are defined. Seems to work though.
 #if defined(__WINS__)
-#define FPM_INTEL
-// already defined in .mmp file
-//#else
-//#define FPM_ARM
+#define FPM_DEFAULT
+#else
+#define FPM_ARM
 #endif
 
-#define OPT_SPEED 
+#if defined(__VC32__)
+#define SYMBIAN_STACKFIX
+#endif
+
+// #define OPT_SPEED 
+#define OPT_ACCURACY
 
 /* Define to enable a fast subband synthesis approximation optimization. */
 #define OPT_SSO 
@@ -19,28 +21,28 @@
 /* #undef EXPERIMENTAL */
 
 /* Define to 1 if you have the <assert.h> header file. */
-#define HAVE_ASSERT_H 1
+// #define HAVE_ASSERT_H 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #undef HAVE_DLFCN_H */
 
 /* Define to 1 if you have the <errno.h> header file. */
-#define HAVE_ERRNO_H 1
+// #define HAVE_ERRNO_H 1
 
 /* Define to 1 if you have the `fcntl' function. */
 /* #undef HAVE_FCNTL */
 
 /* Define to 1 if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1
+// #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `fork' function. */
 /* #undef HAVE_FORK */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H 1
+// #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the <limits.h> header file. */
-#define HAVE_LIMITS_H 1
+// #define HAVE_LIMITS_H 1
 
 /* Define if your MIPS CPU supports a 2-operand MADD16 instruction. */
 /* #undef HAVE_MADD16_ASM */
@@ -49,34 +51,32 @@
 /* #undef HAVE_MADD_ASM */
 
 /* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
+// #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `pipe' function. */
 /* #undef HAVE_PIPE */
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
+// #define HAVE_STDINT_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H 1
+// #define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the <strings.h> header file. */
-#define HAVE_STRINGS_H 1
+// #define HAVE_STRINGS_H 1
 
-/* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H 1
+// #define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#define HAVE_SYS_TYPES_H 1
+// #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 /* #undef HAVE_SYS_WAIT_H */
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H */
+// #define HAVE_UNISTD_H */
 
 /* Define to 1 if you have the `waitpid' function. */
 /* #undef HAVE_WAITPID */
@@ -125,7 +125,7 @@
 #define SIZEOF_LONG_LONG 8
 
 /* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
+// #define STDC_HEADERS 1
 
 /* Version number of package */
 #define VERSION "0.15.1b"

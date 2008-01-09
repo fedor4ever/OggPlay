@@ -18,6 +18,7 @@
  *
  * $Id$
  */
+
 #ifdef __VC32__
 #pragma warning( disable : 4131 ) 
 #pragma warning( disable : 4127 ) 
@@ -25,6 +26,8 @@
 #pragma warning( disable : 4244 ) 
 #pragma warning( disable : 4706 ) // assignment within conditional expression 
 #endif
+
+#include <OggShared.h>
 
 # ifdef HAVE_CONFIG_H
 #  include "config.h"

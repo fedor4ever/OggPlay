@@ -22,15 +22,13 @@
 #pragma warning( disable : 4244 )  // conversion loss
 #pragma warning( disable : 4018 )  // signed/unsigned mismatch
 
+#include <OggShared.h>
 
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
 
 # include "global.h"
-
-# include <stdlib.h>
-# include <string.h>
 
 # ifdef HAVE_ASSERT_H
 #  include <assert.h>
@@ -1254,7 +1252,7 @@ enum mad_error III_huffdecode(struct mad_bitptr *ptr, mad_fixed_t xr[576],
     }
   }
 
-  assert(-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT);
+  // assert(-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT);
 
 # if 0 && defined(DEBUG)
   if (bits_left < 0)
@@ -1321,7 +1319,7 @@ void III_reorder(mad_fixed_t xr[576], struct channel const *channel,
     }
   }
 
-  memcpy(&xr[18 * sb], &tmp[sb], (576 - 18 * sb) * sizeof(mad_fixed_t));
+  _ogg_memcpy(&xr[18 * sb], &tmp[sb], (576 - 18 * sb) * sizeof(mad_fixed_t));
 }
 
 /*
@@ -2392,9 +2390,9 @@ enum mad_error III_decode(struct mad_bitptr *ptr, struct mad_frame *frame,
     enum mad_error error;
 #if defined SYMBIAN_STACKFIX
     mad_fixed_t **xr;
-	xr=(mad_fixed_t**)malloc(sizeof(mad_fixed_t*)*2);
-	xr[0]=(mad_fixed_t*)malloc(sizeof(mad_fixed_t)*576);
-	xr[1]=(mad_fixed_t*)malloc(sizeof(mad_fixed_t)*576);
+	xr=(mad_fixed_t**)_ogg_malloc(sizeof(mad_fixed_t*)*2);
+	xr[0]=(mad_fixed_t*)_ogg_malloc(sizeof(mad_fixed_t)*576);
+	xr[1]=(mad_fixed_t*)_ogg_malloc(sizeof(mad_fixed_t)*576);
 #else
 	mad_fixed_t xr[2][576];
 #endif
@@ -2523,9 +2521,9 @@ enum mad_error III_decode(struct mad_bitptr *ptr, struct mad_frame *frame,
       }
     }
 #if defined SYMBIAN_STACKFIX
-	free(xr[0]);
-	free(xr[1]);
-	free(xr);
+	_ogg_free(xr[0]);
+	_ogg_free(xr[1]);
+	_ogg_free(xr);
 #endif
 
   }
@@ -2551,7 +2549,7 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
   /* allocate Layer III dynamic structures */
 
   if (stream->main_data == 0) {
-    stream->main_data = malloc(MAD_BUFFER_MDLEN);
+    stream->main_data = _ogg_malloc(MAD_BUFFER_MDLEN);
     if (stream->main_data == 0) {
       stream->error = MAD_ERROR_NOMEM;
       return -1;
@@ -2559,7 +2557,7 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
   }
 
   if (frame->overlap == 0) {
-    frame->overlap = calloc(2 * 32 * 18, sizeof(mad_fixed_t));
+    frame->overlap = _ogg_calloc(2 * 32 * 18, sizeof(mad_fixed_t));
     if (frame->overlap == 0) {
       stream->error = MAD_ERROR_NOMEM;
       return -1;
@@ -2653,10 +2651,10 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
 		   *stream->main_data + stream->md_len - si.main_data_begin);
 
       if (md_len > si.main_data_begin) {
-	assert(stream->md_len + md_len -
-	       si.main_data_begin <= MAD_BUFFER_MDLEN);
+	// assert(stream->md_len + md_len -
+	//       si.main_data_begin <= MAD_BUFFER_MDLEN);
 
-	memcpy(*stream->main_data + stream->md_len,
+	_ogg_memcpy(*stream->main_data + stream->md_len,
 	       mad_bit_nextbyte(&stream->ptr),
 	       frame_used = md_len - si.main_data_begin);
 	stream->md_len += frame_used;
@@ -2692,7 +2690,7 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
   /* preload main_data buffer with up to 511 bytes for next frame(s) */
 
   if (frame_free >= next_md_begin) {
-    memcpy(*stream->main_data,
+    _ogg_memcpy(*stream->main_data,
 	   stream->next_frame - next_md_begin, next_md_begin);
     stream->md_len = next_md_begin;
   }
@@ -2705,7 +2703,7 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
 	extra = next_md_begin - frame_free;
 
       if (extra < stream->md_len) {
-	memmove(*stream->main_data,
+	_ogg_memmove(*stream->main_data,
 		*stream->main_data + stream->md_len - extra, extra);
 	stream->md_len = extra;
       }
@@ -2713,7 +2711,7 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
     else
       stream->md_len = 0;
 
-    memcpy(*stream->main_data + stream->md_len,
+    _ogg_memcpy(*stream->main_data + stream->md_len,
 	   stream->next_frame - frame_free, frame_free);
     stream->md_len += frame_free;
   }

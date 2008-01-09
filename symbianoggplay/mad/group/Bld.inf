@@ -2,15 +2,7 @@
 // Component description file
 
 PRJ_PLATFORMS 
-WINS WINSCW ARMI
+WINS ARMI
 
 PRJ_MMPFILES
-// The non plugin MAD
-//mad.mmp
-// The plugin MAD
-madpluginDecoder.h
-
-PRJ_EXPORTS
-
-// API Headers
-..\libmad\mad.h
+oggmad.mmp

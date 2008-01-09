@@ -27,7 +27,11 @@
 extern "C" {
 # endif
 
-//# define FPM_INTEL
+#if defined(__WINS__)
+#define FPM_DEFAULT
+#else
+#define FPM_ARM
+#endif
 
 
 
@@ -586,7 +590,7 @@ typedef struct {
   unsigned long fraction;	/* 1/MAD_TIMER_RESOLUTION seconds */
 } mad_timer_t;
 
-extern mad_timer_t const mad_timer_zero;
+const mad_timer_t mad_timer_zero = { 0, 0 };
 
 # define MAD_TIMER_RESOLUTION	352800000UL
 
