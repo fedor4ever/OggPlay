@@ -1,0 +1,11 @@
+EXPORTS
+	FLAC__stream_decoder_delete @ 1 NONAME ; CODE
+	FLAC__stream_decoder_finish @ 2 NONAME ; CODE
+	FLAC__stream_decoder_init_ogg_stream @ 3 NONAME ; CODE
+	FLAC__stream_decoder_new @ 4 NONAME ; CODE
+	FLAC__stream_decoder_process_single @ 5 NONAME ; CODE
+	FLAC__stream_decoder_process_until_end_of_metadata @ 6 NONAME ; CODE
+	FLAC__stream_decoder_seek_absolute @ 7 NONAME ; CODE
+	FLAC__stream_decoder_set_metadata_respond @ 8 NONAME ; CODE
+	FLAC__stream_decoder_init_stream @ 9 NONAME ; CODE
+

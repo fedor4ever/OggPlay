@@ -1,0 +1,30 @@
+// oggflac.mmp
+TARGET                                  OggPlayFlaci.dll 
+TARGETTYPE                              dll 
+UID                                     0x1000008d 0x1020202B 
+/* [+] */ macro                         FLAC__NO_DLL FLAC__INTEGER_ONLY_LIBRARY FLAC__HAS_OGG 
+// [-]    MACRO                         FLAC__NO_DLL 
+// [-]    MACRO                         FLAC__INTEGER_ONLY_LIBRARY 
+// [-]    MACRO                         FLAC__HAS_OGG 
+SOURCEPATH                              .. 
+SOURCE                                  dllentry.cpp 
+SOURCE                                  framing.c 
+SOURCE                                  bitreader.c 
+SOURCE                                  bitmath.c 
+SOURCE                                  format.c 
+SOURCE                                  cpu.c 
+SOURCE                                  crc.c 
+SOURCE                                  lpc.c 
+SOURCE                                  md5.c 
+SOURCE                                  fixed.c 
+SOURCE                                  float.c 
+SOURCE                                  memory.c 
+SOURCE                                  ogg_mapping.c 
+SOURCE                                  ogg_decoder_aspect.c 
+SOURCE                                  stream_decoder.c 
+
+USERINCLUDE                             .. 
+SYSTEMINCLUDE                           \Epoc32\include 
+LIBRARY                                 euser.lib 
+LIBRARY                                 efsrv.lib 
+LIBRARY                                 OggPlayShared.lib 

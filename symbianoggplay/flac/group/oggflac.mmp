@@ -1,0 +1,36 @@
+// oggflac.mmp
+TARGET        OggPlayFlaci.dll
+TARGETTYPE    dll
+UID 0x1000008d 0x1020202B
+
+MACRO FLAC__NO_DLL
+MACRO FLAC__INTEGER_ONLY_LIBRARY
+MACRO FLAC__HAS_OGG
+// MACRO FLAC__OVERFLOW_DETECT
+// MACRO DEBUG
+
+SOURCEPATH    ..
+SOURCE        dllentry.cpp
+
+// Ogg support
+SOURCE        framing.c
+
+// Flac stream decoder
+SOURCE        bitreader.c
+SOURCE        bitmath.c
+SOURCE        format.c
+SOURCE        cpu.c
+SOURCE        crc.c
+SOURCE        lpc.c
+SOURCE        md5.c
+SOURCE        fixed.c
+SOURCE        float.c
+SOURCE        memory.c
+SOURCE        ogg_mapping.c
+SOURCE        ogg_decoder_aspect.c
+SOURCE        stream_decoder.c
+
+USERINCLUDE ..
+SYSTEMINCLUDE \Epoc32\include
+
+LIBRARY       euser.lib efsrv.lib OggPlayShared.lib
