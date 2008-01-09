@@ -7,7 +7,6 @@ EPOCSTACKSIZE                           0x8000
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\data 
-USERINCLUDE                             ..\vorbis\plugin 
 USERINCLUDE                             ..\plugin\inc 
 SYSTEMINCLUDE                           \Epoc32\Include 
 
@@ -70,7 +69,7 @@ START BITMAP Oggsplash.mbm
   TARGETPATH                              \system\apps\OggPlay 
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
-  SOURCE                                  c12 s90splash_unstable.bmp 
+  SOURCE                                  c12 s90splash.bmp 
 END  
 
 START BITMAP fish.mbm 

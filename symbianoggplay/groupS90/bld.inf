@@ -18,15 +18,14 @@ PRJ_EXPORTS
 ..\Inc\OggS90.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
-..\Plugin\Inc\OggPlayPlugin.h
-
-// Default skin
-..\bitmaps\skins\icyS90\icyS90.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\icyS90.skn
-..\bitmaps\skins\icyS90\icyS90.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\icyS90.skn
-..\bitmaps\skins\icyS90\icyS90.mbm \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\icyS90.mbm
-..\bitmaps\skins\icyS90\icyS90.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\icyS90.mbm
+..\shared\OggShared.h
 
 PRJ_MMPFILES
+..\shared\groupS90\oggsharedS90.mmp
+
+..\vorbis\groupS90\OggvorbisS90.mmp
+..\flac\groupS90\oggflacS90.mmp
+
+..\Plugin\groupS90\OggPlayControllerS90.mmp
 OggPlayS90.mmp
-..\vorbis\groupS90\OggPluginDecoderS90.mmp
 

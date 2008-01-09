@@ -1,116 +1,110 @@
 //  Basics
-TARGET        OggPlay.exe
-TARGETTYPE    EXE
-UID           0x100039CE 0xF000A661
+TARGET                                  OggPlay.exe 
+TARGETTYPE                              EXE 
+UID                                     0x100039CE 0xF000A661 
+CAPABILITY                              NONE 
+SECUREID                                0xF000A661 
+VENDORID                                0 
+EPOCSTACKSIZE                           0x8000 
+EPOCHEAPSIZE                            0x20000 0x400000 
+USERINCLUDE                             ..\inc 
+USERINCLUDE                             ..\vorbis 
+USERINCLUDE                             ..\flac 
+USERINCLUDE                             ..\data 
+SYSTEMINCLUDE                           \Epoc32\Include 
+SOURCEPATH                              ..\data 
+START RESOURCE OggPlay.rss 
+  TARGETPATH                              resource\apps 
+  HEADER                                   
+END  
 
-CAPABILITY    NONE
-SECUREID      0xF000A661
-VENDORID      0
-
-EPOCSTACKSIZE 0x8000
-EPOCHEAPSIZE 0x20000 0x400000
-
-//  Source Files
-USERINCLUDE ..\inc
-USERINCLUDE ..\vorbis
-USERINCLUDE ..\data
-USERINCLUDE ..\vorbis\plugin
-USERINCLUDE ..\plugin\inc
-SYSTEMINCLUDE \Epoc32\Include 
-
-SOURCEPATH ..\src
-SOURCE OggLog.cpp
-SOURCE OggPlay.cpp
-SOURCE OggControls.cpp
-SOURCE OggDialogs.cpp
-SOURCE OggMsgEnv.cpp
-SOURCE OggPlayAppView.cpp
-SOURCE OggViews.cpp
-SOURCE OggFiles.cpp
-SOURCE OggHelperFcts.cpp
-SOURCE OggFilesSearchDialogs.cpp
-SOURCE OggSettingsContainer.cpp
-SOURCE OggSplashContainer.cpp
-SOURCE OggUserHotkeys.cpp
-SOURCE OggPluginSelectionDialogS60.cpp
-SOURCE OggTremor.cpp
-SOURCE OggMultiThread.cpp
-SOURCE OggThreadClasses.cpp
-SOURCE OggRateConvert.cpp
-
-SOURCEPATH ..\vorbis
-SOURCE TremorDecoder.cpp
+START RESOURCE OggPlay_reg.rss 
+  TARGETPATH                              \private\10003A3F\apps 
+END  
 
 
-//  Resource Files
-SOURCEPATH ..\data
-START RESOURCE OggPlay.rss
-HEADER
-TARGETPATH resource\apps
-END
+SOURCEPATH                              ..\flac 
+SOURCE                                  FlacDecoder.cpp 
 
-START RESOURCE OggPlay_reg.rss
-TARGETPATH \private\10003A3F\apps
-END
+SOURCEPATH                              ..\src 
+SOURCE                                  OggLog.cpp 
+SOURCE                                  OggPlay.cpp 
+SOURCE                                  OggControls.cpp 
+SOURCE                                  OggDialogs.cpp 
+SOURCE                                  OggMsgEnv.cpp 
+SOURCE                                  OggPlayAppView.cpp 
+SOURCE                                  OggViews.cpp 
+SOURCE                                  OggFiles.cpp 
+SOURCE                                  OggHelperFcts.cpp 
+SOURCE                                  OggFilesSearchDialogs.cpp 
+SOURCE                                  OggSettingsContainer.cpp 
+SOURCE                                  OggSplashContainer.cpp 
+SOURCE                                  OggUserHotkeys.cpp 
+SOURCE                                  OggPluginSelectionDialogS60.cpp 
+SOURCE                                  OggTremor.cpp 
+SOURCE                                  OggMultiThread.cpp 
+SOURCE                                  OggThreadClasses.cpp 
+SOURCE                                  OggRateConvert.cpp 
 
-LANG SC EN FR GE DU IT SP SW TU DA PO RU
+SOURCEPATH                              ..\vorbis 
+SOURCE                                  TremorDecoder.cpp 
 
-// Library Files
-// Used by all
-LIBRARY euser.lib 
-LIBRARY apparc.lib
-LIBRARY cone.lib
-LIBRARY efsrv.lib
-LIBRARY eikcore.lib
-LIBRARY eikdlg.lib
-LIBRARY eikcoctl.lib
-LIBRARY eikctl.lib
-LIBRARY gdi.lib
-LIBRARY ws32.lib 
-LIBRARY bafl.lib
-LIBRARY fbscli.lib
-LIBRARY bitgdi.lib
-LIBRARY apgrfx.lib
-LIBRARY egul.lib 
-LIBRARY charconv.lib
-LIBRARY flogger.lib 
-LIBRARY hal.lib
+LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
+LIBRARY                                 aknskins.lib 
+LIBRARY                                 euser.lib 
+LIBRARY                                 apparc.lib 
+LIBRARY                                 cone.lib 
+LIBRARY                                 efsrv.lib 
+LIBRARY                                 eikcore.lib 
+LIBRARY                                 eikdlg.lib 
+LIBRARY                                 eikcoctl.lib 
+LIBRARY                                 eikctl.lib 
+LIBRARY                                 gdi.lib 
+LIBRARY                                 ws32.lib 
+LIBRARY                                 bafl.lib 
+LIBRARY                                 fbscli.lib 
+LIBRARY                                 bitgdi.lib 
+LIBRARY                                 apgrfx.lib 
+LIBRARY                                 egul.lib 
+LIBRARY                                 charconv.lib 
+LIBRARY                                 flogger.lib 
+LIBRARY                                 hal.lib 
+LIBRARY                                 avkon.lib 
+LIBRARY                                 etext.lib 
+LIBRARY                                 form.lib 
+LIBRARY                                 estor.lib 
+LIBRARY                                 etel.lib 
+LIBRARY                                 mediaclientaudiostream.lib 
+LIBRARY                                 OggPlayShared.lib 
+LIBRARY                                 OggPlayVorbisi.lib 
+LIBRARY                                 OggPlayFlaci.lib 
+START BITMAP OggPlayIcon.mbm 
+  TARGETPATH                              \resource\apps 
+  HEADER                                   
+  SOURCEPATH                              ..\aif 
+  SOURCE                                  c16 context_pane_fish.bmp 
+  SOURCE                                  1 context_pane_fish_mask.bmp 
+  SOURCE                                  c16 list_icon_fish.bmp 
+  SOURCE                                  1 list_icon_fish_mask.bmp 
+  SOURCE                                  c16 list_icon_fish_24x24.bmp 
+  SOURCE                                  1 list_icon_fish_mask_24x24.bmp 
 
-LIBRARY avkon.lib
+END  
 
-LIBRARY etext.lib
-LIBRARY form.lib
-LIBRARY estor.lib
+START BITMAP fish.mbm 
+  TARGETPATH                              \resource\apps\OggPlay 
+  HEADER                                   
+  SOURCEPATH                              ..\bitmaps 
+  SOURCE                                  c12 fish0.bmp 
+  SOURCE                                  1 fishmask.bmp 
 
-LIBRARY etel.lib
-LIBRARY mediaclientaudiostream.lib
-LIBRARY OggplayVorbis.lib
+END  
 
-START BITMAP OggPlayIcon.mbm
-TARGETPATH   \resource\apps
-HEADER
-SOURCEPATH   ..\aif
-SOURCE       c16 context_pane_fish.bmp
-SOURCE       1   context_pane_fish_mask.bmp
-SOURCE       c16 list_icon_fish.bmp
-SOURCE       1   list_icon_fish_mask.bmp
-SOURCE       c16 list_icon_fish_24x24.bmp
-SOURCE       1   list_icon_fish_mask_24x24.bmp
-END
+START BITMAP OggSplash.mbm 
+  TARGETPATH                              \private\F000A661 
+  HEADER                                   
+  SOURCEPATH                              ..\bitmaps 
+  SOURCE                                  c12 s60V3splash.bmp 
 
-
-START BITMAP fish.mbm
-TARGETPATH   \resource\apps\OggPlay
-HEADER
-SOURCEPATH   ..\bitmaps
-SOURCE       c12 fish0.bmp
-SOURCE       1   fishmask.bmp
-END
-
-START BITMAP OggSplash.mbm
-TARGETPATH   \private\F000A661
-HEADER
-SOURCEPATH   ..\bitmaps
-SOURCE       c12 s60V3splash_unstable.bmp
-END
+END  
 

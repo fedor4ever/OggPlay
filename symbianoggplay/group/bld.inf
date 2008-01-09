@@ -18,15 +18,11 @@ PRJ_EXPORTS
 ..\Inc\OggS60.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
-..\Plugin\Inc\OggPlayPlugin.h
-
-// Default skin
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.skn
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
-..\bitmaps\skins\mcNuOggPlay\mcNuOggPlay.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\mcNuOggPlay.mbm
+..\shared\OggShared.h
 
 PRJ_MMPFILES
+..\shared\group\oggshared.mmp
 ..\vorbis\group\oggvorbis.mmp
+..\flac\group\oggflac.mmp
 OggPlay.mmp
 

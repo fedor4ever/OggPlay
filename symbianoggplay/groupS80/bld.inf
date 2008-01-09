@@ -18,14 +18,13 @@ PRJ_EXPORTS
 ..\Inc\OggS80.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
-..\Plugin\Inc\OggPlayPlugin.h
-
-// Default skin
-..\bitmaps\skins\icyS80\icyS80.skn \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\icyS80.skn
-..\bitmaps\skins\icyS80\icyS80.skn \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\icyS80.skn
-..\bitmaps\skins\icyS80\icyS80.mbm \epoc32\release\wins\udeb\z\system\apps\OGGPLAY\icyS80.mbm
-..\bitmaps\skins\icyS80\icyS80.mbm \epoc32\release\winscw\udeb\z\system\apps\OGGPLAY\icyS80.mbm
+..\shared\OggShared.h
 
 PRJ_MMPFILES
+..\shared\groupS80\oggsharedS80.mmp
+
+..\vorbis\groupS80\OggvorbisS80.mmp
+..\flac\groupS80\oggflacS80.mmp
+
+..\Plugin\groupS80\OggPlayControllerS80.mmp
 OggPlayS80.mmp
-..\vorbis\groupS80\OggPluginDecoderS80.mmp

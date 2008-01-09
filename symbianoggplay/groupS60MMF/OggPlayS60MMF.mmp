@@ -1,16 +1,14 @@
+
 TARGET                                  OggPlay.app 
 TARGETTYPE                              app 
 TARGETPATH                              \system\apps\Oggplay 
 UID                                     0x100039CE 0x1000A661 
 EPOCSTACKSIZE                           0x8000 
-
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\data 
-USERINCLUDE                             ..\vorbis\plugin 
 USERINCLUDE                             ..\plugin\inc 
 SYSTEMINCLUDE                           \Epoc32\Include 
-
 SOURCEPATH                              ..\data 
 START RESOURCE OggPlay.rss 
   TARGETPATH                              \system\apps\Oggplay 
@@ -59,7 +57,6 @@ LIBRARY                                 charconv.lib
 LIBRARY                                 flogger.lib 
 LIBRARY                                 hal.lib 
 LIBRARY                                 avkon.lib 
-LIBRARY                                 MediaClientImage.lib 
 LIBRARY                                 etext.lib 
 LIBRARY                                 form.lib 
 LIBRARY                                 estor.lib 
@@ -67,12 +64,12 @@ LIBRARY                                 etel.lib
 LIBRARY                                 mediaclientaudiostream.lib 
 LIBRARY                                 MediaClientAudio.lib 
 LIBRARY                                 MMFControllerFramework.lib 
-
 START BITMAP OggSplash.mbm 
   TARGETPATH                              \system\apps\OggPlay 
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
-  SOURCE                                  c12 S60MMFSplash_unstable.bmp 
+  SOURCE                                  c12 S60MMFSplash.bmp 
+
 END  
 
 START BITMAP fish.mbm 
@@ -81,5 +78,6 @@ START BITMAP fish.mbm
   SOURCEPATH                              ..\bitmaps 
   SOURCE                                  c12 fish0.bmp 
   SOURCE                                  1 fishmask.bmp 
+
 END  
 

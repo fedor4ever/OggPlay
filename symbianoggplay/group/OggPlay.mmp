@@ -8,9 +8,8 @@ EPOCSTACKSIZE 0x8000
 //  Source Files
 USERINCLUDE ..\inc
 USERINCLUDE ..\vorbis
+USERINCLUDE ..\flac
 USERINCLUDE ..\data
-USERINCLUDE ..\vorbis\plugin
-USERINCLUDE ..\plugin\inc
 SYSTEMINCLUDE \Epoc32\Include 
 
 SOURCEPATH ..\src
@@ -36,6 +35,8 @@ SOURCE OggRateConvert.cpp
 SOURCEPATH ..\vorbis
 SOURCE TremorDecoder.cpp
 
+SOURCEPATH ..\flac
+SOURCE FlacDecoder.cpp
 
 //  Resource Files
 RESOURCE ..\data\OggPlay.rss
@@ -63,25 +64,23 @@ LIBRARY egul.lib
 LIBRARY charconv.lib
 LIBRARY flogger.lib 
 LIBRARY hal.lib
-
 LIBRARY avkon.lib
-LIBRARY MediaClientImage.lib 
-
 LIBRARY etext.lib
 LIBRARY form.lib
 LIBRARY estor.lib
-
 LIBRARY etel.lib
-
 LIBRARY mediaclientaudiostream.lib
-LIBRARY libvorbisidec.lib
+
+LIBRARY OggPlayShared.lib
+LIBRARY OggPlayVorbisi.lib
+LIBRARY OggPlayFlaci.lib
 
 //  Build the AIF & MBM files
 START BITMAP OggSplash.mbm
 TARGETPATH   \system\apps\OggPlay
 HEADER
 SOURCEPATH   ..\bitmaps
-SOURCE       c12 s60splash_unstable.bmp
+SOURCE       c12 s60splash.bmp
 END
 
 START BITMAP fish.mbm
