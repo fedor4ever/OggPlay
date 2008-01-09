@@ -19,8 +19,7 @@
 #ifndef OGGPLAYCONTROLLER_H
 #define OGGPLAYCONTROLLER_H
 
-// INCLUDES
-#include <E32Base.h>
+#include <e32base.h>
 #include <e32std.h>
 #include <e32math.h>
 #include <ImplementationProxy.h>
@@ -29,284 +28,256 @@
 #include <mmf\server\mmfformat.h>
 #include <MmfAudioOutput.h>
 #include <MmfFile.h>
-
 #include <mdaaudiooutputstream.h>
 #include <mda/common/audio.h>
 
 #include "OggRateConvert.h"
 #include "OggPlayDecoder.h"
 
-// FORWARD DECLARATIONS
-class COggSource;
+const TInt KMaxCommentLength = 256;
+
 class RFile;
-
-// Literals
-_LIT(KFakeFormatDecodePanic, "FakeFormatDecode");
-
-// CLASS DECLARATION
+class COggSource;
 class COggPlayController :	public CMMFController,
-                            public MMMFAudioPlayDeviceCustomCommandImplementor,
-                            public MMMFAudioPlayControllerCustomCommandImplementor,
-                            public MAsyncEventHandler,
-                            public MOggSampleRateFillBuffer,
-							public MMdaAudioOutputStreamCallback
+public MMMFAudioPlayDeviceCustomCommandImplementor, public MMMFAudioPlayControllerCustomCommandImplementor,
+public MAsyncEventHandler, public MOggSampleRateFillBuffer, public MMdaAudioOutputStreamCallback
 	{
-	public:	 // Constructors and destructor
+public:
+    // The decoder passed in the NewL is owned and will be destroyed by the controller
+	static COggPlayController* NewL();
+	~COggPlayController();
 
-        /**
-        * Two-phased constructor.
-        */
-        // The decoder passed in the NewL is owned and will be destroyed by the controller
-		static COggPlayController* NewL(RFs* aFs, MDecoder *aDecoder);
+private:
+    COggPlayController();
+	void ConstructL();
 
-        /**
-        * Destructor.
-        */
-		~COggPlayController();
+	// From MMdaAudioOutputStreamCallback
+	void MaoscPlayComplete(TInt aError);
+	void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
+	void MaoscOpenComplete(TInt aError);
 
-	private:
+public:
+	// Functions from base classes
 
-        COggPlayController(RFs* aFs, MDecoder *aDecoder);
-		/**
-        * Symbian 2nd phase constructor.
-        */
-		void ConstructL();
-
-		// From MMdaAudioOutputStreamCallback
-		void MaoscPlayComplete(TInt aError);
-		void MaoscBufferCopied(TInt aError, const TDesC8& aBuffer);
-		void MaoscOpenComplete(TInt aError);
-
-	public:	// Functions from base classes
-
-		/**
-        * From CMMFController Add data source to controller.
-        * @since
-        * @param aDataSource A reference to the data source.
-        * @return void
-        */
-		void AddDataSourceL(MDataSource& aDataSource);
+	/**
+    * From CMMFController Add data source to controller.
+    * @since
+    * @param aDataSource A reference to the data source.
+    * @return void
+    */
+	void AddDataSourceL(MDataSource& aDataSource);
 	
-		/**
-        * From CMMFController Add data sink to controller.
-        * @since
-        * @param aDataSink A reference to the data sink.
-        * @return void
-        */
-		void AddDataSinkL(MDataSink& aDataSink);
+	/**
+    * From CMMFController Add data sink to controller.
+    * @since
+    * @param aDataSink A reference to the data sink.
+    * @return void
+    */
+	void AddDataSinkL(MDataSink& aDataSink);
 
-		/**
-        * From CMMFController Remove data source from controller.
-        * @since
-        * @param  aDataSource A reference to the data source.
-        * @return void
-        */
-		void RemoveDataSourceL(MDataSource& aDataSource);
+	/**
+    * From CMMFController Remove data source from controller.
+    * @since
+    * @param  aDataSource A reference to the data source.
+    * @return void
+    */
+	void RemoveDataSourceL(MDataSource& aDataSource);
 
-		/**
-        * From CMMFController Remove data sink from controller.
-        * @since
-        * @param aDataSink A reference to the data sink.
-        * @return void
-        */
-		void RemoveDataSinkL(MDataSink& aDataSink);
+	/**
+    * From CMMFController Remove data sink from controller.
+    * @since
+    * @param aDataSink A reference to the data sink.
+    * @return void
+    */
+	void RemoveDataSinkL(MDataSink& aDataSink);
         
-		/**
-        * From CMMFController Handle custom commands to controller.
-        * @since
-        * @param aMessage Message to controller.
-        * @return void
-        */
-		void CustomCommand(TMMFMessage& aMessage);
+	/**
+    * From CMMFController Handle custom commands to controller.
+    * @since
+    * @param aMessage Message to controller.
+    * @return void
+    */
+	void CustomCommand(TMMFMessage& aMessage);
         
-		/**
-        * From CMMFController Set priority settings.
-        * @since
-        * @param aPrioritySettings Wanted priority.
-        * @return void
-        */
-		void SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings);
+	/**
+    * From CMMFController Set priority settings.
+    * @since
+    * @param aPrioritySettings Wanted priority.
+    * @return void
+    */
+	void SetPrioritySettings(const TMMFPrioritySettings& aPrioritySettings);
 
-        /**
-        * From MAsyncEventHandler
-        */
-        virtual TInt SendEventToClient(const TMMFEvent& aEvent);
+    /**
+    * From MAsyncEventHandler
+    */
+    TInt SendEventToClient(const TMMFEvent& aEvent);
 
-		/**
-        * From CMMFController Reset controller.
-        * @since
-        * @param void
-        * @return void
-        */
-		void ResetL();
+	/**
+    * From CMMFController Reset controller.
+    * @since
+    * @param void
+    * @return void
+    */
+	void ResetL();
 
-		/**
-        * From CMMFController  Primes controller.
-        * @since
-        * @param void
-        * @return void
-        */
-		void PrimeL();
+	/**
+    * From CMMFController  Primes controller.
+    * @since
+    * @param void
+    * @return void
+    */
+	void PrimeL();
 
-		/**
-        * From CMMFController Start recording.
-        * @since
-        * @param void
-        * @return void
-        */
-		void PlayL();
+	/**
+    * From CMMFController Start recording.
+    * @since
+    * @param void
+    * @return void
+    */
+	void PlayL();
 
-		/**
-        * From CMMFController Pause recording.
-        * @since
-        * @param void
-        * @return void
-        */
-		void PauseL();
+	/**
+    * From CMMFController Pause recording.
+    * @since
+    * @param void
+    * @return void
+    */
+	void PauseL();
 
-		/**
-        * From CMMFController Stop recording.
-        * @since
-        * @param void
-        * @return void
-        */
-		void StopL();
+	/**
+    * From CMMFController Stop recording.
+    * @since
+    * @param void
+    * @return void
+    */
+	void StopL();
 
-		/**
-        * From CMMFController Returns current recording position.
-        * @since
-        * @param void
-        * @return Current position of recording.
-        */
-		TTimeIntervalMicroSeconds PositionL() const;
+	/**
+    * From CMMFController Returns current recording position.
+    * @since
+    * @param void
+    * @return Current position of recording.
+    */
+	TTimeIntervalMicroSeconds PositionL() const;
 
-		/**
-        * From CMMFController Sets current recording position. Not supported.
-        * @since
-        * @param aPosition Reference to wanted position.
-        * @return void
-        */
-		void SetPositionL(const TTimeIntervalMicroSeconds& aPosition);
+	/**
+    * From CMMFController Sets current recording position. Not supported.
+    * @since
+    * @param aPosition Reference to wanted position.
+    * @return void
+    */
+	void SetPositionL(const TTimeIntervalMicroSeconds& aPosition);
 
-		/**
-        * From CMMFController Returns current maximum duration.
-        * @since
-        * @param void 
-        * @return Maximum remaining duration of recording.
-        */
-		TTimeIntervalMicroSeconds DurationL() const;
+	/**
+    * From CMMFController Returns current maximum duration.
+    * @since
+    * @param void 
+    * @return Maximum remaining duration of recording.
+    */
+	TTimeIntervalMicroSeconds DurationL() const;
 
-		void GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries);
-		CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex);
+	void GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries);
+	CMMFMetaDataEntry* GetMetaDataEntryL(TInt aIndex);
 
-        void MapdSetVolumeL(TInt aVolume);
-        void MapdGetMaxVolumeL(TInt& aMaxVolume);
-        void MapdGetVolumeL(TInt& aVolume);
-        void MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration);
-        void MapdSetBalanceL(TInt aBalance);
-        void MapdGetBalanceL(TInt& aBalance);
-        void MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart, const TTimeIntervalMicroSeconds& aEnd);
-        void MapcDeletePlaybackWindowL();
-        void MapcGetLoadingProgressL(TInt& aPercentageComplete);
+    void MapdSetVolumeL(TInt aVolume);
+    void MapdGetMaxVolumeL(TInt& aMaxVolume);
+    void MapdGetVolumeL(TInt& aVolume);
+    void MapdSetVolumeRampL(const TTimeIntervalMicroSeconds& aRampDuration);
+    void MapdSetBalanceL(TInt aBalance);
+    void MapdGetBalanceL(TInt& aBalance);
+    void MapcSetPlaybackWindowL(const TTimeIntervalMicroSeconds& aStart, const TTimeIntervalMicroSeconds& aEnd);
+    void MapcDeletePlaybackWindowL();
+    void MapcGetLoadingProgressL(TInt& aPercentageComplete);
         
-        //From MOggSampleRateFillBuffer
-        TInt GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins);
+    // From MOggSampleRateFillBuffer
+    TInt GetNewSamples(TDes8 &aBuffer);
 
-    private: // Internal Functions
-        void OpenFileL(const TDesC& aFile, TBool aOpenForInfo);
-        void GetFrequenciesL(TMMFMessage& aMessage );
-        void SetVolumeGainL(TMMFMessage& aMessage);
+private:
+	// Internal Functions
+	MDecoder* GetDecoderL(const TDesC& aFileName);
+    void OpenFileL(const TDesC& aFile);
+	void OpenCompleteL();
 
-		TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
-		void SetAudioCapsL(TInt theChannels, TInt theRate);
+	void GetFrequenciesL(TMMFMessage& aMessage);
+    void SetVolumeGainL(TMMFMessage& aMessage);
 
-		void PlayNowL();
-		void PlayDeferred();
+	TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
+	void SetAudioCapsL(TInt theChannels, TInt theRate);
 
-	private: // Data
+	void PlayNowL();
+	void PlayDeferred();
 
-		/**
-        * Controller internal states
-        */
-		enum TOggPlayControllerState
+private:
+    // Controller internal states
+	enum TOggPlayControllerState
 	    {
-			EStateNotOpened = 0,
-            EStatePrimed,
-            EStateOpen,
-			EStatePlaying,
-            EStatePaused,
-            EStateDestroying,
-            EStateInterrupted
+		EStateNotOpened,
+        EStateOpenInfo,
+        EStateOpen,
+        EStatePrimed,
+		EStatePlaying,
+        EStatePaused,
+        EStateDestroying,
+        EStateInterrupted
 		};
 
-	    TOggPlayControllerState iState;
-
-        // OggTremor stuff
-        TFileName iFileName;
-        RFile *iFile;
+	TOggPlayControllerState iState;
         
-        enum { KMaxStringLength = 256 };
-        TBuf<KMaxStringLength>   iAlbum;
-        TBuf<KMaxStringLength>   iArtist;
-        TBuf<KMaxStringLength>   iGenre;
-        TBuf<KMaxStringLength>   iTitle;
-        TBuf<KMaxStringLength>   iTrackNumber;
-        TTimeIntervalMicroSeconds iFileLength;
+    TBuf<KMaxCommentLength> iAlbum;
+    TBuf<KMaxCommentLength> iArtist;
+    TBuf<KMaxCommentLength> iGenre;
+    TBuf<KMaxCommentLength> iTitle;
+    TBuf<KMaxCommentLength> iTrackNumber;
+    TTimeIntervalMicroSeconds iFileLength;
 
-		RFs* iFs;
-        MDecoder *iDecoder;
+	RFs iFs;
+    TFileName iFileName;
+    MDecoder *iDecoder;
         
-        CMMFAudioOutput * iAudioOutput;
-        CMMFBuffer * iSinkBuffer;
-        TBool iOwnSinkBuffer;
-        COggSource * iOggSource;
-        TMMFPrioritySettings iMMFPrioritySettings;
-        TBool iRandomRingingTone;
-        TInt iUsedRate;
-        TInt iUsedChannels;
+    CMMFAudioOutput* iAudioOutput;
+    COggSource* iOggSource;
 
-		enum TStreamState
+	TMMFPrioritySettings iMMFPrioritySettings;
+    TBool iRandomRingingTone;
+    TInt iUsedRate;
+    TInt iUsedChannels;
+
+	enum TStreamState
 		{
-			EStreamNotOpen,
-			EStreamStateRequested,
-			EStreamOpened
+		EStreamNotOpen,
+		EStreamStateRequested,
+		EStreamOpened
 		};
 
-		CMdaAudioOutputStream* iStream;
-		TMdaAudioDataSettings iSettings;
-		TBool iStreamError;
-		TStreamState iStreamState;
-		TMMFMessage* iStreamMessage;
-		TBool iPlayRequestPending;
+	CMdaAudioOutputStream* iStream;
+	TMdaAudioDataSettings iSettings;
+	TBool iStreamError;
+	TStreamState iStreamState;
+	TMMFMessage* iStreamMessage;
+	TBool iPlayRequestPending;
 
-		class TFreqBins 
+	class TFreqBins 
 		{
-		public:
-			TInt64 iTime;
-			TInt32 iFreqCoefs[KNumberOfFreqBins];
+	public:
+		TInt64 iPcmByte;
+		TInt32 iFreqCoefs[KNumberOfFreqBins];
 		};
 
-		TFreqBins iFreqArray[KFreqArrayLength];
-		TInt iLastFreqArrayIdx;
+	TFreqBins iFreqArray[KFreqArrayLength];
+	TInt iLastFreqArrayIdx;
 
-		TBool iRequestingFrequencyBins;
+	TBool iRequestingFrequencyBins;
+	TInt iBytesSinceLastFrequencyBin;
+	TInt iMaxBytesBetweenFrequencyBins;
+	TInt64 iLastPlayTotalBytes;
 
-		TInt iRate;
-		TInt iChannels;
-		TInt iBitRate;
-		TInt iFileSize;
+	TInt iRate;
+	TInt iChannels;
+	TInt iBitRate;
+	TInt iFileSize;
 	};
 
-enum
-{
-    KOggPlayPluginErrNotReady = -200,
-    KOggPlayPluginErrNotSupported,
-    KOggPlayPluginErrFileNotFound,
-    KOggPlayPluginErrOpeningFile
-};
 
-
-    
 /**
 Fake format decode class: this is required to satisfy CMMFAudioOutput::NegotiateL
 which requires a CMMFFormatDecode: it will query it for configuration info 
@@ -316,11 +287,8 @@ class has no other functionality other than reporting this information.
 class CFakeFormatDecode : public CMMFFormatDecode
 	{
 public:
-	static CFakeFormatDecode* NewL(	TFourCC aFourCC, 
-									TUint aChannels, 
-									TUint aSampleRate, 
-									TUint aBitRate);
-	virtual ~CFakeFormatDecode();
+	CFakeFormatDecode(TFourCC aFourCC, TUint aChannels, TUint aSampleRate, TUint aBitRate);
+	~CFakeFormatDecode();
 	
 	virtual TUint Streams(TUid aMediaType) const;
 	virtual TTimeIntervalMicroSeconds FrameTimeInterval(TMediaId aMediaType) const;
@@ -331,8 +299,7 @@ public:
 	virtual TUint NumChannels();
 	virtual TUint SampleRate();
 	virtual TUint BitRate();
-private:
-	CFakeFormatDecode();
+
 private:
 	TFourCC iFourCC;
 	TUint iChannels;
@@ -341,11 +308,12 @@ private:
 	};
 
 
-class COggSource: public CBase, public MDataSource
+class COggSource : public CBase, public MDataSource
 {
 public:
     COggSource(MOggSampleRateFillBuffer &aSampleRateFillBuffer);
     ~COggSource();
+
     void ConstructL(TInt aBufferSize, TInt aInputRate, TInt aOutputRate, TInt aInputChannel, TInt aOutputChannel);
 
     // from MDataSource:
@@ -363,6 +331,7 @@ public:
     void SetSink(MDataSink* aSink);
 	void SetVolumeGain(TGainType aGain);
 
+public:
 	TInt64 iTotalBufferBytes;
 
 private:
