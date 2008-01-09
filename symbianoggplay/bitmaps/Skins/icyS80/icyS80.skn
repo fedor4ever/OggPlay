@@ -54,7 +54,7 @@ OggPlay 1 {
       Position 404 14 40 13
     }
     Analyzer {
-      Position 352 110 120 70
+      Position 352 110 120 60
       BarIcon  46 47
     }
   }
