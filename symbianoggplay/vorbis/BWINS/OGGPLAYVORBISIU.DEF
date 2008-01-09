@@ -1,0 +1,29 @@
+EXPORTS
+	ov_bitrate @ 1 NONAME
+	ov_bitrate_instant @ 2 NONAME
+	ov_clear @ 3 NONAME
+	ov_comment @ 4 NONAME
+	ov_getFreqBin @ 5 NONAME
+	ov_info @ 6 NONAME
+	ov_open @ 7 NONAME
+	ov_open_callbacks @ 8 NONAME
+	ov_pcm_seek @ 9 NONAME
+	ov_pcm_seek_page @ 10 NONAME
+	ov_pcm_tell @ 11 NONAME
+	ov_pcm_total @ 12 NONAME
+	ov_raw_seek @ 13 NONAME
+	ov_raw_tell @ 14 NONAME
+	ov_raw_total @ 15 NONAME
+	ov_read @ 16 NONAME
+	ov_reqFreqBin @ 17 NONAME
+	ov_seekable @ 18 NONAME
+	ov_serialnumber @ 19 NONAME
+	ov_streams @ 20 NONAME
+	ov_test @ 21 NONAME
+	ov_test_callbacks @ 22 NONAME
+	ov_test_open @ 23 NONAME
+	ov_time_seek @ 24 NONAME
+	ov_time_seek_page @ 25 NONAME
+	ov_time_tell @ 26 NONAME
+	ov_time_total @ 27 NONAME
+
