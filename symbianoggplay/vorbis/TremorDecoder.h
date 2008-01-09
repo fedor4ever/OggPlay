@@ -20,45 +20,46 @@
 #define TREMORDECODER_H
 
 #include <e32base.h>
-#include "OggPlayDecoder.h"
+#include <f32file.h>
+
 #include "ivorbisfile.h"
+#include "OggPlayDecoder.h"
 
-
-class RFs;
 class CTremorDecoder: public CBase, public MDecoder
-{
+	{
 public:
-  CTremorDecoder(RFs& aFs);
-  ~CTremorDecoder();
-  TInt Clear();
-  TInt Open(RFile* f,const TDesC& aFilename=_L(""));
-  TInt OpenInfo(RFile* f,const TDesC& aFilename=_L(""));
-  TInt Read(TDes8& aBuffer,int Pos);
-  TInt Close();
+	CTremorDecoder(RFs& aFs);
+	~CTremorDecoder();
 
-  TInt Channels();
-  TInt Rate();
-  TInt Bitrate();
-  TInt64 Position();
-  void Setposition(TInt64 aPosition);
-  TInt64 TimeTotal();
-  TInt FileSize();
+	TInt Clear();
+	TInt Open(const TDesC& aFilename);
+	TInt OpenInfo(const TDesC& aFilename);
+	TInt OpenComplete();
 
-  void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
-  void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
-  TBool RequestingFrequencyBins();
+	TInt Read(TDes8& aBuffer, TInt Pos);
+	void Close();
 
-private:
-  void GetString(TDes& aBuf, const char* aStr);
+	TInt Channels();
+	TInt Rate();
+	TInt Bitrate();
+	void Setposition(TInt64 aPosition);
+	TInt64 TimeTotal();
+	TInt FileSize();
 
-public: 
+	void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
+	void GetFrequencyBins(TInt32* aBins, TInt NumberOfBins);
+	TBool RequestingFrequencyBins();
 
 private:
-  TInt iCurrentSection; // used in the call to ov_read
-  OggVorbis_File iVf;
-  vorbis_info *vi;
+	void GetString(TDes& aBuf, const char* aStr);
 
-  RFs& iFs;
-};
+private:
+	TInt iCurrentSection; // used in the call to ov_read
+	OggVorbis_File iVf;
+	vorbis_info *vi;
+
+	RFs& iFs;
+	RFile iFile;
+	};
 
 #endif

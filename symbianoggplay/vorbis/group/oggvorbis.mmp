@@ -1,21 +1,25 @@
-// oggvorbis.mmp
-TARGET        libvorbisidec.dll
+TARGET        OggPlayVorbisi.dll
 TARGETTYPE    dll
 UID 0x1000008d 0x101FD21D
 
 SOURCEPATH    ..
 SOURCE        dllentry.cpp
-SOURCE        mdct.c block.c window.c \
-              synthesis.c info.c \
-              floor1.c floor0.c \
-              res012.c mapping0.c registry.c codebook.c \
-              sharedbook.c framing.c bitwise.c \
-              vorbisfile.c \
-              utf8Fix.c
 
-SOURCE        microsoftInternal.c
-SOURCE        Symbian.cpp
+SOURCE        mdct.c
+SOURCE        block.c
+SOURCE        window.c
+SOURCE        synthesis.c
+SOURCE        info.c
+SOURCE        floor1.c
+SOURCE        floor0.c
+SOURCE        res012.c
+SOURCE        mapping0.c
+SOURCE        registry.c
+SOURCE        codebook.c
+SOURCE        sharedbook.c
+SOURCE        framing.c
+SOURCE        bitwise.c
+SOURCE        vorbisfile.c
 
 SYSTEMINCLUDE \Epoc32\include
-
-LIBRARY       euser.lib efsrv.lib
+LIBRARY       euser.lib efsrv.lib OggPlayShared.lib

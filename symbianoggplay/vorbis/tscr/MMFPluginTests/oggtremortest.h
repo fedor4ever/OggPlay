@@ -8,34 +8,25 @@
 #include <MdaAudioSamplePlayer.h>
 #include "OggPluginAdaptor.h"
 
-#ifndef MMF_AVAILABLE
-#include <e32uid.h>
-#include <OggPlayPlugin.h>
-#endif
-
-
 
 class CIvorbisTest: public CBase, public MKeyPressObserver, public MPlaybackObserver
-    {
-    public:
-        
-        static CIvorbisTest * NewL(CConsoleBase *aConsole);
+	{
+public:   
+	static CIvorbisTest * NewL(CConsoleBase *aConsole);
+	~CIvorbisTest();
 
-        // Destruction
-        ~CIvorbisTest();
+	virtual void NotifyPlayComplete();
+	virtual void NotifyUpdate();
+	virtual void NotifyPlayInterrupted();
 
-        virtual void NotifyPlayComplete();
-        virtual void NotifyUpdate();
-        virtual void NotifyPlayInterrupted();
-    private:
-        TInt ProcessKeyPress(TChar aChar) ;
-        
-        void ConstructL(CConsoleBase *aConsole);
-     
-        CConsoleBase *iConsole;
-        TInt iVolume;
-        TBuf<100> iFilename;
-        TInt iFilenameIdx;
-        COggPluginAdaptor * iPlayer;
+private:
+	void ConstructL(CConsoleBase *aConsole);
+	TInt ProcessKeyPress(TChar aChar);
 
+private:     
+	CConsoleBase* iConsole;
+	TInt iVolume;
+	TFileName iFilename;
+	TInt iFilenameIdx;
+	COggPluginAdaptor* iPlayer;
     };

@@ -6,10 +6,6 @@
 #include "oggtremortest.h"
 #include <mda\common\audio.h>
 
-#ifndef MMF_AVAILABLE
-#include <e32uid.h>
-#include <e32svr.h>
-#endif
 
 CIvorbisTest * CIvorbisTest::NewL(CConsoleBase *aConsole)
     {

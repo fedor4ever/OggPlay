@@ -2,7 +2,7 @@
 // Component description file
 
 PRJ_PLATFORMS 
-WINS WINSCW ARMI
+WINS ARMI
 
 PRJ_MMPFILES
-OggPluginDecoderS90.mmp
+OggVorbisS90.mmp

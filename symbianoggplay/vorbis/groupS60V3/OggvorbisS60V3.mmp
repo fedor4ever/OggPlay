@@ -1,5 +1,4 @@
-// oggvorbis.mmp
-TARGET                                  OggPlayVorbis.dll 
+TARGET                                  OggPlayVorbisi.dll 
 TARGETTYPE                              dll 
 UID                                     0x1000008d 0xF01FD21D
 
@@ -7,7 +6,9 @@ CAPABILITY                              NONE
 SECUREID                                0xF01FD21D
 VENDORID                                0
 
+SYSTEMINCLUDE                           \Epoc32\include 
 SOURCEPATH                              .. 
+
 SOURCE                                  mdct.c 
 SOURCE                                  block.c 
 SOURCE                                  window.c 
@@ -23,10 +24,5 @@ SOURCE                                  sharedbook.c
 SOURCE                                  framing.c 
 SOURCE                                  bitwise.c 
 SOURCE                                  vorbisfile.c 
-SOURCE                                  microsoftInternal.c 
-SOURCE                                  Symbian.cpp 
-SOURCE                                  utf8Fix.c
 
-SYSTEMINCLUDE                           \Epoc32\include 
-LIBRARY                                 euser.lib 
-LIBRARY                                 efsrv.lib 
+LIBRARY                                 euser.lib efsrv.lib OggPlayShared.lib

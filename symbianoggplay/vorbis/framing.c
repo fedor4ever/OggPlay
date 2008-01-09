@@ -68,14 +68,10 @@ static void _ogg_buffer_destroy(ogg_buffer_state *bs){
       _ogg_free(r);
     }
     bs->unused_references=0;
- if(!bs->outstanding){
+
+    if(!bs->outstanding)
       _ogg_free(bs);
-    }
-    else
-        {
-        /* This should never happen ?*/
-        _ogg_exit(-1);
-        }
+
   }
 }
 
