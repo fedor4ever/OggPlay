@@ -4,7 +4,7 @@
 &EN
 ;
 ;Version string to be changed
-#{"OggPlay"},(0x1000A661),1,69,1
+#{"OggPlay"},(0x1000A661),1,71,1
 ;
 ;Supports Series 80 v 2.0
 (0x101F8ED2), 0, 0, 0, {"Series80ProductID"}
@@ -17,13 +17,17 @@
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsc" -"!:\system\apps\OggPlay\OggPlay.rsc"
 ;"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.rsc"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
-"\Epoc32\data\z\system\apps\OGGPLAY\s60splash.mbm"-"!:\system\apps\OggPlay\s60splash.mbm"
+"\Epoc32\data\z\system\apps\OGGPLAY\Oggsplash.mbm"-"!:\system\apps\OggPlay\Oggsplash.mbm"
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
-"..\bitmaps\Skins\icys80\icys80.skn"-"!:\system\apps\oggplay\icys80.skn"
-"..\bitmaps\Skins\icys80\icys80.mbm"-"!:\system\apps\oggplay\icys80.mbm"
+"..\bitmaps\Skins\ClearS80\ClearS80.skn"-"!:\system\apps\oggplay\ClearS80.skn"
+"..\bitmaps\Skins\ClearS80\ClearS80.mbm"-"!:\system\apps\oggplay\ClearS80.mbm"
+
+"\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
+"\epoc32\release\armi\urel\OggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
+"\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
+"\epoc32\release\armi\urel\OggPlayController.dll"-"!:\system\libs\Plugins\OggPlayController.dll"
+"\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
+
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ini",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN
-
-"\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
-"\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
