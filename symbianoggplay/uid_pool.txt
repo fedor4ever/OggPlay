@@ -1,26 +1,26 @@
 OggPlay UID pool
 
- UID                Use
+UID                Use
 
-0x1000A661          OggPlay Application.
-0x101FD21D          Tremor DLL
-0x101FF67C          Recognizer
-0x101FF67D          OggPlay Application for internal development
-0x101FF67E          FullSteel skin
-0x101FF67F          GreyZone skin
-0x101FF680          Temporary development
-0x101FF681          Amber skin
-0x101FF682          mcNuOggPlay
-0x101FF683          TremorPlugin
-0x101FF684          TremorPluginController
-0x101FF685          TremorPluginFormat
-0x10202027          MadPlugin
-0x10202028          MadPluginController
-0x10202029          MadPluginFormat
-0x1020202A          MADPLUGINDECODERPREMMF.DLL
-0x1020202B          Unused
-0x1020202C          Unused
-0x1020202D          Unused
-0x1020202E          Unused
-0x1020202F          Unused
-0x10202030          Unused
+0x1000A661         OggPlay Application.
+0x101FD21D         Tremor DLL
+0x101FF67C         Recognizer
+0x101FF67D         OggPlay Application for internal development
+0x101FF67E         FullSteel skin
+0x101FF67F         GreyZone skin
+0x101FF680         Temporary development
+0x101FF681         Amber skin
+0x101FF682         mcNuOggPlay
+0x101FF683         OggPlayPlugin dll
+0x101FF684         OggPlayPluginController
+0x101FF685         Tremor Format
+0x10202027         MadPlugin
+0x10202028         MadPluginController
+0x10202029         MadPluginFormat
+0x1020202A         MADPLUGINDECODERPREMMF.DLL
+0x1020202B         Flac DLL
+0x1020202C         OggShared DLL
+0x1020202D         Ogg Flac Format
+0x1020202E         Native Flac Format
+0x1020202F         Unused
+0x10202030         Unused
