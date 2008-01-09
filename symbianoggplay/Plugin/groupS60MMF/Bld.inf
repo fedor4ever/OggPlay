@@ -1,0 +1,8 @@
+// BLD.INF
+// Component description file
+
+PRJ_PLATFORMS 
+WINS WINSCW ARMI
+
+PRJ_MMPFILES
+OggPlayControllerS60MMF.mmp

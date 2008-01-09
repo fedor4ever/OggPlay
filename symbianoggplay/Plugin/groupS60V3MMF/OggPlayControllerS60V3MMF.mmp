@@ -1,0 +1,50 @@
+TARGET                                  OggPlayController.dll 
+TARGETTYPE                              plugin
+UID                                     0x10009D8D 0xF01FF683
+
+CAPABILITY                              NONE 
+SECUREID                                0xF01FF683
+VENDORID                                0
+
+SOURCEPATH                              ..\..\vorbis
+SOURCE                                  TremorDecoder.cpp 
+
+SOURCEPATH                              ..\..\flac
+SOURCE                                  FlacDecoder.cpp 
+
+SOURCEPATH                              ..\..\src 
+SOURCE                                  OggHelperFcts.cpp 
+SOURCE                                  OggRateConvert.cpp 
+
+SOURCEPATH                              ..\src 
+SOURCE                                  OggLog.cpp 
+SOURCE                                  OggPlayController.cpp 
+SOURCE                                  OggPlayPluginFactory.cpp 
+
+SOURCEPATH                              ..\data
+START RESOURCE OggPlayController.rss 
+TARGET OggPlayController.rsc
+END
+
+
+USERINCLUDE                             ..\inc
+USERINCLUDE                             ..\..\inc 
+USERINCLUDE                             ..\..\vorbis 
+USERINCLUDE                             ..\..\flac
+SYSTEMINCLUDE                           \epoc32\include 
+SYSTEMINCLUDE                           \epoc32\include\ecom 
+SYSTEMINCLUDE                           \epoc32\include\mmf\common 
+SYSTEMINCLUDE                           \epoc32\include\mmf\server 
+LIBRARY                                 mmfcontrollerframework.lib 
+LIBRARY                                 mmfstandardcustomcommands.lib 
+LIBRARY                                 MMFDevSound.lib 
+LIBRARY                                 mmfserverbaseclasses.lib 
+LIBRARY                                 ecom.lib 
+LIBRARY                                 euser.lib 
+LIBRARY                                 charconv.lib 
+LIBRARY                                 MediaClientAudioStream.lib 
+LIBRARY                                 flogger.lib 
+LIBRARY                                 efsrv.lib 
+
+LIBRARY                                 OggPlayVorbisi.lib
+LIBRARY                                 OggPlayFlaci.lib

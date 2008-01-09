@@ -1,0 +1,115 @@
+/*
+ *  Copyright (c) 2004 
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+//  INCLUDES
+#include <RegistryInfo.rh>
+#include "ImplementationUIDs.hrh"
+#include <mmfPluginInterfaceUIDs.hrh>
+
+
+// theInfo
+// Ogg Decoder controller plugin ECOM registration
+RESOURCE REGISTRY_INFO theInfo
+	{
+	dll_uid = 0x101FF683;
+	interfaces = 
+		{
+		INTERFACE_INFO // Controller Plugin Description
+			{
+			interface_uid = KMmfUidPluginInterfaceController;
+			implementations = 
+				{
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = KOggPlayUidControllerImplementation;
+					version_no = 1;
+					display_name = "OggPlay controller";
+					default_data = "?";
+					opaque_data = "<s>OggPlay<i>0x101F5D07<p>0x101F0001";
+					// 0x101F5D07 = KUidMediaTypeAudio
+					}
+				};
+			},
+
+		INTERFACE_INFO // Play Format Description
+			{
+			interface_uid = 0x101F0001;
+			implementations = 
+				{
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = KOggTremorUidPlayFormatImplementation;
+					version_no = 1;
+					display_name = "Ogg Tremor Format";
+					default_data = "?";
+					opaque_data = "<s>OggPlay<i>0x101F5D07<e>.ogg<h>OggS*vorbis<m>audio/wav";
+
+                    // SUPPLIER = OggPlay
+                    // MEDIA ID = uid for audio media type
+                    // FILE EXTENSION = .ogg
+                    // HEADER DATA = look for Ogg in header data. 
+                    // MIME TYPE = audio/wav, to allow using it as ringtone
+					}
+				};
+			},
+
+		INTERFACE_INFO // Play Format Description
+			{
+			interface_uid = 0x101F0001;
+			implementations = 
+				{
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = KOggFlacUidPlayFormatImplementation;
+					version_no = 1;
+					display_name = "Ogg Flac Format";
+					default_data = "?";
+					opaque_data = "<s>OggPlay<i>0x101F5D07<e>.oga<h>OggS*fLaC<m>audio/wav";
+
+                    // SUPPLIER = OggPlay
+                    // MEDIA ID = uid for audio media type
+                    // FILE EXTENSION = .oga
+                    // HEADER DATA = look for Ogg in header data. 
+                    // MIME TYPE = audio/wav, to allow using it as ringtone
+					}
+				};
+			},
+
+		INTERFACE_INFO // Play Format Description
+			{
+			interface_uid = 0x101F0001;
+			implementations = 
+				{
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = KNativeFlacUidPlayFormatImplementation;
+					version_no = 1;
+					display_name = "Flac Format";
+					default_data = "?";
+					opaque_data = "<s>OggPlay<i>0x101F5D07<e>.flac<h>fLaC<m>audio/wav";
+
+                    // SUPPLIER = OggPlay
+                    // MEDIA ID = uid for audio media type
+                    // FILE EXTENSION = .flac
+                    // HEADER DATA = look for fLaC in header data. 
+                    // MIME TYPE = audio/wav, to allow using it as ringtone
+					}
+				};
+			}
+		};
+	}
