@@ -98,11 +98,11 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iCbaControl[1][3] = static_cast <CEikChoiceList*> (Control(EOggSettingCba14));
   iVolumeBoostControl = static_cast <CEikChoiceList*> (Control(EOggSettingVolumeBoost));
 
-  iAlarmActiveControl = static_cast<CEikCheckBox*> (Control(EOggAlarmActive));
-  iAlarmTimeControl = static_cast<CEikTimeEditor*> (Control(EOggAlarmTime));
-  iAlarmSnoozeControl = static_cast<CEikChoiceList*> (Control(EOggAlarmSnooze));
-  iAlarmVolumeControl = static_cast<CEikChoiceList*> (Control(EOggAlarmVolume));
-  iAlarmBoostControl = static_cast<CEikChoiceList*> (Control(EOggAlarmBoost));
+  iAlarmActiveControl = static_cast<CEikCheckBox*> (Control(EOggSettingAlarmActive));
+  iAlarmTimeControl = static_cast<CEikTimeEditor*> (Control(EOggSettingAlarmTime));
+  iAlarmSnoozeControl = static_cast<CEikChoiceList*> (Control(EOggSettingAlarmSnooze));
+  iAlarmVolumeControl = static_cast<CEikChoiceList*> (Control(EOggSettingAlarmVolume));
+  iAlarmBoostControl = static_cast<CEikChoiceList*> (Control(EOggSettingAlarmBoost));
 
   CDesCArray *listboxArray= new (ELeave) CDesCArrayFlat(10);
   listboxArray->AppendL(KFullScanString); 
@@ -204,25 +204,25 @@ void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
 		{
 		appUi->SetVolumeGainL((TGainType) iVolumeBoostControl->CurrentItem());
 		}
-	else if (aControlId == EOggAlarmActive)
+	else if (aControlId == EOggSettingAlarmActive)
 		{
 		appUi->SetAlarm(static_cast <TBool> (iAlarmActiveControl->State()));
 		}
-	else if (aControlId == EOggAlarmTime)
+	else if (aControlId == EOggSettingAlarmTime)
 		{
 		appUi->iSettings.iAlarmTime = iAlarmTimeControl->Time();
 		appUi->SetAlarmTime();
 		}
-	else if (aControlId == EOggAlarmSnooze)
+	else if (aControlId == EOggSettingAlarmSnooze)
 		{
 		appUi->iSettings.iAlarmSnooze = iAlarmSnoozeControl->CurrentItem();
 		appUi->SetAlarmTime();
 		}
-	else if (aControlId == EOggAlarmVolume)
+	else if (aControlId == EOggSettingAlarmVolume)
 		{
 		appUi->iSettings.iAlarmVolume = iAlarmVolumeControl->CurrentItem() + 1;
 		}
-	else if (aControlId == EOggAlarmBoost)
+	else if (aControlId == EOggSettingAlarmBoost)
 		{
 		appUi->iSettings.iAlarmGain = iAlarmBoostControl->CurrentItem();
 		}

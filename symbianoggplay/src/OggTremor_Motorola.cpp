@@ -310,10 +310,8 @@ void COggPlayback::Play()
    RDebug::Print( _L("Play:%d"), iState );
 #endif
 
-#ifdef MDCT_FREQ_ANALYSER
   iLastFreqArrayIdx = 0;
   iLatestPlayTime = 0.0;
-#endif
 
    TInt err;
 
@@ -486,7 +484,6 @@ void COggPlayback::SetVolumeGain( TGainType aGain )
 // GetFrequencyBins
 ////////////////////////////////////////////////////////////////
 
-#ifdef MDCT_FREQ_ANALYSER
 const TInt32 * COggPlayback::GetFrequencyBins()
 {
    TTimeIntervalMicroSeconds currentPos;
@@ -511,21 +508,6 @@ const TInt32 * COggPlayback::GetFrequencyBins()
    
    return iFreqArray[idx].iFreqCoefs;
 }
-#endif
-
-// GetDataChunk
-////////////////////////////////////////////////////////////////
-
-#ifndef MDCT_FREQ_ANALYSER
-const void* COggPlayback::GetDataChunk()
-{
-   void *p = NULL;
-
-   p = (void*) iBuffer[iSentIdx]->Ptr();
-
-   return ( p );
-}
-#endif
 
 // OnEvent
 ////////////////////////////////////////////////////////////////
@@ -673,7 +655,6 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer, TBool aRequestFrequencyBins )
    {
       TInt len = aBuffer.Length();
       
-#ifdef MDCT_FREQ_ANALYSER
       if (iTimeWithoutFreqCalculation > iTimeWithoutFreqCalculationLim )
       {
          iTimeWithoutFreqCalculation = 0;
@@ -690,7 +671,6 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer, TBool aRequestFrequencyBins )
       {
          iDecoder->GetFrequencyBins(NULL,0);
       }
-#endif
       
       cnt = iDecoder->Read( aBuffer, len );
 
@@ -698,10 +678,8 @@ TInt COggPlayback::GetNewSamples( TDes8 &aBuffer, TBool aRequestFrequencyBins )
       {
          aBuffer.SetLength( len + cnt );
 
-#ifdef MDCT_FREQ_ANALYSER
          iLatestPlayTime += ( cnt * iTimeBetweenTwoSamples );
          iTimeWithoutFreqCalculation += cnt;
-#endif      
       }
       else
       {

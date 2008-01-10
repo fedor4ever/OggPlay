@@ -1,97 +1,98 @@
+/*
+ *  Copyright (c) 2003 L. H. Wilden.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
-#include "OggFilesSearchDialogs.h"
-#include "Oggplay.hrh"
-#include <Oggplay.rsg>
+#include <OggOs.h>
 #include <coemain.h>
-#ifdef SERIES60
+
+#if defined(SERIES60)
 #include <aknappui.h>
+#include <aknutils.h>
+
+#if defined(SERIES60SUI)
+#include <AknsDrawUtils.h>
+#include <AknsBasicBackgroundControlContext.h>
+#endif
+
 #include <avkon.rsg>
 #endif
-#ifdef SERIES80
+
+#if defined(SERIES80)
 #include <eikenv.h>
 #include <eikappui.h>
 #include <eikbtgpc.h>
 #include <eikcore.rsg>
 #endif
 
-#ifdef UIQ
+#if defined(UIQ)
 #include <eikappui.h>
 #endif
 
 #include <eikapp.h>
 
+#include <Oggplay.rsg>
+#include "Oggplay.hrh"
+#include "OggFilesSearchDialogs.h"
+#include "OggLog.h"
+
 
 COggFilesSearchDialog::COggFilesSearchDialog(MOggFilesSearchBackgroundProcess *aBackgroundProcess)
+: iBackgroundProcess(aBackgroundProcess)
 {
-    iBackgroundProcess = aBackgroundProcess;
 }
-
 
 SEikControlInfo COggFilesSearchDialog::CreateCustomControlL(TInt aControlType)
 {
     if (aControlType == EOggFileSearchControl) 
-    { 
-        iContainer = COggFilesSearchContainer::NewL(iBackgroundProcess,&ButtonGroupContainer());
-    } 
-    SEikControlInfo info = {iContainer,0,0};
+        iContainer = new(ELeave) COggFilesSearchContainer(*this, iBackgroundProcess, &ButtonGroupContainer());
+
+	SEikControlInfo info = {iContainer, 0, 0};
     return info;
 }
 
 
-/////////////////////
-
-COggFilesSearchContainer::COggFilesSearchContainer()
+COggFilesSearchContainer::COggFilesSearchContainer(COggFilesSearchDialog& aDlg, MOggFilesSearchBackgroundProcess* aBackgroundProcess, CEikButtonGroupContainer* aCba)
+: iParent(aDlg), iBackgroundProcess(aBackgroundProcess), iCba(aCba)
     {
     }
+
+COggFilesSearchContainer::~COggFilesSearchContainer()
+    {
+    delete iFishBmp;
+    delete iFishMask;
+    delete iAO;
+
+#if defined(SERIES60SUI)
+	delete iBgContext;
+#endif
+	}
 
 void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
-{
-    TInt width=aReader.ReadInt16();
-    TInt height=aReader.ReadInt16();
-    TSize containerSize (width, height);
-    SetSize(containerSize);
-    
-    // Prepare fonts.
-    TFontSpec fs(_L("LatinPlain12"), 12);
-    CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinPlain,fs);
-    TFontSpec fs2(_L("LatinBold12"), 12);
-    CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(iFontLatinBold12,fs2);
+	{
+	iTitleTxt = aReader.ReadTPtrC();
+	iLine1Txt = aReader.ReadTPtrC();
+	iLine2Txt = aReader.ReadTPtrC();
+	iLine3Txt = aReader.ReadTPtrC();
 
-    
-#ifdef PLAYLIST_SUPPORT
-	iLabels = new(ELeave)CArrayPtrFlat<CEikLabel>(7);
-    
-    TPtrC text[] = { aReader.ReadTPtrC(),  aReader.ReadTPtrC(),  aReader.ReadTPtrC(), aReader.ReadTPtrC(), _L("0"), _L("0"),_L("0") };
-    const CFont* fonts[] = {iFontLatinBold12, iFontLatinPlain, iFontLatinPlain,iFontLatinPlain, iFontLatinBold12,iFontLatinBold12,iFontLatinBold12};
-	const TInt  PosValues [][4] = { {10, 2, 156, 16}, {2, 25, 140, 16}, {2,45,140,16}, {2,65,140,16}, {145,25,20,16}, {145,45,30,16}, {145,65,20,16} };
-	const TInt Colors[][3] = { {0,0,255}, {0,0,0}, {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0} };
-    const TGulAlignmentValue Align[] = { EHCenterVCenter,EHRightVTop,EHRightVTop,EHRightVTop,EHLeftVTop,EHLeftVTop,EHLeftVTop };
-    for (TInt i=0; i<7; i++)
-#else
-    iLabels = new(ELeave)CArrayPtrFlat<CEikLabel>(5);
-    
-    TPtrC text[] = { aReader.ReadTPtrC(),  aReader.ReadTPtrC(),  aReader.ReadTPtrC(), _L("0"), _L("0") };
-    const CFont* fonts[] = {iFontLatinBold12, iFontLatinPlain, iFontLatinPlain,iFontLatinBold12,iFontLatinBold12};
-    const TInt  PosValues [][4] = { {10, 2, 156, 16}, {2, 25, 140, 16}, {2,45,140,16}, {145,25,20,16}, {145,45,40,16} };
-    const TInt Colors[][3] = { {0,0,255}, {0,0,0}, {0,0,0},{0,0,0},{0,0,0} };
-    const TGulAlignmentValue Align[] = { EHCenterVCenter,EHRightVTop,EHRightVTop,EHLeftVTop,EHLeftVTop };
-    for (TInt i=0; i<5; i++)
+#if defined(SERIES60SUI)
+	iBgContext = CAknsBasicBackgroundControlContext::NewL(KAknsIIDQsnBgAreaMain, TRect(TPoint(0, 0), MinimumSize()), ETrue);
 #endif
-    {
-        CEikLabel * c = new(ELeave) CEikLabel();
-  
-        c->SetContainerWindowL(*this);
-        c->OverrideColorL(0x36,TRgb(Colors[i][0], Colors[i][1], Colors[i][2]) );
-        TPoint pos (PosValues[i][0],PosValues[i][1]);
-        TSize size (PosValues[i][2],PosValues[i][3]);
-        c->SetExtent(pos,size);
-        c->SetTextL( text[i] );
-        c->SetFont(fonts[i]);
-        c->SetAlignment(Align[i]);
-        iLabels->AppendL(c);
-    }
 
-     //Load bitmaps
+    // Load bitmaps
 	TFileName fileName(iEikonEnv->EikAppUi()->Application()->AppFullName());
 	TParsePtr parse(fileName);
 
@@ -104,57 +105,180 @@ void COggFilesSearchContainer::ConstructFromResourceL(TResourceReader& aReader)
     fileName.Append(_L("fish.mbm"));
 #endif
 
-	ifish1 = iEikonEnv->CreateBitmapL(fileName, 0); 
-    ifishmask = iEikonEnv->CreateBitmapL(fileName, 1);
-    iFishPosition = 40;
+	iFishBmp = iEikonEnv->CreateBitmapL(fileName, 0); 
+    iFishMask = iEikonEnv->CreateBitmapL(fileName, 1);
+
+	iAO = new(ELeave) COggFilesSearchAO(this);
+    iAO->StartL();
 
     ActivateL();	
-    iAO = new (ELeave) COggFilesSearchAO(this);
-    iAO->StartL();
+	}
+
+#if defined(SERIES60SUI)
+TTypeUid::Ptr COggFilesSearchContainer::MopSupplyObject(TTypeUid aId)
+	{
+	return MAknsControlContext::SupplyMopObject(aId, iBgContext);
+	}
+#endif
+
+_LIT(KMaxScanTxt, " 0000");
+_LIT(KFormatTxt, "%S %d");
+TSize COggFilesSearchContainer::MinimumSize()
+{
+#if defined(SERIES60SUI)
+	const CFont* titleFont = AknLayoutUtils::FontFromId(EAknLogicalFontPrimaryFont, NULL);
+	const CFont* textFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont, NULL);
+#elif defined(SERIES60)
+	const CFont* titleFont = LatinBold12();
+	const CFont* textFont = LatinPlain12();
+#else
+	CFont* titleFont;
+	TFontSpec fs(_L("LatinPlain12"), 12);
+	CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(titleFont, fs);
+
+	CFont* textFont;
+	TFontSpec fs2(_L("LatinBold12"), 12);
+	CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(textFont, fs2);
+#endif
+
+	TInt titleHeight = titleFont->HeightInPixels();
+
+	TBuf<128> txtBuf = iTitleTxt;
+	TInt titleWidth = titleFont->TextWidthInPixels(txtBuf);
+
+	txtBuf = iLine1Txt;
+	txtBuf.Append(KMaxScanTxt);
+	TInt textWidth = textFont->TextWidthInPixels(txtBuf);
+
+	txtBuf = iLine2Txt;
+	txtBuf.Append(KMaxScanTxt);
+	TInt textWidth2 = textFont->TextWidthInPixels(txtBuf);
+
+	txtBuf = iLine3Txt;
+	txtBuf.Append(KMaxScanTxt);
+	TInt textWidth3 = textFont->TextWidthInPixels(txtBuf);
+
+	TInt totalWidth = titleWidth>textWidth ? titleWidth : textWidth;
+	totalWidth = totalWidth>textWidth2 ? totalWidth : textWidth2;
+	totalWidth = totalWidth>textWidth3 ? totalWidth : textWidth3;
+
+	totalWidth = (totalWidth * 116) / 100;
+	if (totalWidth & 1)
+		totalWidth++;
+
+	TInt textHeight = textFont->HeightInPixels();
+	TInt totalHeight = (150 * (titleHeight + 3 * textHeight)) / 100 + 36;
+	totalHeight = (totalHeight * 110) / 100;
+	if (totalHeight & 1)
+		totalHeight++;
+
+	iFishPosition.iX = (totalWidth >> 1) - 21;
+	iFishPosition.iY = (95 * totalHeight) / 100 - 30;
+	iFishMinX = 2;
+	iFishMaxX = totalWidth - 48;
+	iFishStepX = (iFishMaxX - iFishMinX) / 20;
+
+	return TSize(totalWidth, totalHeight);
 }
 
-
-COggFilesSearchContainer* COggFilesSearchContainer::NewL(
-                                      MOggFilesSearchBackgroundProcess *aBackgroundProcess ,
-                                      CEikButtonGroupContainer * aCba)
-    {
-    COggFilesSearchContainer* self = new (ELeave) COggFilesSearchContainer;
-    self->iBackgroundProcess = aBackgroundProcess;
-    self->iCba = aCba;
-    return self;
-    }
-
-
-TInt COggFilesSearchContainer::CountComponentControls() const
-    {
-#ifdef PLAYLIST_SUPPORT
-    return 7;
-#else
-    return 5;
+#if defined(SERIES60SUI)
+void COggFilesSearchContainer::SizeChanged()
+{
+	iBgContext->SetRect(Rect());
+	iBgContext->SetParentPos(PositionRelativeToScreen());
+}
 #endif
-    }
 
-
-CCoeControl* COggFilesSearchContainer::ComponentControl(TInt aIndex) const
-    {
-    return ((*iLabels)[aIndex]);
-    }
-
+#if defined(SERIES60SUI)
 void COggFilesSearchContainer::Draw(const TRect& aRect) const
-    {    
-    CWindowGc& gc = SystemGc();
-    gc.SetBrushColor(KRgbWhite);
-    gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
-    gc.DrawRect(aRect);
+    {
+	CWindowGc& gc = SystemGc();
 
-#ifdef PLAYLIST_SUPPORT
-	gc.BitBltMasked(TPoint(iFishPosition,90),ifish1,
-        TRect(0,0, 42, 28), ifishmask, ETrue);
+	// Draw the dialog background (with skin if available)
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+  	MAknsControlContext* cc = AknsDrawUtils::ControlContext(this);
+    AknsDrawUtils::Background(skin, cc, this, gc, aRect);
+
+	TRgb titleColor(0, 0, 0);
+	AknsUtils::GetCachedColor(skin, titleColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG1);
+	gc.SetPenColor(titleColor);
+    gc.DrawRect(Rect());
+
+	TRgb textColor(0, 0, 0);
+	AknsUtils::GetCachedColor(skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+	gc.SetPenColor(textColor);
+
+	const CFont* titleFont = AknLayoutUtils::FontFromId(EAknLogicalFontPrimaryFont, NULL);
+	const CFont* textFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont, NULL);
 #else
-    gc.BitBltMasked(TPoint(iFishPosition,60),ifish1,
-        TRect(0,0, 42, 28), ifishmask, ETrue);
+void COggFilesSearchContainer::Draw(const TRect& /* aRect */) const
+    {
+	CWindowGc& gc = SystemGc();
+
+	gc.SetBrushColor(KRgbWhite);
+	gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
+    gc.DrawRect(Rect());
+
+	TRgb textColor(0, 0, 0);
+
+#if defined(SERIES60)
+	const CFont* titleFont = LatinBold12();
+	const CFont* textFont = LatinPlain12();
+#else
+	CFont* titleFont;
+	TFontSpec fs(_L("LatinPlain12"), 12);
+	CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(titleFont, fs);
+
+	CFont* textFont;
+	TFontSpec fs2(_L("LatinBold12"), 12);
+	CCoeEnv::Static()->ScreenDevice()->GetNearestFontInPixels(textFont, fs2);
+#endif
 #endif
 
+	TInt titleBaseLine = (Rect().Size().iHeight * 5) / 100;
+	titleBaseLine += titleFont->AscentInPixels();
+
+	TInt titleWidth = titleFont->TextWidthInPixels(iTitleTxt);
+	if (titleWidth & 1)
+		titleWidth++;
+
+	TInt titlePos = (Rect().Size().iWidth - titleWidth) >> 1;
+
+	gc.UseFont(titleFont);
+	gc.DrawText(iTitleTxt, TPoint(titlePos, titleBaseLine));
+
+	TInt textBaseLine = (Rect().Size().iHeight * 5) / 100;
+	textBaseLine += (150 * titleFont->HeightInPixels()) / 100;
+
+	textBaseLine += textFont->AscentInPixels();
+	TInt textPos = (Rect().Size().iWidth * 10) / 100;
+	TBuf<128> txtBuf;
+	if (iFoldersCount)
+		txtBuf.Format(KFormatTxt, &iLine1Txt, iFoldersCount);
+	else
+		txtBuf = iLine1Txt;
+
+	gc.UseFont(textFont);
+	gc.SetPenColor(textColor);
+	gc.DrawText(txtBuf, TPoint(textPos, textBaseLine));
+
+	if (iFilesCount)
+		txtBuf.Format(KFormatTxt, &iLine2Txt, iFilesCount);
+	else
+		txtBuf = iLine2Txt;
+
+	textBaseLine += (150 * textFont->HeightInPixels()) / 100;
+	gc.DrawText(txtBuf, TPoint(textPos, textBaseLine));
+
+	if (iPlayListCount)
+		txtBuf.Format(KFormatTxt, &iLine3Txt, iPlayListCount);
+	else
+		txtBuf = iLine3Txt;
+
+	textBaseLine += (150 * textFont->HeightInPixels()) / 100;
+	gc.DrawText(txtBuf, TPoint(textPos, textBaseLine));
+
+	gc.BitBltMasked(iFishPosition, iFishBmp, TRect(iFishBmp->SizeInPixels()), iFishMask, ETrue);
     }
 
 
@@ -171,135 +295,103 @@ void COggFilesSearchContainer::UpdateCba()
 }
 #endif
 
-COggFilesSearchContainer::~COggFilesSearchContainer ()
-    {
-    if (iFontLatinPlain)
-    {
-        CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFontLatinPlain);
-    }
-    if (iFontLatinBold12)
-    {
-        CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFontLatinBold12);
-    }
-
-    iLabels->ResetAndDestroy();
-    delete iLabels;
-    delete ifish1;
-    delete ifishmask;
-    delete iAO;
-    }
-
-
-TCoeInputCapabilities COggFilesSearchContainer::InputCapabilities() const
-    {
-    return TCoeInputCapabilities::ENone;
-    }
-
 void COggFilesSearchContainer::UpdateControl()
 {
-#ifdef PLAYLIST_SUPPORT    
-    TInt aNbDir, aNbFiles, aNbPlayLists;
-    iBackgroundProcess->FileSearchGetCurrentStatus(aNbDir, aNbFiles, aNbPlayLists);
+	iBackgroundProcess->FileSearchGetCurrentStatus(iFoldersCount, iFilesCount, iPlayListCount);
 
-	TBuf<10> number;
-    number.AppendNum(aNbDir);
-    (*iLabels)[4]->SetTextL(number); 
+	iFishPosition.iX -= iFishStepX;
+    if (iFishPosition.iX < iFishMinX)
+        iFishPosition.iX = iFishMaxX;
 
-	TBuf<10> number2;
-    number2.AppendNum(aNbFiles);
-    (*iLabels)[5]->SetTextL(number2); 
-
-	TBuf<10> number3;
-    number3.AppendNum(aNbPlayLists);
-    (*iLabels)[6]->SetTextL(number3);
-#else
-    TInt aNbDir, aNbFiles;
-    iBackgroundProcess->FileSearchGetCurrentStatus(aNbDir,aNbFiles);
-    TBuf<10> number;
-    number.AppendNum(aNbDir);
-    (*iLabels)[3]->SetTextL(number); 
-     TBuf<10> number2;
-    number2.AppendNum(aNbFiles);
-    (*iLabels)[4]->SetTextL(number2); 
-#endif
-
-    DrawNow();
-    iFishPosition = iFishPosition - 5;
-    if (iFishPosition <5)
-        iFishPosition = 120;
+	DrawNow();
 }
 
 
-COggFilesSearchAO::COggFilesSearchAO( COggFilesSearchContainer * aContainer)
+COggFilesSearchAO::COggFilesSearchAO(COggFilesSearchContainer * aContainer)
 : CActive(EPriorityIdle), iContainer(aContainer)
-{
+	{
     CActiveScheduler::Add(this);
-}
+	}
 
 COggFilesSearchAO::~COggFilesSearchAO()
-{
+	{
 	Cancel();
+
+	if (iTimer)
+		iTimer->Cancel();
 
 	delete iCallBack;
 	delete iTimer;
-}
+	}
 
 void COggFilesSearchAO::RunL()
-{
-    // Run one iteration of the long process.
-    MOggFilesSearchBackgroundProcess *longProcess = iContainer->iBackgroundProcess;
+	{
+	TInt result = iStatus.Int();
+	if (result != KErrNone)
+		{
+		if (result == KOggFileScanStepComplete)
+			iSearchStatus = (TSearchStatus) (((TInt) iSearchStatus) + 1);
+		else
+			{
+			TRACEF(COggLog::VA(_L("File search step error: %d"), result));
+			}
+		}
 
-#ifdef PLAYLIST_SUPPORT
-	if (longProcess->FileSearchIsProcessDone())
-		longProcess->ScanNextPlayList();
-	else
-#endif
-		longProcess->FileSearchStepL();
-    
+	// Run one iteration of the long process.
+	MOggFilesSearchBackgroundProcess* longProcess = iContainer->iBackgroundProcess;
+	switch (iSearchStatus)
+		{
+		case EScanningFiles:
+			longProcess->FileSearchStep(iStatus);
+			break;
 
-#ifdef PLAYLIST_SUPPORT
-	if (longProcess->PlayListScanIsProcessDone() )
-#else
-    if (longProcess->FileSearchIsProcessDone() )
-#endif
-    {
-        iContainer->UpdateControl();
+		case EScanningPlaylists:
+			longProcess->ScanNextPlayList(iStatus);
+			break;
+
+		case EScanningComplete:
+			iContainer->UpdateControl();
 
 #if defined(SERIES60) || defined(SERIES80)
-		iContainer->UpdateCba();
+			iContainer->UpdateCba();
 #endif
-		iTimer->Cancel();
-    } 
-    else
-		SelfComplete();
-}
+			iTimer->Cancel();
+			return;
+
+		default:
+			{
+			TRACEF(_L("File Search unknown step"));
+			break;
+			}
+		}
+
+	SetActive();
+	}
 
 void COggFilesSearchAO::DoCancel()
-{
-	if (iTimer)
-		iTimer->Cancel();
-}
+	{
+	iContainer->iBackgroundProcess->CancelOutstandingRequest();
+	}
 
 void COggFilesSearchAO::StartL()
-{
-	iTimer = CPeriodic::New(CActive::EPriorityStandard);
-	iCallBack = new (ELeave) TCallBack(COggFilesSearchAO::CallBack, iContainer);
+	{
+	iTimer = CPeriodic::NewL(CActive::EPriorityStandard);
+	iCallBack = new(ELeave) TCallBack(COggFilesSearchAO::CallBack, iContainer);
 	iTimer->Start(TTimeIntervalMicroSeconds32(100000), TTimeIntervalMicroSeconds32(100000), *iCallBack);
 
 	SelfComplete();
-}
+	}
 
 void COggFilesSearchAO::SelfComplete()
-{
+	{
 	TRequestStatus* status = &iStatus;
 	User::RequestComplete(status, KErrNone);
 
 	SetActive();
-}
+	}
 
 TInt COggFilesSearchAO::CallBack(TAny* aPtr)
-{
+	{
 	((COggFilesSearchContainer *) aPtr)->UpdateControl();
 	return 1;
-}
-
+	}

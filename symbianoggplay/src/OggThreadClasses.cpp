@@ -19,9 +19,6 @@
 // Platform settings
 #include <OggOs.h>
 
-// This file is for MULTI_THREAD_PLAYBACK only
-#if defined(MULTI_THREAD_PLAYBACK)
-
 #include <e32std.h>
 #include <e32base.h>
 #include "OggLog.h"
@@ -181,5 +178,3 @@ void CThreadCommandHandler::RequestComplete(TInt err)
 	TRequestStatus* commandStatus = &iCommandStatus;
 	iCommandThread.RequestComplete(commandStatus, err);
 }
-
-#endif /* MULTI_THREAD_PLAYBACK */

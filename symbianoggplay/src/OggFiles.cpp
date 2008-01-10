@@ -26,365 +26,354 @@
 
 
 TOggPlayList::TOggPlayList()
-{
-}
+	{
+	}
   
 TOggPlayList* TOggPlayList::NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName)
-  {
-  TOggPlayList* self = new (ELeave) TOggPlayList();
-  CleanupStack::PushL(self);
+	{
+	TOggPlayList* self = new(ELeave) TOggPlayList;
+	CleanupStack::PushL(self);
 
-  TBuf<128> buf;
-  CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_13);
+	const TDesC& unassignedTxt = ((COggPlayAppUi *) CEikonEnv::Static()->EikAppUi())->UnassignedTxt();
+	self->SetTextL(self->iTitle, aShortName);
+	self->SetTextL(self->iAlbum, unassignedTxt);
+	self->SetTextL(self->iArtist, unassignedTxt);
+	self->SetTextL(self->iGenre, unassignedTxt);
+	self->SetTextL(self->iTrackNumber, unassignedTxt);
+	self->SetTrackTitleL();
 
-  self->SetText(self->iTitle, aShortName);
-  self->SetText(self->iAlbum, buf);
-  self->SetText(self->iArtist, buf);
-  self->SetText(self->iGenre,buf);
-  self->SetText(self->iTrackNumber, buf);
-  self->SetTrackTitle();
+	self->iSubFolder = aSubFolder.AllocL();
+	self->iFileName = aFileName.AllocL();
+	self->iShortName = aShortName.AllocL();
 
-  self->iSubFolder =  HBufC::NewL(aSubFolder.Length());
-  *(self->iSubFolder) = aSubFolder;
-
-  self->iFileName =  HBufC::NewL(aFileName.Length());
-  *(self->iFileName) = aFileName;
-
-  self->iShortName =  HBufC::NewL(aShortName.Length());
-  *(self->iShortName) = aShortName;
-
-  self->iAbsoluteIndex = aAbsoluteIndex;
-  CleanupStack::Pop(self);
-  return self;
-  }
+	self->iAbsoluteIndex = aAbsoluteIndex;
+	CleanupStack::Pop(self);
+	return self;
+	}
 
 TOggPlayList* TOggPlayList::NewL(TFileText& tf)
-  {
-  TOggPlayList* self = new (ELeave) TOggPlayList();
-  CleanupStack::PushL(self);
+	{
+	TOggPlayList* self = new(ELeave) TOggPlayList;
+	CleanupStack::PushL(self);
 
-  TBuf<128> buf;
-  CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_13);
+	const TDesC& unassignedTxt = ((COggPlayAppUi *) CEikonEnv::Static()->EikAppUi())->UnassignedTxt();
+	self->SetTextL(self->iAlbum, unassignedTxt);
+	self->SetTextL(self->iArtist, unassignedTxt);
+	self->SetTextL(self->iGenre, unassignedTxt);
+	self->SetTextL(self->iTrackNumber, unassignedTxt);
 
-  self->SetText(self->iAlbum, buf);
-  self->SetText(self->iArtist, buf);
-  self->SetText(self->iGenre,buf);
-  self->SetText(self->iTrackNumber, buf);
+	self->ReadL(tf);
+	self->SetTextL(self->iTitle, *(self->iShortName));
+	self->SetTrackTitleL();
 
-  self->ReadL(tf);
-  self->SetText(self->iTitle, *(self->iShortName));
-  self->SetTrackTitle();
-
-  CleanupStack::Pop(); // self
-  return self;
-  }
+	CleanupStack::Pop(self);
+	return self;
+	}
 
 TOggPlayList::~TOggPlayList()
-{
-  iPlayListEntries.Close();
-}
+	{
+	iPlayListEntries.Close();
+	}
 
 TInt TOggPlayList::Count()
-{
+	{
 	return iPlayListEntries.Count();
-}
+	}
 
 TOggFile* TOggPlayList::operator[] (TInt aIndex)
-{
+	{
 	return iPlayListEntries[aIndex];
-}
+	}
 
 TOggFile::TFileTypes TOggPlayList::FileType() const
-{
+	{
 	return EPlayList;
-}
+	}
 
 void TOggPlayList::SetTextFromFileL(TFileText& aTf, HBufC* &aBuffer)
-{
-  TBuf<KTFileTextBufferMaxSize> buf;
-  User::LeaveIfError(aTf.Read(buf));
+	{
+	TBuf<KTFileTextBufferMaxSize> buf;
+	User::LeaveIfError(aTf.Read(buf));
 
-  delete aBuffer;
-  aBuffer = NULL;
+	delete aBuffer;
+	aBuffer = NULL;
   
-  aBuffer= buf.AllocL();  
-}
+	aBuffer= buf.AllocL();  
+	}
 
 void TOggPlayList::ReadL(TFileText& tf)
-{
-  SetTextFromFileL(tf, iSubFolder);
-  SetTextFromFileL(tf, iFileName);
-  SetTextFromFileL(tf, iShortName);
-}    
+	{
+	SetTextFromFileL(tf, iSubFolder);
+	SetTextFromFileL(tf, iFileName);
+	SetTextFromFileL(tf, iShortName);
+	}
 
 void TOggPlayList::ScanPlayListL(RFs& aFs, TOggFiles* aFiles)
-{
-  RFile file;
-  User::LeaveIfError(file.Open(aFs, *iFileName, EFileShareReadersOnly));
-  CleanupClosePushL(file);
-
-  TInt fileSize;
-  User::LeaveIfError(file.Size(fileSize));
-  HBufC8* buf = HBufC8::NewLC(fileSize);
-  TPtr8 bufPtr(buf->Des());
-  User::LeaveIfError(file.Read(bufPtr));
-
-  TInt i = 0;
-  TInt j = -1;
-  while (j<fileSize)
-  {
-	i = j+1; // Start of next line
-
-	// Skip any white space
-	TText8 nextChar;
-	for ( ; i<fileSize ; i++)
 	{
-		nextChar = bufPtr[i];
-		if ((nextChar == ' ') || (nextChar == '\n') || (nextChar == '\r') || (nextChar == '\t'))
+	RFile file;
+	User::LeaveIfError(file.Open(aFs, *iFileName, EFileShareReadersOnly));
+	CleanupClosePushL(file);
+
+	TInt fileSize;
+	User::LeaveIfError(file.Size(fileSize));
+	HBufC8* buf = HBufC8::NewLC(fileSize);
+	TPtr8 bufPtr(buf->Des());
+	User::LeaveIfError(file.Read(bufPtr));
+
+	TInt i = 0;
+	TInt j = -1;
+	while (j<fileSize)
+		{
+		i = j+1; // Start of next line
+
+		// Skip any white space
+		TText8 nextChar;
+		for ( ; i<fileSize ; i++)
+			{
+			nextChar = bufPtr[i];
+			if ((nextChar == ' ') || (nextChar == '\n') || (nextChar == '\r') || (nextChar == '\t'))
+				continue;
+
+			break;
+			}
+
+		// Check if we have reached the end
+		if (i == fileSize)
+			break;
+
+		// Extract the file name
+		for (j = i ; j<fileSize ; j++)
+			{
+			nextChar = bufPtr[j];
+			if (nextChar == '\n')
+				break;
+			}
+
+		// Remove any white space from the end
+		do
+			{
+			j--;
+			nextChar = bufPtr[j];
+			} while ((nextChar == ' ') || (nextChar == '\r') || (nextChar == '\t'));
+
+		// Skip comment lines
+		if (bufPtr[i] == '#')
 			continue;
 
-		break;
+		// Construct the filename (add the playlist path if the filename is relative)
+		TFileName fileName;
+		fileName.Copy(bufPtr.Mid(i, (j-i) + 1));
+		if (fileName[0] == '\\')
+			fileName.Insert(0, TPtrC(iFileName->Ptr(), 2));
+		else if (fileName[1] != ':')
+			fileName.Insert(0, TPtrC(iFileName->Ptr(), iFileName->Length()-(iShortName->Length()+4)));
+
+		// Search for the file and add it to the list (if found)
+		TOggFile* o = aFiles->FindFromFileNameL(fileName);
+		if (o)
+			iPlayListEntries.Append(o);
+		}
+
+	CleanupStack::PopAndDestroy(2, &file); 
 	}
-
-	// Check if we have reached the end
-	if (i == fileSize)
-		break;
-
-	// Extract the file name
-	for (j = i ; j<fileSize ; j++)
-	{
-		nextChar = bufPtr[j];
-		if (nextChar == '\n')
-			break;
-	}
-
-	// Remove any white space from the end
-	do
-	{
-		j--;
-		nextChar = bufPtr[j];
-	} while ((nextChar == ' ') || (nextChar == '\r') || (nextChar == '\t'));
-
-	// Skip comment lines
-	if (bufPtr[i] == '#')
-		continue;
-
-	// Construct the filename (add the playlist path if the filename is relative)
-	TFileName fileName;
-	fileName.Copy(bufPtr.Mid(i, (j-i) + 1));
-	if (fileName[0] == '\\')
-		fileName.Insert(0, TPtrC(iFileName->Ptr(), 2));
-	else if (fileName[1] != ':')
-		fileName.Insert(0, TPtrC(iFileName->Ptr(), iFileName->Length()-(iShortName->Length()+4)));
-
-	// Search for the file and add it to the list (if found)
-	TOggFile* o = aFiles->FindFromFileNameL(fileName);
-	if (o)
-		iPlayListEntries.Append(o);
-  }
-
-  CleanupStack::PopAndDestroy(2, &file); 
-}
 
 TInt TOggPlayList::Write(TInt aLineNumber, HBufC* aBuf)
-{
-  aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n"), aLineNumber, iSubFolder, iFileName, iShortName);
+	{
+	aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n"), aLineNumber, iSubFolder, iFileName, iShortName);
  
-  return KErrNone;
-}
+	return KErrNone;
+	}
 
-
-////////////////////////////////////////////////////////////////
-//
-// TOggFile
-//
-////////////////////////////////////////////////////////////////
 
 TOggFile::TOggFile()
-  {
-  }
+	{
+	}
 
+_LIT(KEmpty, "-");
 TOggFile* TOggFile::NewL()
-  {
-  TOggFile* self = new (ELeave) TOggFile();
-  CleanupStack::PushL(self);
-  self->SetText(self->iTitle,_L("-"));
-  self->SetText(self->iAlbum,_L("-"));
-  self->SetText(self->iArtist,_L("-"));
-  self->SetText(self->iGenre,_L("-"));
-  self->SetText(self->iFileName,_L("-"));
-  self->SetText(self->iSubFolder,_L("-"));
-  self->SetText(self->iShortName,_L("-"));
-  self->SetText(self->iTrackNumber,_L("-"));
-  self->SetText(self->iTrackTitle,_L("-"));
-  CleanupStack::Pop(); // self
-  //TRACE(COggLog::VA(_L("TOggFile::NewL() 0x%X"), self ));
-  return self;
-  }
+	{
+	TOggFile* self = new(ELeave) TOggFile;
+	CleanupStack::PushL(self);
 
-TOggFile* TOggFile::NewL(TInt aAbsoluteIndex,
-           const TDesC& aTitle,
-		   const TDesC& anAlbum,
-		   const TDesC& anArtist,
-		   const TDesC& aGenre,
-		   const TDesC& aSubFolder,
-		   const TDesC& aFileName,
-		   const TDesC& aShortName,
-		   const TDesC& aTrackNumber)
-  {
-  TOggFile* self = new (ELeave) TOggFile();
-  CleanupStack::PushL(self);
+	self->SetTextL(self->iTitle, KEmpty);
+	self->SetTextL(self->iAlbum, KEmpty);
+	self->SetTextL(self->iArtist, KEmpty);
+	self->SetTextL(self->iGenre, KEmpty);
+	self->SetTextL(self->iFileName, KEmpty);
+	self->SetTextL(self->iSubFolder, KEmpty);
+	self->SetTextL(self->iShortName, KEmpty);
+	self->SetTextL(self->iTrackNumber, KEmpty);
+	self->SetTextL(self->iTrackTitle, KEmpty);
 
-  TBuf<128> buf;
+	CleanupStack::Pop(self);
+	return self;
+	}
 
-#ifdef PLAYLIST_SUPPORT
-  CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_13);
-#else
-  CEikonEnv::Static()->ReadResource(buf, R_OGG_STRING_12);
-#endif
+TOggFile* TOggFile::NewL(TInt aAbsoluteIndex, const TDesC& aTitle, const TDesC& aAlbum, const TDesC& aArtist,
+const TDesC& aGenre, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName, const TDesC& aTrackNumber)
+	{
+	TOggFile* self = new(ELeave) TOggFile;
+	CleanupStack::PushL(self);
 
-  self->iAbsoluteIndex = aAbsoluteIndex;
-  if (aTitle.Length()>0) self->SetText(self->iTitle, aTitle); else self->SetText(self->iTitle, aShortName);
-  if (anAlbum.Length()>0) self->SetText(self->iAlbum, anAlbum); else self->SetText(self->iAlbum, buf);
-  if (anArtist.Length()>0) self->SetText(self->iArtist, anArtist); else self->SetText(self->iArtist, buf);
-  if (aGenre.Length()>0) self->SetText(self->iGenre, aGenre); else self->SetText(self->iGenre,buf);
-  if (aSubFolder.Length()>0) self->SetText(self->iSubFolder, aSubFolder); else self->SetText(self->iSubFolder,buf);
-  self->SetText(self->iFileName, aFileName);
-  self->SetText(self->iShortName, aShortName);
-  if (aTrackNumber.Length()>0) self->SetText(self->iTrackNumber, aTrackNumber); else self->SetText(self->iTrackNumber, buf);
+	const TDesC& unassignedTxt = ((COggPlayAppUi *) CEikonEnv::Static()->EikAppUi())->UnassignedTxt();
+	self->iAbsoluteIndex = aAbsoluteIndex;
+	if (aTitle.Length()>0)
+		self->SetTextL(self->iTitle, aTitle);
+	else
+		self->SetTextL(self->iTitle, aShortName);
+  
+	if (aAlbum.Length()>0)
+		self->SetTextL(self->iAlbum, aAlbum);
+	else
+		self->SetTextL(self->iAlbum, unassignedTxt);
+  
+	if (aArtist.Length()>0)
+		self->SetTextL(self->iArtist, aArtist);
+	else
+		self->SetTextL(self->iArtist, unassignedTxt);
 
-  self->SetTrackTitle();
-  CleanupStack::Pop(); // self
+	if (aGenre.Length()>0)
+		self->SetTextL(self->iGenre, aGenre);
+	else
+		self->SetTextL(self->iGenre, unassignedTxt);
+
+	if (aSubFolder.Length()>0)
+		self->SetTextL(self->iSubFolder, aSubFolder);
+	else
+		self->SetTextL(self->iSubFolder, unassignedTxt);
+
+	self->SetTextL(self->iFileName, aFileName);
+	self->SetTextL(self->iShortName, aShortName);
+
+	if (aTrackNumber.Length()>0)
+		self->SetTextL(self->iTrackNumber, aTrackNumber);
+	else
+		self->SetTextL(self->iTrackNumber, unassignedTxt);
+
+  self->SetTrackTitleL();
+  CleanupStack::Pop(self);
   return self;
   }
 
 TOggFile* TOggFile::NewL(TFileText& tf, TInt aVersion)
   {
-  TOggFile* self = new (ELeave) TOggFile();
+  TOggFile* self = new(ELeave) TOggFile();
   CleanupStack::PushL(self);
   self->ReadL(tf, aVersion);
 
-  CleanupStack::Pop(); // self
+  CleanupStack::Pop(self);
   return self;
   }
 
-void
-TOggFile::SetTrackTitle() 
-{
-  TInt track(0);
-  TLex parse(*iTrackNumber);
-  parse.Val(track);
-  if (track>999) track=999;
-  TBuf<128> buf;
-  buf.NumFixedWidth(track,EDecimal,2);
-  buf.Append(_L(" "));
-  buf.Append(iTitle->Left(123));
-  SetText(iTrackTitle,buf);
-}
+void TOggFile::SetTrackTitleL()
+	{
+	TInt track(0);
+	TLex parse(*iTrackNumber);
+	parse.Val(track);
+	if (track>999)
+		track = 999;
+
+	TBuf<128> buf;
+	buf.NumFixedWidth(track, EDecimal, 2);
+	buf.Append(_L(" "));
+	buf.Append(iTitle->Left(123));
+	SetTextL(iTrackTitle, buf);
+	}
 
 TOggFile::~TOggFile()
-{
-  delete iTitle;
-  delete iAlbum;
-  delete iArtist;
-  delete iGenre;
-  delete iSubFolder;
-  delete iFileName;
-  delete iShortName;
-  delete iTrackNumber;
-  delete iTrackTitle;
-}
+	{
+	delete iTitle;
+	delete iAlbum;
+	delete iArtist;
+	delete iGenre;
+	delete iSubFolder;
+	delete iFileName;
+	delete iShortName;
+	delete iTrackNumber;
+	delete iTrackTitle;
+	}
 
 TOggFile::TFileTypes TOggFile::FileType() const
-{
+	{
 	return EFile;
-}
+	}
 
-void
-TOggFile::SetText(HBufC* & aBuffer, const TDesC& aText)
-{
-  if (aBuffer) delete aBuffer;
-  aBuffer= 0;
-  aBuffer= HBufC::New(aText.Length());
-  *aBuffer= aText;
-}
+void TOggFile::SetTextL(HBufC* &aBuffer, const TDesC& aText)
+	{
+	if (aBuffer)
+		{
+		delete aBuffer;
+		aBuffer = NULL;
+		}
 
-void
-TOggFile::SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer)
-{
-  TBuf<KTFileTextBufferMaxSize> buf;
-  User::LeaveIfError( aTf.Read(buf) );
+	aBuffer = aText.AllocL();
+	}
 
-  if (aBuffer) 
-  {
-      delete(aBuffer);
-      aBuffer =NULL;
-  }
-  
-  aBuffer= buf.AllocL();  
-    
-}
+void TOggFile::SetTextFromFileL(TFileText& aTf, HBufC*& aBuffer)
+	{
+	TBuf<KTFileTextBufferMaxSize> buf;
+	User::LeaveIfError(aTf.Read(buf));
 
-void
-TOggFile::ReadL(TFileText& tf, TInt aVersion)
-{
-  SetTextFromFileL( tf, iTitle );
-  SetTextFromFileL( tf, iAlbum );
-  SetTextFromFileL( tf, iArtist );
-  SetTextFromFileL( tf, iGenre );
-  SetTextFromFileL( tf, iSubFolder );
-  SetTextFromFileL( tf, iFileName );
-  SetTextFromFileL( tf, iShortName );
-  if( aVersion >= 1 )
-    SetTextFromFileL( tf, iTrackNumber );
-  SetTrackTitle();
-}    
+	if (aBuffer)
+		{
+		delete aBuffer;
+		aBuffer = NULL;
+		}
 
+	aBuffer = buf.AllocL();
+	}
 
-TInt
-TOggFile::Write( TInt aLineNumber, HBufC* aBuf )
-{
-  aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n"), 
-    aLineNumber, 
-    iTitle, iAlbum, iArtist, iGenre, iSubFolder, iFileName, iShortName, iTrackNumber);
+void TOggFile::ReadL(TFileText& tf, TInt aVersion)
+	{
+	SetTextFromFileL(tf, iTitle);
+	SetTextFromFileL(tf, iAlbum);
+	SetTextFromFileL(tf, iArtist);
+	SetTextFromFileL(tf, iGenre);
+	SetTextFromFileL(tf, iSubFolder);
+	SetTextFromFileL(tf, iFileName);
+	SetTextFromFileL(tf, iShortName);
+
+	if (aVersion >= 1)
+		SetTextFromFileL(tf, iTrackNumber);
+
+	SetTrackTitleL();
+	}
+
+TInt TOggFile::Write(TInt aLineNumber, HBufC* aBuf)
+	{
+	aBuf->Des().Format(_L("%d\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n%S\n"), 
+    aLineNumber, iTitle, iAlbum, iArtist, iGenre, iSubFolder, iFileName, iShortName, iTrackNumber);
  
-  return KErrNone;
-}
+	return KErrNone;
+	}
 
 
-////////////////////////////////////////////////////////////////
-//
-// TOggKey
-//
-////////////////////////////////////////////////////////////////
-
-TOggKey::TOggKey(TInt anOrder) : 
-  TKeyArrayFix(0,ECmpNormal),
-  iFiles(0),
-  iOrder(anOrder)
-{
-  iSample= TOggFile::NewL();
-  SetPtr(iSample);
-}
+TOggKey::TOggKey(TInt anOrder)
+: TKeyArrayFix(0,ECmpNormal), iFiles(0), iOrder(anOrder)
+	{
+	iSample= TOggFile::NewL();
+	SetPtr(iSample);
+	}
 
 TOggKey::~TOggKey() 
 {
     delete iSample;
 }
 
-void
-TOggKey::SetFiles(CArrayPtrFlat<TOggFile>* theFiles)
+void TOggKey::SetFiles(CArrayPtrFlat<TOggFile>* theFiles)
 {
   iFiles= theFiles;
 }
 
-TAny*
-TOggKey::At(TInt anIndex) const
+TAny* TOggKey::At(TInt anIndex) const
 {
-  if (anIndex==KIndexPtr) return(&iSample->iTitle);
+  if (anIndex==KIndexPtr)
+	  return(&iSample->iTitle);
 
-  if (anIndex>=0 && anIndex<iFiles->Count()) {
-    switch (iOrder) {
+  if (anIndex>=0 && anIndex<iFiles->Count())
+  {
+    switch (iOrder)
+	{
     case COggPlayAppUi::ETitle : return (*iFiles)[anIndex]->iTitle;
     case COggPlayAppUi::EAlbum : return (*iFiles)[anIndex]->iAlbum;
     case COggPlayAppUi::EArtist: return (*iFiles)[anIndex]->iArtist;
@@ -399,16 +388,8 @@ TOggKey::At(TInt anIndex) const
 }
 
 
-
-////////////////////////////////////////////////////////////////
-//
-// TOggKeyNumeric
-//
-////////////////////////////////////////////////////////////////
-
-TOggKeyNumeric::TOggKeyNumeric() : 
-  TKeyArrayFix(_FOFF(TOggFile,iAbsoluteIndex),ECmpTInt),
-  iFiles(0)
+TOggKeyNumeric::TOggKeyNumeric()
+: TKeyArrayFix(_FOFF(TOggFile,iAbsoluteIndex),ECmpTInt), iFiles(0)
 {
   SetPtr(&iInteger); 
 }
@@ -417,47 +398,30 @@ TOggKeyNumeric::~TOggKeyNumeric()
 {
 }
 
-void
-TOggKeyNumeric::SetFiles(CArrayPtrFlat<TOggFile>* theFiles)
+void TOggKeyNumeric::SetFiles(CArrayPtrFlat<TOggFile>* theFiles)
 {
   iFiles= theFiles;
 }
 
-TAny*
-TOggKeyNumeric::At(TInt anIndex) const
+TAny* TOggKeyNumeric::At(TInt anIndex) const
 {
   if (anIndex==KIndexPtr) 
-      return( (TUint8 *)iPtr + iKeyOffset );
+      return ((TUint8 *) iPtr) + iKeyOffset;
 
-  if (anIndex>=0 && anIndex<iFiles->Count()) {
-       return &( (*iFiles)[anIndex]->iAbsoluteIndex );
-  }
+  if (anIndex>=0 && anIndex<iFiles->Count())
+       return &((*iFiles)[anIndex]->iAbsoluteIndex);
 
   return 0;
 }
 
 
-////////////////////////////////////////////////////////////////
-//
-// TOggFiles
-//
-////////////////////////////////////////////////////////////////
-
-
-TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback) :
-  iFiles(0),
-  iOggPlayback(anOggPlayback),
-  iOggKeyTitles(COggPlayAppUi::ETitle),
-  iOggKeyAlbums(COggPlayAppUi::EAlbum),
-  iOggKeyArtists(COggPlayAppUi::EArtist),
-  iOggKeyGenres(COggPlayAppUi::EGenre),
-  iOggKeySubFolders(COggPlayAppUi::ESubFolder),
-  iOggKeyFileNames(COggPlayAppUi::EFileName),
-  iOggKeyTrackTitle(COggPlayAppUi::ETrackTitle),
-  iOggKeyAbsoluteIndex(),
-  iVersion(-1)
+TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback)
+: iFiles(0), iOggPlayback(anOggPlayback), iOggKeyTitles(COggPlayAppUi::ETitle),
+iOggKeyAlbums(COggPlayAppUi::EAlbum), iOggKeyArtists(COggPlayAppUi::EArtist),
+iOggKeyGenres(COggPlayAppUi::EGenre), iOggKeySubFolders(COggPlayAppUi::ESubFolder),
+iOggKeyFileNames(COggPlayAppUi::EFileName), iOggKeyTrackTitle(COggPlayAppUi::ETrackTitle)
 {
-  iFiles= new(ELeave) CArrayPtrFlat<TOggFile>(10);
+  iFiles = new(ELeave) CArrayPtrFlat<TOggFile>(10);
 
   iOggKeyTitles.SetFiles(iFiles);
   iOggKeyAlbums.SetFiles(iFiles);
@@ -468,19 +432,20 @@ TOggFiles::TOggFiles(CAbsPlayback* anOggPlayback) :
   iOggKeyTrackTitle.SetFiles(iFiles);
   iOggKeyAbsoluteIndex.SetFiles(iFiles);
 
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
   iSupportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
 #endif
 }
 
-TOggFiles::~TOggFiles() {
+TOggFiles::~TOggFiles()
+{
   iFiles->ResetAndDestroy();
   delete iFiles;
 
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
   delete iSupportedExtensionList;
 #endif
-  }
+}
 
 void TOggFiles::CreateDb(RFs& session)
 {
@@ -495,12 +460,12 @@ void TOggFiles::CreateDb(RFs& session)
   AddDirectory(_L("C:\\documents\\Media files\\other\\"),session);
   AddDirectory(_L("D:\\Media files\\document\\"),session);
   AddDirectory(_L("C:\\documents\\Media files\\document\\"),session);
+
 #if defined(SERIES60)  
   AddDirectory(_L("C:\\Oggs\\"),session);
   AddDirectory(_L("E:\\Oggs\\"),session);
 #endif
 
-#ifdef PLAYLIST_SUPPORT
 	// Parse playlists
 	TInt numFiles = iFiles->Count();
 	TInt err;
@@ -513,415 +478,400 @@ void TOggFiles::CreateDb(RFs& session)
 			TRAP(err, ((TOggPlayList*) o)->ScanPlayListL(session, this));
 		}
 	}
-#endif
 
   CEikonEnv::Static()->BusyMsgCancel();
 }
 
-void TOggFiles::AddDirectory(const TDesC& aDir,RFs& session)
-{
-    if (AddDirectoryStart(aDir,session) ==KErrNone) {
-        while ( !FileSearchIsProcessDone() ) {
-            FileSearchStepL();
-        }
-    }
+void TOggFiles::AddDirectory(const TDesC& aDir, RFs& session)
+	{
+    if (AddDirectoryStart(aDir, session) == KErrNone)
+		{
+		TRequestStatus requestStatus;
+		do
+			{
+			FileSearchStep(requestStatus);
+			User::WaitForRequest(requestStatus);
+			} while (requestStatus != KOggFileScanStepComplete);
+	    }
+
     AddDirectoryStop();
-}
+	}
 
 TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
-{
-  TRACE(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir ));
+	{
+	TRACE(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir ));
 
-  // Check if the drive is available (i.e. memory stick is inserted)
+	// Check if the drive is available (i.e. memory stick is inserted)
 #if defined(UIQ)
-  if (!EikFileUtils::FolderExists(aDir)) 
+	if (!EikFileUtils::FolderExists(aDir)) 
 #else
-  // UIQ_? Have had some problems with FolderExists in the WIN emulator (?)
-  if (!EikFileUtils::PathExists(aDir)) 
+	// UIQ_? Have had some problems with FolderExists in the WIN emulator (?)
+	if (!EikFileUtils::PathExists(aDir)) 
 #endif
-    {
-    TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
-      return KErrNotFound;
-    }
+		{
+		TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
+		return KErrNotFound;
+		}
  
-    if (iPathArray == NULL)
-    {
-        iPathArray = new (ELeave) CDesC16ArrayFlat (3);
-    iDs = CDirScan::NewL(session);
-        iDirScanFinished = EFalse;
-		iPlayListScanFinished = EFalse;
-        iDirScanSession = &session;
-        iDirScanDir = const_cast < TDesC *> (&aDir);
-        iNbDirScanned = 0;
-        iNbFilesFound = 0;
-        iNbPlayListsFound = 0;
-        iCurrentIndexInDirectory = 0;
-        iCurrentDriveIndex = 0;
-        iDirectory=NULL;
-    TRAPD(err,iDs->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
-  if (err!=KErrNone) 
-    {
-    TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aDir ));
-        delete iDs; iDs=0;
-        return KErrNotFound;
-    }
-    }
-    iPathArray->AppendL(aDir);
-    return KErrNone;
-}
+	if (!iPathArray)
+		{
+		iPathArray = new(ELeave) CDesC16ArrayFlat (3);
+		iDs = CDirScan::NewL(session);
+		iDirScanSession = &session;
+		iDirScanDir = const_cast < TDesC *> (&aDir);
+		iNbDirScanned = 0;
+		iNbFilesFound = 0;
+		iNbPlayListsFound = 0;
+		iCurrentIndexInDirectory = -1;
+		iCurrentDriveIndex = 0;
+		iDirectory = NULL;
+
+		TRAPD(err,iDs->SetScanDataL(aDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
+		if (err != KErrNone) 
+			{
+			TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aDir));
+
+			delete iDs ; iDs = NULL;
+			return KErrNotFound;
+			}
+		}
+
+	iPathArray->AppendL(aDir);
+	return KErrNone;
+	}
 
 void TOggFiles::AddDirectoryStop()
 {
-    delete iDs; iDs=0;
-    delete iDirectory; iDirectory = 0;
-    if (iOggPlayback)
-        iOggPlayback->ClearComments();
-    if (iPathArray)
+	if (iPathArray)
         iPathArray->Reset();
-    delete iPathArray; iPathArray = 0;
-    
+
+	delete iDs ; iDs = NULL;
+    delete iDirectory ; iDirectory = NULL;
+	delete iPathArray ; iPathArray = NULL;    
 }
 
-void  TOggFiles::FileSearchStepL()
-{
-    if (iCurrentIndexInDirectory == 0)
+void TOggFiles::FileSearchStep(TRequestStatus& aRequestStatus)
 	{
-		// Add New directory
-		if (!NextDirectory())
-			return;
-    }
+	iFileScanRequestStatus = &aRequestStatus;
+	aRequestStatus = KRequestPending;
 
-    for (; iCurrentIndexInDirectory<iDirectory->Count(); iCurrentIndexInDirectory++) 
-    {
-		// Add new files
-		if (AddNextFileL())
-			break;
-	}
-
-    if (iCurrentIndexInDirectory == iDirectory->Count())
-	{
-        // Go to next directory
-        iCurrentIndexInDirectory = 0;
-	}
-}
-
-TBool TOggFiles::NextDirectory()
-{
-	// Move on to the next directory
-    delete iDirectory;
-    iDirectory = NULL;
-
-	TRAPD(err,iDs->NextL(iDirectory));
-    if (err!=KErrNone) 
-    {
-        TRACEF(COggLog::VA(_L("Unable to scan directory %S for oggfiles"), &iDirScanDir ));
-        delete iDs; iDs=0;
-        iDirScanFinished = ETrue;
-        return EFalse;
-    }
-        
-    if (iDirectory==0) 
-    {
-        // No more files in that drive.
-        // Any other drive to search in?
-        iCurrentDriveIndex++;
-        if (iCurrentDriveIndex < iPathArray->Count() ){
-            // More drives to search
-            TRAPD(err,iDs->SetScanDataL((*iPathArray)[iCurrentDriveIndex],
-                KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
-            if (err!=KErrNone) 
-            {
-                TPtrC aBuf((*iPathArray)[iCurrentDriveIndex]);
-                TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aBuf ));
-                delete iDs; iDs=0;
-                iDirScanFinished = ETrue;
-            }
-
-            return EFalse;
-        }
-		else
+	if (iCurrentIndexInDirectory == -1)
 		{
+		// Add New directory
+		TOggFilesNextDir nextDir = NextDirectory();
+		if (nextDir != EOggFilesNextDirReady)
+			{
+			TInt completeStatus = (nextDir == EOggFilesLastDirScanned) ? KOggFileScanStepComplete : KErrNone;
+			User::RequestComplete(iFileScanRequestStatus, completeStatus);
+			return;
+			}
+		}
+
+	TInt dirCount = iDirectory->Count();
+    for (; iCurrentIndexInDirectory<dirCount ; iCurrentIndexInDirectory++) 
+		{
+		// Try to add the next file (return if we get one)
+		if (AddNextFile())
+			return;
+		}
+
+	// Go to next directory
+	iCurrentIndexInDirectory = -1;
+	User::RequestComplete(iFileScanRequestStatus, KErrNone);
+	}
+
+TOggFiles::TOggFilesNextDir TOggFiles::NextDirectory()
+	{
+	// Move on to the next directory
+	delete iDirectory;
+	iDirectory = NULL;
+
+	TRAPD(err, iDs->NextL(iDirectory));
+	if (err != KErrNone) 
+		{
+		TRACEF(COggLog::VA(_L("Unable to scan directory %S for oggfiles"), &iDirScanDir ));
+		delete iDs ; iDs = NULL;
+
+		return EOggFilesLastDirScanned;
+		}
+        
+	if (iDirectory == NULL) 
+		{
+		// No more files in that drive.
+		// Any other drive to search in?
+		iCurrentDriveIndex++;
+		if (iCurrentDriveIndex < iPathArray->Count())
+			{
+			// More drives to search
+            TRAP(err, iDs->SetScanDataL((*iPathArray)[iCurrentDriveIndex], KEntryAttNormal, ESortByName|EAscending,CDirScan::EScanDownTree));
+            if (err != KErrNone) 
+				{
+                TPtrC aBuf((*iPathArray)[iCurrentDriveIndex]);
+                TRACEF(COggLog::VA(_L("Unable to setup scan directory %S for oggfiles"), &aBuf));
+                delete iDs ; iDs = NULL;
+
+				return EOggFilesLastDirScanned;
+				}
+
+            return EOggFilesNextDriveReady;
+			}
+		else
+			{
             // No more directories to search
-            iDirScanFinished = ETrue;
-            return EFalse;
-        }
-    }
+			return EOggFilesLastDirScanned;
+			}
+		}
 
     iNbDirScanned++;
-	return ETrue;
-}
-
-TBool TOggFiles::AddNextFileL()
-{
-    TBuf<256> shortname;
-	TBool fileFound = EFalse; 
-	const TEntry e= (*iDirectory)[iCurrentIndexInDirectory];
-        
-    iFullname.Copy(iDs->FullPath());
-    iFullname.Append(e.iName);
-        
-    TParsePtrC p(iFullname);
-    if (IsSupportedAudioFile(p)) 
-    {
-        shortname.Copy(e.iName);
-        shortname.Delete(shortname.Length()-4,4); // get rid of the .ogg extension
-
-		iPath.Copy(iDs->AbbreviatedPath());
-        if (iPath.Length()>1 && iPath[iPath.Length()-1]==L'\\')
-            iPath.SetLength(iPath.Length()-1); // get rid of trailing back slash
-            
-        TInt err = iOggPlayback->Info(iFullname, ETrue);
-        if( err == KErrNone )
-        {
-            TOggFile* o = TOggFile::NewL(iNbFilesFound,
-                iOggPlayback->Title(), 
-                iOggPlayback->Album(), 
-                iOggPlayback->Artist(), 
-                iOggPlayback->Genre(), 
-                iPath,
-                iFullname,
-                shortname,
-                iOggPlayback->TrackNumber());
-                
-            iFiles->AppendL(o);
-            iNbFilesFound++;
-			iCurrentIndexInDirectory++;
-			fileFound = ETrue;
-        }
-        else
-        {
-            TRACEF(COggLog::VA(_L("Failed with code %d"), err ));
-        }
-    }
-#ifdef PLAYLIST_SUPPORT
-	else if (IsPlayListFile(p))
-	{
-		// Add the playlist to the list of playlists.
-        shortname.Copy(e.iName);
-        shortname.Delete(shortname.Length()-4,4); // get rid of the .m3u extension
-
-		iPath.Copy(iDs->AbbreviatedPath());
-        if (iPath.Length()>1 && iPath[iPath.Length()-1]==L'\\')
-            iPath.SetLength(iPath.Length()-1); // get rid of trailing back slash
-
-		TOggPlayList* o = TOggPlayList::NewL(iNbPlayListsFound, iPath, iFullname, shortname);
-        iFiles->AppendL(o);
-        
-		iNbPlayListsFound++;
-		iCurrentIndexInDirectory++;
-		fileFound = ETrue;
+	iCurrentIndexInDirectory = 0;
+	return EOggFilesNextDirReady;
 	}
-#endif
+
+TBool TOggFiles::AddNextFile()
+	{
+	TBool fileFound = EFalse; 
+	const TEntry& e = (*iDirectory)[iCurrentIndexInDirectory];
+
+	TFileName fullName;
+	fullName.Copy(iDs->FullPath());
+	fullName.Append(e.iName);
+        
+	TParsePtrC p(fullName);
+	if (IsSupportedAudioFile(p)) 
+		{
+		iShortName.Copy(p.Name());
+
+		iPath.Copy(iDs->AbbreviatedPath());
+		if (iPath.Length()>1 && iPath[iPath.Length()-1] == L'\\')
+			iPath.SetLength(iPath.Length()-1); // get rid of trailing back slash
+
+        TInt err = iOggPlayback->Info(fullName, *this);
+        if (err == KErrNone)
+			fileFound = ETrue;
+        else
+			{
+			// Just skip the file if there is an error
+            TRACEF(COggLog::VA(_L("AddNextFile failed with code %d"), err));
+			}
+		}
+	else if (IsPlayListFile(p))
+		{
+		fileFound = ETrue;
+		iCurrentIndexInDirectory++;
+
+		// Add the playlist to the list of playlists.
+		TFileName path;
+		path.Copy(iDs->AbbreviatedPath());
+        if ((path.Length()>1) && (path[path.Length()-1] == L'\\'))
+            path.SetLength(path.Length()-1); // get rid of trailing back slash
+
+		TOggPlayList* o = NULL;
+		TRAPD(err,
+			{
+			o = TOggPlayList::NewL(iNbPlayListsFound, path, fullName, p.Name());
+			iFiles->AppendL(o);
+			});
+        
+		if (err == KErrNone)
+			iNbPlayListsFound++;
+	
+		User::RequestComplete(iFileScanRequestStatus, err);
+		}
 
 	return fileFound;
-}
-	
-TBool TOggFiles::FileSearchIsProcessDone() const
-{
-    return iDirScanFinished;
-};
-
-#ifdef PLAYLIST_SUPPORT
-void TOggFiles::ScanNextPlayList()
-{
-	TInt numFiles = iFiles->Count();
-	if (iCurrentIndexInDirectory == numFiles)
-	{
-		iPlayListScanFinished = ETrue;
-		return;
 	}
 
-	for ( ; iCurrentIndexInDirectory<numFiles ; iCurrentIndexInDirectory++)
+void TOggFiles::FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo)
 	{
-		TOggFile* o = (*iFiles)[iCurrentIndexInDirectory];
-		if (o->FileType() == TOggFile::EPlayList)
+	iCurrentIndexInDirectory++;
+
+	if (aErr != KErrNone)
 		{
-			// Parse the playlist, ignoring any errors.
-			TRAPD(err, ((TOggPlayList*) o)->ScanPlayListL(*iDirScanSession, this));
-			iCurrentIndexInDirectory++;
-			break;
+		User::RequestComplete(iFileScanRequestStatus, aErr);
+		return;
+		}
+
+	TOggFile* o = NULL;
+	TRAP(aErr,
+		{
+		o = TOggFile::NewL(iNbFilesFound, aFileInfo.iTitle, aFileInfo.iAlbum, 
+		aFileInfo.iArtist, aFileInfo.iGenre, iPath, aFileInfo.iFileName, iShortName, aFileInfo.iTrackNumber);
+
+		iFiles->AppendL(o);
+		});
+  
+	if (aErr == KErrNone)
+		iNbFilesFound++;
+
+	User::RequestComplete(iFileScanRequestStatus, aErr);
+	}
+
+void TOggFiles::CancelOutstandingRequest()
+	{
+	if (iFileScanRequestStatus)
+		{
+		iOggPlayback->InfoCancel();
+		User::RequestComplete(iFileScanRequestStatus, KErrCancel);
 		}
 	}
-}
 
-TBool TOggFiles::PlayListScanIsProcessDone() const
-{
-    return iPlayListScanFinished;
-}
-#endif
+void TOggFiles::ScanNextPlayList(TRequestStatus& aRequestStatus)
+	{
+	iFileScanRequestStatus = &aRequestStatus;
+	aRequestStatus = KRequestPending;
 
-void  TOggFiles::FileSearchProcessFinished()
-{// Not used
-};
-void  TOggFiles::FileSearchDialogDismissedL(TInt /*aButtonId*/)
-{// Not used
-};
+	TInt numFiles = iFiles->Count();
+	if (iCurrentIndexInFiles == numFiles)
+		{
+		User::RequestComplete(iFileScanRequestStatus, KOggFileScanStepComplete);
+		return;
+		}
 
-TInt  TOggFiles::FileSearchCycleError(TInt aError)
-{// Not used
-    return(aError);
-};
+	for ( ; iCurrentIndexInFiles<numFiles ; iCurrentIndexInFiles++)
+		{
+		TOggFile* o = (*iFiles)[iCurrentIndexInFiles];
+		if (o->FileType() == TOggFile::EPlayList)
+			{
+			// Parse the playlist, ignoring any errors.
+			TRAPD(err, ((TOggPlayList*) o)->ScanPlayListL(*iDirScanSession, this));
+			iCurrentIndexInFiles++;
+			break;
+			}
+		}
 
-#ifdef PLAYLIST_SUPPORT
+	User::RequestComplete(iFileScanRequestStatus, KErrNone);
+	}
+
 void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists)
-{
+	{
     aNbDir = iNbDirScanned;
     aNbFiles = iNbFilesFound;
     aNbPlayLists = iNbPlayListsFound;
-};
-#else
-void  TOggFiles::FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles)
-{
-    aNbDir = iNbDirScanned;
-    aNbFiles = iNbFilesFound;
-};
-#endif
+	}
 
-TInt TOggFiles::SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session)
-{
-    ClearFiles();
+TInt TOggFiles::SearchAllDrives(CEikDialog* aDialog, TInt aDialogID, RFs& session)
+	{
+	ClearFiles();
     
-    TChar driveLetter; TDriveInfo driveInfo;
-    TInt err=KErrNone;
-    TInt driveNumber;
-    for (driveNumber=EDriveA; driveNumber<=EDriveZ; driveNumber++) {
-      session.Drive(driveInfo,driveNumber); 
-      if (driveInfo.iDriveAtt == (TUint)KDriveAbsent)
-          continue; 
-      if ( (driveInfo.iType != (TUint) EMediaRom) 
-          && (driveInfo.iType != (TUint) EMediaNotPresent)
-#ifdef __WINS__
+	TChar driveLetter; TDriveInfo driveInfo;
+	TInt err=KErrNone;
+	TInt driveNumber;
+	for (driveNumber = EDriveA ; driveNumber<=EDriveZ ; driveNumber++)
+		{
+		session.Drive(driveInfo, driveNumber); 
+		if (driveInfo.iDriveAtt == (TUint) KDriveAbsent)
+			continue; 
+
+		if ((driveInfo.iType != (TUint) EMediaRom) && (driveInfo.iType != (TUint) EMediaNotPresent)
+#if defined(__WINS__)
           // For some reasons, the emulator finds a non-existing drive X, which blows up everything...
           && (driveInfo.iType != EMediaHardDisk) 
 #endif
-          ){
-          TRAP(err, session.DriveToChar(driveNumber,driveLetter));
-          if (err) break;
-          TBuf <10> driveName;
-          driveName.Format(_L("%c:\\"), ((TUint) driveLetter));
-          err = AddDirectoryStart(driveName,session);
-          if (err) break;
-      }
-    }
-    if ( err == KErrNone) {
+          )
+			{
+			TRAP(err, session.DriveToChar(driveNumber,driveLetter));
+			if (err)
+				break;
+
+			TBuf <10> driveName;
+			driveName.Format(_L("%c:\\"), ((TUint) driveLetter));
+			err = AddDirectoryStart(driveName, session);
+			if (err)
+				break;
+			}
+		}
+
+	if (err == KErrNone)
+		{
         TRAP(err, aDialog->ExecuteLD(aDialogID));
-    }
-    else {
-        delete (aDialog);
-        aDialog = NULL;
-    }
+		}
+    else
+        delete aDialog;
+
     AddDirectoryStop();
-    return (err);
+    return err;
 }
 
-TInt TOggFiles::SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session)
+TInt TOggFiles::SearchSingleDrive(const TDesC& aDir, CEikDialog* aDialog, TInt aDialogID, RFs& session)
 {
     ClearFiles();
     if (!EikFileUtils::PathExists(aDir)) 
     {
-      TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir ));
-      TBuf<256> buf1,buf2;
+	  delete aDialog;
+      TRACEF(COggLog::VA(_L("Folder %S doesn't exist"), &aDir));
+
+	  TBuf<256> buf1, buf2;
       CEikonEnv::Static()->ReadResource(buf2, R_OGG_ERROR_28);
       buf1.Append(aDir);
-      ((COggPlayAppUi*)CEikonEnv::Static()->AppUi())->iOggMsgEnv->OggErrorMsgL(buf2,buf1);
+
+	  COggMsgEnv::OggErrorMsgL(buf2, buf1);
       return KErrNotFound;
     }
-    TInt err = AddDirectoryStart(aDir,session);
-    if ( err == KErrNone) {
+
+    TInt err = AddDirectoryStart(aDir, session);
+    if (err == KErrNone)
+	{
         TRAP(err, aDialog->ExecuteLD(aDialogID));
     }
-    else {
-        delete (aDialog);
-        aDialog = NULL;
-    }
-    AddDirectoryStop();
-    return (err);
+    else
+        delete aDialog;
+
+	AddDirectoryStop();
+    return err;
 }
 
-TBool TOggFiles::CreateDbWithSingleFile(const TDesC& aFile){
+void TOggFiles::CreateDbWithSingleFile(const TDesC& aFile, TRequestStatus& aRequestStatus)
+	{
+	iFileScanRequestStatus = &aRequestStatus;
+	aRequestStatus = KRequestPending;
 
-  TParsePtrC p(aFile);	
-	if (IsSupportedAudioFile(p)) {
-		
-		ClearFiles();
-		AddFile(aFile);
-
-		if (iFiles->Count()) {
-			return ETrue;
-		}
-	}
-	return EFalse;
-}
-
-void TOggFiles::AddFile(const TDesC& aFile){
-	//_LIT(KS,"adding File %s to oggfiles");
-	//OGGLOG.WriteFormat(KS,aFile.Ptr());
-	
+	TInt err = KErrArgument;
 	TParsePtrC p(aFile);
+	if (IsSupportedAudioFile(p))
+		{
+		ClearFiles();
 
-	if (IsSupportedAudioFile(p)) {
-		
-		iFullname.Copy(aFile);
-
-		TBuf<256> shortname;
-		shortname.Append(p.Name());
-
+		iShortName.Copy(p.Name());
 		iPath.Copy(p.DriveAndPath());
-		if (iPath.Length()>1 && iPath[iPath.Length()-1]==L'\\'){
-			iPath.Delete(iPath.Length()-1,1); // get rid of trailing back slash
-		}
-		if ( iOggPlayback->Info(aFile, EFalse) == KErrNone) {
+		if (iPath.Length()>1 && iPath[iPath.Length()-1] == L'\\')
+			iPath.Delete(iPath.Length()-1, 1); // get rid of trailing back slash
 
-			TOggFile* o = TOggFile::NewL(
-                iFiles->Count(),
-                iOggPlayback->Title(), 
-				iOggPlayback->Album(), 
-				iOggPlayback->Artist(), 
-				iOggPlayback->Genre(), 
-				iPath,
-				iFullname,
-				shortname,
-				iOggPlayback->TrackNumber());
-			
-			TRAPD(err, iFiles->AppendL(o));
-		} 	
+		err = iOggPlayback->Info(aFile, *this);
+		}
+
+	if (err != KErrNone)
+		User::RequestComplete(iFileScanRequestStatus, err);
 	}
-	iOggPlayback->ClearComments();
-}
 
 TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 {
   RFile in;
-  if(in.Open(session, aFileName, EFileRead|EFileStreamText)== KErrNone) {
-
+  if(in.Open(session, aFileName, EFileRead|EFileStreamText)== KErrNone)
+  {
     TFileText tf;
     tf.Set(in);
     
     // check file version:
     TBuf<KTFileTextBufferMaxSize> line;
 	TInt err;
-    iVersion= -1;
-    if(tf.Read(line)==KErrNone) {
+    TInt version= -1;
+    if (tf.Read(line)==KErrNone)
+	{
       TLex parse(line);
-      parse.Val(iVersion);
+      parse.Val(version);
     }
     
-#ifdef PLAYLIST_SUPPORT
-	if ((iVersion!=0) && (iVersion!=1) && (iVersion!=2))
-#else
-	if ((iVersion!=0) && (iVersion!=1))
-#endif
+	if ((version!=0) && (version!=1) && (version!=2))
 	{
       in.Close();
       return EFalse;
     }
 
-#ifdef PLAYLIST_SUPPORT
 	TInt i;
 	TInt numPlayLists = 0;
 	RPointerArray<TOggPlayList> playLists;
 	CleanupClosePushL(playLists);
-	if (iVersion==2)
+	if (version==2)
 	{
 		if(tf.Read(line)==KErrNone)
 		{
@@ -962,12 +912,11 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 		  playLists.Append(o);
 		}
 	}
-#endif
 	
     while (tf.Read(line)==KErrNone) 
       {
       TOggFile* o = NULL;
-      TRAP( err, o = TOggFile::NewL(tf, iVersion); );
+      TRAP( err, o = TOggFile::NewL(tf, version); );
       if (err != KErrNone)
 	  {
          in.Close();
@@ -980,7 +929,6 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 
     in.Close();
 	
-#ifdef PLAYLIST_SUPPORT
 	// Parse playlists
 	for (i = 0 ; i<numPlayLists ; i++)
 	{
@@ -989,7 +937,6 @@ TBool TOggFiles::ReadDb(const TFileName& aFileName, RFs& session)
 	}
 
 	CleanupStack::PopAndDestroy(&playLists);
-#endif
 
 	return ETrue;
   }
@@ -1019,12 +966,7 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
     
   // Write file version:
   TBuf<16> line;
-
-#ifdef PLAYLIST_SUPPORT
   line.Num(2);
-#else
-  line.Num(1);
-#endif
 
   err = tf.Write(line);
      
@@ -1034,7 +976,6 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
   // Buffer up writes. Speed issue on phones without MMC write cache.
   TInt i;
 
-#ifdef PLAYLIST_SUPPORT
   TInt numFiles = iFiles->Count();
   if (err==KErrNone)
   {
@@ -1074,7 +1015,6 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
 
 	CleanupStack::PopAndDestroy(&playLists);
   }
-#endif
 
   if (err == KErrNone)
   {
@@ -1124,8 +1064,7 @@ void TOggFiles::WriteDbL(const TFileName& aFileName, RFs& session)
   CEikonEnv::Static()->BusyMsgCancel();
 }
 
-void
-TOggFiles::AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TInt anAbsoluteIndex)
+void TOggFiles::AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TInt anAbsoluteIndex)
 {
   TInt lineLength = aText.Length() + 15;
   HBufC* hbuf = HBufC::NewLC(lineLength);
@@ -1141,8 +1080,7 @@ TOggFiles::AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDes
   CleanupStack::PopAndDestroy();
 }
 
-void
-TOggFiles::AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TDesC& anInternalText)
+void TOggFiles::AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TDesC& anInternalText)
 {
   TInt lineLength = aText.Length() + anInternalText.Length() + 15;
   HBufC* hbuf = HBufC::NewLC(lineLength);
@@ -1156,285 +1094,320 @@ TOggFiles::AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDes
   CleanupStack::PopAndDestroy();
 }
 
-void
-TOggFiles::AppendTitleAndArtist(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TInt anAbsoluteIndex)
-{
-  TInt lineLength = aTitle.Length() + aDelim.Length() + aArtist.Length() + 15;
-  HBufC* hbuf = HBufC::NewLC(lineLength);
-  TPtr hbufDes = hbuf->Des();
-  hbufDes.AppendNum((TInt) aType);
-  hbufDes.Append(KColumnListSeparator);
-  hbufDes.Append(aTitle);
-  hbufDes.Append(aDelim);
-  hbufDes.Append(aArtist);
-  hbufDes.Append(KColumnListSeparator);
-  hbufDes.AppendNum(anAbsoluteIndex);
-  hbufDes.Append(KColumnListSeparator);
-  hbufDes.AppendNum(0);
-  arr.AppendL(hbufDes);
-  CleanupStack::PopAndDestroy();
-}
+void TOggFiles::AppendTitleAndArtist(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TInt anAbsoluteIndex)
+	{
+	TInt lineLength = aTitle.Length() + aDelim.Length() + aArtist.Length() + 15;
+	HBufC* hBuf = HBufC::NewLC(lineLength);
+	TPtr hDes = hBuf->Des();
 
-void
-TOggFiles::ClearFiles()
-{
-  iFiles->ResetAndDestroy();
-}
+	hDes.AppendNum((TInt) aType);
+	hDes.Append(KColumnListSeparator);
+	hDes.Append(aTitle);
+	hDes.Append(aDelim);
+	hDes.Append(aArtist);
+	hDes.Append(KColumnListSeparator);
+	hDes.AppendNum(anAbsoluteIndex);
+	hDes.Append(KColumnListSeparator);
+	hDes.AppendNum(0);
+	arr.AppendL(hDes);
+	
+	CleanupStack::PopAndDestroy(hBuf);
+	}
 
+void TOggFiles::ClearFiles()
+	{
+	iCurrentIndexInFiles = 0;
+	iFiles->ResetAndDestroy();
+	}
 
-TDesC & 
-TOggFiles::FindFromIndex(TInt anIndex)
-{
-    _LIT(Empty, "-");
-    TOggFile * o = TOggFile::NewL(anIndex, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty);
+TDesC& TOggFiles::FindFromIndex(TInt anIndex)
+	{
+    TOggFile * o = TOggFile::NewL(anIndex, KEmpty, KEmpty, KEmpty, KEmpty, KEmpty, KEmpty, KEmpty, KEmpty);
     CleanupStack::PushL(o);
-    TInt foundIdx=-1;
-    iFiles->Find( (TOggFile * const &) *o, iOggKeyAbsoluteIndex, foundIdx );
-    CleanupStack::PopAndDestroy();
+
+	TInt foundIdx = -1;
+    iFiles->Find((TOggFile * const &) *o, iOggKeyAbsoluteIndex, foundIdx);
+
+	CleanupStack::PopAndDestroy(o);
     return *(*iFiles)[foundIdx]->iFileName;
-}
+	}
 
 TOggFile* TOggFiles::FindFromFileNameL(TFileName& aFileName)
-{
-    _LIT(Empty, "-");
-    TOggFile* o = TOggFile::NewL(-1, Empty, Empty, Empty, Empty, Empty, aFileName, Empty, Empty);
+	{
+    TOggFile* o = TOggFile::NewL(-1, KEmpty, KEmpty, KEmpty, KEmpty, KEmpty, aFileName, KEmpty, KEmpty);
 
 	TInt foundIdx;
 	TBool found = EFalse;
 	for (foundIdx = 0 ; foundIdx < iFiles->Count() ; foundIdx++)
-	{
+		{
 		TOggFile* o2 = (*iFiles)[foundIdx];
 		if (!(o2->iFileName->Compare(*o->iFileName)))
-		{
+			{
 			found = ETrue;
 			break;
+			}
 		}
-	}
 
 	delete o;
 	return (found) ? (*iFiles)[foundIdx] : NULL ;
-}
-
-void 
-TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum, 
-			   const TDesC& anArtist, const TDesC& aGenre, 
-			   const TDesC& aSubFolder)
-{
-  arr.Reset();
-
-  if (anAlbum.Length()>0) 
-	  iFiles->Sort(iOggKeyTrackTitle); 
-  else {
-	  if (aSubFolder.Length()>0) 
-		  iFiles->Sort(iOggKeyFileNames); 
-	  else 
-		  iFiles->Sort(iOggKeyTitles);
 	}
 
-  if( anAlbum.Length()==0 && anArtist.Length()==0  && aGenre.Length()==0  && aSubFolder.Length()==0 ) {
-    TBuf<10> buf;
-    CEikonEnv::Static()->ReadResource(buf, R_OGG_BY);
-    for (TInt i=0; i<iFiles->Count(); i++) {
-      TOggFile& o= *(*iFiles)[i];
-	  if (o.FileType() != TOggFile::EPlayList)
-		AppendTitleAndArtist(arr, COggListBox::ETitle, *(o.iTitle), buf, *(o.iArtist), (TInt) &o);
-    }
+void TOggFiles::FillTitles(CDesCArray& arr, const TDesC& anAlbum, 
+const TDesC& anArtist, const TDesC& aGenre, const TDesC& aSubFolder)
+	{
+	arr.Reset();
+	if (anAlbum.Length()>0) 
+		iFiles->Sort(iOggKeyTrackTitle); 
+	else
+		{
+		if (aSubFolder.Length()>0) 
+			iFiles->Sort(iOggKeyFileNames); 
+		else 
+			iFiles->Sort(iOggKeyTitles);
+		}
 
-  } else {
-    for (TInt i=0; i<iFiles->Count(); i++) {
-      TOggFile& o= *(*iFiles)[i];
-      TBool select=
-        (anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
-        (anArtist.Length()==0 || *o.iArtist==anArtist) &&
-        (aGenre.Length()==0 || *o.iGenre==aGenre) &&
-        (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
-      if (select)
-	  {
-		if (o.FileType() != TOggFile::EPlayList)
-			AppendLine(arr, COggListBox::ETitle, *(o.iTitle), (TInt) &o);
-	  }
-    }
-  }
-}
+	if (anAlbum.Length()==0 && anArtist.Length()==0  && aGenre.Length()==0  && aSubFolder.Length()==0)
+		{
+		TBuf<10> buf;
+		CEikonEnv::Static()->ReadResource(buf, R_OGG_BY);
+		for (TInt i = 0 ; i<iFiles->Count() ; i++)
+			{
+			TOggFile& o= *(*iFiles)[i];
+
+			// Playlists don't appear in titles view
+			if (o.FileType() == TOggFile::EPlayList)
+				continue;
+
+			AppendTitleAndArtist(arr, COggListBox::ETitle, *(o.iTitle), buf, *(o.iArtist), (TInt) &o);
+			}
+		}
+	else
+		{
+		for (TInt i = 0 ; i<iFiles->Count() ; i++)
+			{
+			TOggFile& o = *(*iFiles)[i];
+
+			// Playlists don't appear in titles view
+			if (o.FileType() == TOggFile::EPlayList)
+				continue;
+
+			TBool select = (anAlbum.Length()==0 || *o.iAlbum==anAlbum) && (anArtist.Length()==0 || *o.iArtist==anArtist)
+			&& (aGenre.Length()==0 || *o.iGenre==aGenre) && (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
+
+			if (select)
+				AppendLine(arr, COggListBox::ETitle, *(o.iTitle), (TInt) &o);
+			}
+		}
+	}
 
 void TOggFiles::FillAlbums(CDesCArray& arr, const TDesC& /*anArtist*/, const TFileName& aSubFolder)
-{
-  arr.Reset();
-  iFiles->Sort(iOggKeyAlbums);
-  TBuf<256> lastAlbum;
-  for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= *(*iFiles)[i];
+	{
+	arr.Reset();
+	iFiles->Sort(iOggKeyAlbums);
 
-	// Playlists don't appear in album view
-	if (o.FileType() == TOggFile::EPlayList)
-		continue;
+	TBuf<256> lastAlbum;
+	for (TInt i = 0 ; i<iFiles->Count() ; i++)
+		{
+		TOggFile& o= *(*iFiles)[i];
 
-    if (aSubFolder.Length()==0 || *(o.iSubFolder)==aSubFolder) {
-      if (lastAlbum!=*o.iAlbum) {
-		AppendLine(arr, COggListBox::EAlbum, *(o.iAlbum), *(o.iAlbum));
-		lastAlbum= *o.iAlbum;
-      }
-    }
-  }
-}
+		// Playlists don't appear in album view
+		if (o.FileType() == TOggFile::EPlayList)
+			continue;
+
+		if (aSubFolder.Length()==0 || *(o.iSubFolder)==aSubFolder)
+			{
+			if (lastAlbum!=*o.iAlbum)
+				{
+				AppendLine(arr, COggListBox::EAlbum, *(o.iAlbum), *(o.iAlbum));
+				lastAlbum= *o.iAlbum;
+				}
+			}
+		}
+	}
 
 void TOggFiles::FillArtists(CDesCArray& arr, const TFileName& aSubFolder)
-{
-  arr.Reset();
-  iFiles->Sort(iOggKeyArtists);
-  TBuf<256> lastArtist;
-  for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= *(*iFiles)[i];
-
-	// Playlists don't appear in artist view
-	if (o.FileType() == TOggFile::EPlayList)
-		continue;
-
-    if (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder) {
-      if (lastArtist!=*o.iArtist) {
-	AppendLine(arr, COggListBox::EArtist, *o.iArtist, *o.iArtist);
-	lastArtist= *o.iArtist;
-      }
-    }
-  }
-}
-
-void TOggFiles::FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, 
-			      const TDesC& aGenre, const TFileName& aSubFolder)
-{
-  arr.Reset();
-  iFiles->Sort(iOggKeyFileNames);
-  for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= *(*iFiles)[i];
-    TBool select=
-      (anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
-      (anArtist.Length()==0 || *o.iArtist==anArtist) &&
-      (aGenre.Length()==0 || *o.iGenre==aGenre) &&
-      (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
-    if (select)
 	{
+	arr.Reset();
+	iFiles->Sort(iOggKeyArtists);
+
+	TBuf<256> lastArtist;
+	for (TInt i = 0 ; i<iFiles->Count() ; i++)
+		{
+		TOggFile& o= *(*iFiles)[i];
+
+		// Playlists don't appear in artist view
 		if (o.FileType() == TOggFile::EPlayList)
-			AppendLine(arr, COggListBox::EPlayList, *o.iShortName, (TInt) &o);
-		else
-			AppendLine(arr, COggListBox::EFileName, *o.iShortName, (TInt) &o);
+			continue;
+
+		if (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder)
+			{
+			if (lastArtist!=*o.iArtist)
+				{
+				AppendLine(arr, COggListBox::EArtist, *o.iArtist, *o.iArtist);
+				lastArtist= *o.iArtist;
+				}
+			}
+		}
 	}
-  }
-}
+
+void TOggFiles::FillFileNames(CDesCArray& arr, const TDesC& anAlbum,
+const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder)
+	{
+	arr.Reset();
+	iFiles->Sort(iOggKeyFileNames);
+
+	for (TInt i = 0 ; i<iFiles->Count() ; i++)
+		{
+		TOggFile& o = *(*iFiles)[i];
+
+		// Playlists don't appear in files view
+		if (o.FileType() == TOggFile::EPlayList)
+			continue;
+
+		TBool select = (anAlbum.Length()==0 || *o.iAlbum==anAlbum) && (anArtist.Length()==0 || *o.iArtist==anArtist)
+		&& (aGenre.Length()==0 || *o.iGenre==aGenre) && (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
+
+		if (select)
+			AppendLine(arr, COggListBox::EFileName, *o.iShortName, (TInt) &o);
+		}
+	}
 
 void TOggFiles::FillSubFolders(CDesCArray& arr)
-{
-  arr.Reset();
-  iFiles->Sort(iOggKeySubFolders);
-  TBuf<256> lastSubFolder;
-  for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= *(*iFiles)[i];
-    if (lastSubFolder!=*o.iSubFolder) {
-      AppendLine(arr, COggListBox::ESubFolder, *o.iSubFolder, *o.iSubFolder);
-      lastSubFolder= *o.iSubFolder;
-    }
-  }
-}
+	{
+	arr.Reset();
+	iFiles->Sort(iOggKeySubFolders);
 
-void TOggFiles::FillGenres(CDesCArray& arr, const TDesC& anAlbum, 
-			   const TDesC& anArtist, const TFileName& aSubFolder)
-{
-  arr.Reset();
-  iFiles->Sort(iOggKeyGenres);
-  TBuf<256> lastGenre;
-  for (TInt i=0; i<iFiles->Count(); i++) {
-    TOggFile& o= *(*iFiles)[i];
+	TBuf<256> lastSubFolder;
+	for (TInt i = 0 ; i<iFiles->Count() ; i++)
+		{
+		TOggFile& o= *(*iFiles)[i];
 
-	// Playlists don't appear in genre view
-	if (o.FileType() == TOggFile::EPlayList)
-		continue;
+		// Playlists don't appear in sub folders view
+		if (o.FileType() == TOggFile::EPlayList)
+			continue;
 
-    if (lastGenre!=*o.iGenre) {
-      TBool select=
-	(anAlbum.Length()==0 || *o.iAlbum==anAlbum) &&
-	(anArtist.Length()==0 || *o.iAlbum==anArtist) &&
-	(aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
-      if (select) {
-	AppendLine(arr, COggListBox::EGenre, *o.iGenre, *o.iGenre);
-	lastGenre= *o.iGenre;
-      }
-    }
-  }
-}
+		if (lastSubFolder != *o.iSubFolder)
+			{
+			AppendLine(arr, COggListBox::ESubFolder, *o.iSubFolder, *o.iSubFolder);
+			lastSubFolder= *o.iSubFolder;
+			}
+		}
+	}
 
-#ifdef PLAYLIST_SUPPORT
+void TOggFiles::FillGenres(CDesCArray& arr, const TDesC& anAlbum,
+const TDesC& anArtist, const TFileName& aSubFolder)
+	{
+	arr.Reset();
+	iFiles->Sort(iOggKeyGenres);
+
+	TBuf<256> lastGenre;
+	for (TInt i = 0 ; i<iFiles->Count() ; i++)
+		{
+		TOggFile& o= *(*iFiles)[i];
+
+		// Playlists don't appear in genre view
+		if (o.FileType() == TOggFile::EPlayList)
+			continue;
+
+		if (lastGenre!=*o.iGenre)
+			{
+			TBool select = (anAlbum.Length()==0 || *o.iAlbum==anAlbum) && (anArtist.Length()==0 || *o.iAlbum==anArtist)
+			&& (aSubFolder.Length()==0 || *o.iSubFolder==aSubFolder);
+
+			if (select)
+				{
+				AppendLine(arr, COggListBox::EGenre, *o.iGenre, *o.iGenre);
+				lastGenre= *o.iGenre;
+				}
+			}
+		}
+	}
+
 void TOggFiles::FillPlayLists(CDesCArray& arr)
-{
-  arr.Reset();
-  iFiles->Sort(iOggKeyFileNames);
+	{
+	arr.Reset();
+	iFiles->Sort(iOggKeyFileNames);
 
-  TInt numFiles = iFiles->Count();
-  for (TInt i=0 ; i<numFiles ; i++)
-  {
-	  TOggFile* o = (*iFiles)[i];
-	  if (o->FileType() == TOggFile::EPlayList)
-		AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
-  }
-}
+	TInt numFiles = iFiles->Count();
+	for (TInt i=0 ; i<numFiles ; i++)
+		{
+		TOggFile* o = (*iFiles)[i];
+		if (o->FileType() == TOggFile::EPlayList)
+			AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
+		}
+	}
 
 void TOggFiles::FillPlayList(CDesCArray& arr, const TDesC& aPlayListFile)
-{
-  arr.Reset();
+	{
+	arr.Reset();
 
-  TInt playListInt(0);
-  TLex parse(aPlayListFile);
-  parse.Val(playListInt);
-  TOggPlayList* playList = (TOggPlayList*) playListInt;
+	TInt playListInt(0);
+	TLex parse(aPlayListFile);
+	parse.Val(playListInt);
+	TOggPlayList* playList = (TOggPlayList*) playListInt;
 
-  // Loop through the entries and add them
-  TInt numEntries = playList->Count();
-  for (TInt i = 0 ; i<numEntries ; i++)
-  {
-    TOggFile* o = (*playList)[i];
-	if (o->FileType() == TOggFile::EPlayList)
-		AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
-	else
-		AppendLine(arr, COggListBox::EFileName, *(o->iShortName), (TInt) o);
-  }
-}
-#endif
+	// Loop through the entries and add them
+	TInt numEntries = playList->Count();
+	for (TInt i = 0 ; i<numEntries ; i++)
+		{
+		TOggFile* o = (*playList)[i];
+		if (o->FileType() == TOggFile::EPlayList)
+			AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
+		else
+			AppendLine(arr, COggListBox::EFileName, *(o->iShortName), (TInt) o);
+		}
+	}
 
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
 TBool TOggFiles::IsSupportedAudioFile(TParsePtrC& p)
-{
-    TBool result=EFalse;
+	{
+    TBool result = EFalse;
     if (p.ExtPresent())
-    {
+		{
         TPtrC pp (p.Ext().Mid(1)); // Remove the . in front of the extension
       
-        for (TInt i=0; i<iSupportedExtensionList->Count(); i++)
-        {
-            result=(pp.CompareF( (*iSupportedExtensionList)[i] ) == 0 );  
+        for (TInt i = 0 ; i<iSupportedExtensionList->Count() ; i++)
+			{
+            result = (pp.CompareF((*iSupportedExtensionList)[i] ) == 0);  
             if (result)
                 break;
-        }
-    }
-    return result;
-}
-#else /*PLUGIN_SYSTEM */
+			}
+		}
+
+	return result;
+	}
+#else
 
 _LIT(KOggExt, ".ogg");
-_LIT(KOggExtUC, ".OGG");
+_LIT(KOgaExt, ".oga");
+_LIT(KFlacExt, ".flac");
+_LIT(KMp3Ext, ".mp3");
 TBool TOggFiles::IsSupportedAudioFile(TParsePtrC& p)
-{
+	{
+	TBuf<10> ext(p.Ext());
+	ext.LowerCase();
 
-  TBool result= (p.Ext().Compare(KOggExt)==0) || (p.Ext().Compare(KOggExtUC)==0); 
+	if (ext.Compare(KOggExt) == 0)
+		return ETrue;
 
-#ifdef MP3_SUPPORT
-  result=result || (p.Ext().Compare( _L(".mp3"))==0 || p.Ext().Compare( _L(".MP3"))==0);
+	if (ext.Compare(KOgaExt) == 0)
+		return ETrue;
+
+	if (ext.Compare(KFlacExt) == 0)
+		return ETrue;
+
+#if defined(MP3_SUPPORT)
+	if (ext.Compare(KMp3Ext) == 0)
+		return ETrue;
 #endif
 
-  return result;
-}
-#endif /* PLUGIN_SYSTEM */
+	return EFalse;
+	}
+#endif // PLUGIN_SYSTEM
 
 _LIT(KPlayListExt, ".m3u");
-_LIT(KPlayListExtUC, ".M3U");
 TBool TOggFiles::IsPlayListFile(TParsePtrC& p)
-{
-  return (p.Ext().Compare(KPlayListExt) == 0) || (p.Ext().Compare(KPlayListExtUC) == 0);
-}
+	{
+	TBuf<10> ext(p.Ext());
+	return (ext.CompareF(KPlayListExt) == 0);
+	}

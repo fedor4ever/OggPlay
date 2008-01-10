@@ -19,8 +19,8 @@
 // Platform settings
 #include <OggOs.h>
 
-// This file is for Series 60 and MMF only
-#if defined(SERIES60) && defined(MMF_AVAILABLE)
+// This file is for Series 60 and PLUGIN_SYSTEM only
+#if defined(SERIES60) && defined(PLUGIN_SYSTEM)
 
 #include <aknlists.h>
 #include <aknutils.h>
@@ -67,7 +67,6 @@ COggplayCodecSelectionSettingItemList::~COggplayCodecSelectionSettingItemList ()
 void COggplayCodecSelectionSettingItemList::RefreshListboxModel()
   {
   TBuf<64> listboxBuf;
-	   
 
   // Build the menu on the fly, according to the list plugins.
   CDesCArray* modelArray = static_cast<CDesCArray*>(iListBox->Model()->ItemTextArray());
@@ -113,20 +112,17 @@ void COggplayCodecSelectionSettingItemList::ProcessCommandL (TInt /*aCommandId*/
     // Display the list of available codecs for the selected extension
     
 	// Create CEikTextListBox instance, list
-    CEikTextListBox* list = new( ELeave ) CAknSinglePopupMenuStyleListBox;
-    // Push list'pointer to CleanupStack.
-    CleanupStack::PushL( list );
-    // Create CAknPopupList instance, popupList
-    CAknPopupList* popupList = CAknPopupList::NewL( list, 
-                                                    R_AVKON_SOFTKEYS_SELECT_CANCEL,
-                                                    AknPopupLayouts::EMenuWindow );
-    // Push popupList'pointer to CleanupStack.
+    CEikTextListBox* list = new(ELeave) CAknSinglePopupMenuStyleListBox;
+    CleanupStack::PushL(list);
+
+	// Create CAknPopupList instance, popupList
+    CAknPopupList* popupList = CAknPopupList::NewL(list, R_AVKON_SOFTKEYS_SELECT_CANCEL, AknPopupLayouts::EMenuWindow);
     CleanupStack::PushL( popupList );
-    // Initialize listbox.
-    list->ConstructL( popupList, CEikListBox::ELeftDownInViewRect );
-    list->CreateScrollBarFrameL( ETrue );
-    list->ScrollBarFrame()->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
-                                                     CEikScrollBarFrame::EAuto );
+
+	// Initialize listbox.
+    list->ConstructL(popupList, CEikListBox::ELeftDownInViewRect);
+    list->CreateScrollBarFrameL(ETrue);
+    list->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
     
     // The extension currently selected in the listbox.
     TBuf <10> selectedExtension = iExtensionList->MdcaPoint(iListBox->CurrentItemIndex());
@@ -141,7 +137,7 @@ void COggplayCodecSelectionSettingItemList::ProcessCommandL (TInt /*aCommandId*/
     }
 
     TBuf <50> tmp;
-   	iEikonEnv->ReadResource(tmp,R_OGG_USE_NO_CODEC);
+   	iEikonEnv->ReadResource(tmp, R_OGG_USE_NO_CODEC);
 	items->AppendL(tmp);
     
     // Push items'pointer to CleanupStack.  
@@ -328,11 +324,9 @@ CCoeControl* CCodecInfoList::ComponentControl(TInt /*aIndex*/) const
   return iListBox;
   }
 
-TKeyResponse CCodecInfoList::OfferKeyEventL(
-    const TKeyEvent& aKeyEvent,
-    TEventCode aType )
+TKeyResponse CCodecInfoList::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   {
   return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
   
-#endif /* SERIES60 && MMF_AVAILABLE */
+#endif // SERIES60 && PLUGIN_SYSTEM

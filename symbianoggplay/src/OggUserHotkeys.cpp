@@ -83,7 +83,7 @@ void COggUserHotkeysControl::SetHotkey( TInt aRow, TInt aCode )
   }
 
 // Static method
-TOggplaySettings::THotkeys COggUserHotkeysControl::Hotkey( const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData )
+TOggplaySettings::THotkeys COggUserHotkeysControl::Hotkey(const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData)
   {
   for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
     {

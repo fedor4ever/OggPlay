@@ -27,122 +27,21 @@
 #include <aknutils.h>
 
 
-void COggSettingsContainer::ConstructL(const TRect& aRect, TUid aId)
-{
-    CreateWindowL();
-        
-    if (aId ==  KOggPlayUidSettingsView)
-    {
-        iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
-        iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_SETTING_ITEM_LIST);
-    }
-#if defined(MULTI_THREAD_PLAYBACK)
-	else if (aId == KOggPlayUidPlaybackOptionsView)
-	{
-        iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
-        iListBox->ConstructFromResourceL(R_OGGPLAY_DISPLAY_PLAYBACK_OPTIONS_ITEM_LIST);
-	}
-#endif
-	else if (aId == KOggPlayUidAlarmSettingsView)
-	{
-        iListBox = new(ELeave) COggplayDisplaySettingItemList((COggPlayAppUi &)*CEikonEnv::Static()->AppUi());
-        iListBox->ConstructFromResourceL(R_OGGPLAY_ALARM_S60_SETTING_ITEM_LIST);
-	}
-    else
-        User::Leave(KErrNotSupported);
-    
-    SetRect(aRect);
-    ActivateL();
-    iListBox->SetMopParent(this);
-    iListBox->LoadSettingsL();
-    
-    iListBox->SetRect(aRect);
-    iListBox->ActivateL();
-}
-
-COggSettingsContainer::~COggSettingsContainer()
-    {
-    if (iListBox)
-	    {
-      TRAPD(ignore, iListBox->StoreSettingsL());
-      delete iListBox;
-	    }
-    }
-
-void COggSettingsContainer::SizeChanged()
-    {
-    if (iListBox) iListBox->SetRect(Rect());
-    }
-
-TInt COggSettingsContainer::CountComponentControls() const
-    {
-    if (iListBox)
-      return 1;
-    else
-      return 0;
-    }
-
-CCoeControl* COggSettingsContainer::ComponentControl(TInt aIndex) const
-    {
-    switch ( aIndex )
-        {
-        case 0:
-            return iListBox;
-        default:
-            return NULL;
-        }
-    }
-
-void COggSettingsContainer::Draw(const TRect& aRect) const
-    {
-    CWindowGc& gc = SystemGc();
-    gc.SetPenStyle(CGraphicsContext::ENullPen);
-    gc.SetBrushColor(KRgbGray);
-    gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
-    gc.DrawRect(aRect);
-    }
-
-void COggSettingsContainer::HandleControlEventL(
-    CCoeControl* /*aControl*/,TCoeEvent /*aEventType*/)
-    {
-    }
-
-TKeyResponse COggSettingsContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType)
-{
-  TKeyResponse response=EKeyWasNotConsumed;
-  if (iListBox)
-  {
-	response = iListBox->OfferKeyEventL(aKeyEvent, aType);
-  }
-
-  return response;
-}
-
-void COggSettingsContainer::VolumeGainChangedL()
-{
-	if (iListBox)
-		((COggplayDisplaySettingItemList*) iListBox)->VolumeGainChangedL();
-}
-
-#if defined(MULTI_THREAD_PLAYBACK)
-void COggSettingsContainer::BufferingModeChangedL()
-{
-	if (iListBox)
-		((COggplayDisplaySettingItemList*) iListBox)->BufferingModeChangedL();
-}
-#endif
-
-
-COggplayDisplaySettingItemList::COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi)
+COggSettingItemList::COggSettingItemList(COggPlayAppUi& aAppUi)
 : iData(aAppUi.iSettings), iAppUi(aAppUi)
 {
 }
 
-CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdentifier)
+COggSettingItemList::~COggSettingItemList()
+    {
+    TRAPD(ignore, StoreSettingsL());
+    }
+
+CAknSettingItem* COggSettingItemList::CreateSettingItemL(TInt aIdentifier)
 {
   switch (aIdentifier)
   {
-  case EOggRepeat:
+  case EOggSettingRepeatId:
     return new(ELeave) CRepeatSettingItem(aIdentifier, iAppUi);
 
   case EOggSettingScanDir:
@@ -166,7 +65,7 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   case EOggSettingVolumeBoost:
      return iGainSettingItem = new(ELeave) CGainSettingItem(aIdentifier, iAppUi);
 
-#if defined(MULTI_THREAD_PLAYBACK)
+#if !defined(PLUGIN_SYSTEM)
   case EOggSettingBufferingMode:
     return iBufferingModeItem = new(ELeave) CBufferingModeSettingItem(aIdentifier, iAppUi);
 
@@ -174,19 +73,19 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
     return new(ELeave) CThreadPrioritySettingItem(aIdentifier, iAppUi);
 #endif
 
-  case EOggAlarmActive:
+  case EOggSettingAlarmActive:
     return new(ELeave) CAlarmSettingItem(aIdentifier, iAppUi);
 
-  case EOggAlarmTime:
+  case EOggSettingAlarmTime:
     return new(ELeave) CAlarmTimeSettingItem(aIdentifier, iAppUi);
 
-  case EOggAlarmVolume:
+  case EOggSettingAlarmVolume:
      return new(ELeave) CAknVolumeSettingItem(aIdentifier, iData.iAlarmVolume);
 
-  case EOggAlarmBoost:
+  case EOggSettingAlarmBoost:
 	return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmGain);
 
-  case EOggAlarmSnooze:
+  case EOggSettingAlarmSnooze:
 	return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmSnooze);
 
   default:
@@ -196,7 +95,27 @@ CAknSettingItem* COggplayDisplaySettingItemList::CreateSettingItemL(TInt aIdenti
   return NULL;
 }
 
-// CRepeatItem
+void COggSettingItemList::VolumeGainChangedL()
+{
+	if (iGainSettingItem)
+		{
+		iGainSettingItem->LoadL();
+		HandleChangeInItemArrayOrVisibilityL();
+		}
+}
+
+#if !defined(PLUGIN_SYSTEM)
+void COggSettingItemList::BufferingModeChangedL()
+{
+	if (iBufferingModeItem)
+		{
+		iBufferingModeItem->LoadL();
+		HandleChangeInItemArrayOrVisibilityL();
+		}
+}
+#endif
+
+
 CRepeatSettingItem::CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iRepeat), iAppUi(aAppUi)
 {
@@ -209,27 +128,6 @@ void CRepeatSettingItem::EditItemL(TBool aCalledFromMenu)
 }
 
 
-void COggplayDisplaySettingItemList::VolumeGainChangedL()
-{
-	if (iGainSettingItem)
-		{
-		iGainSettingItem->LoadL();
-		HandleChangeInItemArrayOrVisibilityL();
-		}
-}
-
-#if defined(MULTI_THREAD_PLAYBACK)
-void COggplayDisplaySettingItemList::BufferingModeChangedL()
-{
-	if (iBufferingModeItem)
-		{
-		iBufferingModeItem->LoadL();
-		HandleChangeInItemArrayOrVisibilityL();
-		}
-}
-#endif
-
-// Overload of the Gain setting, so that change will take place right away
 CGainSettingItem::CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iGainType), iAppUi(aAppUi)
 {
@@ -241,8 +139,7 @@ void  CGainSettingItem::EditItemL(TBool aCalledFromMenu)
   iAppUi.SetVolumeGainL((TGainType) InternalValue());
 }
 
-
-#if defined(MULTI_THREAD_PLAYBACK)
+#if !defined(PLUGIN_SYSTEM)
 CBufferingModeSettingItem::CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iBufferingMode), iAppUi(aAppUi)
 {
@@ -266,6 +163,7 @@ void  CThreadPrioritySettingItem::EditItemL(TBool aCalledFromMenu)
   iAppUi.SetThreadPriority((TStreamingThreadPriority) InternalValue());
 }
 #endif
+
 
 CAlarmSettingItem::CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iAlarmActive), iAppUi(aAppUi)
@@ -291,4 +189,4 @@ void CAlarmTimeSettingItem::EditItemL(TBool aCalledFromMenu)
   iAppUi.SetAlarmTime();
 }
 
-#endif /* SERIES60 */
+#endif // SERIES60

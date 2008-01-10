@@ -21,7 +21,7 @@
 
 
 void CSplashContainer::ConstructL()
-{
+	{
 	// Check if there is a splash mbm available
 	TFileName fileName(CEikonEnv::Static()->EikAppUi()->Application()->AppFullName());
 	TParsePtr parse(fileName);
@@ -31,10 +31,10 @@ void CSplashContainer::ConstructL()
 	TFileName privatePath;
 	err = iCoeEnv->FsSession().PrivatePath(privatePath);
 	if (err != KErrNone)
-	{
+		{
 		TRACEF(COggLog::VA(_L("Error getting private path: %d"), err ));
 		User::Leave(err);
-	}
+		}
 
 	fileName.Copy(parse.Drive());
 	fileName.Append(privatePath);
@@ -47,16 +47,16 @@ void CSplashContainer::ConstructL()
 	iBitmap = new (ELeave) CFbsBitmap;
 	err = iBitmap->Load(fileName, 0, EFalse);
 	if (err == KErrNone)
-	{
+		{
 		// Custom splash successfully loaded
 		return;
-	}
+		}
 	else if ((err != KErrNotFound) && (err != KErrPathNotFound))
-	{
+		{
 		// Something went wrong loading it
 		TRACEF(COggLog::VA(_L("Error loading custom splash: %d"), err ));
 		User::Leave(err);
-	}
+		}
 
 	// There's no custom splash, so load the default
 #if defined(SERIES60V3)
@@ -70,14 +70,14 @@ void CSplashContainer::ConstructL()
 
 	err = iBitmap->Load(fileName, 0, EFalse);
 	if (err != KErrNone)
-	{
+		{
 		TRACEF(COggLog::VA(_L("Error loading splash bitmap: %d"), err ));
 		User::Leave(err);
+		}
 	}
-}
 
 void CSplashContainer::ShowSplashL()
-{
+	{
 #if defined(SERIES90)
 	// For some reason on S90 the splash view gets activated twice,
 	// so we must avoid creating the window twice (otherwise we get a CONE 10 panic)
@@ -93,30 +93,29 @@ void CSplashContainer::ShowSplashL()
 	// Show the splash screen for 1 second and then load the app.
 	iDisplayTimer = new (ELeave) COggTimer(TCallBack(TimerExpired, this));
 	iDisplayTimer->Wait(1000000);
-}
+	}
 
 CSplashContainer::~CSplashContainer()
-{
+	{
     delete iDisplayTimer;
 	delete iBitmap;
-}
+	}
 
 void CSplashContainer::Draw(const TRect& /*aRect*/) const
-{
-  CWindowGc& gc = SystemGc();
-  TRect bitmapRect = TRect(iBitmap->SizeInPixels());
-  TRect screenRect = TRect(CCoeEnv::Static()->ScreenDevice()->SizeInPixels());
-  if (bitmapRect == screenRect)
-	gc.BitBlt(TPoint(0, 0), iBitmap);
-  else
-	gc.DrawBitmap(screenRect, iBitmap, bitmapRect);
-}
+	{
+	CWindowGc& gc = SystemGc();
+	TRect bitmapRect = TRect(iBitmap->SizeInPixels());
+	TRect screenRect = TRect(CCoeEnv::Static()->ScreenDevice()->SizeInPixels());
+	if (bitmapRect == screenRect)
+		gc.BitBlt(TPoint(0, 0), iBitmap);
+	else
+		gc.DrawBitmap(screenRect, iBitmap, bitmapRect);
+	}
 
-
-TInt CSplashContainer::TimerExpired(TAny* /* aPtr */)
-{
-  // Signal that the startup should continue
-  COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
-  appUi->NextStartUpState(KErrNone);
-  return 0;
-}
+TInt CSplashContainer::TimerExpired(TAny* /*aPtr*/)
+	{
+	// Signal that the startup should continue
+	COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->EikAppUi();
+	appUi->NextStartUpState(KErrNone);
+	return 0;
+	}

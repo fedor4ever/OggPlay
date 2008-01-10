@@ -19,9 +19,6 @@
 // Platform settings
 #include <OggOs.h>
 
-// This file is for MULTI_THREAD_PLAYBACK only
-#if defined(MULTI_THREAD_PLAYBACK)
-
 #include <e32std.h>
 #include "OggLog.h"
 #include "OggTremor.h"
@@ -131,7 +128,7 @@ void CBufferingThreadAO::DoCancel()
 // The streaming thread AO is owned by the playback engine and runs in the streaming thread
 // aBufferFlushPending and aBufferingThreadPriority are references to the values held in the playback engine
 CStreamingThreadAO::CStreamingThreadAO(TStreamingThreadData& aSharedData, TBool& aBufferFlushPending, TThreadPriority& aBufferingThreadPriority)
-: CBufferingAO(EPriorityIdle, aSharedData),iBufferFlushPending(aBufferFlushPending), iBufferingThreadPriority(aBufferingThreadPriority)
+: CBufferingAO(EPriorityIdle, aSharedData), iBufferFlushPending(aBufferFlushPending), iBufferingThreadPriority(aBufferingThreadPriority)
 {
 }
 
@@ -1029,5 +1026,3 @@ void CStreamingThreadListener::DoCancel()
 	TRequestStatus* status = &iStatus;
 	User::RequestComplete(status, KErrCancel);
 }
-
-#endif /* MULTI_THREAD_PLAYBACK */

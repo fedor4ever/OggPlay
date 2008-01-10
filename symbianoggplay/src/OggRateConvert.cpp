@@ -25,12 +25,8 @@ COggSampleRateConverter::COggSampleRateConverter()
 }
 
 void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBufferProvider,
-                                   TInt /*aBufferSize*/,
-                                   TInt aMinimumSamplesInBuffer,
-                                   TInt aInputSampleRate,
-                                   TInt aOutputSampleRate,
-                                   TInt aInputChannel,
-                                   TInt aOutputChannel)
+TInt /*aBufferSize*/, TInt aMinimumSamplesInBuffer, TInt aInputSampleRate,
+TInt aOutputSampleRate, TInt aInputChannel, TInt aOutputChannel)
 {
     iFillBufferProvider = aSampleRateFillBufferProvider;
     iMinimumSamplesInBuffer = aMinimumSamplesInBuffer;
@@ -43,7 +39,6 @@ void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBuff
 		iConvertRateFn = &COggSampleRateConverter::ConvertRateMono;
 
     iSamplingRateFactor = static_cast<TReal> (aInputSampleRate) /aOutputSampleRate;
-
     if (iRateConvertionNeeded)
     {
         __ASSERT_ALWAYS(iSamplingRateFactor>1, User::Panic(_L("Sampling rate factor should be >1"), 0));
@@ -84,23 +79,19 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
 
     TPtr8 interBuffer(NULL, 0);
     if (iIntermediateBuffer)
-    {
         interBuffer.Set(iIntermediateBuffer->Des());
-    }
   
     // Audio Processing Routing
 	// Request frequency bins for each complete buffer
-	TBool requestFrequencyBins = ETrue;
     switch( (iChannelMixingNeeded <<1) + iRateConvertionNeeded )
     {
     case 0:
         // No Channel mixing, No rate convertion
         while (aBuffer.Length() <= iMinimumSamplesInBuffer) 
         {
-            ret = iFillBufferProvider->GetNewSamples(aBuffer, requestFrequencyBins);
-            if (ret <=0) break;
-
-			requestFrequencyBins = EFalse;
+            ret = iFillBufferProvider->GetNewSamples(aBuffer);
+            if (ret <=0)
+				break;
         }
         break;
         
@@ -114,29 +105,29 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
             if (remains<4096)
                 interBuffer.Set((TUint8 *) interBuffer.Ptr(), 0, remains);
 
-            ret = iFillBufferProvider->GetNewSamples(interBuffer, requestFrequencyBins);
-            if (ret<=0) break;
+            ret = iFillBufferProvider->GetNewSamples(interBuffer);
+            if (ret<=0)
+				break;
 
-			requestFrequencyBins = EFalse;
-	        (this->*iConvertRateFn)(interBuffer, aBuffer);
-			
+	        (this->*iConvertRateFn)(interBuffer, aBuffer);			
         }
         break;
+
     case 2:
         // Channel mixing, no rate convertion
         {
-            TPtr8 outBufferPtr( (TUint8*) aBuffer.Ptr(), aBuffer.MaxLength() );
+            TPtr8 outBufferPtr((TUint8*) aBuffer.Ptr(), aBuffer.MaxLength());
             while(aBuffer.Length() <= iMinimumSamplesInBuffer)
             {
                 interBuffer.SetLength(0);
                 TInt remains = (aBuffer.MaxLength()-aBuffer.Length())<<1;
                 if (remains<4096)
-                    interBuffer.Set( (TUint8 *) interBuffer.Ptr(), 0, remains );
+                    interBuffer.Set((TUint8 *) interBuffer.Ptr(), 0, remains);
 
-                ret = iFillBufferProvider->GetNewSamples(interBuffer, requestFrequencyBins);
-                if (ret <=0) break;
+                ret = iFillBufferProvider->GetNewSamples(interBuffer);
+                if (ret <=0)
+					break;
 
-				requestFrequencyBins = EFalse;
                 ret = ret >> 1;
                 MixChannels(interBuffer, outBufferPtr);
                 outBufferPtr.Set((TUint8 *) &(outBufferPtr.Ptr()[ret]), 0, outBufferPtr.MaxLength() - ret);
@@ -144,7 +135,8 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
             }
             break;
         }
-    case 3:
+
+	case 3:
         // Channel mixing, Rate convertion
         while(aBuffer.Length() <= iMinimumSamplesInBuffer)
         {
@@ -152,12 +144,12 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
             TInt remains = (TInt) (((aBuffer.MaxLength() - aBuffer.Length()) << 1) * iSamplingRateFactor) - 2;
 
             if (remains<4096)
-                interBuffer.Set( (TUint8 *) interBuffer.Ptr(), 0, remains );
+                interBuffer.Set((TUint8 *) interBuffer.Ptr(), 0, remains);
 
-			ret = iFillBufferProvider->GetNewSamples(interBuffer, requestFrequencyBins);
-            if (ret <=0) break;
+			ret = iFillBufferProvider->GetNewSamples(interBuffer);
+            if (ret <=0)
+				break;
 
-			requestFrequencyBins = EFalse;
             MixChannels(interBuffer, interBuffer);
             ConvertRateMono(interBuffer, aBuffer);
         }
@@ -239,7 +231,7 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
         break;
     }
 
-    return (ret);
+    return ret;
 }
 
 void COggSampleRateConverter::ConvertRateMono(TDes8 &aInputBuffer, TDes8 &aOutputBuffer)
@@ -392,7 +384,7 @@ void COggSampleRateConverter::ConvertRateStereo(TDes8 &aInputBuffer, TDes8 &aOut
     aOutputBuffer.SetLength(aOutputBuffer.Length() +  addedSamples);
 }
 
-void COggSampleRateConverter::MixChannels( TDes8 &aInputBuffer, TDes8 &aOutputBuffer )
+void COggSampleRateConverter::MixChannels(TDes8 &aInputBuffer, TDes8 &aOutputBuffer)
 {
     // Input and Output buffer can be the same.
     // The OutputBuffer is overwritten with the new values;
