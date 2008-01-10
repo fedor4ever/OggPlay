@@ -22,5 +22,5 @@
 //  Build targets for S60
 #define SERIES60
 #define SERIES60V3
-
+#define SERIES60SUI
 #endif

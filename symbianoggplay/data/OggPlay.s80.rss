@@ -79,18 +79,18 @@ RESOURCE CBA r_option_stop_cba
 }
 
 
-RESOURCE TBUF r_ogg_version { buf=KVersionString; }
-
 // About view
-RESOURCE TBUF r_ogg_about_line_1 { buf=ogg_version_txt; }
-RESOURCE TBUF r_ogg_about_line_2 { buf=ogg_c_author; }
-RESOURCE TBUF r_ogg_about_line_3 { buf=ogg_link_txt; }
-RESOURCE TBUF r_ogg_about_line_4 { buf=ogg_vorbis_c; }
-RESOURCE TBUF r_ogg_about_line_5 { buf=ogg_translation; }
-RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
+RESOURCE ABOUTTEXT r_dialog_about
+	{
+	version = ogg_about_version;
+	copyright = ogg_about_cpr;
+	link = ogg_about_lnk;
+	copyright2 = ogg_about_cpr2;
+	copyright3 = ogg_about_cpr3;
+	porting = ogg_about_port_S80;
+	}
 
-
-RESOURCE DIALOG r_dialog_about {
+RESOURCE DIALOG r_dialog_about_S80 {
   title = ogg_about_oggplay;
   buttons =  R_EIK_BUTTONS_CONTINUE; 
   flags   = EEikDialogFlagWait;
@@ -129,16 +129,6 @@ RESOURCE DIALOG r_dialog_info {
   items = {
     DLG_LINE {
 	type = EEikCtLabel;
-	prompt = ogg_filename_txt;
-        id = EOggInfoDialog;
-	control = LABEL
-	{
-		txt="";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
         id = EOggLabelFileName;
 	control = LABEL
 	{
@@ -150,6 +140,16 @@ RESOURCE DIALOG r_dialog_info {
 	type = EEikCtLabel;
 	prompt= ogg_filesize;
 	id= EOggLabelFileSize;
+	control = LABEL
+	{
+		txt="0";
+		horiz_align=EEikLabelAlignHLeft;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	prompt= ogg_duration;
+	id= EOggLabelDuration;
 	control = LABEL
 	{
 		txt="0";
@@ -264,13 +264,24 @@ RESOURCE ARRAY r_volume_boost_items
     {
     items = { 
 		LBUF { txt = ogg_volume_boost_m24db; },
+		LBUF { txt = ogg_volume_boost_m21db; },
 		LBUF { txt = ogg_volume_boost_m18db; },
+		LBUF { txt = ogg_volume_boost_m15db; },
 		LBUF { txt = ogg_volume_boost_m12db; },
+		LBUF { txt = ogg_volume_boost_m9db; },
+		LBUF { txt = ogg_volume_boost_m6db; },
+		LBUF { txt = ogg_volume_boost_m3db; },
 		LBUF { txt = ogg_volume_boost_none; },
+		LBUF { txt = ogg_volume_boost_1db; },
+		LBUF { txt = ogg_volume_boost_2db; },
+		LBUF { txt = ogg_volume_boost_4db; },
 		LBUF { txt = ogg_volume_boost_6db; },
+		LBUF { txt = ogg_volume_boost_8db; },
+		LBUF { txt = ogg_volume_boost_10db; },
 		LBUF { txt = ogg_volume_boost_12db; }
     };
     }
+
 
 RESOURCE MENU_PANE r_empty_menu {}
 
@@ -291,17 +302,10 @@ RESOURCE DIALOG r_dialog_files_search {
 	id =    EOggScrollableTextDialog;
 	control = FILESEARCHCONTROL
 	{
-#ifdef PLAYLIST_SUPPORT
-	height= 120;
-#else
-	height= 90;
-#endif
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
     filesFoundStr =ogg_filescan_label2_mmf;
-#ifdef PLAYLIST_SUPPORT
     playlistsFoundStr =ogg_filescan_label3;
-#endif
 	};
     }
   };
@@ -497,12 +501,12 @@ RESOURCE ARRAY options_multipage4
     DLG_LINE {
               type = EEikCtCheckBox;
               prompt = ogg_alarm_s60;
-              id = EOggAlarmActive;
+              id = EOggSettingAlarmActive;
              },
     DLG_LINE {
 			type = EEikCtTimeEditor;
             prompt = ogg_alarm_time_s60;
-			id = EOggAlarmTime;
+			id = EOggSettingAlarmTime;
 			control = TIME_EDITOR
 				{
 				minTime = TIME { };
@@ -513,7 +517,7 @@ RESOURCE ARRAY options_multipage4
     DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_alarm_snooze;
-              id = EOggAlarmSnooze;
+              id = EOggSettingAlarmSnooze;
               control = CHOICELIST
 				{
                 array_id= r_alarm_snooze_items;
@@ -522,7 +526,7 @@ RESOURCE ARRAY options_multipage4
     DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_alarm_volume;
-              id = EOggAlarmVolume;
+              id = EOggSettingAlarmVolume;
               control = CHOICELIST
 				{
                 array_id= r_alarm_volume_items;
@@ -531,7 +535,7 @@ RESOURCE ARRAY options_multipage4
     DLG_LINE {
               type = EEikCtChoiceList;
               prompt = ogg_alarm_boost;
-              id = EOggAlarmBoost;
+              id = EOggSettingAlarmBoost;
               control = CHOICELIST {
                 array_id= r_volume_boost_items;
               };

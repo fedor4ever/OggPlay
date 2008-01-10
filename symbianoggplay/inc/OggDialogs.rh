@@ -10,19 +10,36 @@ STRUCT SCROLLABLERICHTEXT
 
 STRUCT FILESEARCHCONTROL
     {
-	WORD width  = 176;
-
-#ifdef PLAYLIST_SUPPORT
-	WORD height = 130;
-#else
-	WORD height = 100;
-#endif
 	LTEXT title = "";
 	LTEXT dirScannedStr = "";
 	LTEXT filesFoundStr = "";
 
-#ifdef PLAYLIST_SUPPORT
 	LTEXT playlistsFoundStr = "";
-#endif
     }
  
+STRUCT FILEINFO
+    {
+    LTEXT filesize = "";
+    LTEXT duration = "";
+    LTEXT bitrate = "";
+    LTEXT hzrate = "";
+    LTEXT channels = "";
+    LTEXT filepath = "";
+    }
+
+STRUCT PLAYLISTINFO
+    {
+    LTEXT filesize = "";
+    LTEXT playlistentries = "";
+    LTEXT filepath = "";
+    }
+
+STRUCT ABOUTTEXT
+    {
+    LTEXT version = "";
+    LTEXT copyright = "";
+    LTEXT link = "";
+    LTEXT copyright2 = "";
+    LTEXT copyright3 = "";
+    LTEXT porting = "";
+    }

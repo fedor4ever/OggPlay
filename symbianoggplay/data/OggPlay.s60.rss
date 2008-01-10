@@ -23,7 +23,7 @@ NAME OGGP
 #include <eikon.rh>
 #include <uikon.rh>
 #include <eikon.rsg>
-#include <uikon.hrh> // EEikMenuTitleRightAlign
+#include <uikon.hrh>
 
 #include <avkon.rsg>
 #include <avkon.rh>
@@ -82,191 +82,132 @@ RESOURCE MENU_BAR r_oggplay_menubar
   };
 }
   
-RESOURCE TBUF r_ogg_version { buf=KVersionString; }
-
-// About view
-RESOURCE TBUF r_ogg_about_line_1 { buf=ogg_version_txt; }
-RESOURCE TBUF r_ogg_about_line_2 { buf=ogg_c_author; }
-RESOURCE TBUF r_ogg_about_line_3 { buf=ogg_link_txt; }
-RESOURCE TBUF r_ogg_about_line_4 { buf=ogg_vorbis_c; }
-RESOURCE TBUF r_ogg_about_line_5 { buf=ogg_translation; }
-RESOURCE TBUF r_ogg_about_line_6 { buf=ogg_port; }
-
-
-RESOURCE DIALOG r_dialog_about {
-  buttons =  R_AVKON_SOFTKEYS_BACK; 
-  flags = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-	type =  EOggScrollableTextControl;
-	id =    EOggScrollableTextDialog;
-	control = SCROLLABLERICHTEXT
+// Dialogs
+RESOURCE ABOUTTEXT r_dialog_about
 	{
-	};
-    }	
-  };
+	version = ogg_about_version;
+	copyright = ogg_about_cpr;
+	link = ogg_about_lnk;
+	copyright2 = ogg_about_cpr2;
+	copyright3 = ogg_about_cpr3;
+	porting = ogg_about_port;
+	}
+
+RESOURCE DIALOG r_dialog_about_S60
+{ 
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+    {
+        DLG_LINE
+        {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+            {
+            label = ogg_about_oggplay;
+            };
+        },
+        DLG_LINE
+        {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+            {
+            };
+        }
+    };
 }
 
-
-RESOURCE DIALOG r_dialog_infowin {
-  buttons =  R_AVKON_SOFTKEYS_BACK; 
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-	type =  EOggScrollableTextControl;
-	id =    EOggScrollableTextDialog;
-	control = SCROLLABLERICHTEXT
+RESOURCE FILEINFO r_dialog_info
 	{
-	height= 75;
-	};
-    }	
-  };
+    filesize = ogg_filesize;
+    duration = ogg_duration;
+    bitrate = ogg_bitrate;
+    hzrate = ogg_rate_hz;
+    channels = ogg_channels;
+    filepath = ogg_filepath;
+	}
+
+RESOURCE PLAYLISTINFO r_dialog_playlist_info
+    {
+    filesize = ogg_filesize;
+    playlistentries = ogg_playlist_entries;
+    filepath = ogg_filepath;
+    }
+
+RESOURCE DIALOG r_dialog_info_S60
+{ 
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+    {
+        DLG_LINE
+        {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+            {
+            label = ogg_file_prop;
+            };
+        },
+        DLG_LINE
+        {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+            {
+            };
+        }
+    };
 }
 
+RESOURCE DIALOG r_dialog_msg
+{ 
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+    {
+        DLG_LINE
+        {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+            {
+            };
+        },
+        DLG_LINE
+        {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+            {
+            };
+        }
+    };
+}
 
-RESOURCE DIALOG r_dialog_files_search {
+RESOURCE DIALOG r_dialog_files_search
+{
   buttons =  R_AVKON_SOFTKEYS_CANCEL; 
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
+  flags   = EEikDialogFlagWait | EEikDialogFlagCbaButtons;
+  items =
+  {
+    DLG_LINE
+    {
 	type =  EOggFileSearchControl;
 	id =    EOggScrollableTextDialog;
 	control = FILESEARCHCONTROL
 	{
-#ifdef PLAYLIST_SUPPORT
-	height= 120;
-#else
-	height= 90;
-#endif
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
     filesFoundStr =ogg_filescan_label2_mmf;
-
-#ifdef PLAYLIST_SUPPORT
     playlistsFoundStr =ogg_filescan_label3;
-#endif
 	};
     }	
   };
 }
 
-
-RESOURCE DIALOG r_dialog_info {
-  title   = ogg_file_prop;
-  buttons = R_AVKON_SOFTKEYS_OPTIONS_BACK;
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt = ogg_filename_txt;
-        id = EOggInfoDialog;
-	control = LABEL 
-	{
-		txt="";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-        id = EOggLabelFileName;
-	control = LABEL 
-	{
-		txt=ogg_filename_unknown;
-		horiz_align=EEikLabelAlignHLeft;
-	};	
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= ogg_filesize;
-	id= EOggLabelFileSize;
-	control = LABEL 
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= ogg_bitrate;
-	id = EOggLabelBitRate;
-	control = LABEL 
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= ogg_rate_hz;
-        id   = EOggLabelRate;
-	control = LABEL 
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    } ,
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= ogg_channels;
-	id = EOggLabelChannels;
-	control = LABEL
-	{
-		txt="0";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    }
-  };
-}
-
-RESOURCE DIALOG r_dialog_playlist_info {
-  title   = ogg_file_prop;
-  buttons = R_AVKON_SOFTKEYS_OPTIONS_BACK;
-  flags   = EEikDialogFlagWait;
-  items = {
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt = ogg_filename_txt;
-        id = EOggInfoDialog;
-	control = LABEL 
-	{
-		txt="";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    },
-    
-    DLG_LINE {
-	type = EEikCtLabel;
-        id = EOggLabelFileName;
-	control = LABEL 
-	{
-		txt=ogg_filename_unknown;
-		horiz_align=EEikLabelAlignHLeft;
-	};	
-    },
-
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= ogg_filesize;
-	id= EOggLabelFileSize;
-	control = LABEL 
-	{
-		txt="000000";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    },
-
-    DLG_LINE {
-	type = EEikCtLabel;
-	prompt= ogg_playlist_entries;
-	id = EOggLabelPlayListEntries;
-	control = LABEL 
-	{
-		txt="000000";
-		horiz_align=EEikLabelAlignHLeft;
-	};
-    }
-  };
-}
 
 RESOURCE ARRAY r_hotkey_array {
   items= {
@@ -294,7 +235,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
         {
 	    AVKON_SETTING_ITEM
 	        {  
-	        identifier = EOggRepeat;
+	        identifier = EOggSettingRepeatId;
 			setting_page_resource = r_oggplay_binary_setting_page;
 			associated_resource = r_oggplay_popup_setting_binary_texts;
 			name = ogg_repeat2;    
@@ -334,7 +275,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			associated_resource = r_oggplay_rsk_play_setting_item_list;
 			name = ogg_rsk_play;
 			}
-#if !defined(MULTI_THREAD_PLAYBACK)
+#if defined(PLUGIN_SYSTEM)
         , AVKON_SETTING_ITEM
 			{
 			identifier = EOggSettingVolumeBoost;
@@ -346,7 +287,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
         };
     }
 
-#if defined(MULTI_THREAD_PLAYBACK)
+#if !defined(PLUGIN_SYSTEM)
 RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_playback_options_item_list
     {
     flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
@@ -388,33 +329,33 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_alarm_s60_setting_item_list
         {
 	    AVKON_SETTING_ITEM
 	        {  
-	        identifier = EOggAlarmActive;
+	        identifier = EOggSettingAlarmActive;
 			setting_page_resource = r_oggplay_binary_setting_page;
 			associated_resource = r_oggplay_popup_setting_binary_texts;
 			name = ogg_alarm_s60;
 	        }
 	    ,AVKON_SETTING_ITEM
 			{
-			identifier = EOggAlarmTime;
+			identifier = EOggSettingAlarmTime;
 			setting_page_resource = r_oggplay_alarm_time_page;
 			name = ogg_alarm_time_s60;
 			}
 	    ,AVKON_SETTING_ITEM
 			{
-			identifier = EOggAlarmSnooze;
+			identifier = EOggSettingAlarmSnooze;
 			setting_page_resource = r_oggplay_alarm_snooze_page;
 			associated_resource = r_oggplay_alarm_snooze_item_list;
 			name = ogg_alarm_snooze;
 			}
 	    ,AVKON_SETTING_ITEM
 			{
-			identifier = EOggAlarmVolume;
+			identifier = EOggSettingAlarmVolume;
 			setting_page_resource = r_oggplay_alarm_volume_page;
 			name = ogg_alarm_volume;
 			}
 	    ,AVKON_SETTING_ITEM
 			{
-			identifier = EOggAlarmBoost;
+			identifier = EOggSettingAlarmBoost;
 			setting_page_resource = r_oggplay_volume_boost;
 			associated_resource = r_oggplay_volume_boost_item_list;
 			name = ogg_alarm_boost;
@@ -658,9 +599,8 @@ RESOURCE ARRAY r_oggplay_volume_boost_item_array
     };
     }
 
-// ---------------------------------------------------------------
 
-#if defined(MULTI_THREAD_PLAYBACK)
+#if !defined(PLUGIN_SYSTEM)
 RESOURCE AVKON_SETTING_PAGE r_oggplay_buffering_mode
     {   
     label = ogg_buffering_mode;
@@ -692,7 +632,6 @@ RESOURCE ARRAY r_oggplay_buffering_mode_item_array
 	};
     }
 
-// ---------------------------------------------------------------
 
 RESOURCE AVKON_SETTING_PAGE r_oggplay_thread_priority_page
 	{
@@ -725,6 +664,7 @@ RESOURCE ARRAY r_oggplay_popped_up_thread_priority_texts
 		};
 	}
 #endif
+
 
 RESOURCE AVKON_SETTING_PAGE r_oggplay_alarm_time_page
 	{
@@ -824,8 +764,6 @@ RESOURCE CBA r_oggplay_snooze_buttons
 	}
 
 // Codec info items
-///////////////////////////////////////////////////////////////////////////////
-
 RESOURCE ARRAY r_codec_info_items
 {
   items = {
@@ -837,11 +775,8 @@ RESOURCE ARRAY r_codec_info_items
 }
 
 
-
 // CBA's (Softkey) definitions
-///////////////////////////////////////////////////////////////////////////////
-
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
 RESOURCE CBA r_user_select_back_cba
 {
   buttons = { 
@@ -889,7 +824,8 @@ RESOURCE CBA r_option_pause_cba
     CBA_BUTTON { id = EAknSoftkeyOptions; txt = ogg_cba_option; },
     CBA_BUTTON { id = EUserPauseCBA; txt = ogg_cba_pause; }
   };
-}  
+}
+
 RESOURCE CBA r_option_play_cba
 {
   buttons = { 
@@ -907,8 +843,6 @@ RESOURCE CBA r_option_back_cba
 }  
 
 // User hotkey listbox settings resources (listbox is code only)
-///////////////////////////////////////////////////////////////////////////////
-
 RESOURCE ARRAY r_user_hotkey_items
 {
   items = {
@@ -936,13 +870,12 @@ RESOURCE MENU_PANE r_options_menu
 	MENU_ITEM { command=EOggOptions; txt=ogg_settings; },
 	MENU_ITEM { command=EOggUserHotkeys; txt=ogg_user_hotkey; }
 
-#ifdef PLUGIN_SYSTEM
+#if defined PLUGIN_SYSTEM
 	, MENU_ITEM { command=EOggCodecSelection; txt=ogg_codec_selection; }
-#endif
-
-#if defined(MULTI_THREAD_PLAYBACK)
+#else
 	, MENU_ITEM { command=EOggPlaybackOptions; txt=ogg_playback; }
 #endif
+
 	, MENU_ITEM { command=EOggAlarmSettings; txt=ogg_alarm_s60; }
   };
 }
@@ -951,13 +884,11 @@ RESOURCE MENU_PANE r_file_menu
 {
   items= {
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
-      MENU_ITEM { command=EOggShuffle;  txt=""; // Updated dynamically
-	              flags=EEikMenuItemCheckBox; },
-      MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
-      MENU_ITEM { txt=ogg_options_cascade;
-                  cascade=r_options_menu; },
-      MENU_ITEM { command=EOggAbout;	    txt=ogg_about_label; },
-      MENU_ITEM { command=EEikCmdExit;	    txt=ogg_exit_label; }
+      MENU_ITEM { command=EOggShuffle; txt=""; flags=EEikMenuItemCheckBox; },
+      MENU_ITEM { command=EOggViewRebuild; txt=ogg_find_files; },
+      MENU_ITEM { txt=ogg_options_cascade; cascade=r_options_menu; },
+      MENU_ITEM { command=EOggAbout; txt=ogg_about_label; },
+      MENU_ITEM { command=EEikCmdExit; txt=ogg_exit_label; }
   };
 }
 
@@ -1010,6 +941,7 @@ RESOURCE TBUF r_ogg_error_29 { buf=ogg_text_error_29; }
 RESOURCE TBUF r_ogg_error_30 { buf=ogg_text_error_30; }
 RESOURCE TBUF r_ogg_error_31 { buf=ogg_text_error_31; }
 RESOURCE TBUF r_ogg_error_32 { buf=ogg_text_error_32; }
+RESOURCE TBUF r_ogg_error_33 { buf=ogg_text_error_33; }
 
 RESOURCE TBUF r_ogg_string_1 { buf=ogg_text_string_1; }
 RESOURCE TBUF r_ogg_string_2 { buf=ogg_text_string_2; }

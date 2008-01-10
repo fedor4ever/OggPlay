@@ -16,161 +16,176 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DIALOG_H
+#ifndef _OGG_DIALOG_H
+#define _OGG_DIALOG_H
 
+#if defined(SERIES60)
+#include <e32base.h>
+#else
 #include <eikdialg.h>
 #include <frmtview.h>
 #include <txtrich.h>
 #include <coemain.h>
 #include <barsread.h>
 #include <eiksbfrm.h>
-
-
-class CHotkeyDialog : public CEikDialog
-{
- public:
-
-  CHotkeyDialog(int *aHotKeyIdx, int* anAlarmActive, TTime* anAlarmTime);
-
-  TBool OkToExitL(TInt aButtonId);
-  void PreLayoutDynInitL();
-  int *iHotKeyIndex;
-  int *iAlarmActive;
-  TTime *iAlarmTime;
-};
-
-class COggInfoDialog : public CEikDialog
-{
- public:
-
-  void SetFileName(const TDesC& aFileName);
-  void SetFileSize(TInt aFileSize);
-  void SetRate(TInt aRate);
-  void SetChannels(TInt aChannels);
-  void SetTime(TInt aTime);
-  void SetBitRate(TInt aBitRate);
-
-  void PreLayoutDynInitL();
- private:
-
-  TFileName iFileName;
-  TInt      iFileSize;
-  TInt      iRate;
-  TInt      iChannels;
-  TInt      iTime;
-  TInt      iBitRate;
-};
-
-class COggPlayListInfoDialog : public CEikDialog
-{
-public:
-
-  void SetFileName(const TDesC& aFileName);
-  void SetFileSize(TInt aFileSize);
-  void SetPlayListEntries(TInt aPlayListEntries);
-
-  void PreLayoutDynInitL();
-
-private:
-  TFileName iFileName;
-  TInt      iFileSize;
-  TInt      iPlayListEntries;
-};
-
-#if !(defined(SERIES60) || defined(SERIES80) )
-
-class COggAboutDialog : public CEikDialog
-{
- public:
-
-  void SetVersion(const TDesC& aVersion);
-  void PreLayoutDynInitL();
-
- private:
-
-  TBuf<128> iVersion;
-};
-
-
-#else
-
-// Needed by Series 60 because of small screen,
-// UIQ can do without.
-
-
-class CScrollableRichTextControl : public CCoeControl
-{
-public:
-
-        // second-phase construction
-        CScrollableRichTextControl() {}; 
-        ~CScrollableRichTextControl(); // destructor
-    void UpdateModelL(CRichText * aRichText);
-        void Draw(const TRect& aRect) const;
-        void Quit(); // does termination
-        void Draw(const TRect& /* aRect */);
-        TCoeInputCapabilities InputCapabilities() const;
-        TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
-        
-        void ConstructFromResourceL(TResourceReader& aReader);
-        
-private:
-    void UpdateScrollIndicatorL();
-        
-    CRichText* iRichText; // global text object pointer, not owned.
-        TStreamId iStreamId; // required when storing and restoring global text
-        // text layout and view stuff
-        CTextLayout* iLayout; // text layout
-        CTextView* iTextView; // text view
-        TRect iViewRect; // rectangle through which to view text
-    
-    CEikScrollBarFrame * iSBFrame ; //Scrollbar
-};
-
-class CScrollableTextDialog : public CEikDialog
-{
-public:
-    
-    SEikControlInfo CreateCustomControlL(TInt aControlType);
-    void UpdateModelL(CRichText * aRichText);
-    
-private:
-    CScrollableRichTextControl * iScrollableControl;
-};
-
-
-
-class COggAboutDialog : public  CScrollableTextDialog
-{
-public:
-    
-    void SetVersion(const TDesC& aVersion);
-    void PreLayoutDynInitL();
-    ~COggAboutDialog();
-private:
-    
-    CParaFormatLayer* iParaFormatLayer;
-    CCharFormatLayer* iCharFormatLayer;
-    TBuf<128> iVersion;
-    CRichText* iRichText; 
-};
-
-class COggInfoWinDialog : public  CScrollableTextDialog
-{
-public:
-    
-    void SetInfoWinL(const TDesC& msg1, const TDesC& msg2 );
-    void PreLayoutDynInitL();
-
-    ~COggInfoWinDialog();
-private:
-    
-    CParaFormatLayer* iParaFormatLayer;
-    CCharFormatLayer* iCharFormatLayer;
-    HBufC *iMsg1;
-    HBufC *iMsg2;
-    CRichText* iRichText; 
-};
 #endif
 
+#if defined(SERIES60)
+class COggAboutDialog : public CBase
+	{
+public:
+	void ExecuteLD(TInt aResourceId);
+	};
+
+class TOggFileInfo;
+class COggFileInfoDialog : public CBase
+	{
+public:
+	COggFileInfoDialog(const TOggFileInfo& aFileInfo);
+	void ExecuteLD(TInt aResourceId);
+
+private:
+	TFileName iFileName;
+	TInt iFileSize;
+	TInt iTime;
+	TInt iBitRate;
+	TInt iRate;
+	TInt iChannels;
+	};
+
+class COggPlayListInfoDialog : public CBase
+	{
+public:
+	COggPlayListInfoDialog(const TDesC& aFileName, TInt aFileSize, TInt aPlayListEntries);
+	void ExecuteLD(TInt aResourceId);
+
+private:
+	TFileName iFileName;
+	TInt iFileSize;
+	TInt iPlayListEntries;
+	};
+#else
+class TOggFileInfo;
+class COggFileInfoDialog : public CEikDialog
+	{
+public:
+	COggFileInfoDialog(const TOggFileInfo& aFileInfo);
+
+	// From CEikDialog
+	void PreLayoutDynInitL();
+
+private:
+	TFileName iFileName;
+	TInt iFileSize;
+	TInt iTime;
+	TInt iBitRate;
+	TInt iRate;
+	TInt iChannels;
+	};
+
+class COggPlayListInfoDialog : public CEikDialog
+	{
+public:
+	COggPlayListInfoDialog(const TDesC& aFileName, TInt aFileSize, TInt aPlayListEntries);
+
+	// From CEikDialog
+	void PreLayoutDynInitL();
+
+private:
+	TFileName iFileName;
+	TInt iFileSize;
+	TInt iPlayListEntries;
+	};
+#endif
+
+#if defined(UIQ)
+class CHotkeyDialog : public CEikDialog
+	{
+public:
+	CHotkeyDialog(TInt* aHotKeyIdx, TInt* anAlarmActive, TTime* anAlarmTime);
+
+	TBool OkToExitL(TInt aButtonId);
+	void PreLayoutDynInitL();
+
+private:
+	TInt *iHotKeyIndex;
+	TInt *iAlarmActive;
+	TTime *iAlarmTime;
+	};
+
+class COggAboutDialog : public CEikDialog
+	{
+public:
+	void SetVersion(const TDesC& aVersion);
+	void PreLayoutDynInitL();
+
+private:
+	TBuf<128> iVersion;
+	};
+#elif !defined(SERIES60)
+// Needed by SERIES80 because of small screen, UIQ can do without.
+class CScrollableRichTextControl : public CCoeControl
+	{
+public:
+	~CScrollableRichTextControl();
+
+	void UpdateModelL(CRichText * aRichText);
+	void Draw(const TRect& aRect) const;
+	TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
+        
+	void ConstructFromResourceL(TResourceReader& aReader);
+        
+private:
+	void UpdateScrollIndicatorL();
+        
+	CRichText* iRichText; // global text object pointer, not owned.
+	TStreamId iStreamId; // required when storing and restoring global text
+
+	// text layout and view stuff
+	CTextLayout* iLayout; // text layout
+	CTextView* iTextView; // text view
+	TRect iViewRect; // rectangle through which to view text
+
+	CEikScrollBarFrame * iSBFrame ; //Scrollbar
+	};
+
+class CScrollableTextDialog : public CEikDialog
+	{
+public: 
+	SEikControlInfo CreateCustomControlL(TInt aControlType);
+	void UpdateModelL(CRichText * aRichText);
+
+private:
+	CScrollableRichTextControl * iScrollableControl;
+	};
+
+class COggAboutDialog : public  CScrollableTextDialog
+	{
+public:
+	~COggAboutDialog();
+
+	void PreLayoutDynInitL();
+
+private:    
+	CParaFormatLayer* iParaFormatLayer;
+	CCharFormatLayer* iCharFormatLayer;
+	CRichText* iRichText; 
+	};
+
+class COggInfoWinDialog : public  CScrollableTextDialog
+	{
+public:    
+    COggInfoWinDialog();
+    ~COggInfoWinDialog();
+
+	void SetInfoWinL(const TDesC& msg1, const TDesC& msg2 );
+	void PreLayoutDynInitL();
+private:    
+	CParaFormatLayer* iParaFormatLayer;
+	CCharFormatLayer* iCharFormatLayer;
+	HBufC *iMsg1;
+	HBufC *iMsg2;
+	CRichText* iRichText; 
+	};
+#endif // UIQ
 #endif

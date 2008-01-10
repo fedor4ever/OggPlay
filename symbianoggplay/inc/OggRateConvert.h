@@ -7,7 +7,7 @@ const TInt KNumberOfFreqBins = 16; // This shouldn't be changed without making s
 class MOggSampleRateFillBuffer 
 {
 public:
-   virtual TInt GetNewSamples(TDes8 &aBuffer, TBool aRequestFrequencyBins) = 0;
+   virtual TInt GetNewSamples(TDes8 &aBuffer) = 0;
 };
 
 

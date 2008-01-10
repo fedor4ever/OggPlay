@@ -62,6 +62,7 @@ enum {
   EOggInfoDialog,
   EOggLabelFileName,
   EOggLabelFileSize,
+  EOggLabelDuration,
   EOggLabelBitRate,
   EOggLabelRate,
   EOggLabelChannels,
@@ -81,45 +82,16 @@ enum {
   EOggCodecName,
   
   EOggAlarmSettings,
-  EOggAlarmActive,
-  EOggAlarmTime,
-  EOggAlarmVolume,
-  EOggAlarmBoost,
-  EOggAlarmSnooze,
 
   EOggAlarmTriggeredNote,
   EOggButtonSnooze,
   EOggButtonCancel
 };
 
-enum TOggplayCommandIds
-    {
-    EOggplayCmdAppTest = 1
-    };
-
-enum TOggplayTabViewId
-    {
-    EOggplayView1Tab= 1,
-    EOggplayView2Tab
-    };
- 
-
-enum TOggplayDlgLineId // dialog line ids
-    {
-    EOggplayDlg1Label = 1,
-    EOggplayDlg2Label,
-	EOggLabelAboutVersion2,
-	EOggLabelAboutVersion3,
-	EOggLabelAboutVersion4,
-	EOggLabelAboutVersion5,
-	EOggLabelAboutVersion6,
-	EwizradialDlg1Label
-    };
-
 //Settings list
 enum TOggplaySettingId
 	{
-	EOggSettingScanDir,
+	EOggSettingScanDir = 20000,
 	EOggSettingManeuvringSpeed,
 	EOggSettingAutoPlayId,
 	EOggSettingRepeatId,
@@ -130,6 +102,11 @@ enum TOggplaySettingId
     EOggSettingVolumeBoost,
     EOggSettingBufferingMode,
     EOggSettingThreadPriority,
+    EOggSettingAlarmActive,
+    EOggSettingAlarmTime,
+    EOggSettingAlarmVolume,
+    EOggSettingAlarmBoost,
+    EOggSettingAlarmSnooze,
     EOggSettingCba01,
     EOggSettingCba02,
     EOggSettingCba03,
@@ -164,4 +141,4 @@ enum TOggplayMiscSeries60 // Also used for Series80
   ECbaSelectFolder
   };
 
-#endif      // OGGPLAY_HRH
+#endif // OGGPLAY_HRH

@@ -16,90 +16,105 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <OggOs.h>
-#include <badesca.h>
-#include "OggRateConvert.h"  // For TGainType
-#include "OggMsgEnv.h"
-#include "OggAbsPlayback.h"
-
-#include <MdaAudioSampleEditor.h>
-#ifndef MMF_AVAILABLE
-#include <e32uid.h>
-#include <OggPlayPlugin.h>
-#endif
-
 #ifndef OGGPLUGINADAPTOR_H
 #define OGGPLUGINADAPTOR_H
 
+#include <OggOs.h>
+#include <badesca.h>
+#include <MdaAudioSampleEditor.h>
+
+#include "OggRateConvert.h"
+#include "OggMsgEnv.h"
+#include "OggAbsPlayback.h"
+
+class COggPluginAdaptor;
+class TUtilFileOpenObserver : public MMdaObjectStateChangeObserver
+	{
+public:
+	void SetFileInfo(const TDesC& aFileName);
+
+private:
+	// From MMdaObjectStateChangeObserver
+	void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
+
+public:
+	TBool iFullInfo;
+	TUid iControllerUid;
+	TOggFileInfo iFileInfo;
+
+	MFileInfoObserver* iFileInfoObserver;
+	};
+
 class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObserver
-{
- public: 
-  COggPluginAdaptor(COggMsgEnv* anEnv, MPlaybackObserver* anObserver);
-  virtual ~COggPluginAdaptor();
-  void ConstructL();
+	{
+public: 
+	COggPluginAdaptor(COggMsgEnv* aEnv, MPlaybackObserver* aObserver);
+	~COggPluginAdaptor();
+ 
+	void ConstructL();
 
-  virtual TInt   Info(const TDesC& aFileName, TBool silent= EFalse);
-  virtual TInt   Open(const TDesC& aFileName);
+	// From CAbsPlayback
+	TInt Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver);
+	TInt FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver);
+	void InfoCancel();
 
-  virtual void   Pause();
-  virtual void   Resume();
-  virtual void   Play();
-  virtual void   Stop();
-  virtual void   SetVolume(TInt aVol);
-  virtual void   SetPosition(TInt64 aPos);
+	TInt Open(const TDesC& aFileName);
 
-  virtual TInt64 Position();
-  virtual TInt64 Time();
-  virtual TInt   Volume();
-#ifdef MDCT_FREQ_ANALYSER
-  virtual const TInt32 * GetFrequencyBins();
-#else
-  virtual const void* GetDataChunk();
-#endif
-  virtual void SetVolumeGain(TGainType aGain);
-  virtual void GetAudioProperties();
+	void Pause();
+	void Resume();
+	void Play();
+	void Stop();
+	void SetVolume(TInt aVol);
+	void SetPosition(TInt64 aPos);
+
+	TInt64 Position();
+	TInt64 Time();
+	TInt Volume();
+	const TInt32* GetFrequencyBins();
+	void SetVolumeGain(TGainType aGain);
   
-  virtual CPluginSupportedList& GetPluginListL(); 
+	CPluginSupportedList& GetPluginListL(); 
 
 private:
-  // From MMdaObjectStateChangeObserver
-  virtual void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
+	// From MMdaObjectStateChangeObserver
+	void MoscoStateChangeEvent(CBase* aObject, TInt aPreviousState, TInt aCurrentState, TInt aErrorCode);
 
-  // New Functions
-  void SearchPluginsL(const TDesC &aName, TBool isEnabled);
-  void OpenL(const TDesC& aFileName);
-  void ConstructAPlayerL(const TDesC &aFileName);
-  void ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes & aDestinationBuffer);
+	// New Functions
+	void SearchPluginsL(const TDesC &aName, TBool isEnabled);
+
+	void OpenL(const TDesC& aFileName);
+	void OpenInfoL(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver, TBool aFullInfo = EFalse);
+
+	void ConstructAPlayerL();
+	void ConstructAFileInfoUtilL();
+
+	static void GetAudioProperties(TOggFileInfo& aFileInfo, CMdaAudioRecorderUtility* aUtil, TUid aControllerUid);
+	static void ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes & aDestinationBuffer);
+	static void RetrieveFileInfo(CMdaAudioRecorderUtility* aUtil, TOggFileInfo& aFileInfo, TBool aFullInfo, TUid aPluginControllerUid);
 
 private:
-  COggMsgEnv*               iEnv;
+	COggMsgEnv* iEnv;
   
-  TFileName iFilename;
-  TInt iError;
+	TFileName iFilename;
+	TInt iError;
 
-#ifdef MMF_AVAILABLE
-  // RecorderUtility is used instead of PlayerUtility to be able to choose which plugin
-  // we will use, in case of conflits (2 codecs supporting same type)
-  // The PlayerUtility doesn't allow this choice.
-  CMdaAudioRecorderUtility *iPlayer; 
-  CActiveSchedulerWait iWait;
-  TUid iPluginControllerUID;
-  TInt32 iFreqBins[16];
-#else
-  CPseudoMMFController * iPlayer;
-  
-  CPseudoMMFController * iOggPlayer;
-  CPseudoMMFController * iMp3Player;
-  // Use RLibrary object to interface to the DLL
-  RLibrary iOggLibrary;
-  RLibrary iMp3Library;
-#endif
+	// RecorderUtility is used instead of PlayerUtility to be able to choose which plugin
+	// we will use, in case of conflits (2 codecs supporting same type)
+	// The PlayerUtility doesn't allow this choice.
+	CMdaAudioRecorderUtility *iPlayer; 
+	TUid iPluginControllerUID;
+	TInt32 iFreqBins[16];
 
-  TTimeIntervalMicroSeconds iLastPosition;
-  TBool iInterrupted;
-  TInt iVolume;
+	TTimeIntervalMicroSeconds iLastPosition;
+	TBool iInterrupted;
 
-  TGainType iGain;
-};
+	TInt iVolume;
+	TGainType iGain;
+
+	CMdaAudioRecorderUtility* iFileInfoUtil; 
+	TUtilFileOpenObserver iFileOpenObserver;
+	
+	friend class TUtilFileOpenObserver;
+	};
 
 #endif

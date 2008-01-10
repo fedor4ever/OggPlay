@@ -61,19 +61,20 @@ _LIT(KEndToken,"}");
 
 // TOggParser:
 // Read the skin defintion file
-// ----------------------------
-class TOggParser {
-
+class TOggParser
+{
  public:
 
-  enum TState { 
+  enum TState
+  { 
     ESuccess, EFileNotFound, ENoOggSkin,
     EUnknownVersion, EFlipOpenExpected,
     ESyntaxError, EBeginExpected,
     EEndExpected, EBitmapNotFound, EIntegerExpected,
-    EOutOfRange};
+    EOutOfRange
+  };
 
-  TOggParser(RFs& aFs, const TFileName& aFileName, TInt aScaleFactor = 1);
+  TOggParser(RFs& aFs, const TFileName& aFileName);
   ~TOggParser();
 
   TBool ReadSkin(COggCanvas* fo, COggCanvas* fc);
@@ -93,7 +94,6 @@ class TOggParser {
   TInt      iLine;
   TBuf<128> iToken;
   TInt      iVersion;
-  TInt		iScaleFactor;
 
   HBufC8*   iBuffer;
   const TUint8* iBufferPtr;
@@ -102,24 +102,22 @@ class TOggParser {
 
 // COggControl:
 // Abstract base type for objects displayed on a COggCanvas
-// --------------------------------------------------------
-class COggControl : public CBase {
-
- public:
-
+class COggControl : public CBase
+{
+public:
   COggControl();
   COggControl(TBool aHighFrequency);
-  virtual ~COggControl();
+  ~COggControl();
 
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
-  void         SetObserver(MOggControlObserver* obs);
+  void SetObserver(MOggControlObserver* obs);
 
   virtual void MakeVisible(TBool isVisible);
-  TBool        IsVisible();
-  void         SetDimmed(TBool aDimmed);
-  TBool        IsDimmed();
-  void         SetFocus(TBool aFocus);
-  TBool        Focus();
+  TBool IsVisible();
+  void SetDimmed(TBool aDimmed);
+  TBool IsDimmed();
+  void SetFocus(TBool aFocus);
+  TBool Focus();
 
   virtual void PointerEvent(const TPointerEvent& p);
   virtual void ControlEvent(TInt anEventType, TInt aValue);
@@ -127,9 +125,15 @@ class COggControl : public CBase {
   virtual void Redraw(TBool doRedraw = ETrue);
   virtual void SetFocusIcon(CGulIcon* anIcon);
 
-  TRect        Rect();
-  TSize        Size();
+  TRect Rect();
+  TSize Size();
 
+  virtual void  SetBitmapFile(const TFileName& aBitmapFile);
+  virtual TBool Read(TOggParser& p);
+
+  TBool HighFrequency();
+
+public:
   TInt   ix;
   TInt   iy;
   TInt   iw;
@@ -137,13 +141,8 @@ class COggControl : public CBase {
 
   CGulIcon*   iFocusIcon;
   TDblQueLink iDlink;
-  
-  virtual void  SetBitmapFile(const TFileName& aBitmapFile);
-  virtual TBool Read(TOggParser& p);
 
-  TBool HighFrequency();
-
- protected:
+protected:
   // these can/must be overriden to create specific behaviour:
   virtual void Cycle() {}
   virtual void Draw(CBitmapContext& aBitmapContext) = 0;
@@ -171,20 +170,19 @@ class COggControl : public CBase {
 
 // COggText:
 // A line of scrollable text
-//--------------------------
-class COggText : public COggControl {
-
- public:
-
+class COggText : public COggControl
+{
+public:
   COggText();
-  virtual ~COggText();
+  ~COggText();
 
   void SetText(const TDesC& aText);
   void SetFont(CFont* aFont, TBool ownedByControl = EFalse);
   void SetFontColor(TRgb aColor);
   void ScrollNow();  // restart the text scrolling
 
-  enum ScrollStyle {
+  enum ScrollStyle
+  {
     EOnce=0,
     EEndless,
     ETilBorder,
@@ -220,7 +218,7 @@ class COggText : public COggControl {
   TInt   iDrawOffset;
   TInt   iScrollBackward;
  
- private:
+private:
    // scroll to the left off the textarea and repeat
    void CycleOff();
 
@@ -238,13 +236,11 @@ class COggText : public COggControl {
 // COggIcon:
 // An icon (bitmap+mask) that can blink.
 // Ownership of the CGulIcon is taken!
-//--------------------------------------
-class COggIcon : public COggControl {
-
- public:
-
+class COggIcon : public COggControl
+{
+public:
   COggIcon();
-  virtual ~COggIcon();
+  ~COggIcon();
 
   void SetIcon(CGulIcon* anIcon);
   void Blink();
@@ -252,8 +248,7 @@ class COggIcon : public COggControl {
   void Hide();
   void SetBlinkFrequency(TInt aFrequency);
 
- protected:
-
+protected:
   virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Cycle();
@@ -267,13 +262,11 @@ class COggIcon : public COggControl {
 
 // COggAnimation
 // Display a sequence of bitmaps.
-//-------------------------------
-class COggAnimation : public COggControl {
-
- public:
-
+class COggAnimation : public COggControl
+{
+public:
   COggAnimation();
-  virtual ~COggAnimation();
+  ~COggAnimation();
 
   void SetBitmaps(TInt aFirstBitmap, TInt aNumBitmaps);
   void ClearBitmaps();
@@ -284,36 +277,31 @@ class COggAnimation : public COggControl {
   void SetStyle(TInt aStyle);
 
  protected:
-
   virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Cycle();
   virtual void Draw(CBitmapContext& aBitmapContext);
 
-  //CFbsBitmap* iBitmaps;
   CArrayPtrFlat<CFbsBitmap> iBitmaps;     
   TBool       iPause;
   TInt        iFrequency;
   TInt        iFirstBitmap;
-  //TInt        iNumBitmaps;
   TInt        iStyle;
 };
 
 
 // COggDigits
 // Display numbers with custom bitmaps.
-//-------------------------------------
-class COggDigits : public COggControl {
-
- public:
-
-  enum Digits { EDigit0=0, EDigit1, EDigit2, EDitit3, EDigit4,
-		EDigit5, EDigit6, EDigit7, EDigit8, EDigit9,
-		EDigitColon, EDigitDash, EDigitSlash, EDigitDot,
-		ENumDigits };
+class COggDigits : public COggControl
+{
+public:
+  enum Digits
+  { EDigit0=0, EDigit1, EDigit2, EDitit3, EDigit4,
+	EDigit5, EDigit6, EDigit7, EDigit8, EDigit9,
+	EDigitColon, EDigitDash, EDigitSlash, EDigitDot, ENumDigits };
 
   COggDigits();
-  virtual ~COggDigits();
+  ~COggDigits();
 
   void SetText(const TDesC& aText);
   void SetBitmaps(TInt aFirstBitmap);
@@ -321,10 +309,8 @@ class COggDigits : public COggControl {
   void ClearBitmaps();
   void ClearMasks();
 
- protected:
-
+protected:
   virtual TBool ReadArguments(TOggParser& p);
-
   virtual void Draw(CBitmapContext& aBitmapContext);
 
   HBufC*      iText;
@@ -341,13 +327,11 @@ class COggDigits : public COggControl {
 // - the disabled state + mask
 // - the pressed state + mask
 // Ownership of the bitmaps is taken!
-//-------------------
-class COggButton : public COggControl {
-
- public:
-
+class COggButton : public COggControl
+{
+public:
   COggButton();
-  virtual ~COggButton();
+  ~COggButton();
 
   void SetActiveMask(const TFileName& aFileName, TInt anIdx);
   void SetNormalIcon(CGulIcon* anIcon);
@@ -356,13 +340,11 @@ class COggButton : public COggControl {
   void SetStyle(TInt aStyle);
   void SetState(TInt aState);
 
- protected:
-
+protected:
   virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Draw(CBitmapContext& aBitmapContext);
   virtual void PointerEvent(const TPointerEvent& p);
-
   
   CFbsBitmap* iActiveMask;
   CGulIcon*   iNormalIcon;
@@ -374,55 +356,93 @@ class COggButton : public COggControl {
 };
 
 
-// COggSlider:
+// COggSlider
 // A slider control with different styles:
 // style 0 -> part of a bitmap is shown (opened from left to right)
 // style 1 -> like 0, but opening from bottom to top
 // style 2 -> the bitmap is moved from left to right
-// style 3 -> the bitmap is moved from bootom to top
-// ----------------------------------------------------------------
-class COggSlider : public COggControl {
+// style 3 -> the bitmap is moved from bottom to top
+class COggSliderBase : public COggControl
+	{
+public:
+	~COggSliderBase();
 
- public:
+	void SetStyle(TInt aStyle);
+	void SetKnobIcon(CGulIcon* anIcon);
 
-  COggSlider();
-  virtual ~COggSlider();
-  void SetStyle(TInt aStyle);
-  void SetKnobIcon(CGulIcon* anIcon);
-  void SetValue(TInt aValue);  
-  void SetMaxValue(TInt aMaxValue);
+protected:
+	// From COggControl
+	TBool ReadArguments(TOggParser& p);
 
-  TInt CurrentValue();
+	virtual TInt GetPosFromValue() = 0;
 
- protected:
+protected:
+	CGulIcon* iKnobIcon;
+	TInt iStyle;
+	TBool iIsMoving;
+	TInt  iPos;
+	};
 
-  virtual TBool ReadArguments(TOggParser& p);
+class COggSlider : public COggSliderBase
+	{
+public:
+	COggSlider();
 
-  virtual void Draw(CBitmapContext& aBitmapContext);
-  virtual void PointerEvent(const TPointerEvent& p);
+	void SetValue(TInt aValue);  
+	void SetMaxValue(TInt aMaxValue);
 
-  TInt GetPosFromValue(TInt aValue);
-  TInt GetValueFromPos(TInt aPos);
+	TInt CurrentValue();
 
-  CGulIcon* iKnobIcon;
-  TInt      iStyle;
-  TInt      iValue;
-  TInt      iMaxValue;
-  TBool     iIsMoving;
-  TInt      iPos; // current position in pixels
-};
+protected:
+	// From COggControl
+	void PointerEvent(const TPointerEvent& p);
+	void Draw(CBitmapContext& aBitmapContext);
 
+	// From COggSliderBase
+	TInt GetPosFromValue();
+
+	TInt GetValueFromPos(TInt aPos);
+
+private:
+	TInt iValue;
+	TInt iMaxValue;
+	};
+
+
+// COggSlider64
+// Same as COggSlider but with 64 bit position
+class COggSlider64 : public COggSliderBase
+	{
+public:
+	COggSlider64();
+
+	void SetValue(TInt64 aValue);  
+	void SetMaxValue(TInt64 aMaxValue);
+
+	TInt64 CurrentValue();
+
+protected:
+	// From COggControl
+	void PointerEvent(const TPointerEvent& p);
+	void Draw(CBitmapContext& aBitmapContext);
+
+	// From COggSliderBase
+	TInt GetPosFromValue();
+
+	TInt64 GetValueFromPos(TInt aPos);
+
+private:
+	TInt64 iValue;
+	TInt64 iMaxValue;
+	};
 
 // COggScrollBar
 // A scrollbar that can have an associated control (e.g. a listbox)
-//---------------------------------
 class COggScrollBar : public COggControl
 {
-
- public:
-
+public:
   COggScrollBar();
-  virtual ~COggScrollBar();
+  ~COggScrollBar();
 
   void SetStyle(TInt aStyle);
   void SetKnobIcon(CGulIcon* anIcon);
@@ -436,43 +456,37 @@ class COggScrollBar : public COggControl
   TInt CurrentValue();
 
  protected:
-
-  virtual TBool ReadArguments(TOggParser& p);
-
-  virtual void Draw(CBitmapContext& aBitmapContext);
-  virtual void PointerEvent(const TPointerEvent& p);
+  // From COggControl
+  TBool ReadArguments(TOggParser& p);
+  void Draw(CBitmapContext& aBitmapContext);
+  void PointerEvent(const TPointerEvent& p);
 
   TInt GetValueFromPos(TInt aPos);
   TInt GetPosFromValue(TInt aValue);
 
-  TBool        iStyle; // 0= horizontal; 1= vertical
-  TInt         iValue;
-  TInt         iMaxValue;
+  TBool iStyle; // 0 = horizontal; 1 = vertical
+  TInt iValue;
+  TInt iMaxValue;
   COggControl* iAssociated;
-  CGulIcon*    iKnobIcon;
-  TInt         iScrollerSize;
-  TInt         iPos;
-  TInt         iPage;
-  TInt         iStep;
-  TBool        iIsMoving;
+  CGulIcon* iKnobIcon;
+
+  TInt iScrollerSize;
+  TInt iPos;
+  TInt iPage;
+  TInt iStep;
+  TBool iIsMoving;
 };
 
 
 // COggListBox
 // This is a simple list box which holds a visible text in each
 // line plus an invisible ("info") string.
-//------------------
 class COggListBox : public COggControl 
 {
 public:
-#ifdef PLAYLIST_SUPPORT
   enum TItemTypes { ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EBack, EPlaying, EPaused, EPlayList};
-#else
-  enum TItemTypes { ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EBack, EPlaying, EPaused};
-#endif
 
- public:
-
+public:
   COggListBox();
   virtual ~COggListBox();
 
@@ -539,13 +553,12 @@ public:
 // COggAnalyzer
 // A frequency analyzer which does a discrete fourier transformation
 // and displays the amplitude in dB of 16 frequency bands.
-// --------------------
-class COggAnalyzer : public COggControl {
-
- public:
-
+const TInt KAnalyzerNumValues = 16;
+class COggAnalyzer : public COggControl
+{
+public:
   COggAnalyzer();
-  virtual ~COggAnalyzer();
+  ~COggAnalyzer();
 
   virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
   void SetBarIcon(CGulIcon* aBarIcon);
@@ -562,8 +575,7 @@ class COggAnalyzer : public COggControl {
   void Clear();
   TInt Style();
 
- protected:
-
+protected:
   virtual TBool ReadArguments(TOggParser& p);
 
   virtual void Cycle();
@@ -572,29 +584,27 @@ class COggAnalyzer : public COggControl {
 
   CGulIcon* iBarIcon;
   TInt      iNumValues;
-  //TInt      iShowPeaks; // show peak value for iShowPeaks cycles
+  // TInt      iShowPeaks; // show peak value for iShowPeaks cycles
   TInt      iStyle;     // currently only 0=off; 1=on
 
-  TInt*     iValues;    // the current values
-  TInt*     iPeaks;     // the current peak values
-  short int iFFTAbs[512];
-  short int iFFTIm[512];
-  short int iFFTRe[512];
-  int       iDx;
+  TInt     iValues[KAnalyzerNumValues];    // the current values
+  TInt     iPeaks[KAnalyzerNumValues];     // the current peak values
+  TInt16    iFFTAbs[512];
+  TInt16    iFFTIm[512];
+  TInt16    iFFTRe[512];
+  TInt      iDx;
 };
 
 
 // COggCanvas
 // A canvas that can display and manage several COggControls 
 // and which uses an off-screen bitmap for double buffering
-//----------------------------------------------------------
-class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
+class COggCanvas : public CCoeControl
 {
  public:
-
   COggCanvas();
-  virtual ~COggCanvas();
-  TInt LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
+  ~COggCanvas();
+  void LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx);
 
   void Refresh();
   void Invalidate();
@@ -610,19 +620,12 @@ class COggCanvas : public CCoeControl //, public MMdaImageUtilObserver
   void CycleLowFrequencyControls();
 
  protected:
-
-  // from MMdaImageUtilObserver:
-//  virtual void MiuoOpenComplete(TInt aError);
-//  virtual void MiuoConvertComplete(TInt aError);
-//  virtual void MiuoCreateComplete(TInt aError);
-
   // from CCoeControl:
-  virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent);
-  virtual TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
+  void HandlePointerEventL(const TPointerEvent& aPointerEvent);
+  TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
 
-  virtual void DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& aBitmapDevice) const;
+  void DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& aBitmapDevice) const;
 
-  void SizeChanged();
   void DestroyBitmap();
   void CreateBitmapL(const TSize& aSize);
   void Draw(const TRect& aRect) const;

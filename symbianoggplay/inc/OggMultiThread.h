@@ -19,7 +19,6 @@
 #ifndef _OggMulti_h
 #define _OggMulti_h
 
-#if defined(MULTI_THREAD_PLAYBACK)
 #include <e32base.h>
 #include <e32std.h>
 #include <mdaaudiooutputstream.h>
@@ -382,5 +381,4 @@ private:
 	TStreamingThreadListeningState iListeningState;
 };
 
-#endif // MULTI_THREAD_PLAYBACK
 #endif // _OggMulti_h

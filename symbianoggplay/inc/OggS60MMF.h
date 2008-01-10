@@ -21,6 +21,8 @@
  
 //  Build targets for S60MMF
 #define SERIES60
+// #define SERIES60SUI
+
 #define OS70S
 
 #endif

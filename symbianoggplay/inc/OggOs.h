@@ -36,45 +36,16 @@ chSTR2(__LINE__) "):" #desc)
 // DEBUGGING
 #define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
 
-
-//# Version String
-#if defined(SERIES60)
- #if defined(OS70S)
-  #define KVersionMajor 1
-  #define KVersionMinor 70
-  #define KVersionString "1.70"
- #else
-  #define KVersionMajor 1
-  #define KVersionMinor 12
-  #define KVersionString "1.093"
- #endif
-#endif
-#if defined(UIQ)
- #define KVersionMajor 1
- #define KVersionMinor 32
- #define KVersionString "1.32"
-#endif
-#if defined(SERIES80)
- #define KVersionMajor 1
- #define KVersionMinor 70
- #define KVersionString "1.70"
-#endif
-
-#ifdef OS70S
+#if defined(OS70S)
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
 #define PLUGIN_SYSTEM
-
-// This flag is only for SOS 7.0S and over, should never be set for older SOS
-#define MMF_AVAILABLE 
 #else
-// PLUGIN_SYSTEM on the SOS 6.1 is experimental at the moment. 
-//#define PLUGIN_SYSTEM 
 // support for legacy audio codec (-:
 // this is experimental at the moment.
-//#define MP3_SUPPORT
-#endif /* OS70S */
+// #define MP3_SUPPORT
+#endif
 
 // Force filling the buffer to at least 75% of their capacity before sending them to
 // the audio streaming device
@@ -82,27 +53,20 @@ chSTR2(__LINE__) "):" #desc)
 // UIQ_?
 #define FORCE_FULL_BUFFERS
 
-// Multi threaded playback, non MMF only (experimental)
-#if defined(SERIES60)
-  #if !defined(OS70S)
-  #define MULTI_THREAD_PLAYBACK
-#endif
-#endif
-
-#if !defined(OS70S)
-  // There is something wrong how Nokia audio streaming handles the
-  // first buffers. They are somehow swallowed.
-  // To avoid that problem, wait a short time before streaming, 
-  // so that Application drawing have been done.
-  #define DELAY_AUDIO_STREAMING_START
+#if defined(PLUGIN_SYSTEM)
+// PLUGIN SYSTEM uses asynchronous open
+#define DELAY_AUDIO_STREAMING_OPEN
+#else
+// !PLUGIN SYSTEM uses asynchronous play
+#define DELAY_AUDIO_STREAMING_START
 #endif
 
-#if defined(SERIES60) || defined(SERIES80)
+#if defined(SERIES60) || defined(SERIES80) || defined(DELAY_AUDIO_STREAMING_OPEN)
+// Used on S60, S80, S90
+// This must be defined if DELAY_AUDIO_STREAMING_OPEN is present because
+// the code for !SEARCH_OGGS_FROM_ROOT assumes synchronous open
 #define SEARCH_OGGS_FROM_ROOT
 #endif
-
-// Use MDCT coeffs to generate the freq analyser
-#define MDCT_FREQ_ANALYSER 
 
 // Some phones require direct TSY access for phone call notification
 #if !defined(MOTOROLA)
@@ -114,8 +78,4 @@ chSTR2(__LINE__) "):" #desc)
 #define EMachineUid_SendoX  0x101FA031
 #define EMachineUid_NGage   0x101F8C19
 #define EMachineUid_NGageQD 0x101FB2B1
-
-// Playlist support
-#define PLAYLIST_SUPPORT
-
 #endif

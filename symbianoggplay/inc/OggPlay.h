@@ -42,6 +42,7 @@
 #endif
 
 const TInt ENoFileSelected = -1;
+const TInt KFfRwdStep = 20000;
 
 #include <coeccntx.h>  // MCoeControlContex
 #include <e32base.h>
@@ -72,10 +73,10 @@ const TUid KOggPlayUidPlaybackOptionsView = { 8 };
 const TUid KOggPlayUidAlarmSettingsView = { 9 };
 
 struct TKeyCodes
-{
-  int code; 
-  int mask;
-};
+	{
+	TInt code; 
+	TInt mask;
+	};
 
 const TInt KMaxKeyCodes = 4;
 static const TKeyCodes keycodes[] = 
@@ -95,95 +96,101 @@ _LIT(KMmcSearchDir,"C:\\Ogg\\");
 _LIT(KMmcSearchDir,"E:\\Ogg\\");
 #endif
 
-
 _LIT(KFullScanString,"Full scan");
 
-// global settings - these are set through the settings view
-
-#ifdef SERIES80
- const TInt KNofSoftkeys = 4;
+// Global settings - these are set through the settings view
+#if defined(SERIES80)
+const TInt KNofSoftkeys = 4;
 #else
- const TInt KNofSoftkeys = 1;
+const TInt KNofSoftkeys = 1;
 #endif
  
 class TOggplaySettings
 	{
 public:
-  enum TScanmode    // COggplayDisplaySettingItemList - COggSettingsContainer
+	enum TScanmode
 		{
-      EFullScan,
-      EMmcOgg,
-      EMmmcFull
-#ifdef SERIES80
-      ,ECustomDir
+		EFullScan,
+		EMmcOgg,
+		EMmmcFull
+#if defined(SERIES80)
+		, ECustomDir
 #endif
 		};
-  TInt iScanmode;
   
-#ifdef SERIES80
-  TBuf<255> iCustomScanDir;
-#endif
+	TInt iScanmode;
   
-  TInt iAutoplay;
-  TInt iManeuvringSpeed;
-  TInt iWarningsEnabled;
-   
-  TInt iSoftKeysPlay[KNofSoftkeys];
-  TInt iSoftKeysIdle[KNofSoftkeys];
-  TInt iGainType;
-  
-  enum THotkeys {   // COggUserHotkeys
-    ENoHotkey,
-    EFastForward,
-    ERewind,
-    EPageUp,
-    EPageDown,
-    ENextSong,
-    EPreviousSong,
-#if !defined(SERIES80)
-    EKeylock,
-    EPauseResume,
-#endif
-    EPlay,
-    EPause,
-    EStop,
-	EVolumeBoostUp,
-	EVolumeBoostDown,
-    EHotKeyExit,
-    EHotKeyBack,
-    EHotkeyVolumeHelp,
-
-    KFirstHotkeyIndex = EFastForward,
 #if defined(SERIES80)
-	ENofHotkeysV4=EPlay,
-#else
-	ENofHotkeysV4=EKeylock,
+	TFileName iCustomScanDir;
 #endif
-	ENofHotkeysV5=EVolumeBoostUp,
-	ENofHotkeysV7=EHotKeyExit,
-    ENofHotkeys=EHotkeyVolumeHelp+1
-    };
+  
+	TInt iAutoplay;
+	TInt iManeuvringSpeed;
+	TBool iWarningsEnabled;
+   
+	TInt iSoftKeysPlay[KNofSoftkeys];
+	TInt iSoftKeysIdle[KNofSoftkeys];
+	TInt iGainType;
+  
+	enum THotkeys
+		{  
+		// COggUserHotkeys
+		ENoHotkey,
+		EFastForward,
+		ERewind,
+		EPageUp,
+		EPageDown,
+		ENextSong,
+		EPreviousSong,
 
-  TInt iUserHotkeys[ENofHotkeys];
-  TBool iLockedHotkeys[ENofHotkeys];
-  TBool iRepeat;
-  TBool iRandom;
+#if !defined(SERIES80)
+		EKeylock,
+		EPauseResume,
+#endif
 
-  // Multi thread playback settings
-  TInt iBufferingMode;
-  TInt iThreadPriority;	
+		EPlay,
+		EPause,
+		EStop,
+		EVolumeBoostUp,
+		EVolumeBoostDown,
+		EHotKeyExit,
+		EHotKeyBack,
+		EHotkeyVolumeHelp,
 
-  // Alarm clock settings
-  TBool iAlarmActive;
-  TTime iAlarmTime;
-  TInt iAlarmVolume;
-  TInt iAlarmGain;
-  TInt iAlarmSnooze;
-};
+		KFirstHotkeyIndex = EFastForward,
+
+#if defined(SERIES80)
+		ENofHotkeysV4 = EPlay,
+#else
+		ENofHotkeysV4 = EKeylock,
+#endif
+
+		ENofHotkeysV5 = EVolumeBoostUp,
+		ENofHotkeysV7 = EHotKeyExit,
+		ENofHotkeys = EHotkeyVolumeHelp+1
+		};
+
+	TInt iUserHotkeys[ENofHotkeys];
+	TBool iLockedHotkeys[ENofHotkeys];
+	TBool iRepeat;
+	TBool iRandom;
+
+#if !defined(PLUGIN_SYSTEM)
+	TInt iBufferingMode;
+	TInt iThreadPriority;
+#endif
+
+	// Alarm clock settings
+	TBool iAlarmActive;
+	TTime iAlarmTime;
+	TInt iAlarmVolume;
+	TInt iAlarmGain;
+	TInt iAlarmSnooze;	
+	};
 
  
-static const TInt KHotkeysActions[]  =
-  {
+const TInt KHotkeysActions[]  =
+	{
   	//Must be kept synchronized with the TOggplaySettings::THotkey enum !
   	EEikCmdCanceled,	// ENoHotkey,
     EUserFastForward,	// EFastForward,
@@ -192,11 +199,13 @@ static const TInt KHotkeysActions[]  =
     EUserListBoxPageDown,// EPageDown,
     EOggNextSong,		// ENextSong,
     EOggPrevSong,		// EPreviousSong,
+
 #if !defined(SERIES80)
     EUserKeylock,		// EKeylock,
     EUserPlayPauseCBA,	// EPauseResume,
 #endif
-    EUserPlayCBA,   	// EPlay,
+
+	EUserPlayCBA,   	// EPlay,
     EUserPauseCBA,  	// EPause,
     EUserStopPlayingCBA,// EStop,
 	EVolumeBoostUp,		// EVolumeBoostUp,
@@ -204,14 +213,14 @@ static const TInt KHotkeysActions[]  =
     EEikCmdExit,    	// EHotKeyExit,
     EUserBackCBA,  		// EHotKeyBack,
     EUserVolumeHelp     // EHotkeyVolumeHelp 
-  };
+	};
  
  
-// Forward declarations:
-//----------------------
+// Forward declarations
 class COggPlayAppUi;
 class COggPlayAppView;
 class COggFOView;
+class COggFCView;
 
 class CEikColumnListBox;
 class CEikBitmapButton;
@@ -220,42 +229,42 @@ class COggSongList;
 
 // COggActive
 // A utility class monitoring the telephone line
-//----------------------------------------------
-#ifdef MONITOR_TELEPHONE_LINE
+#if defined(MONITOR_TELEPHONE_LINE)
 class COggActive : public CBase
-{
- public:
-  COggActive();
-  void ConstructL(COggPlayAppUi* theAppUi);
-  ~COggActive();
+	{
+public:
+	COggActive();
+	~COggActive();
 
-  void IssueRequest();
-  void CancelCallBack();
+	void ConstructL(COggPlayAppUi* theAppUi);
 
-  static TInt CallBack(TAny* aPtr);
-  TInt CallBack();
+	void IssueRequest();
+	void CancelCallBack();
 
- private:
-  RTelServer*    iServer;
-  RPhone*        iPhone;
-  RLine*         iLine;
-  TRequestStatus iRequestStatusChange;
+	static TInt CallBack(TAny* aPtr);
+	TInt CallBack();
+
+private:
+	RTelServer* iServer;
+	RPhone* iPhone;
+	RLine* iLine;
+	TRequestStatus iRequestStatusChange;
   
-  CPeriodic*     iTimer;
-  TCallBack*     iCallBack;
+	CPeriodic* iTimer;
+	TCallBack* iCallBack;
 
-  TInt           iInterrupted;
-  TInt           iLineCallsReportedAtIdle;
-  TInt           iLineToMonitor;
-  COggPlayAppUi* iAppUi;
-};
+	TInt iInterrupted;
+	TInt iLineCallsReportedAtIdle;
+	TInt iLineToMonitor;
+	COggPlayAppUi* iAppUi;
+	};
 #endif
 
 class COggPlayAppUi;
 class COggStartUpAO : public CActive
-{
+	{
 public:
-	COggStartUpAO(class COggPlayAppUi& aAppUi);
+	COggStartUpAO(COggPlayAppUi& aAppUi);
 	~COggStartUpAO();
 
 	void NextStartUpState();
@@ -267,203 +276,247 @@ private:
 
 private:
 	COggPlayAppUi& iAppUi;
-};
+	};
 
-#ifdef SERIES60
+class TOggFiles;
+class COggStartUpEmbeddedAO : public CActive
+	{
+public:
+	COggStartUpEmbeddedAO(COggPlayAppUi& aAppUi, TOggFiles& aFiles);
+	~COggStartUpEmbeddedAO();
+
+	void CreateDbWithSingleFile(TFileName& aFileName);
+
+private:
+	// From CActive
+	void RunL();
+	void DoCancel();
+
+private:
+	COggPlayAppUi& iAppUi;
+	TOggFiles& iFiles;
+	};
+
+
+#if defined(SERIES60)
 class CAknErrorNote;
-class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver
+class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver, public MFileInfoObserver
 #elif defined(SERIES80)
-class COggPlayAppUi : public CEikAppUi, public MPlaybackObserver
+class COggPlayAppUi : public CEikAppUi, public MPlaybackObserver, public MFileInfoObserver
 #else
-class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver
+class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver, public MFileInfoObserver
 #endif
 {
 public:
+	// Start up states (OggPlay startup has several stages)
 	enum TStartUpState
-	{ EAppUiConstruct, EActivateSplashView, EStartOggPlay, EActivateStartUpView, EPostConstruct, EStartUpComplete, EStartUpFailed };
+	{ EAppUiConstruct, EActivateSplashView, EStartOggPlay, EActivateStartUpView,
+	  EPostConstruct, EStartRunningEmbedded, EStartUpComplete, EStartUpFailed };
+
+	// The views supported by the listbox
+	enum TViews
+	{ ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EPlayList, ETop, ETrackTitle };
 
 public:
-  COggPlayAppUi();
-  void ConstructL();
+	COggPlayAppUi();
+	~COggPlayAppUi();
 
-  void StartUpError(TInt aErr);
-  void NextStartUpState(TInt aErr);
-  void NextStartUpState();
+	void ConstructL();
+	void NextStartUpState(TInt aErr);
 
-  ~COggPlayAppUi();
+	// from MPlaybackObserver
+	void NotifyUpdate();
+	void NotifyPlayComplete();
+	void NotifyPlayInterrupted();
+	void ResumeUpdates();
 
-  // the views supported by the listbox:
-#ifdef PLAYLIST_SUPPORT
-  enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EPlayList, ETop, ETrackTitle };
-#else
-  enum TViews { ETitle=0, EAlbum, EArtist, EGenre, ESubFolder, EFileName, ETop, ETrackTitle };
+#if !defined(PLUGIN_SYSTEM)
+	void NotifyStreamOpen(TInt aErr);
 #endif
 
-  // global settings stored in the ini file:
-  TOggplaySettings iSettings;
-
-  // backwards compatibility - deprecated
-  // as long as these are not part of TOggplaySettings, they can't be set 
-  // through the settings view
-  TInt iHotkey;
-  TInt iVolume;            // [0...100]
-  TInt iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
-  TViews iViewBy;
-
-  // global status:
-  TInt iTryResume;         // after iTryResume seconds try resuming music (after sound device was stolen)
-
-  TBool iIsRunningEmbedded; // is true when application got startet through the recognizer
-
-  TFileName iDbFileName;
-  TFileName iIniFileName;
-  TFileName iEmbeddedFileName;
-
-  COggPlayAppView* iAppView;
-  CAbsPlayback*    iOggPlayback;
-
-#ifdef MONITOR_TELEPHONE_LINE
-  COggActive*      iActive;
-#endif
-
-  COggMsgEnv*      iOggMsgEnv;
-  COggSongList*    iSongList;
-
-  // from MPlaybackObserver:
-  virtual void NotifyUpdate();
-  virtual void NotifyPlayComplete();
-  virtual void NotifyPlayInterrupted();
-  virtual void ResumeUpdates();
-
-#if !defined(OS70S)
-  virtual void NotifyStreamOpen(TInt aErr);
+#if defined(DELAY_AUDIO_STREAMING_OPEN)
+	void NotifyFileOpen(TInt aErr);
 #endif
 
 #if defined(DELAY_AUDIO_STREAMING_START)
-  virtual void NotifyPlayStarted();
+	void NotifyPlayStarted();
 #endif
 
-#if defined(MULTI_THREAD_PLAYBACK)
-  virtual void NotifyFatalPlayError();
-#endif
+	void NotifyFatalPlayError();
 
-  // high level functions:
-  void PlaySelect();
-  void PauseResume();
-  void Pause();
-  void Stop();
-  void NextSong();
-  void PreviousSong();
+	// From MFileInfoObserver
+	void FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo);
 
-  void ShowFileInfo();
+	// High level functions
+	void PlaySelect();
+	void PauseResume();
+	void Pause();
+	void Stop();
+	void NextSong();
+	void PreviousSong();
 
-  void SelectPreviousView();
-  void SelectNextView();
+	void ShowFileInfo();
 
-  void ActivateOggViewL();
-  void ActivateOggViewL(const TUid aViewId);
+	void SelectPreviousView();
+	void SelectNextView();
 
-  void UpdateSoftkeys(TBool aForce=EFalse);
+	void ActivateOggViewL();
+	void ActivateOggViewL(const TUid aViewId);
+
+	void UpdateSoftkeys(TBool aForce=EFalse);
   
-  // from CQikAppUi:
-  void HandleCommandL(int aCommand);
-  void HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent);
-  void HandleForegroundEventL(TBool aForeground);
-  void DynInitMenuPaneL(int aMenuId, CEikMenuPane* aMenuPane);
-  TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName,const TDesC8& aTail);
+	// from CEikAppUi
+	void HandleCommandL(TInt aCommand);
+	void HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent);
+	void HandleForegroundEventL(TBool aForeground);
+	void DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane);
+	TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName, const TDesC8& aTail);
 
-  void OpenFileL(const TDesC& aFileName);
-  TInt FileSize(const TDesC& aFileName);
-  void WriteIniFile();
-  void SetRandomL(TBool aRandom);
-  void SetRepeat(TBool aRepeat);
-  void ToggleRepeat();
-  void ToggleRandom();
+	void OpenFileL(const TDesC& aFileName);
+	TInt FileSize(const TDesC& aFileName);
+	void WriteIniFile();
+	void SetRandomL(TBool aRandom);
+	void SetRepeat(TBool aRepeat);
+	void ToggleRepeat();
+	void ToggleRandom();
   
-#ifdef SERIES80
-  CEikButtonGroupContainer * Cba()  
-  { return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 
+#if defined(SERIES80)
+	CEikButtonGroupContainer* Cba()  
+	{ return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 
 #endif
 
-  void SetVolumeGainL(TGainType aNewGain);
+	void SetVolumeGainL(TGainType aNewGain);
 
-#if defined(MULTI_THREAD_PLAYBACK)
-  void SetBufferingModeL(TBufferingMode aNewBufferingMode);
-  void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
-#endif
+	void SetBufferingModeL(TBufferingMode aNewBufferingMode);
+	void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
 
-  void SetAlarm(TBool aAlarmActive);
-  void SetAlarmTime();
+	void SetAlarm(TBool aAlarmActive);
+	void SetAlarmTime();
+
+	TInt Rnd(TInt aMax);
+	void FileOpenErrorL(TInt aErr);
+	const TDesC& UnassignedTxt()
+	{ return iUnassignedTxt; }
 
 private:
-  void StartOggPlay();
-  void StartOggPlayL();
+	void StartOggPlay();
+	void StartOggPlayL();
 
-  void ActivateStartUpView();
-  void ActivateStartUpViewL();
+	void ActivateStartUpView();
+	void ActivateStartUpViewL();
 
-  void PostConstruct();
-  void PostConstructL();
+	void PostConstruct();
+	void PostConstructL();
 
-  void ReadIniFile();
-  TInt32 IniRead32( TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = 0x7FFFFFFF );
-  TInt64 IniRead64( TFileText& aFile, TInt64 aDefault = 0 );
-#ifdef SERIES80
-  void IniReadDes( TFileText& aFile, TDes& value,const TDesC& defaultValue );
-#endif
-  void SetHotKey();
+	void StartRunningEmbedded();
+	void RunningEmbeddedDbReady(TInt aErr);
 
-#if !defined(MULTI_THREAD_PLAYBACK)
-  void SetProcessPriority();
-  void SetThreadPriority();
-#endif
+	void StartUpError(TInt aErr);
+	void NextStartUpState();
 
-  void FindSkins();
+	void ReadIniFile();
+	void ReadSkin(TInt aSkin);
 
-  int iCapturedKeyHandle;
-  TFileName iSkinFileDir;
-  TInt iCurrentSkin;
-  CDesCArray* iSkins;
+	TInt32 IniRead32(TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = KMaxTInt32);
+	TInt64 IniRead64(TFileText& aFile, TInt64 aDefault = 0);
 
-  COggSplashView* iSplashFOView;
-  COggFOView* iFOView;
-
-#if defined(UIQ) && !defined(MOTOROLA)
-  COggSplashView* iSplashFCView;
-  COggFCView* iFCView;
+#if defined(SERIES80)
+	void IniReadDes(TFileText& aFile, TDes& value, const TDesC& defaultValue);
 #endif
 
-#if defined(SERIES60)
-  COggSettingsView* iSettingsView;
-  COggUserHotkeysView* iUserHotkeysView;
+	void SetHotKey();
+	void FindSkins();
 
-#ifdef PLUGIN_SYSTEM
-   COggPluginSettingsView* iCodecSelectionView;
-#endif
-
-#if defined(MULTI_THREAD_PLAYBACK)
-  COggPlaybackOptionsView* iPlaybackOptionsView;
-#endif
-
-  COggAlarmSettingsView* iAlarmSettingsView;
-#endif /* SERIES60 */
-
-  RArray<TInt> iViewHistoryStack;
-  RArray<TInt> iRestoreStack;
-  TInt iRestoreCurrent;
-
-  TBool iForeground;
-
-  COggStartUpAO* iStartUpAO;
-  TBuf<128> iStartUpErrorTxt1;
-  TBuf<128> iStartUpErrorTxt2;
-
-#if defined(SERIES60)
-  CAknErrorNote* iStartUpErrorDlg;
+#if defined(SERIES60SUI)
+    // From CAknAppUi
+	void HandleResourceChangeL(TInt aType); 
 #endif
 
 public:
-  TStartUpState iStartUpState;
+	// Global settings stored in the ini file
+	TOggplaySettings iSettings;
+
+	// backwards compatibility - deprecated
+	// as long as these are not part of TOggplaySettings, they can't be set 
+	// through the settings view
+	TInt iHotkey;
+	TInt iVolume;            // [0...100]
+	TInt iAnalyzerState;     // 0= off; 1=on; 2= on with peaks
+	TViews iViewBy;
+
+	TFileName iDbFileName;
+	TFileName iIniFileName;
+	TFileName iFileName;
+
+	COggPlayAppView* iAppView;
+	CAbsPlayback* iOggPlayback;
+
+	COggMsgEnv* iOggMsgEnv;
+	COggSongList* iSongList;
+
+private:
+#if defined(MONITOR_TELEPHONE_LINE)
+	COggActive* iActive;
+#endif
+
+	TBool iIsRunningEmbedded; // is true when application got started through the recognizer
+	TInt iTryResume; // after iTryResume seconds try resuming music (after sound device was stolen)
+
+	TInt iCapturedKeyHandle;
+	TFileName iSkinFileDir;
+	TInt iCurrentSkin;
+	CDesCArray* iSkins;
+
+	COggSplashView* iSplashFOView;
+	COggFOView* iFOView;
+
+	COggSplashView* iSplashFCView;
+	COggFCView* iFCView;
+
+#if defined(SERIES60)
+	COggSettingsView* iSettingsView;
+	COggUserHotkeysView* iUserHotkeysView;
+
+#if defined(PLUGIN_SYSTEM)
+	COggPluginSettingsView* iCodecSelectionView;
+#endif
+
+	COggPlaybackOptionsView* iPlaybackOptionsView;
+	COggAlarmSettingsView* iAlarmSettingsView;
+#endif
+
+	RArray<TInt> iViewHistoryStack;
+	RArray<TInt> iRestoreStack;
+	TInt iRestoreCurrent;
+
+	TBool iForeground;
+	TBool iMainViewActive;
+
+	COggStartUpAO* iStartUpAO;
+	COggStartUpEmbeddedAO* iStartUpEmbeddedAO;
+
+	TBuf<128> iUnassignedTxt;
+	TBuf<128> iStartUpErrorTxt1;
+	TBuf<128> iStartUpErrorTxt2;
+
+	TInt64 iRndSeed;
+	TInt64 iRndMax;
+
+#if defined(SERIES60)
+	CAknErrorNote* iStartUpErrorDlg;
+#endif
+
+#if defined(SERIES60SUI)
+	// CFbsTypefaceStore* iTypefaceStore;
+	// TInt iFontId;
+#endif
+
+public:
+	TStartUpState iStartUpState;
+
+	friend class COggActive;
+	friend class COggStartUpAO;
+	friend class COggStartUpEmbeddedAO;
 };
 
 class TOggPlayList;
@@ -482,82 +535,81 @@ public:
 	TInt iPlayingIdx;
 };
 
-class ROggPlayListStack
-{
-public:
-	TInt Push(const TOggPlayListStackEntry& aPlayListStackEntry);
-	void Pop(TOggPlayListStackEntry& aPlayListStackEntry);
 
-	void Reset();
-	void Close();
-
-private:
-	RPointerArray<TOggPlayList> iPlayListArray;
-	RArray<TInt> iPlayingIdxArray;
-};
-
-
-// COggSongList:
+// COggSongList
 // Base class defining the interface for managing the song list.
-//------------------------------------------------------
 class TOggFile;
 class COggSongList : public CBase
 {
 public:
-    virtual const TDesC & GetNextSong()=0;    
-    virtual const TDesC & GetPreviousSong()=0;
-    void  SetPlayingFromListBox(TInt aPlaying);
-    const TDesC& GetPlaying();
-    const TOggFile* GetPlayingFile();
-    const TBool AnySongPlaying();
-    void  SetRepeat(TBool aRepeat);
-    const TBool IsSelectedFromListBoxCurrentlyPlaying();
     ~COggSongList();
 
+    const TDesC& GetPlaying();
+    const TOggFile* GetPlayingFile();
+    TBool AnySongPlaying();
+    void  SetRepeat(TBool aRepeat);
+    TBool IsSelectedFromListBoxCurrentlyPlaying();
+
+	virtual const TDesC& GetNextSong()=0;    
+    virtual const TDesC& GetPreviousSong()=0;
+	virtual void  SetPlayingFromListBox(TInt aPlaying);
+
 protected:
-	COggSongList(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
+	COggSongList(COggPlayAppView* aAppView);
     void ConstructL(COggSongList* aSongList);
 
-	void  SetPlaying(TInt aPlaying, TBool aPreviousSong = EFalse);
-    TInt iPlayingIdx;           // index of the file which is currently being played
-    RPointerArray<TOggFile> iFileList;
-    COggPlayAppView* iAppView; 
-    CAbsPlayback*    iOggPlayback;
-    TBool iRepeat;
-    TBool iNewFileList;
+	void SetPlaying(TInt aPlaying);
+	void AddFile(TOggFile* aFile, TInt aPlayingIdx);
 
-	ROggPlayListStack iPlayListStack;
-	TOggPlayList* iPlayList;
-	TInt iPlayListIdx;
+protected:
+	TInt iPlayingIdx; // Index of the file currently being played (maybe a playlist)
+	RPointerArray<TOggFile> iFileList;
+
+	TInt iFullListPlayingIdx; // Index of the actual audio file being played
+    RPointerArray<TOggFile> iFullFileList;
+
+    TBool iRepeat;
+
+private:
+	COggPlayAppView* iAppView; 
 };
 
 class COggNormalPlay : public COggSongList
 {
 public:     
-	static COggNormalPlay* NewL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback, COggSongList* aSongList = NULL);
-	const TDesC& GetNextSong();  
-	const TDesC& GetPreviousSong();
+	static COggNormalPlay* NewL(COggPlayAppView* aAppView, COggSongList* aSongList = NULL);
 	~COggNormalPlay();
 
+	// From COggSongList
+	const TDesC& GetNextSong();  
+	const TDesC& GetPreviousSong();
+
 private:
-    COggNormalPlay(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
+    COggNormalPlay(COggPlayAppView* aAppView);
 };
 
 class COggRandomPlay : public COggSongList
 {
 public:
-	static COggRandomPlay* NewL(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback, COggSongList* aSongList = NULL);
-	virtual const TDesC & GetNextSong();  
-	virtual const TDesC & GetPreviousSong();
+	static COggRandomPlay* NewL(COggPlayAppUi* aAppUi, COggPlayAppView* aAppView, COggSongList* aSongList = NULL);
 	~COggRandomPlay();
 
-private:
-	COggRandomPlay(COggPlayAppView* aAppView, CAbsPlayback* aOggPlayback);
-    void ConstructL(COggSongList* aSongList);
+	// From COggSongList
+	const TDesC& GetNextSong();
+	const TDesC& GetPreviousSong();
+	void SetPlayingFromListBox(TInt aPlaying);
 
 private:
-    RPointerArray<TOggFile> iRandomMemory;
-    RArray<TInt> iRandomMemoryIdx;
+	COggRandomPlay(COggPlayAppUi* aAppUi, COggPlayAppView* aAppView);
+    void ConstructL(COggSongList* aSongList);
+
+	void GenerateRandomListL();
+
+private:
+	COggPlayAppUi* iAppUi;
+
+    RArray<TInt> iRandomMemory;
+	TInt iRandomMemoryIdx;
 };
 
 
@@ -571,7 +623,7 @@ public:
 #endif
 
   CFileStore*  OpenFileL(TBool aDoOpen ,const TDesC& aFilename, RFs& aFs);
-  CEikAppUi* CreateAppUiL() ;
+  CEikAppUi* CreateAppUiL();
 };
 
 #if defined(SERIES60)

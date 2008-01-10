@@ -20,41 +20,46 @@
 #define __OggViews_h
 
 #include <coecntrl.h>
-
 #include "OggSplashCOntainer.h"
 
 class COggPlayAppView;
 class COggUserHotkeysControl;
 class COggViewBase : public CBase, public MCoeView
 {
- public:
-
+public:
   COggViewBase(COggPlayAppView& aOggViewCtl);
   ~COggViewBase();
   
- protected:		
-
+protected:
   // From MCoeView
   void ViewDeactivated();
   void ViewConstructL();
   void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 
+protected:
   COggPlayAppView& iOggViewCtl;
+
+private:
+  COggViewBase* iNext;
+  friend class COggPlayAppView;
 };
 
 class COggSplashView : public CBase, public MCoeView
 	{
 public:
 	COggSplashView(const TUid& aViewId);
-	void ConstructL();
-
 	~COggSplashView();
+
+	void ConstructL();
 
 	// From MCoeView
 	TVwsViewId ViewId() const;
-	TBool ViewScreenModeCompatible(TInt aScreenMode);
 	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 	void ViewDeactivated();
+
+#if defined(UIQ)
+	TBool ViewScreenModeCompatible(TInt aScreenMode);
+#endif
 
 private:
 	TUid iViewId;
@@ -64,139 +69,135 @@ private:
 class COggFOView : public COggViewBase
 {
  public:
-
   COggFOView(COggPlayAppView& aOggViewCtl);
   ~COggFOView();
-  virtual TVwsViewId ViewId() const;
-  virtual TVwsViewIdAndMessage ViewScreenDeviceChangedL();
-  virtual TBool ViewScreenModeCompatible(TInt aScreenMode);
-  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			      const TDesC8& /*aCustomMessage*/);
+
+  TVwsViewId ViewId() const;
+
+#if defined(UIQ)
+  TVwsViewIdAndMessage ViewScreenDeviceChangedL();
+  TBool ViewScreenModeCompatible(TInt aScreenMode);
+#endif
+
+  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 };
 
+#if defined(UIQ) || defined(SERIES60SUI)
 class COggFCView : public COggViewBase
 {
- public:
-
+public:
   COggFCView(COggPlayAppView& aOggViewCtl);
   ~COggFCView();
-  virtual TVwsViewId ViewId() const;
-  virtual TVwsViewIdAndMessage ViewScreenDeviceChangedL();
-  virtual TBool ViewScreenModeCompatible(TInt aScreenMode);
-  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			      const TDesC8& /*aCustomMessage*/);
+
+  TVwsViewId ViewId() const;
+  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+
+#if defined(UIQ)
+  TVwsViewIdAndMessage ViewScreenDeviceChangedL();
+  TBool ViewScreenModeCompatible(TInt aScreenMode);
+#endif
 };
+#endif
 
 #if defined(SERIES60)
 class COggS60Utility
 {
 public:
-  static void DisplayStatusPane( TInt aTitleID );
+  static void DisplayStatusPane(TInt aTitleID);
   static void RemoveStatusPane();
 };
 
-class COggSettingsContainer;
-
+class COggSettingItemList;
 class COggSettingsView : public COggViewBase
 {
-  public:
+public:
+	COggSettingsView(COggPlayAppView& aView);
+	~COggSettingsView();
 
-  COggSettingsView(COggPlayAppView&,  TUid aViewUid);
-  ~COggSettingsView();
-  virtual TVwsViewId ViewId() const;
+	TVwsViewId ViewId() const;
 
-#if !defined(MULTI_THREAD_PLAYBACK)
-  void VolumeGainChangedL();
+#if defined(PLUGIN_SYSTEM)
+	void VolumeGainChangedL();
 #endif
 
-  COggSettingsContainer* iContainer;
-  private:
-  
-    // implements MCoeView:
-  virtual void ViewDeactivated();
-  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			      const TDesC8& /*aCustomMessage*/);
+private:  
+  // From MCoeView
+  void ViewDeactivated();
+  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 
-  TUid iUid;
-  
+private:
+  COggSettingItemList* iContainer;
 };
 
 class COggUserHotkeysView : public COggViewBase
 	{
-	public:
-		COggUserHotkeysView(COggPlayAppView& aOggViewCtl);
-		~COggUserHotkeysView();
-		virtual TVwsViewId ViewId() const;
-		virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			const TDesC8& /*aCustomMessage*/);
-    void ViewDeactivated();
+public:
+	COggUserHotkeysView(COggPlayAppView& aOggViewCtl);
+	~COggUserHotkeysView();
 
-  private:
-		COggUserHotkeysControl* iUserHotkeysContainer;
-        COggPlayAppView& iOggViewCtl;
+	TVwsViewId ViewId() const;
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	void ViewDeactivated();
+
+private:
+	COggUserHotkeysControl* iUserHotkeysContainer;
+    COggPlayAppView& iOggViewCtl;
 	};
 
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
 class COggplayCodecSelectionSettingItemList;
 class COggPluginSettingsView : public COggViewBase
 	{
-	public:
-		COggPluginSettingsView(COggPlayAppView& aOggViewCtl);
-		~COggPluginSettingsView();
-		virtual TVwsViewId ViewId() const;
-		virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, 
-			const TDesC8& /*aCustomMessage*/);
+public:
+	COggPluginSettingsView(COggPlayAppView& aOggViewCtl);
+	~COggPluginSettingsView();
+
+	// From MCoeView
+	TVwsViewId ViewId() const;
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
     void ViewDeactivated();
 
   private:
 	COggplayCodecSelectionSettingItemList* iCodecSelection;
     COggPlayAppView& iOggViewCtl;
-	};
-	
+	};	
 #endif
 
-#if defined(MULTI_THREAD_PLAYBACK)
 class COggPlaybackOptionsView : public COggViewBase
 {
 public:
-  COggPlaybackOptionsView(COggPlayAppView&,  TUid aViewUid);
+  COggPlaybackOptionsView(COggPlayAppView& aView);
   ~COggPlaybackOptionsView();
  
-  virtual TVwsViewId ViewId() const;
+  TVwsViewId ViewId() const;
   void VolumeGainChangedL();
   void BufferingModeChangedL();
 
 public:
-  COggSettingsContainer* iContainer;
+  COggSettingItemList* iContainer;
 
 private:
-  // implements MCoeView:
-  virtual void ViewDeactivated();
-  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/);
-
-private:
-  TUid iUid;
+  // From MCoeView
+  void ViewDeactivated();
+  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 };
-#endif
 
 class COggAlarmSettingsView : public COggViewBase
 {
 public:
-  COggAlarmSettingsView(COggPlayAppView&,  TUid aViewUid);
+  COggAlarmSettingsView(COggPlayAppView& aView);
   ~COggAlarmSettingsView();
  
   virtual TVwsViewId ViewId() const;
 
 public:
-  COggSettingsContainer* iContainer;
+  COggSettingItemList* iContainer;
 
 private:
-  // implements MCoeView:
-  virtual void ViewDeactivated();
-  virtual void ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/);
-
-private:
-  TUid iUid;
+  // From MCoeView
+  void ViewDeactivated();
+  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 };
-#endif /* SERIES_60 */
+
+#endif // SERIES60
 #endif

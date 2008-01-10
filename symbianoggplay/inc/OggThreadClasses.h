@@ -19,7 +19,6 @@
 #ifndef _OggThreadClasses_h
 #define _OggThreadClasses_h
 
-#if defined(MULTI_THREAD_PLAYBACK)
 #include <e32base.h>
 #include <e32std.h>
 
@@ -96,5 +95,4 @@ private:
 	CThreadPanicHandler& iPanicHandler;
 };
 
-#endif // MULTI_THREAD_PLAYBACK
 #endif // _OggThreadClasses_h

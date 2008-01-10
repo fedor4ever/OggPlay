@@ -16,32 +16,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <e32base.h>
 #ifndef OGGMSGENV_H
 #define OGGMSGENV_H
 
+#include <e32def.h>
+#include <e32base.h>
 
-const TInt KMaxNoteLength = 50;
-
-class TOggplaySettings;
 class COggMsgEnv : public CBase
 {
 public:
-    COggMsgEnv(TOggplaySettings &aSettings);
+    COggMsgEnv(TBool& aWarningsEnabled);
     ~COggMsgEnv();
 
-	void ConstructL();
+	TBool WarningsEnabled() const;
+    void OggWarningMsgL(const TDesC& aWarning) const;
+    static void OggErrorMsgL(const TDesC& aFirstLine, const TDesC& aSecondLine);
+    static void OggErrorMsgL(TInt aFirstLineId, TInt aSecondLineId);
 
-	// Warnings Enabled?
-	TBool WarningsEnabled();
-
-    // Error Msg
-    void OggWarningMsgL(const TDesC& aWarning);
-
-    static void OggErrorMsgL(const TDesC& aFirstLine,const TDesC& aSecondLine);// const;
-    static void OggErrorMsgL(TInt aFirstLineId,TInt aSecondLineId=0);// const;
 private:
-    TOggplaySettings &iSettings;
+    const TBool &iWarningsEnabled;
 };
 
 #endif

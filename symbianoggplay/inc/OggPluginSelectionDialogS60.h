@@ -21,7 +21,7 @@
 // INCLUDES
 #include "OggPlay.h"
 
-#if ( defined(SERIES60) && defined(PLUGIN_SYSTEM) )
+#if defined(SERIES60) && defined(PLUGIN_SYSTEM)
 #include <coecntrl.h>
 #include <aknsettingitemlist.h> 
 #include <aknpopupsettingpage.h> 
@@ -30,20 +30,20 @@
 class CEikTextListBox;
 
 /// Control hosting listbox for plugin assignments.
-//
-
-class COggplayCodecSelectionSettingItemList : public CCoeControl ,public MEikCommandObserver
+class COggplayCodecSelectionSettingItemList : public CCoeControl, public MEikCommandObserver
   {
 public:
-  COggplayCodecSelectionSettingItemList ( );
-  void ConstructL(const TRect& aRect);
+  COggplayCodecSelectionSettingItemList();
   ~COggplayCodecSelectionSettingItemList();
 
-private : // New
+  void ConstructL(const TRect& aRect);
+
+private:
+  // New
   void RefreshListboxModel();
   static TInt TimerExpired(TAny* aPtr);
   
-private : // Framework
+  // Framework
   TInt CountComponentControls() const;
   CCoeControl* ComponentControl(TInt aIndex) const;
   TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType );
@@ -53,42 +53,37 @@ private:
   CEikTextListBox *iListBox;      // Owned
   CDesCArrayFlat *iExtensionList; // Owned
   COggTimer *iWaitTimer;          //Owned
-  CPluginSupportedList *iPluginSupportedList; // Not Owned
-  
-
-  
+  CPluginSupportedList *iPluginSupportedList; // Not Owned  
   };
 
 
-/* A list, showing the info about the choosen codec */
-
+// A list, showing the info about the choosen codec
 class CCodecInfoList :  public MEikCommandObserver, public CCoeControl
   {
 public:
-  CCodecInfoList( CPluginInfo& aPluginInfo );
-  void ConstructL(const TRect& aRect);
+  CCodecInfoList(CPluginInfo& aPluginInfo);
   ~CCodecInfoList();
 
-private : // New
-	void RefreshListboxModel();
+  void ConstructL(const TRect& aRect);
 
-private : // Framework
+private:
+  // New
+  void RefreshListboxModel();
+
+  // Framework
   TInt CountComponentControls() const;
   CCoeControl* ComponentControl(TInt aIndex) const;
   TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType );
 
-private: // From MEikCommandObserver
-    void ProcessCommandL (TInt aCommandId);
+  // From MEikCommandObserver
+  void ProcessCommandL (TInt aCommandId);
+
 private:
   CPluginInfo& iPluginInfo;
   CEikTextListBox *iListBox;
   CActiveSchedulerWait iWait;	
   CEikButtonGroupContainer *iCba;
-
   };
   
-#endif /* SERIES60 && MMF_AVAILABLE */
-
-#endif /* OGGPLUGINSELECTIONDIALOGS60_H */
-
-// End of File
+#endif // SERIES60 && PLUGIN_SYSTEN
+#endif // OGGPLUGINSELECTIONDIALOGS60_H

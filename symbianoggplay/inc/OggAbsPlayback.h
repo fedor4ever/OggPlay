@@ -20,206 +20,176 @@
 #ifndef OGGABSPLAYBACK_H
 #define OGGABSPLAYBACK_H
 
-#include <badesca.h>
 #include <OggOs.h>
+#include "OggFileInfo.h"
 #include "OggRateConvert.h"
 
 const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
 
-const TInt KErrOggFileNotFound = -101;
 
-#ifdef PLUGIN_SYSTEM
+#if defined(PLUGIN_SYSTEM)
+#include <MdaAudioSampleEditor.h>
 
-#include <MdaAudioSampleEditor.h> // For CMMFFormatImplementationInformation
-//
-// CPluginInfo class
-//------------------------------------------------------
 class CPluginInfo : public CBase
-{
+	{
+public:
+    static CPluginInfo* NewL( const TDesC& anExtension, 
+	const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid);
+	~CPluginInfo();
+    
 private :
-  CPluginInfo();
+	CPluginInfo();
+	void ConstructL(const TDesC& anExtension, 
+	const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid);
   
 public:
-    ~CPluginInfo();
-    static CPluginInfo* NewL( const TDesC& anExtension, 
-        const CMMFFormatImplementationInformation &aFormatInfo,
-        const TUid aControllerUid);
-    void ConstructL ( const TDesC& anExtension, 
-        const CMMFFormatImplementationInformation &aFormatInfo,
-        const TUid aControllerUid);
-    
-    HBufC* iExtension;
-    HBufC* iName;
-    HBufC* iSupplier;
-    TInt iVersion;
-    TUid iFormatUid;
-    TUid iControllerUid;
-};
+	HBufC* iExtension;
+	HBufC* iName;
+	HBufC* iSupplier;
+	TInt iVersion;
+	TUid iFormatUid;
+	TUid iControllerUid;
+	};
 
-//
-// CPluginSupportedList class
-//------------------------------------------------------
 class CPluginSupportedList: public CBase
-{
-    public:
-
-        CPluginSupportedList();
-        void ConstructL();
-        ~CPluginSupportedList();
+	{
+public:
+	CPluginSupportedList();
+	~CPluginSupportedList();
         
-        void AddPluginL(const TDesC &extension,
-        	const CMMFFormatImplementationInformation &aFormatInfo,
-            const TUid aControllerUid);
+	void ConstructL();
+
+	void AddPluginL(const TDesC &extension,
+	const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid);
             
-        void SelectPluginL(const TDesC &extension, TUid aUid);
-        CPluginInfo * GetSelectedPluginInfo(const TDesC &extension);
-        CArrayPtrFlat <CPluginInfo> * GetPluginInfoList(const TDesC &extension);
-		
-		void AddExtension(const TDesC &extension);
-		CDesCArrayFlat * SupportedExtensions();
-		
-    private:
-    
-        TInt FindListL(const TDesC &anExtension);
-        
-    
-        typedef struct
-        {
-        	TBuf<10> extension;
-        	CPluginInfo *selectedPlugin;
-        	CArrayPtrFlat <CPluginInfo>* listPluginInfos; 
-        } TExtensionList;
-        
-        CArrayPtrFlat <TExtensionList> * iPlugins; // Plugins that have been selected
+	void SelectPluginL(const TDesC &extension, TUid aUid);
+	CPluginInfo* GetSelectedPluginInfo(const TDesC &extension);
+	CArrayPtrFlat <CPluginInfo>* GetPluginInfoList(const TDesC &extension);
 
-};
+	void AddExtension(const TDesC &extension);
+	CDesCArrayFlat* SupportedExtensions();
+
+private:
+	TInt FindListL(const TDesC &anExtension);
+
+	class TExtensionList
+		{
+	public:
+		TBuf<10> extension;
+		CPluginInfo *selectedPlugin;
+		CArrayPtrFlat <CPluginInfo>* listPluginInfos; 
+		};
+
+	// Plugins that have been selected
+	CArrayPtrFlat <TExtensionList>* iPlugins;
+	};
 #endif
 
 
-// MPlaybackObserver class
-class MPlaybackObserver 
-{
- public:
-  virtual void NotifyUpdate() = 0;
-  virtual void NotifyPlayComplete() = 0;
-  virtual void NotifyPlayInterrupted() = 0;
-  virtual void ResumeUpdates() = 0;
+class MPlaybackObserver
+	{
+public:
+	virtual void NotifyUpdate() = 0;
+	virtual void NotifyPlayComplete() = 0;
+	virtual void NotifyPlayInterrupted() = 0;
+	virtual void ResumeUpdates() = 0;
 
-#if !defined(OS70S)
-  virtual void NotifyStreamOpen(TInt aErr) = 0;
+#if !defined(PLUGIN_SYSTEM)
+	virtual void NotifyStreamOpen(TInt aErr) = 0;
+#endif
+
+#if defined(DELAY_AUDIO_STREAMING_OPEN)
+	virtual void NotifyFileOpen(TInt aErr) = 0;
 #endif
 
 #if defined (DELAY_AUDIO_STREAMING_START)
-  virtual void NotifyPlayStarted() = 0;
+	virtual void NotifyPlayStarted() = 0;
 #endif
 
-#if defined(MULTI_THREAD_PLAYBACK)
-  virtual void NotifyFatalPlayError() = 0;
-#endif
-};
+	virtual void NotifyFatalPlayError() = 0;
+	};
 
-class CAbsPlayback : public CBase {
+class MFileInfoObserver
+	{
+public:
+	virtual void FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo) = 0;
+	};
 
- public:
+class CAbsPlayback : public CBase
+	{
+public:
+	// Playback states
+	enum TState
+		{
+		EClosed,		// The playback engine is closed (playback is not possible)
+		EStreamOpen,	// The playback engine is open, but not ready (playback is not possible)
+		EStopped,		// The playback engine is ready to play
+		EPaused,		// The playback engine is paused
+		EPlaying		// The playback engine is playing 
+		};
 
-  // Playback states
-  enum TState
-  {
-    EClosed,        // The playback engine is closed (playback is not possible)
-	EStreamOpen,    // The playback engine is open, but not ready (playback is not possible)
-    EStopped,       // The playback engine is ready to play
-    EPaused,        // The playback engine is paused
-    EPlaying        // The playback engine is playing 
-  };
+	CAbsPlayback(MPlaybackObserver* aObserver);
 
-  CAbsPlayback(MPlaybackObserver* anObserver=NULL);
+	// Here is a bunch of abstract methods which need to implemented for each audio format
+	virtual void ConstructL() = 0;
 
-  // Here is a bunch of abstract methods which need to implemented for
-  // each audio format:
-  ////////////////////////////////////////////////////////////////
+	// Open a file and retrieve information (meta data, file size etc.) without playing it
+	virtual TInt Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver) = 0;
+	virtual TInt FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver) = 0;
+	virtual void InfoCancel() = 0;
 
-  virtual void   ConstructL() = 0;
-  // Open a file and retrieve information (meta data, file size etc.) without playing it:
-  virtual TInt   Info(const TDesC& aFileName, TBool silent= EFalse) = 0;
+	// Open a file and prepare playback
+	virtual TInt Open(const TDesC& aFileName) = 0;
+	virtual const TOggFileInfo& DecoderFileInfo();
 
-  // Open a file and prepare playback:
-  virtual TInt   Open(const TDesC& aFileName) = 0;
+	virtual void Pause() = 0;
+	virtual void Resume() = 0;
+	virtual void Play() = 0;
+	virtual void Stop() = 0;
 
-  virtual void   Pause() = 0;
-  virtual void   Resume() = 0;
-  virtual void   Play() = 0;
-  virtual void   Stop() = 0;
+	virtual void SetVolume(TInt aVol) = 0;
+	virtual void SetPosition(TInt64 aPos) = 0;
 
-  virtual void   SetVolume(TInt aVol) = 0;
-  virtual void   SetPosition(TInt64 aPos) = 0;
-
-  virtual TInt64 Position() = 0;
-  virtual TInt64 Time() = 0;
-  virtual TInt   Volume() = 0;
+	virtual TInt64 Position() = 0;
+	virtual TInt Volume() = 0;
   
-#ifdef MDCT_FREQ_ANALYSER
-  virtual const TInt32 * GetFrequencyBins() = 0;
-#else
-  virtual const void* GetDataChunk() = 0;
+	virtual const TInt32* GetFrequencyBins() = 0;
+
+#if defined(PLUGIN_SYSTEM)
+	virtual CPluginSupportedList& GetPluginListL() = 0;
 #endif
 
-#ifdef PLUGIN_SYSTEM
-  virtual CPluginSupportedList & GetPluginListL() = 0;
-#endif
-   // Implemented Helpers 
-   ////////////////////////////////////////////////////////////////
-
-   virtual TState State()                 { return ( iState );             };
+	// Implemented Helpers 
+	virtual TState State();
    
-   // Information about the playback file 
-   virtual TInt   BitRate()               { return ( iBitRate ); };
-   virtual TInt   Channels()              { return ( iChannels );          };
-   virtual TInt   FileSize()              { return ( iFileSize );          };
-   virtual TInt   Rate()                  { return ( iRate );              };
+	// Information about the playback file 
+	virtual TInt BitRate();
+	virtual TInt Channels();
+	virtual TInt FileSize();
+	virtual TInt Rate();
+	virtual TInt64 Time();
 
-   virtual const TDesC&     Album()       { return ( iAlbum );             };
-   virtual const TDesC&     Artist()      { return ( iArtist );            };
-   virtual const TFileName& FileName()    { return ( iFileName );          };
-   virtual const TDesC&     Genre()       { return ( iGenre );             };
-   virtual const TDesC&     Title()       { return ( iTitle );             };
-   virtual const TDesC&     TrackNumber() { return ( iTrackNumber );       };
+	virtual const TDesC& Album();
+	virtual const TDesC& Artist();
+	virtual const TFileName& FileName();
+	virtual const TDesC& Genre();
+	virtual const TDesC& Title();
+	virtual const TDesC& TrackNumber();
 
-   virtual void   ClearComments()         { iArtist.SetLength(0);          \
-                                            iTitle.SetLength(0);           \
-                                            iAlbum.SetLength(0);           \
-                                            iGenre.SetLength(0);           \
-                                            iTrackNumber.SetLength(0);     \
-                                            iFileName.SetLength(0);        };
-   virtual void   SetObserver( MPlaybackObserver* anObserver )             \
-                                          { iObserver = anObserver;        };
-   virtual void   SetVolumeGain(TGainType /*aGain*/)
-                                          { /* No gain by default */    };
-                                          
- protected:
+	virtual void ClearComments();
+	virtual void SetVolumeGain(TGainType aGain);
 
-   TState                   iState;
-   MPlaybackObserver*       iObserver;
+protected:
+	TState iState;
+	MPlaybackObserver* iObserver;
 
-   // File properties and tag information   
-   //-------------------------------------
-   TInt                     iBitRate;
-   TInt                     iChannels;
-   TInt                     iFileSize;
-   TInt                     iRate;
-   TInt64                   iTime;
-  
-   enum { KMaxStringLength = 256 };
-   TBuf<KMaxStringLength>   iAlbum;
-   TBuf<KMaxStringLength>   iArtist;
-   TFileName                iFileName;
-   TBuf<KMaxStringLength>   iGenre;
-   TBuf<KMaxStringLength>   iTitle;
-   TBuf<KMaxStringLength>   iTrackNumber;
+	// File properties and tag information
+	TOggFileInfo iFileInfo;
 
-#ifdef PLUGIN_SYSTEM
-   CPluginSupportedList iPluginSupportedList;
- #endif
+#if defined(PLUGIN_SYSTEM)
+	CPluginSupportedList iPluginSupportedList;
+#endif
 };
 
 #endif

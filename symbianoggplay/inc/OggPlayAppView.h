@@ -19,27 +19,21 @@
 #ifndef _OggPlayAppView_h
 #define _OggPlayAppView_h
 
-#include <coeccntx.h>  // MCoeControlContex
-
 #include "OggControls.h"
 #include "OggPlay.h"
 #include "OggFiles.h"
 #include "OggUserHotkeys.h"
 
-const TInt KFfRwdStep=20000;
 
-class CCoeControl;
 class COggTimer;
-class COggPlayAppView : public CCoeControl,
-			public MCoeControlObserver,
-			public MCoeControlContext,
-			public MOggControlObserver
+class COggViewBase;
+class COggPlayAppView : public CCoeControl, public MOggControlObserver
 {
 public:
-
   COggPlayAppView();
   ~COggPlayAppView();
-  void ConstructL(COggPlayAppUi *aApp, const TRect& aRect);
+ 
+  void ConstructL(COggPlayAppUi *aApp);
 
   // display functions:
   void InitView();
@@ -59,15 +53,15 @@ public:
   void UpdateRandom();
   void SetTime(TInt64 aTime);
 
-  /* Functions to interract with the listbox */
-  void        SelectItem(TInt idx);
+  // Functions to interract with the listbox
+  void SelectItem(TInt idx);
   COggListBox::TItemTypes GetItemType(TInt idx);
-  TInt        GetSelectedIndex();
+  TInt GetSelectedIndex();
   CDesCArray* GetTextArray();
   TBool HasAFileName(TInt idx);
-  const TDesC & GetFileName(TInt idx);
+  const TDesC& GetFileName(TInt idx);
   TOggFile* GetFile(TInt idx);
-  const COggPlayAppUi::TViews    GetViewName(TInt idx);
+  const COggPlayAppUi::TViews GetViewName(TInt idx);
   void GetFilterData(TInt idx, TDes &aData);
   void SelectFile(TOggFile* aFile);
   void ListBoxPageDown();
@@ -82,17 +76,18 @@ public:
   void  GotoFlipClosed();
   void  GotoFlipOpen();
   void  AppToForeground(const TBool aForeground) const;
-  void  SwitchToStandbyView();
-  void  Activated();
-  void  Deactivated();
-  void  ChangeLayout(TBool aSmall);
+
+  void  Activated(COggViewBase* aActivatedView);
+  void  Deactivated(COggViewBase* aDeactivatedView);
+
+  void  ChangeLayout(TInt aLayout);
 
   void  ReadSkin(const TFileName& aFileName);
   void  ReadControls();
   TBool SetHotkeysFromSkin(TOggParser& p);
   TBool ReadHotkeyArgument(TOggParser& p);
 
-  void SetupListBox(COggListBox* aListBox, TInt aScaleFactor);
+  void SetupListBox(COggListBox* aListBox, TSize aSize);
 
   // keyboard focus handling:
   void SetNextFocus();
@@ -113,31 +108,31 @@ public:
   static TInt AlarmErrorCallBack(TAny* aPtr);
   void HandleAlarmCallBack();
 
-  // from MCoeControlObserver:
-  void         HandleControlEventL(CCoeControl* aControl, TCoeEvent aEventType);
-
-  // from CCoeControl:
+  // From CCoeControl
   TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
-  TInt         CountComponentControls() const;
+  TInt CountComponentControls() const;
   CCoeControl* ComponentControl(TInt aIndex) const;
 
-  // from MOggControlObserver:
-  virtual void OggPointerEvent(COggControl* c, const TPointerEvent& p);
-  virtual void OggControlEvent(COggControl* c, TInt aEventType, TInt aValue);
-  virtual void AddControlToFocusList(COggControl* c);
+  // From MOggControlObserver:
+  void OggPointerEvent(COggControl* c, const TPointerEvent& p);
+  void OggControlEvent(COggControl* c, TInt aEventType, TInt aValue);
+  void AddControlToFocusList(COggControl* c);
 
-  TInt                  iPosChanged;
-  TOggFiles*            iOggFiles;
+  void HandleNewSkinLayout();
+  void OggSeek(TInt aSeekTime);
+
+public:
+  TOggFiles* iOggFiles;
 
 private:
   void  ReadCanvas(TInt aCanvas, TOggParser& p);
-  void  ResetControls();
   void  ClearCanvases();
 
   const TInt GetValueFromTextLine(TInt idx);
 
-  /// COggCanvas[0..1], flip open and closed
-  CArrayPtrFlat<CCoeControl>* iControls;
+private:
+  TInt iLayout;
+  TInt64 iPosChanged;
   COggPlayAppUi* iApp;
 
   CPeriodic* iTimer;
@@ -147,7 +142,6 @@ private:
   TCallBack* iAlarmCallBack;
   TCallBack* iAlarmErrorCallBack;
 
-  TInt       iActivateCount;
   TFileName  iIconFileName;
   CDesCArray* iTextArray;
   TInt       iSelected; 
@@ -155,59 +149,63 @@ private:
   //keyboard focus handling: 
   // do we do keyboard focus handling ?
   TBool      iFocusControlsPresent;
+
   //maintain a doubly linked list of controls that can get focus.
   TDblQue<COggControl> iFocusControlsHeader;
   TDblQueIter<COggControl> iFocusControlsIter;
 
-  TInt               iMode; // 0 = flip-open; 1= flip-closed
-  COggCanvas*        iCanvas[2];
+  /// COggCanvas[0..1], flip open and closed
+  TInt iMode; // 0 = flip-open ; 1= flip-closed
+  TInt iModeMax;
+  COggCanvas* iCanvas[2];
 
   // Ogg controls
   // (one for flip-closed/open each, can be the same pointer)
+  COggText* iTitle[2];
+  COggText* iArtist[2];
+  COggText* iAlbum[2];
+  COggText* iGenre[2];
+  COggText* iTrackNumber[2];
+  COggText* iFileName[2];
+  COggText* iClock[2];
+  COggText* iAlarm[2];
+  COggText* iPlayed[2];
 
-  COggText*          iTitle[2];
-  COggText*          iArtist[2];
-  COggText*          iAlbum[2];
-  COggText*          iGenre[2];
-  COggText*          iTrackNumber[2];
-  COggText*          iFileName[2];
-  COggText*          iClock[2];
-  COggText*          iAlarm[2];
-  COggText*          iPlayed[2];
+  COggDigits* iPlayedDigits[2];
+  COggDigits* iTotalDigits[2];
 
-  COggDigits*        iPlayedDigits[2];
-  COggDigits*        iTotalDigits[2];
+  COggIcon* iAlarmIcon[2];
+  COggIcon* iRepeatIcon[2];
+  COggIcon* iRandomIcon[2];
+  COggIcon* iPlaying[2];
+  COggIcon* iPaused[2];
 
-  COggIcon*          iAlarmIcon[2];
-  COggIcon*          iRepeatIcon[2];
-  COggIcon*          iRandomIcon[2];
-  COggIcon*          iPlaying[2];
-  COggIcon*          iPaused[2];
+  COggSlider* iVolume[2];
+  COggSlider* iVolumeBoost[2];
+  COggSlider64* iPosition[2];
 
-  COggSlider*        iVolume[2];
-  COggSlider*        iVolumeBoost[2];
-  COggSlider*        iPosition[2];
+  COggButton* iPlayButton[2];
+  COggButton* iPauseButton[2];
+  COggButton* iPlayButton2[2];
+  COggButton* iPauseButton2[2];
+  COggButton* iStopButton[2];
+  COggButton* iNextSongButton[2];
+  COggButton* iPrevSongButton[2];
+  COggButton* iRepeatButton[2];
+  COggButton* iRandomButton[2];
 
-  COggButton*        iPlayButton[2];
-  COggButton*        iPauseButton[2];
-  COggButton*        iPlayButton2[2];
-  COggButton*        iPauseButton2[2];
-  COggButton*        iStopButton[2];
-  COggButton*        iNextSongButton[2];
-  COggButton*        iPrevSongButton[2];
-  COggButton*        iRepeatButton[2];
-  COggButton*        iRandomButton[2];
+  COggAnalyzer* iAnalyzer[2];
 
-  COggAnalyzer*      iAnalyzer[2];
+  COggListBox*  iListBox[2];
+  COggScrollBar* iScrollBar[2];
 
-  COggListBox*       iListBox[2];
-  COggScrollBar*     iScrollBar[2];
-
-  COggAnimation*     iAnimation[2];
-  COggAnimation*     iLogo[2];
+  COggAnimation* iAnimation[2];
+  COggAnimation* iLogo[2];
 
   TInt iCycleFrequencyCounter;
   TInt iCurrentClockMinute;
+
+  COggViewBase* iHead;
 };
 
 #endif

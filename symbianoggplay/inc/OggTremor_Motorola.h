@@ -54,11 +54,7 @@ public:
    void   SetVolume( TInt aVol );
    void   SetVolumeGain(TGainType aGain);
    TInt   Volume( void );
-#ifdef MDCT_FREQ_ANALYSER
    const TInt32* GetFrequencyBins();
-#else
-   const void* GetDataChunk( void );
-#endif
 
    // Other local methods
    virtual TInt GetNewSamples( TDes8 &aBuffer, TBool aRequestFrequencyBins );
@@ -124,7 +120,6 @@ private:
    friend CObserverCallback;
    CObserverCallback *iObserverAO;
 
-#ifdef MDCT_FREQ_ANALYSER
    TReal  iLatestPlayTime;
    TReal  iTimeBetweenTwoSamples;
    
@@ -139,7 +134,6 @@ private:
    TInt iLastFreqArrayIdx;
    TInt iTimeWithoutFreqCalculation;
    TInt iTimeWithoutFreqCalculationLim;
-#endif
 };
 
 #endif

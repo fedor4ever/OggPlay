@@ -18,62 +18,28 @@
 #ifndef OGGCONTAINER_H
 #define OGGCONTAINER_H
 
-// INCLUDES
-#include "OggPlay.h"
-
-#include <coecntrl.h>
 #if defined(SERIES60)
 #include <aknsettingitemlist.h> 
 #include <aknpopupsettingpage.h> 
-#endif
+#include "OggPlay.h"
 
-
-// COggSettingsContainer  container control class.
-class COggSettingsContainer : public CCoeControl, MCoeControlObserver
-    {
-    public: // Constructors and destructor
-        void ConstructL(const TRect& aRect, TUid aId);
-        ~COggSettingsContainer();
-
-    public: // New functions
-		void VolumeGainChangedL();
-
-		#if defined(MULTI_THREAD_PLAYBACK)
-		void BufferingModeChangedL();
-		#endif
-
-    public: // Functions from base classes
-
-    private: // Functions from base classes
-        void SizeChanged();
-        TInt CountComponentControls() const;
-        CCoeControl* ComponentControl(TInt aIndex) const;
-        void Draw(const TRect& aRect) const;
-        void HandleControlEventL(CCoeControl* aControl,TCoeEvent aEventType);
-        TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
-
-    private: //data
-#if defined(SERIES60)
-        CAknSettingItemList* iListBox;
-#endif
-    };
-
-
-#if defined(SERIES60)
 class CGainSettingItem;
 class CBufferingModeSettingItem;
-class COggplayDisplaySettingItemList : public CAknSettingItemList
+class COggSettingItemList : public CAknSettingItemList
 {
 public:
-  COggplayDisplaySettingItemList(COggPlayAppUi& aAppUi);
+  COggSettingItemList(COggPlayAppUi& aAppUi);
+  ~COggSettingItemList();
+
   void VolumeGainChangedL();
 
-#if defined(MULTI_THREAD_PLAYBACK)
+#if !defined(PLUGIN_SYSTEM)
   void BufferingModeChangedL();
 #endif
-  
+
 protected:
-  virtual CAknSettingItem* CreateSettingItemL(TInt aSettingId);
+  // From CAknSettingItemList
+  CAknSettingItem* CreateSettingItemL(TInt aSettingId);
   
 private:
   TOggplaySettings& iData;
@@ -81,7 +47,7 @@ private:
 
   CGainSettingItem* iGainSettingItem;
 
-#if defined(MULTI_THREAD_PLAYBACK)
+#if !defined(PLUGIN_SYSTEM)
   CBufferingModeSettingItem* iBufferingModeItem;
 #endif
 };
@@ -110,7 +76,7 @@ private: //data
     COggPlayAppUi& iAppUi;
 };
 
-// Multi thread playback classes
+#if !defined(PLUGIN_SYSTEM)
 class CBufferingModeSettingItem : public CAknEnumeratedTextPopupSettingItem
 {
 public:  // Constructors and destructor
@@ -134,6 +100,7 @@ private: // Functions from base classes
 private: //data
 	COggPlayAppUi& iAppUi;
 };
+#endif
 
 class CAlarmSettingItem : public CAknBinaryPopupSettingItem
 {
@@ -159,5 +126,5 @@ private: //data
 	COggPlayAppUi& iAppUi;
 };
 
-#endif /* SERIES60 */
+#endif // SERIES60
 #endif
