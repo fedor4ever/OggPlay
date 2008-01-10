@@ -4,20 +4,26 @@ CHARACTER_SET UTF8
 #define ogg_hotkey "Genvej:"
 #define ogg_alarm "Alarm:"
 #define ogg_active "Aktiv:"
+
 #define ogg_about_oggplay "Om OggPlay"
-#define ogg_version_txt "Version " KVersionString
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "se også http://symbianoggplay.sourceforge.net"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
-#define ogg_translation ""
-#define ogg_port "S60 version: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "se også http://symbianoggplay.sourceforge.net"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
+#define ogg_about_port "S60 version:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_about_port_S80 "S60 version: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+
 #define ogg_file_prop "Fil egenskaber"
 #define ogg_filename_txt "Filnavn:"
 #define ogg_filename_unknown "Ukendt"
 #define ogg_filesize "Filstørrelse [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bitrate [kbit/s]:"
 #define ogg_rate_hz "Frekvens [Hz]:"
 #define ogg_channels "Kanaler:"
+#define ogg_playlist_entries "Playlist entries:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "Ingen"
 #define ogg_hotkey_camera "Kamera knap"
 #define ogg_hotkey_browser "Browser knap"
@@ -46,10 +52,7 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "Direktorier gennemsøgt:"
 #define ogg_filescan_label2 "Antal .Ogg filer fundet:"
 #define ogg_filescan_label2_mmf "Audio files found:" // To be translated
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Antal .M3u filer fundet:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Error reading mask bitmap."
 #define ogg_text_error_2 "COggCanvas: Error converting background bitmap: "
@@ -63,7 +66,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_10 "Kun mono og stereo er understøttet."
 #define ogg_text_error_12 "Audio formatet er ikke understøttet."
 //#define ogg_text_error_13 "Kun 11025,16000,22050,32000,44100 og 48000 Hz er understøttet."
-#define ogg_text_error_14 "Kan ikke åbne filen"
+#define ogg_text_error_14 "Kan ikke åbne filen (%d):"
 #define ogg_text_error_15 "Ingen filer åbne."
 #define ogg_text_error_16 "Fejl code "
 #define ogg_text_error_17 "Buffer fejl (tx)"
@@ -77,12 +80,13 @@ CHARACTER_SET UTF8
 #define ogg_text_error_24 "Denne fil er samplet ved %i Hz. Denne mobil understøtter desværre kun følgende sample rates : %S. "
 #define ogg_text_error_25 "Dette er en stereo fil. Denne mobil understøtter desværre kun mono."
 #define ogg_text_error_26 "Oggplay vil automatisk down-sample filen så den kan afspilles. Overvej evt. at resample filen/filerne for at spare plads. Kvaliteten vil blive den samme."
-#define ogg_text_error_27 "Denne advarsel kan slås fra i opsætnings menuen."
+#define ogg_text_error_27 "OggPlay Advarsel"
 #define ogg_text_error_28 "Cannot open directory" // To be translated
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Opdaterer filliste..."
 #define ogg_text_string_2 "Opdaterer fil database..."
@@ -95,13 +99,8 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(genrer)"
 #define ogg_text_string_10 "(foldere)"
 #define ogg_text_string_11 "(filer)"
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlister)"
 #define ogg_text_string_13 "(ukendte)"
-#else
-#define ogg_text_string_12 "(ukendte)"
-#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Genveje"
@@ -185,7 +184,6 @@ CHARACTER_SET UTF8
 #define ogg_cba_select               "Select"     // To be Translated 
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
-#define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
 
 // Multi thread playback strings

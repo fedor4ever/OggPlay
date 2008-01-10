@@ -82,7 +82,7 @@ RESOURCE CBA r_option_stop_cba
 // About view
 RESOURCE ABOUTTEXT r_dialog_about
 	{
-	version = ogg_about_version;
+	version = "OggPlay 1.71";
 	copyright = ogg_about_cpr;
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;

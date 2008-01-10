@@ -401,6 +401,7 @@ void COggPlayAppUi::ConstructL()
 
 void COggPlayAppUi::NextStartUpState(TInt aErr)
 	{
+	TRACEF(COggLog::VA(_L("COggPlayAppUi::NextStartupState: %d %d"), (TInt) iStartUpState, aErr));		
 	if (iStartUpState == EStartUpFailed)
 		return;
 
@@ -476,7 +477,7 @@ void COggPlayAppUi::ActivateStartUpView()
 	}
 
 void COggPlayAppUi::ActivateStartUpViewL()
-{
+	{
 	iFOView = new(ELeave) COggFOView(*iAppView);
 	RegisterViewL(*iFOView);  
 
@@ -505,10 +506,10 @@ void COggPlayAppUi::ActivateStartUpViewL()
 #endif
 
 	ActivateOggViewL();
-}
+	}
 
 void COggPlayAppUi::StartUpError(TInt aErr)
-{
+	{
 	// Format a string with the state and error code
 	TBuf<128> errorTxt;
 	errorTxt.Format(iStartUpErrorTxt2, iStartUpState, aErr);
@@ -525,7 +526,7 @@ void COggPlayAppUi::StartUpError(TInt aErr)
 #endif
 
 	Exit();
-}
+	}
 
 void COggPlayAppUi::StartOggPlayL()
 	{
@@ -718,8 +719,14 @@ void COggPlayAppUi::RunningEmbeddedDbReady(TInt aErr)
 #if defined(SERIES80)
 	// Apparently on S80 we are always running embedded.
 	// The app is launched with C:\MyFiles\OggPlay as the filename
-	aErr = KErrNone;
-	iIsRunningEmbedded = EFalse;
+
+	// Consequently we just fall back to the previous method of ignoring errors
+	// Not ideal really as it would be better to give the user a startup error (if there really is an error)
+	if (aErr != KErrNone)
+		{
+		aErr = KErrNone;
+		iIsRunningEmbedded = EFalse;
+		}
 #endif
 
 	NextStartUpState(aErr);
@@ -1648,12 +1655,10 @@ void COggPlayAppUi::FindSkins()
 	iSkins->Reset();
 		
 	CDirScan* ds = CDirScan::NewLC(iCoeEnv->FsSession());
-	TRAPD(err,ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
-	if (err!=KErrNone)
+	TRAPD(err, ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
+	if (err != KErrNone)
 		{
-		//_LIT(KS,"Error in FindSkins-SetScanDataL");
-		//OGGLOG.WriteFormat(KS);
-		
+        TRACEF(COggLog::VA(_L("Error in FindSkins: %d"), err));		
 		CleanupStack::PopAndDestroy(ds);
 		return;
 		}
@@ -1747,7 +1752,7 @@ void COggPlayAppUi::ReadIniFile()
     TInt err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileRead | EFileStreamText);    
     if (err != KErrNone)
 		{
-        TRACEF(COggLog::VA(_L("ReadIni:%d"), err ));
+        TRACEF(COggLog::VA(_L("ReadIni: %d"), err ));
         return;
 		}
 	
@@ -2188,7 +2193,7 @@ void COggPlayAppUi::WriteIniFile()
 			}
 		}
 
-	TRACEF(_L("Writing Inifile..."));
+	TRACEF(_L("Writing Inifile... DONE"));
 	}
 
 void COggPlayAppUi::HandleForegroundEventL(TBool aForeground)

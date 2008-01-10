@@ -3,20 +3,26 @@
 #define ogg_hotkey "Hotkey:"
 #define ogg_alarm "Alarm:"
 #define ogg_active "Active:"
+
 #define ogg_about_oggplay "About OggPlay"
-#define ogg_version_txt "Version ???"
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "see http://symbianoggplay.sourceforge.net for more info"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
-#define ogg_translation ""
-#define ogg_port "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "See http://symbianoggplay.sourceforge.net for more info"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
+#define ogg_about_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_about_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+
 #define ogg_file_prop "File properties"
 #define ogg_filename_txt "Filename:"
 #define ogg_filename_unknown "unknown"
 #define ogg_filesize "Filesize [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bitrate [kbit/s]:"
-#define ogg_rate_hz "Rate [Hz]:"
+#define ogg_rate_hz "Sample rate [Hz]:"
 #define ogg_channels "Channels:"
+#define ogg_playlist_entries "Playlist entries:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "None"
 #define ogg_hotkey_camera "Camera button"
 #define ogg_hotkey_browser "Browser button"
@@ -53,10 +59,7 @@
 #define ogg_filescan_label1 "Directories scanned:"
 #define ogg_filescan_label2 "Number of .ogg found:"
 #define ogg_filescan_label2_mmf "Audio files found:" 
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Number of .m3u found:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Error reading mask bitmap."
 #define ogg_text_error_2 "COggCanvas: Error converting background bitmap: "
@@ -72,7 +75,7 @@
 // This is not used anymore
 //#define ogg_text_error_13 "Only the following sample rates are supported: 11025,16000,22050,32000,44100,48000 Hz."
 //
-#define ogg_text_error_14 "Cannot open this file"
+#define ogg_text_error_14 "Cannot open file (%d):"
 #define ogg_text_error_15 "No file is open."
 #define ogg_text_error_16 "Error code "
 #define ogg_text_error_17 "Error sending buffer"
@@ -86,12 +89,13 @@
 #define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "
 #define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
 #define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
-#define ogg_text_error_27 "This warning message can be disabled, from the options menu."
+#define ogg_text_error_27 "OggPlay Warning"
 #define ogg_text_error_28 "Cannot open directory" 
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Updating list of files..."
 #define ogg_text_string_2 "Writing file database..."
@@ -105,12 +109,8 @@
 #define ogg_text_string_10 "(subfolders)"
 #define ogg_text_string_11 "(files)"
 
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(unassigned)"
-#else
-#define ogg_text_string_12 "(unassigned)"
-#endif
 
 #define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
 // S60 Hotkey settings
@@ -203,7 +203,6 @@
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"
 #define ogg_format_text_volume_help  "Volume help"
-#define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"
 
 #define ogg_alarm_s60                    "Alarm"

@@ -2,20 +2,27 @@
 #define ogg_hotkey "Schnellstart:"
 #define ogg_alarm "Alarm:"
 #define ogg_active "Activ:"
+
 #define ogg_about_oggplay "Über OggPlay"
-#define ogg_version_txt "Version ???"
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "see http://symbianoggplay.sourceforge.net für mehr Infos"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "see http://symbianoggplay.sourceforge.net für mehr Infos"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_translation ""
-#define ogg_port "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"  
+#define ogg_port "Port to S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"  
+#define ogg_port_S80 "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"  
+
 #define ogg_file_prop "Dateieigenschaften"
 #define ogg_filename_txt "Dateiname:"
 #define ogg_filename_unknown "unbekannt"
 #define ogg_filesize "Dateigröße [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bitrate [kbit/s]:"
 #define ogg_rate_hz "Samplingrate [Hz]:"
 #define ogg_channels "Kanäle:"
+#define ogg_playlist_entries "Playlist entries:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "Keiner"
 #define ogg_hotkey_camera "Kameraknopf"
 #define ogg_hotkey_browser "Browserknopf"
@@ -43,10 +50,7 @@
 #define ogg_filescan_label1 "Verzeichnisse durchsucht:"
 #define ogg_filescan_label2 "Anzahl gefundener Oggfiles:"
 #define ogg_filescan_label2_mmf "Audio files found:" // To be translated
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Anzahl gefundener Playlistfiles:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Fehler beim lesen der Maske."
 #define ogg_text_error_2 "COggCanvas: Fehler beim konvertieren des Hintergrundbildes: "
@@ -59,7 +63,7 @@
 #define ogg_text_error_9 "Ogg Vorbis Datei korrupt."
 #define ogg_text_error_10 "Nur Streams mit ein oder zwei Kanälen werden unterstützt."
 #define ogg_text_error_12 "Nicht unterstzütztes Audioformat."
-#define ogg_text_error_14 "Kann diese Datei nicht öffnen."
+#define ogg_text_error_14 "Kann diese Datei nicht öffnen (%d):"
 #define ogg_text_error_15 "Keine Datei ist geöffnet."
 #define ogg_text_error_16 "Fehlernummer "
 #define ogg_text_error_17 "Fehler beim Senden eines Puffers"
@@ -70,12 +74,13 @@
 #define ogg_text_error_24 "Diese Datei wurde mit einer Samplingrate von %i Hz erstellt. Leider unterstützt Ihr Telefon nur folgende Raten: %S. "
 #define ogg_text_error_25 "Diese Datei ist in Stereo erstellt, aber ihr Telefon unterstützt nur Mono"
 #define ogg_text_error_26 "Oggplay wird die Umrechnung automatisch erledigen. Es ist jedoch vorteilhafter, die Dateien in eiem von Ihrem Telefon unterstützten Format vorzunehmen. Dadurch können deutlich kleinere Dateien bei gleicher Qualität erzeugt werden."
-#define ogg_text_error_27 "Diese Meldung kann im Optionsmenü abgeschaltet werden."
+#define ogg_text_error_27 "OggPlay Meldung"
 #define ogg_text_error_28 "Cannot open directory" // To be translated
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Aktualisiere Liste der Dateien..."
 #define ogg_text_string_2 "Schreibe Dateidatenbank..."
@@ -88,13 +93,8 @@
 #define ogg_text_string_9 "(Genres)"
 #define ogg_text_string_10 "(Verzeichnisse)"
 #define ogg_text_string_11 "(Dateien)"
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(nicht zugeordnet)"
-#else
-#define ogg_text_string_12 "(nicht zugeordnet)"
-#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"
@@ -180,7 +180,6 @@
 #define ogg_cba_select               "Auswahl"     // To be Translated 
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Abbrechen"     // To be Translated 
-#define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Ordner"
 
 // Multi thread playback strings

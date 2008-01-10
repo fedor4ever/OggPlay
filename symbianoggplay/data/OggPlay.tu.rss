@@ -5,20 +5,27 @@ CHARACTER_SET UTF8
 #define ogg_hotkey "Kısayol:"
 #define ogg_alarm "Alarm:"
 #define ogg_active "Açık:"
+
 #define ogg_about_oggplay "OggPlay Hakkında"
-#define ogg_version_txt "Sürüm ???"
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "Bilgi için http://symbianoggplay.sourceforge.net"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "Bilgi için http://symbianoggplay.sourceforge.net"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_translation "Tercüme: A. A. Aydıner"
-#define ogg_port "S60'a uyarlama: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_port "S60'a uyarlama:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_port_S80 "S60'a uyarlama: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+
 #define ogg_file_prop "Dosya özellikleri"
 #define ogg_filename_txt "Dosya:"
 #define ogg_filename_unknown "dosyasız"
 #define ogg_filesize "Büyüklük [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bit oranı [kbit/s]:"
 #define ogg_rate_hz "Frekans [Hz]:"
 #define ogg_channels "Kanallar:"
+#define ogg_playlist_entries "Playlist entries:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "Yok"
 #define ogg_hotkey_camera "Kamera düğmesi"
 #define ogg_hotkey_browser "Tarayıcı düğmesi"
@@ -47,10 +54,7 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "Taranan klasörler:"
 #define ogg_filescan_label2 "Bulunan .ogg dosyaları:"
 #define ogg_filescan_label2_mmf "Audio files found:" // To be translated
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Bulunan .m3u dosyaları:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Bit haritası okunurken hata."
 #define ogg_text_error_2 "COggCanvas: Arkaplanı değiştirirken hata: "
@@ -64,7 +68,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_10 "Sadece bir veya iki kanallı veri akımları destekleniyor."
 #define ogg_text_error_12 "Desteklenmeyen ses biçimi."
 //#define ogg_text_error_13 "Desteklenen örnekleme oranları: 11025,16000,22050,32000,44100,48000 Hz."
-#define ogg_text_error_14 "Bu dosya açılamıyor"
+#define ogg_text_error_14 "Bu dosya açılamıyor (%d):"
 #define ogg_text_error_15 "Açık dosya yok."
 #define ogg_text_error_16 "Hata kodu "
 #define ogg_text_error_17 "Depolanan veriyi gönderirken hata"
@@ -84,6 +88,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Dosya listesi yenileniyor..."
 #define ogg_text_string_2 "Dosya veritabanı yazılıyor..."
@@ -96,13 +101,8 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(çeşitler)"
 #define ogg_text_string_10 "(klasörler)"
 #define ogg_text_string_11 "(dosyalar)"
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(karşılıksız)"
-#else
-#define ogg_text_string_12 "(karşılıksız)"
-#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Kısayollar"
@@ -188,7 +188,6 @@ CHARACTER_SET UTF8
 #define ogg_cba_select               "Select"     // To be Translated
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"     // To be Translated
-#define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
 
 // Multi thread playback strings

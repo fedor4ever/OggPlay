@@ -4,20 +4,27 @@ CHARACTER_SET UTF8
 #define ogg_hotkey "Клавиша:"
 #define ogg_alarm "Alarm:"
 #define ogg_active "Активно:"
+
 #define ogg_about_oggplay "Об OggPlay"
-#define ogg_version_txt "Версия ???"
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "смотрите http://symbianoggplay.sourceforge.net для информации"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "смотрите http://symbianoggplay.sourceforge.net для информации"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_translation "Шамиль Рандуев"
-#define ogg_port "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+
 #define ogg_file_prop "Свойства файда"
 #define ogg_filename_txt "Имя файла:"
 #define ogg_filename_unknown "неизвестно"
 #define ogg_filesize "Размер файла [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bitrate [kbit/s]:"
 #define ogg_rate_hz "Rate [Hz]:"
 #define ogg_channels "Каналы:"
+#define ogg_playlist_entries "Записи из плэйлиста:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "Ничего"
 #define ogg_hotkey_camera "Кнопка камеры"
 #define ogg_hotkey_browser "Кнока браузера"
@@ -47,10 +54,7 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "Сканировано директорий:"
 #define ogg_filescan_label2 "Количество файлов .ogg:"
 #define ogg_filescan_label2_mmf "Найдено звуковых файлов:" // To be translated
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Количество файлов .m3u:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Ошибка чтения картинки маски."
 #define ogg_text_error_2 "COggCanvas: Ошибка конвертации картинки фона: "
@@ -66,7 +70,7 @@ CHARACTER_SET UTF8
 // This is not used anymore
 //#define ogg_text_error_13 "Only the following sample rates are supported: 11025,16000,22050,32000,44100,48000 Hz."
 //
-#define ogg_text_error_14 "Невозможно открыть этот файл"
+#define ogg_text_error_14 "Невозможно открыть этот файл (%d):"
 #define ogg_text_error_15 "Ничего не открыто."
 #define ogg_text_error_16 "Код ошибки "
 #define ogg_text_error_17 "Ошибка отправки буфера"
@@ -86,6 +90,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Обновляем список файлов..."
 #define ogg_text_string_2 "Пишем файл базы ..."
@@ -98,13 +103,8 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(жанры)"
 #define ogg_text_string_10 "(директории)"
 #define ogg_text_string_11 "(файлы)"
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(плэйлисты)"
 #define ogg_text_string_13 "(неопределенные)"
-#else
-#define ogg_text_string_12 "(неопределенные)"
-#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Клавиши"
@@ -192,7 +192,6 @@ CHARACTER_SET UTF8
 #define ogg_boost_up                 "Увел. громкость"     
 #define ogg_boost_down               "Умен. громкость"   // To be Translated
 #define ogg_boost_downS80            "Volume boost dwn"
-#define ogg_playlist_entries         "Записи из плэйлиста:"
 #define ogg_cba_select_folder        "Папка"
 
 // Multi thread playback strings

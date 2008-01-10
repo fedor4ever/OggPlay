@@ -91,7 +91,7 @@ void CSplashContainer::ShowSplashL()
     ActivateL();
 
 	// Show the splash screen for 1 second and then load the app.
-	iDisplayTimer = new (ELeave) COggTimer(TCallBack(TimerExpired, this));
+	iDisplayTimer = new(ELeave) COggTimer(TCallBack(TimerExpired, this));
 	iDisplayTimer->Wait(1000000);
 	}
 

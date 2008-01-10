@@ -3,17 +3,19 @@
 #define ogg_hotkey "Tecla d'accés:"
 #define ogg_alarm "Alarma:"
 #define ogg_active "Activa:"
+
 #define ogg_about_oggplay "Sobre l'OggPlay"
-#define ogg_version_txt "Versió ???"
-#define ogg_c_author "(c) 2003-2006 por Leif H. Wilden"
-#define ogg_link_txt "visita http://symbianoggplay.sourceforge.net per a més informació"
-#define ogg_vorbis_c "(c) códec Ogg/Vorbis per Xiph.org"
-#define ogg_translation "(c) códec Ogg/Vorbis per Xiph.org"
+#define ogg_about_cpr "© 2003-2008 por Leif H. Wilden"
+#define ogg_about_lnk "visita http://symbianoggplay.sourceforge.net per a més informació"
+#define ogg_about_cpr2 "© códec Ogg/Vorbis Xiph.org"
+#define ogg_about_cpr3 "© códec Flac Josh Coalson"
 #define ogg_port "Propietats del fitxer"
+
 #define ogg_file_prop "Nom de l'arxiu:"
 #define ogg_filename_txt "desconegut"
 #define ogg_filename_unknown "?"
 #define ogg_filesize "Tamany [en Octets]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Freqüencia [kbit/s]:"
 #define ogg_rate_hz "Freqüencia [Hz]:"
 #define ogg_channels "Canals:"
@@ -44,9 +46,8 @@
 #define ogg_filescan_label2_mmf "Audio files found:" 
 #define ogg_filescan_label1 "Directories scanned:"
 #define ogg_filescan_label2 "Number of .ogg found:"
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Number of .m3u found:"
-#endif
+
 #define ogg_text_error_1 "COggButton: Error llegint l'imatge de la mascara"
 #define ogg_text_error_2 "COggCanvas: Error fent la conversió de la imatge de fons: "
 #define ogg_text_error_3 "COggPlayAppUi: No es pot establir la prioritat del procés: Err code "
@@ -88,12 +89,9 @@
 #define ogg_text_string_9 "(Géneres)"
 #define ogg_text_string_10 "(Subcarpetes)"
 #define ogg_text_string_11 "(Arxius)"
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(sense assignar)"
-#else
-#define ogg_text_string_12 "(sense assignar)"
-#endif
+
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"
 #define ogg_format_text_fast_forward "Fast forward"

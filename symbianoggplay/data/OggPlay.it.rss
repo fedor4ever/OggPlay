@@ -2,20 +2,27 @@
 #define ogg_hotkey "Tasti veloci:"
 #define ogg_alarm "Sveglia:"
 #define ogg_active "Attiva:"
+
 #define ogg_about_oggplay "Riguardo OggPlay"
-#define ogg_version_txt "Versione ???"
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "visita http://symbianoggplay.sourceforge.net per uteriori informazioni"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "visita http://symbianoggplay.sourceforge.net per uteriori informazioni"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_translation "Translation by Enrico Feltresi"
-#define ogg_port "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_port "Port to S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_port_S80 "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+
 #define ogg_file_prop "Proprietà file"
 #define ogg_filename_txt "Nome file:"
 #define ogg_filename_unknown "Sconosciuto"
 #define ogg_filesize "Dimensione file [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bitrate [kbit/s]:"
 #define ogg_rate_hz "Frequenza [Hz]:"
 #define ogg_channels "Canali:"
+#define ogg_playlist_entries "Playlist entries:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "Nessuno"
 #define ogg_hotkey_camera "Tasto Fotocamera"
 #define ogg_hotkey_browser "Tasto Internet"
@@ -42,10 +49,7 @@
 #define ogg_filescan_label1 "Directories scanned:"
 #define ogg_filescan_label2 "Number of .ogg found:"
 #define ogg_filescan_label2_mmf "Audio files found:" // To be translated
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Number of .m3u found:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Errore nella lettura della maschera bitmap:" 
 #define ogg_text_error_2 "COggCanvas: Errore nel convertire lo sfondo bitmap:" 
@@ -59,7 +63,7 @@
 #define ogg_text_error_10 "Sono permessi solo stream ad uno o due canali." 
 #define ogg_text_error_12 "Formato audio non permesso." 
 //#define ogg_text_error_13 "Sono permesse solo le seguenti frequenze di campionamento:  11025,16000,22050,32000,44100,48000 Hz." 
-#define ogg_text_error_14 "Apertura file non riuscita." 
+#define ogg_text_error_14 "Apertura file non riuscita (%d):" 
 #define ogg_text_error_15 "Nessun file è stato aperto." 
 #define ogg_text_error_16 "Errore numero:" 
 #define ogg_text_error_17 "Errore nel mandare il buffer." 
@@ -73,12 +77,13 @@
 #define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "
 #define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
 #define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
-#define ogg_text_error_27 "This warning message can be disabled, from the options menu."
+#define ogg_text_error_27 "OggPlay Warning"
 #define ogg_text_error_28 "Cannot open directory" // To be translated
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Aggiornamento lista file" 
 #define ogg_text_string_2 "Sto scrivendo il file nella banca dati..." 
@@ -91,13 +96,8 @@
 #define ogg_text_string_9 "(genere)" 
 #define ogg_text_string_10 "(cartella)" 
 #define ogg_text_string_11 "(file)" 
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(non assegnato)" 
-#else
-#define ogg_text_string_12 "(non assegnato)" 
-#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"
@@ -180,7 +180,6 @@
 #define ogg_cba_select               "Select"     // To be Translated 
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
-#define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
 
 // Multi thread playback strings

@@ -4,20 +4,27 @@ CHARACTER_SET UTF8
 #define ogg_hotkey "Sneltoets:"
 #define ogg_alarm "Alarm:"
 #define ogg_active "Actief:"
+
 #define ogg_about_oggplay "Over OggPlay"
-#define ogg_version_txt "Versie ???"
-#define ogg_c_author "© 2003-2006 Leif H. Wilden"
-#define ogg_link_txt "Bezoek http://symbianoggplay.sourceforge.net voor meer informatie"
-#define ogg_vorbis_c "© Ogg/Vorbis codec Xiph.org"
+#define ogg_about_cpr "© 2003-2008 Leif H. Wilden"
+#define ogg_about_lnk "Bezoek http://symbianoggplay.sourceforge.net voor meer informatie"
+#define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
+#define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_translation "Vertaling: Bart Kussener"
-#define ogg_port "Omzetting naar S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_port "Omzetting naar S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_about_port_S80 "Omzetting naar S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+
 #define ogg_file_prop "Bestandseigenschappen"
 #define ogg_filename_txt "Bestandsnaam:"
 #define ogg_filename_unknown "onbekend"
 #define ogg_filesize "Bestandsgrootte [byte]:"
+#define ogg_duration "Duration [min:sec]:"
 #define ogg_bitrate "Bitsnelheid [kbit/s]:"
 #define ogg_rate_hz "Frequentie [Hz]:"
 #define ogg_channels "Kanalen:"
+#define ogg_playlist_entries "Playlist entries:"
+#define ogg_filepath "Path: "
+
 #define ogg_hotkey_none "Geen"
 #define ogg_hotkey_camera "Camera knop"
 #define ogg_hotkey_browser "Internet knop"
@@ -45,10 +52,7 @@ CHARACTER_SET UTF8
 #define ogg_filescan_label1 "mappen doorzocht:"
 #define ogg_filescan_label2 "Nummers van .ogg gevonden:"
 #define ogg_filescan_label2_mmf "Audio files found:" // To be translated
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_filescan_label3 "Nummers van .m3u gevonden:"
-#endif
 
 #define ogg_text_error_1 "COggButton: Leesfout bij masker tekening."
 #define ogg_text_error_2 "COggCanvas: Fout bij converteren van achtergrondtekening: "
@@ -62,7 +66,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_10   "Alleen geluidsbronnen met een of twee kanalen worden ondersteunt."
 #define ogg_text_error_12 "Niet ondersteunt muziekformaat."
 //#define ogg_text_error_13 "Alleen de volgende samplefrequenties worden ondersteunt: 11025,16000,22050,32000,44100,48000 Hz."
-#define ogg_text_error_14 "Kan dit bestand niet openen."
+#define ogg_text_error_14 "Kan dit bestand niet openen (%d):"
 #define ogg_text_error_15 "Geen bestand is geopend."
 #define ogg_text_error_16 "Foutcode "
 #define ogg_text_error_17 "Fout bij het zenden van de buffer"
@@ -76,12 +80,13 @@ CHARACTER_SET UTF8
 #define ogg_text_error_24 "Alleen de volgende samplefrequenties worden ondersteunt: "
 #define ogg_text_error_25 "Dit ogg bestand bevat 2 audiosporen (stereo). Spijtig genoeg is enkel mono playback ondersteunt door de telefoon."
 #define ogg_text_error_26 "Oggplay zal de nodige omzetting doen zodat je in staat bent om deze ogg af te spelen. Maar, als je bezorgd bent in verband de grootte van de bestanden, codeer dan de bestanden met een bitsnelheid die wordt ondersteunt door je telefoon. Door dit te doen kan je grootte van de bestanden aanzienlijk beperken zonder impact op de playback kwaliteit."
-#define ogg_text_error_27 "Dit waarschuwingsbericht kan worden uitgeschakeld in het menu opties."
+#define ogg_text_error_27 "OggPlay Waarschuwingsbericht"
 #define ogg_text_error_28 "Cannot open directory" // To be translated
 #define ogg_text_error_29 "Not enough memory"
 #define ogg_text_error_30 "Audio playback taken by another process"
 #define ogg_text_error_31 "Startup Error"
 #define ogg_text_error_32 "Ogg error: %d, %d"
+#define ogg_text_error_33 "OggPlay Error"
 
 #define ogg_text_string_1 "Actualisering van de bestandslijst..."
 #define ogg_text_string_2 "Opslaan van bestandsdatabase..."
@@ -94,13 +99,8 @@ CHARACTER_SET UTF8
 #define ogg_text_string_9 "(genres)"
 #define ogg_text_string_10 "(submappen)"
 #define ogg_text_string_11 "(bestanden)"
-
-#ifdef PLAYLIST_SUPPORT
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(niet toegewezen)"
-#else
-#define ogg_text_string_12 "(niet toegewezen)"
-#endif
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Sneltoets"
@@ -187,7 +187,6 @@ CHARACTER_SET UTF8
 #define ogg_cba_select               "Select"     // To be Translated 
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"     // To be Translated 
-#define ogg_playlist_entries         "Playlist entries:"
 #define ogg_cba_select_folder        "Folder"	//To be translated
 
 // Multi thread playback strings
