@@ -1,4 +1,4 @@
-  Welcome to OggPlay 1.70
+  Welcome to OggPlay 1.71 MMF
 
 Welcome to the Series 60
 version of OggPlay, the open
@@ -7,13 +7,8 @@ released under the GPL by
 Leif H. Wilden.
 
 New for this release:
-Fixed ringtone playing only once
-Fixed Find new files crash with some mp3s
-
-Changed the handling of splash screens
-(skins with splash screens will need updating)
-
-Some internal changes
-(Minor tweaks and bug fixes)
+Support for FLAC format
+More variable volume boost
+Many bug fixes!
 
 Enjoy!

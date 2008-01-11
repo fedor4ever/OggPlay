@@ -1,20 +1,51 @@
 
-This is the Release Note for Release 1.70 of Oggplay for S60 V3.
+This is the Release Note for Release 1.71 MMF of Oggplay for S60 V3
 
 *******************************************************************
- This release is only experimental and hasn't been thoroughly tested.
- Please use the official release 1.0.0 , unless you are willing to
- beta test our new features.
- 
- If you experiment problems please report them to our public forums
- and remember to include the version number.
+If you experience problems please report them to our public forums
+and remember to include the version number and the model of your phone.
 *******************************************************************
 
-What's new in Release 1.70:
+What's new in Release 1.71:
 --------------------------
 
-This is a beta release:
-First working version of OggPlay 1.70 compiled for S60 V3
+Oggplay will now play Flac encoded audio (both native and Ogg Flac) 
+More variable volume boost (-24db to +12db in smaller steps)
+The current volume boost level can now be seen on screen
+"Key repeats" have been enabled for changing volume and scrolling through tracks
+"Key repeats" have been disabled when navigating between views
+Improved S60 dialog boxes
+Previous song now works properly in Shuffle mode
+Default hotkeys added:
+3             - Fast forward
+1             - Rewind
+2             - Page up
+8             - Page down
+6             - Next song
+4             - Previous song
+hold *        - Keylock
+5             - Play / Pause
+C             - Stop
+9             - Volume boost up
+7             - Volume boost down
+Right softkey - Back
+Default playback mode is now Multi-thread / Normal priority (Try changing to High priority if audio stuttering is a problem)
+"File Info" now includes the duration of the track
+"File Info" now displays the filename and path seperately
+Playlists are no longer included in files and subfolders views 
+A few other miscellaneous bug fixes
+
+For S60V3:
+Improved scalable UI support (switching between portrait and landscape now works correctly)
+Text is drawn anti-aliased
+OggPlay is using a new font: "Bitstream Vera Sans" (see the Readme file for more details)
+Sis file is now signed with a 10-year certificate
+
+Known issues:
+1. You need to restart the phone before running OggPlay (otherwise text will not be displayed correctly)
+
+2. You need to restart the phone before attempting to uninstall
+   On the N80 (running firmware v4.0623.0.41) Oggplay cannot be uninstalled
 
 
 
@@ -25,6 +56,5 @@ http://symbianoggplay.sourceforge.net/
 
 For help and open discussion about OggPlay see under 'Public Forums' on
 http://sourceforge.net/projects/symbianoggplay/
-
 
 -the S60 Oggplay developers.

@@ -42,32 +42,32 @@
 
 ; Double resolution (352x416)
 IF DisplayXPixels=352 AND DisplayYPixels=416
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayDRVB3\mcNuOggPlayDRVB3.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayDRVB3\mcNuOggPlayDRVB3.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayDR\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayDR\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
 ENDIF
 
 ; QVGA (240x320)
 IF DisplayXPixels=240 AND DisplayYPixels=320
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGA\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGA\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
 ENDIF
 
 ; Landscape QVGA (320x240)
 IF DisplayXPixels=320 AND DisplayYPixels=240
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGA\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGA\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
 ENDIF
 
 ; Low resolution (176x208)
 IF DisplayXPixels=176 AND DisplayYPixels=208
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayLR\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayLR\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
 ENDIF
 
 ; Square resolution (208x208)
 IF DisplayXPixels=208 AND DisplayYPixels=208
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
-"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
 ENDIF
 
 ; Fonts for the mcNuOggPlay skin

@@ -1,13 +1,14 @@
-  Welcome to OggPlay 1.70
+  Welcome to OggPlay 1.71 MMF
 
-Welcome to the Series 60
+Welcome to the Series 60 V3
 version of OggPlay, the open
 source media player on Symbian,
 released under the GPL by 
 Leif H. Wilden.
 
-This is a beta release:
-First working version of OggPlay 1.70 compiled for S60 V3
-Please read the release notes as there are some issues
+New for this release:
+Support for FLAC format
+More variable volume boost
+Many bug fixes!
 
 Enjoy!
