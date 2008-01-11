@@ -43,3 +43,5 @@ mcNuOggPlayLR.mbm /c12bitmaps/file.bmp
 /1bitmaps/scrollbar.mask.bmp
 /c12bitmaps/AlarmS.bmp
 /1bitmaps/AlarmSm.bmp
+/c12bitmaps/volboost.bmp
+/1bitmaps/volboost.mask.bmp
