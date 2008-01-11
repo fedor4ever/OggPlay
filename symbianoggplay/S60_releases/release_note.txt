@@ -17,17 +17,18 @@ The current volume boost level can now be seen on screen
 Improved S60 dialog boxes
 Previous song now works properly in Shuffle mode
 Default hotkeys added:
-3      - Fast Forward
-1      - Rewind
-2      - Page up
-8      - Page down
-6      - Next song
-4      - Previous song
-hold * - Keylock
-5      - Play / Pause
-C      - Stop
-9      - Volume boost up
-7      - Volume boost down
+3             - Fast forward
+1             - Rewind
+2             - Page up
+8             - Page down
+6             - Next song
+4             - Previous song
+hold *        - Keylock
+5             - Play / Pause
+C             - Stop
+9             - Volume boost up
+7             - Volume boost down
+Right softkey - Back
 Default playback mode is now Multi-thread / Normal priority (Try changing to High priority if audio stuttering is a problem)
 "File Info" now includes the duration of the track
 "File Info" now displays the filename and path seperately

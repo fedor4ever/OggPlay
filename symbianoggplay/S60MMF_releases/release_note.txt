@@ -1,154 +1,47 @@
 
-This is the Release Note for Release 1.70 of Oggplay for Series60.
+This is the Release Note for Release 1.71 MMF of Oggplay for S60
 
-******************************************************************************
-**** This release will NOT work on Nokia 7650, Nokia 3650, Nokia NGage,   ****
-**** Nokia NGage QD, Siemens SX-1 , Sendo X                               ****
-****                                                                      ****
-******************************************************************************
+*******************************************************************
+If you experience problems please report them to our public forums
+and remember to include the version number and the model of your phone.
+*******************************************************************
 
-OggPlay is a music player for phones running on the Symbian Operating system. 
-It comes bundled with a .ogg file format decoder, but it detects and uses MMF 
-plugins which may come built-in your phone or that might have been installed
-later on. MP3, AAC, MP4, M4A plugins are supported.
-
-See the ReadMeFirst.html to see which file formats your phone supports.
-
-This release will only work on phones that supports MMF framework.
-         
-
-History
---------------------------------------------------------------------------------------------
-
-What's new in Release 1.70:
---------------------------
-Fixed ringtone playing only once
-Fixed Find new files crash with some mp3s
-
-Changed the handling of splash screens
-(skins with splash screens will need updating)
-
-Internal changes only
-(Some minor bug fixes)
-
-
-What's new in Release 1.6.9:
---------------------------
-Added support for drive relative paths in Playlists
-Selecting Shuffle Play from the menu now enables random playback
-Changing between Normal Play and Shuffle Play no longer stops playback
-Some internal changes (hopefully I've not broken anything)
-Added alarm clock
-
-Notes:
-In order to use the alarm clock you must leave OggPlay running.
-It is best to move OggPlay to the background as less processing power is used when OggPlay runs in the background.
-
-To select a particular track for the alarm:
-1. Make sure OggPlay is not currently in the middle of a track (paused)
-2. Leave the track highlight on the track you want to play as the alarm
-
-If you want a random alarm:
-1. Make sure OggPlay is not currently in the middle of a track (paused)
-2. Turn on "Shuffle play"
-3. Leave the track highlight on "(titles)" 
-
-
-What's new in Release 1.6.7:
---------------------------
-Fixed ringtone low volume
-Added support for double resolution skins
-(N90 users should install mcNuOggPlayN90.sis) 
-
-What's new in Release 1.6.6:
---------------------------
-More bug fixes
-Added volume boost
-Added support for double resolution (N90).
-This is untested (N90 beta testers required!)
-
-What's new in Release 1.6.5:
---------------------------
-WAV, AMR, M4a support.
-Several bug fixes.
-
-What's new in Release 1.6.4:
---------------------------
-Winamp playlist support.
-Few bugs squashed.
-
-What's new in Release 1.6.3:
---------------------------
-Fix for the too long filename crahsing the MMFController.
-Somehow faster file scan.
-
-What's new in Release 1.6.2:
---------------------------
-The ogg plugin can be used as a "random" ringing tone: everytime a phone call
-is received, the ringing tone played will be randomly choosen from the list
-of available .ogg files in the device. The file ReadMeFirst.html gives the 
-instructions for creating the ramdom ringing tones.
-
-Fixed the crackling  & popping sound (most notably on 6600, but also heard on 
-some other phones as well) that was introduced in release 1.6.1.
-
-
-What's new in Release 1.6.1:
---------------------------
-Ogg files can now be reliably used as ringing tone. 
-Support for bluetooth headset.
-
-This adress a feature of previous versions where ogg files could be set as ringing tone,
-but they were simply not ringing when call was received. This has been fixed. And as expected,
-when using ogg as ringing tone, vibration will work, if enabled. 
-Proper functionality of ringing tones has been verified on 2 different firmware versions of 6600, 
-and on one 7610.
-
-
-What's new in Release 1.6.0:
---------------------------
-Support for MP4 format.
-Support for M4A format, aka, the iTunes(TM) format. This format is exactly same as mp4, 
-but in order to use it, you´ll have to rename the file extension from m4a to mp4.
-
-Capability to choose which plugin will be used. Note that the plugin that you choose might
-not be fully compatible with OggPlay (OvController, for example).
-
-A little bunch of bug fixes.
-
-What's new in Release 1.5.1:
---------------------------
-Some bug fixes related to MP3 and AAC reading on the Nokia 7610:
- + Forward/Rewind now functional
- + Volume not going back to maximum level, when changing tune.
-
-Ogg files can now be played using "Nokia Music Player", in the very
-unlikely event that OggPlay UI is not preferred.
-
-What's new in Release 1.5.0:
+What's new in Release 1.71:
 --------------------------
 
-OggPlay nows plays MP3 and AAC in addition to Ogg file format, depending
-on the phone capabilities.
-
-
-What's missing:
----------------
-Some features present in 1.0.0 have been dropped, since quite a lot of work is required to
-make them work in a MMF plugin. They will be reintroduced in future releases.
-These features are:
-  - Amplification (6, 12 db)
-  - Frequency analyzer
-
+Oggplay will now play Flac encoded audio (both native and Ogg Flac) 
+More variable volume boost (-24db to +12db in smaller steps)
+The current volume boost level can now be seen on screen
+"Key repeats" have been enabled for changing volume and scrolling through tracks
+"Key repeats" have been disabled when navigating between views
+Improved S60 dialog boxes
+Previous song now works properly in Shuffle mode
+Default hotkeys added:
+3             - Fast forward
+1             - Rewind
+2             - Page up
+8             - Page down
+6             - Next song
+4             - Previous song
+hold *        - Keylock
+5             - Play / Pause
+C             - Stop
+9             - Volume boost up
+7             - Volume boost down
+Right softkey - Back
+Default playback mode is now Multi-thread / Normal priority (Try changing to High priority if audio stuttering is a problem)
+"File Info" now includes the duration of the track
+"File Info" now displays the filename and path seperately
+Playlists are no longer included in files and subfolders views 
+A few other miscellaneous bug fixes
 
 
 Links:
----------------------------------------------------------------------------------------------
+------
 For more information about Oggplay, please see the webpage at
 http://symbianoggplay.sourceforge.net/
 
 For help and open discussion about OggPlay see under 'Public Forums' on
 http://sourceforge.net/projects/symbianoggplay/
-
 
 -the S60 Oggplay developers.
