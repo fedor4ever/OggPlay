@@ -31,7 +31,7 @@ OggPlay 1 {
       Step 1
     }
     ListBox {
-      Position 0 2 172 126
+      Position 0 2 172 128
       Font LatinPlain12 20 0
       FontColor 117 193 226
       FontColorSelected 255 255 255
