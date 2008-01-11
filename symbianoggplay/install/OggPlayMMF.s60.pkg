@@ -3,14 +3,11 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
-;Version string to be changed
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-  "OggPlay"},(0x1000A661),1,70,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,1
 ;
 ; 0x101F7960 for S60 v2.0 and later
-(0x101F7960),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
-                     "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", 
-                     "Series60ProductID", "Series60ProductID", "Series60ProductID" }
+(0x101F7960),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
+"Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID" }
 ;
 ; Display Release notes
 ;
@@ -35,7 +32,11 @@
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
 
-"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OGGPLUGINDECODER.DLL"-"!:\system\libs\Plugins\OGGTREMORCONTROLLER.DLL"
+
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayController.dll"-"!:\system\libs\Plugins\OggPlayController.dll"
 "C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
 
 ; we try to be nice and uninstall our configuration files

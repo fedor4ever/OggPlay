@@ -3,13 +3,11 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
-%{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-"OggPlay"}
+%{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay", "OggPlay"}
 
 :"OggPlay"
 
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-"OggPlay"},(0xF000A661),1,0,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay", "OggPlay"},(0xF000A661),1,71,1
 
 ;Supports Series 60 v 3.0
 [0x101F7961],0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"
@@ -20,7 +18,6 @@
 ;
 "..\S60V3_releases\sisnotes.txt" - "",FT,TC
 ;
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggplayVorbis.dll"-"!:\sys\bin\OggplayVorbis.dll"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggPlay.exe"-"!:\sys\bin\OggPlay.exe"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\10003A3F\apps\OggPlay_reg.rsc"-"!:\private\10003A3F\import\apps\OggPlay_reg.rsc"
 { "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay.ren"
@@ -39,89 +36,40 @@
 
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\OggSplash.mbm"-"!:\private\F000A661\OggSplash.mbm"
 
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggPlayShared.dll"-"!:\sys\bin\OggPlayShared.dll"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggplayVorbisi.dll"-"!:\sys\bin\OggplayVorbisi.dll"
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggPlayFlaci.dll"-"!:\sys\bin\OggPlayFlaci.dll"
+
 ; Double resolution (352x416)
-; E60
-IF MachineUID=0x20001856
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
-ENDIF
-
-; E70
-IF MachineUID=0x20001857
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
-ENDIF
-
-; N80
-IF MachineUID=0x200005F9
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayDR.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
+IF DisplayXPixels=352 AND DisplayYPixels=416
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayDRVB3\mcNuOggPlayDRVB3.mbm"-"!:\private\F000A661\import\mcNuOggPlayDR.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayDRVB3\mcNuOggPlayDRVB3.skn"-"!:\private\F000A661\import\mcNuOggPlayDR.skn"
 ENDIF
 
 ; QVGA (240x320)
-; E50
-IF MachineUID=0x20002495
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
-ENDIF
-
-; N71
-IF MachineUID=0x200005FF
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
-ENDIF
-
-; N73
-IF MachineUID=0x200005FB
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
-ENDIF
-
-; N92
-IF MachineUID=0x200005FA
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
-ENDIF
-
-; N93
-IF MachineUID=0x20000600
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
-ENDIF
-
-; Low resolution (176x208)
-; 3250
-IF MachineUID=0x200005F8
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
-ENDIF
-
-; N91
-IF MachineUID=0x200005FC
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
+IF DisplayXPixels=240 AND DisplayYPixels=320
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
 ENDIF
 
 ; Landscape QVGA (320x240)
-; E61
-IF MachineUID=0x20001858
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVLS.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVLS.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlayQVLS.skn"-"!:\private\F000A661\import\mcNuOggPlayQVLS.skn"
+IF DisplayXPixels=320 AND DisplayYPixels=240
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayQVGAVB3\mcNuOggPlayQVGAVB3.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
+ENDIF
+
+; Low resolution (176x208)
+IF DisplayXPixels=176 AND DisplayYPixels=208
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayLR.mbm"-"!:\private\F000A661\import\mcNuOggPlayLR.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlayLR.skn"-"!:\private\F000A661\import\mcNuOggPlayLR.skn"
 ENDIF
 
 ; Square resolution (208x208)
-; 5500
-IF MachineUID=0x20000602
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\import\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
+IF DisplayXPixels=208 AND DisplayYPixels=208
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
+"C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
 ENDIF
 
 ; Fonts for the mcNuOggPlay skin
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\teen____.ttf"-"!:\resource\fonts\teen____.ttf"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\teenlite.ttf"-"!:\resource\fonts\teenlite.ttf"
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\ProFontWindows.ttf"-"!:\resource\fonts\ProFontWindows.ttf"
-
-
-; we try to be nice and uninstall our configuration files
-""-"!:\private\F000A661\oggplay.ini",FN
-""-"!:\private\F000A661\oggplay.db",FN
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\Vera.ttf"-"!:\resource\fonts\OggPlayVera.ttf"
+;"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\Vera.ttf"-"!:\OggPlayFonts\OggPlayVera.ttf"

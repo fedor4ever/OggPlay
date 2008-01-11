@@ -3,19 +3,17 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
-#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-   "OggPlay" },(0x1000A661),1,0,1
+#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay" },(0x1000A661),1,71,1
 ;
 ; 0x101F6F88 for S60 v0.9 and later
-(0x101F6F88),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
-                     "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", 
-                     "Series60ProductID", "Series60ProductID", "Series60ProductID" }
+(0x101F6F88),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
+"Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID" }
+
 ;
 ; Display Release notes
 ;
 "..\S60_releases\sisnotes.txt" - "",FT,TC
 ;
-"\epoc32\release\armi\urel\libvorbisidec.dll"-"!:\system\libs\libvorbisidec.dll"
 "\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "\epoc32\release\armi\urel\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
 { "\epoc32\release\armi\urel\OggPlay.ren" 
@@ -34,6 +32,10 @@
 "\epoc32\release\armi\urel\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.skn"-"!:\system\apps\oggplay\mcNuOggPlay.skn"
 "..\bitmaps\Skins\mcNuOggPlay\mcNuOggPlay.mbm"-"!:\system\apps\oggplay\mcNuOggPlay.mbm"
+
+"\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
+"\epoc32\release\armi\urel\oggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
+"\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
 
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ini",FN
