@@ -1,22 +1,27 @@
 OggPlay 1 {
   FlipOpen {
     Played {
-      Position 14 234 50 20
-      Font ProFontWindows 14 0
+      Position 12 234 40 20
+      Font "Bitstream Vera Sans" 14 0
       FontColor 255 255 255
     }
     Title {
       Position 14 265 210 32
-      Font Teen 18 0
+      Font "Bitstream Vera Sans" 21 0
       FontColor 255 255 255
       Style 3
       ScrollDelay 10
       ScrollStep 4
     }
     Volume {
-      Position 169 236 60 12
+      Position 167 226 60 12
       Style 0
       KnobIcon 22 23
+    }
+    VolumeBoost {
+      Position 158 240 80 13
+      Style 4
+      KnobIcon 45 46
     }
     Position {
       Position 12 256 216 9
@@ -24,32 +29,71 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     ScrollBar {
-      Position 234 0 6 215
+      Position 234 2 6 200
       KnobIcon 41 42
       Style 1
-      ScrollerSize 14
+      ScrollerSize 0
       Step 1
     }
     ListBox {
-      Position 0 4 232 200
-      Font "Teen light" 17 0
+      Position 0 2 234 200
+      Font "Bitstream Vera Sans" 15 0
       FontColor 117 193 226
       FontColorSelected 255 255 255
       BarColorSelected 18 130 181
     }
     Clock {
       Position 4 204 70 20
-      Font ProFontWindows 12 0
+      Font "Bitstream Vera Sans" 12 0
       FontColor 255 255 255
     }
     Alarm {
-      Position 160 204 70 20
-      Font ProFontWindows 12 0
+      Position 172 204 70 20
+      Font "Bitstream Vera Sans" 12 0
       FontColor 255 255 255
     }
     AlarmIcon {
-      Position 140 204 26 30
+      Position 154 203 18 22
       Icon 43 44
+    }
+  }
+  FlipClosed {
+    Played {
+      Position 4 155 40 20
+      Font "Bitstream Vera Sans" 14 0
+      FontColor 255 255 255
+    }
+    Title {
+      Position 7 173 304 24
+      Font "Bitstream Vera Sans" 21 0
+      FontColor 255 255 255
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    Volume {
+      Position 255 158 60 12
+      Style 0
+      KnobIcon 22 23
+    }
+    Position {
+      Position 52 160 196 9
+      Style 0
+      KnobIcon 47 48
+    }
+    ScrollBar {
+      Position 312 1 8 150
+      KnobIcon 41 42
+      Style 1
+      ScrollerSize 0
+      Step 1
+    }
+    ListBox {
+      Position 0 1 312 150
+      Font "Bitstream Vera Sans" 15 0
+      FontColor 117 193 226
+      FontColorSelected 255 255 255
+      BarColorSelected 18 130 181
     }
   }
 }

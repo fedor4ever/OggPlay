@@ -16,7 +16,7 @@ mcNuOggPlayQVGA.mbm /c12bitmaps/file.bmp
 /1bitmaps/file.mask.bmp
 /c12bitmaps/paused.bmp
 /1bitmaps/paused.mask.bmp
-/1bitmaps/x.flipclosed.bmp
+/c16bitmaps/bg2.bmp
 /c16bitmaps/bg.bmp
 /c12..\..\..\listboxfocus.bmp
 /c12..\..\..\listboxfocusm.bmp
@@ -43,3 +43,7 @@ mcNuOggPlayQVGA.mbm /c12bitmaps/file.bmp
 /1bitmaps/scrollbar.mask.bmp
 /c12bitmaps/alarm.bmp
 /1bitmaps/alarmm.bmp
+/c12bitmaps/volboost.bmp
+/1bitmaps/volboost.mask.bmp
+/c12bitmaps/trackerslider2.bmp
+/1bitmaps/trackerslider2.mask.bmp
