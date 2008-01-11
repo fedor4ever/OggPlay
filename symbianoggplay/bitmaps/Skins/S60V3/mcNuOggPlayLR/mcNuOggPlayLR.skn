@@ -2,12 +2,12 @@ OggPlay 1 {
   FlipOpen {
     Played {
       Position 9 149 30 13
-      Font ProFontWindows 9 0
+      Font "Bitstream Vera Sans" 9 0
       FontColor 255 255 255
     }
     Title {
-      Position 9 172 158 16
-      Font "Teen Light" 15 0
+      Position 9 171 158 16
+      Font "Bitstream Vera Sans" 15 0
       FontColor 255 255 255
       Style 3
       ScrollDelay 10
@@ -24,27 +24,27 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     ScrollBar {
-      Position 172 0 4 162
+      Position 172 2 4 128
       KnobIcon 41 42
       Style 1
-      ScrollerSize 20
+      ScrollerSize 0
       Step 1
     }
     ListBox {
-      Position 0 2 172 126
-      Font ProFontWindows 9 0
+      Position 0 2 172 128
+      Font "Bitstream Vera Sans" 10 0
       FontColor 117 193 226
       FontColorSelected 255 255 255
       BarColorSelected 18 130 181
     }
     Clock {
       Position 5 131 48 12
-      Font ProFontWindows 9 0
+      Font "Bitstream Vera Sans" 10 0
       FontColor 255 255 255
     }
     Alarm {
-      Position 121 131 48 12
-      Font ProFontWindows 9 0
+      Position 123 131 48 12
+      Font "Bitstream Vera Sans" 10 0
       FontColor 255 255 255
     }
     AlarmIcon {
