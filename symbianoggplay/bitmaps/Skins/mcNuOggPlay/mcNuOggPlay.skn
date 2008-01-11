@@ -14,9 +14,14 @@ OggPlay 1 {
       ScrollStep 4
     }
     Volume {
-      Position 128 151 39 8
+      Position 128 145 39 8
       Style 0
       KnobIcon 22 23
+    }
+    VolumeBoost {
+      Position 112 155 64 7
+      Style 4
+      KnobIcon 45 46
     }
     Position {
       Position 9 164 158 6
@@ -24,10 +29,10 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     ScrollBar {
-      Position 172 0 4 162
+      Position 172 2 4 128
       KnobIcon 41 42
       Style 1
-      ScrollerSize 20
+      ScrollerSize 0
       Step 1
     }
     ListBox {
@@ -43,12 +48,12 @@ OggPlay 1 {
       FontColor 255 255 255
     }
     Alarm {
-      Position 121 131 48 12
+      Position 128 131 48 12
       Font LatinPlain12 18 0
       FontColor 255 255 255
     }
     AlarmIcon {
-      Position 107 130 13 15
+      Position 112 130 13 15
       Icon 43 44
     }
   }
