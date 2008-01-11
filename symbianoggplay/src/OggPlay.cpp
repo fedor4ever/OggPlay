@@ -2275,7 +2275,9 @@ TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand /*aCommand*/, TFileNa
 	}
 
 void COggPlayAppUi::OpenFileL(const TDesC& aFileName)
-	{	
+	{
+	TRACEF(COggLog::VA(_L("COggPlayAppUi::OpenFileL: %S"), &aFileName));		
+
 	iFileName = aFileName;
 	iIsRunningEmbedded = ETrue;
 	}

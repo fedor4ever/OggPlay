@@ -20,29 +20,31 @@
 #define __OggViews_h
 
 #include <coecntrl.h>
+
+#include <OggOs.h>
 #include "OggSplashCOntainer.h"
 
 class COggPlayAppView;
 class COggUserHotkeysControl;
 class COggViewBase : public CBase, public MCoeView
-{
+	{
 public:
-  COggViewBase(COggPlayAppView& aOggViewCtl);
-  ~COggViewBase();
+	COggViewBase(COggPlayAppView& aOggViewCtl);
+	~COggViewBase();
   
 protected:
-  // From MCoeView
-  void ViewDeactivated();
-  void ViewConstructL();
-  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	// From MCoeView
+	void ViewDeactivated();
+	void ViewConstructL();
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 
 protected:
-  COggPlayAppView& iOggViewCtl;
+	COggPlayAppView& iOggViewCtl;
 
 private:
-  COggViewBase* iNext;
-  friend class COggPlayAppView;
-};
+	COggViewBase* iNext;
+	friend class COggPlayAppView;
+	};
 
 class COggSplashView : public CBase, public MCoeView
 	{
@@ -67,49 +69,47 @@ private:
 	};
 
 class COggFOView : public COggViewBase
-{
+	{
  public:
-  COggFOView(COggPlayAppView& aOggViewCtl);
-  ~COggFOView();
+	COggFOView(COggPlayAppView& aOggViewCtl);
+	~COggFOView();
 
-  TVwsViewId ViewId() const;
+	TVwsViewId ViewId() const;
 
 #if defined(UIQ)
-  TVwsViewIdAndMessage ViewScreenDeviceChangedL();
-  TBool ViewScreenModeCompatible(TInt aScreenMode);
+	TVwsViewIdAndMessage ViewScreenDeviceChangedL();
+	TBool ViewScreenModeCompatible(TInt aScreenMode);
 #endif
 
-  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
-};
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	};
 
-#if defined(UIQ) || defined(SERIES60SUI)
 class COggFCView : public COggViewBase
-{
+	{
 public:
-  COggFCView(COggPlayAppView& aOggViewCtl);
-  ~COggFCView();
+	COggFCView(COggPlayAppView& aOggViewCtl);
+	~COggFCView();
 
-  TVwsViewId ViewId() const;
-  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	TVwsViewId ViewId() const;
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 
 #if defined(UIQ)
-  TVwsViewIdAndMessage ViewScreenDeviceChangedL();
-  TBool ViewScreenModeCompatible(TInt aScreenMode);
+	TVwsViewIdAndMessage ViewScreenDeviceChangedL();
+	TBool ViewScreenModeCompatible(TInt aScreenMode);
 #endif
-};
-#endif
+	};
 
 #if defined(SERIES60)
 class COggS60Utility
-{
+	{
 public:
-  static void DisplayStatusPane(TInt aTitleID);
-  static void RemoveStatusPane();
-};
+	static void DisplayStatusPane(TInt aTitleID);
+	static void RemoveStatusPane();
+	};
 
 class COggSettingItemList;
 class COggSettingsView : public COggViewBase
-{
+	{
 public:
 	COggSettingsView(COggPlayAppView& aView);
 	~COggSettingsView();
@@ -121,13 +121,13 @@ public:
 #endif
 
 private:  
-  // From MCoeView
-  void ViewDeactivated();
-  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	// From MCoeView
+	void ViewDeactivated();
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
 
 private:
-  COggSettingItemList* iContainer;
-};
+	COggSettingItemList* iContainer;
+	};
 
 class COggUserHotkeysView : public COggViewBase
 	{
@@ -164,40 +164,41 @@ public:
 #endif
 
 class COggPlaybackOptionsView : public COggViewBase
-{
+	{
 public:
-  COggPlaybackOptionsView(COggPlayAppView& aView);
-  ~COggPlaybackOptionsView();
+	COggPlaybackOptionsView(COggPlayAppView& aView);
+	~COggPlaybackOptionsView();
  
-  TVwsViewId ViewId() const;
-  void VolumeGainChangedL();
-  void BufferingModeChangedL();
+	// From MCoeView
+	TVwsViewId ViewId() const;
+
+	void VolumeGainChangedL();
+	void BufferingModeChangedL();
 
 public:
-  COggSettingItemList* iContainer;
+	COggSettingItemList* iContainer;
 
 private:
-  // From MCoeView
-  void ViewDeactivated();
-  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
-};
+	// From MCoeView
+	void ViewDeactivated();
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	};
 
 class COggAlarmSettingsView : public COggViewBase
-{
+	{
 public:
-  COggAlarmSettingsView(COggPlayAppView& aView);
-  ~COggAlarmSettingsView();
+	COggAlarmSettingsView(COggPlayAppView& aView);
+	~COggAlarmSettingsView();
  
-  virtual TVwsViewId ViewId() const;
+	TVwsViewId ViewId() const;
 
 public:
-  COggSettingItemList* iContainer;
+	COggSettingItemList* iContainer;
 
 private:
-  // From MCoeView
-  void ViewDeactivated();
-  void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
-};
-
+	// From MCoeView
+	void ViewDeactivated();
+	void ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage);
+	};
 #endif // SERIES60
 #endif
