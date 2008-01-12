@@ -1384,20 +1384,18 @@ _LIT(KFlacExt, ".flac");
 _LIT(KMp3Ext, ".mp3");
 TBool TOggFiles::IsSupportedAudioFile(TParsePtrC& p)
 	{
-	TBuf<10> ext(p.Ext());
-	ext.LowerCase();
-
-	if (ext.Compare(KOggExt) == 0)
+	TFileName ext(p.Ext());
+	if (ext.CompareF(KOggExt) == 0)
 		return ETrue;
 
-	if (ext.Compare(KOgaExt) == 0)
+	if (ext.CompareF(KOgaExt) == 0)
 		return ETrue;
 
-	if (ext.Compare(KFlacExt) == 0)
+	if (ext.CompareF(KFlacExt) == 0)
 		return ETrue;
 
 #if defined(MP3_SUPPORT)
-	if (ext.Compare(KMp3Ext) == 0)
+	if (ext.CompareF(KMp3Ext) == 0)
 		return ETrue;
 #endif
 
@@ -1408,6 +1406,5 @@ TBool TOggFiles::IsSupportedAudioFile(TParsePtrC& p)
 _LIT(KPlayListExt, ".m3u");
 TBool TOggFiles::IsPlayListFile(TParsePtrC& p)
 	{
-	TBuf<10> ext(p.Ext());
-	return (ext.CompareF(KPlayListExt) == 0);
+	return (p.Ext().CompareF(KPlayListExt) == 0);
 	}

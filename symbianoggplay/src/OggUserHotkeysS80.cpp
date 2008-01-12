@@ -25,85 +25,94 @@
 #include "OggPlay.h"
 #include "OggUserHotkeys.h"
 
-static const TInt KMapRssListToCommand[]  =
-  {
-    // Maps the "RESOURCE ARRAY r_user_hotkey_items" from the .rss file
-    // to a corresponding index in the table THotkeys. 
-    // Must be kept synchronized with the r_user_hotkey_items!
-    TOggplaySettings::ENoHotkey,
-    TOggplaySettings::EFastForward,
-    TOggplaySettings::ERewind,
-    TOggplaySettings::EPageUp,
-    TOggplaySettings::EPageDown,
-    TOggplaySettings::ENextSong,
-    TOggplaySettings::EPreviousSong,
- 	// EKeylock disabled, (not used in S80)
-    // EPauseResume, (not used in S80)
-    TOggplaySettings::EPlay,
-    TOggplaySettings::EPause,
-    TOggplaySettings::EStop,
+static const TInt KMapRssListToCommand[] =
+	{
+	// Maps the "RESOURCE ARRAY r_user_hotkey_items" from the .rss file
+	// to a corresponding index in the table THotkeys. 
+	// Must be kept synchronized with the r_user_hotkey_items!
+	TOggplaySettings::ENoHotkey,
+	TOggplaySettings::EFastForward,
+	TOggplaySettings::ERewind,
+	TOggplaySettings::EPageUp,
+	TOggplaySettings::EPageDown,
+	TOggplaySettings::ENextSong,
+	TOggplaySettings::EPreviousSong,
+
+	// EKeylock disabled, (not used in S80)
+	// EPauseResume, (not used in S80)
+
+	TOggplaySettings::EPlay,
+	TOggplaySettings::EPause,
+	TOggplaySettings::EStop,
 	TOggplaySettings::EVolumeBoostUp,
 	TOggplaySettings::EVolumeBoostDown,
-    TOggplaySettings::EHotKeyExit,
-    TOggplaySettings::EHotKeyBack,
-    TOggplaySettings::EHotkeyVolumeHelp
-  };
+	TOggplaySettings::EHotKeyExit,
+	TOggplaySettings::EHotKeyBack,
+	TOggplaySettings::EHotkeyVolumeHelp,
+	TOggplaySettings::EHotkeyToggleShuffle,
+	TOggplaySettings::EHotkeyToggleRepeat
+	};
 
-TInt 
-COggUserHotkeysS80::MapRssListToCommand(TInt aRSSIndex)  
-  {
-    return KMapRssListToCommand[aRSSIndex];
-  };
+TInt COggUserHotkeysS80::MapRssListToCommand(TInt aRSSIndex)  
+	{
+	return KMapRssListToCommand[aRSSIndex];
+	}
   
   
-TInt 
-COggUserHotkeysS80::MapCommandToRssList(TInt aCommandIndex)  
-  {
-  	TInt j;
-  	TBool found = EFalse;
-	for ( j=0; j<TOggplaySettings::ENofHotkeys; j++ )
-	   if ( aCommandIndex == KMapRssListToCommand[j] )
-	   {
-	       found = 1;
-	      break;
-	   }
+TInt COggUserHotkeysS80::MapCommandToRssList(TInt aCommandIndex)  
+	{
+	TInt j;
+	TBool found = EFalse;
+	for (j = 0 ; j<TOggplaySettings::ENofHotkeys ; j++)
+		{
+		if (aCommandIndex == KMapRssListToCommand[j])
+			{
+			found = ETrue;
+			break;
+			}
+		}
+
 	if (found)
-	   return j;
-	return 0; // Return NoHotkeys if not found
-  }
+		return j;
 
-void
-COggUserHotkeysS80::SetSoftkeys(TBool aPlaying)
-{
-  TBuf<50> buf;
-  TInt action;
-  CEikonEnv * eikonEnv = CEikonEnv::Static();
-  CEikButtonGroupContainer * Cba = eikonEnv->AppUiFactory()->ToolBar();  
-  TOggplaySettings settings = static_cast <COggPlayAppUi *> ( eikonEnv->AppUi() ) -> iSettings;
+	return 0; // Return NoHotkeys if not found
+	}
+
+void COggUserHotkeysS80::SetSoftkeys(TBool aPlaying)
+	{
+	TBuf<50> buf;
+	TInt action;
+	CEikonEnv* eikonEnv = CEikonEnv::Static();
+	CEikButtonGroupContainer* cba = eikonEnv->AppUiFactory()->ToolBar();  
+	const TOggplaySettings& settings = ((COggPlayAppUi*) eikonEnv->EikAppUi())->iSettings;
   
-  CDesCArrayFlat* array = eikonEnv->ReadDesCArrayResourceL(R_USER_HOTKEY_ITEMS);
-  CleanupStack::PushL(array);
+	CDesCArrayFlat* array = eikonEnv->ReadDesCArrayResourceL(R_USER_HOTKEY_ITEMS);
+	CleanupStack::PushL(array);
  
-  for (TInt i=0; i<4; i++)
-  {
-    TInt hotkeyIndex = settings.iSoftKeysIdle[i];
-    if (aPlaying)
-       hotkeyIndex = settings.iSoftKeysPlay[i];
+	for (TInt i = 0 ; i<4 ; i++)
+		{
+		TInt hotkeyIndex = settings.iSoftKeysIdle[i];
+		if (aPlaying)
+			hotkeyIndex = settings.iSoftKeysPlay[i];
     
-    TInt command = hotkeyIndex;
-    switch (hotkeyIndex)
-    {
-    	case TOggplaySettings::ENoHotkey:
-    	    action = EEikCmdCanceled;
-    	    buf.Zero();
-    	    break;
-    	default:
-  			action = KHotkeysActions[hotkeyIndex]; 
-       buf.Copy(array->MdcaPoint(MapCommandToRssList(command)));
-    }
-    Cba->SetCommandL(i,action, buf); 
-  }
-  CleanupStack::PopAndDestroy(array);
-}
+		TInt command = hotkeyIndex;
+		switch (hotkeyIndex)
+			{
+			case TOggplaySettings::ENoHotkey:
+				action = EEikCmdCanceled;
+				buf.Zero();
+    		    break;
+
+			default:
+				action = KHotkeysActions[hotkeyIndex];
+				buf.Copy(array->MdcaPoint(MapCommandToRssList(command)));
+				break;
+			}
+
+		cba->SetCommandL(i, action, buf); 
+		}
+
+	CleanupStack::PopAndDestroy(array);
+	}
 
 #endif /* SERIES80 */

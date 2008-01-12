@@ -178,16 +178,9 @@ void CSettingsS80Dialog::ShowFolderCommand(TBool aShow)
 }
 
 void CSettingsS80Dialog::LineChangedL(TInt aControlId)
-{
-	if (aControlId==EOggSettingScanDir)
-		{
-			ShowFolderCommand(ETrue);
-		}
-	else 
-		{
-			ShowFolderCommand(EFalse);
-		}
-}
+	{
+	ShowFolderCommand(aControlId == EOggSettingScanDir);
+	}
 
 void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
 {

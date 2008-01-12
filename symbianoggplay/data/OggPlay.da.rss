@@ -34,6 +34,8 @@ CHARACTER_SET UTF8
 #define ogg_repeat_on         "Repeat er aktiv"						// New
 #define ogg_repeat_off        "Repeat er slået fra"					// New
 #define ogg_shuffle_playlist "Shuffle playliste"
+#define ogg_repeat "Repeat - %S"
+#define ogg_repeat2 "Repeat"
 #define ogg_find_files "Find nye filer"
 #define ogg_skins "Skins"
 #define ogg_options_cascade "Opsætninger..."
@@ -45,7 +47,6 @@ CHARACTER_SET UTF8
 #define ogg_play "Afspil"
 #define ogg_pause "Pause"
 
- 
 #define ogg_filescan_main_title "File discovery" // To be translated
 #define ogg_filescan_title "Leder efter .Ogg filer"
 #define ogg_filescan_title_mmf "Looking for files" // To be translated
@@ -65,7 +66,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_9 "Dette er ikke en ogg vorbis fil?!"
 #define ogg_text_error_10 "Kun mono og stereo er understøttet."
 #define ogg_text_error_12 "Audio formatet er ikke understøttet."
-//#define ogg_text_error_13 "Kun 11025,16000,22050,32000,44100 og 48000 Hz er understøttet."
+// #define ogg_text_error_13 "Kun 11025,16000,22050,32000,44100 og 48000 Hz er understøttet."
 #define ogg_text_error_14 "Kan ikke åbne filen (%d):"
 #define ogg_text_error_15 "Ingen filer åbne."
 #define ogg_text_error_16 "Fejl code "
@@ -74,9 +75,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_19 "Input fejl "
 #define ogg_text_error_20 "Fejl"
 #define ogg_text_error_21 "COggCanvas: Error opening background image."
-// Not used anymore
-//#define ogg_text_error_22 "Only the following sample rates are supported: "
-//#define ogg_text_error_23 "Only streams with one channel are supported."
+// #define ogg_text_error_22 "Only the following sample rates are supported: "
+// #define ogg_text_error_23 "Only streams with one channel are supported."
 #define ogg_text_error_24 "Denne fil er samplet ved %i Hz. Denne mobil understøtter desværre kun følgende sample rates : %S. "
 #define ogg_text_error_25 "Dette er en stereo fil. Denne mobil understøtter desværre kun mono."
 #define ogg_text_error_26 "Oggplay vil automatisk down-sample filen så den kan afspilles. Overvej evt. at resample filen/filerne for at spare plads. Kvaliteten vil blive den samme."
@@ -101,6 +101,7 @@ CHARACTER_SET UTF8
 #define ogg_text_string_11 "(filer)"
 #define ogg_text_string_12 "(playlister)"
 #define ogg_text_string_13 "(ukendte)"
+#define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Genveje"
@@ -142,7 +143,6 @@ CHARACTER_SET UTF8
 #define ogg_cba_play_pause            "Play / Pause" // To be Translated 
 
 // New Tags, not yet translated:
-
 #define ogg_random_on                "Shuffle Play"
 #define ogg_random_off               "Normal Play"
 #define ogg_volume_boost             "Volume Boost"
@@ -162,6 +162,7 @@ CHARACTER_SET UTF8
 #define ogg_volume_boost_8db         "8dB Gain"
 #define ogg_volume_boost_10db        "10dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
+
 #define ogg_boost_up                 "Volume boost up"
 #define ogg_boost_down               "Volume boost down"
 #define ogg_boost_downS80            "Volume boost dwn"
@@ -174,17 +175,24 @@ CHARACTER_SET UTF8
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
 
-// S80 Specific strings
-#define ogg_softkeys                 "Softkeys"   // To be Translated 
-#define ogg_cba_1                    "Softkey #1" // To be Translated 
-#define ogg_cba_2                    "Softkey #2" // To be Translated 
-#define ogg_cba_3                    "Softkey #3" // To be Translated 
-#define ogg_cba_4                    "Softkey #4" // To be Translated 
 
-#define ogg_cba_select               "Select"     // To be Translated 
+// S80 Specific strings
+#define ogg_softkeys_idle            "Idle Softkeys"
+#define ogg_softkeys_play            "PlayMode Softkeys"
+#define ogg_cba_1                    "Softkey #1"
+#define ogg_cba_2                    "Softkey #2"
+#define ogg_cba_3                    "Softkey #3"
+#define ogg_cba_4                    "Softkey #4"
+
+#define ogg_cba_select               "Select"
 #define ogg_cba_continue             "Continue"
-#define ogg_cba_cancel               "Cancel"     // To be Translated 
-#define ogg_cba_select_folder        "Folder"	//To be translated
+#define ogg_cba_cancel               "Cancel"
+#define ogg_cba_select_folder        "Folder"
+
+#define ogg_format_text_volume_help  "Volume help"
+#define ogg_toggle_shuffle           "Random"
+#define ogg_toggle_repeat            "Repeat"
+
 
 // Multi thread playback strings
 #define ogg_buffering_mode "Buffering mode"

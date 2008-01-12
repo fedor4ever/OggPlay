@@ -1,20 +1,16 @@
 ClearS80 skin for OggPlay
 =========================
-Version 28-05-2007, by Chris Handley
+Version 08-01-2008, by Chris Handley
 
 ClearS80 is a skin for OggPlay running on Series 80 devices, like the Nokia
-9500.  ClearS80 is heavily based upon the IcyS80 skin, which is the only S80
+9500.  ClearS80 is heavily based upon the IcyS80 skin, which was the only S80
 skin provided with OggPlay.
 
 
 Installation
 ------------
-Just copy the files "ClearS80.mbm" & "ClearS80.skn" into OggPlay's program
-folder.  This folder is "System\Apps\OggPlay" on the disk you installed OggPlay
-to.
-
-I have given my permission for ClearS80 to be provided with OggPlay, so
-those steps may be unnecessary!
+None needed, as it comes with OggPlay, and to my surprise it may even become
+the default skin.
 
 
 What is it like?
@@ -57,16 +53,23 @@ BMCONV program that comes with some Symbian SDKs.  I eventually ended-up with
 about 48 BMP files, and a batch file which could be used to create a new MBM
 file (including the correct bitmap depths, which was a big hassle).
 
-I then went about editing the relevant BMP files with Microsoft Paint, editing the SKN file
-with Notepad, and uploading the new MBM/SKN files to my Nokia 9500 for testing.
-At one point I had to add an extra BMP file (as one BMP had a dual purpose), so
-ClearS80's MBM no-longer exactly matches the layout of IcyS80.
+I then went about editing the relevant BMP files with Microsoft Paint, editing
+the SKN file with Notepad, and uploading the new MBM/SKN files to my Nokia 9500
+for testing.  At one point I had to add an extra BMP file (as one BMP had a dual
+purpose), so ClearS80's MBM no-longer exactly matches the layout of IcyS80.
 
-In the "source" folder I have included all the files necessary to edit &
-recreate the ClearS80.mbm file.  Simply double-click the "ClearS80_CreateMBM"
-batch file, which runs the provided BMCONV program with the correct parameters
-(all 50 of them!).  You can probably delete BMCONV if you have a Symbian SDK
-installed.
+
+You can get all the files necessary to edit & recreate the ClearS80.mbm file
+from here:
+http://symbianoggplay.cvs.sourceforge.net/symbianoggplay/symbianoggplay/bitmaps/Skins/ClearS80/
+
+As long as you have a Symbian SDK installed, then simply double-clicking on the
+"ClearS80_CreateMBM" batch file will run the BMCONV program with the correct
+parameters (all 50 of them!) required to recreate the ClearS80.mbm file.  If it
+does not work, then you need to obtain a recent version of BMCONV, and put it in
+the same folder as the batch file.  Email me if you can't find a suitable
+version of BMCONV.
+
 
 As long as the author of IcyS80 does not object, I put all of my files in the
 public domain - so you can do anything you please with them!  You could slightly

@@ -10,8 +10,8 @@
 #define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_translation "Traducao por LordNins"
-#define ogg_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
-#define ogg_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_about_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
 
 #define ogg_file_prop "Propriedades do Ficheiro"
 #define ogg_filename_txt "Nome:"
@@ -66,9 +66,7 @@
 #define ogg_text_error_9 "Nao e um ficheiro Ogg?!"
 #define ogg_text_error_10 "Apenas musicas com um ou dois canais suportadas."
 #define ogg_text_error_12 "Ficheiro Nao suportado."
-// This is not used anymore
 //#define ogg_text_error_13 "Frequencias suportadas: 11025,16000,22050,32000,44100,48000 Hz."
-//
 #define ogg_text_error_14 "Nao pode abrir o ficheiro (%d):"
 #define ogg_text_error_15 "Nenhum ficheiro aberto."
 #define ogg_text_error_16 "Error code "
@@ -77,7 +75,6 @@
 #define ogg_text_error_19 "Erro de leitura"
 #define ogg_text_error_20 "Erro"
 #define ogg_text_error_21 "COggCanvas: Erro na abertura da imagem de fundo."
-// Not used anymore
 //#define ogg_text_error_22 "Frequencias suportadas: "
 //#define ogg_text_error_23 "Apenas musicas com um ou dois canais suportadas."
 #define ogg_text_error_24 "Ficheiro codificado com uma frequencia = %i Hz. Infelizmente o telefone s¢ suporta as frequencias: %S. "
@@ -104,6 +101,7 @@
 #define ogg_text_string_11 "(ficheiros)"
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(nao atribuido)"
+#define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Atalhos"
@@ -116,16 +114,12 @@
 #define ogg_format_text_keylock      "Bloquear"          // NEW 2004-04-24
 #define ogg_format_text_playpause	 "Pausa / Play"     // NEW 2004-05-08
 
-
 #define ogg_settings                 "Definicoes"  // in the menu
 #define ogg_settings_title           "Definicoes Oggplay" // on top of the settings screen
 #define ogg_filescanmode             "Modo de Pesquisa"
-//#define ogg_maneuvring_speed         "Auto Mudanca Dir"  // DELETE
 #define ogg_autostart                "Autoplay no Inicio"
 #define ogg_fullscan                 "Pesquisa Completa"
 #define ogg_mmcdir                   "E:\Ogg"
-//#define ogg_normal                   "Normal"         // DELETE
-//#define ogg_fast                     "Rapido"           // DELETE
 #define ogg_on                       "On"
 #define ogg_off                      "Off"
 #define ogg_popup_on                 "Permitido"
@@ -168,6 +162,10 @@
 #define ogg_volume_boost_10db        "Ganho de 10dB"
 #define ogg_volume_boost_12db        "Ganho de 12dB"
 
+#define ogg_boost_up                 "Volume boost up"
+#define ogg_boost_down               "Volume boost down"
+#define ogg_boost_downS80            "Volume boost dwn"
+
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "Nenhum Plugin"
 
@@ -178,20 +176,22 @@
 
 
 // S80 Specific strings
-#define ogg_softkeys                 "Softkeys"   // To be Translated 
-#define ogg_cba_1                    "Softkey #1" // To be Translated 
-#define ogg_cba_2                    "Softkey #2" // To be Translated 
-#define ogg_cba_3                    "Softkey #3" // To be Translated 
-#define ogg_cba_4                    "Softkey #4" // To be Translated 
+#define ogg_softkeys_idle            "Idle Softkeys"
+#define ogg_softkeys_play            "PlayMode Softkeys"
+#define ogg_cba_1                    "Softkey #1"
+#define ogg_cba_2                    "Softkey #2"
+#define ogg_cba_3                    "Softkey #3"
+#define ogg_cba_4                    "Softkey #4"
 
-#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_select               "Select"
 #define ogg_cba_continue             "Continue"
-#define ogg_cba_cancel               "Cancel"     // To be Translated 
+#define ogg_cba_cancel               "Cancel"
+#define ogg_cba_select_folder        "Folder"
 
-#define ogg_boost_up                 "Volume boost up"     // To be Translated
-#define ogg_boost_down               "Volume boost down"   // To be Translated
-#define ogg_boost_downS80            "Volume boost dwn"
-#define ogg_cba_select_folder        "Folder"	//To be translated
+#define ogg_format_text_volume_help  "Volume help"
+#define ogg_toggle_shuffle           "Random"
+#define ogg_toggle_repeat            "Repeat"
+
 
 // Multi thread playback strings
 #define ogg_buffering_mode "Buffering mode"

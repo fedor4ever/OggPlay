@@ -988,238 +988,230 @@ void COggPlayAppUi::UpdateSoftkeys(TBool /* aForce */)
 	}
 
 void COggPlayAppUi::HandleCommandL(TInt aCommand)
-{
-  switch (aCommand)
-  {
-	case EOggAbout:
+	{
+	TBuf<256> buf;
+	switch (aCommand)
 		{
-#if defined(SERIES80)
-		COggAboutDialog *d = new(ELeave) COggAboutDialog;
-		d->ExecuteLD(R_DIALOG_ABOUT_S80);
-#else
-		COggAboutDialog *d = new(ELeave) COggAboutDialog;
-		d->ExecuteLD(R_DIALOG_ABOUT);
-#endif
-		break;
-		}
-
-	case EOggPlay:
-		PlaySelect();
-		break;
-		
-	case EOggStop:
-		Stop();
-		break;
-		
-	case EOggPauseResume:
-		PauseResume();
-		break;
-		
-	case EOggInfo:
-		ShowFileInfo();
-		break;
-		
-	case EOggShuffle:
-		SetRandomL(!iSettings.iRandom);
-		break;
-		
-	case EOggRepeat:
-	    ToggleRepeat();
-		break;
-		
-	case EOggOptions:
-		{
-#if defined(UIQ)
-		CHotkeyDialog *hk = new(ELeave) CHotkeyDialog(&iHotkey, &(iSettings.iAlarmActive), &(iSettings.iAlarmTime));
-		if (hk->ExecuteLD(R_DIALOG_HOTKEY)==EEikBidOk)
+		case EOggAbout:
 			{
-			SetHotKey();
-			iAppView->SetAlarm();
-			}
-#elif defined(SERIES80)
-        CSettingsS80Dialog *hk = new(ELeave) CSettingsS80Dialog(&iSettings);
-		hk->ExecuteLD(R_DIALOG_OPTIONS) ;
-		UpdateSoftkeys(EFalse);
-#elif defined(SERIES60)
-        ActivateOggViewL(KOggPlayUidSettingsView);
+#if defined(SERIES80)
+			COggAboutDialog *d = new(ELeave) COggAboutDialog;
+			d->ExecuteLD(R_DIALOG_ABOUT_S80);
+#else
+			COggAboutDialog *d = new(ELeave) COggAboutDialog;
+			d->ExecuteLD(R_DIALOG_ABOUT);
 #endif
-		break;
-		}
+			break;
+			}
+
+		case EOggPlay:
+			PlaySelect();
+			break;
+		
+		case EOggStop:
+			Stop();
+			break;
+		
+		case EOggPauseResume:
+			PauseResume();
+			break;
+		
+		case EOggInfo:
+			ShowFileInfo();
+			break;
+		
+		case EOggShuffle:
+			SetRandomL(!iSettings.iRandom);
+			break;
+		
+		case EOggRepeat:
+		    ToggleRepeat();
+			break;
+		
+		case EOggOptions:
+			{
+#if defined(UIQ)
+			CHotkeyDialog *hk = new(ELeave) CHotkeyDialog(&iHotkey, &(iSettings.iAlarmActive), &(iSettings.iAlarmTime));
+			if (hk->ExecuteLD(R_DIALOG_HOTKEY)==EEikBidOk)
+				{
+				SetHotKey();
+				iAppView->SetAlarm();
+				}
+#elif defined(SERIES80)
+			CSettingsS80Dialog *hk = new(ELeave) CSettingsS80Dialog(&iSettings);
+			hk->ExecuteLD(R_DIALOG_OPTIONS) ;
+			UpdateSoftkeys(EFalse);
+#elif defined(SERIES60)
+			ActivateOggViewL(KOggPlayUidSettingsView);
+#endif
+			break;
+			}
 
 #if defined(PLUGIN_SYSTEM)
-    case EOggCodecSelection:
-        {
+		case EOggCodecSelection:
+			{
 #if defined(SERIES80)
-		CCodecsS80Dialog *cd = new(ELeave) CCodecsS80Dialog();
-		cd->ExecuteLD(R_DIALOG_CODECS);
+			CCodecsS80Dialog *cd = new(ELeave) CCodecsS80Dialog();
+			cd->ExecuteLD(R_DIALOG_CODECS);
 #else
-         ActivateOggViewL(KOggPlayUidCodecSelectionView);
+			ActivateOggViewL(KOggPlayUidCodecSelectionView);
 #endif
-		break;
-        }
+			break;
+			}
 #endif
 
-    case EOggPlaybackOptions:
-		ActivateOggViewL(KOggPlayUidPlaybackOptionsView);
-		break;
+		case EOggPlaybackOptions:
+			ActivateOggViewL(KOggPlayUidPlaybackOptionsView);
+			break;
 
 #if defined(SERIES60)
-	case EOggAlarmSettings:
-		ActivateOggViewL(KOggPlayUidAlarmSettingsView);
-		break;
+		case EOggAlarmSettings:
+			ActivateOggViewL(KOggPlayUidAlarmSettingsView);
+			break;
 #endif
 
-	case EOggNextSong:
-		NextSong();
-		break;
+		case EOggNextSong:
+			NextSong();
+			break;
 		
-	case EOggPrevSong:
-		PreviousSong();
-		break;
+		case EOggPrevSong:
+			PreviousSong();
+			break;
 		
-	case EOggViewByTitle:
-	case EOggViewByAlbum:
-	case EOggViewByArtist:
-	case EOggViewByGenre:
-	case EOggViewBySubFolder:
-	case EOggViewByFileName:
-	case EOggViewByPlayList:
-        {
-		TBuf<16> dummy;
-		iAppView->FillView((TViews)(aCommand-EOggViewByTitle), ETop, dummy);
-		break;
-		}
+		case EOggViewByTitle:
+		case EOggViewByAlbum:
+		case EOggViewByArtist:
+		case EOggViewByGenre:
+		case EOggViewBySubFolder:
+		case EOggViewByFileName:
+		case EOggViewByPlayList:
+			iAppView->FillView((TViews)(aCommand-EOggViewByTitle), ETop, buf);
+			break;
 
-	case EOggViewRebuild:
-		{
-		iIsRunningEmbedded = EFalse;
-		HandleCommandL(EOggStop);
+		case EOggViewRebuild:
+			{
+			iIsRunningEmbedded = EFalse;
+			HandleCommandL(EOggStop);
 
 #if defined(SEARCH_OGGS_FROM_ROOT)
-        COggFilesSearchDialog *d = new(ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
-        if (iSettings.iScanmode == TOggplaySettings::EMmcOgg)
-          iAppView->iOggFiles->SearchSingleDrive(KMmcSearchDir, d, R_DIALOG_FILES_SEARCH, iCoeEnv->FsSession());
+			COggFilesSearchDialog *d = new(ELeave) COggFilesSearchDialog(iAppView->iOggFiles);
+			if (iSettings.iScanmode == TOggplaySettings::EMmcOgg)
+				iAppView->iOggFiles->SearchSingleDrive(KMmcSearchDir, d, R_DIALOG_FILES_SEARCH, iCoeEnv->FsSession());
 #if defined(SERIES80)
-		else if (iSettings.iScanmode == TOggplaySettings::ECustomDir)
-          iAppView->iOggFiles->SearchSingleDrive(iSettings.iCustomScanDir, d, R_DIALOG_FILES_SEARCH, iCoeEnv->FsSession());
+			else if (iSettings.iScanmode == TOggplaySettings::ECustomDir)
+				iAppView->iOggFiles->SearchSingleDrive(iSettings.iCustomScanDir, d, R_DIALOG_FILES_SEARCH, iCoeEnv->FsSession());
 #endif
-        else
-          iAppView->iOggFiles->SearchAllDrives(d, R_DIALOG_FILES_SEARCH, iCoeEnv->FsSession());
+			else
+				iAppView->iOggFiles->SearchAllDrives(d, R_DIALOG_FILES_SEARCH, iCoeEnv->FsSession());
 #else
-		iAppView->iOggFiles->CreateDb(iCoeEnv->FsSession());
+			iAppView->iOggFiles->CreateDb(iCoeEnv->FsSession());
 #endif
 
-		iAppView->iOggFiles->WriteDbL(iDbFileName, iCoeEnv->FsSession());
-		iViewHistoryStack.Reset();
+			iAppView->iOggFiles->WriteDbL(iDbFileName, iCoeEnv->FsSession());
+			iViewHistoryStack.Reset();
 
-		TBuf<16> dummy;
-		iAppView->FillView(ETop, ETop, dummy);
-		iAppView->Invalidate();
-		break;
-		}
+			iAppView->FillView(ETop, ETop, buf);
+			iAppView->Invalidate();
+			break;
+			}
 		
-	case EOggSkinOne:
-	case EOggSkinTwo:
-	case EOggSkinThree:
-	case EOggSkinFour:
-	case EOggSkinFive:
-	case EOggSkinSix:
-	case EOggSkinSeven:
-	case EOggSkinEight:
-	case EOggSkinNine:
-	case EOggSkinTen:
-		ReadSkin(aCommand-EOggSkinOne);
-		iAppView->HandleNewSkinLayout();
-		break;
+		case EOggSkinOne:
+		case EOggSkinTwo:
+		case EOggSkinThree:
+		case EOggSkinFour:
+		case EOggSkinFive:
+		case EOggSkinSix:
+		case EOggSkinSeven:
+		case EOggSkinEight:
+		case EOggSkinNine:
+		case EOggSkinTen:
+			ReadSkin(aCommand-EOggSkinOne);
+			iAppView->HandleNewSkinLayout();
+			break;
 
 #if defined(SERIES60) || defined(SERIES80)
-  case EUserStopPlayingCBA:
- 	HandleCommandL(EOggStop);
-    break;
+		case EUserStopPlayingCBA:
+ 			HandleCommandL(EOggStop);
+			break;
 
-  case EUserPauseCBA:
- 	iOggPlayback->Pause(); // does NOT call UpdateS60Softkeys
-	iAppView->Update();
-    UpdateSoftkeys();
-    break;
+		case EUserPauseCBA:
+			iOggPlayback->Pause(); // does NOT call UpdateS60Softkeys
+			iAppView->Update();
+			UpdateSoftkeys();
+			break;
 
-  case EUserPlayCBA:
- 	HandleCommandL(EOggPlay);
-	iAppView->Update();
-    break;
+		case EUserPlayCBA:
+			HandleCommandL(EOggPlay);
+			iAppView->Update();
+			break;
 
-  case EUserBackCBA:
- 	SelectPreviousView();
-    break;
+		case EUserBackCBA:
+			SelectPreviousView();
+			break;
 
-  case EOggUserHotkeys:
-    ActivateOggViewL(KOggPlayUidUserView);
-    break;
+		case EOggUserHotkeys:
+			ActivateOggViewL(KOggPlayUidUserView);
+			break;
 
-  case EUserHotKeyCBABack:
-	ActivateOggViewL();
-    break;
-    
-  case EUserFastForward:
-	iAppView->OggSeek(KFfRwdStep);
-    break;
+		case EUserHotKeyCBABack:
+			ActivateOggViewL();
+			break;
+	
+		case EUserFastForward:
+			iAppView->OggSeek(KFfRwdStep);
+			break;
 
-  case EUserRewind:
-	iAppView->OggSeek(-KFfRwdStep);
-    break;
+		case EUserRewind:
+			iAppView->OggSeek(-KFfRwdStep);
+			break;
 
-  case EUserListBoxPageDown:
-  	iAppView->ListBoxPageDown();
-    break;
+		case EUserListBoxPageDown:
+			iAppView->ListBoxPageDown();
+			break;
 
-  case EUserListBoxPageUp:
-  	iAppView->ListBoxPageUp();
-    break;
+		case EUserListBoxPageUp:
+			iAppView->ListBoxPageUp();
+			break;
 
-  case EUserVolumeHelp: 
-	{
-    TBuf<256> buf;
-	iEikonEnv->ReadResourceL(buf, R_OGG_STRING_14);
-	User::InfoPrint(buf);
-	break;
-    }
+		case EUserVolumeHelp: 
+			iEikonEnv->ReadResourceL(buf, R_OGG_STRING_14);
+			User::InfoPrint(buf);
+			break;
 
-  case EVolumeBoostUp:
-	{
-	TGainType currentGain = (TGainType) iSettings.iGainType;
-	TInt newGain = currentGain + 1;
-	if (newGain<=EStatic12dB)
-		SetVolumeGainL((TGainType) newGain);
-	break;
-	}
+		case EVolumeBoostUp:
+			{
+			TGainType currentGain = (TGainType) iSettings.iGainType;
+			TInt newGain = currentGain + 1;
+			if (newGain<=EStatic12dB)
+				SetVolumeGainL((TGainType) newGain);
+			break;
+			}
 
-  case EVolumeBoostDown:
-	{
-	TGainType currentGain = (TGainType) iSettings.iGainType;
-	TInt newGain = currentGain - 1;
-	if (newGain>=EMinus24dB)
-		SetVolumeGainL((TGainType) newGain);
-	break;
-	}
+		case EVolumeBoostDown:
+			{
+			TGainType currentGain = (TGainType) iSettings.iGainType;
+			TInt newGain = currentGain - 1;
+			if (newGain>=EMinus24dB)
+				SetVolumeGainL((TGainType) newGain);
+			break;
+			}
 #endif
 
 #if defined(SERIES60)
-	case EAknSoftkeyBack:
+		case EAknSoftkeyBack:
 #endif
-	case EEikCmdExit:
-		{
-		// Only do exit operations if we have actually finished starting up
-		if (iStartUpState == EStartUpComplete)
-			{
-			HandleCommandL(EOggStop);
-			WriteIniFile();
-			}
-		
-		Exit();
-		break;
+		case EEikCmdExit:
+			// Only do exit operations if we have actually finished starting up
+			if (iStartUpState == EStartUpComplete)
+				{
+				HandleCommandL(EOggStop);
+				WriteIniFile();
+				}
+
+			Exit();
+			break;
 		}
 	}
-}
 
 void COggPlayAppUi::PlaySelect()
 	{
@@ -1726,7 +1718,7 @@ void COggPlayAppUi::ReadIniFile()
     iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
     iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong;
     iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
-    iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotKeyExit;
+    iSettings.iSoftKeysPlay[3] = TOggplaySettings::ERewind;
 	iSettings.iCustomScanDir = KFullScanString;
 #endif
 #endif
@@ -1762,11 +1754,11 @@ void COggPlayAppUi::ReadIniFile()
 	// Read in the fields
 	TInt ini_version = 0;
 
-	TInt val = (TInt) IniRead32( tf );
+	TInt val = (TInt) IniRead32(tf);
 	if ( val == 0xdb ) // Our magic number ! (see writeini below)
 		{
 		// Followed by version number
-		ini_version = (TInt) IniRead32( tf );
+		ini_version = (TInt) IniRead32(tf);
 		TRACEF(COggLog::VA(_L("Inifile version %d"), ini_version ));
 		}
 	else
@@ -1837,15 +1829,15 @@ void COggPlayAppUi::ReadIniFile()
 		iSettings.iSoftKeysIdle[3] = (TInt) IniRead32(tf);
 		iSettings.iSoftKeysPlay[3] = (TInt) IniRead32(tf);
 #endif
-		iSettings.iRandom = (TBool) IniRead32(tf, 0, 1);
 
+		iSettings.iRandom = (TBool) IniRead32(tf, 0, 1);
 		} // version 2 onwards
 
 #if defined(PLUGIN_SYSTEM)
 	TInt nbController = IniRead32(tf);
 	for (TInt j = 0 ; j<nbController ; j++)
 		{
-		TBuf<10> extension;
+		TFileName extension;
 		if (tf.Read(extension) != KErrNone)
 			extension = KNullDesC;
 
@@ -2000,20 +1992,19 @@ void COggPlayAppUi::IniReadDes( TFileText& aFile, TDes& value,const TDesC& defau
 #endif
 
 void COggPlayAppUi::WriteIniFile()
-{
+	{
     TRACEF(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S, %d"), &iIniFileName, iIsRunningEmbedded));
     
     // Accessing the MMC , using the TFileText is extremely slow. 
-    // We'll do everything using the C:\ drive then move the file to it's final destination
-    // in MMC.
-    
+    // We'll do everything using the C:\ drive then move the file to it's final destination in MMC.
     TParsePtrC p(iIniFileName);
 	TBool useTemporaryFile = EFalse;
 	TFileName fileName = iIniFileName;
     if (p.Drive() != _L("C:"))
 		{
     	useTemporaryFile = ETrue;
-    	// Create the c:\tmp\ directory
+
+		// Create the c:\tmp\ directory
         TInt errorCode = iCoeEnv->FsSession().MkDir(_L("C:\\tmp\\"));
         if ((errorCode != KErrNone) && (errorCode !=  KErrAlreadyExists) )
           return;
@@ -2027,15 +2018,15 @@ void COggPlayAppUi::WriteIniFile()
     if (out.Replace(iCoeEnv->FsSession(), fileName, EFileWrite | EFileStreamText) != KErrNone)
 		return;
     
-    TRACEF(_L("Writing Inifile..."));
-    TFileText tf;
-    tf.Set(out);
+	TRACEF(_L("Writing Inifile..."));
+	TFileText tf;
+	tf.Set(out);
     
     // this should do the trick for forward compatibility:
-    TInt magic=0xdb;
-    TInt iniversion=12;
+	TInt magic=0xdb;
+	TInt iniversion=12;
 
-    TBuf<64> num;
+	TBuf<64> num;
     num.Num(magic);
     tf.Write(num);
     
@@ -2142,7 +2133,7 @@ void COggPlayAppUi::WriteIniFile()
         tf.Write(num);
         for (j = 0 ; j<supportedExtensionList->Count() ; j++)
 			{
-            tf.Write( (*supportedExtensionList)[j]);
+            tf.Write((*supportedExtensionList)[j]);
             CPluginInfo * selected = iOggPlayback->GetPluginListL().GetSelectedPluginInfo((*supportedExtensionList)[j]);
             if (selected)
             	num.Num((TInt)selected->iControllerUid.iUid) ;
@@ -2231,7 +2222,7 @@ void COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 		iAppView->StopCallBack();
 	}
 
-void COggPlayAppUi::ToggleRandom()
+void COggPlayAppUi::ToggleRandomL()
 	{
 	SetRandomL(!iSettings.iRandom);
 	}

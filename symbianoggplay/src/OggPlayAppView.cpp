@@ -570,72 +570,67 @@ TBool COggPlayAppView::SetHotkeysFromSkin(TOggParser& p)
 	}
 
 TBool COggPlayAppView::ReadHotkeyArgument(TOggParser& p)
-{
-  TInt numkey;
-  if (p.iToken==_L("FastForward")) {
-    p.Debug(_L("Setting FastForward."));
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EFastForward]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EFastForward]=ETrue;
-    }
-  } else if(p.iToken==_L("Rewind")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::ERewind]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::ERewind]=ETrue;
-    }
-  } else if(p.iToken==_L("PageUp")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPageUp]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPageUp]=ETrue;
-    }
-  } else if(p.iToken==_L("PageDown")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPageDown]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPageDown]=ETrue;
-    }
-  } else if(p.iToken==_L("NextSong")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::ENextSong]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::ENextSong]=ETrue;
-    }
-  } else if(p.iToken==_L("PreviousSong")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPreviousSong]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPreviousSong]=ETrue;
-    }
-  }
-#if !defined(SERIES80) 
-  else if(p.iToken==_L("PauseResume"))
-  {
-    if (p.ReadToken(numkey))
 	{
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPauseResume]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPauseResume]=ETrue;
-    }
+	TInt numkey;
+	if (p.iToken == _L("FastForward"))
+		{
+		p.Debug(_L("Setting FastForward."));
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EFastForward]='0'+numkey;
+		}
+	else if (p.iToken == _L("Rewind"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::ERewind]='0'+numkey;
+		}
+	else if (p.iToken == _L("PageUp"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EPageUp]='0'+numkey;
 
-  }
+		}
+	else if (p.iToken == _L("PageDown"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EPageDown]='0'+numkey;
+		}
+	else if (p.iToken == _L("NextSong"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::ENextSong]='0'+numkey;
+		}
+	else if( p.iToken == _L("PreviousSong"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EPreviousSong] ='0'+numkey;
+		}
+
+#if !defined(SERIES80) 
+	else if (p.iToken == _L("PauseResume"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EPauseResume]='0'+numkey;
+		}
 #endif
-  else if(p.iToken==_L("Play")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPlay]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPlay]=ETrue;
-    }
 
-  } else if(p.iToken==_L("Pause")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EPause]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EPause]=ETrue;
-    }
-  } else if(p.iToken==_L("Stop")) {
-    if (p.ReadToken(numkey)) {
-      iApp->iSettings.iUserHotkeys[TOggplaySettings::EStop]='0'+numkey;
-      iApp->iSettings.iLockedHotkeys[TOggplaySettings::EStop]=ETrue;
-    }
+	else if (p.iToken == _L("Play"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EPlay]='0'+numkey;
+		}
+	else if (p.iToken == _L("Pause"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EPause]='0'+numkey;
+		}
+	else if (p.iToken == _L("Stop"))
+		{
+		if (p.ReadToken(numkey))
+			iApp->iSettings.iUserHotkeys[TOggplaySettings::EStop]='0'+numkey;
+		}
 
-  }
-
-  return ETrue;
-}
+	return ETrue;
+	}
 
 void COggPlayAppView::SetupListBox(COggListBox* aListBox, TSize aSize)
 {
@@ -2250,28 +2245,45 @@ void COggPlayAppView::OggSeek(TInt aSeekTime)
 	}
 
 void COggPlayAppView::OggControlEvent(COggControl* c, TInt aEventType, TInt /*aValue*/)
-{
-  if (c==iListBox[iMode]) {
-    if (aEventType==1) {
-      iSelected= iListBox[iMode]->CurrentItemIndex();
-      UpdateControls(); // the current item index changed
-    }
-    if (aEventType==2) iApp->HandleCommandL(EOggPlay); // an item was selected (by tipping on it)
-  }
+	{
+	if (c == iListBox[iMode])
+		{
+		if (aEventType == 1)
+			{
+			iSelected = iListBox[iMode]->CurrentItemIndex();
+			UpdateControls(); // the current item index changed
+			}
 
-  if (c==iPlayButton[iMode]) {
-    if (iApp->iOggPlayback->State()==CAbsPlayback::EPaused)
-      iApp->HandleCommandL(EOggPauseResume);
-    else
-      iApp->HandleCommandL(EOggPlay);
-  }
-  if (c==iPauseButton[iMode]) iApp->HandleCommandL(EOggPauseResume);
-  if (c==iStopButton[iMode]) iApp->HandleCommandL(EOggStop);
-  if (c==iNextSongButton[iMode]) iApp->NextSong();
-  if (c==iPrevSongButton[iMode]) iApp->PreviousSong();
-  if (c==iRepeatButton[iMode]) iApp->ToggleRepeat();
-  if (c==iRandomButton[iMode]) iApp->ToggleRandom();
-}
+		if (aEventType == 2)
+			iApp->HandleCommandL(EOggPlay); // an item was selected (by tipping on it)
+		}
+
+	if (c == iPlayButton[iMode])
+		{
+		if (iApp->iOggPlayback->State() == CAbsPlayback::EPaused)
+			iApp->HandleCommandL(EOggPauseResume);
+		else
+			iApp->HandleCommandL(EOggPlay);
+		}
+
+	if (c == iPauseButton[iMode])
+		iApp->HandleCommandL(EOggPauseResume);
+
+	if (c == iStopButton[iMode])
+		iApp->HandleCommandL(EOggStop);
+
+	if (c == iNextSongButton[iMode])
+		iApp->NextSong();
+
+	if (c == iPrevSongButton[iMode])
+		iApp->PreviousSong();
+
+	if (c == iRepeatButton[iMode])
+		iApp->ToggleRepeat();
+
+	if (c == iRandomButton[iMode])
+		iApp->ToggleRandomL();
+	}
 
 void COggPlayAppView::OggPointerEvent(COggControl* c, const TPointerEvent& p)
 	{

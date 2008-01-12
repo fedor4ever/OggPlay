@@ -171,7 +171,7 @@ MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 	MDecoder* decoder = NULL;
 
 	TParsePtrC p(aFileName);
-	TBuf<10> ext(p.Ext());
+	TFileName ext(p.Ext());
 
 	if (ext.CompareF(KOggExt) == 0)
 		decoder = new(ELeave) CTremorDecoder(iFs);

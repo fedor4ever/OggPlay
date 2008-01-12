@@ -78,8 +78,8 @@ void CSplashContainer::ConstructL()
 
 void CSplashContainer::ShowSplashL()
 	{
-#if defined(SERIES90)
-	// For some reason on S90 the splash view gets activated twice,
+#if defined(SERIES80)
+	// For some reason on S80 the splash view gets activated twice,
 	// so we must avoid creating the window twice (otherwise we get a CONE 10 panic)
 	if (iDisplayTimer)
 		return;

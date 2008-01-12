@@ -76,7 +76,7 @@ private:
 	class TExtensionList
 		{
 	public:
-		TBuf<10> extension;
+		TFileName extension;
 		CPluginInfo *selectedPlugin;
 		CArrayPtrFlat <CPluginInfo>* listPluginInfos; 
 		};

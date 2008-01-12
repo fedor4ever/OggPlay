@@ -35,6 +35,8 @@ CHARACTER_SET UTF8
 #define ogg_repeat_on         "Herhalen staat aan"						// New
 #define ogg_repeat_off        "Herhalen staat uit"						// New
 #define ogg_shuffle_playlist "Willekeurige volgorde"
+#define ogg_repeat "Repeat - %S"
+#define ogg_repeat2 "Repeat"
 #define ogg_find_files "Zoek nieuwe bestanden"
 #define ogg_skins "Skins"
 #define ogg_options_cascade "Opties..."
@@ -65,7 +67,7 @@ CHARACTER_SET UTF8
 #define ogg_text_error_9 "Dit is geen ogg vorbis bestand?!" 
 #define ogg_text_error_10   "Alleen geluidsbronnen met een of twee kanalen worden ondersteunt."
 #define ogg_text_error_12 "Niet ondersteunt muziekformaat."
-//#define ogg_text_error_13 "Alleen de volgende samplefrequenties worden ondersteunt: 11025,16000,22050,32000,44100,48000 Hz."
+// #define ogg_text_error_13 "Alleen de volgende samplefrequenties worden ondersteunt: 11025,16000,22050,32000,44100,48000 Hz."
 #define ogg_text_error_14 "Kan dit bestand niet openen (%d):"
 #define ogg_text_error_15 "Geen bestand is geopend."
 #define ogg_text_error_16 "Foutcode "
@@ -74,9 +76,8 @@ CHARACTER_SET UTF8
 #define ogg_text_error_19 "Fout bij het inlezen "
 #define ogg_text_error_20 "Fout"
 #define ogg_text_error_21 "COggCanvas: Fout bij het openen van de achtergrondtekening."
-// Not used anymore
-//#define ogg_text_error_22 "Alleen de volgende samplefrequenties worden ondersteunt: "
-//#define ogg_text_error_23 "Alleen geluidsbronnen met één kanaal worden ondersteunt."
+// #define ogg_text_error_22 "Alleen de volgende samplefrequenties worden ondersteunt: "
+// #define ogg_text_error_23 "Alleen geluidsbronnen met één kanaal worden ondersteunt."
 #define ogg_text_error_24 "Alleen de volgende samplefrequenties worden ondersteunt: "
 #define ogg_text_error_25 "Dit ogg bestand bevat 2 audiosporen (stereo). Spijtig genoeg is enkel mono playback ondersteunt door de telefoon."
 #define ogg_text_error_26 "Oggplay zal de nodige omzetting doen zodat je in staat bent om deze ogg af te spelen. Maar, als je bezorgd bent in verband de grootte van de bestanden, codeer dan de bestanden met een bitsnelheid die wordt ondersteunt door je telefoon. Door dit te doen kan je grootte van de bestanden aanzienlijk beperken zonder impact op de playback kwaliteit."
@@ -101,6 +102,7 @@ CHARACTER_SET UTF8
 #define ogg_text_string_11 "(bestanden)"
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(niet toegewezen)"
+#define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Sneltoets"
@@ -110,16 +112,15 @@ CHARACTER_SET UTF8
 #define ogg_format_text_page_down    "Bestandslijst pagina omlaag"
 #define ogg_format_text_next_song	 ogg_next_song
 #define ogg_format_text_prev_song	 ogg_prev_song
- 
+#define ogg_format_text_keylock      "Keylock"          // NEW 2004-04-24
+#define ogg_format_text_playpause	 "Pause / Play"     // NEW 2004-05-08
+
 #define ogg_settings                 "Instellingen"  // in the menu
 #define ogg_settings_title           "Oggplay Instellingen" // on top of the settings screen
 #define ogg_filescanmode             "Bestand scan mode"
-//#define ogg_maneuvring_speed         "Automatisch map veranderen"
 #define ogg_autostart                "Automatisch afspelen bij start"
 #define ogg_fullscan                 "Volledige Scan"
 #define ogg_mmcdir                   "E:\Ogg"
-//#define ogg_normal                   "Normaal"
-//#define ogg_fast                     "Snel"
 #define ogg_on                       "Aan"
 #define ogg_off                      "Uit"
 #define ogg_popup_on                 "Ingeschakeld"
@@ -130,7 +131,6 @@ CHARACTER_SET UTF8
 #define ogg_warnings                 "Waarschuwing"
 #define ogg_by                       " door "
 
- 
 #define ogg_rsk_idle                 "Rechtse Softkey / Rust "
 #define ogg_rsk_play                 "Rechtse SK / Speel mode"
 #define ogg_cba_back                 "Terug"
@@ -143,7 +143,7 @@ CHARACTER_SET UTF8
 #define ogg_cba_play                 "Speel"
 #define ogg_cba_play_pause           "Play / Pause" // To be Translated 
 
-// New Tags, not yet translated:
+// To be translated
 #define ogg_random_on                "Shuffle Play"
 #define ogg_random_off               "Normal Play"
 #define ogg_volume_boost             "Volume Boost"
@@ -163,10 +163,10 @@ CHARACTER_SET UTF8
 #define ogg_volume_boost_8db         "8dB Gain"
 #define ogg_volume_boost_10db        "10dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
+
 #define ogg_boost_up                 "Volume boost up"
 #define ogg_boost_down               "Volume boost down"
 #define ogg_boost_downS80            "Volume boost dwn"
-
 
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"
@@ -178,16 +178,22 @@ CHARACTER_SET UTF8
 
 
 // S80 Specific strings
-#define ogg_softkeys                 "Softkeys"   // To be Translated 
-#define ogg_cba_1                    "Softkey #1" // To be Translated 
-#define ogg_cba_2                    "Softkey #2" // To be Translated 
-#define ogg_cba_3                    "Softkey #3" // To be Translated 
-#define ogg_cba_4                    "Softkey #4" // To be Translated 
+#define ogg_softkeys_idle            "Idle Softkeys"
+#define ogg_softkeys_play            "PlayMode Softkeys"
+#define ogg_cba_1                    "Softkey #1"
+#define ogg_cba_2                    "Softkey #2"
+#define ogg_cba_3                    "Softkey #3"
+#define ogg_cba_4                    "Softkey #4"
 
-#define ogg_cba_select               "Select"     // To be Translated 
+#define ogg_cba_select               "Select"
 #define ogg_cba_continue             "Continue"
-#define ogg_cba_cancel               "Cancel"     // To be Translated 
-#define ogg_cba_select_folder        "Folder"	//To be translated
+#define ogg_cba_cancel               "Cancel"
+#define ogg_cba_select_folder        "Folder"
+
+#define ogg_format_text_volume_help  "Volume help"
+#define ogg_toggle_shuffle           "Random"
+#define ogg_toggle_repeat            "Repeat"
+
 
 // Multi thread playback strings
 #define ogg_buffering_mode "Buffering mode"

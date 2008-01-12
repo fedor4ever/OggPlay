@@ -10,8 +10,8 @@
 #define ogg_about_cpr2 "© codec Ogg Vorbis Xiph.org"
 #define ogg_about_cpr3 "© codec Flac Josh Coalson"
 #define ogg_translation "Traduit par Colin Savary et Berthier Lemieux"
-#define ogg_port "Adaptation pour S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
-#define ogg_port_S80 "Adaptation pour S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_port "Adaptation pour S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
+#define ogg_about_port_S80 "Adaptation pour S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
 
 #define ogg_file_prop "Propriétés du fichier"
 #define ogg_filename_txt "Nom de fichier:"
@@ -34,6 +34,8 @@
 #define ogg_repeat_on         "Répét. Activée"	
 #define ogg_repeat_off        "Répét. Desactivée"	
 #define ogg_shuffle_playlist "Mélanger liste de lecture"
+#define ogg_repeat "Repeat - %S"
+#define ogg_repeat2 "Repeat"
 #define ogg_find_files "Chercher fichiers"
 #define ogg_skins "Skins"
 #define ogg_options_cascade "Options..."
@@ -99,6 +101,7 @@
 #define ogg_text_string_11 "(fichiers)"
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(non-assignés)"
+#define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Raccourcis"
@@ -108,16 +111,15 @@
 #define ogg_format_text_page_down    "Bas de liste"
 #define ogg_format_text_next_song	 ogg_next_song
 #define ogg_format_text_prev_song	 ogg_prev_song
+#define ogg_format_text_keylock      "Keylock"          // NEW 2004-04-24
+#define ogg_format_text_playpause	 "Pause / Play"     // NEW 2004-05-08
 
 #define ogg_settings                 "Parametres"  // in the menu
 #define ogg_settings_title           "Parametres"  // on top of the settings screen
 #define ogg_filescanmode             "Mode de recherche"
-#define ogg_maneuvring_speed         "Explor. Dossiers Auto"
 #define ogg_autostart                "Autoplay au démarrage"
 #define ogg_fullscan                 "Tout le téléphone"
 #define ogg_mmcdir                   "E:\Ogg"
-#define ogg_normal                   "Normal"
-#define ogg_fast                     "Rapide"
 #define ogg_on                       "Activé"
 #define ogg_off                      "Desactivé"
 #define ogg_popup_on                 "Activé"
@@ -140,7 +142,6 @@
 #define ogg_cba_play                 "Play"
 #define ogg_cba_play_pause           "Play / Pause" 
 
-
 #define ogg_random_on                "Ordre Aléatoire"
 #define ogg_random_off               "Ordre Normal"
 #define ogg_volume_boost             "Amplification"
@@ -161,6 +162,11 @@
 #define ogg_volume_boost_10db        "Gain 10dB"
 #define ogg_volume_boost_12db        "Gain 12dB"
 
+// To be translated
+#define ogg_boost_up                 "Volume boost up"
+#define ogg_boost_down               "Volume boost down"
+#define ogg_boost_downS80            "Volume boost dwn"
+
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "Aucun détecté"
 
@@ -171,21 +177,22 @@
 
 
 // S80 Specific strings
-#define ogg_softkeys                 "Softkeys"   
-#define ogg_cba_1                    "Softkey #1" 
-#define ogg_cba_2                    "Softkey #2" 
-#define ogg_cba_3                    "Softkey #3"  
+#define ogg_softkeys_idle            "Idle Softkeys"
+#define ogg_softkeys_play            "PlayMode Softkeys"
+#define ogg_cba_1                    "Softkey #1"
+#define ogg_cba_2                    "Softkey #2"
+#define ogg_cba_3                    "Softkey #3"
 #define ogg_cba_4                    "Softkey #4"
 
-#define ogg_cba_select               "Select."    
+#define ogg_cba_select               "Select"
 #define ogg_cba_continue             "Continue"
-#define ogg_cba_cancel               "Cancel."    
+#define ogg_cba_cancel               "Cancel"
+#define ogg_cba_select_folder        "Folder"
 
-// New Tags, not yet translated:
-#define ogg_boost_up                 "Volume boost up"
-#define ogg_boost_down               "Volume boost down"
-#define ogg_boost_downS80            "Volume boost dwn"
-#define ogg_cba_select_folder        "Folder"	//To be translated
+#define ogg_format_text_volume_help  "Volume help"
+#define ogg_toggle_shuffle           "Random"
+#define ogg_toggle_repeat            "Repeat"
+
 
 // Multi thread playback strings
 #define ogg_buffering_mode "Buffering mode"

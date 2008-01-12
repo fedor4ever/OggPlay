@@ -21,6 +21,8 @@
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\ClearS80\ClearS80.skn"-"!:\system\apps\oggplay\ClearS80.skn"
 "..\bitmaps\Skins\ClearS80\ClearS80.mbm"-"!:\system\apps\oggplay\ClearS80.mbm"
+"..\bitmaps\Skins\icyS80\icyS80.skn"-"!:\system\apps\oggplay\IcyS80.skn"
+"..\bitmaps\Skins\icyS80\icyS80.mbm"-"!:\system\apps\oggplay\IcyS80.mbm"
 
 "\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
 "\epoc32\release\armi\urel\OggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"

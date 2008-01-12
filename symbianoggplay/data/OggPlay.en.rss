@@ -45,13 +45,6 @@
 #define ogg_stop "Stop"
 #define ogg_play "Play"
 #define ogg_pause "Pause"
-#define ogg_boost_up "Volume boost up"
-#define ogg_boost_down "Volume boost down"
-#define ogg_boost_downS80 "Volume boost dwn"
-
-#define ogg_buffering_mode "Buffering mode"
-#define ogg_thread_priority "Thread priority" 
-
 
 #define ogg_filescan_main_title "File discovery"
 #define ogg_filescan_title "Looking for ogg files"
@@ -72,9 +65,7 @@
 #define ogg_text_error_9 "This is not an ogg vorbis file?!"
 #define ogg_text_error_10 "Only streams with one or two channels are supported."
 #define ogg_text_error_12 "Unsupported audio format."
-// This is not used anymore
-//#define ogg_text_error_13 "Only the following sample rates are supported: 11025,16000,22050,32000,44100,48000 Hz."
-//
+// #define ogg_text_error_13 "Only the following sample rates are supported: 11025,16000,22050,32000,44100,48000 Hz."
 #define ogg_text_error_14 "Cannot open file (%d):"
 #define ogg_text_error_15 "No file is open."
 #define ogg_text_error_16 "Error code "
@@ -83,9 +74,8 @@
 #define ogg_text_error_19 "Input error "
 #define ogg_text_error_20 "Error"
 #define ogg_text_error_21 "COggCanvas: Error opening background image."
-// Not used anymore
-//#define ogg_text_error_22 "Only the following sample rates are supported: "
-//#define ogg_text_error_23 "Only streams with one channel are supported."
+// #define ogg_text_error_22 "Only the following sample rates are supported: "
+// #define ogg_text_error_23 "Only streams with one channel are supported."
 #define ogg_text_error_24 "This ogg file has been encoded using sampling rate = %i Hz. Unfortunately your phone only supports audio playback for the following sampling rates: %S. "
 #define ogg_text_error_25 "This ogg file contains 2 audio tracks (stereo), unfortunately only mono playback is supported by the phone. "
 #define ogg_text_error_26 "Oggplay will do the required convertion in order to allow you play the ogg. But, if you're concerned about the size of your ogg files, please consider encoding them in a rate supported by your phone. This will reduce considerably the size of the files, with no impact on the quality of played-back audios."
@@ -108,11 +98,10 @@
 #define ogg_text_string_9 "(genres)"
 #define ogg_text_string_10 "(subfolders)"
 #define ogg_text_string_11 "(files)"
-
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(unassigned)"
-
 #define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
+
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"
 #define ogg_format_text_fast_forward "Fast forward"
@@ -124,16 +113,12 @@
 #define ogg_format_text_keylock      "Keylock"          // NEW 2004-04-24
 #define ogg_format_text_playpause	 "Pause / Play"     // NEW 2004-05-08
 
-
 #define ogg_settings                 "Settings"  // in the menu
 #define ogg_settings_title           "Oggplay Settings" // on top of the settings screen
 #define ogg_filescanmode             "File scan mode"
-//#define ogg_maneuvring_speed         "Auto Change Dir"  // DELETE
 #define ogg_autostart                "Autoplay on start"
 #define ogg_fullscan                 "Full Scan"
 #define ogg_mmcdir                   "E:\Ogg"
-//#define ogg_normal                   "Normal"         // DELETE
-//#define ogg_fast                     "Fast"           // DELETE
 #define ogg_on                       "On"
 #define ogg_off                      "Off"
 #define ogg_popup_on                 "Enabled"
@@ -176,6 +161,10 @@
 #define ogg_volume_boost_10db        "10dB Gain"
 #define ogg_volume_boost_12db        "12dB Gain"
 
+#define ogg_boost_up                 "Volume boost up"
+#define ogg_boost_down               "Volume boost down"
+#define ogg_boost_downS80            "Volume boost dwn"
+
 #define ogg_codec_selection          "Codecs"
 #define ogg_no_plugin_found          "No Plugin Found"
 
@@ -184,12 +173,6 @@
 #define ogg_codec_info_version       "Version"
 #define ogg_codec_info_UID           "UID"
 
-#define ogg_playback                 "Playback"
-#define ogg_playback_title           "Playback options"
-
-#define ogg_buffering_mode_multi     "Multi thread"
-#define ogg_buffering_mode_single    "Single thread"
-#define ogg_buffering_mode_none      "No buffering"
 
 // S80 Specific strings
 #define ogg_softkeys_idle            "Idle Softkeys"
@@ -202,8 +185,23 @@
 #define ogg_cba_select               "Select"
 #define ogg_cba_continue             "Continue"
 #define ogg_cba_cancel               "Cancel"
-#define ogg_format_text_volume_help  "Volume help"
 #define ogg_cba_select_folder        "Folder"
+
+#define ogg_format_text_volume_help  "Volume help"
+#define ogg_toggle_shuffle           "Random"
+#define ogg_toggle_repeat            "Repeat"
+
+
+// Multi thread playback strings
+#define ogg_buffering_mode "Buffering mode"
+#define ogg_thread_priority "Thread priority" 
+
+#define ogg_playback                 "Playback"
+#define ogg_playback_title           "Playback options"
+
+#define ogg_buffering_mode_multi     "Multi thread"
+#define ogg_buffering_mode_single    "Single thread"
+#define ogg_buffering_mode_none      "No buffering"
 
 #define ogg_alarm_s60                    "Alarm"
 #define ogg_alarm_time_s60               "Alarm time"

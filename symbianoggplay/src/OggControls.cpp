@@ -211,18 +211,18 @@ CGulIcon* TOggParser::ReadIcon(const TFileName& aBitmapFile)
 }
 
 TBool TOggParser::ReadColor(TRgb& aColor)
-{
-  TInt red(0), green(0), blue(0);
-  TBool success= ReadToken(red) && ReadToken(green) && ReadToken(blue);
-  if (success)
-  {
-    aColor.SetRed(red);
-    aColor.SetGreen(green);
-    aColor.SetBlue(blue);
-  }
+	{
+	TInt red(0), green(0), blue(0);
+	TBool success = ReadToken(red) && ReadToken(green) && ReadToken(blue);
+	if (success)
+		{
+		aColor.SetRed(red);
+		aColor.SetGreen(green);
+		aColor.SetBlue(blue);
+		}
 
-  return success;
-}
+	return success;
+	}
 
 CFont* TOggParser::ReadFont()
 	{

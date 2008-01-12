@@ -63,24 +63,26 @@ void COggUserHotkeysControl::ConstructL(const TRect& aRect)
 
 
 COggUserHotkeysControl::~COggUserHotkeysControl()
-  {
-  delete iListBox;
-  }
+	{
+	delete iListBox;
+	}
 
-void COggUserHotkeysControl::SetHotkey( TInt aRow, TInt aCode )
-  {
-  aRow += TOggplaySettings::KFirstHotkeyIndex;
+void COggUserHotkeysControl::SetHotkey(TInt aRow, TInt aCode)
+	{
+	aRow += TOggplaySettings::KFirstHotkeyIndex;
 
-  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
-    {
-    if( i == aRow )
-      continue;
-    // Prevent replicas
-    if( iData.iUserHotkeys[i] == aCode )
-      iData.iUserHotkeys[i] = TOggplaySettings::ENoHotkey;
-    }
-  iData.iUserHotkeys[aRow] = aCode;
-  }
+	for (TInt i = TOggplaySettings::KFirstHotkeyIndex ; i<TOggplaySettings::ENofHotkeys ; i++)
+		{
+		if( i == aRow )
+			continue;
+    
+		// Prevent replicas
+		if (iData.iUserHotkeys[i] == aCode)
+			iData.iUserHotkeys[i] = TOggplaySettings::ENoHotkey;
+		}
+	
+	iData.iUserHotkeys[aRow] = aCode;
+	}
 
 // Static method
 TOggplaySettings::THotkeys COggUserHotkeysControl::Hotkey(const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData)

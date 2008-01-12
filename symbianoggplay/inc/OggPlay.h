@@ -156,6 +156,8 @@ public:
 		EHotKeyExit,
 		EHotKeyBack,
 		EHotkeyVolumeHelp,
+		EHotkeyToggleShuffle,
+		EHotkeyToggleRepeat,
 
 		KFirstHotkeyIndex = EFastForward,
 
@@ -166,12 +168,10 @@ public:
 #endif
 
 		ENofHotkeysV5 = EVolumeBoostUp,
-		ENofHotkeysV7 = EHotKeyExit,
-		ENofHotkeys = EHotkeyVolumeHelp+1
+		ENofHotkeys = EHotkeyToggleRepeat+1
 		};
 
 	TInt iUserHotkeys[ENofHotkeys];
-	TBool iLockedHotkeys[ENofHotkeys];
 	TBool iRepeat;
 	TBool iRandom;
 
@@ -212,7 +212,9 @@ const TInt KHotkeysActions[]  =
 	EVolumeBoostDown,	// EVolumeBoostDown,
     EEikCmdExit,    	// EHotKeyExit,
     EUserBackCBA,  		// EHotKeyBack,
-    EUserVolumeHelp     // EHotkeyVolumeHelp 
+    EUserVolumeHelp,    // EHotkeyVolumeHelp 
+	EOggShuffle,        // EHotkeyToggleShuffle
+	EOggRepeat          // EHotkeyToggleRepeat
 	};
  
  
@@ -378,7 +380,7 @@ public:
 	void SetRandomL(TBool aRandom);
 	void SetRepeat(TBool aRepeat);
 	void ToggleRepeat();
-	void ToggleRandom();
+	void ToggleRandomL();
   
 #if defined(SERIES80)
 	CEikButtonGroupContainer* Cba()  

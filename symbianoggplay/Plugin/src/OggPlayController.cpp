@@ -201,9 +201,6 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
         User::Leave(KErrNotSupported);
     
 	TRACEF(COggLog::VA(_L("OggPlayController::iFileName %S "), &iFileName));
-
-	// Open the file here, in order to get the tags.
-    OpenFileL(iFileName);
 	}
 
 void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
@@ -727,7 +724,10 @@ void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries)
 
 CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
 	{
-    switch(aIndex)
+	if (iState == EStateNotOpened)
+		OpenFileL(iFileName);
+
+	switch(aIndex)
 		{
 		case 0:
 			return (CMMFMetaDataEntry::NewL(_L("title"), iTitle));
@@ -812,7 +812,7 @@ MDecoder* COggPlayController::GetDecoderL(const TDesC& aFileName)
 	MDecoder* decoder = NULL;
 
 	TParsePtrC p(aFileName);
-	TBuf<10> ext(p.Ext());
+	TFileName ext(p.Ext());
 
 	if (ext.CompareF(KOggExt) == 0)
 		decoder = new(ELeave) CTremorDecoder(iFs);
