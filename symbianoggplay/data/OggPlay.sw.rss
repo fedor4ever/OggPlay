@@ -34,8 +34,8 @@
 #define ogg_repeat_on         "Repetering på"						// New
 #define ogg_repeat_off        "Repetering av"						// New
 #define ogg_shuffle_playlist "Kasta om spellistan"
-#define ogg_repeat "Repeat - %S"
-#define ogg_repeat2 "Repeat"
+#define ogg_repeat "Repetering - %S"
+#define ogg_repeat2 "Repetering"
 #define ogg_find_files "Sök nya filer"
 #define ogg_skins "Skal"
 #define ogg_options_cascade "Inställningar..."

@@ -36,8 +36,8 @@ CHARACTER_SET UTF8
 #define ogg_repeat_on         "Tekrarlama açık" // New
 #define ogg_repeat_off        "Tekrarlama kapalı" // New
 #define ogg_shuffle_playlist "Rastgele listele"
-#define ogg_repeat "Repeat - %S"
-#define ogg_repeat2 "Repeat"
+#define ogg_repeat "Tekrarlama - %S"
+#define ogg_repeat2 "Tekrarlama"
 #define ogg_find_files "Yeni dosyalar bul"
 #define ogg_skins "Kabuklar"
 #define ogg_options_cascade "Seçenekler..."

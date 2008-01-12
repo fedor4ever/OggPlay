@@ -35,8 +35,8 @@ CHARACTER_SET UTF8
 #define ogg_repeat_on         "Repetir activado"						// New
 #define ogg_repeat_off        "Repetir desactivado"						// New
 #define ogg_shuffle_playlist "Orden Aleatorio"
-#define ogg_repeat "Repeat - %S"
-#define ogg_repeat2 "Repeat"
+#define ogg_repeat "Repetir - %S"
+#define ogg_repeat2 "Repetir"
 #define ogg_find_files "Buscar nuevos archivos"
 #define ogg_skins "Decorados"
 #define ogg_options_cascade "Opciones..."
