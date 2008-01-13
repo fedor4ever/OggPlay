@@ -1018,12 +1018,6 @@ void COggPlayAppView::ListBoxPageUp()
         SelectItem(index - iListBox[iMode]->NofVisibleLines() + 1);
 }
 
-void COggPlayAppView::SetTime(TInt64 aTime)
-	{
-	if (iPosition[iMode])
-		iPosition[iMode]->SetMaxValue(aTime);
-	}
-
 void COggPlayAppView::UpdateRepeat()
 {
   if (iApp->iSettings.iRepeat)
@@ -1358,7 +1352,7 @@ void COggPlayAppView::Update()
   UpdateAnalyzer();
   UpdateListbox();
   UpdateControls();
-  UpdateSongPosition();
+  UpdateSongPosition(ETrue);
   UpdateClock(ETrue);
   UpdateVolume();
   UpdateVolumeBoost();
@@ -1470,7 +1464,10 @@ void COggPlayAppView::UpdateControls()
   if (iRandomIcon[iMode]) iRandomIcon[iMode]->MakeVisible(iApp->iSettings.iRandom);
 }
 
-void COggPlayAppView::UpdateSongPosition()
+_LIT(KPositionFormat, "%02d:%02d");
+_LIT(KDurationFormat, "%02d:%02d");
+_LIT(KPosAndDurationFormat, "%S / %S");
+void COggPlayAppView::UpdateSongPosition(TBool aUpdateDuration)
 	{
 #if defined(SERIES60) || defined(SERIES80)
 	// Only show "Played" time component when not stopped, i.e. only show when artist, title etc is displayed
@@ -1485,25 +1482,35 @@ void COggPlayAppView::UpdateSongPosition()
 #endif
 
 	// Update the song position displayed in the menubar (flip open) or in the TOggCanvas (flip closed)
-	TBuf<64> mbuf;
 #if defined(SERIES60V3)
 	TInt sec = iApp->iOggPlayback->Position()/1000;
 #else
-	TInt sec = iApp->iOggPlayback->Position().GetTInt()/1000;
+	TInt sec = (iApp->iOggPlayback->Position()/TInt64(1000)).GetTInt();
 #endif
 
 	TInt min = sec/60;
 	sec -= min*60;
 
+	TBuf<32> positionBuf;
+	positionBuf.Format(KPositionFormat, min, sec);
+
+	if (aUpdateDuration)
+		iTimeTot = iApp->iOggPlayback->Time();
+
 #if defined(SERIES60V3)
-	TInt sectot = iApp->iOggPlayback->Time()/1000;
+	TInt secTot = iTimeTot/1000;
 #else
-	TInt sectot = iApp->iOggPlayback->Time().GetTInt()/1000;
+	TInt secTot = (iTimeTot/TInt64(1000)).GetTInt();
 #endif
 
-	TInt mintot = sectot/60;
-	sectot -= mintot*60;
-	mbuf.Format(_L("%02d:%02d / %02d:%02d"), min, sec, mintot, sectot);
+	TInt minTot = secTot/60;
+	secTot -= minTot*60;
+
+	TBuf<32> durationBuf;
+	durationBuf.Format(KDurationFormat, minTot, secTot);
+
+	TBuf<32> posAndDurationBuf;
+	posAndDurationBuf.Format(KPosAndDurationFormat, &positionBuf, &durationBuf);
 
 #if defined(UIQ)
 	if (IsFlipOpen())
@@ -1522,26 +1529,27 @@ void COggPlayAppView::UpdateSongPosition()
 	else
 		{
 		if (iPlayed[iMode])
-			iPlayed[iMode]->SetText(mbuf);
+			iPlayed[iMode]->SetText(posAndDurationBuf);
 
 		if (iPlayedDigits[iMode])
-			iPlayedDigits[iMode]->SetText(mbuf.Left(5));
+			iPlayedDigits[iMode]->SetText(positionBuf);
 
-		if (iTotalDigits[iMode])
-			iTotalDigits[iMode]->SetText(mbuf.Right(5));
+		if (iTotalDigits[iMode] && aUpdateDuration)
+			iTotalDigits[iMode]->SetText(durationBuf);
 		}
 #else
 	if (iPlayed[iMode])
-		iPlayed[iMode]->SetText(mbuf);
+		iPlayed[iMode]->SetText(posAndDurationBuf);
 
 	if (iPlayedDigits[iMode])
-		iPlayedDigits[iMode]->SetText(mbuf.Left(5));
+		iPlayedDigits[iMode]->SetText(positionBuf);
 
-	if (iTotalDigits[iMode])
-		iTotalDigits[iMode]->SetText(mbuf.Right(5));
+	if (iTotalDigits[iMode] && aUpdateDuration)
+		iTotalDigits[iMode]->SetText(durationBuf);
 #endif
-  
-	SetTime(iApp->iOggPlayback->Time());
+
+	if (iPosition[iMode] && aUpdateDuration)
+		iPosition[iMode]->SetMaxValue(iTimeTot);
 	}
 
 void COggPlayAppView::UpdateClock(TBool forceUpdate)

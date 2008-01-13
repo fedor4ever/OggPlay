@@ -1,13 +1,14 @@
 ;
-; Series 80  - ARMI urel
+; Series 80 multilingual installer - ARMI urel
 ;
-&EN
+&EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
 ;Version string to be changed
-#{"OggPlay"},(0x1000A661),1,71,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,1
 ;
 ;Supports Series 80 v2.0
-(0x101F8ED2), 0, 0, 0, {"Series80ProductID"}
+(0x101F8ED2), 0, 0, 0, {"Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID",
+"Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID" }
 ;
 ; Display Release notes
 ;
@@ -15,8 +16,17 @@
 
 "\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
-"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsc" -"!:\system\apps\OggPlay\OggPlay.rsc"
-;"\Epoc32\data\z\system\apps\OGGPLAY\OggPlay_caption.rsc"-"!:\system\apps\OggPlay\OggPlay_caption.rsc"
+{ "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.ren" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rfr" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rge"   
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rdu"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rit"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsp"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rsw" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rtu" 
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rda"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rpo"
+  "\Epoc32\data\z\system\apps\OGGPLAY\OggPlay.rru" } -"!:\system\apps\OggPlay\OggPlay.rsc"
 "\Epoc32\data\z\system\apps\OGGPLAY\Oggsplash.mbm"-"!:\system\apps\OggPlay\Oggsplash.mbm"
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\ClearS80\ClearS80.skn"-"!:\system\apps\oggplay\ClearS80.skn"

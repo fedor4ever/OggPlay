@@ -910,7 +910,6 @@ void COggPlayAppUi::NotifyFileOpen(TInt aErr)
 	iOggPlayback->Play();
 
 #if !defined(DELAY_AUDIO_STREAMING_START)
-	iAppView->SetTime(iOggPlayback->Time());
 	iAppView->Update();
 	UpdateSoftkeys();
 #endif
@@ -1262,7 +1261,6 @@ void COggPlayAppUi::PlaySelect()
 			iOggPlayback->Play();
 
 #if !defined(DELAY_AUDIO_STREAMING_START)
-			iAppView->SetTime(iOggPlayback->Time());
 			iAppView->Update();
 			UpdateSoftkeys();
 #endif
@@ -1494,7 +1492,6 @@ void COggPlayAppUi::NextSong()
             iOggPlayback->Play();
 
 #if !defined(DELAY_AUDIO_STREAMING_START)
-            iAppView->SetTime(iOggPlayback->Time());
 			UpdateSoftkeys();
             iAppView->Update();
 #endif
@@ -1551,7 +1548,6 @@ void COggPlayAppUi::PreviousSong()
             iOggPlayback->Play();
 
 #if !defined(DELAY_AUDIO_STREAMING_START)
-			iAppView->SetTime(iOggPlayback->Time());
             UpdateSoftkeys();
             iAppView->Update();
 #endif

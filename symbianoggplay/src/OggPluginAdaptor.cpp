@@ -610,7 +610,12 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* aObject, TInt aPreviousStat
 
     if (aCurrentState == CMdaAudioClipUtility::EPlaying)
 		{
-		if (aErr != KErrNone)
+		if (aErr == KErrNone)
+			{
+			// From opened to Playing
+			iObserver->NotifyPlayStarted();
+			}
+		else
 			{
 			// From opened to Playing
 			// The sound device was stolen by somebody else. (A SMS arrival notice, for example).

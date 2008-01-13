@@ -3,6 +3,7 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
+;Version string to be changed
 #{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,1
 ;
 ; 0x101F7960 for S60 v2.0 and later

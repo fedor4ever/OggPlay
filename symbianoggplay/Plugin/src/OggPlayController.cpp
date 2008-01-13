@@ -42,6 +42,15 @@
 // Nokia phones don't seem to like large buffers, so just use one size (4K)
 #define USE_FIXED_SIZE_BUFFERS
 
+// Some of the old Nokias want to lock the file
+// Enable this macro to compile in a workaround
+// #define MUSIC_PLAYER_REQUIRES_EXCLUSIVE_ACCESS
+
+// Some of them also don't like being initially told that the duration is 0
+// Older versions of OggPlay would just lie and return 5:00, but I don't really like that solution
+// Enable this macro to obtain the duration when the data source is added
+// #define MUSIC_PLAYER_REQUIRES_DURATION
+
 // Buffer sizes to use
 // (approx. 0.1s of audio per buffer)
 #if defined(USE_FIXED_SIZE_BUFFERS)
@@ -201,6 +210,30 @@ void COggPlayController::AddDataSourceL(MDataSource& aDataSource)
         User::Leave(KErrNotSupported);
     
 	TRACEF(COggLog::VA(_L("OggPlayController::iFileName %S "), &iFileName));
+
+	// Open the file here (so we can validate the source and get the tags)
+    OpenFileL();
+
+#if defined(MUSIC_PLAYER_REQUIRES_DURATION)
+	// For some inexplicable reason the MMF asks for the duration of the file (by calling DurationL()) when the file is opened.
+	// Unfortunately at that point we don't know the duration, so we just return 0.
+	// On the N70 and E60 this doesn't cause any problems, but on some of the older Nokias...
+
+	// Complete the open operation to get the duration
+	// Note that this will probably make "Find files" run a fair bit slower, unfortunately
+	OpenCompleteL();
+#endif
+
+#if defined(MUSIC_PLAYER_REQUIRES_EXCLUSIVE_ACCESS)
+	// Some of the old Nokias want to lock the file (heaven knows why)
+	// To get around this we close the file (and re-open it later)
+	iDecoder->Clear();
+
+	delete iDecoder;
+	iDecoder = NULL;
+
+	iState = EStateNotOpened;
+#endif
 	}
 
 void COggPlayController::AddDataSinkL(MDataSink& aDataSink)
@@ -513,7 +546,7 @@ void COggPlayController::PrimeL()
         User::Leave(KErrNotReady);
 
 	if (iState == EStateNotOpened)
-		OpenFileL(iFileName);
+		OpenFileL();
 
 	if (iState == EStateOpenInfo)
 		OpenCompleteL();
@@ -603,11 +636,24 @@ void COggPlayController::CustomCommand(TMMFMessage& aMessage)
 
 		case EOggPlayControllerCCGetAudioProperties:
 			{
+			if (iState == EStateNotOpened)
+				{
+				TRAPD(err, OpenFileL());
+				if (err != KErrNone)
+					{
+					aMessage.Complete(err);
+					return;
+					}
+				}
+
 			if (iState == EStateOpenInfo)
 				{
 				TRAPD(err, OpenCompleteL());
 				if (err != KErrNone)
+					{
 					aMessage.Complete(err);
+					return;
+					}
 				}
 
 			TInt audioProperties[6];
@@ -714,7 +760,7 @@ void COggPlayController::SetPositionL(const TTimeIntervalMicroSeconds& aPosition
 
 TTimeIntervalMicroSeconds COggPlayController::DurationL() const
 	{
-    return iFileLength;
+	return iFileLength;
 	}
 
 void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries)
@@ -724,9 +770,6 @@ void COggPlayController::GetNumberOfMetaDataEntriesL(TInt& aNumberOfEntries)
 
 CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
 	{
-	if (iState == EStateNotOpened)
-		OpenFileL(iFileName);
-
 	switch(aIndex)
 		{
 		case 0:
@@ -753,10 +796,10 @@ CMMFMetaDataEntry* COggPlayController::GetMetaDataEntryL(TInt aIndex)
 	return NULL;
 	}
 
-void COggPlayController::OpenFileL(const TDesC& aFile)
+void COggPlayController::OpenFileL()
 	{
-	iDecoder = GetDecoderL(aFile);
-	TInt err = iDecoder->OpenInfo(aFile);
+	iDecoder = GetDecoderL();
+	TInt err = iDecoder->OpenInfo(iFileName);
 	if (err != KErrNone)
 		{
 		iDecoder->Clear();
@@ -807,11 +850,11 @@ _LIT(KOggExt, ".ogg");
 _LIT(KOgaExt, ".oga");
 _LIT(KFlacExt, ".flac");
 _LIT(KMp3Ext, ".mp3");
-MDecoder* COggPlayController::GetDecoderL(const TDesC& aFileName)
+MDecoder* COggPlayController::GetDecoderL()
 	{
 	MDecoder* decoder = NULL;
 
-	TParsePtrC p(aFileName);
+	TParsePtrC p(iFileName);
 	TFileName ext(p.Ext());
 
 	if (ext.CompareF(KOggExt) == 0)

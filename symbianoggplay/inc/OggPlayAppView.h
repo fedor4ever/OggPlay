@@ -42,8 +42,8 @@ public:
   void Update(); // calls all of the following:
   void UpdateListbox();
   void UpdateControls();
-  void UpdateSongPosition();
-  void UpdateClock(TBool forceUpdate=EFalse);
+  void UpdateSongPosition(TBool aUpdateDuration = EFalse);
+  void UpdateClock(TBool aForceUpdate = EFalse);
   void UpdateVolume();
   void UpdateVolumeBoost();
   void UpdatePlaying();
@@ -51,7 +51,6 @@ public:
 
   void UpdateRepeat(); 
   void UpdateRandom();
-  void SetTime(TInt64 aTime);
 
   // Functions to interract with the listbox
   void SelectItem(TInt idx);
@@ -204,6 +203,8 @@ private:
 
   TInt iCycleFrequencyCounter;
   TInt iCurrentClockMinute;
+
+  TInt64 iTimeTot;
 
   COggViewBase* iHead;
 };

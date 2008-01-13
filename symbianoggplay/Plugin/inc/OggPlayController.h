@@ -194,8 +194,8 @@ public:
 
 private:
 	// Internal Functions
-	MDecoder* GetDecoderL(const TDesC& aFileName);
-    void OpenFileL(const TDesC& aFile);
+	MDecoder* GetDecoderL();
+    void OpenFileL();
 	void OpenCompleteL();
 
 	void GetFrequenciesL(TMMFMessage& aMessage);

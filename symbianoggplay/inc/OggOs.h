@@ -54,8 +54,9 @@ chSTR2(__LINE__) "):" #desc)
 #define FORCE_FULL_BUFFERS
 
 #if defined(PLUGIN_SYSTEM)
-// PLUGIN SYSTEM uses asynchronous open
+// PLUGIN SYSTEM uses asynchronous open and asynchronous play
 #define DELAY_AUDIO_STREAMING_OPEN
+#define DELAY_AUDIO_STREAMING_START
 #else
 // !PLUGIN SYSTEM uses asynchronous play
 #define DELAY_AUDIO_STREAMING_START
