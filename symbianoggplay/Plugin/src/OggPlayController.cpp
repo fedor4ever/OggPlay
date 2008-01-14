@@ -992,15 +992,23 @@ TInt COggPlayController::GetNewSamples(TDes8 &aBuffer)
 			if (!requestingFrequencyBins)
 				{
 				// The frequency request has completed
+				iRequestingFrequencyBins = EFalse;
 				iBytesSinceLastFrequencyBin = 0;
 
+				// Time stamp the data
+				iFreqArray[iLastFreqArrayIdx].iPcmByte = iOggSource->iTotalBufferBytes;
+
+				// Move to the next array entry
 				iLastFreqArrayIdx++;
 				if (iLastFreqArrayIdx == KFreqArrayLength)
 					iLastFreqArrayIdx = 0;
 
-				// The frequency request has completed
-				iFreqArray[iLastFreqArrayIdx].iPcmByte = iOggSource->iTotalBufferBytes;
-				iRequestingFrequencyBins = EFalse;
+				// Mark it invalid
+#if defined(SERIES60V3)
+				iFreqArray[iLastFreqArrayIdx].iPcmByte = KMaxTInt64;
+#else
+				iFreqArray[iLastFreqArrayIdx].iPcmByte = TInt64(KMaxTInt32, KMaxTUint32);
+#endif
 				}
 			}
 		}
@@ -1029,7 +1037,7 @@ void  COggPlayController::GetFrequenciesL(TMMFMessage& aMessage)
 
 	TInt64 positionBytes = iLastPlayTotalBytes + TInt64(2)*TInt64(iUsedChannels)*TInt64(iAudioOutput->SoundDevice().SamplesPlayed());
 	TInt idx = iLastFreqArrayIdx;
-	for (TInt i=0; i<KFreqArrayLength; i++)
+	for (TInt i = 0 ; i<KFreqArrayLength ; i++)
 		{
 		if (iFreqArray[idx].iPcmByte <= positionBytes)
 			break;

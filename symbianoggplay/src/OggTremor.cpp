@@ -786,14 +786,23 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 			if (!requestingFrequencyBins)
 				{
 				// The frequency request has completed
+				iRequestingFrequencyBins = EFalse;
 				iBytesSinceLastFrequencyBin = 0;
 
+				// Time stamp the data
+				iFreqArray[iLastFreqArrayIdx].iPcmByte = iSharedData.iTotalBufferBytes;
+
+				// Move to the next array entry
 				iLastFreqArrayIdx++;
 				if (iLastFreqArrayIdx == KFreqArrayLength)
 					iLastFreqArrayIdx = 0;
 
-				iFreqArray[iLastFreqArrayIdx].iPcmByte = iSharedData.iTotalBufferBytes;
-				iRequestingFrequencyBins = EFalse;
+				// Mark it invalid
+#if defined(SERIES60V3)
+				iFreqArray[iLastFreqArrayIdx].iPcmByte = KMaxTInt64;
+#else
+				iFreqArray[iLastFreqArrayIdx].iPcmByte = TInt64(KMaxTInt32, KMaxTUint32);
+#endif
 				}
 			}
 		}
