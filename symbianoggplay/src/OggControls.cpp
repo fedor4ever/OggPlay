@@ -303,113 +303,121 @@ void TOggParser::Debug(const TDesC& txt, TInt level)
 
 COggControl::COggControl()
 : iRedraw(ETrue), iVisible(ETrue)
-{
-}
+	{
+	}
 
 COggControl::COggControl(TBool aHighFrequency)
 : iRedraw(ETrue), iVisible(ETrue), iHighFrequency(aHighFrequency)
-{
-}
+	{
+	}
 
 COggControl::~COggControl()
-{
-  if (iFocusIcon) { delete iFocusIcon; iFocusIcon= 0; }
-}
+	{
+	delete iFocusIcon;
+	}
   
 void COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
-{
-  ix= ax;
-  iy= ay;
-  iw= aw;
-  ih= ah;
-  iRedraw= ETrue;
-}
+	{
+	ix = ax;
+	iy = ay;
+	iw = aw;
+	ih = ah;
+	
+	iRedraw= ETrue;
+	}
 
 void COggControl::Redraw(TBool doRedraw)
-{
-  iRedraw= doRedraw;
-}
+	{
+	iRedraw= doRedraw;
+	}
 
 void COggControl::MakeVisible(TBool isVisible)
-{
-  if (isVisible!=iVisible) {
-    iVisible= isVisible;
-    iRedraw= ETrue;
-  }
-}
+	{
+	if (isVisible != iVisible)
+		{
+		iVisible = isVisible;
+		iRedraw = ETrue;
+		}
+	}
 
 TBool COggControl::IsVisible()
-{
-  return iVisible;
-}
+	{
+	return iVisible;
+	}
 
 void COggControl::SetDimmed(TBool aDimmed)
-{
-  if (aDimmed!=iDimmed) {
-    iDimmed= aDimmed;
-    iRedraw= ETrue;
-  }
-}
+	{
+	if (aDimmed != iDimmed)
+		{
+		iDimmed = aDimmed;
+		iRedraw = ETrue;
+		}
+	}
 
 void COggControl::SetFocus(TBool aFocus)
-{
-  //__ASSERT_DEBUG(iAcceptsFocus,OGGLOG.Write(_L("Assert: OggControl::SetFocus - asked to set focus, but should never accept it")));
-  if (aFocus!=iFocus) {
-    iFocus= aFocus;
-    iRedraw= ETrue;
-  }
-}
+	{
+	//__ASSERT_DEBUG(iAcceptsFocus,OGGLOG.Write(_L("Assert: OggControl::SetFocus - asked to set focus, but should never accept it")));
+	if (aFocus != iFocus)
+		{
+		iFocus = aFocus;
+		iRedraw = ETrue;
+		}
+	}
 
 TBool COggControl::Focus()
-{
-  return iFocus;
-}
+	{
+	return iFocus;
+	}
 
 
 TBool COggControl::IsDimmed()
-{
-  return iDimmed;
-}
+	{
+	return iDimmed;
+	}
 
 TRect COggControl::Rect()
-{
-  return TRect(TPoint(ix,iy),TSize(iw,ih));
-}
+	{
+	return TRect(TPoint(ix,iy), TSize(iw,ih));
+	}
 
 TSize COggControl::Size()
-{
-  return TSize(iw,ih);
-}
+	{
+	return TSize(iw,ih);
+	}
 
 void COggControl::SetObserver(MOggControlObserver* obs)
-{
-  iObserver= obs;
-}
+	{
+	iObserver = obs;
+	}
 
 void COggControl::PointerEvent(const TPointerEvent& p)
-{
-  if (iObserver && !iDimmed) iObserver->OggPointerEvent(this, p);
-}
+	{
+	if (iObserver && !iDimmed)
+		iObserver->OggPointerEvent(this, p);
+	}
 
 void COggControl::ControlEvent(TInt anEventType, TInt aValue)
-{
-  if (iObserver && !iDimmed) iObserver->OggControlEvent(this, anEventType, aValue);
-}
+	{
+	if (iObserver && !iDimmed)
+		iObserver->OggControlEvent(this, anEventType, aValue);
+	}
 
 
 void COggControl::SetBitmapFile(const TFileName& aFileName)
-{
-  iBitmapFile= aFileName;
-}
+	{
+	iBitmapFile= aFileName;
+	}
 
 void COggControl::SetFocusIcon(CGulIcon* anIcon)
-{
-  iAcceptsFocus=ETrue;
+	{
+	iAcceptsFocus = ETrue;
 
-  if (iFocusIcon) delete iFocusIcon;
-  iFocusIcon= anIcon;
-  iRedraw= ETrue;
-}
+	if (iFocusIcon)
+		delete iFocusIcon;
+
+	iFocusIcon= anIcon;
+	iRedraw= ETrue;
+	}
 
 void COggControl::DrawFocus(CBitmapContext& aBitmapContext)
 {
@@ -728,92 +736,96 @@ TBool COggText::ReadArguments(TOggParser& p)
 
 COggIcon::COggIcon()
 : iIcon(0), iBlinkFrequency(5), iBlinking(EFalse)
-{
-}
+	{
+	}
 
 COggIcon::~COggIcon()
-{
-  delete iIcon;
-}
+	{
+	delete iIcon;
+	}
 
 void COggIcon::SetIcon(CGulIcon* anIcon)
-{
-  if (iIcon)
-	  delete iIcon;
+	{
+	delete iIcon;
 
-  iIcon= anIcon;
-  iRedraw= ETrue;
-}
+	iIcon = anIcon;
+	iRedraw = ETrue;
+	}
 
 void COggIcon::Blink()
-{
-  iBlinking= ETrue;
-  iVisible= ETrue;
-  iCycle= 0;
-  iRedraw= ETrue;
-}
+	{
+	iBlinking = ETrue;
+	iVisible = ETrue;
+	iCycle = 0;
+	
+	iRedraw = ETrue;
+	}
 
 void COggIcon::Show()
-{
-  iBlinking= EFalse;
-  iVisible= ETrue;
-  iRedraw= ETrue;
-}
+	{
+	if (!iVisible)
+		iRedraw = ETrue;
+
+	iBlinking = EFalse;
+	iVisible = ETrue;
+	}
 
 void COggIcon::Hide()
-{
-  iBlinking= EFalse;
-  iVisible= EFalse;
-  iRedraw= ETrue;
-}
+	{
+	if (iVisible)
+		iRedraw = ETrue;
+
+	iBlinking = EFalse;
+	iVisible = EFalse;
+	}
 
 void COggIcon::SetBlinkFrequency(TInt aFrequency)
-{
-  iBlinkFrequency= aFrequency;
-}
+	{
+	iBlinkFrequency = aFrequency;
+	}
 
 void COggIcon::Cycle()
-{
-  if (!iBlinking)
-	  return;
+	{
+	if (!iBlinking)
+		return;
 
-  iCycle++;
+	iCycle++;
 
-  if (iCycle<iBlinkFrequency)
-	  return;
+	if (iCycle<iBlinkFrequency)
+		return;
 
-  iRedraw= ETrue;
-  iVisible= !iVisible;
-  iCycle= 0;
-}
+	iRedraw = ETrue;
+	iVisible = !iVisible;
+	iCycle = 0;
+	}
 
 void COggIcon::Draw(CBitmapContext& aBitmapContext)
-{
-  if (!iIcon)
-	  return;
+	{
+	if (!iIcon)
+		return;
 
-  aBitmapContext.BitBltMasked(TPoint(ix,iy), iIcon->Bitmap(),
-  TRect(TPoint(0,0),iIcon->Bitmap()->SizeInPixels()), iIcon->Mask(), ETrue);
-}
+	aBitmapContext.BitBltMasked(TPoint(ix,iy), iIcon->Bitmap(),
+	TRect(TPoint(0,0),iIcon->Bitmap()->SizeInPixels()), iIcon->Mask(), ETrue);
+	}
 
 TBool COggIcon::ReadArguments(TOggParser& p)
-{
-  TBool success= COggControl::ReadArguments(p);
-  if (success && p.iToken==_L("BlinkFrequency"))
-  {
-    p.Debug(_L("Setting blink frequency."));
-    success= p.ReadToken(iBlinkFrequency);
-  }
+	{
+	TBool success= COggControl::ReadArguments(p);
+	if (success && p.iToken==_L("BlinkFrequency"))
+		{
+		p.Debug(_L("Setting blink frequency."));
+		success= p.ReadToken(iBlinkFrequency);
+		}
 
-  if (success && p.iToken==_L("Icon"))
-  {
-    p.Debug(_L("Setting icon."));
-    SetIcon(p.ReadIcon(iBitmapFile));
-    success= iIcon!=0;
-  }
+	if (success && p.iToken==_L("Icon"))
+		{
+		p.Debug(_L("Setting icon."));
+		SetIcon(p.ReadIcon(iBitmapFile));
+		success= iIcon!=0;
+		}
 
-  return success;
-}
+	return success;
+	}
 
 
 COggAnimation::COggAnimation()
@@ -1687,71 +1699,71 @@ void COggSlider64::PointerEvent(const TPointerEvent& p)
 
 COggScrollBar::COggScrollBar()
 : iMaxValue(100), iScrollerSize(10), iPage(1), iStep(1)
-{
-}
-
-COggScrollBar::~COggScrollBar()
-{
-    delete iKnobIcon;
-}
-
-void COggScrollBar::SetStyle(TInt aStyle)
-{
-  iStyle = aStyle;
-  iRedraw = ETrue;
-}
-
-void COggScrollBar::SetKnobIcon(CGulIcon* anIcon)
-{
-  iKnobIcon = anIcon;
-  iRedraw = ETrue;
-}
-
-void COggScrollBar::SetScrollerSize(TInt aSize)
-{
-  iScrollerSize = aSize;
-  iRedraw = ETrue;
-}
-
-void COggScrollBar::SetPage(TInt aPage)
-{
-  iPage = aPage;
-}
-
-void COggScrollBar::SetStep(TInt aStep)
-{
-  iStep = aStep;
-}
-
-void COggScrollBar::SetAssociatedControl(COggControl* aControl)
-{
-  iAssociated = aControl;
-}
-
-void COggScrollBar::Draw(CBitmapContext& aBitmapContext)
-{
-  if (!iKnobIcon)
-	  return;
-
-  TSize s(iKnobIcon->Bitmap()->SizeInPixels());
-  TRect r(TPoint(0,0), s);
-  TPoint p(ix, iy);
-
-  iPos= GetPosFromValue(iValue);
-
-  switch (iStyle)
 	{
-	case 0:
-		p.iX= iPos;
-		break;
-
-	case 1:
-		p.iY= iPos;
-		break;
 	}
 
-  aBitmapContext.BitBltMasked(p, iKnobIcon->Bitmap(), r, iKnobIcon->Mask(), ETrue);
-}
+COggScrollBar::~COggScrollBar()
+	{
+    delete iKnobIcon;
+	}
+
+void COggScrollBar::SetStyle(TInt aStyle)
+	{
+	iStyle = aStyle;
+	iRedraw = ETrue;
+	}
+
+void COggScrollBar::SetKnobIcon(CGulIcon* anIcon)
+	{
+	iKnobIcon = anIcon;
+	iRedraw = ETrue;
+	}
+
+void COggScrollBar::SetScrollerSize(TInt aSize)
+	{
+	iScrollerSize = aSize;
+	iRedraw = ETrue;
+	}
+
+void COggScrollBar::SetPage(TInt aPage)
+	{
+	iPage = aPage;
+	}
+
+void COggScrollBar::SetStep(TInt aStep)
+	{
+	iStep = aStep;
+	}
+
+void COggScrollBar::SetAssociatedControl(COggControl* aControl)
+	{
+	iAssociated = aControl;
+	}
+
+void COggScrollBar::Draw(CBitmapContext& aBitmapContext)
+	{
+	if (!iKnobIcon)
+		return;
+
+	TSize s(iKnobIcon->Bitmap()->SizeInPixels());
+	TRect r(TPoint(0,0), s);
+	TPoint p(ix, iy);
+
+	iPos = GetPosFromValue(iValue);
+
+	switch (iStyle)
+		{
+		case 0:
+			p.iX= iPos;
+			break;
+
+		case 1:
+			p.iY= iPos;
+			break;
+		}
+
+	aBitmapContext.BitBltMasked(p, iKnobIcon->Bitmap(), r, iKnobIcon->Mask(), ETrue);
+	}
 
 void COggScrollBar::PointerEvent(const TPointerEvent& p)
 {
@@ -1822,9 +1834,24 @@ void COggScrollBar::SetValue(TInt aValue)
 }
 
 TInt COggScrollBar::GetPosFromValue(TInt aValue)
-{
-  if (!iKnobIcon || (iMaxValue == 0))
-	  return 0;
+	{
+	if (!iKnobIcon)
+		return 0;
+
+	if (iMaxValue == 0)
+		{
+		// Implies iValue also == 0;
+		switch (iStyle)
+			{
+			case 0:
+				return ix + iScrollerSize;
+				break;
+
+			case 1:
+				return iy + iScrollerSize;
+				break;
+			}
+		}
 
   TSize s(iKnobIcon->Bitmap()->SizeInPixels());
   switch (iStyle)
@@ -2614,23 +2641,12 @@ void COggCanvas::AddControl(COggControl* c)
 void COggCanvas::ClearControls()
 {
   iControls.ResetAndDestroy();
- 
 }
 
 void COggCanvas::DrawControl()
 {
-  if (iBitmap)
-  {
     iBitmapContext->SetClippingRect(Rect());
-    if (iBackground)
-	{
-      iBitmapContext->BitBlt(TPoint(0,0),iBackground);
-    }
-	else
-	{
-      iBitmapContext->SetBrushColor(KRgbWhite);
-      iBitmapContext->Clear(Rect());
-    }
+    iBitmapContext->BitBlt(TPoint(0,0),iBackground);
 
     // DrawControl will draw relative to its Position().
     // when drawing to the bitmap gc, Position() should be (0,0)
@@ -2647,7 +2663,6 @@ void COggCanvas::DrawControl()
 		iControls[i]->iRedraw = EFalse;
 
 	iPosition = position;
-  }
 }
 
 void COggCanvas::DestroyBitmap()
@@ -2696,13 +2711,7 @@ void COggCanvas::DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& /*aB
     if (c->iRedraw)
 	{
       aBitmapContext.SetClippingRect(Rect());
-      if (iBackground) 
-        aBitmapContext.BitBlt(TPoint(c->ix,c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)));
-      else
-	  {
-		aBitmapContext.SetBrushColor(KRgbWhite);
-		aBitmapContext.Clear(TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)));
-      }
+      aBitmapContext.BitBlt(TPoint(c->ix,c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)));
     }
   }
 

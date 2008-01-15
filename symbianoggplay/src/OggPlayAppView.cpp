@@ -1348,25 +1348,25 @@ void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::
 	}
 
 void COggPlayAppView::Update()
-{
-  UpdateAnalyzer();
-  UpdateListbox();
-  UpdateControls();
-  UpdateSongPosition(ETrue);
-  UpdateClock(ETrue);
-  UpdateVolume();
-  UpdateVolumeBoost();
-  UpdatePlaying();
-}
+	{
+	UpdateAnalyzer();
+	UpdateListbox();
+	UpdateControls();
+	UpdateSongPosition(ETrue);
+	UpdateClock(ETrue);
+	UpdateVolume();
+	UpdateVolumeBoost();
+	UpdatePlaying();
+	}
 
 void COggPlayAppView::UpdateAnalyzer()
-{
-  if (iAnalyzer[iMode])
-  {
-    iAnalyzer[iMode]->Clear();
-    iAnalyzer[iMode]->SetStyle(iApp->iAnalyzerState);
-  }
-}
+	{
+	if (iAnalyzer[iMode])
+		{
+		iAnalyzer[iMode]->Clear();
+		iAnalyzer[iMode]->SetStyle(iApp->iAnalyzerState);
+		}
+	}
 
 void COggPlayAppView::UpdateListbox()
 {
@@ -1416,53 +1416,66 @@ void COggPlayAppView::UpdateListbox()
 }
 
 TBool COggPlayAppView::CanPlay()
-{
-  CAbsPlayback::TState playState = iApp->iOggPlayback->State();
-  return (playState >= CAbsPlayback::EStreamOpen) && (playState != CAbsPlayback::EPlaying);
-}
+	{
+	CAbsPlayback::TState playState = iApp->iOggPlayback->State();
+	return (playState >= CAbsPlayback::EStreamOpen) && (playState != CAbsPlayback::EPlaying);
+	}
 
 TBool COggPlayAppView::CanPause()
-{
-  return iApp->iOggPlayback->State() == CAbsPlayback::EPlaying;
-}
+	{
+	return iApp->iOggPlayback->State() == CAbsPlayback::EPlaying;
+	}
 
 TBool COggPlayAppView::CanStop()
-{
-  return iApp->iOggPlayback->State() >= CAbsPlayback::EPaused;
-}
+	{
+	return iApp->iOggPlayback->State() >= CAbsPlayback::EPaused;
+	}
 
 TBool COggPlayAppView::PlayDimmed()
-{
-  return 
-	  (GetSelectedIndex()<0 || GetItemType(GetSelectedIndex())==COggListBox::EBack || 
-     iApp->iViewBy==COggPlayAppUi::EArtist || iApp->iViewBy==COggPlayAppUi::EAlbum || 
-     iApp->iViewBy==COggPlayAppUi::EGenre || iApp->iViewBy==COggPlayAppUi::ESubFolder ||
-     iApp->iViewBy==COggPlayAppUi::ETop) 
-    && !(iApp->iOggPlayback->State()==CAbsPlayback::EPaused);
+	{
+	return ((GetSelectedIndex()<0) ||
+	(GetItemType(GetSelectedIndex()) == COggListBox::EBack) || 
+	(iApp->iViewBy == COggPlayAppUi::EArtist) || (iApp->iViewBy == COggPlayAppUi::EAlbum) || 
+	(iApp->iViewBy == COggPlayAppUi::EGenre) || (iApp->iViewBy == COggPlayAppUi::ESubFolder) ||
+	(iApp->iViewBy == COggPlayAppUi::ETop)) 
+    && !(iApp->iOggPlayback->State() == CAbsPlayback::EPaused);
 }
 
 void COggPlayAppView::UpdateControls()
-{
-  if (iPlayButton[iMode] && CanPlay()) 
-    iPlayButton[iMode]->SetDimmed(PlayDimmed());
+	{
+	if (iPlayButton[iMode] && CanPlay()) 
+		iPlayButton[iMode]->SetDimmed(PlayDimmed());
 
-  if (iPlayButton2[iMode])
-    iPlayButton2[iMode]->SetDimmed(!CanPlay() || PlayDimmed());
-  if (iPauseButton2[iMode])
-    iPauseButton2[iMode]->SetDimmed(!CanPause());
+	if (iPlayButton2[iMode])
+		iPlayButton2[iMode]->SetDimmed(!CanPlay() || PlayDimmed());
 
-  if (iPlayButton[iMode]) iPlayButton[iMode]->MakeVisible(CanPlay());
-  if (iPauseButton[iMode]) iPauseButton[iMode]->MakeVisible(!CanPlay());
+	if (iPauseButton2[iMode])
+		iPauseButton2[iMode]->SetDimmed(!CanPause());
+
+	if (iPlayButton[iMode])
+		iPlayButton[iMode]->MakeVisible(CanPlay());
+
+	if (iPauseButton[iMode])
+		iPauseButton[iMode]->MakeVisible(!CanPlay());
     
-  if (iStopButton[iMode]) iStopButton[iMode]->SetDimmed( !CanStop() );
+	if (iStopButton[iMode])
+		iStopButton[iMode]->SetDimmed(!CanStop());
 
-  if (iPosition[iMode]) iPosition[iMode]->SetDimmed( !CanStop() );
+	if (iPosition[iMode])
+		iPosition[iMode]->SetDimmed(!CanStop());
  
-  if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
-  if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(iApp->iSettings.iRandom);
-  if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->MakeVisible(iApp->iSettings.iRepeat);
-  if (iRandomIcon[iMode]) iRandomIcon[iMode]->MakeVisible(iApp->iSettings.iRandom);
-}
+	if (iRepeatButton[iMode])
+		iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
+
+	if (iRandomButton[iMode])
+		iRandomButton[iMode]->SetState(iApp->iSettings.iRandom);
+
+	if (iRepeatIcon[iMode])
+		iRepeatIcon[iMode]->MakeVisible(iApp->iSettings.iRepeat);
+
+	if (iRandomIcon[iMode])
+		iRandomIcon[iMode]->MakeVisible(iApp->iSettings.iRandom);
+	}
 
 _LIT(KPositionFormat, "%02d:%02d");
 _LIT(KDurationFormat, "%02d:%02d");
@@ -1713,7 +1726,13 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 #if defined(SERIES60) || defined(SERIES80)
 	enum EOggKeys
 		{
+#if defined(SERIES60)
 		EOggConfirm = EKeyDevice3
+#elif defined(SERIES90)
+		EOggConfirm = EKeyDevice7
+#else // SERIES80
+		EOggConfirm = EKeyDeviceA
+#endif
 		};
 
 	enum EOggScancodes
@@ -1730,102 +1749,63 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 	CAbsPlayback* playback = iApp->iOggPlayback;
 
 	COggControl* c = iFocusControlsIter;
-	if ((code == 0) && (aType == EEventKeyDown))
+	if (aType == EEventKeyDown)
 		{
+#if defined(SERIES80) && !defined(SERIES90)
+		// Conversions needed for S80 joystick
 		switch (scanCode)
 			{
 			case EStdKeyDevice6:
-				scanCode = EOggLeft; // S80 joystick
+				scanCode = EOggLeft;
 				break;
 
 			case EStdKeyDevice7:
-#if defined(SERIES90)
-				code = EOggConfirm; // S90 joystick, apparently!
-#else
-				scanCode = EOggRight; // S80 joystick
-#endif
+				scanCode = EOggRight;
 				break;
 
 			case EStdKeyDevice8:
-				scanCode = EOggUp;   // S80 joystick
+				scanCode = EOggUp;
 				break;
 
 			case EStdKeyDevice9:
-				scanCode = EOggDown; // S80 joystick
+				scanCode = EOggDown;
 				break;
-
-			case EStdKeyDeviceA:
-				code = EOggConfirm; // S80 joystick
-				break;
-		}
-
-	if (iFocusControlsPresent && (scanCode == EOggLeft))
-		{
-		SetPrevFocus();
-		return EKeyWasConsumed;
-		}
-	else if (iFocusControlsPresent && (scanCode == EOggRight))
-		{
-		SetNextFocus();
-		return EKeyWasConsumed;
-		}
-	else
-		{
-#if !defined(SERIES60)
-		if ((c == iListBox[iMode]) || !iFocusControlsPresent)
-			{
-			if (scanCode == EOggDown)
-				{
-				SelectItem(index+1);
-				return EKeyWasConsumed;
-				}
-			else if (scanCode == EOggUp)
-				{
-				SelectItem(index-1);
-				return EKeyWasConsumed;
-				}
 			}
 #endif
 
-		if ((c == iVolume[iMode] && (scanCode==EOggUp || scanCode==EOggDown))
-		|| (!iFocusControlsPresent && (scanCode==EOggLeft || scanCode==EOggRight)))
+		if (iFocusControlsPresent && (scanCode == EOggLeft))
 			{
-			if (playback->State() == CAbsPlayback::EPlaying)
-				{
-#if !defined(SERIES60)
-				if ((scanCode == EOggUp) || (scanCode == EOggRight))
-					iApp->iVolume += KStepVolume;
-				else if ((scanCode == EOggDown) || (scanCode == EOggLeft))
-					iApp->iVolume -= KStepVolume;
-
-				if (iApp->iVolume>KMaxVolume)
-					iApp->iVolume = KMaxVolume;
-
-				if (iApp->iVolume<0)
-					iApp->iVolume = 0;
-
-				playback->SetVolume(iApp->iVolume);
-				UpdateVolume();
-#endif
-				}
-			else
-				{
-				// not playing, i.e. stopped or paused
-				if ((scanCode == EOggDown) || (scanCode == EOggLeft))
-					iApp->SelectPreviousView();
-				else if ((scanCode == EOggDown) || (scanCode == EOggRight))
-					{
-					if (HasAFileName(index))
-						iApp->HandleCommandL(EOggPlay);
-					else
-						iApp->SelectNextView();
-					}
-				}
-
+			SetPrevFocus();
 			return EKeyWasConsumed;
 			}
+		else if (iFocusControlsPresent && (scanCode == EOggRight))
+			{
+			SetNextFocus();
+			return EKeyWasConsumed;
+			}
+		else
+			{
+			if ((c == iVolume[iMode] && (scanCode==EOggUp || scanCode==EOggDown))
+			|| (!iFocusControlsPresent && (scanCode==EOggLeft || scanCode==EOggRight)))
+				{
+				if (playback->State() != CAbsPlayback::EPlaying)
+					{
+					// not playing, i.e. stopped or paused
+					if ((scanCode == EOggDown) || (scanCode == EOggLeft))
+						iApp->SelectPreviousView();
+					else if ((scanCode == EOggDown) || (scanCode == EOggRight))
+						{
+						if (HasAFileName(index))
+							iApp->HandleCommandL(EOggPlay);
+						else
+							iApp->SelectNextView();
+						}
+					}
+
+				return EKeyWasConsumed;
+				}
+			}
 		}
-	}
 
 	if (code == EOggConfirm)
 		{
@@ -1985,7 +1965,6 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 
 	if (code>0)
 		{
-#if defined(SERIES60)
 		if ((c == iListBox[iMode]) || !iFocusControlsPresent)
 			{
 			if (scanCode == EOggDown)
@@ -2020,70 +1999,9 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 				UpdateVolume();
 				}
 			}
-#endif
-
-	// Why is this lot included in S60 (and S80) builds?
-	if (aKeyEvent.iScanCode==EStdKeyDeviceD)
-		{
-		iApp->NextSong();
-		return EKeyWasConsumed;
-		} // jog dial up
-    else if (aKeyEvent.iScanCode==EStdKeyDeviceE)
-		{
-		iApp->PreviousSong();
-		return EKeyWasConsumed;
-		}  // jog dial down
-    else if (aKeyEvent.iScanCode==167)
-		{
-		AppToForeground(EFalse);
-		return EKeyWasConsumed;
-		} // back key <-
-    else if (aKeyEvent.iScanCode==174)
-		{
-		iApp->HandleCommandL(EOggStop);
-		return EKeyWasConsumed;
-		} // "C" key
-    // else if (aKeyEvent.iScanCode==173)
-		// {
-		// iApp->HandleCommandL(EOggShuffle);
-		// return EKeyWasConsumed;
-		// }// menu button
-	else if (aKeyEvent.iScanCode==133)
-		{ // "*"
-		if (iTitle[iMode])
-			iTitle[iMode]->ScrollNow();
-
-		if (iAlbum[iMode])
-			iAlbum[iMode]->ScrollNow();
-
-		if (iArtist[iMode])
-			iArtist[iMode]->ScrollNow();
-
-		if (iGenre[iMode])
-			iGenre[iMode]->ScrollNow();
-
-		return EKeyWasConsumed;
-	    }
-    else if (aKeyEvent.iScanCode==127)
-		{ // "#"
-		iApp->ToggleRepeat();
-		return EKeyWasConsumed;
 		}
 
-    // 48..57 == "0"..."9"
-    // 172 jog dial press
-    // 179    == OK
-
-    // this is what's being sent when closing through taskswitcher
-    // couldn't find any documentation on this.
-    if (code == EStdKeyNumLock)
-	{
-      iApp->HandleCommandL(EEikCmdExit);
-      return EKeyWasConsumed;
-    }
-  }
-
-  return EKeyWasNotConsumed;
+	return EKeyWasNotConsumed;
 #else // UIQ keyhandling
   enum EOggKeys
   {
