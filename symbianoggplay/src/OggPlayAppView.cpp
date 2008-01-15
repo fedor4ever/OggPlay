@@ -114,6 +114,8 @@ void COggPlayAppView::ConstructL(COggPlayAppUi *aApp)
   iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack, *iAlarmErrorCallBack);
 }
 
+_LIT(KBeginToken,"{");
+_LIT(KEndToken,"}");
 void COggPlayAppView::ReadSkin(const TFileName& aFileName)
 {
   ClearCanvases();

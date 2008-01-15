@@ -29,37 +29,31 @@
 #include <flogger.h>
 #include <f32file.h>
 
-// MOggControlObserver:
+// MOggControlObserver
 // Observe mouse pointer down/drag/up events for COggControls
-
 class COggControl;
 class COggCanvas;
-class MOggControlObserver {
+class MOggControlObserver
+	{
+public:
+	virtual void OggPointerEvent(COggControl* c, const TPointerEvent& p) = 0;
+	virtual void OggControlEvent(COggControl* c, TInt aEventType, TInt aValue) = 0;
+	virtual void AddControlToFocusList(COggControl* c) = 0;
+	};
 
- public:
 
-  virtual void OggPointerEvent(COggControl* /*c*/, const TPointerEvent& /*p*/) {}
-  virtual void OggControlEvent(COggControl* /*c*/, TInt /*aEventType*/, TInt /*aValue*/) {}
-  virtual void AddControlToFocusList(COggControl* /*c*/) {}
-};
-
-
-enum TAnalyzerModes {
-  EZero,
-  EOne,
-  EPeak,
-  EDecay    /** Peak hold, constant decay for S60 DCT analyzer (masks dropouts)   */
-  };
+enum TAnalyzerModes
+	{
+	EZero,
+	EOne,
+	EPeak,
+	EDecay    /** Peak hold, constant decay for S60 DCT analyzer (masks dropouts)   */
+	};
 
 const TInt KDCTAnalyzerDynamic = 50;
 const TInt KDecaySteplength = 3;
 
-
-_LIT(KBeginToken,"{");
-_LIT(KEndToken,"}");
-
-
-// TOggParser:
+// TOggParser
 // Read the skin defintion file
 class TOggParser
 {
@@ -103,69 +97,73 @@ class TOggParser
 // COggControl:
 // Abstract base type for objects displayed on a COggCanvas
 class COggControl : public CBase
-{
+	{
 public:
-  COggControl();
-  COggControl(TBool aHighFrequency);
-  ~COggControl();
+	COggControl();
+	COggControl(TBool aHighFrequency);
+	~COggControl();
 
-  virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
-  void SetObserver(MOggControlObserver* obs);
+	virtual void SetPosition(TInt ax, TInt ay, TInt aw, TInt ah);
+	void SetObserver(MOggControlObserver* obs);
 
-  virtual void MakeVisible(TBool isVisible);
-  TBool IsVisible();
-  void SetDimmed(TBool aDimmed);
-  TBool IsDimmed();
-  void SetFocus(TBool aFocus);
-  TBool Focus();
+	virtual void MakeVisible(TBool isVisible);
+	TBool IsVisible();
 
-  virtual void PointerEvent(const TPointerEvent& p);
-  virtual void ControlEvent(TInt anEventType, TInt aValue);
+	void SetDimmed(TBool aDimmed);
+	TBool IsDimmed();
 
-  virtual void Redraw(TBool doRedraw = ETrue);
-  virtual void SetFocusIcon(CGulIcon* anIcon);
+	void SetFocus(TBool aFocus);
+	TBool Focus();
 
-  TRect Rect();
-  TSize Size();
+	virtual void PointerEvent(const TPointerEvent& p);
+	virtual void ControlEvent(TInt anEventType, TInt aValue);
 
-  virtual void  SetBitmapFile(const TFileName& aBitmapFile);
-  virtual TBool Read(TOggParser& p);
+	virtual void Redraw(TBool doRedraw = ETrue);
+	virtual void SetFocusIcon(CGulIcon* anIcon);
 
-  TBool HighFrequency();
+	TRect Rect();
+	TSize Size();
+
+	virtual void  SetBitmapFile(const TFileName& aBitmapFile);
+	virtual TBool Read(TOggParser& p);
+
+	TBool HighFrequency();
 
 public:
-  TInt   ix;
-  TInt   iy;
-  TInt   iw;
-  TInt   ih;
+	TInt ix;
+	TInt iy;
+	TInt iw;
+	TInt ih;
 
-  CGulIcon*   iFocusIcon;
-  TDblQueLink iDlink;
+	CGulIcon* iFocusIcon;
+	TDblQueLink iDlink;
 
 protected:
-  // these can/must be overriden to create specific behaviour:
-  virtual void Cycle() {}
-  virtual void Draw(CBitmapContext& aBitmapContext) = 0;
+	// These must be overriden to create specific behaviour
+	virtual void Cycle();
+	virtual void Draw(CBitmapContext& aBitmapContext) = 0;
 
-  virtual void DrawFocus(CBitmapContext& aBitmapContext);
-  void DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon);
+	virtual void DrawFocus(CBitmapContext& aBitmapContext);
+	void DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon);
 
-  // utility functions:
-  virtual TBool ReadArguments(TOggParser& p);
+	virtual CFbsBitmap* OverlayMask();
 
-  TBool  iRedraw;   // if true: something has changed with the control and the control needs to be redrawn
-  TInt   iCycle;    // frame nmber of an animation etc. (1 cycle = 10ms)
-  TBool  iVisible;  // if false the control will not be drawn
-  TBool  iDimmed;   // if false the control is disabled and rejects pointer and keyboard focus events
-  TBool  iAcceptsFocus; // if true the control can accept keyboard focus, else it's never focussed.
-  TBool  iFocus;    // if true, control has focus.
+	// Utility functions
+	virtual TBool ReadArguments(TOggParser& p);
 
-  MOggControlObserver* iObserver;
-  TFileName iBitmapFile;
-  TBool iHighFrequency;
+	TBool iRedraw;       // if true: something has changed with the control and the control needs to be redrawn
+	TInt iCycle;         // frame nmber of an animation etc. (1 cycle = 10ms)
+	TBool iVisible;      // if false the control will not be drawn
+	TBool iDimmed;       // if false the control is disabled and rejects pointer and keyboard focus events
+	TBool iAcceptsFocus; // if true the control can accept keyboard focus, else it's never focussed.
+	TBool iFocus;        // if true, control has focus.
 
-  friend class COggCanvas;
-};
+	MOggControlObserver* iObserver;
+	TFileName iBitmapFile;
+	TBool iHighFrequency;
+
+	friend class COggCanvas;
+	};
 
 
 // COggText:
@@ -237,27 +235,30 @@ private:
 // An icon (bitmap+mask) that can blink.
 // Ownership of the CGulIcon is taken!
 class COggIcon : public COggControl
-{
+	{
 public:
-  COggIcon();
-  ~COggIcon();
+	COggIcon();
+	~COggIcon();
 
-  void SetIcon(CGulIcon* anIcon);
-  void Blink();
-  void Show();
-  void Hide();
-  void SetBlinkFrequency(TInt aFrequency);
+	void SetIcon(CGulIcon* anIcon);
+	void Blink();
+	void Show();
+	void Hide();
+	void SetBlinkFrequency(TInt aFrequency);
+
+	CFbsBitmap* OverlayMask();
 
 protected:
-  virtual TBool ReadArguments(TOggParser& p);
+	virtual TBool ReadArguments(TOggParser& p);
 
-  virtual void Cycle();
-  virtual void Draw(CBitmapContext& aBitmapContext);
+	virtual void Cycle();
+	virtual void Draw(CBitmapContext& aBitmapContext);
 
-  CGulIcon* iIcon;
-  TBool     iBlinkFrequency;
-  TBool     iBlinking;
-};
+	CGulIcon* iIcon;
+	TBool iBlinkFrequency;
+	TBool iBlinking;
+	TBool iOverlayIcon;
+	};
 
 
 // COggAnimation
@@ -631,10 +632,15 @@ class COggCanvas : public CCoeControl
   void Draw(const TRect& aRect) const;
 
 protected:
-  CFbsBitGc*         iBitmapContext;
-  CFbsBitmap*	     iBitmap;
-  CFbsBitmap*        iBackground;
+  CFbsBitmap* iBitmap;
   CFbsBitmapDevice*  iBitmapDevice;
+  CFbsBitGc* iBitmapContext;
+
+  CFbsBitmap* iOverlayMaskBitmap;
+  CFbsBitmapDevice*  iOverlayMaskDevice;
+  CFbsBitGc* iOverlayMaskContext;
+
+  CFbsBitmap*        iBackground;
   
   CArrayPtrFlat<COggControl> iControls;
 

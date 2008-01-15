@@ -46,7 +46,9 @@ TInt GetTextWidth(const TDesC& aText, CFont* aFont, TInt w)
   return w;
 }
 
- // TOggParser
+
+_LIT(KBeginToken,"{");
+_LIT(KEndToken,"}");
 TOggParser::TOggParser(RFs& aFs, const TFileName& aFileName)
 {
   iLine= 1;
@@ -80,9 +82,9 @@ TOggParser::TOggParser(RFs& aFs, const TFileName& aFileName)
 }
 
 TOggParser::~TOggParser()
-{
-  delete iBuffer;
-}
+	{
+	delete iBuffer;
+	}
 
 TBool TOggParser::ReadHeader()
 {
@@ -315,7 +317,17 @@ COggControl::~COggControl()
 	{
 	delete iFocusIcon;
 	}
-  
+
+void COggControl::Cycle()
+	{
+	}
+
+CFbsBitmap* COggControl::OverlayMask()
+	{
+	// By default controls own the area of their rectangle
+	return NULL;
+	}
+
 void COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
 	{
 	ix = ax;
@@ -814,64 +826,77 @@ TBool COggIcon::ReadArguments(TOggParser& p)
 	if (success && p.iToken==_L("BlinkFrequency"))
 		{
 		p.Debug(_L("Setting blink frequency."));
-		success= p.ReadToken(iBlinkFrequency);
+		success = p.ReadToken(iBlinkFrequency);
 		}
 
 	if (success && p.iToken==_L("Icon"))
 		{
 		p.Debug(_L("Setting icon."));
 		SetIcon(p.ReadIcon(iBitmapFile));
-		success= iIcon!=0;
+		success = (iIcon != NULL);
+		}
+
+	if (success && p.iToken==_L("OverlayIcon"))
+		{
+		p.Debug(_L("Setting overlay icon."));
+		SetIcon(p.ReadIcon(iBitmapFile));
+		iOverlayIcon = ETrue;
+
+		success = (iIcon != NULL);
 		}
 
 	return success;
 	}
 
+CFbsBitmap* COggIcon::OverlayMask()
+	{
+	return iOverlayIcon ? iIcon->Mask() : NULL;
+	}
 
 COggAnimation::COggAnimation()
 : iBitmaps(10), iPause(100), iFrequency(2), iFirstBitmap(0), iStyle(0)
-{
-}
+	{
+	}
 
 COggAnimation::~COggAnimation()
-{
-  ClearBitmaps();
-}
+	{
+	ClearBitmaps();
+	}
 
 void COggAnimation::ClearBitmaps() 
-{
-  iBitmaps.ResetAndDestroy();
-}
+	{
+	iBitmaps.ResetAndDestroy();
+	}
 
 void COggAnimation::SetBitmaps(TInt aFirstBitmap, TInt aNumBitmaps)
-{
-  ClearBitmaps();
-  iFirstBitmap= aFirstBitmap;
+	{
+	ClearBitmaps();
+	iFirstBitmap = aFirstBitmap;
   
-  for (TInt i = 0 ; i < aNumBitmaps ; i++)
-    {
-    CFbsBitmap* ibitmap= new (ELeave) CFbsBitmap;
-    ibitmap->Load(iBitmapFile,aFirstBitmap+i);
-    iBitmaps.AppendL(ibitmap);
-    }
+	for (TInt i = 0 ; i<aNumBitmaps ; i++)
+		{
+		CFbsBitmap* ibitmap= new(ELeave) CFbsBitmap;
+		ibitmap->Load(iBitmapFile,aFirstBitmap+i);
+		iBitmaps.AppendL(ibitmap);
+		}
 
-  iRedraw= ETrue;
-}
+	iRedraw = ETrue;
+	}
 
 void COggAnimation::Start()
-{
-  iCycle= 0;
-  iRedraw= ETrue;
-}
+	{
+	iCycle = 0;
+	iRedraw = ETrue;
+	}
 
 void COggAnimation::Stop()
-{
-  if (iCycle!=-1)
-  {
-    iCycle= -1;
-    iRedraw= ETrue;
-  }
-}
+	{
+	if (iCycle!=-1)
+		{
+		iCycle= -1;
+		iRedraw= ETrue;
+		}
+	}
 
 void COggAnimation::SetPause(TInt aPause)
 {
@@ -2624,27 +2649,27 @@ void COggCanvas::Refresh()
 }
 
 void COggCanvas::Invalidate()
-{
-  DrawNow();
-}
+	{
+	DrawNow();
+	}
 
 COggControl* COggCanvas::GetControl(TInt i)
-{
-  return iControls[i];
-}
+	{
+	return iControls[i];
+	}
 
 void COggCanvas::AddControl(COggControl* c)
-{
-  iControls.AppendL(c);
-}
+	{
+	iControls.AppendL(c);
+	}
 
 void COggCanvas::ClearControls()
-{
-  iControls.ResetAndDestroy();
-}
+	{
+	iControls.ResetAndDestroy();
+	}
 
 void COggCanvas::DrawControl()
-{
+	{
     iBitmapContext->SetClippingRect(Rect());
     iBitmapContext->BitBlt(TPoint(0,0),iBackground);
 
@@ -2663,74 +2688,99 @@ void COggCanvas::DrawControl()
 		iControls[i]->iRedraw = EFalse;
 
 	iPosition = position;
-}
+	}
 
 void COggCanvas::DestroyBitmap()
-{
-  delete iBitmapContext;
-  iBitmapContext = NULL;
+	{
+	delete iBitmapContext;
+	iBitmapContext = NULL;
 
-  delete iBitmapDevice;
-  iBitmapDevice = NULL;
+	delete iBitmapDevice;
+	iBitmapDevice = NULL;
 
-  delete iBitmap;
-  iBitmap = NULL;
-}
+	delete iBitmap;
+	iBitmap = NULL;
+
+	delete iOverlayMaskContext;
+	iOverlayMaskContext = NULL;
+
+	delete iOverlayMaskDevice;
+	iOverlayMaskDevice = NULL;
+
+	delete iOverlayMaskBitmap;
+	iOverlayMaskBitmap = NULL;
+	}
 
 void COggCanvas::CreateBitmapL(const TSize& aSize)
-{
-  iBitmap = new (ELeave) CFbsBitmap;
-  iBitmap->Create(aSize, iEikonEnv->ScreenDevice()->DisplayMode());
+	{
+	iBitmap = new(ELeave) CFbsBitmap;
+	iBitmap->Create(aSize, iEikonEnv->ScreenDevice()->DisplayMode());
   
-  iBitmapDevice = CFbsBitmapDevice::NewL(iBitmap);
-  iBitmapDevice->CreateContext(iBitmapContext);
-}
+	iBitmapDevice = CFbsBitmapDevice::NewL(iBitmap);
+	User::LeaveIfError(iBitmapDevice->CreateContext(iBitmapContext));
+
+	iOverlayMaskBitmap = new(ELeave) CFbsBitmap;
+	iOverlayMaskBitmap->Create(aSize, EGray2);
+
+	iOverlayMaskDevice = CFbsBitmapDevice::NewL(iOverlayMaskBitmap);
+	User::LeaveIfError(iOverlayMaskDevice->CreateContext(iOverlayMaskContext));
+	
+	iOverlayMaskContext->SetBrushColor(KRgbWhite);
+	iOverlayMaskContext->Clear();
+	}
 
 void COggCanvas::Draw(const TRect& aRect) const
-{
-  CWindowGc& gc=SystemGc();
-  
-  if (iBitmap)
-  {
-    gc.BitBlt(aRect.iTl, iBitmap, TRect(aRect.iTl - Position(), aRect.Size()));
-  }
-  else
-  {
-    CWsScreenDevice* screenDevice = iCoeEnv->ScreenDevice();
-    DrawControl(gc, *screenDevice);
-  }
-}
+	{
+	CWindowGc& gc=SystemGc();
+	gc.BitBlt(aRect.iTl, iBitmap, TRect(aRect.iTl - Position(), aRect.Size()));
+	}
 
 void COggCanvas::DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& /*aBitmapDevice*/) const
-{
-  // Clear backgrounds
-  TInt i, iMax = iControls.Count();
-  for (i = 0; i < iMax; i++)
-  {
-    COggControl* c= iControls[i];
-    if (c->iRedraw)
 	{
-      aBitmapContext.SetClippingRect(Rect());
-      aBitmapContext.BitBlt(TPoint(c->ix,c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)));
-    }
-  }
+	// Clear backgrounds
+	TInt i, iMax = iControls.Count();
+	for (i = 0 ; i<iMax ; i++)
+		{
+		COggControl* c= iControls[i];
+		if (c->iRedraw)
+			{
+			aBitmapContext.SetClippingRect(Rect());
 
-  // Redraw controls
-  for (i = 0; i < iMax ; i++)
-  {
-    COggControl* c= iControls[i];
-    if (c->iRedraw && c->IsVisible())
-	{
-      aBitmapContext.SetClippingRect(c->Rect());
-      c->Draw(aBitmapContext);
-    }
-  }
-}
+			// With an overlay control we only clear the bits that are part of the control
+			// For normal controls we just clear the whole thing
+			CFbsBitmap* overlayMask = c->OverlayMask();
+			if (overlayMask)
+				{
+				//Set up the mask
+				iOverlayMaskContext->BitBlt(TPoint(c->ix, c->iy), overlayMask, TRect(TPoint(0, 0), TSize(c->iw,c->ih)));
+
+				// Do a mask clear
+				aBitmapContext.BitBltMasked(TPoint(c->ix, c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)), iOverlayMaskBitmap, ETrue);
+
+				// Clear the mask (ready for next time)
+				iOverlayMaskContext->Clear(TRect(TPoint(c->ix, c->iy), TSize(c->iw,c->ih)));
+				}
+			else
+				aBitmapContext.BitBlt(TPoint(c->ix, c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)));
+			}
+		}
+
+	// Redraw controls
+	for (i = 0 ; i<iMax ; i++)
+		{
+		COggControl* c= iControls[i];
+		if (c->iRedraw && c->IsVisible())
+			{
+			aBitmapContext.SetClippingRect(c->Rect());
+			c->Draw(aBitmapContext);
+			}
+		}
+	}
 
 TKeyResponse COggCanvas::OfferKeyEventL(const TKeyEvent& /*aKeyEvent*/, TEventCode /*aType*/)
-{
-  return EKeyWasNotConsumed;
-}
+	{
+	return EKeyWasNotConsumed;
+	}
 
 void COggCanvas::HandlePointerEventL(const TPointerEvent& aPointerEvent)
 {
