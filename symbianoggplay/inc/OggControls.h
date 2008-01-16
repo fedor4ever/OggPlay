@@ -56,42 +56,42 @@ const TInt KDecaySteplength = 3;
 // TOggParser
 // Read the skin defintion file
 class TOggParser
-{
- public:
+	{
+public:
+	enum TState
+		{ 
+		ESuccess, EFileNotFound, ENoOggSkin,
+		EUnknownVersion, EFlipOpenExpected,
+		ESyntaxError, EBeginExpected,
+		EEndExpected, EBitmapNotFound, EIntegerExpected,
+		EOutOfRange
+		};
 
-  enum TState
-  { 
-    ESuccess, EFileNotFound, ENoOggSkin,
-    EUnknownVersion, EFlipOpenExpected,
-    ESyntaxError, EBeginExpected,
-    EEndExpected, EBitmapNotFound, EIntegerExpected,
-    EOutOfRange
-  };
+	TOggParser(RFs& aFs, const TFileName& aFileName);
+	~TOggParser();
 
-  TOggParser(RFs& aFs, const TFileName& aFileName);
-  ~TOggParser();
+	void ReportError();
+	void Debug(const TDesC& aTxt);
 
-  TBool ReadSkin(COggCanvas* fo, COggCanvas* fc);
-  void  ReportError();
-  void  Debug(const TDesC& txt, TInt level=0);
+	TBool ReadHeader();
+	TBool ReadToken();
+	TBool ReadToken(TInt& aValue);
 
-  TBool ReadHeader();
-  TBool ReadToken();
-  TBool ReadToken(TInt& aValue);
-  CGulIcon* ReadIcon(const TFileName& aBitmapFile);
-  TBool     ReadColor(TRgb& aColor);
-  CFont*    ReadFont();
+	CGulIcon* ReadIcon(const TFileName& aBitmapFile);
+	CFbsBitmap* ReadBitmap(const TFileName& aBitmapFile);
+	TBool ReadColor(TRgb& aColor);
+	CFont* ReadFont();
 
-  // protected:
-  TBool     iDebug;
-  TState    iState;
-  TInt      iLine;
-  TBuf<128> iToken;
-  TInt      iVersion;
+	// protected:
+	TBool iDebug;
+	TState iState;
+	TInt iLine;
+	TBuf<128> iToken;
+	TInt iVersion;
 
-  HBufC8*   iBuffer;
-  const TUint8* iBufferPtr;
-};
+	HBufC8* iBuffer;
+	const TUint8* iBufferPtr;
+	};
 
 
 // COggControl:
@@ -146,8 +146,6 @@ protected:
 	virtual void DrawFocus(CBitmapContext& aBitmapContext);
 	void DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon);
 
-	virtual CFbsBitmap* OverlayMask();
-
 	// Utility functions
 	virtual TBool ReadArguments(TOggParser& p);
 
@@ -158,6 +156,7 @@ protected:
 	TBool iAcceptsFocus; // if true the control can accept keyboard focus, else it's never focussed.
 	TBool iFocus;        // if true, control has focus.
 
+	CFbsBitmap* iOverlayMask;
 	MOggControlObserver* iObserver;
 	TFileName iBitmapFile;
 	TBool iHighFrequency;
@@ -246,8 +245,6 @@ public:
 	void Hide();
 	void SetBlinkFrequency(TInt aFrequency);
 
-	CFbsBitmap* OverlayMask();
-
 protected:
 	virtual TBool ReadArguments(TOggParser& p);
 
@@ -257,7 +254,6 @@ protected:
 	CGulIcon* iIcon;
 	TBool iBlinkFrequency;
 	TBool iBlinking;
-	TBool iOverlayIcon;
 	};
 
 
@@ -640,7 +636,7 @@ protected:
   CFbsBitmapDevice*  iOverlayMaskDevice;
   CFbsBitGc* iOverlayMaskContext;
 
-  CFbsBitmap*        iBackground;
+  CFbsBitmap* iBackground;
   
   CArrayPtrFlat<COggControl> iControls;
 

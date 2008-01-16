@@ -51,8 +51,8 @@ _LIT(KBeginToken,"{");
 _LIT(KEndToken,"}");
 TOggParser::TOggParser(RFs& aFs, const TFileName& aFileName)
 {
-  iLine= 1;
-  iDebug= ETrue;
+  iLine = 1;
+  iDebug = EFalse; /* ETrue; */
   iBuffer = NULL;
 
   RFile file;
@@ -196,21 +196,32 @@ void ScaleBitmapL(CFbsBitmap* aDst, CFbsBitmap* aSrc, TInt aScaleFactor)
 }
 
 CGulIcon* TOggParser::ReadIcon(const TFileName& aBitmapFile)
-{
-  TInt idxBitmap, idxMask;
-  if (!ReadToken(idxBitmap))
-	  return NULL;
+	{
+	TInt bitmapIdx, maskIdx;
+	if (!ReadToken(bitmapIdx))
+		return NULL; // Fix me, just leave (and sort out what the AppView and Canvas do if there are skin errors!)
 
-  if (!ReadToken(idxMask))
-	  return NULL;
+	if (!ReadToken(maskIdx))
+		return NULL;
 
-  CGulIcon* result = CEikonEnv::Static()->CreateIconL(aBitmapFile, idxBitmap, idxMask);
+	CGulIcon* result = CEikonEnv::Static()->CreateIconL(aBitmapFile, bitmapIdx, maskIdx);
+	if (!result) // FIXME (This won't be NULL, so all this error handling is redundant)
+		iState= EBitmapNotFound;
 
-  if (!result)
-	  iState= EBitmapNotFound;
+	return result;
+	}
 
-  return result;
-}
+CFbsBitmap* TOggParser::ReadBitmap(const TFileName& aBitmapFile)
+	{
+	TInt bitmapIdx;
+	if (!ReadToken(bitmapIdx))
+		return NULL;
+
+	CFbsBitmap* bitmap = new(ELeave) CFbsBitmap;
+	User::LeaveIfError(bitmap->Load(aBitmapFile, bitmapIdx));
+
+	return bitmap;
+	}
 
 TBool TOggParser::ReadColor(TRgb& aColor)
 	{
@@ -258,11 +269,14 @@ CFont* TOggParser::ReadFont()
 
 void TOggParser::ReportError()
 {
-  if (iState==ESuccess) return;
+  if (iState==ESuccess)
+	  return;
+
   TBuf<128> buf;
   buf.Append(_L("Line "));
   buf.AppendNum(iLine);
   buf.Append(_L(": "));
+
   switch (iState) {
   case EFileNotFound: buf.Append(_L("File not found.")); break;
   case ENoOggSkin: buf.Append(_L("This is not an Ogg skin file!")); break;
@@ -276,31 +290,29 @@ void TOggParser::ReportError()
   case EOutOfRange: buf.Append(_L("Number is out of the valid range.")); break;
   default: buf.Append(_L("Unknown error.")); break;
   }
+
   buf.Append(_L("Last token: <"));
   buf.Append(iToken);
   buf.Append(_L(">"));
 
-  //CCoeEnv::Static()->InfoWinL(_L("Error reading skin file"),buf);
-  User::InfoPrint(buf);
-  //OGGLOG.Write(buf);
+  TRACEF(buf);
 }
 
-void TOggParser::Debug(const TDesC& txt, TInt level)
-{
-  if (level==0 && !iDebug) return;
-  TBuf<256> buf;
-  buf.Append(_L("Debug ("));
-  buf.AppendNum(iLine);
-  buf.Append(_L("): "));
-  buf.Append(txt);
-  buf.Append(_L(" Token:"));
-  buf.Append(iToken); 
-  //TRACEF(COggLog::VA(_L("%S"), &buf ));
-  //OGGLOG.WriteFormat(buf);
+void TOggParser::Debug(const TDesC& txt)
+	{
+	if (!iDebug)
+		return;
 
-//  User::InfoPrint(buf);
-//  User::After(TTimeIntervalMicroSeconds32(1000000));
-}
+	TBuf<256> buf;
+	buf.Append(_L("Debug ("));
+	buf.AppendNum(iLine);
+	buf.Append(_L("): "));
+	buf.Append(txt);
+	buf.Append(_L(" Token:"));
+	buf.Append(iToken); 
+
+	TRACEF(buf);
+	}
 
 
 COggControl::COggControl()
@@ -316,16 +328,11 @@ COggControl::COggControl(TBool aHighFrequency)
 COggControl::~COggControl()
 	{
 	delete iFocusIcon;
+	delete iOverlayMask;
 	}
 
 void COggControl::Cycle()
 	{
-	}
-
-CFbsBitmap* COggControl::OverlayMask()
-	{
-	// By default controls own the area of their rectangle
-	return NULL;
 	}
 
 void COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
@@ -462,163 +469,161 @@ TBool COggControl::Read(TOggParser& p)
 }
 
 TBool COggControl::ReadArguments(TOggParser& p)
-{
-  if (p.iToken==_L("Position"))
-  {
-    p.Debug(_L("Setting position."));
-    TInt ax, ay, aw, ah;
-    if (p.ReadToken(ax) && p.ReadToken(ay) && p.ReadToken(aw) && p.ReadToken(ah))
 	{
-      SetPosition(ax, ay, aw, ah);
-      return ETrue;
-    }
-    else
-      return EFalse;
-  }
-  else if (p.iToken==_L("FocusIcon"))
-  {
-    p.Debug(_L("Setting focused icon."));
-    CGulIcon* aIcon=p.ReadIcon(iBitmapFile);
+	if (p.iToken == _L("Position"))
+		{
+		p.Debug(_L("Setting position."));
+		TInt ax, ay, aw, ah;
+		if (p.ReadToken(ax) && p.ReadToken(ay) && p.ReadToken(aw) && p.ReadToken(ah))
+			{
+			SetPosition(ax, ay, aw, ah);
+			return ETrue;
+			}
+		else
+			return EFalse;
+		}
+	else if (p.iToken == _L("FocusIcon"))
+		{
+		p.Debug(_L("Setting focused icon."));
+		SetFocusIcon(p.ReadIcon(iBitmapFile));
 
-    SetFocusIcon(aIcon);
-    iObserver->AddControlToFocusList(this);
-  }
+		iObserver->AddControlToFocusList(this);
+		}
+	else if (p.iToken == _L("OverlayMask"))
+		iOverlayMask = p.ReadBitmap(iBitmapFile);
 
-  return ETrue;
-}
+	return ETrue;
+	}
 
 TBool COggControl::HighFrequency()
-{
+	{
 	return iHighFrequency;
-}
+	}
 
 
 COggText::COggText()
 : iFontColor(0,0,0), iNeedsScrolling(EFalse), iHasScrolled(EFalse), iScrollDelay(30), iScrollStep(2)
-{
-}
+	{
+	}
 
 COggText::~COggText()
-{
-  delete iText;
+	{
+	delete iText;
 
-  if (iFont && iOwnedByControl) 
-      CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFont);
-}
+	if (iFont && iOwnedByControl) 
+		CCoeEnv::Static()->ScreenDevice()->ReleaseFont(iFont);
+	}
 
 void COggText::SetFont(CFont* aFont, TBool ownedByControl)
-{
-  iFont= aFont;
-  iRedraw= ETrue;
-  iOwnedByControl = ownedByControl;
+	{
+	iFont= aFont;
+	iRedraw= ETrue;
+	iOwnedByControl = ownedByControl;
 
-  iFontHeight = iFont->HeightInPixels();
-  iFontAscent = iFont->AscentInPixels();
+	iFontHeight = iFont->HeightInPixels();
+	iFontAscent = iFont->AscentInPixels();
 
 #if defined(SERIES60)
-  if (iFont->TypeUid() == KCFbsFontUid)
-  {
-	  CFbsFont* fbsFont = (CFbsFont *) iFont;
-	  if (fbsFont->IsOpenFont())
-	  {
-	    TOpenFontMetrics fontMetrics;
-		if (fbsFont->GetFontMetrics(fontMetrics))
+	if (iFont->TypeUid() == KCFbsFontUid)
 		{
-		  iFontHeight = fontMetrics.MaxHeight() + fontMetrics.MaxDepth() + 1;
-		  iFontAscent = fontMetrics.MaxHeight();
+		CFbsFont* fbsFont = (CFbsFont *) iFont;
+		if (fbsFont->IsOpenFont())
+			{
+			TOpenFontMetrics fontMetrics;
+			if (fbsFont->GetFontMetrics(fontMetrics))
+				{
+				iFontHeight = fontMetrics.MaxHeight() + fontMetrics.MaxDepth() + 1;
+				iFontAscent = fontMetrics.MaxHeight();
+				}
+			}
 		}
-	  }
-  }
 #endif
 
-  iLinePadding = (ih - iFontHeight) / 2;
-  if (iLinePadding<0)
-	  iLinePadding = 0;
-}
+	iLinePadding = (ih - iFontHeight) / 2;
+	if (iLinePadding<0)
+		iLinePadding = 0;
+	}
 
 void COggText::SetFontColor(TRgb aColor)
-{
-  iFontColor= aColor;
-  iRedraw= ETrue;
-}
+	{
+	iFontColor= aColor;
+	iRedraw= ETrue;
+	}
 
 void COggText::SetScrollStyle(TInt aScrollStyle)
-{
-  iScrollStyle=aScrollStyle;
-}
+	{
+	iScrollStyle=aScrollStyle;
+	}
 
 void COggText::SetScrollDelay(TInt aScrollDelay)
-{
-  iScrollDelay=aScrollDelay;
-}
+	{
+	iScrollDelay=aScrollDelay;
+	}
 
 void COggText::SetScrollStep(TInt aScrollStep)
-{
-  iScrollStep=aScrollStep;
-}
+	{
+	iScrollStep=aScrollStep;
+	}
 
 void COggText::SetText(const TDesC& aText)
-{
-  if (iText) 
-    {
+	{
     delete iText;
-    iText = NULL;
-    }
+	iText = NULL;
 
-  iText = HBufC::NewL(aText.Length());
-  iText->Des().Copy(aText);
+	iText = HBufC::NewL(aText.Length());
+	iText->Des().Copy(aText);
 
-  iTextWidth= GetTextWidth(aText, iFont, iw);
-  iNeedsScrolling= iTextWidth>iw;
+	iTextWidth= GetTextWidth(aText, iFont, iw);
+	iNeedsScrolling= iTextWidth>iw;
 
-  iCycle= 0;
-  iDrawOffset= 0;
-  iHasScrolled= EFalse;
-  iRedraw= ETrue;
-}
+	iCycle= 0;
+	iDrawOffset= 0;
+	iHasScrolled= EFalse;
+	iRedraw= ETrue;
+	}
 
 void COggText::ScrollNow()
-{
-  iHasScrolled= EFalse;
-  iCycle= iScrollDelay;
-}
+	{
+	iHasScrolled= EFalse;
+	iCycle= iScrollDelay;
+	}
 
 void COggText::Cycle()
-{
-  if (!iNeedsScrolling)
-	  return;
+	{
+	if (!iNeedsScrolling)
+		return;
 
-  switch(iScrollStyle)
-  {
-  case EOnce:
-    CycleOnce();
-    break;
+	switch(iScrollStyle)
+		{
+		case EOnce:
+			CycleOnce();
+			break;
 
-  case EEndless:
-    CycleOff();
-    break;
+		case EEndless:
+			CycleOff();
+			break;
 
-  case ETilBorder:
-    CycleBorder();
-    break;
+		case ETilBorder:
+			CycleBorder();
+			break;
 
-  case EBackAndForth:
-    CycleBackAndForth();
-    break;
+		case EBackAndForth:
+			CycleBackAndForth();
+			break;
 
-  default:
-    CycleOff();
-    break;
-  }
-}
+		default:
+			CycleOff();
+			break;
+		}
+	}
 
 void COggText::CycleOnce()
-{
-  if (iHasScrolled)
-	  return;
+	{
+	if (iHasScrolled)
+		return;
 
-  CycleOff();
-}
+	CycleOff();
+	}
 
 void COggText::CycleOff()
 {
@@ -821,7 +826,7 @@ void COggIcon::Draw(CBitmapContext& aBitmapContext)
 
 TBool COggIcon::ReadArguments(TOggParser& p)
 	{
-	TBool success= COggControl::ReadArguments(p);
+	TBool success = COggControl::ReadArguments(p);
 	if (success && p.iToken==_L("BlinkFrequency"))
 		{
 		p.Debug(_L("Setting blink frequency."));
@@ -835,21 +840,7 @@ TBool COggIcon::ReadArguments(TOggParser& p)
 		success = (iIcon != NULL);
 		}
 
-	if (success && p.iToken==_L("OverlayIcon"))
-		{
-		p.Debug(_L("Setting overlay icon."));
-		SetIcon(p.ReadIcon(iBitmapFile));
-		iOverlayIcon = ETrue;
-
-		success = (iIcon != NULL);
-		}
-
 	return success;
-	}
-
-CFbsBitmap* COggIcon::OverlayMask()
-	{
-	return iOverlayIcon ? iIcon->Mask() : NULL;
 	}
 
 COggAnimation::COggAnimation()
@@ -2745,13 +2736,11 @@ void COggCanvas::DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& /*aB
 			{
 			aBitmapContext.SetClippingRect(Rect());
 
-			// With an overlay control we only clear the bits that are part of the control
-			// For normal controls we just clear the whole thing
-			CFbsBitmap* overlayMask = c->OverlayMask();
-			if (overlayMask)
+			// If the control has an overlay mask we clear using the mask
+			if (c->iOverlayMask)
 				{
 				//Set up the mask
-				iOverlayMaskContext->BitBlt(TPoint(c->ix, c->iy), overlayMask, TRect(TPoint(0, 0), TSize(c->iw,c->ih)));
+				iOverlayMaskContext->BitBlt(TPoint(c->ix, c->iy), c->iOverlayMask, TRect(TPoint(0, 0), TSize(c->iw,c->ih)));
 
 				// Do a mask clear
 				aBitmapContext.BitBltMasked(TPoint(c->ix, c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)), iOverlayMaskBitmap, ETrue);
@@ -2760,7 +2749,10 @@ void COggCanvas::DrawControl(CBitmapContext& aBitmapContext, CBitmapDevice& /*aB
 				iOverlayMaskContext->Clear(TRect(TPoint(c->ix, c->iy), TSize(c->iw,c->ih)));
 				}
 			else
+				{
+				// Clear the entire rectangle
 				aBitmapContext.BitBlt(TPoint(c->ix, c->iy), iBackground, TRect(TPoint(c->ix,c->iy), TSize(c->iw,c->ih)));
+				}
 			}
 		}
 
