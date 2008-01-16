@@ -1537,7 +1537,7 @@ void COggPlayAppView::UpdateSongPosition(TBool aUpdateDuration)
 		// As we cannot officially get the TitleArray, we have to steal it (hack)
 		CEikMenuBar::CTitleArray *ta;
 		ta = *(CEikMenuBar::CTitleArray**)((char*)mb + sizeof(*mb) - 4*sizeof(void*));
-		ta->At(1)->iData.iText.Copy(mbuf);
+		ta->At(1)->iData.iText.Copy(posAndDurationBuf);
 		mb->SetSize(mb->Size());
 		mb->DrawNow();
 		}

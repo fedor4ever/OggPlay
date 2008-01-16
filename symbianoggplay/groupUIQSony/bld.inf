@@ -18,9 +18,11 @@ PRJ_EXPORTS
 ..\Inc\OggUIQSony.h \epoc32\include\OggPlatform.h
 ..\Inc\OggPlayUid.h
 ..\Inc\OggOs.h
-..\Plugin\Inc\OggPlayPlugin.h
+..\shared\OggShared.h
 
 PRJ_MMPFILES
-..\vorbis\groupUIQSony\OggvorbisUIQSony.mmp
+..\shared\groupUIQSony\oggsharedUIQSony.mmp
+..\vorbis\groupUIQSony\oggvorbisUIQSony.mmp
+..\flac\groupUIQSony\oggflacUIQSony.mmp
 OggPlayUIQSony.mmp
 

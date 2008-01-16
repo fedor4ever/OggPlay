@@ -232,8 +232,7 @@ RESOURCE DIALOG r_dialog_playlist_info {
   items = {
     DLG_LINE {
 	type = EEikCtLabel;
-	prompt = ogg_filename_txt;
-        id = EOggInfoDialog;
+	id = EOggInfoDialog;
 	control = LABEL 
 	{
 		txt="";
@@ -281,7 +280,6 @@ RESOURCE DIALOG r_dialog_files_search {
 	id =    EOggScrollableTextDialog;
 	control = FILESEARCHCONTROL
 	{
-	height= 90;
 	title = ogg_filescan_title;
     dirScannedStr =ogg_filescan_label1;
     filesFoundStr =ogg_filescan_label2;

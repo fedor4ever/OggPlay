@@ -424,11 +424,10 @@ void COggControl::SetFocusIcon(CGulIcon* anIcon)
 	{
 	iAcceptsFocus = ETrue;
 
-	if (iFocusIcon)
-		delete iFocusIcon;
-
+	delete iFocusIcon;
 	iFocusIcon= anIcon;
-	iRedraw= ETrue;
+
+	iRedraw = ETrue;
 	}
 
 void COggControl::DrawFocus(CBitmapContext& aBitmapContext)
@@ -759,8 +758,8 @@ COggIcon::~COggIcon()
 void COggIcon::SetIcon(CGulIcon* anIcon)
 	{
 	delete iIcon;
-
 	iIcon = anIcon;
+
 	iRedraw = ETrue;
 	}
 
