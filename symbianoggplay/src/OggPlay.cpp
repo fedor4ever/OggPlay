@@ -716,9 +716,10 @@ void COggPlayAppUi::RunningEmbeddedDbReady(TInt aErr)
 		NextSong();
 		}
 
-#if defined(SERIES80)
-	// Apparently on S80 we are always running embedded.
-	// The app is launched with C:\MyFiles\OggPlay as the filename
+#if defined(UIQ) || defined(SERIES80)
+	// Apparently on UIQ and S80 we are always running embedded.
+	// On UIQ the app is launched with C:\Documents\OggPlay\OggPlay
+	// On S80 the app is launched with C:\MyFiles\OggPlay as the filename
 
 	// Consequently we just fall back to the previous method of ignoring errors
 	// Not ideal really as it would be better to give the user a startup error (if there really is an error)

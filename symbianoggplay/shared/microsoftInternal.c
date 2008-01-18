@@ -30,7 +30,7 @@
 #include <e32def.h>
 #include <OggPlatform.h>
 
-#ifdef __VC32__
+#if defined(__VC32__)
 
 #define __NAKED__ EXPORT_C __declspec( naked )
 
@@ -330,7 +330,39 @@ label101:
         _asm push        eax
         _asm ret
     }
+#elif defined(__CW32__)
+// Dummy exports (so the wins and winscw def file need not be different)
+EXPORT_C void _allmul()
+    {
+    }
 
+EXPORT_C void _allshl()
+    {
+    }
+
+EXPORT_C void _alldiv()
+    {
+    }
+
+EXPORT_C void _allshr()
+    {
+    }
+
+EXPORT_C void _aullshr()
+    {
+    }
+
+EXPORT_C void _aulldiv()
+    {
+    }
+
+EXPORT_C void _aullrem()
+    {
+    }
+
+EXPORT_C void _alloca_probe()
+    {
+    }
 #else
 #if !defined(SERIES60V3)
 // GCC stuff (missing unsigned 64bit division)

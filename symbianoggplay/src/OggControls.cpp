@@ -424,7 +424,7 @@ void COggControl::ControlEvent(TInt anEventType, TInt aValue)
 
 void COggControl::SetBitmapFile(const TFileName& aFileName)
 	{
-	iBitmapFile= aFileName;
+	iBitmapFile = aFileName;
 	}
 
 void COggControl::SetFocusIcon(CGulIcon* anIcon)
