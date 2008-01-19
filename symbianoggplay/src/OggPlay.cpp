@@ -98,18 +98,20 @@ TUid COggPlayApplication::AppDllUid() const
 	}
 
 // COggPlayDocument class
-CFileStore* COggPlayDocument::OpenFileL(TBool /*aDoOpen*/,const TDesC& aFilename, RFs& /*aFs*/)
+CFileStore* COggPlayDocument::OpenFileL(TBool aDoOpen, const TDesC& aFilename, RFs& /* aFs */)
 	{
+	TRACEF(COggLog::VA(_L("COggPlayDocument::OpenFileL: %d, %S"), (TInt) aDoOpen, &aFilename));
+
 	iAppUi->OpenFileL(aFilename);
 	return NULL;
 	}
 
-#if defined(SERIES60)
-COggPlayDocument::COggPlayDocument(CAknApplication& aApp)
-#else
 COggPlayDocument::COggPlayDocument(CEikApplication& aApp)
-#endif
+#if defined(UIQ)
+: CQikDocument(aApp)
+#else
 : CEikDocument(aApp)
+#endif
 	{
 	}
 
@@ -348,6 +350,36 @@ void COggStartUpEmbeddedAO::DoCancel()
 	}
 
 
+#if defined(UIQ)
+COggViewActivationAO::COggViewActivationAO(COggPlayAppUi& aAppUi)
+: CActive(EPriorityIdle), iAppUi(aAppUi)
+	{
+	CActiveScheduler::Add(this);
+	}
+
+COggViewActivationAO::~COggViewActivationAO()
+	{
+	}
+
+void COggViewActivationAO::ActivateOggView()
+	{
+	TRequestStatus* status = &iStatus;
+	User::RequestComplete(status, KErrNone);
+
+	SetActive();
+	}
+
+void COggViewActivationAO::RunL()
+	{
+	iAppUi.ActivateOggViewL();
+	}
+	
+void COggViewActivationAO::DoCancel()
+	{
+	}
+#endif
+
+	
 // App UI class, COggPlayAppUi
 COggPlayAppUi::COggPlayAppUi()
 : iViewBy(ETop)
@@ -369,14 +401,16 @@ void COggPlayAppUi::ConstructL()
 	BaseConstructL();
 #endif
 
-	// Construct the splash view
+	// Construct the splash views
 	TRACEF(_L("COggPlayAppUi::ConstructL(): Construct Splash views..."));
 
+	// Splash view (used for flip open mode on UIQ and both flip open and flip closed on S60)
     iSplashFOView = new(ELeave) COggSplashView(KOggPlayUidSplashFOView);
 	iSplashFOView->ConstructL();
 	RegisterViewL(*iSplashFOView);
 
 #if defined(UIQ)
+	// UIQ has a second Splash view for flip closed mode
     iSplashFCView = new(ELeave) COggSplashView(KOggPlayUidSplashFCView);
 	iSplashFCView->ConstructL();
 	RegisterViewL(*iSplashFCView);
@@ -450,6 +484,13 @@ void COggPlayAppUi::NextStartUpState()
 		delete iStartUpErrorDlg;
 		iStartUpErrorDlg = NULL;
 #endif
+
+#if defined(UIQ)
+		// Create an AO for handling UIQ application switches
+		// An application switch brings Oggplay back to the splash view
+		// The splash view then schedules an event to re-launch the main view
+		iOggViewActivationAO = new(ELeave) COggViewActivationAO(*this);
+#endif
 		break;
 
 	default:
@@ -480,6 +521,13 @@ void COggPlayAppUi::ActivateStartUpViewL()
 	{
 	iFOView = new(ELeave) COggFOView(*iAppView);
 	RegisterViewL(*iFOView);  
+
+#if defined(UIQ)
+	// Set the default view
+	// This is the view that gets activated in FO mode when the user switches back to OggPlay
+	// Note that FC mode works differently (the "default" FC view is always the splash FC view)
+	SetDefaultViewL(*iFOView);
+#endif
 
 #if defined(UIQ) || defined(SERIES60SUI)
 	iFCView = new(ELeave) COggFCView(*iAppView);
@@ -531,7 +579,7 @@ void COggPlayAppUi::StartUpError(TInt aErr)
 void COggPlayAppUi::StartOggPlayL()
 	{
 	TFileName fileName(Application()->AppFullName());
-	TParsePtr parse(fileName);
+	TParsePtrC parse(fileName);
 
 #if defined(SERIES60V3)
 	TFileName privatePath;
@@ -540,7 +588,7 @@ void COggPlayAppUi::StartOggPlayL()
 	TBuf<2> appDriveLetter(parse.Drive());
 	iIniFileName.Copy(appDriveLetter);
 	iIniFileName.Append(privatePath);
-	iIniFileName.Append(_L("OggPlay.ini"));
+	iIniFileName.Append(_L("OggPlay.ogi"));
  
 	iDbFileName.Copy(appDriveLetter);
 	iDbFileName.Append(privatePath);
@@ -552,7 +600,7 @@ void COggPlayAppUi::StartOggPlayL()
 #else
 	iIniFileName.Copy(fileName);
 	iIniFileName.SetLength(iIniFileName.Length() - 3);
-	iIniFileName.Append(_L("ini"));
+	iIniFileName.Append(_L("ogi"));
 
 	iDbFileName.Copy(fileName);
 	iDbFileName.SetLength(iDbFileName.Length() - 3);
@@ -563,7 +611,7 @@ void COggPlayAppUi::StartOggPlayL()
 
 #if defined(__WINS__)
 	// The emulator doesn't like to write to the Z: drive, avoid that.
-	iIniFileName = _L("C:\\oggplay.ini");
+	iIniFileName = _L("C:\\oggplay.ogi");
 	iDbFileName = _L("C:\\oggplay.db");
 #endif
 
@@ -572,7 +620,7 @@ void COggPlayAppUi::StartOggPlayL()
 	iRndSeed = homeTime.Int64();
 	iRndMax = KMaxTInt ; iRndMax++;
 
-	iSkins= new(ELeave) CDesCArrayFlat(3);
+	iSkins = new(ELeave) CDesCArrayFlat(3);
 	FindSkins();
 	
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings.iWarningsEnabled);
@@ -619,7 +667,9 @@ void COggPlayAppUi::StartOggPlayL()
 	AddToStackL(iAppView); // Receiving Keyboard Events 
 	iAppView->InitView();
 
+#if defined(UIQ)
 	SetHotKey();
+#endif
 
 #if defined(MONITOR_TELEPHONE_LINE)
 	iActive = new(ELeave) COggActive;
@@ -643,29 +693,15 @@ void COggPlayAppUi::PostConstruct()
 	}
 
 void COggPlayAppUi::PostConstructL()
-{
+	{
 	// Ideally we just de-register (and delete) the splash view now that we are done with it. 
-	// However, on S60 V1 we can't do this if OggPlay is running embedded: for some reason we get a CONE 30 panic
-	// if the apps key is pressed (the app that embeds us must try to access the splash view I guess)
-	// Similarly S90 doesn't like us de-registering the splash view either :-(
-#if !defined(SERIES90)
-	if (!iIsRunningEmbedded)
-		{
-		// Delete the splash view. We won't be seeing it again
-		DeregisterView(*iSplashFOView);
+	// However older versions of the view server seem to get confused if we get rid of the splash view
+#if defined(SERIES60V3)
+	// Delete the splash view. We won't be seeing it again
+	DeregisterView(*iSplashFOView);
 
-		delete iSplashFOView;
-		iSplashFOView = NULL;
-		}
-#endif
-
-#if defined(UIQ)
-	// In FC mode the splash view is also used to launch
-	// the main FC view, so we can't de-register it here, :-(
-	// DeregisterView(*iSplashFCView);
-
-	// delete iSplashFCView;
-	// iSplashFCView = NULL;
+	delete iSplashFOView;
+	iSplashFOView = NULL;
 #endif
 
 	// Set the playback volume
@@ -716,20 +752,6 @@ void COggPlayAppUi::RunningEmbeddedDbReady(TInt aErr)
 		NextSong();
 		}
 
-#if defined(UIQ) || defined(SERIES80)
-	// Apparently on UIQ and S80 we are always running embedded.
-	// On UIQ the app is launched with C:\Documents\OggPlay\OggPlay
-	// On S80 the app is launched with C:\MyFiles\OggPlay as the filename
-
-	// Consequently we just fall back to the previous method of ignoring errors
-	// Not ideal really as it would be better to give the user a startup error (if there really is an error)
-	if (aErr != KErrNone)
-		{
-		aErr = KErrNone;
-		iIsRunningEmbedded = EFalse;
-		}
-#endif
-
 	NextStartUpState(aErr);
 	}
 
@@ -749,6 +771,12 @@ COggPlayAppUi::~COggPlayAppUi()
 	if (iDoorObserver)
 		iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::ENoChanges); 
 
+#if defined(UIQ)
+	if (iOggViewActivationAO)
+		iOggViewActivationAO->Cancel();
+	delete iOggViewActivationAO;
+#endif
+
 	if (iStartUpEmbeddedAO)
 		iStartUpEmbeddedAO->Cancel();
 	delete iStartUpEmbeddedAO;
@@ -757,7 +785,7 @@ COggPlayAppUi::~COggPlayAppUi()
 		iStartUpAO->Cancel();
 	delete iStartUpAO;
 
-#if defined (SERIES60)
+#if defined(SERIES60)
 	delete iStartUpErrorDlg;
 #endif
 
@@ -767,16 +795,16 @@ COggPlayAppUi::~COggPlayAppUi()
 		delete iSplashFOView;
 		}
 
-	if (iFOView)
-		{
-		DeregisterView(*iFOView);
-		delete iFOView;
-		}
-
 	if (iSplashFCView)
 		{
 		DeregisterView(*iSplashFCView);
 		delete iSplashFCView;
+		}
+
+	if (iFOView)
+		{
+		DeregisterView(*iFOView);
+		delete iFOView;
 		}
 
 	if (iFCView)
@@ -828,8 +856,10 @@ COggPlayAppUi::~COggPlayAppUi()
 #endif
 
 	delete iOggPlayback;
-	iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
-	
+
+	if (iCapturedKeyHandle)
+		iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
+
 	delete iSkins;
 	delete iOggMsgEnv ;
 	delete iSongList;
@@ -840,30 +870,28 @@ COggPlayAppUi::~COggPlayAppUi()
 	COggLog::Exit();  
 	}
 
+#if defined(UIQ)
+void COggPlayAppUi::ActivateOggView()
+	{
+	// Asynchronously activate the view
+	iOggViewActivationAO->ActivateOggView();
+	}
+#endif
+
 void COggPlayAppUi::ActivateOggViewL()
-{
-  TUid viewUid;
-  viewUid = iAppView->IsFlipOpen() ? KOggPlayUidFOView : KOggPlayUidFCView;
-  ActivateOggViewL(viewUid);
-}
+	{
+	TUid viewUid = iAppView->IsFlipOpen() ? KOggPlayUidFOView : KOggPlayUidFCView;
+	ActivateOggViewL(viewUid);
+	}
 
 void COggPlayAppUi::ActivateOggViewL(const TUid aViewId)
-{
+	{
 	TVwsViewId viewId;
 	viewId.iAppUid = KOggPlayUid;
 	viewId.iViewUid = aViewId;
-	
-	iMainViewActive = (aViewId == KOggPlayUidFOView) || (aViewId == KOggPlayUidFCView);
-	ActivateViewL(viewId);
-}
 
-void COggPlayAppUi::HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent)
-{
-	if (aType == EEventUser+1)
-		ActivateOggViewL();
-	else 
-		CEikAppUi::HandleApplicationSpecificEventL(aType, aEvent);
-}
+	ActivateViewL(viewId);
+	}
 
 #if !defined(PLUGIN_SYSTEM)
 void COggPlayAppUi::NotifyStreamOpen(TInt aErr)
@@ -940,22 +968,20 @@ void COggPlayAppUi::NotifyFatalPlayError()
 	HandleCommandL(EEikCmdExit);
 	}
 
+#if defined(UIQ)
 void COggPlayAppUi::SetHotKey()
 	{
-	if(iCapturedKeyHandle)
+	if (iCapturedKeyHandle)
 		iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
 	iCapturedKeyHandle = 0;
-	if(!iHotkey || !keycodes[iHotkey-1].code)
+
+	if (!iHotkey || !KHotkeyKeycodes[iHotkey-1].code)
 		return;
 
-#if !defined(SERIES60)
-	iCapturedKeyHandle = iEikonEnv->RootWin().CaptureKey(keycodes[iHotkey-1].code,
-		keycodes[iHotkey-1].mask, keycodes[iHotkey-1].mask, 2);
-#else
-	iCapturedKeyHandle = iEikonEnv->RootWin().CaptureKey(keycodes[iHotkey-1].code,
-		keycodes[iHotkey-1].mask, keycodes[iHotkey-1].mask);
-#endif
+	iCapturedKeyHandle = iEikonEnv->RootWin().CaptureKey(KHotkeyKeycodes[iHotkey-1].code,
+	KHotkeyKeycodes[iHotkey-1].mask, KHotkeyKeycodes[iHotkey-1].mask, 2);
 	}
+#endif
 
 #if defined(SERIES60) || defined(SERIES80) 
 void COggPlayAppUi::UpdateSoftkeys(TBool aForce)
@@ -1073,7 +1099,7 @@ void COggPlayAppUi::HandleCommandL(TInt aCommand)
 		case EOggNextSong:
 			NextSong();
 			break;
-		
+
 		case EOggPrevSong:
 			PreviousSong();
 			break;
@@ -1215,14 +1241,13 @@ void COggPlayAppUi::HandleCommandL(TInt aCommand)
 
 void COggPlayAppUi::PlaySelect()
 	{
-	TInt idx = iAppView->GetSelectedIndex();
-
 	if (iViewBy==ETop)
 		{
 		SelectNextView();
 		return;
 		}
 
+	TInt idx = iAppView->GetSelectedIndex();
 	if (iAppView->GetItemType(idx) == COggListBox::EBack)
 		{
 		// the back item was selected: show the previous view
@@ -1322,7 +1347,7 @@ void COggPlayAppUi::SelectPreviousView()
 	if (!iViewHistoryStack.Count())
 		return;
 
-	TInt previousListboxLine = (TInt) iViewHistoryStack[iViewHistoryStack.Count()-1];
+	TInt previousListboxLine = iViewHistoryStack[iViewHistoryStack.Count()-1];
 	iViewHistoryStack.Remove(iViewHistoryStack.Count()-1);
 
 	const TInt previousView = iAppView->GetViewName(0);
@@ -1343,13 +1368,9 @@ void COggPlayAppUi::SelectNextView()
 	TInt idx = iAppView->GetSelectedIndex();
 	if (iViewBy == ETop)
 		{
-		if (idx>=ETitle && idx<=EPlayList)
-			{
-			iViewHistoryStack.Append(idx);
-			HandleCommandL(EOggViewByTitle+idx);
-			}
-
-		  return;
+		iViewHistoryStack.Append(idx);
+		HandleCommandL(EOggViewByTitle+idx);
+		return;
 		}
 		
 	if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==EPlayList))
@@ -1515,13 +1536,16 @@ void COggPlayAppUi::NextSong()
 			}
 		else if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder)
 			{
-            HandleCommandL(EOggPlay); // select the 1st song in the current category
+			if (iAppView->GetItemType(iAppView->GetSelectedIndex()) == COggListBox::EBack)
+				iAppView->SelectItem(1);
+
+			HandleCommandL(EOggPlay); // select the 1st song in the current category
             HandleCommandL(EOggPlay); // play it!
 			}
 		else
 			{
-            // if no song is playing, play the currently selected song
-			if (iAppView->GetItemType(iAppView->GetSelectedIndex())==COggListBox::EBack)
+            // If no song is playing, play the currently selected song
+			if (iAppView->GetItemType(iAppView->GetSelectedIndex()) == COggListBox::EBack)
 				iAppView->SelectItem(1);
 
 			HandleCommandL(EOggPlay); // play it!
@@ -1531,54 +1555,35 @@ void COggPlayAppUi::NextSong()
 
 void COggPlayAppUi::PreviousSong()
 	{
-	if (iSongList->AnySongPlaying()) 
-		{
-        // If a song is currently playing, stop playback and play the previous song (if there is one)
-		iFileName = iSongList->GetPreviousSong();
-		if (!iFileName.Length())
-			{
-            HandleCommandL(EOggStop);
-			return;
-			}
+	// Do nothing if there isn't a song playing
+	if (!iSongList->AnySongPlaying())
+		return;
 
-		iOggPlayback->Stop();
-		TInt err = iOggPlayback->Open(iFileName);
-		if (err == KErrNone)
-			{
+	// If a song is currently playing, stop playback and play the previous song (if there is one)
+	iFileName = iSongList->GetPreviousSong();
+	if (!iFileName.Length())
+		{
+		HandleCommandL(EOggStop);
+		return;
+		}
+
+	iOggPlayback->Stop();
+	TInt err = iOggPlayback->Open(iFileName);
+	if (err == KErrNone)
+		{
 #if !defined(DELAY_AUDIO_STREAMING_OPEN)
-            iOggPlayback->Play();
+		iOggPlayback->Play();
 
 #if !defined(DELAY_AUDIO_STREAMING_START)
-            UpdateSoftkeys();
-            iAppView->Update();
+		UpdateSoftkeys();
+		iAppView->Update();
 #endif
 #endif
-			}
-		else
-			{
-			FileOpenErrorL(err);
-            HandleCommandL(EOggStop);
-			}
 		}
-    else
+	else
 		{
-        if (iViewBy==ETop)
-			{
-            HandleCommandL(EOggPlay); // select the current category
-            HandleCommandL(EOggPlay); // select the 1st song in that category
-            HandleCommandL(EOggPlay); // play it!
-			}
-		else if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder)
-			{
-            HandleCommandL(EOggPlay); // select the 1st song in the current category
-            HandleCommandL(EOggPlay); // play it!
-			}
-		else
-			{
-            // if no song is playing, play the currently selected song
-			if (iAppView->GetItemType(iAppView->GetSelectedIndex())==COggListBox::EBack) iAppView->SelectItem(1);
-            HandleCommandL(EOggPlay); // play it!
-			}
+		FileOpenErrorL(err);
+		HandleCommandL(EOggStop);
 		}
 	}
 
@@ -1595,12 +1600,13 @@ void COggPlayAppUi::DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane)
 			}
 #endif
 
-		// "Repeat" on/off entry, UIQ uses check box, Series 60 uses variable argument string.
 #if defined(UIQ)
 		if (iSettings.iRepeat) 
 			aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
 
-		// UIQ_? for the random stuff
+		if (iSettings.iRandom) 
+			aMenuPane->SetItemButtonState(EOggShuffle, EEikMenuItemSymbolOn);
+
 #elif defined(SERIES60)
 		TBuf<50> buf;
 		iEikonEnv->ReadResourceL(buf, iSettings.iRandom ? R_OGG_RANDOM_OFF : R_OGG_RANDOM_ON);
@@ -1631,6 +1637,9 @@ void COggPlayAppUi::DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane)
 		{
 		if (iSettings.iRepeat)
 			aMenuPane->SetItemButtonState(EOggRepeat, EEikMenuItemSymbolOn);
+
+		if (iSettings.iRandom) 
+			aMenuPane->SetItemButtonState(EOggShuffle, EEikMenuItemSymbolOn);
 
 		aMenuPane->SetItemDimmed(EOggStop, !iAppView->CanStop());
 		aMenuPane->SetItemDimmed(EOggPlay, !iAppView->CanPlay());
@@ -1683,41 +1692,40 @@ void COggPlayAppUi::FindSkins()
 
 void COggPlayAppUi::ReadIniFile()
 	{
-    // Set some default values (for first time users)
+    TRACEF(COggLog::VA(_L("COggPlayAppUi::ReadIniFile() %S"), &iIniFileName));
+
+	// Set some default values (for first time users)
 #if defined(SERIES60)
-	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyBack;
-    iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyBack;
+	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotkeyBack;
+    iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotkeyBack;
 
-	iSettings.iUserHotkeys[TOggplaySettings::EFastForward] = '3';
-    iSettings.iUserHotkeys[TOggplaySettings::ERewind] = '1';
+	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyFastForward] = '3';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyRewind] = '1';
 
-    iSettings.iUserHotkeys[TOggplaySettings::EPageUp] = '2';
-    iSettings.iUserHotkeys[TOggplaySettings::EPageDown] = '8';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyPageUp] = '2';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyPageDown] = '8';
 
-    iSettings.iUserHotkeys[TOggplaySettings::ENextSong] = '6';
-    iSettings.iUserHotkeys[TOggplaySettings::EPreviousSong] = '4';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyNextSong] = '6';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyPreviousSong] = '4';
 
-    iSettings.iUserHotkeys[TOggplaySettings::EKeylock] = '*';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyKeylock] = '*';
 
-    iSettings.iUserHotkeys[TOggplaySettings::EPauseResume] = '5';
-	iSettings.iUserHotkeys[TOggplaySettings::EStop] = EStdKeyBackspace;
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyPauseResume] = '5';
+	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyStop] = EStdKeyBackspace;
 
-	iSettings.iUserHotkeys[TOggplaySettings::EVolumeBoostUp] = '9';
-	iSettings.iUserHotkeys[TOggplaySettings::EVolumeBoostDown] = '7';
-
-    iSettings.iScanmode = TOggplaySettings::EFullScan;
-#else
-#if defined(SERIES80)
-	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EPlay;
-    iSettings.iSoftKeysIdle[1] = TOggplaySettings::EHotKeyBack;
+	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyVolumeBoostUp] = '9';
+	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyVolumeBoostDown] = '7';
+#elif defined(SERIES80)
+	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotkeyPlay;
+    iSettings.iSoftKeysIdle[1] = TOggplaySettings::EHotkeyBack;
     iSettings.iSoftKeysIdle[2] = TOggplaySettings::EHotkeyVolumeHelp;
-    iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotKeyExit;
-    iSettings.iSoftKeysPlay[0] = TOggplaySettings::EPause;
-    iSettings.iSoftKeysPlay[1] = TOggplaySettings::ENextSong;
-    iSettings.iSoftKeysPlay[2] = TOggplaySettings::EFastForward;
-    iSettings.iSoftKeysPlay[3] = TOggplaySettings::ERewind;
+    iSettings.iSoftKeysIdle[3] = TOggplaySettings::EHotkeyExit;
+    iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotkeyPause;
+    iSettings.iSoftKeysPlay[1] = TOggplaySettings::EHotkeyNextSong;
+    iSettings.iSoftKeysPlay[2] = TOggplaySettings::EHotkeyFastForward;
+    iSettings.iSoftKeysPlay[3] = TOggplaySettings::EHotkeyRewind;
+
 	iSettings.iCustomScanDir = KFullScanString;
-#endif
 #endif
  
     iSettings.iWarningsEnabled = ETrue;
@@ -1729,459 +1737,525 @@ void COggPlayAppUi::ReadIniFile()
 	iSettings.iAlarmGain = ENoGain;
 	iSettings.iAlarmSnooze = 1;
 
-    iAnalyzerState = EDecay; 
+    iAnalyzerState = EDecay;
+    iSettings.iScanmode = TOggplaySettings::EFullScan;
 
-#if !defined(PLUGIN_SYSTEM)
 	iSettings.iBufferingMode = EBufferThread;
 	iSettings.iThreadPriority = ENormal;
-#endif
 
-    // Open the file
-    RFile in;
-    TInt err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileRead | EFileStreamText);    
+	// Open the file
+	RFile in;
+    TInt err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileShareReadersOnly);
     if (err != KErrNone)
 		{
-        TRACEF(COggLog::VA(_L("ReadIni: %d"), err ));
+        TRACEF(COggLog::VA(_L("ReadIni: File open error: %d"), err));
         return;
 		}
-	
-	TFileText tf;
-	tf.Set(in);
 
-	// Read in the fields
-	TInt ini_version = 0;
-
-	TInt val = (TInt) IniRead32(tf);
-	if ( val == 0xdb ) // Our magic number ! (see writeini below)
+	TInt fileSize = 0;
+	err = in.Size(fileSize);
+	if ((err != KErrNone) || (fileSize>1024))
 		{
-		// Followed by version number
-		ini_version = (TInt) IniRead32(tf);
-		TRACEF(COggLog::VA(_L("Inifile version %d"), ini_version ));
+		TRACEF(COggLog::VA(_L("ReadIni: File size error: %d, File size: %d"), err, fileSize));
+		in.Close();
+		return;
+		}
+
+	TBuf8<1024> iniFileBuf;
+	err = in.Read(iniFileBuf);
+	in.Close();
+
+	if (err != KErrNone)
+		{
+		TRACEF(COggLog::VA(_L("ReadIni: File read error: %d"), err));
+		return;
+		}
+
+	// Read the data
+	TPtrC8 iniFileData(iniFileBuf);
+	TInt magic = IniRawRead32(iniFileData);
+	if (magic == 0x2A49474F) // Our magic number ! (see writeini below)
+		{
+		TRAPD(err, ReadIniFileL(iniFileData));
+		if (err != KErrNone)
+			{
+			// We tolerate all errors when reading the ini file
+			TRACEF(COggLog::VA(_L("ReadIni: File parsing error: %d"), err));
+			return;
+			}
 		}
 	else
 		{
-		// Not the magic number so this must be an old version
-		// Seek back to beginning of the file and start parsing from there
-		tf.Seek(ESeekStart);
+		TRACEF(COggLog::VA(_L("ReadIni: File stamp error")));
+		return;
 		}
-	
-	iHotkey = (TInt) IniRead32(tf, 0, KMaxKeyCodes);
-	iSettings.iRepeat = (TBool) IniRead32(tf, 1, 1);
-	iVolume = (TInt) IniRead32(tf, KMaxVolume, KMaxVolume);
-	
-	TInt64 tmp64 = IniRead64(tf);
-	TTime t(tmp64);
-	iSettings.iAlarmTime = t;
+	}
 
-	iAnalyzerState = (TInt) IniRead32(tf, 0, 3);
-	val = IniRead32(tf);  // For backward compatibility
-	iCurrentSkin = (TInt) IniRead32(tf, 0, (iSkins->Count() - 1));
-   
-	if (ini_version >= 2)
+void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
+	{
+	// Read the version number
+	TInt err;
+	TInt iniVersion = IniRead32L(aIniFileData, 1, 1);
+	TRACEF(COggLog::VA(_L("ReadIni: version %d"), iniVersion));
+
+	// Read the OS version
+	TInt iniOsVersion = IniRead32L(aIniFileData, 0, 5);
+
+#if defined(SERIES60)
+#if !defined(SERIES60V3)
+#if !defined(SERIES60SUI)
+	TInt osVersion = 0;
+#else
+	TInt osVersion = 1;
+#endif
+#else
+	TInt osVersion = 2;
+#endif
+#elif defined(SERIES80)
+#if !defined(SERIES90)
+	TInt osVersion = 3;
+#else
+	TInt osVersion = 4;
+#endif
+#else
+	TInt osVersion = 5;
+#endif
+
+	// In principle we could cope with OS version mismatches but
+	// it's far more likely that if the version doesn't match the file is corrupt.
+	if (osVersion != iniOsVersion)
 		{
-		TInt restore_stack_count = (TInt) IniRead32(tf);      
-		for (TInt i = 0; i < restore_stack_count; i++)
-			iRestoreStack.Append((TInt) IniRead32(tf));
+		// The only possible reason for a mismatch is the user
+		// has upgraded from a S60 version to a S60 SUI version 
+		if ((osVersion>1) || (iniOsVersion>1))
+			User::Leave(KErrCorrupt);
+		}
+
+	// Determine if this .ogi file was written with the non-mmf or mmf version
+	TBool mmfDataPresent = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+
+#if defined(UIQ)
+	iHotkey = IniRead32L(aIniFileData, 0, KMaxKeyCodes);
+#else
+	/* iHotkey = */ IniRead32L(aIniFileData, 0, 0);
+#endif
+
+	iSettings.iRepeat = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+	iVolume = IniRead32L(aIniFileData, 0, KMaxVolume);
 	
-		iRestoreCurrent = (TInt) IniRead32(tf);
-		iSettings.iScanmode = (TInt) IniRead32(tf);
+	iSettings.iAlarmTime = TTime(IniRead64L(aIniFileData));
+
+	iAnalyzerState = IniRead32L(aIniFileData, (TInt32) EZero, (TInt32) EDecay);
+	iCurrentSkin = IniRead32L(aIniFileData, 0, KMaxTInt);
+	if (iCurrentSkin>(iSkins->Count() - 1)) // Check that the skin exists (the user may have deleted some of them)
+		iCurrentSkin = 0; // Reset to the default skin
+
+	TInt restoreStackCount = IniRead32L(aIniFileData, 0, 2);
+	TInt i;
+	for (i = 0 ; i<restoreStackCount ; i++)
+		iRestoreStack.Append(IniRead32L(aIniFileData, 0, KMaxTInt));
+	
+	iRestoreCurrent = IniRead32L(aIniFileData, 0, KMaxTInt);
 
 #if defined(SERIES80)
-		IniReadDes(tf, iSettings.iCustomScanDir, KMmcSearchDir);
+	iSettings.iScanmode = IniRead32L(aIniFileData, (TInt) TOggplaySettings::EFullScan, (TInt) TOggplaySettings::ECustomDir);
+#else
+	iSettings.iScanmode = IniRead32L(aIniFileData, (TInt) TOggplaySettings::EFullScan, (TInt) TOggplaySettings::EMmcFull);
 #endif
 
-		iSettings.iAutoplay = (TInt) IniRead32(tf);
-		iSettings.iManeuvringSpeed = (TInt) IniRead32(tf);
+	iSettings.iAutoplay = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+	/* iSettings.iManeuvringSpeed = */ IniRead32L(aIniFileData, 0, 0);
       
-		// For backwards compatibility for number of hotkeys
-		TInt num_of_hotkeys = 0;
-		if (ini_version<7) 
-			num_of_hotkeys = (ini_version >= 5) ? TOggplaySettings::ENofHotkeysV5 : TOggplaySettings::ENofHotkeysV4;
-		else 
-			num_of_hotkeys = (TInt)  IniRead32(tf);
- 
-		for (TInt j = TOggplaySettings::KFirstHotkeyIndex; j < num_of_hotkeys ; j++) 
-			iSettings.iUserHotkeys[j] = (TInt) IniRead32(tf);
+	TInt numHotKeys = IniRead32L(aIniFileData, 0, (TInt) TOggplaySettings::ENumHotkeys);
+	for (i = TOggplaySettings::EFirstHotkeyIndex ; i<numHotKeys ; i++) 
+		iSettings.iUserHotkeys[i] = IniRead32L(aIniFileData, 0, KMaxTInt);
       
-		iSettings.iWarningsEnabled = (TBool) IniRead32(tf);
-		if (ini_version<7) 
-			{
-			// The way the softkeys is stored has changed, ignore the value from the ini file.
-            IniRead32(tf); 
-        	IniRead32(tf);
-        	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotKeyExit;
-        	iSettings.iSoftKeysPlay[0] = TOggplaySettings::EHotKeyExit;
-			}
-        else
-			{
-			iSettings.iSoftKeysIdle[0] = (TInt) IniRead32(tf);
-      		iSettings.iSoftKeysPlay[0] = (TInt) IniRead32(tf);
-			}
+	iSettings.iWarningsEnabled = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+	iSettings.iRandom = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+	iSettings.iGainType = IniRead32L(aIniFileData, (TInt) EMinus24dB, (TInt) EStatic12dB);
+	iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
 
-#if defined(SERIES80)
-		iSettings.iSoftKeysIdle[1] = (TInt) IniRead32(tf);
-		iSettings.iSoftKeysPlay[1] = (TInt) IniRead32(tf);
-		iSettings.iSoftKeysIdle[2] = (TInt) IniRead32(tf);
-		iSettings.iSoftKeysPlay[2] = (TInt) IniRead32(tf);
-		iSettings.iSoftKeysIdle[3] = (TInt) IniRead32(tf);
-		iSettings.iSoftKeysPlay[3] = (TInt) IniRead32(tf);
-#endif
+	iSettings.iAlarmActive = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+	iSettings.iAlarmVolume = IniRead32L(aIniFileData, 1, 10);
+	iSettings.iAlarmGain = IniRead32L(aIniFileData, (TInt) EMinus24dB, (TInt) EStatic12dB);
+	iSettings.iAlarmSnooze = IniRead32L(aIniFileData, 0, 3);
 
-		iSettings.iRandom = (TBool) IniRead32(tf, 0, 1);
-		} // version 2 onwards
-
-#if defined(PLUGIN_SYSTEM)
-	TInt nbController = IniRead32(tf);
-	for (TInt j = 0 ; j<nbController ; j++)
-		{
-		TFileName extension;
-		if (tf.Read(extension) != KErrNone)
-			extension = KNullDesC;
-
-		TUid uid;
-		uid.iUid = IniRead32(tf);
-		TRAPD(nevermind, iOggPlayback->GetPluginListL().SelectPluginL(extension, uid));
-
-		TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid.iUid, nevermind));
-		}
-#endif
-
-	if (ini_version>=7)
-		{
-		iSettings.iGainType = IniRead32(tf);
-		if (ini_version<12)
-			{
-			// Adjust the setting to the new range
-			switch(iSettings.iGainType)
-				{
-				case EMinus21dB:
-					iSettings.iGainType = EMinus18dB;
-					break;
-
-				case EMinus18dB:
-					iSettings.iGainType = EMinus12dB;
-					break;
-
-				case EMinus15dB:
-					iSettings.iGainType = ENoGain;
-					break;
-
-				case EMinus12dB:
-					iSettings.iGainType = EStatic6dB;
-					break;
-
-				case EMinus9dB:
-					iSettings.iGainType = EStatic12dB;
-					break;
-
-				default:
-					break;
-				}
-			}
-
-		iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
-		}
+	iSettings.iBufferingMode = IniRead32L(aIniFileData, (TInt) EBufferThread, (TInt) ENoBuffering);
 
 #if !defined(PLUGIN_SYSTEM)
-	if (ini_version>=8)
-		{
-		iSettings.iBufferingMode = IniRead32(tf);
-		TInt err = ((COggPlayback*) iOggPlayback)->SetBufferingMode((TBufferingMode) iSettings.iBufferingMode);
-		if (err != KErrNone)
-			iSettings.iBufferingMode = ENoBuffering;
-
-		iSettings.iThreadPriority = IniRead32(tf);
-		((COggPlayback*) iOggPlayback)->SetThreadPriority((TStreamingThreadPriority) iSettings.iThreadPriority);
-		}
+	err = ((COggPlayback*) iOggPlayback)->SetBufferingMode((TBufferingMode) iSettings.iBufferingMode);
+	if (err != KErrNone)
+		iSettings.iBufferingMode = ENoBuffering;
 #endif
 
-	if (ini_version>=11)
-		{
-		iSettings.iAlarmActive = IniRead32(tf);
-		iSettings.iAlarmVolume = IniRead32(tf);
-		iSettings.iAlarmGain = IniRead32(tf);
-		if (ini_version<12)
-			{
-			// Adjust the setting to the new range
-			switch(iSettings.iAlarmGain)
-				{
-				case EMinus21dB:
-					iSettings.iAlarmGain = EMinus18dB;
-					break;
+	iSettings.iThreadPriority = IniRead32L(aIniFileData, (TInt) ENormal, (TInt) EHigh);
 
-				case EMinus18dB:
-					iSettings.iAlarmGain = EMinus12dB;
-					break;
+#if !defined(PLUGIN_SYSTEM)
+	((COggPlayback*) iOggPlayback)->SetThreadPriority((TStreamingThreadPriority) iSettings.iThreadPriority);
+#endif
 
-				case EMinus15dB:
-					iSettings.iAlarmGain = ENoGain;
-					break;
-
-				case EMinus12dB:
-					iSettings.iAlarmGain = EStatic6dB;
-					break;
-
-				case EMinus9dB:
-					iSettings.iAlarmGain = EStatic12dB;
-					break;
-
-				default:
-					break;
-				}
-			}
-
-		iSettings.iAlarmSnooze = IniRead32(tf);
-		}
-
-	in.Close();
-	}
-
-TInt32 COggPlayAppUi::IniRead32(TFileText& aFile, TInt32 aDefault, TInt32 aMaxValue)
-	{
-	TInt32 val = aDefault;
-	TBuf<128> line;
-
-	if (aFile.Read(line) == KErrNone)
-		{
-		TLex parse(line);
-		if (parse.Val(val) == KErrNone)
-			{
-			if (val > aMaxValue)
-				val = aDefault;
-			}
-		else
-			val = aDefault;
-		}
-
-	return val;
-	}
-  
-TInt64 COggPlayAppUi::IniRead64(TFileText& aFile, TInt64 aDefault)
-	{
-	TInt64 val = aDefault;
-	TBuf<128> line;
-
-	if (aFile.Read(line) == KErrNone)
-		{
-		TLex parse(line);
-		if (parse.Val(val) != KErrNone)
-			val = aDefault;
-		}
-
-	return val;
-	}
+	TInt maxSoftKeyIndex = ((TInt) TOggplaySettings::ENumHotkeys) - 1;
+	iSettings.iSoftKeysIdle[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+	iSettings.iSoftKeysPlay[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 
 #if defined(SERIES80)
-void COggPlayAppUi::IniReadDes( TFileText& aFile, TDes& value,const TDesC& defaultValue )
-{
-   TBuf<255> line;
+	iSettings.iSoftKeysIdle[1] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+	iSettings.iSoftKeysPlay[1] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+	iSettings.iSoftKeysIdle[2] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+	iSettings.iSoftKeysPlay[2] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+	iSettings.iSoftKeysIdle[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+	iSettings.iSoftKeysPlay[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 
-   if ( aFile.Read(line) == KErrNone )
-   {
-		   value.Copy(line);
-		   
-    } else 
-    {
-    	   value.Copy(defaultValue);
-    	   
-    }
-}
+	TRAP(err, IniReadDesL(aIniFileData, iSettings.iCustomScanDir));
+	if (err != KErrNone)
+		{
+		// Reset the values if the ReadDesL() fails
+		iSettings.iScanmode = TOggplaySettings::EFullScan;
+		iSettings.iCustomScanDir = KFullScanString;
+		User::Leave(err);
+		}
 #endif
+
+	// For the non-MMF version that's the end of the file
+	if (!mmfDataPresent)
+		return;
+
+#if defined(PLUGIN_SYSTEM)
+	TInt numExtensions = IniRead32L(aIniFileData, 0, KMaxTInt);
+	for (i = 0 ; i<numExtensions ; i++)
+		{
+		TFileName extension;
+		IniReadDesL(aIniFileData, extension);
+
+		TUid uid;
+		uid.iUid = (TInt32) IniRead32L(aIniFileData);
+
+		TRAP(err, iOggPlayback->GetPluginListL().SelectPluginL(extension, uid));
+		TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid.iUid, err));
+		}
+#endif
+	}
+
+TInt COggPlayAppUi::IniRawRead32(TPtrC8& aDes)
+	{
+	if (aDes.Length()<4)
+		User::Leave(KErrCorrupt);
+
+	TInt val;
+	Mem::Copy(&val, aDes.Ptr(), 4);
+
+	aDes.Set(aDes.Ptr()+4, aDes.Length()-4);
+	return val;
+	}
+
+TInt COggPlayAppUi::IniRead32L(TPtrC8& aDes)
+	{
+	TInt val;
+	TLex8 desLex(aDes);
+	User::LeaveIfError(desLex.Val(val));
+
+	TInt bytesToAdvance = desLex.Offset()+1;
+	aDes.Set(aDes.Ptr()+bytesToAdvance, aDes.Length()-bytesToAdvance);
+	return val;
+	}
+
+TInt COggPlayAppUi::IniRead32L(TPtrC8& aDes, TInt aLowerLimit, TInt aUpperLimit)
+	{
+	TInt val;
+	TLex8 desLex(aDes);
+	User::LeaveIfError(desLex.Val(val));
+
+	if ((val<aLowerLimit) || (val>aUpperLimit))
+		User::Leave(KErrCorrupt);
+
+	TInt bytesToAdvance = desLex.Offset()+1;
+	aDes.Set(aDes.Ptr()+bytesToAdvance, aDes.Length()-bytesToAdvance);
+	return val;
+	}
+
+TInt64 COggPlayAppUi::IniRead64L(TPtrC8& aDes)
+	{
+	TInt64 val;
+	TLex8 desLex(aDes);
+	User::LeaveIfError(desLex.Val(val));
+
+	TInt bytesToAdvance = desLex.Offset()+1;
+	aDes.Set(aDes.Ptr()+bytesToAdvance, aDes.Length()-bytesToAdvance);
+	return val;
+	}
+
+TInt64 COggPlayAppUi::IniRead64L(TPtrC8& aDes, TInt64 aLowerLimit, TInt64 aUpperLimit)
+	{
+	TInt64 val;
+	TLex8 desLex(aDes);
+	User::LeaveIfError(desLex.Val(val));
+
+	if ((val<aLowerLimit) || (val>aUpperLimit))
+		User::Leave(KErrCorrupt);
+
+	TInt bytesToAdvance = desLex.Offset()+1;
+	aDes.Set(aDes.Ptr()+bytesToAdvance, aDes.Length()-bytesToAdvance);
+	return val;
+	}
+
+const TUint8 KIniValueTerminator = '\n';
+void COggPlayAppUi::IniReadDesL(TPtrC8& aDes, TDes& aValue)
+	{
+	aValue.Zero();
+	TInt maxBytes = aValue.MaxSize();
+
+	TInt i;
+	for (i = 0 ; i<maxBytes ; i += 2)
+		{
+		// Check for at least one 8 bit character
+		if (!aDes.Length())
+			User::Leave(KErrCorrupt);
+
+		// Check for terminator
+		if (aDes[0] == KIniValueTerminator)
+			break;
+
+		// Check for at least one 16 bit character
+		if (aDes.Length()<2)
+			User::Leave(KErrCorrupt);
+
+		// Append it to the output string
+		TChar char16 = ((TUint16) aDes[0]) | (((TUint16) (aDes[1])) << 8);
+		aValue.Append(char16);
+
+		// Advance one 16 bit character
+		aDes.Set(aDes.Ptr()+2, aDes.Length()-2);
+		}
+	
+	if (i == maxBytes)
+		User::Leave(KErrOverflow);
+
+	aDes.Set(aDes.Ptr()+1, aDes.Length()-1);
+	}
 
 void COggPlayAppUi::WriteIniFile()
 	{
     TRACEF(COggLog::VA(_L("COggPlayAppUi::WriteIniFile() %S, %d"), &iIniFileName, iIsRunningEmbedded));
     
-    // Accessing the MMC , using the TFileText is extremely slow. 
-    // We'll do everything using the C:\ drive then move the file to it's final destination in MMC.
-    TParsePtrC p(iIniFileName);
-	TBool useTemporaryFile = EFalse;
-	TFileName fileName = iIniFileName;
-    if (p.Drive() != _L("C:"))
-		{
-    	useTemporaryFile = ETrue;
+	// Output buffer to write data to
+	TBuf8<1024> iniFileBuf;
+	iniFileBuf.SetLength(10);
 
-		// Create the c:\tmp\ directory
-        TInt errorCode = iCoeEnv->FsSession().MkDir(_L("C:\\tmp\\"));
-        if ((errorCode != KErrNone) && (errorCode !=  KErrAlreadyExists) )
-          return;
-          
-        // Create the file
-    	fileName = _L("C:\\tmp\\");
-    	fileName.Append(p.NameAndExt());
-		}
-    
-    RFile out;    
-    if (out.Replace(iCoeEnv->FsSession(), fileName, EFileWrite | EFileStreamText) != KErrNone)
-		return;
-    
-	TRACEF(_L("Writing Inifile..."));
-	TFileText tf;
-	tf.Set(out);
-    
-    // this should do the trick for forward compatibility:
-	TInt magic=0xdb;
-	TInt iniversion=12;
+	// Magic identifier string
+	iniFileBuf[0] = 'O';
+	iniFileBuf[1] = 'G';
+	iniFileBuf[2] = 'I';
+	iniFileBuf[3] = '*';
 
-	TBuf<64> num;
-    num.Num(magic);
-    tf.Write(num);
-    
-    num.Num(iniversion);
-    tf.Write(num);
+	// Ini file version number
+	// Please increase the version number when adding stuff
+	// (also update the range check in ReadIniFile())
+	iniFileBuf[4] = '1';
+	iniFileBuf[5] = KIniValueTerminator;
 
-	num.Num(iHotkey);
-	tf.Write(num);
-	
-	num.Num(iSettings.iRepeat);
-	tf.Write(num);
+	// Ini file OS version
+#if defined(SERIES60)
+#if !defined(SERIES60V3)
+#if !defined(SERIES60SUI)
+	iniFileBuf[6] = '0'; // Plain S60 (e.g. Sendo X)
+	iniFileBuf[7] = KIniValueTerminator;
+#else
+	iniFileBuf[6] = '1'; // S60 + SUI (e.g Nokia N90)
+	iniFileBuf[7] = KIniValueTerminator;
+#endif
+#else
+	iniFileBuf[6] = '2'; // S60 V3 (e.g. Nokia E60)
+	iniFileBuf[7] = KIniValueTerminator;
+#endif
+#elif defined(SERIES80)
+#if !defined(SERIES90)
+	iniFileBuf[6] = '3'; // S80 (e.g Nokia 9500)
+	iniFileBuf[7] = KIniValueTerminator;
+#else
+	iniFileBuf[6] = '4'; // S90 (e.g Nokia 7700)
+	iniFileBuf[7] = KIniValueTerminator;
+#endif
+#else
+	iniFileBuf[6] = '5'; // UIQ (e.g. SE P900)
+	iniFileBuf[7] = KIniValueTerminator;
+#endif
 
-	num.Num(iVolume);
-	tf.Write(num);
+#if defined(PLUGIN_SYSTEM)
+	// MMF initialisation data present
+	iniFileBuf[8] = '1';
+	iniFileBuf[9] = KIniValueTerminator;
+#else
+	// No MMF initialisation data
+	iniFileBuf[8] = '0';
+	iniFileBuf[9] = KIniValueTerminator;
+#endif
 
-	num.Num(iSettings.iAlarmTime.Int64());
-	tf.Write(num);
+	// Write the data
+	iniFileBuf.AppendNum(iHotkey);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iRepeat ? 1 : 0);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iVolume);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iAlarmTime.Int64());
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iAnalyzerState);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iCurrentSkin);
+	iniFileBuf.Append(KIniValueTerminator);
 	
-	num.Num(iAnalyzerState);
-	tf.Write(num);
-	
-	// for backward compatibility:
-	num.Num(iAnalyzerState);
-	tf.Write(num);
-	
-	num.Num(iCurrentSkin);
-	tf.Write(num);
-	
-    // from iniversion 2 onwards:
+	TInt i;
 	if (iIsRunningEmbedded)
 		{
-	    num.Num(iRestoreStack.Count());
-		tf.Write(num);
-    
-		for ( TInt i = 0; i < iRestoreStack.Count(); i++ )
+		// Leave the restore stack unchanged
+		TInt restoreStackCount = iRestoreStack.Count();
+		iniFileBuf.AppendNum(restoreStackCount);
+		iniFileBuf.Append(KIniValueTerminator);
+
+		for (i = 0; i < restoreStackCount ; i++)
 			{
-			num.Num(iRestoreStack[i]);
-			tf.Write(num);
+			iniFileBuf.AppendNum(iRestoreStack[i]);
+			iniFileBuf.Append(KIniValueTerminator);
 			}
-    
-		num.Num(iRestoreCurrent);
-		tf.Write(num);
+
+		iniFileBuf.AppendNum(iRestoreCurrent);
+		iniFileBuf.Append(KIniValueTerminator);
 		}
 	else
 		{
-	    num.Num(iViewHistoryStack.Count());
-		tf.Write(num);
+		// Write a new restore stack
+		TInt viewHistoryStackCount = iViewHistoryStack.Count();
+		iniFileBuf.AppendNum(viewHistoryStackCount);
+		iniFileBuf.Append(KIniValueTerminator);
     
-		for (TInt i = 0 ; i<iViewHistoryStack.Count() ; i++)
+		for (i = 0 ; i<viewHistoryStackCount ; i++)
 			{
-			num.Num(iViewHistoryStack[i]);
-			tf.Write(num);
+			iniFileBuf.AppendNum(iViewHistoryStack[i]);
+			iniFileBuf.Append(KIniValueTerminator);
 			}
     
-	    num.Num(iAppView->GetSelectedIndex());
-		tf.Write(num);
+		iniFileBuf.AppendNum(iAppView->GetSelectedIndex());
+		iniFileBuf.Append(KIniValueTerminator);
 		}
 	
-	num.Num(iSettings.iScanmode);
-	tf.Write(num);
+	iniFileBuf.AppendNum(iSettings.iScanmode);
+	iniFileBuf.Append(KIniValueTerminator);
 
-#if defined(SERIES80)	
-	tf.Write(iSettings.iCustomScanDir);
-#endif
+	iniFileBuf.AppendNum(iSettings.iAutoplay ? 1 : 0);
+	iniFileBuf.Append(KIniValueTerminator);
 
-	num.Num(iSettings.iAutoplay);
-	tf.Write(num);
-
- 	num.Num(iSettings.iManeuvringSpeed);
-	tf.Write(num);
+	iniFileBuf.AppendNum(iSettings.iManeuvringSpeed);
+	iniFileBuf.Append(KIniValueTerminator);
     
-    num.Num((TUint) TOggplaySettings::ENofHotkeys);
-    tf.Write(num);
+	iniFileBuf.AppendNum((TInt) TOggplaySettings::ENumHotkeys);
+	iniFileBuf.Append(KIniValueTerminator);
     
-    TInt j;
-    for (j = TOggplaySettings::KFirstHotkeyIndex; j<TOggplaySettings::ENofHotkeys ; j++) 
+    for (i = TOggplaySettings::EFirstHotkeyIndex; i<TOggplaySettings::ENumHotkeys ; i++) 
 		{
-        num.Num(iSettings.iUserHotkeys[j]);
-        tf.Write(num);
+		iniFileBuf.AppendNum(iSettings.iUserHotkeys[i]);
+		iniFileBuf.Append(KIniValueTerminator);
 		}
     
-	num.Num(iSettings.iWarningsEnabled ? 1 : 0);
-    tf.Write(num);
+	iniFileBuf.AppendNum(iSettings.iWarningsEnabled ? 1 : 0);
+	iniFileBuf.Append(KIniValueTerminator);
     
-    for (j = 0 ; j<KNofSoftkeys ; j++)
-	    {
-        num.Num(iSettings.iSoftKeysIdle[j]);
-        tf.Write(num);
+	iniFileBuf.AppendNum(iSettings.iRandom ? 1 : 0);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iGainType);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iAlarmActive ? 1 : 0);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iAlarmVolume);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iAlarmGain);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iAlarmSnooze);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iBufferingMode);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	iniFileBuf.AppendNum(iSettings.iThreadPriority);
+	iniFileBuf.Append(KIniValueTerminator);
+
+	for (i = 0 ; i<KNofSoftkeys ; i++)
+		{
+		iniFileBuf.AppendNum(iSettings.iSoftKeysIdle[i]);
+		iniFileBuf.Append(KIniValueTerminator);
     
-        num.Num(iSettings.iSoftKeysPlay[j]);
-        tf.Write(num);
+		iniFileBuf.AppendNum(iSettings.iSoftKeysPlay[i]);
+		iniFileBuf.Append(KIniValueTerminator);
 		}
-    
-    num.Num(iSettings.iRandom);
-    tf.Write(num);
+
+#if defined(SERIES80)
+	HBufC8* customScanDir8 = HBufC8::NewMaxLC(iSettings.iCustomScanDir.Size());
+	Mem::Copy((TAny *) customScanDir8->Ptr(), iSettings.iCustomScanDir.Ptr(), iSettings.iCustomScanDir.Size());
+
+	iniFileBuf.Append(*customScanDir8);
+	iniFileBuf.Append(KIniValueTerminator);
+	CleanupStack::PopAndDestroy(customScanDir8);
+#endif
 
 #if defined(PLUGIN_SYSTEM)
-    CDesCArrayFlat * supportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
-    TRAPD(err,
-		{
-        CleanupStack::PushL(supportedExtensionList);
-        
-        num.Num(supportedExtensionList->Count());
-        tf.Write(num);
-        for (j = 0 ; j<supportedExtensionList->Count() ; j++)
-			{
-            tf.Write((*supportedExtensionList)[j]);
-            CPluginInfo * selected = iOggPlayback->GetPluginListL().GetSelectedPluginInfo((*supportedExtensionList)[j]);
-            if (selected)
-            	num.Num((TInt)selected->iControllerUid.iUid) ;
-            else
-            	num.Num(0);
-            tf.Write(num);
-			}
-        
-        CleanupStack::PopAndDestroy(1);
-	    });
-#endif
+	CDesCArrayFlat * supportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
+	CleanupStack::PushL(supportedExtensionList);
     
-    num.Num(iSettings.iGainType);
-    tf.Write(num);
+	TInt supportedExtensionListCount = supportedExtensionList->Count();
+	iniFileBuf.AppendNum(supportedExtensionListCount);
+	iniFileBuf.Append(KIniValueTerminator);
 
-#if !defined(PLUGIN_SYSTEM)
-    num.Num(iSettings.iBufferingMode);
-    tf.Write(num);
-
-	num.Num(iSettings.iThreadPriority);
-    tf.Write(num);
-#endif
-
-	num.Num(iSettings.iAlarmActive);
-	tf.Write(num);
-
-	num.Num(iSettings.iAlarmVolume);
-	tf.Write(num);
-
-	num.Num(iSettings.iAlarmGain);
-	tf.Write(num);
-
-	num.Num(iSettings.iAlarmSnooze);
-	tf.Write(num);
-
-	// Please increase ini_version when adding stuff
-	
-	out.Close();
-	if (useTemporaryFile) 
+	for (i = 0 ; i<supportedExtensionListCount ; i++)
 		{
-		// Move the file to the MMC
-		CFileMan* fileMan = NULL;
-	    TRAPD(err2, fileMan = CFileMan::NewL(iCoeEnv->FsSession()));
-		if (err2 == KErrNone)
+		TPtrC supportedExtension((*supportedExtensionList)[i]);
+		HBufC8* supportedExtension8 = HBufC8::NewMaxLC(supportedExtension.Size());
+		Mem::Copy((TAny *) supportedExtension8->Ptr(), supportedExtension.Ptr(), supportedExtension.Size());
+
+		iniFileBuf.Append(*supportedExtension8);
+		iniFileBuf.Append(KIniValueTerminator);
+		CleanupStack::PopAndDestroy(supportedExtension8);
+
+		CPluginInfo* selected = iOggPlayback->GetPluginListL().GetSelectedPluginInfo(supportedExtension);
+		if (selected)
 			{
-			fileMan->Move( fileName, iIniFileName,CFileMan::EOverWrite);
-			delete (fileMan);
+			iniFileBuf.AppendNum((TInt) selected->iControllerUid.iUid);
+			iniFileBuf.Append(KIniValueTerminator);
+			}
+		else
+			{
+			iniFileBuf.AppendNum(0);
+			iniFileBuf.Append(KIniValueTerminator);
 			}
 		}
+        
+	CleanupStack::PopAndDestroy(supportedExtensionList);
+#endif
+	
+	// Now we've got all the data, write the file
+    RFile out;
+	TInt err = out.Replace(iCoeEnv->FsSession(), iIniFileName, EFileWrite);
+    if (err != KErrNone)
+		{
+        TRACEF(COggLog::VA(_L("WriteIni: File replace error: %d"), err ));
+		return;
+		}
 
-	TRACEF(_L("Writing Inifile... DONE"));
+	err = out.Write(iniFileBuf);
+	if (err != KErrNone)
+		{
+        TRACEF(COggLog::VA(_L("WriteIni: File write error: %d"), err ));
+		}
+
+	out.Close();
 	}
 
 void COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
@@ -2196,20 +2270,20 @@ void COggPlayAppUi::HandleForegroundEventL(TBool aForeground)
 	CEikAppUi::HandleForegroundEventL(aForeground);
 #endif
 
+	// Ignore the intial foreground event as we won't be ready
 	if (iStartUpState != EStartUpComplete)
 		return;
 
 	if (aForeground)
 		{
-#if defined(UIQ)
-		// UIQ deactivates our view when we are moved to the background
-		// Consequently we need to re-activate it when we are moved back into the foreground
-		ActivateOggViewL();
-#endif
-
 #if defined(SERIES60SUI)
-		// With S60 Scalable UI the layout may have changed, so we need to activate the correct view
-		if (iMainViewActive)
+		// With S60 Scalable UI the layout may have changed
+		// Check to see if we need to activate a different view
+		TVwsViewId viewId;
+		GetActiveViewId(viewId);
+
+		TBool flipOpen = iAppView->IsFlipOpen();
+		if ((flipOpen && (viewId.iViewUid == KOggPlayUidFCView)) || (!flipOpen && (viewId.iViewUid == KOggPlayUidFOView)))
 			ActivateOggViewL();
 #endif
 
@@ -2257,15 +2331,19 @@ void COggPlayAppUi::SetRepeat(TBool aRepeat)
     iAppView->UpdateRepeat();
 	}
 
-TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand /*aCommand*/, TFileName& /*aDocumentName*/,const TDesC8& /*aTail*/)
+TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName, const TDesC8& aTail)
 	{
-    return ETrue;
+	TRACEF(COggLog::VA(_L("COggPlayAppUi::ProcessCPL: %d, %S"), (TInt) aCommand, &aDocumentName));
+
+	// On UIQ and Series 80 we don't want to return ETrue if we are simply being asked to run
+	if (aCommand == EApaCommandRun)
+		return CEikAppUi::ProcessCommandParametersL(aCommand, aDocumentName, aTail);
+
+	return ETrue;
 	}
 
 void COggPlayAppUi::OpenFileL(const TDesC& aFileName)
 	{
-	TRACEF(COggLog::VA(_L("COggPlayAppUi::OpenFileL: %S"), &aFileName));		
-
 	iFileName = aFileName;
 	iIsRunningEmbedded = ETrue;
 	}
@@ -2362,10 +2440,14 @@ void COggPlayAppUi::ReadSkin(TInt aSkin)
 void COggPlayAppUi::HandleResourceChangeL(TInt aType)
 	{
 	CAknAppUi::HandleResourceChangeL(aType);
-	
-	if (aType == KEikDynamicLayoutVariantSwitch)
+
+	if ((aType == KEikDynamicLayoutVariantSwitch) && iForeground)
 		{
-		if (iMainViewActive && iForeground)
+		TVwsViewId viewId;
+		GetActiveViewId(viewId);
+
+		// If one of the main views is active, we need to switch to the other one
+		if ((viewId.iViewUid == KOggPlayUidFOView) || (viewId.iViewUid == KOggPlayUidFCView))
 			ActivateOggViewL();
 		}
 	}

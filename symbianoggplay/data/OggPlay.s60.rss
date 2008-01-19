@@ -85,11 +85,12 @@ RESOURCE MENU_BAR r_oggplay_menubar
 // Dialogs
 RESOURCE ABOUTTEXT r_dialog_about
 	{
-	version = "OggPlay 1.71";
+	version = "OggPlay 1.71a";
 	copyright = ogg_about_cpr;
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;
 	copyright3 = ogg_about_cpr3;
+	copyright4 = ogg_about_cpr4;
 	porting = ogg_about_port;
 	}
 
@@ -222,8 +223,9 @@ RESOURCE ARRAY r_hotkey_array {
 RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu 
-{
-}
+	{
+	// Items added dynamically
+	}
 
 // Settings resources
 RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
@@ -468,17 +470,17 @@ RESOURCE ARRAY r_oggplay_rsk_idle_setting_page_list
     {
     items = { 
 		AVKON_ENUMERATED_TEXT { 
-		   value = 14 ; //TOggplaySettings::EHotKeyExit;
+		   value = 14 ; // TOggplaySettings::EHotKeyExit;
 		   text = ogg_cba_exit;  },
 		AVKON_ENUMERATED_TEXT {
-		   value = 11; //TOggplaySettings::EStop;
+		   value = 11; // TOggplaySettings::EStop;
 		   text = ogg_cba_stop; },
 		// skipped:  value = 2; text = ogg_cba_pause;
 		AVKON_ENUMERATED_TEXT { 
-		   value = 9;  //TOggplaySettings::EPlay;
+		   value = 9;  // TOggplaySettings::EPlay;
 		   text = ogg_cba_play; },
 		AVKON_ENUMERATED_TEXT { 
-	 	   value = 15; //TOggplaySettings::EHotKeyBack;
+	 	   value = 15; // TOggplaySettings::EHotKeyBack;
 		   text = ogg_cba_back; }
 		};
 	}

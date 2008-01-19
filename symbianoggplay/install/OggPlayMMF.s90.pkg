@@ -4,7 +4,7 @@
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
 ;Version string to be changed
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,2
 ;
 ;Supports Series 90
 (0x101FBE05), 0, 0, 0, {"Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID",
@@ -39,5 +39,5 @@
 "\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
 
 ; we try to be nice and uninstall our configuration files
-""-"!:\system\apps\OggPlay\oggplay.ini",FN
+""-"!:\system\apps\OggPlay\oggplay.ogi",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN

@@ -3,7 +3,7 @@
 ;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
-#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay" },(0x1000A661),1,71,1
+#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay" },(0x1000A661),1,71,2
 ;
 ; 0x101F6F88 for S60 v0.9 and later
 (0x101F6F88),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
@@ -38,5 +38,5 @@
 "\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
 
 ; we try to be nice and uninstall our configuration files
-""-"!:\system\apps\OggPlay\oggplay.ini",FN
+""-"!:\system\apps\OggPlay\oggplay.ogi",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN

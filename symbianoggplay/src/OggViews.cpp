@@ -107,15 +107,18 @@ TBool COggSplashView::ViewScreenModeCompatible(TInt /* aScreenMode */)
 	}
 #endif
 
-void COggSplashView::ViewActivatedL(const TVwsViewId& /* aPrevViewId */, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
+void COggSplashView::ViewActivatedL(const TVwsViewId& /*aPrevViewId*/, TUid /*aCustomMessageId*/, const TDesC8& /*aCustomMessage*/)
 	{
 #if defined(UIQ)
-	// On UIQ, in FC mode, the splash view is activated by the FC app launcher
-	// If the application is starting we display the splash screen, otherwise we do nothing
-	// (In the latter case the main FC view will be activated by COggPlayAppUi::HandleForegroundEvent())
+	// On UIQ, in FC mode, the splash view is activated by the app launcher
+	// If the application is starting we display the splash screen,
+	// otherwise we schedule an event to display the main view
 	COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
 	if (appUi->iStartUpState != COggPlayAppUi::EActivateSplashView)
+		{
+		appUi->ActivateOggView();
 		return;
+		}
 
 	// On UIQ, in FC mode, we need to manually re-configure the screen device
 	TPixelsAndRotation sizeAndRotation;
@@ -243,16 +246,12 @@ void COggS60Utility::DisplayStatusPane(TInt aTitleID)
 _LIT(KOggPlayTitle, "OggPlay");
 void COggS60Utility::RemoveStatusPane()
 	{
-	CAknAppUi* appUi = (CAknAppUi*)CEikonEnv::Static()->AppUi();
 	CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
 	statusPane->SwitchLayoutL(R_AVKON_STATUS_PANE_LAYOUT_EMPTY);
 
 	// Restore title
 	CAknTitlePane* titlePane = (CAknTitlePane *) statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
 	titlePane->SetTextL(KOggPlayTitle);
-
-	// Restore softkeys
-	((COggPlayAppUi*) appUi)->UpdateSoftkeys();
 	}
 
 
@@ -296,6 +295,9 @@ void COggSettingsView::ViewDeactivated()
 
 		delete iContainer;
 		iContainer = NULL;
+
+		COggPlayAppUi* appUi = (COggPlayAppUi*) CEikonEnv::Static()->AppUi();
+		appUi->UpdateSoftkeys(ETrue);
 		}
 	}
 

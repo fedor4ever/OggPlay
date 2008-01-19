@@ -69,9 +69,8 @@ COggUserHotkeysControl::~COggUserHotkeysControl()
 
 void COggUserHotkeysControl::SetHotkey(TInt aRow, TInt aCode)
 	{
-	aRow += TOggplaySettings::KFirstHotkeyIndex;
-
-	for (TInt i = TOggplaySettings::KFirstHotkeyIndex ; i<TOggplaySettings::ENofHotkeys ; i++)
+	aRow += TOggplaySettings::EFirstHotkeyIndex;
+	for (TInt i = TOggplaySettings::EFirstHotkeyIndex ; i<TOggplaySettings::ENumHotkeys ; i++)
 		{
 		if( i == aRow )
 			continue;
@@ -86,62 +85,77 @@ void COggUserHotkeysControl::SetHotkey(TInt aRow, TInt aCode)
 
 // Static method
 TOggplaySettings::THotkeys COggUserHotkeysControl::Hotkey(const TKeyEvent& aKeyEvent, TEventCode aType, TOggplaySettings* aData)
-  {
-  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<TOggplaySettings::ENofHotkeys; i++ )
-    {
-    // Special processing for the shift key
-    if(aKeyEvent.iScanCode == EStdKeyLeftShift || 
-      aKeyEvent.iScanCode == EStdKeyRightShift ) {
-      if( (aData->iUserHotkeys[i] == aKeyEvent.iScanCode && aType == EEventKeyDown ) )
-        return (TOggplaySettings::THotkeys) i;
-      }
-    else
-      {
-      if( (aData->iUserHotkeys[i] == aKeyEvent.iScanCode && aType == EEventKey ) )
-        return (TOggplaySettings::THotkeys) i;
-      }
-    }
-  return TOggplaySettings::ENoHotkey;
-  }
+	{
+	for (TInt i = TOggplaySettings::EFirstHotkeyIndex ; i<TOggplaySettings::ENumHotkeys ; i++)
+		{
+		// Special processing for the shift key
+		if ((aKeyEvent.iScanCode == EStdKeyLeftShift) || (aKeyEvent.iScanCode == EStdKeyRightShift))
+			{
+			if ((aData->iUserHotkeys[i] == aKeyEvent.iScanCode) && (aType == EEventKeyDown))
+				return (TOggplaySettings::THotkeys) i;
+			}
+		else
+			{
+			if ((aData->iUserHotkeys[i] == aKeyEvent.iScanCode) && (aType == EEventKey))
+				return (TOggplaySettings::THotkeys) i;
+			}
+		}
+
+	return TOggplaySettings::ENoHotkey;
+	}
 
 void COggUserHotkeysControl::RefreshListboxModel()
-  {
-	TBuf<64> keyBuf,listboxBuf;
+	{
+	TBuf<64> keyBuf, listboxBuf;
+	CDesCArrayFlat* array = iCoeEnv->ReadDesCArrayResourceL(R_USER_HOTKEY_ITEMS);
+	CleanupStack::PushL(array);
 
-  CDesCArrayFlat* array = iCoeEnv->ReadDesCArrayResourceL(R_USER_HOTKEY_ITEMS);
-  
-  CDesCArray* modelArray = static_cast<CDesCArray*>(iListBox->Model()->ItemTextArray());
+	CDesCArray* modelArray = (CDesCArray *) iListBox->Model()->ItemTextArray();
+	for (TInt i = TOggplaySettings::EFirstHotkeyIndex; i<=TOggplaySettings::EHotkeyVolumeBoostDown ; i++) 
+		{
+		keyBuf.Zero();
+		switch (iData.iUserHotkeys[i])
+			{
+			case TOggplaySettings::ENoHotkey: 
+				keyBuf.Copy(array->MdcaPoint(TOggplaySettings::ENoHotkey));
+				break;
 
-  for( TInt i=TOggplaySettings::KFirstHotkeyIndex; i<=TOggplaySettings::EVolumeBoostDown; i++ ) 
-    {
-    keyBuf.Zero();
-    switch( iData.iUserHotkeys[i] ) {
-      case TOggplaySettings::ENoHotkey : 
-        keyBuf.Copy(array->MdcaPoint(TOggplaySettings::ENoHotkey)); break;
-      case EStdKeyBackspace : 
-        iEikonEnv->ReadResource(keyBuf, R_OGG_BACKSPACE); break;
-      case EStdKeyLeftShift : 
-      case EStdKeyRightShift :
-        iEikonEnv->ReadResource(keyBuf, R_OGG_SHIFT); break;
-      case EStdKeyNkpAsterisk : 
-        keyBuf.Append(_L("*")); break;
-      case EStdKeyHash : 
-        keyBuf.Append(_L("#")); break;
-      default : 
-        keyBuf.Append(iData.iUserHotkeys[i]); break;
-      }
+			case EStdKeyBackspace:
+				iEikonEnv->ReadResource(keyBuf, R_OGG_BACKSPACE);
+				break;
 
-    TBuf<64> title;
-    title.Copy(array->MdcaPoint(i));
-    listboxBuf.Format(_L("\t%S\t\t%S"), &title, &keyBuf);
-	  modelArray->InsertL(i-TOggplaySettings::KFirstHotkeyIndex,listboxBuf);
-    if( modelArray->MdcaCount()-1 > i-TOggplaySettings::KFirstHotkeyIndex )
-      modelArray->Delete(i-TOggplaySettings::KFirstHotkeyIndex+1);
-    }
+			case EStdKeyLeftShift: 
+			case EStdKeyRightShift:
+				iEikonEnv->ReadResource(keyBuf, R_OGG_SHIFT);
+				break;
+
+			case EStdKeyNkpAsterisk: 
+				keyBuf.Append(_L("*"));
+				break;
+
+			case EStdKeyHash: 
+				keyBuf.Append(_L("#"));
+				break;
+
+			default:
+				keyBuf.Append(iData.iUserHotkeys[i]);
+				break;
+			}
+
+		TBuf<64> title;
+		title.Copy(array->MdcaPoint(i));
+		listboxBuf.Format(_L("\t%S\t\t%S"), &title, &keyBuf);
+		
+		modelArray->InsertL(i-TOggplaySettings::EFirstHotkeyIndex, listboxBuf);
+		if ((modelArray->MdcaCount()-1) > (i-TOggplaySettings::EFirstHotkeyIndex))
+			modelArray->Delete((i-TOggplaySettings::EFirstHotkeyIndex)+1);
+		}
+
 	iListBox->HandleItemAdditionL();
-  DrawDeferred();
-  delete array;
-  }
+	DrawDeferred();
+
+	CleanupStack::PopAndDestroy(array);
+	}
 
 TInt COggUserHotkeysControl::CountComponentControls() const
   {
@@ -180,39 +194,40 @@ TKeyResponse COggUserHotkeysControl::OfferKeyEventL(
 	return iListBox->OfferKeyEventL( aKeyEvent, aType );
   }
 
-void
-COggUserHotkeysS60::SetSoftkeys(TBool aPlaying)
-{
-  CEikonEnv * eikonEnv = CEikonEnv::Static();
-  COggPlayAppUi * appUi = static_cast <COggPlayAppUi *> ( eikonEnv->AppUi() ) ;
-  CEikButtonGroupContainer * Cba = appUi->Cba();  
-  TOggplaySettings settings = appUi->iSettings;
+void COggUserHotkeysS60::SetSoftkeys(TBool aPlaying)
+	{
+	CEikonEnv * eikonEnv = CEikonEnv::Static();
+	COggPlayAppUi * appUi = static_cast <COggPlayAppUi *> ( eikonEnv->AppUi() ) ;
+	CEikButtonGroupContainer * Cba = appUi->Cba();  
+	TOggplaySettings settings = appUi->iSettings;
 
-  TInt aSoftkey = settings.iSoftKeysIdle[0];
-  if (aPlaying)
-    aSoftkey = settings.iSoftKeysPlay[0];
-  
-  switch(aSoftkey) {
-    case TOggplaySettings::EStop:
-      Cba->AddCommandSetToStackL(R_OPTION_STOP_CBA);
-      break;
-    case TOggplaySettings::EHotKeyExit:
-      Cba->AddCommandSetToStackL(R_OPTION_EXIT_CBA);
-      break;
-    case TOggplaySettings::EPause:
-      Cba->AddCommandSetToStackL(R_OPTION_PAUSE_CBA);
-      break;
-    case TOggplaySettings::EPlay:
-      Cba->AddCommandSetToStackL(R_OPTION_PLAY_CBA);
-      break;
-    case TOggplaySettings::EHotKeyBack:
-      Cba->AddCommandSetToStackL(R_OPTION_BACK_CBA);
-      break;
-    default:
-      //OGGPANIC(_L("Invalid Softkey"),1319);
-      break;
-  }
-}
+	TInt softkey = aPlaying ? settings.iSoftKeysPlay[0] : settings.iSoftKeysIdle[0];
+	switch(softkey)
+		{
+		case TOggplaySettings::EHotkeyStop:
+			Cba->AddCommandSetToStackL(R_OPTION_STOP_CBA);
+			break;
+
+		case TOggplaySettings::EHotkeyExit:
+			Cba->AddCommandSetToStackL(R_OPTION_EXIT_CBA);
+			break;
+
+		case TOggplaySettings::EHotkeyPause:
+			Cba->AddCommandSetToStackL(R_OPTION_PAUSE_CBA);
+			break;
+
+		case TOggplaySettings::EHotkeyPlay:
+			Cba->AddCommandSetToStackL(R_OPTION_PLAY_CBA);
+			break;
+
+		case TOggplaySettings::EHotkeyBack:
+			Cba->AddCommandSetToStackL(R_OPTION_BACK_CBA);
+			break;
+
+		default:
+			break;
+		}
+	}
 
 #endif /* SERIES60 */
 

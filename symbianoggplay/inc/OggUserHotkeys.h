@@ -16,9 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// $CVSHeader$
-
-
 #ifndef OGGUSERHOTKEYS_H
 #define OGGUSERHOTKEYS_H
 
@@ -26,14 +23,13 @@
 #include "OggLog.h"
 
 #if defined(SERIES80)
-
 class COggUserHotkeysS80 : public CBase
-{
-	public: 
+	{
+public: 
 	static void SetSoftkeys(TBool aPlaying);
-	static TInt MapCommandToRssList(TInt aCommandIndex)  ;
-	static TInt MapRssListToCommand(TInt aRSSIndex)  ;
-};
+	static TInt MapCommandToRssList(TInt aCommandIndex);
+	static TInt MapRssListToCommand(TInt aRSSIndex);
+	};
 #endif
 
 #if defined(SERIES60)
@@ -49,8 +45,6 @@ class COggUserHotkeysS80 : public CBase
 class CEikTextListBox;
 
 /// Control hosting listbox for user hotkey assignments.
-//
-
 class COggUserHotkeysControl : public CCoeControl
   {
 public:

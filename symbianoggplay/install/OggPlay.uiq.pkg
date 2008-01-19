@@ -1,45 +1,27 @@
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 
-#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay",
-   "OggPlay" },(0x1000A661),1,032,1
+#{ "OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay" },(0x1000A661),1,71,2
 
-(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID",
-                    "SonyEricssonP80xPlatformProductID"}
-
-(0x101F617B),2,0,0,{"UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID",
-                    "UIQ20ProductID"}
+(0x101F80BE),1,0,0,{"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID",
+"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID",
+"SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID","SonyEricssonP80xPlatformProductID"}
 
 "C:\Symbian\UIQ_21\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
 
 IF MachineUID=0x101F408B
-"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.mbm"-"!:\system\apps\OggPlay\OggPlay.mbm"
-"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.skn"-"!:\system\apps\OggPlay\OggPlay.skn"
+"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP800.mbm"-"!:\system\apps\OggPlay\OggPlayP800.mbm"
+"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP800.skn"-"!:\system\apps\OggPlay\OggPlayP800.skn"
 ELSE
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP900.mbm"-"!:\system\apps\OggPlay\OggPlayP900.mbm"
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP900.skn"-"!:\system\apps\OggPlay\OggPlayP900.skn"
 ENDIF
 
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggSplash.mbm"-"!:\system\apps\OggPlay\OggSplash.mbm"
-"C:\Symbian\UIQ_21\epoc32\release\armi\urel\libvorbisidec.dll"-"!:\system\libs\libvorbisidec.dll"
+
+"C:\Symbian\UIQ_21\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
+"C:\Symbian\UIQ_21\epoc32\release\armi\urel\oggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
+"C:\Symbian\UIQ_21\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
 
 
 { "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.ren" 
@@ -55,5 +37,5 @@ ENDIF
   "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.rru" } - "!:\system\apps\OggPlay\OggPlay.rsc"
 
 ; we try to be nice and uninstall our configuration files
-""-"!:\system\apps\OggPlay\oggplay.ini",FN
+""-"!:\system\apps\OggPlay\oggplay.ogi",FN
 ""-"!:\system\apps\OggPlay\oggplay.db",FN

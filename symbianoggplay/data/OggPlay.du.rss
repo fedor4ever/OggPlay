@@ -10,6 +10,7 @@ CHARACTER_SET UTF8
 #define ogg_about_lnk "Bezoek http://symbianoggplay.sourceforge.net voor meer informatie"
 #define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
+#define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
 #define ogg_translation "Vertaling: Bart Kussener"
 #define ogg_about_port "Omzetting naar S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "Omzetting naar S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"

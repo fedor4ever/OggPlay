@@ -42,8 +42,7 @@ CSettingsS80Dialog::CSettingsS80Dialog(TOggplaySettings *aSettings)
 }
 
 
-TBool
-CSettingsS80Dialog::OkToExitL(int  /*aButtonId */)
+TBool CSettingsS80Dialog::OkToExitL(TInt  /*aButtonId */)
 {
   _LIT(KBackslash,"\\");	
  
@@ -61,7 +60,7 @@ CSettingsS80Dialog::OkToExitL(int  /*aButtonId */)
   	}
   }
   
-  iSettings->iAutoplay = static_cast <TInt> (iAutostartControl->State());
+  iSettings->iAutoplay = iAutostartControl->State() ? ETrue : EFalse;
 
   UpdateSoftkeysFromControls();
   return ETrue;
@@ -123,30 +122,24 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   UpdateControlsFromSoftkeys();
 }
 
-void 
-CSettingsS80Dialog::UpdateSoftkeysFromControls()
-{
-    // Update softkeys
-	for (TInt i=0; i<4; i++)
+void CSettingsS80Dialog::UpdateSoftkeysFromControls()
 	{
-	    iSettings->iSoftKeysIdle[i] = 
-	        COggUserHotkeysS80::MapRssListToCommand(iCbaControl[0][i]->CurrentItem());
-        iSettings->iSoftKeysPlay[i] = 
-	        COggUserHotkeysS80::MapRssListToCommand(iCbaControl[1][i]->CurrentItem());
+	// Update softkeys
+	for (TInt i = 0 ; i<4 ; i++)
+		{
+		iSettings->iSoftKeysIdle[i] = COggUserHotkeysS80::MapRssListToCommand(iCbaControl[0][i]->CurrentItem());
+		iSettings->iSoftKeysPlay[i] = COggUserHotkeysS80::MapRssListToCommand(iCbaControl[1][i]->CurrentItem());
+		}
 	}
-}
 
-void 
-CSettingsS80Dialog::UpdateControlsFromSoftkeys()
-{    
-	for (TInt i=0; i<4; i++)
-	{	
-	   iCbaControl[0][i]->SetCurrentItem( 
-	      COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysIdle[i]) );
-	   iCbaControl[1][i]->SetCurrentItem( 
-	      COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysPlay[i]) );
+void CSettingsS80Dialog::UpdateControlsFromSoftkeys()
+	{
+	for (TInt i = 0 ; i<4 ; i++)
+		{
+		iCbaControl[0][i]->SetCurrentItem(COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysIdle[i]));
+		iCbaControl[1][i]->SetCurrentItem(COggUserHotkeysS80::MapCommandToRssList(iSettings->iSoftKeysPlay[i]));
+		}
 	}
-}
 
 void CSettingsS80Dialog::ShowFolderCommand(TBool aShow)
 {

@@ -8,6 +8,7 @@
 #define ogg_about_lnk "see http://symbianoggplay.sourceforge.net für mehr Infos"
 #define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
+#define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
 #define ogg_translation ""
 #define ogg_about_port "Port to S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"  
 #define ogg_about_port_S80 "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"  

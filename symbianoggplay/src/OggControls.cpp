@@ -268,35 +268,36 @@ CFont* TOggParser::ReadFont()
 	}
 
 void TOggParser::ReportError()
-{
-  if (iState==ESuccess)
-	  return;
+	{
+	if (iState == ESuccess)
+		return;
 
-  TBuf<128> buf;
-  buf.Append(_L("Line "));
-  buf.AppendNum(iLine);
-  buf.Append(_L(": "));
+	TBuf<128> buf;
+	buf.Append(_L("Line "));
+	buf.AppendNum(iLine);
+	buf.Append(_L(": "));
 
-  switch (iState) {
-  case EFileNotFound: buf.Append(_L("File not found.")); break;
-  case ENoOggSkin: buf.Append(_L("This is not an Ogg skin file!")); break;
-  case EUnknownVersion: buf.Append(_L("Unknown skin file version.")); break;
-  case EFlipOpenExpected: buf.Append(_L("FlipOpen statement expected.")); break;
-  case ESyntaxError: buf.Append(_L("Syntax error.")); break;
-  case EBeginExpected: buf.Append(_L("{ expected.")); break;
-  case EEndExpected: buf.Append(_L("} expected.")); break;
-  case EBitmapNotFound: buf.Append(_L("Bitmap not found.")); break;
-  case EIntegerExpected: buf.Append(_L("Integer number expected.")); break;
-  case EOutOfRange: buf.Append(_L("Number is out of the valid range.")); break;
-  default: buf.Append(_L("Unknown error.")); break;
-  }
+	switch (iState)
+		{
+		case EFileNotFound: buf.Append(_L("File not found.")); break;
+		case ENoOggSkin: buf.Append(_L("This is not an Ogg skin file!")); break;
+		case EUnknownVersion: buf.Append(_L("Unknown skin file version.")); break;
+		case EFlipOpenExpected: buf.Append(_L("FlipOpen statement expected.")); break;
+		case ESyntaxError: buf.Append(_L("Syntax error.")); break;
+		case EBeginExpected: buf.Append(_L("{ expected.")); break;
+		case EEndExpected: buf.Append(_L("} expected.")); break;
+		case EBitmapNotFound: buf.Append(_L("Bitmap not found.")); break;
+		case EIntegerExpected: buf.Append(_L("Integer number expected.")); break;
+		case EOutOfRange: buf.Append(_L("Number is out of the valid range.")); break;
+		default: buf.Append(_L("Unknown error.")); break;
+		}
 
-  buf.Append(_L("Last token: <"));
-  buf.Append(iToken);
-  buf.Append(_L(">"));
+	buf.Append(_L("Last token: <"));
+	buf.Append(iToken);
+	buf.Append(_L(">"));
 
-  TRACEF(buf);
-}
+	TRACEF(buf);
+	}
 
 void TOggParser::Debug(const TDesC& txt)
 	{
@@ -342,19 +343,19 @@ void COggControl::SetPosition(TInt ax, TInt ay, TInt aw, TInt ah)
 	iw = aw;
 	ih = ah;
 	
-	iRedraw= ETrue;
+	iRedraw = ETrue;
 	}
 
 void COggControl::Redraw(TBool doRedraw)
 	{
-	iRedraw= doRedraw;
+	iRedraw = doRedraw;
 	}
 
-void COggControl::MakeVisible(TBool isVisible)
+void COggControl::MakeVisible(TBool aVisible)
 	{
-	if (isVisible != iVisible)
+	if (aVisible != iVisible)
 		{
-		iVisible = isVisible;
+		iVisible = aVisible;
 		iRedraw = ETrue;
 		}
 	}
@@ -438,35 +439,39 @@ void COggControl::SetFocusIcon(CGulIcon* anIcon)
 	}
 
 void COggControl::DrawFocus(CBitmapContext& aBitmapContext)
-{
-  if(iFocus) {
-    //__ASSERT_DEBUG(iAcceptsFocus,OGGPANIC(_L("Assert - Control has Focus but should never accept it !?"),3815));
-    //__ASSERT_DEBUG(iVisible,OGGPANIC(_L("Assert - Control is not visible, but has focus"),3816));
-    DrawCenteredIcon(aBitmapContext,iFocusIcon);
-  }
-}
+	{
+	if (iFocus)
+		{
+		// __ASSERT_DEBUG(iAcceptsFocus,OGGPANIC(_L("Assert - Control has Focus but should never accept it !?"),3815));
+		// __ASSERT_DEBUG(iVisible,OGGPANIC(_L("Assert - Control is not visible, but has focus"),3816));
+		DrawCenteredIcon(aBitmapContext,iFocusIcon);
+		}
+	}
 
-void COggControl::DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* anIcon)
-{
-  TSize s(anIcon->Bitmap()->SizeInPixels());
-  TPoint p(ix+iw/2-s.iWidth/2,iy+ih/2-s.iHeight/2);
-  aBitmapContext.BitBltMasked(p,anIcon->Bitmap(), TRect(TPoint(0,0),s), anIcon->Mask(), ETrue);
-}
+void COggControl::DrawCenteredIcon(CBitmapContext& aBitmapContext, CGulIcon* aIcon)
+	{
+	TSize s(aIcon->Bitmap()->SizeInPixels());
+	TPoint p(ix+iw/2 - s.iWidth/2, iy+ih/2 - s.iHeight/2);
+	aBitmapContext.BitBltMasked(p, aIcon->Bitmap(), TRect(TPoint(0, 0), s), aIcon->Mask(), ETrue);
+	}
 
 TBool COggControl::Read(TOggParser& p)
-{
-  p.ReadToken();
-  if (p.iToken!=KBeginToken) {
-    p.iState= TOggParser::EBeginExpected;
-    return EFalse;
-  }
-  while (p.ReadToken() && p.iToken!=KEndToken && p.iState==TOggParser::ESuccess) { 
-    ReadArguments(p); 
-    }
-  if (p.iState==TOggParser::ESuccess && p.iToken!=KEndToken) 
-    p.iState= TOggParser::EEndExpected;
-  return p.iState==TOggParser::ESuccess;
-}
+	{
+	p.ReadToken();
+	if (p.iToken != KBeginToken)
+		{
+		p.iState = TOggParser::EBeginExpected;
+		return EFalse;
+		}
+
+	while (p.ReadToken() && (p.iToken != KEndToken) && (p.iState == TOggParser::ESuccess))
+		ReadArguments(p); 
+
+	if ((p.iState == TOggParser::ESuccess) && (p.iToken != KEndToken)) 
+		p.iState = TOggParser::EEndExpected;
+
+	return (p.iState == TOggParser::ESuccess);
+	}
 
 TBool COggControl::ReadArguments(TOggParser& p)
 	{
@@ -546,23 +551,23 @@ void COggText::SetFont(CFont* aFont, TBool ownedByControl)
 
 void COggText::SetFontColor(TRgb aColor)
 	{
-	iFontColor= aColor;
-	iRedraw= ETrue;
+	iFontColor = aColor;
+	iRedraw = ETrue;
 	}
 
 void COggText::SetScrollStyle(TInt aScrollStyle)
 	{
-	iScrollStyle=aScrollStyle;
+	iScrollStyle = aScrollStyle;
 	}
 
 void COggText::SetScrollDelay(TInt aScrollDelay)
 	{
-	iScrollDelay=aScrollDelay;
+	iScrollDelay = aScrollDelay;
 	}
 
 void COggText::SetScrollStep(TInt aScrollStep)
 	{
-	iScrollStep=aScrollStep;
+	iScrollStep = aScrollStep;
 	}
 
 void COggText::SetText(const TDesC& aText)
@@ -573,24 +578,24 @@ void COggText::SetText(const TDesC& aText)
 	iText = HBufC::NewL(aText.Length());
 	iText->Des().Copy(aText);
 
-	iTextWidth= GetTextWidth(aText, iFont, iw);
-	iNeedsScrolling= iTextWidth>iw;
+	iTextWidth = GetTextWidth(aText, iFont, iw);
+	iNeedsScrolling = iTextWidth>iw;
 
-	iCycle= 0;
-	iDrawOffset= 0;
-	iHasScrolled= EFalse;
-	iRedraw= ETrue;
+	iCycle = 0;
+	iDrawOffset = 0;
+	iHasScrolled = EFalse;
+	iRedraw = ETrue;
 	}
 
 void COggText::ScrollNow()
 	{
-	iHasScrolled= EFalse;
-	iCycle= iScrollDelay;
+	iHasScrolled = EFalse;
+	iCycle = iScrollDelay;
 	}
 
 void COggText::Cycle()
 	{
-	if (!iNeedsScrolling)
+	if (!iNeedsScrolling || !iVisible)
 		return;
 
 	switch(iScrollStyle)
@@ -626,78 +631,81 @@ void COggText::CycleOnce()
 	}
 
 void COggText::CycleOff()
-{
-  iCycle++;
+	{
+	iCycle++;
 
-  iDrawOffset= (iCycle - iScrollDelay)*iScrollStep;
-  if (iDrawOffset<0) iDrawOffset= 0;
+	iDrawOffset= (iCycle - iScrollDelay)*iScrollStep;
+	if (iDrawOffset<0)
+		iDrawOffset= 0;
 
-  if (iCycle<iScrollDelay)
-	  return;
+	if (iCycle<iScrollDelay)
+		return;
 
-  iRedraw= ETrue;
-  
-  if ((iCycle-iScrollDelay)*iScrollStep>iTextWidth) {
-    iHasScrolled= ETrue;
-    iCycle=0;
-    iDrawOffset=0;
-  }
-}
+	iRedraw = ETrue;
+
+	if ((iCycle-iScrollDelay)*iScrollStep>iTextWidth)
+		{
+		iHasScrolled = ETrue;
+		iCycle = 0;
+		iDrawOffset = 0;
+		}
+	}
 
 void COggText::CycleBorder()
-{
-  iCycle++;
+	{
+	iCycle++;
 
-  iDrawOffset= (iCycle - iScrollDelay)*iScrollStep;
-  if (iDrawOffset<0) iDrawOffset= 0;
+	iDrawOffset = (iCycle - iScrollDelay)*iScrollStep;
+	if (iDrawOffset<0)
+		iDrawOffset = 0;
 
-  if (iCycle<iScrollDelay)
-	  return;
+	if (iCycle<iScrollDelay)
+		return;
 
-  iRedraw= ETrue;
-  
-  if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth)
-    iCycle=0;
-}
+	iRedraw = ETrue;
+
+	if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth)
+		iCycle = 0;
+	}
 
 void COggText::CycleBackAndForth()
-{
-  iScrollBackward ? iCycle-- : iCycle++;
+	{
+	iScrollBackward ? iCycle-- : iCycle++;
 
-  if (iCycle < 0)
-    iScrollBackward = EFalse;
+	if (iCycle < 0)
+		iScrollBackward = EFalse;
 
-  iDrawOffset = (iCycle - iScrollDelay)*iScrollStep;
-  if (iDrawOffset < 0)
-    iDrawOffset = 0;
+	iDrawOffset = (iCycle - iScrollDelay)*iScrollStep;
+	if (iDrawOffset < 0)
+		iDrawOffset = 0;
 
-  if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth)
-    iDrawOffset=iTextWidth-iw;
+	if ((iw+(iCycle-iScrollDelay)*iScrollStep)>iTextWidth)
+		iDrawOffset=iTextWidth-iw;
   
-  if ((iw+(iCycle-iScrollDelay)*iScrollStep)>(iTextWidth+iScrollDelay*iScrollStep))
-    iScrollBackward=ETrue;
+	if ((iw+(iCycle-iScrollDelay)*iScrollStep)>(iTextWidth+iScrollDelay*iScrollStep))
+		iScrollBackward=ETrue;
 
-  iRedraw = ETrue;
-}
+	iRedraw = ETrue;
+	}
 
 void COggText::Draw(CBitmapContext& aBitmapContext)
-{
-  if (!iText)
-	  return;
+	{
+	if (!iText)
+		return;
 
-  aBitmapContext.UseFont(iFont);
-  aBitmapContext.SetPenColor(iFontColor);
-  aBitmapContext.SetPenSize(TSize(2,2));
+	aBitmapContext.UseFont(iFont);
+	aBitmapContext.SetPenColor(iFontColor);
+	aBitmapContext.SetPenSize(TSize(2,2));
 
-  TRect	lineRect(TPoint(ix-iDrawOffset,iy+iLinePadding), TSize(iw+iDrawOffset, iFontHeight));
-  TPtrC	p(*iText);
+	TRect lineRect(TPoint(ix-iDrawOffset,iy+iLinePadding), TSize(iw+iDrawOffset, iFontHeight));
+	TPtrC p(*iText);
 
-  CGraphicsContext::TTextAlign a= CGraphicsContext::ECenter;
-  if (iNeedsScrolling)
-	  a= CGraphicsContext::ELeft;
+	CGraphicsContext::TTextAlign a= CGraphicsContext::ECenter;
+	if (iNeedsScrolling)
+		a = CGraphicsContext::ELeft;
 
-  aBitmapContext.DrawText(p, lineRect, iFontAscent, a);
-}
+	aBitmapContext.DrawText(p, lineRect, iFontAscent, a);
+	}
 
 void COggText::PointerEvent(const TPointerEvent& p)
 {
@@ -883,8 +891,8 @@ void COggAnimation::Stop()
 	{
 	if (iCycle!=-1)
 		{
-		iCycle= -1;
-		iRedraw= ETrue;
+		iCycle = -1;
+		iRedraw = ETrue;
 		}
 	}
 
@@ -909,36 +917,40 @@ void COggAnimation::SetFrequency(TInt aFrequency)
 }
 
 void COggAnimation::SetStyle(TInt aStyle)
-{
-  if (iStyle!=aStyle)
-  {
-    iStyle= aStyle;
-    iRedraw= ETrue;
-    iCycle= 0;
-  }
-}
+	{
+	if (iStyle != aStyle)
+		{
+		iStyle = aStyle;
+		iRedraw = ETrue;
+		iCycle = 0;
+		}
+	}
 
 void COggAnimation::Cycle()
-{
-  if ((iCycle<0) || !iVisible)
-	  return;
+	{
+	if ((iCycle<0) || !iVisible)
+		return;
 
 #if defined(SERIES60)
-  if (iBitmaps.Count() <= 1)
-	  return;
+	if (iBitmaps.Count() <= 1)
+		return;
 #endif
 
-  iCycle++;
+	iCycle++;
 
-  if (iCycle<iPause)
-	  return;
+	if (iCycle<iPause)
+		return;
 
-  TInt style= 1;
-  if (iStyle==1) style=2;
+	TInt style = 1;
+	if (iStyle == 1)
+		style = 2;
 
-  if (iCycle-iPause>=iBitmaps.Count()*iFrequency*style) iCycle= 0;
-  if (iCycle%iFrequency==0) iRedraw= ETrue;
-}
+	if ((iCycle-iPause)>=(iBitmaps.Count()*iFrequency*style))
+		iCycle= 0;
+
+	if (iCycle%iFrequency == 0)
+		iRedraw = ETrue;
+	}
 
 void COggAnimation::Draw(CBitmapContext& aBitmapContext)
 {
@@ -1989,56 +2001,72 @@ void COggAnalyzer::SetValue(TInt i, TInt theValue)
 }
 
 void COggAnalyzer::SetStyle(TInt aStyle)
-{
-  iStyle = aStyle;
-  iRedraw = ETrue;
-}
+	{
+	iStyle = aStyle;
+	iRedraw = ETrue;
+	}
 
 TInt COggAnalyzer::Style()
-{
-  return iStyle;
-}
+	{
+	return iStyle;
+	}
 
 void COggAnalyzer::Cycle()
-{
-  TInt i;
-  if( iStyle == EPeak ) {
-      iCycle++;
-      if (iCycle%10==0) {
-        iCycle= 0;
-        for (i = 0 ; i<iNumValues ; i++) {
-          if (iPeaks[i]>0 || iPeaks[i]!=iValues[i]) {
-            if (iPeaks[i]!=iValues[i]) { 
-            iPeaks[i]= iValues[i];
-            iRedraw= ETrue;
-            }
-          }
-        }
-      }
-      else {
-        for (i = 0 ; i<iNumValues ; i++) {
-          if (iValues[i]>iPeaks[i]) { 
-            iPeaks[i]= iValues[i];
-            iRedraw= ETrue;
-          } 
-        }
-      }
-    }
-  else if (iStyle == EDecay) {
-    for (i = 0 ; i<iNumValues ; i++) {
-      if (iValues[i] && iValues[i] + KDecaySteplength > iPeaks[i]) { 
-        iPeaks[i]= iValues[i];
-        iRedraw= ETrue;
-      }
-      else {
-        if( iPeaks[i] && (iPeaks[i] -= KDecaySteplength) < 0 ) {
-          iPeaks[i] = 0;
-          iRedraw= ETrue;
-          }
-      }
-    }    
-  }
-}
+	{
+	if (!iVisible)
+		return;
+
+	TInt i;
+	if (iStyle == EPeak)
+		{
+		iCycle++;
+		if (iCycle%10 == 0)
+			{
+			iCycle = 0;
+			for (i = 0 ; i<iNumValues ; i++)
+				{
+				if ((iPeaks[i]>0) || (iPeaks[i] != iValues[i]))
+					{
+					if (iPeaks[i] != iValues[i])
+						{ 
+						iPeaks[i] = iValues[i];
+						iRedraw = ETrue;
+						}
+					}
+				}
+			}
+		else
+			{
+			for (i = 0 ; i<iNumValues ; i++)
+				{
+				if (iValues[i]>iPeaks[i])
+					{ 
+					iPeaks[i] = iValues[i];
+					iRedraw = ETrue;
+					}
+				}
+			}
+		}
+	else if (iStyle == EDecay)
+		{
+		for (i = 0 ; i<iNumValues ; i++)
+			{
+			if (iValues[i] && ((iValues[i] + KDecaySteplength) > iPeaks[i]))
+				{ 
+				iPeaks[i] = iValues[i];
+				iRedraw = ETrue;
+				}
+			else
+				{
+				if (iPeaks[i] && ((iPeaks[i] -= KDecaySteplength) < 0))
+					{
+					iPeaks[i] = 0;
+					iRedraw = ETrue;
+					}
+				}
+			}
+		}
+	}
 
 void COggAnalyzer::Draw(CBitmapContext& aBitmapContext)
 {
@@ -2492,18 +2520,25 @@ void COggListBox::Draw(CBitmapContext& aBitmapContext)
 }
 
 void COggListBox::Cycle()
-{
-  if (iCycle>0) {
-    iCycle--;
-    iOffset -= (iScroll*iLineHeight)/KListboxcycles;
-    iRedraw= ETrue;
-  } else {
-    if (iOffset!=0) {
-      iOffset= 0;
-      iRedraw= ETrue;
-    }
-  }
-}
+	{
+	if (!iVisible)
+		return;
+
+	if (iCycle>0)
+		{
+		iCycle--;
+		iOffset -= (iScroll*iLineHeight)/KListboxcycles;
+		iRedraw = ETrue;
+		}
+	else
+		{
+		if (iOffset != 0)
+			{
+			iOffset = 0;
+			iRedraw = ETrue;
+			}
+		}
+	}
 
 void COggListBox::PointerEvent(const TPointerEvent& p)
 {
@@ -2595,48 +2630,48 @@ void COggCanvas::LoadBackgroundBitmapL(const TFileName& aFileName, TInt iIdx)
 	}
 
 void COggCanvas::Refresh()
-{
-  TBool redrawRequired = EFalse;
-  TInt i;
-  for (i=0; i<iControls.Count(); i++) 
-  {
-    if (iControls[i]->iRedraw)
 	{
-		redrawRequired = ETrue;
-		break;
-    }
-  }
+	TBool redrawRequired = EFalse;
+	TInt i;
+	for (i = 0 ; i<iControls.Count() ; i++) 
+		{
+		if (iControls[i]->iRedraw)
+			{
+			redrawRequired = ETrue;
+			break;
+			}
+		}
 
-  if (redrawRequired)
-  {
-    DrawControl(*iBitmapContext, *iBitmapDevice);
+	if (redrawRequired)
+		{
+		DrawControl(*iBitmapContext, *iBitmapDevice);
 
-	Window().Invalidate();
-	ActivateGc();
-	Window().BeginRedraw();
-	CWindowGc& gc=SystemGc();
+		Window().Invalidate();
+		ActivateGc();
+		Window().BeginRedraw();
+		CWindowGc& gc=SystemGc();
 
 #if defined(SERIES90)
-	// Series 90 has a problem redrawing parts of the screen, so redraw everything
-	TRect rect = TRect(iBitmap->SizeInPixels());
-	gc.BitBlt(rect.iTl, iBitmap, rect);
-#else
-	for (i=0; i<iControls.Count(); i++)
-	{
-		if (iControls[i]->iRedraw)
-		{
-		TRect rect = iControls[i]->Rect();
+		// Series 90 has a problem redrawing parts of the screen, so redraw everything
+		TRect rect = TRect(iBitmap->SizeInPixels());
 		gc.BitBlt(rect.iTl, iBitmap, rect);
+#else
+		for (i = 0 ; i<iControls.Count() ; i++)
+			{
+			if (iControls[i]->iRedraw)
+				{
+				TRect rect = iControls[i]->Rect();
+				gc.BitBlt(rect.iTl, iBitmap, rect);
 
-		iControls[i]->iRedraw = EFalse;
-		}
-	}
+				iControls[i]->iRedraw = EFalse;
+				}
+			}
 #endif
 
-	Window().EndRedraw();
-	DeactivateGc();
-  }
-}
+		Window().EndRedraw();
+		DeactivateGc();
+		}
+	}
 
 void COggCanvas::Invalidate()
 	{
@@ -2792,21 +2827,21 @@ void COggCanvas::HandlePointerEventL(const TPointerEvent& aPointerEvent)
 }
 
 void COggCanvas::CycleHighFrequencyControls()
-{
-  for (int i=0; i<iControls.Count(); i++)
-  {
-    COggControl* control = iControls[i];
-    if (control->HighFrequency())
-		control->Cycle();
-  }
-}
+	{
+	for (TInt i = 0 ; i<iControls.Count() ; i++)
+		{
+		COggControl* control = iControls[i];
+		if (control->HighFrequency())
+			control->Cycle();
+		}
+	}
 
 void COggCanvas::CycleLowFrequencyControls()
-{
-  for (int i=0; i<iControls.Count(); i++)
-  {
-    COggControl* control = iControls[i];
-    if (!control->HighFrequency())
-		control->Cycle();
-  }
-}
+	{
+	for (TInt i = 0 ; i<iControls.Count() ; i++)
+		{
+		COggControl* control = iControls[i];
+		if (!control->HighFrequency())
+			control->Cycle();
+		}
+	}

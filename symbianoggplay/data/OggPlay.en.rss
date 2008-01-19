@@ -9,6 +9,7 @@
 #define ogg_about_lnk "See http://symbianoggplay.sourceforge.net for more info"
 #define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
+#define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
 #define ogg_about_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
 

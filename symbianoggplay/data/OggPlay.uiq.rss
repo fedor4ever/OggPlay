@@ -301,37 +301,31 @@ RESOURCE ARRAY r_hotkey_array {
 RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu 
-{
-  items= {
-//      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
-  };
-}
+	{
+	// Items added dynamically
+	}
 
 RESOURCE MENU_PANE r_file_menu
 {
   items= {
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
-      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat2;
-                  flags=EEikMenuItemCheckBox;},
-      MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
+      MENU_ITEM { command=EOggRepeat; txt=ogg_repeat2; flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggShuffle; txt=ogg_shuffle_playlist; flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggViewRebuild;txt=ogg_find_files; },
-      MENU_ITEM { txt=ogg_skins; 
-                  cascade=r_skin_menu; },
-      MENU_ITEM { command=EOggOptions;	txt=ogg_options_cascade;
-                  flags=EEikMenuItemSeparatorAfter;},
-      MENU_ITEM { command=EOggAbout;	txt=ogg_about_label; },
-      MENU_ITEM { command=EEikCmdExit;	txt=ogg_exit_label; }
+      MENU_ITEM { txt=ogg_skins; cascade=r_skin_menu; },
+      MENU_ITEM { command=EOggOptions; txt=ogg_options_cascade; flags=EEikMenuItemSeparatorAfter;},
+      MENU_ITEM { command=EOggAbout; txt=ogg_about_label; },
+      MENU_ITEM { command=EEikCmdExit; txt=ogg_exit_label; }
   };
 }
 
 RESOURCE MENU_PANE r_popup_menu
 {
   items= {
-      MENU_ITEM { command=EOggNextSong;	txt=ogg_next_song; },
+      MENU_ITEM { command=EOggNextSong; txt=ogg_next_song; },
       MENU_ITEM { command=EOggPrevSong; txt=ogg_prev_song; },
-      MENU_ITEM { command=EOggShuffle;  txt=ogg_shuffle_playlist; },
-      MENU_ITEM { command=EOggRepeat;	txt=ogg_repeat2;
-                  flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggShuffle; txt=ogg_shuffle_playlist; flags=EEikMenuItemCheckBox;},
+      MENU_ITEM { command=EOggRepeat; txt=ogg_repeat2; flags=EEikMenuItemCheckBox;},
       MENU_ITEM { command=EOggPlay; txt=ogg_play; },
       MENU_ITEM { command=EOggPauseResume; txt=ogg_pause; },
       MENU_ITEM { command=EOggStop;	txt=ogg_stop; }

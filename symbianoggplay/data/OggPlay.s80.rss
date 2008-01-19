@@ -82,7 +82,7 @@ RESOURCE CBA r_option_stop_cba
 // About view
 RESOURCE ABOUTTEXT r_dialog_about
 	{
-	version = "OggPlay 1.71";
+	version = "OggPlay 1.71a";
 	copyright = ogg_about_cpr;
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;
@@ -288,11 +288,9 @@ RESOURCE ARRAY r_volume_boost_items
 RESOURCE MENU_PANE r_empty_menu {}
 
 RESOURCE MENU_PANE r_skin_menu
-{
-//  items= {
-//      MENU_ITEM { command=EOggSkinOne; txt=ogg_skin_default; }
-//  };
-}
+	{
+	// Items added dynamically
+	}
 
 RESOURCE DIALOG r_dialog_files_search {
   title = ogg_filescan_main_title;

@@ -22,5 +22,5 @@ UID                Use
 0x1020202C         OggShared DLL
 0x1020202D         Ogg Flac Format
 0x1020202E         Native Flac Format
-0x1020202F         Unused
+0x1020202F         OggPlay FontPackage1
 0x10202030         Unused

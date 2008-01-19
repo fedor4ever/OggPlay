@@ -79,21 +79,22 @@ struct TKeyCodes
 	};
 
 const TInt KMaxKeyCodes = 4;
-static const TKeyCodes keycodes[] = 
-{ { EKeyApplication1, 0 }, // camera
-  { EKeyApplication0, 0 }, // browser
-  { EKeyDevice0,      0 }, // power
-  { 0,                0 }, // flip open
-  // EKeyDevice8 confirm (jog dial push)
-  // EKeyDevice1/2  two way controller
-  // EKeyDevice4..7 four way controller 
-  // EKeyDial
-};
+static const TKeyCodes KHotkeyKeycodes[] = 
+	{
+	{ EKeyApplication1, 0 }, // camera
+	{ EKeyApplication0, 0 }, // browser
+	{ EKeyDevice0,      0 }, // power
+	{ 0,                0 }, // flip open
+	// EKeyDevice8 confirm (jog dial push)
+	// EKeyDevice1/2  two way controller
+	// EKeyDevice4..7 four way controller 
+	// EKeyDial
+	};
 
 #if defined(__WINS__)
-_LIT(KMmcSearchDir,"C:\\Ogg\\");
+_LIT(KMmcSearchDir, "C:\\Ogg\\");
 #else
-_LIT(KMmcSearchDir,"E:\\Ogg\\");
+_LIT(KMmcSearchDir, "E:\\Ogg\\");
 #endif
 
 _LIT(KFullScanString,"Full scan");
@@ -112,19 +113,17 @@ public:
 		{
 		EFullScan,
 		EMmcOgg,
-		EMmmcFull
-#if defined(SERIES80)
-		, ECustomDir
-#endif
+		EMmcFull,
+		ECustomDir
 		};
   
 	TInt iScanmode;
   
 #if defined(SERIES80)
-	TFileName iCustomScanDir;
+  	TFileName iCustomScanDir;
 #endif
   
-	TInt iAutoplay;
+	TBool iAutoplay;
 	TInt iManeuvringSpeed;
 	TBool iWarningsEnabled;
    
@@ -136,49 +135,40 @@ public:
 		{  
 		// COggUserHotkeys
 		ENoHotkey,
-		EFastForward,
-		ERewind,
-		EPageUp,
-		EPageDown,
-		ENextSong,
-		EPreviousSong,
+		EFirstHotkeyIndex,
+		EHotkeyFastForward = EFirstHotkeyIndex,
+		EHotkeyRewind,
+		EHotkeyPageUp,
+		EHotkeyPageDown,
+		EHotkeyNextSong,
+		EHotkeyPreviousSong,
 
 #if !defined(SERIES80)
-		EKeylock,
-		EPauseResume,
+		EHotkeyKeylock,
+		EHotkeyPauseResume,
 #endif
 
-		EPlay,
-		EPause,
-		EStop,
-		EVolumeBoostUp,
-		EVolumeBoostDown,
-		EHotKeyExit,
-		EHotKeyBack,
+		EHotkeyPlay,
+		EHotkeyPause,
+		EHotkeyStop,
+		EHotkeyVolumeBoostUp,
+		EHotkeyVolumeBoostDown,
+		EHotkeyExit,
+		EHotkeyBack,
 		EHotkeyVolumeHelp,
 		EHotkeyToggleShuffle,
 		EHotkeyToggleRepeat,
 
-		KFirstHotkeyIndex = EFastForward,
-
-#if defined(SERIES80)
-		ENofHotkeysV4 = EPlay,
-#else
-		ENofHotkeysV4 = EKeylock,
-#endif
-
-		ENofHotkeysV5 = EVolumeBoostUp,
-		ENofHotkeys = EHotkeyToggleRepeat+1
+		ENumHotkeys
 		};
 
-	TInt iUserHotkeys[ENofHotkeys];
+	TInt iUserHotkeys[ENumHotkeys];
 	TBool iRepeat;
 	TBool iRandom;
 
-#if !defined(PLUGIN_SYSTEM)
+	// Multi thread playback settings
 	TInt iBufferingMode;
 	TInt iThreadPriority;
-#endif
 
 	// Alarm clock settings
 	TBool iAlarmActive;
@@ -299,6 +289,22 @@ private:
 	TOggFiles& iFiles;
 	};
 
+class COggViewActivationAO : public CActive
+	{
+public:
+	COggViewActivationAO(COggPlayAppUi& aAppUi);
+	~COggViewActivationAO();
+
+	void ActivateOggView();
+
+private:
+	// From CActive
+	void RunL();
+	void DoCancel();
+
+private:
+	COggPlayAppUi& iAppUi;
+	};
 
 #if defined(SERIES60)
 class CAknErrorNote;
@@ -362,6 +368,10 @@ public:
 	void SelectPreviousView();
 	void SelectNextView();
 
+#if defined(UIQ)
+	void ActivateOggView();
+#endif
+
 	void ActivateOggViewL();
 	void ActivateOggViewL(const TUid aViewId);
 
@@ -369,7 +379,6 @@ public:
   
 	// from CEikAppUi
 	void HandleCommandL(TInt aCommand);
-	void HandleApplicationSpecificEventL(TInt aType, const TWsEvent& aEvent);
 	void HandleForegroundEventL(TBool aForeground);
 	void DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane);
 	TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName, const TDesC8& aTail);
@@ -417,16 +426,20 @@ private:
 	void NextStartUpState();
 
 	void ReadIniFile();
+	void ReadIniFileL(TPtrC8& aIniFileData);
 	void ReadSkin(TInt aSkin);
 
-	TInt32 IniRead32(TFileText& aFile, TInt32 aDefault = 0, TInt32 aMaxValue = KMaxTInt32);
-	TInt64 IniRead64(TFileText& aFile, TInt64 aDefault = 0);
+	TInt IniRawRead32(TPtrC8& aDes);
+	TInt IniRead32L(TPtrC8& aDes);
+	TInt IniRead32L(TPtrC8& aDes, TInt aLowerLimit, TInt aUpperLimit);
+	TInt64 IniRead64L(TPtrC8& aDes);
+	TInt64 IniRead64L(TPtrC8& aDes, TInt64 aLowerLimit, TInt64 aUpperLimit);
+	void IniReadDesL(TPtrC8& aDes, TDes& value);
 
-#if defined(SERIES80)
-	void IniReadDes(TFileText& aFile, TDes& value, const TDesC& defaultValue);
+#if defined(UIQ)
+	void SetHotKey();
 #endif
 
-	void SetHotKey();
 	void FindSkins();
 
 #if defined(SERIES60SUI)
@@ -492,10 +505,13 @@ private:
 	TInt iRestoreCurrent;
 
 	TBool iForeground;
-	TBool iMainViewActive;
 
 	COggStartUpAO* iStartUpAO;
 	COggStartUpEmbeddedAO* iStartUpEmbeddedAO;
+
+#if defined(UIQ)
+	COggViewActivationAO* iOggViewActivationAO;
+#endif
 
 	TBuf<128> iUnassignedTxt;
 	TBuf<128> iStartUpErrorTxt1;
@@ -615,32 +631,31 @@ private:
 };
 
 
-class COggPlayDocument : public CEikDocument
-{
-public:
-#if defined(SERIES60)
-  COggPlayDocument(CAknApplication& aApp);
+#if defined(UIQ)
+class COggPlayDocument : public CQikDocument
 #else
-  COggPlayDocument(CEikApplication& aApp);
+class COggPlayDocument : public CEikDocument
 #endif
+	{
+public:
+	COggPlayDocument(CEikApplication& aApp);
 
-  CFileStore*  OpenFileL(TBool aDoOpen ,const TDesC& aFilename, RFs& aFs);
-  CEikAppUi* CreateAppUiL();
-};
+	CFileStore* OpenFileL(TBool aDoOpen, const TDesC& aFilename, RFs& aFs);
+	CEikAppUi* CreateAppUiL();
+	};
 
 #if defined(SERIES60)
 class COggPlayApplication : public CAknApplication
-#elif defined(SERIES80)
-class COggPlayApplication : public CEikApplication
-#else
+#elif defined(UIQ)
 class COggPlayApplication : public CQikApplication
+#else
+class COggPlayApplication : public CEikApplication
 #endif
-{
+	{
 private: 
-  // from CApaApplication
-  CApaDocument* CreateDocumentL();
-  TUid AppDllUid() const;
-};
-
+	// from CApaApplication
+	CApaDocument* CreateDocumentL();
+	TUid AppDllUid() const;
+	};
 
 #endif

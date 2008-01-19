@@ -1,0 +1,8 @@
+%{"OggPlay"}
+:"OggPlay"
+#{"OggPlay Fonts"},(0xF020202F),1,0,0
+[0x101F7961],0,0,0,{"Series60ProductID"}
+
+; Fonts for the mcNuOggPlay skin
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\Vera.ttf"-"!:\resource\fonts\OggPlayVera.ttf"
+;"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\Vera.ttf"-"!:\OggPlayFonts\OggPlayVera.ttf"

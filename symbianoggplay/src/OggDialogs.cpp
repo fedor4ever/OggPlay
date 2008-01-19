@@ -66,7 +66,7 @@ void COggAboutDialog::ExecuteLD(TInt aResourceId)
 	TResourceReader resReader;
 	resReader.SetBuffer(&resBuf);
 
-	TBuf<256> bodyTxt;
+	TBuf<512> bodyTxt;
 	TPtrC resTxt = resReader.ReadTPtrC();
 	bodyTxt.Append(resTxt);
 
@@ -90,9 +90,21 @@ void COggAboutDialog::ExecuteLD(TInt aResourceId)
 	bodyTxt.Append(resTxt);
 	bodyTxt.Append(KSingleLF);
 
+#if defined(SERIES60V3)
+	resTxt.Set(resReader.ReadTPtrC());
+	bodyTxt.Append(resTxt);
+	bodyTxt.Append(KSingleLF);
+
 	resTxt.Set(resReader.ReadTPtrC());
 	bodyTxt.Append(resTxt);
 	bodyTxt.Append(KDoubleLF);
+#else
+	resTxt.Set(resReader.ReadTPtrC());
+	bodyTxt.Append(resTxt);
+	bodyTxt.Append(KDoubleLF);
+
+	resReader.ReadTPtrC();
+#endif
 
 	resTxt.Set(resReader.ReadTPtrC());
 	bodyTxt.Append(resTxt);

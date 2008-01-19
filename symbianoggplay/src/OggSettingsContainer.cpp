@@ -29,8 +29,8 @@
 
 COggSettingItemList::COggSettingItemList(COggPlayAppUi& aAppUi)
 : iData(aAppUi.iSettings), iAppUi(aAppUi)
-{
-}
+	{
+	}
 
 COggSettingItemList::~COggSettingItemList()
     {
@@ -96,97 +96,97 @@ CAknSettingItem* COggSettingItemList::CreateSettingItemL(TInt aIdentifier)
 }
 
 void COggSettingItemList::VolumeGainChangedL()
-{
+	{
 	if (iGainSettingItem)
 		{
 		iGainSettingItem->LoadL();
 		HandleChangeInItemArrayOrVisibilityL();
 		}
-}
+	}
 
 #if !defined(PLUGIN_SYSTEM)
 void COggSettingItemList::BufferingModeChangedL()
-{
+	{
 	if (iBufferingModeItem)
 		{
 		iBufferingModeItem->LoadL();
 		HandleChangeInItemArrayOrVisibilityL();
 		}
-}
+	}
 #endif
 
 
 CRepeatSettingItem::CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iRepeat), iAppUi(aAppUi)
-{
-}
+	{
+	}
  
 void CRepeatSettingItem::EditItemL(TBool aCalledFromMenu)
-{
-  CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
-  iAppUi.SetRepeat(InternalValue());
-}
+	{
+	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetRepeat(InternalValue());
+	}
 
 
 CGainSettingItem::CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iGainType), iAppUi(aAppUi)
-{
-}
+	{
+	}
  
 void  CGainSettingItem::EditItemL(TBool aCalledFromMenu)
-{
-  CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
-  iAppUi.SetVolumeGainL((TGainType) InternalValue());
-}
+	{
+	CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetVolumeGainL((TGainType) InternalValue());
+	}
 
 #if !defined(PLUGIN_SYSTEM)
 CBufferingModeSettingItem::CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iBufferingMode), iAppUi(aAppUi)
-{
-}
+	{
+	}
  
 void  CBufferingModeSettingItem::EditItemL(TBool aCalledFromMenu)
-{
-  CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
-  iAppUi.SetBufferingModeL((TBufferingMode) InternalValue());
-}
+	{
+	CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetBufferingModeL((TBufferingMode) InternalValue());
+	}
 
 
 CThreadPrioritySettingItem::CThreadPrioritySettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iThreadPriority), iAppUi(aAppUi)
-{
-}
+	{
+	}
 
-void  CThreadPrioritySettingItem::EditItemL(TBool aCalledFromMenu)
-{
-  CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
-  iAppUi.SetThreadPriority((TStreamingThreadPriority) InternalValue());
-}
+void CThreadPrioritySettingItem::EditItemL(TBool aCalledFromMenu)
+	{
+	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetThreadPriority((TStreamingThreadPriority) InternalValue());
+	}
 #endif
 
 
 CAlarmSettingItem::CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iAlarmActive), iAppUi(aAppUi)
-{
-}
+	{
+	}
  
 void CAlarmSettingItem::EditItemL(TBool aCalledFromMenu)
-{
-  CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
-  iAppUi.SetAlarm(InternalValue());
-}
+	{
+	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetAlarm(InternalValue());
+	}
 
 CAlarmTimeSettingItem::CAlarmTimeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknTimeOrDateSettingItem(aIdentifier, CAknTimeOrDateSettingItem::ETime, aAppUi.iSettings.iAlarmTime), iAppUi(aAppUi)
-{
-}
+	{
+	}
  
 void CAlarmTimeSettingItem::EditItemL(TBool aCalledFromMenu)
-{
-  CAknTimeOrDateSettingItem::EditItemL(aCalledFromMenu);
-  StoreL();
+	{
+	CAknTimeOrDateSettingItem::EditItemL(aCalledFromMenu);
+	StoreL();
   
-  iAppUi.SetAlarmTime();
-}
+	iAppUi.SetAlarmTime();
+	}
 
 #endif // SERIES60

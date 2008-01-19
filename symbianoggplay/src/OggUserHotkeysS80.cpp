@@ -91,11 +91,7 @@ void COggUserHotkeysS80::SetSoftkeys(TBool aPlaying)
  
 	for (TInt i = 0 ; i<4 ; i++)
 		{
-		TInt hotkeyIndex = settings.iSoftKeysIdle[i];
-		if (aPlaying)
-			hotkeyIndex = settings.iSoftKeysPlay[i];
-    
-		TInt command = hotkeyIndex;
+		TInt hotkeyIndex = (aPlaying) ? settings.iSoftKeysPlay[i] : settings.iSoftKeysIdle[i];
 		switch (hotkeyIndex)
 			{
 			case TOggplaySettings::ENoHotkey:
@@ -105,7 +101,7 @@ void COggUserHotkeysS80::SetSoftkeys(TBool aPlaying)
 
 			default:
 				action = KHotkeysActions[hotkeyIndex];
-				buf.Copy(array->MdcaPoint(MapCommandToRssList(command)));
+				buf.Copy(array->MdcaPoint(MapCommandToRssList(hotkeyIndex)));
 				break;
 			}
 

@@ -730,7 +730,7 @@ void COggPlayback::Stop()
 	if ((iState == EStopped) || (iState == EClosed))
 		return;
 
-	iState = EClosed;
+	iState = EStreamOpen;
 
 	CancelTimers();
 	StopStreaming();
@@ -1075,13 +1075,13 @@ TBool COggPlayback::PrimeBuffer(HBufC8& buf)
 }
 
 void COggPlayback::NotifyOpenComplete(TInt aErr)
-{
-  // Called by the streaming thread listener when CMdaAudioOutputStream::Open() completes
-  if (aErr == KErrNone)
-	iState = EStreamOpen;
+	{
+	// Called by the streaming thread listener when CMdaAudioOutputStream::Open() completes
+	if (aErr == KErrNone)
+		iState = EStreamOpen;
 
-  iObserver->NotifyStreamOpen(aErr);
-}
+	iObserver->NotifyStreamOpen(aErr);
+	}
 
 TInt COggPlayback::BufferingModeChanged()
 {

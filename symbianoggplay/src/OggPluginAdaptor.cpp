@@ -144,7 +144,7 @@ CDesCArrayFlat* CPluginSupportedList::SupportedExtensions()
     CDesCArrayFlat * extensions = NULL;
     TRAPD(err,
 		{
-        extensions = new (ELeave) CDesCArrayFlat (3);
+        extensions = new (ELeave) CDesCArrayFlat(3);
         CleanupStack::PushL(extensions);
         for (TInt i=0; i<iPlugins->Count(); i++)
            extensions->AppendL(iPlugins->At(i)->extension);

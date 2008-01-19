@@ -7,11 +7,15 @@
 
 :"OggPlay"
 
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay", "OggPlay"},(0xF000A661),1,71,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay", "OggPlay"},(0xF000A661),1,71,2
 
-;Supports Series 60 v 3.0
+;Supports Series 60 v3.0
 [0x101F7961],0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"
 ,"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"}
+
+; Depends on OggPlay Fonts being installed
+(0xF020202F), 1, 0, 0, {"Oggplay Fonts","Oggplay Fonts","Oggplay Fonts","Oggplay Fonts","Oggplay Fonts",
+"Oggplay Fonts","Oggplay Fonts","Oggplay Fonts","Oggplay Fonts","Oggplay Fonts","Oggplay Fonts"}
 
 ;
 ; Display Release notes
@@ -69,7 +73,3 @@ IF DisplayXPixels=208 AND DisplayYPixels=208
 "C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ\mcNuOggPlaySQ.mbm"-"!:\private\F000A661\import\mcNuOggPlaySQ.mbm"
 "C:\OggPlay\symbianoggplay\bitmaps\skins\S60V3\mcNuOggPlaySQ\mcNuOggPlaySQ.skn"-"!:\private\F000A661\import\mcNuOggPlaySQ.skn"
 ENDIF
-
-; Fonts for the mcNuOggPlay skin
-"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\Vera.ttf"-"!:\resource\fonts\OggPlayVera.ttf"
-;"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\fonts\Vera.ttf"-"!:\OggPlayFonts\OggPlayVera.ttf"
