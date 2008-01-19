@@ -583,6 +583,12 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* aObject, TInt aPreviousStat
 	{
     TRACEF(COggLog::VA(_L("MoscoStateChange :%d %d %d "), aPreviousState,  aCurrentState,  aErr));
 
+	if (aCurrentState == CMdaAudioClipUtility::ENotReady)
+		{
+		// Error opening file
+		iObserver->NotifyFileOpen(aErr);
+		}
+
 	if ((aPreviousState == CMdaAudioClipUtility::ENotReady) && (aCurrentState == CMdaAudioClipUtility::EOpen))
 		{
 		iState = EStopped;

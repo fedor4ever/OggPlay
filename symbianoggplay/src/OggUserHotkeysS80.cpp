@@ -31,23 +31,23 @@ static const TInt KMapRssListToCommand[] =
 	// to a corresponding index in the table THotkeys. 
 	// Must be kept synchronized with the r_user_hotkey_items!
 	TOggplaySettings::ENoHotkey,
-	TOggplaySettings::EFastForward,
-	TOggplaySettings::ERewind,
-	TOggplaySettings::EPageUp,
-	TOggplaySettings::EPageDown,
-	TOggplaySettings::ENextSong,
-	TOggplaySettings::EPreviousSong,
+	TOggplaySettings::EHotkeyFastForward,
+	TOggplaySettings::EHotkeyRewind,
+	TOggplaySettings::EHotkeyPageUp,
+	TOggplaySettings::EHotkeyPageDown,
+	TOggplaySettings::EHotkeyNextSong,
+	TOggplaySettings::EHotkeyPreviousSong,
 
 	// EKeylock disabled, (not used in S80)
 	// EPauseResume, (not used in S80)
 
-	TOggplaySettings::EPlay,
-	TOggplaySettings::EPause,
-	TOggplaySettings::EStop,
-	TOggplaySettings::EVolumeBoostUp,
-	TOggplaySettings::EVolumeBoostDown,
-	TOggplaySettings::EHotKeyExit,
-	TOggplaySettings::EHotKeyBack,
+	TOggplaySettings::EHotkeyPlay,
+	TOggplaySettings::EHotkeyPause,
+	TOggplaySettings::EHotkeyStop,
+	TOggplaySettings::EHotkeyVolumeBoostUp,
+	TOggplaySettings::EHotkeyVolumeBoostDown,
+	TOggplaySettings::EHotkeyExit,
+	TOggplaySettings::EHotkeyBack,
 	TOggplaySettings::EHotkeyVolumeHelp,
 	TOggplaySettings::EHotkeyToggleShuffle,
 	TOggplaySettings::EHotkeyToggleRepeat
@@ -63,7 +63,7 @@ TInt COggUserHotkeysS80::MapCommandToRssList(TInt aCommandIndex)
 	{
 	TInt j;
 	TBool found = EFalse;
-	for (j = 0 ; j<TOggplaySettings::ENofHotkeys ; j++)
+	for (j = 0 ; j<TOggplaySettings::ENumHotkeys ; j++)
 		{
 		if (aCommandIndex == KMapRssListToCommand[j])
 			{

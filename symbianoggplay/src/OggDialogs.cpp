@@ -462,8 +462,10 @@ void COggAboutDialog::PreLayoutDynInitL()
 	resTxt.Set(resReader.ReadTPtrC());
 	iRichText->InsertL(pos, resTxt);
 
-	pos = iRichText->CharPosOfParagraph(len, 8); // get start of 9th para
+	resReader.ReadTPtrC();
 	resTxt.Set(resReader.ReadTPtrC());
+
+	pos = iRichText->CharPosOfParagraph(len, 8); // get start of 9th para
 	iRichText->InsertL(pos, resTxt);
 
 	UpdateModelL(iRichText);
