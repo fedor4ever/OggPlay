@@ -1,0 +1,103 @@
+OggPlay ini file (OggPlay.ogi) specification
+--------------------------------------------
+
+
+.ogi version 1 specification
+----------------------------
+
+
+Header
+------
+
+Data Format:
+Raw bytes
+
+Header data:
+Unique identifier (4 bytes): OGI*
+
+
+Body
+----
+
+Data format:
+All fields are plain text and are terminated with '\n'.
+All number ranges are inclusive (i.e. a --> b means all values between a and b including a and b).
+
+Body data:
+File version number(TInt): 1
+
+OS version(TInt): 0 --> 5
+0 = Series60, 1 = Series60 + Scalable UI, 2 = Series60 V3, 3 = Series80, 4 = Series90, 5 = UIQ2.1
+
+MMF data present(TInt <--> TBool): 0 --> 1
+Used to identify the type of OggPlay version that wrote this .ogi
+
+Hotkey(TInt): 0 --> KMaxKeyCodes (UIQ), 0 (!UIQ)
+
+Repeat(TInt <--> TBool): 0 --> 1
+
+Volume(TInt): 0 --> KMaxVolume
+
+Alarm time(TInt64): No range limits (all values are acceptable)
+
+Analyzer state(TInt): EZero(0) --> EDecay(3)
+
+Current skin idx(TInt): 0 --> KMaxTInt (the value needs to be validated against the actual number of skins available)
+
+Restore stack count(TInt): 0 --> 2 (the view stack is currently a maximum of two levels deep)
+
+Restore stack entries(TInt x Restore stack count): 0 --> KMaxTInt
+
+Restore current(TInt): 0 --> KMaxTInt
+
+Scan mode(TInt): EFullScan(0) --> ECustomDir(3) (S80), EFullScan(0) --> EMmcFull(2) (!S80)
+
+Autoplay(TInt <--> TBool): 0 --> 1
+
+Maneuvring speed(TInt): 0 (not currently used)
+
+NumHotkeys(TInt): 0 --> ENumHotKeys
+
+UserHotkeys(TInt x NumHotkeys): 0 --> KMaxTInt (key codes are enumerations, so a range from 0 to KMaxTInt probably makes sense)
+
+WarningsEnabled(TInt <--> TBool): 0 --> 1
+
+Random(TInt <--> TBool): 0 --> 1
+
+Gain type(TInt): EMinus24dB(0) --> EStatic12dB(15)
+
+Alarm active(TInt <--> TBool): 0 --> 1
+
+Alarm volume(TInt): 0 --> 10
+
+Alarm gain(TInt): EMinus24dB(0) --> EStatic12dB(15)
+
+Alarm snooze(TInt): 0 --> 3
+
+Buffering mode(TInt): EBufferThread(0) --> ENoBuffering(2)
+
+Thread Priority(TInt): ENormal(0) --> EHigh(1)
+ 
+Idle / Play softkeys(TInt x 4 (S80), TInt x 1 (!S80)): 0 --> ENumHotKeys - 1
+
+S80 only:
+Custom scan dir(TDesC): must fit in TFileName
+
+MMF only:
+NumExtensions(TInt): 0 --> KMaxTInt (no maximum limit)
+{
+Extension(TDesC): must fit in TFileName
+ControllerUid(TInt <--> TInt32): No range limits (all values are acceptable)
+} x NumExtensions
+
+
+
+
+
+Additions to specification
+--------------------------
+
+Later versions will add data at the end of the non-MMF data (for general additional data)
+or at the end of the MMF data (for additional MMF specific data). Note that the number of hotkeys can be increased
+without changing the version number as the number of hot keys is encoded in the file.
+
