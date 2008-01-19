@@ -1757,10 +1757,9 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 	TInt index = iListBox[iMode]->CurrentItemIndex();
 	CAbsPlayback::TState playbackState = iApp->iOggPlayback->State();
 
-	COggControl* c = iFocusControlsIter;
-	if (aType == EEventKeyDown)
-		{
 #if defined(SERIES80) && !defined(SERIES90)
+	if ((aType == EEventKeyDown) || (aType == EEventKey))
+		{
 		// Conversions needed for S80 joystick
 		switch (scanCode)
 			{
@@ -1780,8 +1779,12 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 				scanCode = EOggDown;
 				break;
 			}
+		}
 #endif
 
+	COggControl* c = iFocusControlsIter;
+	if (aType == EEventKeyDown)
+		{
 		if (iFocusControlsPresent && (scanCode == EOggLeft))
 			{
 			SetPrevFocus();
@@ -1972,7 +1975,7 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 		}
 #endif
 
-	if (code>0)
+	if (aType == EEventKey)
 		{
 		if ((c == iListBox[iMode]) || !iFocusControlsPresent)
 			{
