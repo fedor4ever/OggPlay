@@ -852,11 +852,10 @@ _LIT(KFlacExt, ".flac");
 _LIT(KMp3Ext, ".mp3");
 MDecoder* COggPlayController::GetDecoderL()
 	{
-	MDecoder* decoder = NULL;
-
 	TParsePtrC p(iFileName);
 	TFileName ext(p.Ext());
 
+	MDecoder* decoder = NULL;
 	if (ext.CompareF(KOggExt) == 0)
 		decoder = new(ELeave) CTremorDecoder(iFs);
 
@@ -872,7 +871,7 @@ MDecoder* COggPlayController::GetDecoderL()
 #endif
 
 	if (!decoder)
-		User::Leave(KErrNotFound);
+		User::Leave(KErrNotSupported);
 
 	return decoder;
 	}

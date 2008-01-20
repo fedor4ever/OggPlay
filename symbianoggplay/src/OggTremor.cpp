@@ -168,11 +168,10 @@ _LIT(KFlacExt, ".flac");
 _LIT(KMp3Ext, ".mp3");
 MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 	{
-	MDecoder* decoder = NULL;
-
 	TParsePtrC p(aFileName);
 	TFileName ext(p.Ext());
 
+	MDecoder* decoder = NULL;
 	if (ext.CompareF(KOggExt) == 0)
 		decoder = new(ELeave) CTremorDecoder(iFs);
 
@@ -188,7 +187,7 @@ MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 #endif
 
 	if (!decoder)
-		User::Leave(KErrNotFound);
+		User::Leave(KErrNotSupported);
 
 	return decoder;
 	}
@@ -205,8 +204,11 @@ TInt COggPlayback::Open(const TDesC& aFileName)
 		iDecoder = NULL;
 		}
 
-	iDecoder = GetDecoderL(aFileName);
-	TInt err = iDecoder->Open(aFileName);
+	TRAPD(err, iDecoder = GetDecoderL(aFileName));
+	if (err != KErrNone)
+		return err;
+
+	err = iDecoder->Open(aFileName);
 	if (err != KErrNone)
 		{
 		iDecoder->Close();
@@ -604,8 +606,12 @@ const TInt32* COggPlayback::GetFrequencyBins()
 
 TInt COggPlayback::Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver)
 	{
-	MDecoder* decoder = GetDecoderL(aFileName);
-	TInt err = decoder->OpenInfo(aFileName);
+	MDecoder* decoder = NULL;
+	TRAPD(err, decoder = GetDecoderL(aFileName));
+	if (err != KErrNone)
+		return err;
+
+	err = decoder->OpenInfo(aFileName);
 	if (err != KErrNone)
 		{
 		decoder->Close();
@@ -633,8 +639,12 @@ TInt COggPlayback::Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObse
 
 TInt COggPlayback::FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver)
 	{
-	MDecoder* decoder = GetDecoderL(aFileName);
-	TInt err = decoder->Open(aFileName);
+	MDecoder* decoder = NULL;
+	TRAPD(err, decoder = GetDecoderL(aFileName));
+	if (err != KErrNone)
+		return err;
+
+	err = decoder->Open(aFileName);
 	if (err != KErrNone)
 		{
 		decoder->Close();
