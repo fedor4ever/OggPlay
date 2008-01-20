@@ -158,7 +158,6 @@ void COggActive::ConstructL(COggPlayAppUi* theAppUi)
 	// Series 60 1.X reports 3 lines 0='Fax' 1='Data' and 2='VoiceLine1' 
     // Series 60 2.0 reports 4 lines 0='Voice1' 1='Voice2' 2='Data' 3='Fax'
 	// (and 'VoiceLine1' reports '1' in EnumerateCall() when in idle ?!?)
-
 	TInt linesToTest = nofLines;
 	
 	// S60: Why is 'iLineCallsReportedAtIdle' not '0' at idle as 
@@ -395,6 +394,15 @@ void COggPlayAppUi::ConstructL()
 	// Trace that we have at least reached the start of the code
 	TRACEF(_L("COggPlayAppUi::ConstructL()"));
 
+	// Read the device uid
+	HAL::Get(HALData::EMachineUid, iMachineUid);
+	TRACEF(COggLog::VA(_L("Phone UID: %x"), iMachineUid));
+
+#if defined(__WINS__)
+	// Set the machine Uid for testing purposes
+	// iMachineUid = EMachineUid_E61;
+#endif
+
 #if defined(SERIES60SUI)
 	BaseConstructL(EAknEnableSkin);
 #else
@@ -628,7 +636,7 @@ void COggPlayAppUi::StartOggPlayL()
 #if defined(PLUGIN_SYSTEM)
 	iOggPlayback = new(ELeave) COggPluginAdaptor(iOggMsgEnv, this);
 #else
-	iOggPlayback = new(ELeave) COggPlayback(iOggMsgEnv, this);
+	iOggPlayback = new(ELeave) COggPlayback(iOggMsgEnv, this, iMachineUid);
 #endif
 
 	iOggPlayback->ConstructL();
@@ -1151,6 +1159,12 @@ void COggPlayAppUi::HandleCommandL(TInt aCommand)
 		case EOggSkinEight:
 		case EOggSkinNine:
 		case EOggSkinTen:
+		case EOggSkinEleven:
+		case EOggSkinTwelve:
+		case EOggSkinThirteen:
+		case EOggSkinFourteen:
+		case EOggSkinFifteen:
+		case EOggSkinSixteen:
 			ReadSkin(aCommand-EOggSkinOne);
 			iAppView->HandleNewSkinLayout();
 			break;
@@ -1624,8 +1638,8 @@ void COggPlayAppUi::DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane)
 			CEikMenuPaneItem::SData item;
 			item.iText.Copy((*iSkins)[i]);
 			item.iText.SetLength(item.iText.Length()-4);
-			item.iCommandId= EOggSkinOne+i;
-			item.iCascadeId= 0;
+			item.iCommandId = EOggSkinOne+i;
+			item.iCascadeId = 0;
 			item.iFlags= 0;
 
 			aMenuPane->AddMenuItemL(item);
@@ -1677,14 +1691,16 @@ void COggPlayAppUi::FindSkins()
 			fullname.Append(e.iName);
 
 			TParsePtrC p(fullname);			
-			if (p.Ext()==_L(".skn") || p.Ext()==_L(".SKN"))
+			if (p.Ext().CompareF(_L(".skn")) == 0)
 				{
 				iSkins->AppendL(p.NameAndExt());
-				if (iSkins->Count()==10) break;
+				if (iSkins->Count() == 16)
+					break;
 				}
 			}
 
-		delete c; c=NULL;
+		delete c;
+		c = NULL;
 		}
 	
 	CleanupStack::PopAndDestroy(ds);

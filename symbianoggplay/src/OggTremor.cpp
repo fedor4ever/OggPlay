@@ -56,8 +56,8 @@
 #endif
 
 
-COggPlayback::COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver)
-:  CAbsPlayback(anObserver), iEnv(anEnv), iSharedData(*this, iUIThread, iBufferingThread)
+COggPlayback::COggPlayback(COggMsgEnv* aEnv, MPlaybackObserver* aObserver, TInt aMachineUid)
+:  CAbsPlayback(aObserver), iEnv(aEnv), iSharedData(*this, iUIThread, iBufferingThread), iMachineUid(aMachineUid)
 	{
 	}
 
@@ -115,10 +115,6 @@ void COggPlayback::ConstructL()
 	iStopAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
 
 	iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
-
-	// Read the device uid
-	HAL::Get(HALData::EMachineUid, iMachineUid);
-	TRACEF(COggLog::VA(_L("Phone UID: %x"), iMachineUid ));
 	}
 
 COggPlayback::~COggPlayback()
@@ -891,9 +887,11 @@ void COggPlayback::StartStreaming()
 	if (iSharedData.iBufferingMode == EBufferThread)
 		iBufferingThreadAO->StartListening();
 
+#if defined(SERIES60) && !defined(SERIES60V3)
 	// The NGage has a poor memory and always forgets the audio settings
 	if ((iMachineUid == EMachineUid_NGage) || (iMachineUid == EMachineUid_NGageQD))
 		iStreamingThreadCommandHandler->SetAudioProperties();
+#endif
 
 	// Start the streaming
 	iStreamingThreadCommandHandler->StartStreaming();

@@ -51,6 +51,12 @@ enum {
   EOggSkinEight,
   EOggSkinNine,
   EOggSkinTen,
+  EOggSkinEleven,
+  EOggSkinTwelve,
+  EOggSkinThirteen,
+  EOggSkinFourteen,
+  EOggSkinFifteen,
+  EOggSkinSixteen,
 
   EOggOptionsHotkey,
   EOggOptionsAlarmTime,

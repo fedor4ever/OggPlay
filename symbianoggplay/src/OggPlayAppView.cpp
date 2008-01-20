@@ -120,7 +120,7 @@ void COggPlayAppView::ReadSkin(const TFileName& aFileName)
 {
   ClearCanvases();
 
-  iIconFileName= aFileName.Left(aFileName.Length()-4);
+  iIconFileName = aFileName.Left(aFileName.Length()-4);
   iIconFileName.Append(_L(".mbm"));
 
   TOggParser p(iCoeEnv->FsSession(), aFileName);
@@ -831,15 +831,25 @@ void COggPlayAppView::ChangeLayout(TInt aMode)
 			iCanvas[1]->MakeVisible(EFalse);
 		}
 
-#if defined(UIQ)
 	// Is there a way on UIQ to tell it we don't want the title bar in FC mode?
-	// As it is we just draw on top of it.
+	// On an E61 (and E61i, E62) is there a way to tell it we don't always want the title bar?
+	// In these cases we just hard code the size instead of calling ClientRect()
+
+#if defined(UIQ)
 	TRect clientRect(iMode ? iCoeEnv->ScreenDevice()->SizeInPixels() : iApp->ClientRect());
 #else
-	// TO DO: On an E61 (and E61i) is there a way to tell it we don't want the title bar?
-	// If not we probably should mod this to draw on top of it (just like the UIQ code above)
-	// Need to add a specific E61 skin to the installer too (like 1.70 did)
 	TRect clientRect(iApp->ClientRect());
+
+#if defined(SERIES60V3)
+	// The E61, E61i and E62 can support two canvas sizes:
+	// Standard QVGA as used on other S60 V3 phones and a slightly larger version that covers the title bar.
+	if ((iApp->iMachineUid == EMachineUid_E61) || (iApp->iMachineUid == EMachineUid_E61i) || (iApp->iMachineUid == EMachineUid_E62))
+		{
+		// If the skin is 220 pixels high we need to use the extra 20 pixels of the title bar
+		if (iCanvas[0]->Size().iHeight == 220)
+			clientRect.iTl = TPoint(0, 0);
+		}
+#endif
 #endif
 
 	SetRect(clientRect);
@@ -1779,6 +1789,16 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 				scanCode = EOggDown;
 				break;
 			}
+
+		// It seems that on S80 a joystick "click" doesn't actually generate a key event
+		// of EKeyDeviceA. Consequently I've changed this back to the way it
+		// used to work: fake a key event when we get "key down EStdKeyDeviceA". 
+		if ((scanCode == EStdKeyDeviceA) && (aType == EEventKeyDown))
+			code = EOggConfirm;
+
+		// Add enter key for S80 (request from Chris)
+		if (code == EKeyEnter)
+			code = EOggConfirm;
 		}
 #endif
 

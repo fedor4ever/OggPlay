@@ -314,7 +314,7 @@ class COggPlayAppUi : public CEikAppUi, public MPlaybackObserver, public MFileIn
 #else
 class COggPlayAppUi : public CQikAppUi, public MPlaybackObserver, public MFileInfoObserver
 #endif
-{
+	{
 public:
 	// Start up states (OggPlay startup has several stages)
 	enum TStartUpState
@@ -406,6 +406,7 @@ public:
 
 	TInt Rnd(TInt aMax);
 	void FileOpenErrorL(TInt aErr);
+
 	const TDesC& UnassignedTxt()
 	{ return iUnassignedTxt; }
 
@@ -450,6 +451,9 @@ private:
 public:
 	// Global settings stored in the ini file
 	TOggplaySettings iSettings;
+
+	// Machine uid (for identifying the phone model)
+	TInt iMachineUid;
 
 	// backwards compatibility - deprecated
 	// as long as these are not part of TOggplaySettings, they can't be set 
@@ -535,11 +539,11 @@ public:
 	friend class COggActive;
 	friend class COggStartUpAO;
 	friend class COggStartUpEmbeddedAO;
-};
+	};
 
 class TOggPlayList;
 class TOggPlayListStackEntry
-{
+	{
 public:
 	TOggPlayListStackEntry()
 	{ }
@@ -551,14 +555,14 @@ public:
 public:
 	TOggPlayList* iPlayList;
 	TInt iPlayingIdx;
-};
+	};
 
 
 // COggSongList
 // Base class defining the interface for managing the song list.
 class TOggFile;
 class COggSongList : public CBase
-{
+	{
 public:
     ~COggSongList();
 
@@ -590,10 +594,10 @@ protected:
 
 private:
 	COggPlayAppView* iAppView; 
-};
+	};
 
 class COggNormalPlay : public COggSongList
-{
+	{
 public:     
 	static COggNormalPlay* NewL(COggPlayAppView* aAppView, COggSongList* aSongList = NULL);
 	~COggNormalPlay();
@@ -604,10 +608,10 @@ public:
 
 private:
     COggNormalPlay(COggPlayAppView* aAppView);
-};
+	};
 
 class COggRandomPlay : public COggSongList
-{
+	{
 public:
 	static COggRandomPlay* NewL(COggPlayAppUi* aAppUi, COggPlayAppView* aAppView, COggSongList* aSongList = NULL);
 	~COggRandomPlay();
@@ -628,7 +632,7 @@ private:
 
     RArray<TInt> iRandomMemory;
 	TInt iRandomMemoryIdx;
-};
+	};
 
 
 #if defined(UIQ)

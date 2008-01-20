@@ -75,8 +75,12 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 
 // Phone UIDs
-// Used for determining the phone type (currently only used for the Sendo X)
+// Used for determining the phone type
 #define EMachineUid_SendoX  0x101FA031
 #define EMachineUid_NGage   0x101F8C19
 #define EMachineUid_NGageQD 0x101FB2B1
+
+#define EMachineUid_E61  0x20001858
+#define EMachineUid_E61i 0x20002D7F
+#define EMachineUid_E62  0x20001859
 #endif

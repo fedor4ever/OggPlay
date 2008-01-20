@@ -109,7 +109,7 @@ class CStreamingThreadListener;
 class COggPlayback : public CAbsPlayback, public MOggSampleRateFillBuffer, public MThreadPanicObserver
 	{
 public: 
-	COggPlayback(COggMsgEnv* anEnv, MPlaybackObserver* anObserver = NULL);
+	COggPlayback(COggMsgEnv* aEnv, MPlaybackObserver* aObserver, TInt aMachineUid);
 	~COggPlayback();
 
 	// From CAbsPlayback
