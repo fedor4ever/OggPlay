@@ -229,10 +229,16 @@ iBitRate(aInfo.iBitRate/1000), iRate(aInfo.iRate), iChannels(aInfo.iChannels)
 _LIT(KTimeFormatTxt, "%d:%02d");
 void COggFileInfoDialog::PreLayoutDynInitL()
 	{
-	CEikLabel* c = (CEikLabel*) Control(EOggLabelFileName);
-	c->SetTextL(iFileName);
+	CEikLabel* c = (CEikLabel *) Control(EOggLabelFileName);
 
-	TBuf<64> buf;
+#if defined(SERIES80)
+	c->SetTextL(iFileName);
+#else
+	TParsePtrC parse(iFileName);
+	c->SetTextL(parse.NameAndExt());
+#endif
+
+	TFileName buf;
 	c = (CEikLabel*) Control(EOggLabelFileSize);
 	buf.Num(iFileSize);
 	c->SetTextL(buf);
@@ -252,6 +258,16 @@ void COggFileInfoDialog::PreLayoutDynInitL()
 	c = (CEikLabel*) Control(EOggLabelBitRate);
 	buf.Num(iBitRate);
 	c->SetTextL(buf);
+
+#if !defined(SERIES80)
+	TPtrC driveAndPath(parse.DriveAndPath());
+	buf = driveAndPath;
+	if (driveAndPath.Length()>3)
+		buf.SetLength(buf.Length()-1);
+
+	c = (CEikLabel*) Control(EOggLabelFilePath);
+	c->SetTextL(buf);
+#endif
 	}
 
 

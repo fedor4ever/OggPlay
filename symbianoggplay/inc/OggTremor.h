@@ -215,9 +215,6 @@ private:
 	// Communication with the decoder
 	MDecoder* iDecoder;
 	TBool iEof; // true after ov_read has encounted the eof
-
-	// Machine uid (for identifying the phone model)
-	TInt iMachineUid;
 	RFs iFs;
 
 	TBool iStreamingErrorDetected;
@@ -236,6 +233,9 @@ private:
 	TStreamingThreadData iSharedData;
 
 	TOggFileInfo iFFileInfo;
+
+	// Machine uid (for identifying the phone model)
+	TInt iMachineUid;
 	};
     
 #endif // _OggTremor_h

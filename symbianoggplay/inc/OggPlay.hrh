@@ -73,6 +73,7 @@ enum {
   EOggLabelRate,
   EOggLabelChannels,
   EOggLabelPlayListEntries,
+  EOggLabelFilePath,
 
   EOggScrollableTextControl,
   EOggScrollableTextDialog,

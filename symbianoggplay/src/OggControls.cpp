@@ -1725,7 +1725,7 @@ void COggSlider64::PointerEvent(const TPointerEvent& p)
 
 
 COggScrollBar::COggScrollBar()
-: iMaxValue(100), iScrollerSize(10), iPage(1), iStep(1)
+: iMaxValue(100.0), iScrollerSize(10), iPage(1), iStep(1)
 	{
 	}
 
@@ -1772,20 +1772,18 @@ void COggScrollBar::Draw(CBitmapContext& aBitmapContext)
 	if (!iKnobIcon)
 		return;
 
-	TSize s(iKnobIcon->Bitmap()->SizeInPixels());
-	TRect r(TPoint(0,0), s);
+	TRect r(TPoint(0, 0), iKnobIcon->Bitmap()->SizeInPixels());
 	TPoint p(ix, iy);
 
 	iPos = GetPosFromValue(iValue);
-
 	switch (iStyle)
 		{
 		case 0:
-			p.iX= iPos;
+			p.iX = iPos;
 			break;
 
 		case 1:
-			p.iY= iPos;
+			p.iY = iPos;
 			break;
 		}
 
@@ -1793,81 +1791,92 @@ void COggScrollBar::Draw(CBitmapContext& aBitmapContext)
 	}
 
 void COggScrollBar::PointerEvent(const TPointerEvent& p)
-{
-  COggControl::PointerEvent(p);
+	{
+	COggControl::PointerEvent(p);
 
-  TSize s(0, 0);
-  if (iKnobIcon)
-	  s= iKnobIcon->Bitmap()->SizeInPixels();
+	TSize s(0, 0);
+	if (iKnobIcon)
+		s = iKnobIcon->Bitmap()->SizeInPixels();
 
-  TInt k, s1, s2;
-  if (iStyle == 0)
-  {
-    k = s.iWidth;
-    s1 = p.iPosition.iX-ix;
-    s2 = p.iPosition.iX;
-  }
-  else
-  {
-    k = s.iHeight;
-    s1 = p.iPosition.iY-iy;
-    s2 = p.iPosition.iY;
-  }
+	TInt k, s1, s2;
+	if (iStyle == 0)
+		{
+		k = s.iWidth;
+		s1 = p.iPosition.iX-ix;
+		s2 = p.iPosition.iX;
+		}
+	else
+		{
+		k = s.iHeight;
+		s1 = p.iPosition.iY-iy;
+		s2 = p.iPosition.iY;
+		}
 
-  if (p.iType==TPointerEvent::EButton1Up)
-	  iIsMoving= EFalse;
+	if (p.iType == TPointerEvent::EButton1Up)
+		iIsMoving= EFalse;
 
-  if (p.iType==TPointerEvent::EButton1Down)
-  {
-    if (s1<iScrollerSize)
-      SetValue(iValue-iStep);
-	else if (s1>ih-iScrollerSize)
-      SetValue(iValue+iStep);
-	else if (s2>=iPos && s2<=iPos+k)
-      iIsMoving= ETrue;
-	else if (s2<iPos)
-      SetValue(iValue-iPage+1);
-	else if (s2>iPos+k)
-      SetValue(iValue+iPage-1);
-  }
+	if (p.iType == TPointerEvent::EButton1Down)
+		{
+		if (s1<iScrollerSize)
+			SetValue(iValue-iStep);
+		else if (s1>(ih-iScrollerSize))
+			SetValue(iValue+iStep);
+		else if ((s2>=iPos) && (s2<=(iPos+k)))
+			iIsMoving = ETrue;
+		else if (s2<iPos)
+			SetValue(iValue-(iPage+1));
+		else if (s2>(iPos+k))
+			SetValue(iValue+(iPage-1));
+		}
 
-  if (iIsMoving)
-	  SetValue(GetValueFromPos(s2));
-}
+	if (iIsMoving)
+		SetValue(GetValueFromPos(s2));
+	}
 
-void COggScrollBar::SetMaxValue(TInt aMaxValue)
-{
-  if (iMaxValue != aMaxValue)
-  {
-    iMaxValue = aMaxValue;
-    iRedraw = ETrue;
-  }
-}
+void COggScrollBar::SetMaxValue(TReal aMaxValue)
+	{
+	if (iMaxValue != aMaxValue)
+		{
+		iMaxValue = aMaxValue;
+		iRedraw = ETrue;
+		}
+	}
 
-void COggScrollBar::SetValue(TInt aValue)
-{
-  if (aValue<0)
-	  aValue=0;
-  else if (aValue>iMaxValue)
-	  aValue= iMaxValue;
+void COggScrollBar::SetValue(TReal aValue)
+	{
+	// Ignore requests to the change the value if we are
+	// responsible for driving the change.
+	if (iProcessingControlEvent)
+		return;
+ 
+	if (aValue<0.0)
+		aValue = 0.0;
+	else if (aValue>iMaxValue)
+		aValue = iMaxValue;
 
-  if (iValue!=aValue)
-  {
-    iValue = aValue;
-    iRedraw = GetPosFromValue(aValue) != iPos;
-    if (iAssociated)
-		iAssociated->ControlEvent(0, aValue);
-  }
-}
+	if (iValue != aValue)
+		{
+		iValue = aValue;
+		iRedraw = (GetPosFromValue(aValue) != iPos);
 
-TInt COggScrollBar::GetPosFromValue(TInt aValue)
+		if (iAssociated)
+			{
+			iProcessingControlEvent = ETrue;
+			iAssociated->ControlEvent(0, (TInt) aValue);
+
+			iProcessingControlEvent = EFalse;
+			}
+		}
+	}
+
+TInt COggScrollBar::GetPosFromValue(TReal aValue)
 	{
 	if (!iKnobIcon)
 		return 0;
 
-	if (iMaxValue == 0)
+	if (iMaxValue == 0.0)
 		{
-		// Implies iValue also == 0;
+		// Implies iValue also == 0.0;
 		switch (iStyle)
 			{
 			case 0:
@@ -1880,86 +1889,96 @@ TInt COggScrollBar::GetPosFromValue(TInt aValue)
 			}
 		}
 
-  TSize s(iKnobIcon->Bitmap()->SizeInPixels());
-  switch (iStyle)
-	{
-	case 0:
-		return ix + iScrollerSize + ((iw - s.iWidth - 2*iScrollerSize)*aValue)/iMaxValue;
-		break;
+	TSize s(iKnobIcon->Bitmap()->SizeInPixels());
+	switch (iStyle)
+		{
+		case 0:
+			return ix + iScrollerSize + ((TInt) (((iw - s.iWidth - 2*iScrollerSize)*aValue)/iMaxValue));
+			break;
 
-	case 1:
-		return iy + iScrollerSize + ((ih-s.iHeight-2*iScrollerSize)*aValue)/iMaxValue;
-		break;
-  }
+		case 1:
+			return iy + iScrollerSize + ((TInt) (((ih - s.iHeight - 2*iScrollerSize)*aValue)/iMaxValue));
+			break;
+		}
 
-  return 0;
-}
-
-TInt COggScrollBar::GetValueFromPos(TInt aPos)
-{
-  if (!iKnobIcon)
-	  return 0;
-
-  TSize s(iKnobIcon->Bitmap()->SizeInPixels());
-  switch (iStyle)
-	{
-	case 0:
-		return ((aPos - ix - s.iWidth/2 - iScrollerSize)*iMaxValue)/(iw - s.iWidth - 2*iScrollerSize);
-		break;
-
-	case 1:
-		return ((aPos - iy - iScrollerSize - s.iHeight/2)*iMaxValue)/(ih - s.iHeight - 2*iScrollerSize);
-		break;
+	return 0;
 	}
+
+TReal COggScrollBar::GetValueFromPos(TInt aPos)
+	{
+	if (!iKnobIcon)
+		return 0;
+
+	TSize s(iKnobIcon->Bitmap()->SizeInPixels());
+	switch (iStyle)
+		{
+		case 0:
+			return ((aPos - ix - iScrollerSize - s.iWidth/2)*iMaxValue)/(iw - s.iWidth - 2*iScrollerSize);
+			break;
+
+		case 1:
+			return ((aPos - iy - iScrollerSize - s.iHeight/2)*iMaxValue)/(ih - s.iHeight - 2*iScrollerSize);
+			break;
+		}
  
 	return 0;
-}
+	}
 
 TBool COggScrollBar::ReadArguments(TOggParser& p)
-{
-  TBool success= COggControl::ReadArguments(p);
-  if (success && p.iToken==_L("ScrollerSize"))
-  {
-    p.Debug(_L("Setting scroller size."));
-    TInt i;
-    success= p.ReadToken(i);
-    if (success) SetScrollerSize(i);
-  }
+	{
+	TBool success = COggControl::ReadArguments(p);
+	if (success && p.iToken == _L("ScrollerSize"))
+		{
+		p.Debug(_L("Setting scroller size."));
 
-  if (success && p.iToken==_L("Style"))
-  {
-    p.Debug(_L("Setting style."));
-    TInt i;
-    success= p.ReadToken(i);
-    if (success) SetStyle(i);
-  }
+		TInt i;
+		success = p.ReadToken(i);
+		if (success)
+			SetScrollerSize(i);
+		}
+
+	if (success && p.iToken == _L("Style"))
+		{
+		p.Debug(_L("Setting style."));
+		
+		TInt i;
+		success = p.ReadToken(i);
+		if (success)
+			SetStyle(i);
+		}
   
-  if (success && p.iToken==_L("Page"))
-  {
-    p.Debug(_L("Setting page."));
-    TInt i;
-    success= p.ReadToken(i);
-    if (success) SetPage(i);
-  }
+	if (success && p.iToken == _L("Page"))
+		{
+		p.Debug(_L("Setting page."));
+
+		TInt i;
+		success = p.ReadToken(i);
+		if (success)
+			SetPage(i);
+		}
   
-  if (success && p.iToken==_L("KnobIcon"))
-  {
-    p.Debug(_L("Setting knob icon."));
-    CGulIcon* c= p.ReadIcon(iBitmapFile);
-    success= c!=0;
-    if (success) SetKnobIcon(c);
-  }
+	if (success && p.iToken == _L("KnobIcon"))
+		{
+		p.Debug(_L("Setting knob icon."));
+
+		CGulIcon* c = p.ReadIcon(iBitmapFile);
+		success = (c != NULL);
+		if (success)
+			SetKnobIcon(c);
+		}
  
-  if (success && p.iToken==_L("Step"))
-  {
-    p.Debug(_L("Setting step."));
-    TInt i;
-    success= p.ReadToken(i);
-    if (success) SetStep(i);
-  }
+	if (success && p.iToken == _L("Step"))
+		{
+		p.Debug(_L("Setting step."));
+
+		TInt i;
+		success = p.ReadToken(i);
+		if (success)
+			SetStep(i);
+		}
   
-  return success;
-}
+	return success;
+	}
 
 
 COggAnalyzer::COggAnalyzer()

@@ -1,10 +1,17 @@
 
-This is the Release Note for Release 1.71 of Oggplay for S60
+This is the Release Note for Release 1.71a of Oggplay for S60
 
 *******************************************************************
 If you experience problems please report them to our public forums
 and remember to include the version number and the model of your phone.
 *******************************************************************
+
+What's new in Release 1.71a:
+----------------------------
+
+Minor bug fixes and improvements
+Some internal changes(Old settings will not be preserved if upgrading)
+
 
 What's new in Release 1.71:
 --------------------------

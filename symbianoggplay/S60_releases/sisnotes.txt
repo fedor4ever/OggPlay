@@ -1,4 +1,4 @@
-  Welcome to OggPlay 1.71
+  Welcome to OggPlay 1.71a
 
 Welcome to the Series 60
 version of OggPlay, the open
@@ -7,8 +7,8 @@ released under the GPL by
 Leif H. Wilden.
 
 New for this release:
-Support for FLAC format
-More variable volume boost
-Many bug fixes!
+Minor bug fixes and improvements
+Some internal changes(Old settings will not be preserved if upgrading)
+
 
 Enjoy!

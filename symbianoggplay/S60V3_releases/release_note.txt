@@ -1,10 +1,25 @@
 
-This is the Release Note for Release 1.71 of Oggplay for S60V3
+This is the Release Note for Release 1.71a of Oggplay for S60V3
 
 *******************************************************************
 If you experience problems please report them to our public forums
 and remember to include the version number and the model of your phone.
 *******************************************************************
+
+What's new in Release 1.71a:
+----------------------------
+
+The S60V3 version of OggPlay is now distributed as two packages: OggPlay and OggPlayFonts
+This is an attempt to isolate the uninstall problems
+(see the Readme and the OggPlay forums for more details) 
+
+E61 users can now use either standard QVGA skins or E61 specific skins
+(the E61 skins on symbian-skin.com, for example)
+
+Fixed the problems with the Winamp skin
+Fixed "Find new files" crash reported by some users
+A few other minor bug fixes and improvements
+
 
 What's new in Release 1.71:
 --------------------------

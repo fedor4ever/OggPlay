@@ -436,43 +436,43 @@ private:
 // COggScrollBar
 // A scrollbar that can have an associated control (e.g. a listbox)
 class COggScrollBar : public COggControl
-{
+	{
 public:
-  COggScrollBar();
-  ~COggScrollBar();
+	COggScrollBar();
+	~COggScrollBar();
 
-  void SetStyle(TInt aStyle);
-  void SetKnobIcon(CGulIcon* anIcon);
-  void SetScrollerSize(TInt aSize);
-  void SetPage(TInt aPage);
-  void SetStep(TInt aStep);
-  void SetAssociatedControl(COggControl* aControl);
-  void SetMaxValue(TInt aMaxValue);
-  void SetValue(TInt aValue);
-
-  TInt CurrentValue();
+	void SetStyle(TInt aStyle);
+	void SetKnobIcon(CGulIcon* anIcon);
+	void SetScrollerSize(TInt aSize);
+	void SetPage(TInt aPage);
+	void SetStep(TInt aStep);
+	void SetAssociatedControl(COggControl* aControl);
+	void SetMaxValue(TReal aMaxValue);
+	void SetValue(TReal aValue);
 
  protected:
-  // From COggControl
-  TBool ReadArguments(TOggParser& p);
-  void Draw(CBitmapContext& aBitmapContext);
-  void PointerEvent(const TPointerEvent& p);
+	// From COggControl
+	TBool ReadArguments(TOggParser& p);
+	void Draw(CBitmapContext& aBitmapContext);
+	void PointerEvent(const TPointerEvent& p);
 
-  TInt GetValueFromPos(TInt aPos);
-  TInt GetPosFromValue(TInt aValue);
+	TReal GetValueFromPos(TInt aPos);
+	TInt GetPosFromValue(TReal aValue);
 
-  TBool iStyle; // 0 = horizontal; 1 = vertical
-  TInt iValue;
-  TInt iMaxValue;
-  COggControl* iAssociated;
-  CGulIcon* iKnobIcon;
+	TBool iStyle; // 0 = horizontal; 1 = vertical
+	TReal iValue;
+	TReal iMaxValue;
+	COggControl* iAssociated;
+	CGulIcon* iKnobIcon;
 
-  TInt iScrollerSize;
-  TInt iPos;
-  TInt iPage;
-  TInt iStep;
-  TBool iIsMoving;
-};
+	TInt iScrollerSize;
+	TInt iPos;
+	TInt iPage;
+	TInt iStep;
+
+	TBool iIsMoving;
+	TBool iProcessingControlEvent;
+	};
 
 
 // COggListBox
