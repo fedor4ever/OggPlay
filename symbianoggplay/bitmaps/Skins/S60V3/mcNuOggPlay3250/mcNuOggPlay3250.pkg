@@ -1,11 +1,7 @@
 %{"OggPlay"}
 :"OggPlay"
-#{"mcNuOggPlay3250 skin"},(0xF000A661),1,0,0,TYPE=SP
+#{"mcNuOggPlay3250 skin"},(0xF000A661),1,71,2,TYPE=PU
 [0x101F7961],0,0,0,{"Series60ProductID"}
-
-; Requires OggPlay
-(0xF000A661),1,0,0,{"OggPlay"}
-
 
 "mcNuOggPlay3250.skn"-"!:\private\F000A661\import\mcNuOggPlay3250.skn"
 "mcNuOggPlay3250.mbm"-"!:\private\F000A661\import\mcNuOggPlay3250.mbm"
