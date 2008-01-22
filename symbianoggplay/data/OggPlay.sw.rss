@@ -10,9 +10,9 @@
 #define ogg_about_cpr2 "© Ogg Vorbis-codec Xiph.org"
 #define ogg_about_cpr3 "© Flac-codec Josh Coalson"
 #define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
-#define ogg_translation "Översättning: Peter Karlsson"
 #define ogg_about_port "S60-anpassning:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "S60-anpassning: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_translation "Översättning: Peter Karlsson"
 
 #define ogg_file_prop "Egenskaper för fil"
 #define ogg_filename_txt "Filnamn:"

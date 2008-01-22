@@ -1028,12 +1028,15 @@ void COggPlayAppUi::HandleCommandL(TInt aCommand)
 		{
 		case EOggAbout:
 			{
-#if defined(SERIES80)
+#if defined(SERIES60)
+			COggAboutDialog *d = new(ELeave) COggAboutDialog;
+			d->ExecuteLD(R_DIALOG_ABOUT);
+#elif defined(SERIES80)
 			COggAboutDialog *d = new(ELeave) COggAboutDialog;
 			d->ExecuteLD(R_DIALOG_ABOUT_S80);
 #else
-			COggAboutDialog *d = new(ELeave) COggAboutDialog;
-			d->ExecuteLD(R_DIALOG_ABOUT);
+			CEikDialog *d = new(ELeave) CEikDialog;
+			d->ExecuteLD(R_DIALOG_ABOUT_UIQ);
 #endif
 			break;
 			}

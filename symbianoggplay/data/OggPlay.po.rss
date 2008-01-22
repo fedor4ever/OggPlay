@@ -10,9 +10,9 @@
 #define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
-#define ogg_translation "Traducao por LordNins"
 #define ogg_about_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_translation "Traducao por LordNins"
 
 #define ogg_file_prop "Propriedades do Ficheiro"
 #define ogg_filename_txt "Nome:"

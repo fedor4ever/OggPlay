@@ -112,16 +112,6 @@ private:
 	TInt *iAlarmActive;
 	TTime *iAlarmTime;
 	};
-
-class COggAboutDialog : public CEikDialog
-	{
-public:
-	void SetVersion(const TDesC& aVersion);
-	void PreLayoutDynInitL();
-
-private:
-	TBuf<128> iVersion;
-	};
 #elif !defined(SERIES60)
 // Needed by SERIES80 because of small screen, UIQ can do without.
 class CScrollableRichTextControl : public CCoeControl

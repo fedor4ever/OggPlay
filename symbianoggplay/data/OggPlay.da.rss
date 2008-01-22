@@ -13,6 +13,7 @@ CHARACTER_SET UTF8
 #define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
 #define ogg_about_port "S60 version:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "S60 version: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_translation ""
 
 #define ogg_file_prop "Fil egenskaber"
 #define ogg_filename_txt "Filnavn:"

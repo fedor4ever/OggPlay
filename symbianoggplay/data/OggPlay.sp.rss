@@ -11,9 +11,9 @@ CHARACTER_SET UTF8
 #define ogg_about_cpr2 "© códec Ogg Vorbis Xiph.org"
 #define ogg_about_cpr3 "© códec Flac Josh Coalson"
 #define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
-#define ogg_translation "Traducción: David Cano"
 #define ogg_about_port "Portado a S60 por:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "Portado a S60 por: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_translation "Traducción: David Cano"
 
 #define ogg_file_prop "Propiedades del archivo"
 #define ogg_filename_txt "Nombre de archivo:"

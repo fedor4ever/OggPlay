@@ -63,8 +63,6 @@ enum {
   EOggOptionsAlarmActive,
   EOggOptionsSeek,
 
-  EOggLabelAboutVersion,
-
   EOggInfoDialog,
   EOggLabelFileName,
   EOggLabelFileSize,

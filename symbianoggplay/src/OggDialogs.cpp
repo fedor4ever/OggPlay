@@ -294,19 +294,6 @@ void COggPlayListInfoDialog::PreLayoutDynInitL()
 
 
 #if defined(UIQ)
-void COggAboutDialog::PreLayoutDynInitL()
-	{
-	CEikLabel* cVersion= (CEikLabel*)Control(EOggLabelAboutVersion);
-	cVersion->SetTextL(iVersion);
-	}
-
-void COggAboutDialog::SetVersion(const TDesC& aVersion)
-	{
-	iVersion = _L("OggPlay ");
-	iVersion.Append(aVersion);
-	}
-
-
 CHotkeyDialog::CHotkeyDialog(TInt *aHotKeyIndex, TInt* anAlarmActive, TTime* anAlarmTime)
 	{
 	iHotKeyIndex = aHotKeyIndex;
