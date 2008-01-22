@@ -57,4 +57,43 @@ OggPlay 1 {
       Icon 43 44
     }
   }
+  FlipClosed {
+    Played {
+      Position 8 235 60 22
+      Font "Bitstream Vera Sans" 20 0
+      FontColor 255 255 255
+    }
+    Title {
+      Position 8 256 398 32
+      Font "Nokia Sans S60 SemiBold" 24 0
+      FontColor 255 255 255
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    Volume {
+      Position 328 239 78 16
+      Style 0
+      KnobIcon 22 23
+    }
+    Position {
+      Position 74 241 245 12
+      Style 0
+      KnobIcon 47 48
+    }
+    ScrollBar {
+      Position 407 4 9 224
+      KnobIcon 41 42
+      Style 1
+      ScrollerSize 0
+      Step 1
+    }
+    ListBox {
+      Position 0 4 407 224
+      Font "Nokia Sans S60 Regular" 21 0
+      FontColor 117 193 226
+      FontColorSelected 255 255 255
+      BarColorSelected 18 130 181
+    }
+  }
 }
