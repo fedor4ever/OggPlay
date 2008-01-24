@@ -1,11 +1,7 @@
 %{"OggPlay"}
 :"OggPlay"
-#{"mcNuOggPlayQVGA skin"},(0xF000A661),1,0,0,TYPE=SP
+#{"mcNuOggPlayQVGA skin"},(0xF000A661),1,71,2,TYPE=PU
 [0x101F7961],0,0,0,{"Series60ProductID"}
-
-; Requires OggPlay
-(0xF000A661),1,0,0,{"OggPlay"}
-
 
 "mcNuOggPlayQVGA.skn"-"!:\private\F000A661\import\mcNuOggPlayQVGA.skn"
 "mcNuOggPlayQVGA.mbm"-"!:\private\F000A661\import\mcNuOggPlayQVGA.mbm"

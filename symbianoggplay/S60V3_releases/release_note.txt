@@ -1,10 +1,16 @@
 
-This is the Release Note for Release 1.71a of Oggplay for S60V3
+This is the Release Note for Release 1.71b of Oggplay for S60V3
 
 *******************************************************************
 If you experience problems please report them to our public forums
 and remember to include the version number and the model of your phone.
 *******************************************************************
+
+What's new in Release 1.71b:
+----------------------------
+
+Fix for E61 skin layout problems
+
 
 What's new in Release 1.71a:
 ----------------------------

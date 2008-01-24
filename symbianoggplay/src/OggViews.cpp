@@ -212,8 +212,8 @@ void COggFCView::ViewActivatedL(const TVwsViewId& aPrevViewId, TUid aCustomMessa
 	{
 	COggViewBase::ViewActivatedL(aPrevViewId, aCustomMessageId, aCustomMessage);
 
-#if defined(SERIES60)
-	COggS60Utility::RemoveStatusPane(); 
+#if defined(SERIES60SUI)
+	COggS60Utility::RestoreTitle();
 #elif defined(UIQ)
 	CEikonEnv::Static()->AppUiFactory()->MenuBar()->MakeVisible(EFalse);
 #endif
@@ -243,16 +243,21 @@ void COggS60Utility::DisplayStatusPane(TInt aTitleID)
 		}
 	}
 
-_LIT(KOggPlayTitle, "OggPlay");
 void COggS60Utility::RemoveStatusPane()
 	{
 	CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
 	statusPane->SwitchLayoutL(R_AVKON_STATUS_PANE_LAYOUT_EMPTY);
+	}
 
-	// Restore title
+#if defined(SERIES60SUI)
+_LIT(KOggPlayTitle, "OggPlay");
+void COggS60Utility::RestoreTitle()
+	{
+	CEikStatusPane* statusPane = CEikonEnv::Static()->AppUiFactory()->StatusPane();
 	CAknTitlePane* titlePane = (CAknTitlePane *) statusPane->ControlL(TUid::Uid(EEikStatusPaneUidTitle));
 	titlePane->SetTextL(KOggPlayTitle);
 	}
+#endif
 
 
 COggSettingsView::COggSettingsView(COggPlayAppView& aOggViewCtl)

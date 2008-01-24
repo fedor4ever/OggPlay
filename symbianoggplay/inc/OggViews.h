@@ -105,6 +105,10 @@ class COggS60Utility
 public:
 	static void DisplayStatusPane(TInt aTitleID);
 	static void RemoveStatusPane();
+
+#if defined(SERIES60SUI)
+	static void RestoreTitle();
+#endif
 	};
 
 class COggSettingItemList;

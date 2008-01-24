@@ -831,25 +831,25 @@ void COggPlayAppView::ChangeLayout(TInt aMode)
 			iCanvas[1]->MakeVisible(EFalse);
 		}
 
-	// Is there a way on UIQ to tell it we don't want the title bar in FC mode?
-	// On an E61 (and E61i, E62) is there a way to tell it we don't always want the title bar?
-	// In these cases we just hard code the size instead of calling ClientRect()
-
 #if defined(UIQ)
+	// Is there a way on UIQ to tell it we don't want the title bar in FC mode?
+	// As it is we just hard code a full screen client rect.
 	TRect clientRect(iMode ? iCoeEnv->ScreenDevice()->SizeInPixels() : iApp->ClientRect());
 #else
-	TRect clientRect(iApp->ClientRect());
-
 #if defined(SERIES60V3)
-	// The E61, E61i and E62 can support two canvas sizes:
-	// Standard QVGA as used on other S60 V3 phones and a slightly larger version that covers the title bar.
+	// Support for E61, E61i and E62 (we remove the status pane if the skin is big enough)
 	if ((iApp->iMachineUid == EMachineUid_E61) || (iApp->iMachineUid == EMachineUid_E61i) || (iApp->iMachineUid == EMachineUid_E62))
 		{
 		// If the skin is 220 pixels high we need to use the extra 20 pixels of the title bar
+		// If it's not we assume it's a standard QVGA skin (i.e. iCanvas[0] height is 293, iCanvas[1] height is 200)
 		if (iCanvas[0]->Size().iHeight == 220)
-			clientRect.iTl = TPoint(0, 0);
+			COggS60Utility::RemoveStatusPane();
+		else
+			COggS60Utility::DisplayStatusPane(R_OGG_PLAY);
 		}
 #endif
+
+	TRect clientRect(iApp->ClientRect());
 #endif
 
 	SetRect(clientRect);

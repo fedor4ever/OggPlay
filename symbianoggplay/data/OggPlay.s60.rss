@@ -85,7 +85,7 @@ RESOURCE MENU_BAR r_oggplay_menubar
 // Dialogs
 RESOURCE ABOUTTEXT r_dialog_about
 	{
-	version = "OggPlay 1.71a";
+	version = "OggPlay 1.71b";
 	copyright = ogg_about_cpr;
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;
@@ -961,6 +961,7 @@ RESOURCE TBUF r_ogg_string_13 { buf=ogg_text_string_13; }
 RESOURCE TBUF r_ogg_string_14 { buf=ogg_text_string_14; }
 
 
+RESOURCE TBUF r_ogg_play           { buf="OggPlay"; }               // Main view title (E61 only) 
 RESOURCE TBUF r_ogg_user_hotkeys   { buf=ogg_user_hotkey; }			// Hotkey view title
 RESOURCE TBUF r_ogg_settings       { buf=ogg_settings; }			// Settings view title
 RESOURCE TBUF32 r_ogg_repeat_on    { buf=ogg_repeat_on; }			// New

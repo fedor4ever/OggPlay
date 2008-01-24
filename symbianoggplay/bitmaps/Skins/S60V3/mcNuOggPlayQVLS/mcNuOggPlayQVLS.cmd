@@ -41,5 +41,9 @@ mcNuOggPlayQVLS.mbm /c12bitmaps/file.bmp
 /c12..\..\..\pausefocus.bmp
 /c12bitmaps/scrollbar.bmp
 /1bitmaps/scrollbar.mask.bmp
-/c12bitmaps/AlarmS.bmp
-/1bitmaps/AlarmSm.bmp
+/c12bitmaps/alarm.bmp
+/1bitmaps/alarmm.bmp
+/c12bitmaps/volboost.bmp
+/1bitmaps/volboost.mask.bmp
+/c12bitmaps/trackerslider2.bmp
+/1bitmaps/trackerslider2.mask.bmp

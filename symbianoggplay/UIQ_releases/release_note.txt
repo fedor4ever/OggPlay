@@ -1,0 +1,34 @@
+
+This is the Release Note for Release 1.71a of Oggplay for UIQ (P800/P900).
+
+*******************************************************************
+ This release is only experimental and hasn't been thoroughly tested.
+ 
+ If you experience problems please report them to our public forums
+ and remember to include the version number and your phone model.
+*******************************************************************
+
+
+What's new in Release 1.71a:
+----------------------------
+
+The UIQ version now uses the multi-thread playback engine
+This should improve the quality of playback when multi-tasking.
+
+Added support for FLAC encoded audio
+Added the track duration to the file info dialog
+The scroll bar is now smoother (it's no longer jerky in views with a small number of tracks)
+Added the recogniser.sis (This can be used to launch ogg play from other applications, such as file browsers)
+One or two bug fixes
+
+
+Links:
+------
+For more information about Oggplay, please see the webpage at
+http://symbianoggplay.sourceforge.net/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+
+-the Oggplay developers.
