@@ -1,0 +1,55 @@
+OggPlay 1 {
+  FlipOpen {
+    Played {
+      Position 4 175 40 20
+      Font "Bitstream Vera Sans" 14 0
+      FontColor 255 255 255
+    }
+    Title {
+      Position 7 193 304 24
+      Font "Bitstream Vera Sans" 21 0
+      FontColor 255 255 255
+      Style 3
+      ScrollDelay 10
+      ScrollStep 4
+    }
+    Volume {
+      Position 255 178 60 12
+      Style 0
+      KnobIcon 22 23
+    }
+    Position {
+      Position 52 180 196 9
+      Style 0
+      KnobIcon 47 48
+    }
+    ScrollBar {
+      Position 312 1 8 150
+      KnobIcon 41 42
+      Style 1
+      ScrollerSize 0
+      Step 1
+    }
+    ListBox {
+      Position 0 1 312 150
+      Font "Bitstream Vera Sans" 24 0
+      FontColor 117 193 226
+      FontColorSelected 255 255 255
+      BarColorSelected 18 130 181
+    }
+    Clock {
+      Position 4 155 70 14
+      Font "Bitstream Vera Sans" 12 0
+      FontColor 255 255 255
+    }
+    Alarm {
+      Position 254 155 70 14
+      Font "Bitstream Vera Sans" 12 0
+      FontColor 255 255 255
+    }
+    AlarmIcon {
+      Position 235 154 18 22
+      Icon 43 44
+    }
+  }
+}
