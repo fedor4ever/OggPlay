@@ -240,9 +240,12 @@ public:
 	~COggIcon();
 
 	void SetIcon(CGulIcon* anIcon);
+	void SetBlinkIcon(CGulIcon* anIcon);
+
 	void Blink();
 	void Show();
 	void Hide();
+
 	void SetBlinkFrequency(TInt aFrequency);
 
 protected:
@@ -252,6 +255,9 @@ protected:
 	virtual void Draw(CBitmapContext& aBitmapContext);
 
 	CGulIcon* iIcon;
+	CGulIcon* iBlinkIcon;
+	CGulIcon* iCurrentIcon;
+
 	TBool iBlinkFrequency;
 	TBool iBlinking;
 	};

@@ -4,7 +4,7 @@
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
 ;Version string to be changed
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,2
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,72,1
 ;
 ;Supports Series 80 v2.0
 (0x101F8ED2), 0, 0, 0, {"Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID",

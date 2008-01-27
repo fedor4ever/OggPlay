@@ -55,7 +55,9 @@ void CSplashContainer::ConstructL()
 		{
 		// Something went wrong loading it
 		TRACEF(COggLog::VA(_L("Error loading custom splash: %d"), err ));
-		User::Leave(err);
+
+		// If the custom splash is bad, just continue and load the default
+		// User::Leave(err);
 		}
 
 	// There's no custom splash, so load the default

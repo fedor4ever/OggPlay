@@ -1360,6 +1360,8 @@ void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::
 		else
 			SelectItem(1);
 		}
+		
+	UpdateControls();
 	}
 
 void COggPlayAppView::Update()

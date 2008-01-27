@@ -759,19 +759,29 @@ TBool COggText::ReadArguments(TOggParser& p)
 
 
 COggIcon::COggIcon()
-: iIcon(0), iBlinkFrequency(5), iBlinking(EFalse)
+: iBlinkFrequency(5), iBlinking(EFalse)
 	{
 	}
 
 COggIcon::~COggIcon()
 	{
 	delete iIcon;
+	delete iBlinkIcon;
 	}
 
 void COggIcon::SetIcon(CGulIcon* anIcon)
 	{
 	delete iIcon;
 	iIcon = anIcon;
+	iCurrentIcon = iIcon;
+
+	iRedraw = ETrue;
+	}
+
+void COggIcon::SetBlinkIcon(CGulIcon* anIcon)
+	{
+	delete iBlinkIcon;
+	iBlinkIcon = anIcon;
 
 	iRedraw = ETrue;
 	}
@@ -819,17 +829,21 @@ void COggIcon::Cycle()
 		return;
 
 	iRedraw = ETrue;
-	iVisible = !iVisible;
+	if (iBlinkIcon)
+		iCurrentIcon = (iCurrentIcon == iIcon) ? iBlinkIcon : iIcon;
+	else
+		iVisible = !iVisible;
+
 	iCycle = 0;
 	}
 
 void COggIcon::Draw(CBitmapContext& aBitmapContext)
 	{
-	if (!iIcon)
+	if (!iCurrentIcon)
 		return;
 
-	aBitmapContext.BitBltMasked(TPoint(ix,iy), iIcon->Bitmap(),
-	TRect(TPoint(0,0),iIcon->Bitmap()->SizeInPixels()), iIcon->Mask(), ETrue);
+	aBitmapContext.BitBltMasked(TPoint(ix,iy), iCurrentIcon->Bitmap(),
+	TRect(TPoint(0, 0), iCurrentIcon->Bitmap()->SizeInPixels()), iCurrentIcon->Mask(), ETrue);
 	}
 
 TBool COggIcon::ReadArguments(TOggParser& p)
@@ -846,6 +860,13 @@ TBool COggIcon::ReadArguments(TOggParser& p)
 		p.Debug(_L("Setting icon."));
 		SetIcon(p.ReadIcon(iBitmapFile));
 		success = (iIcon != NULL);
+		}
+
+	if (success && p.iToken==_L("BlinkIcon"))
+		{
+		p.Debug(_L("Setting blink icon."));
+		SetBlinkIcon(p.ReadIcon(iBitmapFile));
+		success = (iBlinkIcon != NULL);
 		}
 
 	return success;

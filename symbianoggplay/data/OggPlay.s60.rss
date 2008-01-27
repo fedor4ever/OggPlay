@@ -85,7 +85,7 @@ RESOURCE MENU_BAR r_oggplay_menubar
 // Dialogs
 RESOURCE ABOUTTEXT r_dialog_about
 	{
-	version = "OggPlay 1.71b";
+	version = "OggPlay 1.72";
 	copyright = ogg_about_cpr;
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;

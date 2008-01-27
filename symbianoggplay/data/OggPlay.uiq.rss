@@ -106,7 +106,7 @@ RESOURCE DIALOG r_dialog_about_uiq {
 	type = EEikCtLabel;
 	control = LABEL 
 	{
-		txt="OggPlay 1.71a";
+		txt="OggPlay 1.72";
 		horiz_align=EEikLabelAlignHCenter;
 	};
     } ,
