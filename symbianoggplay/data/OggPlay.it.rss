@@ -8,7 +8,8 @@
 #define ogg_about_lnk "visita http://symbianoggplay.sourceforge.net per uteriori informazioni"
 #define ogg_about_cpr2 "© Ogg Vorbis codec Xiph.org"
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
-#define ogg_about_cpr4 "© Vera fonts Bitstream Inc."
+#define ogg_about_cpr4 "© MAD codec Robert Leslie"
+#define ogg_about_cpr5 "© Vera fonts Bitstream Inc."
 #define ogg_about_port "Port to S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
 #define ogg_about_port_S80 "Port to S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
 #define ogg_about_translation "Translation by Enrico Feltresi"
@@ -219,3 +220,5 @@
 #define ogg_alarm_title                  "OggPlay Alarm"
 #define ogg_alarm_message                "Ogg Alarm!"
 #define ogg_cba_snooze                   "Snooze"
+
+#define ogg_mp3_dithering                "MAD Dithering"

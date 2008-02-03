@@ -19,7 +19,6 @@
  * If you would like to negotiate alternate licensing terms, you may do
  * so by contacting: Underbit Technologies, Inc. <info@underbit.com>
  *
- * $Id$
  */
 
 # ifndef LIBID3TAG_ID3TAG_H
