@@ -1,15 +1,34 @@
 Installation instructions
 -------------------------
 
-1. First uninstall any version of OggPlay currently installed on your phone.
+Users that have OggPlay 1.70 or 1.71 installed on their phone
+-------------------------------------------------------------
+
+1. First uninstall the version of OggPlay installed on your phone.
 Important: Turn your phone off and on again before attempting to uninstall.
 Start the application manager, scroll through the list to OggPlay and then select Remove from the Options menu.
 
 2. Install OggPlayFonts.sis (please read the installation issues below before installing)
 Important: After OggPlayFonts.sis is installed turn your phone off and on again
 
-3. Install OggPlayS60V3_1_71aMMF.sis
+3. Install OggPlayS60V3_1_71bMMF.sis
+
+
+Users that have OggPlay 1.71a or later installed on their phone
+---------------------------------------------------------------
+
+Install OggPlayS60V3_1_71bMMF.sis
+
+
+New users
+---------
+
+1. Install OggPlayFonts.sis (please read the installation issues below before installing)
+Important: After OggPlayFonts.sis is installed turn your phone off and on again
+
+2. Install OggPlayS60V3_1_71bMMF.sis
 Once installed you can start OggPlay and search for audio files (Select "Find new files" from the Options menu)
+
 
 
 Installation issues
@@ -28,7 +47,7 @@ Package contents
 
 OggPlay installation files:
 OggPlayFonts.sis
-OggPlayS60V3_1_71aMMF.sis
+OggPlayS60V3_1_71bMMF.sis
 
 Release notes:
 release_note.txt (Please read this!)
@@ -43,6 +62,10 @@ you can have the phone automatically choose a random .ogg file to play for the r
 Note that .ogg ringtones will probably not work on most (if not all) S60V3 phones...
 
 Copyright:
+GPL
+LICENSE
+GPL copyright details
+
 COPYRIGHT.TXT
 The OggPlay distribution now contains one of the Bitstream Vera fonts (Bitstream Vera Sans). 
 This is a free font provided by Bitstream Inc. and the Gnome project (see the Copyright.txt for more details)
