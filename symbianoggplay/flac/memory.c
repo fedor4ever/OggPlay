@@ -29,6 +29,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <OggShared.h>
+
 #if HAVE_CONFIG_H
 #  include <config.h>
 #endif
@@ -36,9 +38,6 @@
 #include "private/memory.h"
 #include "FLAC/assert.h"
 #include "share/alloc.h"
-
-/* OggPlay */
-void _ogg_free(void* aPtr);
 
 #if defined(__VC32__)
 #pragma warning( disable : 4505 ) // unreferenced local function has been removed
@@ -101,7 +100,7 @@ FLAC__bool FLAC__memory_alloc_aligned_int32_array(unsigned elements, FLAC__int32
 	}
 	else {
 		if(*unaligned_pointer != 0)
-			_ogg_free(*unaligned_pointer);
+			free(*unaligned_pointer);
 		*unaligned_pointer = pu;
 		*aligned_pointer = u.pa;
 		return true;
@@ -130,7 +129,7 @@ FLAC__bool FLAC__memory_alloc_aligned_uint32_array(unsigned elements, FLAC__uint
 	}
 	else {
 		if(*unaligned_pointer != 0)
-			_ogg_free(*unaligned_pointer);
+			free(*unaligned_pointer);
 		*unaligned_pointer = pu;
 		*aligned_pointer = u.pa;
 		return true;
@@ -159,7 +158,7 @@ FLAC__bool FLAC__memory_alloc_aligned_uint64_array(unsigned elements, FLAC__uint
 	}
 	else {
 		if(*unaligned_pointer != 0)
-			_ogg_free(*unaligned_pointer);
+			free(*unaligned_pointer);
 		*unaligned_pointer = pu;
 		*aligned_pointer = u.pa;
 		return true;
@@ -188,7 +187,7 @@ FLAC__bool FLAC__memory_alloc_aligned_unsigned_array(unsigned elements, unsigned
 	}
 	else {
 		if(*unaligned_pointer != 0)
-			_ogg_free(*unaligned_pointer);
+			free(*unaligned_pointer);
 		*unaligned_pointer = pu;
 		*aligned_pointer = u.pa;
 		return true;
@@ -219,7 +218,7 @@ FLAC__bool FLAC__memory_alloc_aligned_real_array(unsigned elements, FLAC__real *
 	}
 	else {
 		if(*unaligned_pointer != 0)
-			_ogg_free(*unaligned_pointer);
+			free(*unaligned_pointer);
 		*unaligned_pointer = pu;
 		*aligned_pointer = u.pa;
 		return true;

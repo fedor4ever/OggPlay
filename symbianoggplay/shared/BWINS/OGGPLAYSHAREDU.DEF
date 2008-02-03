@@ -30,4 +30,5 @@ EXPORTS
 	_ogg_tell @ 29 NONAME
 	_ogg_toupper @ 30 NONAME
 	jcode @ 31 NONAME
+	_ogg_strcmp @ 32 NONAME
 

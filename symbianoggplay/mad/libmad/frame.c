@@ -18,8 +18,6 @@
  *
  */
 
-#include <OggShared.h>
-
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
@@ -64,7 +62,7 @@ int (*const decoder_table[3])(struct mad_stream *, struct mad_frame *) = {
  * NAME:	header->init()
  * DESCRIPTION:	initialize header struct
  */
-void mad_header_init(struct mad_header *header)
+EXPORT_C void mad_header_init(struct mad_header *header)
 {
   header->layer          = 0;
   header->mode           = 0;
@@ -106,7 +104,7 @@ EXPORT_C void mad_frame_finish(struct mad_frame *frame)
   mad_header_finish(&frame->header);
 
   if (frame->overlap) {
-    _ogg_free(frame->overlap);
+    free(frame->overlap);
     frame->overlap = 0;
   }
 }
@@ -296,7 +294,7 @@ int free_bitrate(struct mad_stream *stream, struct mad_header const *header)
  * NAME:	header->decode()
  * DESCRIPTION:	read the next frame header from the stream
  */
-int mad_header_decode(struct mad_header *header, struct mad_stream *stream)
+EXPORT_C int mad_header_decode(struct mad_header *header, struct mad_stream *stream)
 {
   register unsigned char const *ptr, *end;
   unsigned int pad_slot, N;

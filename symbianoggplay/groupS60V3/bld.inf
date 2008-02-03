@@ -24,5 +24,6 @@ PRJ_MMPFILES
 ..\shared\groupS60V3\oggsharedS60V3.mmp
 ..\vorbis\groupS60V3\oggvorbisS60V3.mmp
 ..\flac\groupS60V3\oggflacS60V3.mmp
+..\mad\groupS60V3\oggmadS60V3.mmp
 OggPlayS60V3.mmp
 

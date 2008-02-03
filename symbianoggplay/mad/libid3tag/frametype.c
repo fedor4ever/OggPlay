@@ -61,7 +61,7 @@ error "gperf generated tables don't work with this execution character set. Plea
 
 # include "global.h"
 
-# include <string.h>
+// # include <string.h>
 
 # include "id3tag.h"
 # include "frametype.h"

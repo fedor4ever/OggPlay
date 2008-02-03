@@ -31,7 +31,6 @@
 
  ********************************************************************/
 
-#include <e32def.h>
 #include "ivorbiscodec.h"
 #include "os.h"
 #include "codebook.h"
@@ -348,7 +347,7 @@ void mdct_backward(int n, DATA_TYPE *in, DATA_TYPE *out){
   int shift;
   int step;
 
-  for (shift=6;!(n&(1<<shift));shift++);
+  for (shift=6;!(n&(1<<shift));shift++) { }
   shift=13-shift;
   step=2<<shift;
    

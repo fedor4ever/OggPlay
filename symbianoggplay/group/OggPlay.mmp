@@ -9,6 +9,7 @@ EPOCSTACKSIZE 0x8000
 USERINCLUDE ..\inc
 USERINCLUDE ..\vorbis
 USERINCLUDE ..\flac
+USERINCLUDE ..\mad
 USERINCLUDE ..\data
 SYSTEMINCLUDE \Epoc32\Include 
 
@@ -37,6 +38,9 @@ SOURCE TremorDecoder.cpp
 
 SOURCEPATH ..\flac
 SOURCE FlacDecoder.cpp
+
+SOURCEPATH ..\mad
+SOURCE MadDecoder.cpp 
 
 //  Resource Files
 RESOURCE ..\data\OggPlay.rss
@@ -74,6 +78,7 @@ LIBRARY mediaclientaudiostream.lib
 LIBRARY OggPlayShared.lib
 LIBRARY OggPlayVorbisi.lib
 LIBRARY OggPlayFlaci.lib
+LIBRARY OggPlayMadi.lib 
 
 //  Build the AIF & MBM files
 START BITMAP OggSplash.mbm

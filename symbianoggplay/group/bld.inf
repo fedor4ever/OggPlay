@@ -24,5 +24,6 @@ PRJ_MMPFILES
 ..\shared\group\oggshared.mmp
 ..\vorbis\group\oggvorbis.mmp
 ..\flac\group\oggflac.mmp
+..\mad\group\oggmad.mmp
 OggPlay.mmp
 

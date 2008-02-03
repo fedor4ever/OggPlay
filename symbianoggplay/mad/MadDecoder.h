@@ -20,93 +20,99 @@
 #define MADDECODER_H
 
 #include <e32base.h>
+#include <f32file.h>
+
 #include "libmad\mad.h"
 #include "libid3tag\id3tag.h"
-/* #include "libid3tag\tag.h" */
-/* #include "bstdfile.h" */
+#include "madplay\xltagx.h"
 #include "OggPlayDecoder.h"
 
-#define INPUT_BUFFER_SIZE	(5*8192)
+const TInt KInputBufferSize = 8192;
+const TInt KInputBufferMaxSize = 8192+MAD_BUFFER_GUARD;
 
+// Seek table entry
+class TMadFrameTimer
+	{
+public:
+	mad_timer_t iFrameTimer; // frame time
+	TInt iFramePos; // frame file position
+	};
 
 class CMadDecoder : public CBase, public MDecoder
 {
 public:
-  TInt Clear();
-  TInt Open(RFile* f, const TDesC& aFilename);
-  TInt OpenInfo(RFile* f, const TDesC& aFilename);
-  TInt Read(TDes8& aBuffer, TInt Pos);
-  void Close();
+	CMadDecoder(RFs& aFs, const TBool& aDitherAudio, TAudioDither& aLeftDither, TAudioDither& aRightDither);
+	~CMadDecoder();
 
-  TInt Channels();
-  TInt Rate();
-  TInt Bitrate();
-  TInt64 Position();
-  void Setposition(TInt64 aPosition);
-  TInt64 TimeTotal();
-  TInt FileSize();
+	TInt Clear();
+	TInt Open(const TDesC& aFilename);
+	TInt OpenInfo(const TDesC& aFilename);
+	TInt OpenComplete();
 
-  void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
+	TInt Read(TDes8& aBuffer, TInt Pos);
+	void Close();
 
-  void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
-  TBool RequestingFrequencyBins();
+	TInt Channels();
+	TInt Rate();
+	TInt Bitrate();
+	void Setposition(TInt64 aPosition);
+	TInt64 TimeTotal();
+	TInt FileSize();
+
+	void ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber);
+
+	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
+	TBool RequestingFrequencyBins();
 
 private:
-  // Helper functions. Pardon the naming mess.
+	// Helper functions
+	static TInt16 MadFixedToTInt16Fast(mad_fixed_t aSample);
+	static TInt16 MadFixedToTInt16Dithered(mad_fixed_t aSample, TAudioDither* aDither, mad_fixed_t aRandom);
 
-  signed short MadFixedToSshort(mad_fixed_t Fixed);
-  int mad_outputpacket(unsigned char* ptr, const unsigned char* endptr);
-  int mad_read(unsigned char* outputbuffer,int length);
-  void getframeinfo(void);
-  void gettaginfo(void);
-  void jumpseek(void);
-  void MadHandleError();
+	TInt MadOutputPacket(TInt16* aPtr, const TInt16* aEndptr);
+	TInt MadRead(TInt16* aOutputBuffer, TInt aLength);
 
-  // from madplay:
-  struct id3_tag* get_id3(struct mad_stream *stream, id3_length_t tagsize);
-  void process_id3(struct id3_tag const *tag);
-  void Id3GetString(TDes& aString,char const *id);
+	TInt MadHandleError(mad_stream& aStream, TInt &aFilePos, RFile* aFile = NULL);
+	void MadSeek(const mad_timer_t& aNewTimer);
 
-  // private datastructures
+	void MadTimeTotal();
+	TInt MadReadData(mad_stream& aStream, RFile& aFile, TInt& aFilePos, TInt& aBufFilePos, TUint8* aBuf);
+
+	id3_tag* GetId3(id3_length_t tagsize);
+	void ProcessId3();
+	void Id3GetString(TDes& aString, char const *aId);
+
 private: 
-  struct mad_stream	iStream;
-  struct mad_frame	iFrame;
-  struct mad_synth	iSynth;
-  struct id3_tag *id3tag;
-  struct id3_file *filetag;
-  // struct tag xltag; // that's for Xing and Lame tags.
+	mad_stream iStream;
+	mad_frame iFrame;
+	mad_synth iSynth;
 
-  int vbr;
-  unsigned int bitrate;
-  unsigned long vbr_frames;
-  unsigned long vbr_rate;
+	id3_tag *iId3tag;
+	id3_file *iFiletag;
+	tag iXLtag; // Xing and Lame tags.
 
-  mad_timer_t	  iTimer; // current time
-  mad_timer_t     iGlobalTimer; // time where we would like to jump to
-  mad_timer_t     iTotalTime;
-  mad_timer_t     iEstTotalTime;
+	mad_timer_t	iTimer; // current time
+	mad_timer_t iTotalTime; // total time
 
-  unsigned long		iFrameCount;
-  int iPlaystate;
-  enum playstates{
-      EPLAY,
-      EFASTFORWARD,
-      EREVERSE
-  };
+	TUint8 iInputBuffer[KInputBufferMaxSize];
+	const TUint8* iOutputBufferEnd;
 
-  // file structures and misc. internal stuff
-private:
-  unsigned char InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
-  unsigned char* iGuardPtr;
-  const unsigned char	*iOutputBufferEnd;
-  RFile* iInputFp;
+	TInt iFrameCount;
+	TInt iRememberPcmSamples;
 
-  int	iStatus;
-  int iFilesize;
-  int	i;
-  // bstdfile_t* iBstdFile;
+	TFileName iFileName;
+	TInt iFileSize;
+	TInt iFilePos;
+	TInt iBufFilePos;
+	RFile iFile;
+	RFs& iFs;
 
-  int iRememberPcmSamples; //mad_read
-};
+	RArray<TMadFrameTimer> iTimerArray;
+	TInt iTimerIdx;
+
+	const TBool &iDitherAudio;
+	TAudioDither &iLeftDither;
+	TAudioDither &iRightDither;
+	};
 
 #endif

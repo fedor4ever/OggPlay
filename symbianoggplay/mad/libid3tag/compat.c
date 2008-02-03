@@ -63,8 +63,8 @@ error "gperf generated tables don't work with this execution character set. Plea
 
 # include "global.h"
 
-# include <stdlib.h>
-# include <string.h>
+// # include <stdlib.h>
+// # include <string.h>
 
 # ifdef HAVE_ASSERT_H
 #  include <assert.h>

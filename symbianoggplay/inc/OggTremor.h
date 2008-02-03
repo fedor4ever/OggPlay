@@ -21,13 +21,15 @@
 
 #include <e32des8.h>
 #include <eikenv.h>
+
+#include "libmad\mad.h"
+
 #include "OggMsgEnv.h"
 #include "OggHelperFcts.h"
 #include "OggRateConvert.h"
 #include "TremorDecoder.h"
 #include "OggAbsPlayback.h"
 #include "OggMultiThread.h"
-
 
 // Total number of buffers
 const TInt KNoBuffers = 1;
@@ -128,7 +130,6 @@ public:
 
 	void SetVolume(TInt aVol);
 	void SetPosition(TInt64 aPos);
-	void SetVolumeGain(TGainType aGain);
 
 	TInt64 Position();
 	TInt Volume();
@@ -143,6 +144,8 @@ public:
 
 	TInt SetBufferingMode(TBufferingMode aNewBufferingMode);
 	void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
+	void SetVolumeGain(TGainType aGain);
+	void SetMp3Dithering(TBool aDithering);
 
 	TBool FlushBuffers(TFlushBufferEvent aFlushBufferEvent);
 	TBool FlushBuffers(TInt64 aNewPosition);
@@ -214,7 +217,7 @@ private:
 
 	// Communication with the decoder
 	MDecoder* iDecoder;
-	TBool iEof; // true after ov_read has encounted the eof
+	TBool iEof;
 	RFs iFs;
 
 	TBool iStreamingErrorDetected;
@@ -232,10 +235,15 @@ private:
 	TBool iStreamingThreadRunning;
 	TStreamingThreadData iSharedData;
 
-	TOggFileInfo iFFileInfo;
+	TOggFileInfo iInfoFileInfo;
 
 	// Machine uid (for identifying the phone model)
 	TInt iMachineUid;
+
+	TBool iMp3Dithering;
+	TAudioDither iMp3LeftDither;
+	TAudioDither iMp3RightDither;
+	mad_fixed_t iMp3Random;
 	};
     
 #endif // _OggTremor_h

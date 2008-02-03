@@ -40,8 +40,10 @@
 #include "OggPlay.hrh"
 #include <OggPlay.rsg>
 
-_LIT(KMMFTxt, " MMF");
-_LIT(KMP3Txt, " MP3");
+#define BETA_VERSION
+#if defined(BETA_VERSION)
+_LIT(KBetaTxt, " beta1");
+#endif
 
 #if defined(SERIES60)
 #if !defined(SERIES60V3)
@@ -70,10 +72,8 @@ void COggAboutDialog::ExecuteLD(TInt aResourceId)
 	TPtrC resTxt = resReader.ReadTPtrC();
 	bodyTxt.Append(resTxt);
 
-#if defined(PLUGIN_SYSTEM)
-	bodyTxt.Append(KMMFTxt);
-#elif defined(MP3_SUPPORT)
-	bodyTxt.Append(KMP3Txt);
+#if defined(BETA_VERSION)
+	bodyTxt.Append(KBetaTxt);
 #endif
 
 	bodyTxt.Append(KSingleLF);
@@ -85,6 +85,10 @@ void COggAboutDialog::ExecuteLD(TInt aResourceId)
 	resTxt.Set(resReader.ReadTPtrC());
 	bodyTxt.Append(resTxt);
 	bodyTxt.Append(KDoubleLF);
+
+	resTxt.Set(resReader.ReadTPtrC());
+	bodyTxt.Append(resTxt);
+	bodyTxt.Append(KSingleLF);
 
 	resTxt.Set(resReader.ReadTPtrC());
 	bodyTxt.Append(resTxt);

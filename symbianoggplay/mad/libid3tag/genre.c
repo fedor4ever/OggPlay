@@ -46,7 +46,7 @@ id3_ucs4_t const *id3_genre_index(unsigned int index)
  * NAME:	genre->name()
  * DESCRIPTION:	translate an ID3v2 genre number/keyword to its full name
  */
-id3_ucs4_t const *id3_genre_name(id3_ucs4_t const *string)
+EXPORT_C id3_ucs4_t const *id3_genre_name(id3_ucs4_t const *string)
 {
   id3_ucs4_t const *ptr;
   static id3_ucs4_t const genre_remix[] = { 'R', 'e', 'm', 'i', 'x', 0 };

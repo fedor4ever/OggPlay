@@ -21,7 +21,6 @@
 
 #include <OggOs.h>
 #include <OggPlayUid.h>
-#include <e32math.h> // For Random
 
 #if defined(SERIES60)
 #include <aknappui.h>
@@ -129,7 +128,6 @@ public:
    
 	TInt iSoftKeysPlay[KNofSoftkeys];
 	TInt iSoftKeysIdle[KNofSoftkeys];
-	TInt iGainType;
   
 	enum THotkeys
 		{  
@@ -169,6 +167,10 @@ public:
 	// Multi thread playback settings
 	TInt iBufferingMode;
 	TInt iThreadPriority;
+	TInt iGainType;
+
+	// Mp3 settings
+	TBool iMp3Dithering;
 
 	// Alarm clock settings
 	TBool iAlarmActive;
@@ -396,10 +398,10 @@ public:
 	{ return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 
 #endif
 
-	void SetVolumeGainL(TGainType aNewGain);
-
 	void SetBufferingModeL(TBufferingMode aNewBufferingMode);
 	void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
+	void SetVolumeGainL(TGainType aNewGain);
+	void SetMp3Dithering(TBool aDithering);
 
 	void SetAlarm(TBool aAlarmActive);
 	void SetAlarmTime();

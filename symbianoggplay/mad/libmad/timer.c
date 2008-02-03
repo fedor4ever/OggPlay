@@ -18,8 +18,6 @@
  *
  */
 
-#include <OggShared.h>
-
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
@@ -239,7 +237,7 @@ EXPORT_C void mad_timer_add(mad_timer_t *timer, mad_timer_t incr)
  * NAME:	timer->multiply()
  * DESCRIPTION:	multiply a timer by a scalar value
  */
-void mad_timer_multiply(mad_timer_t *timer, signed long scalar)
+EXPORT_C void mad_timer_multiply(mad_timer_t *timer, signed long scalar)
 {
   mad_timer_t addend;
   unsigned long factor;

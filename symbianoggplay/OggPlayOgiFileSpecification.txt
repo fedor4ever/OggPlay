@@ -2,6 +2,13 @@ OggPlay ini file (OggPlay.ogi) specification
 --------------------------------------------
 
 
+.ogi version 2 specification
+----------------------------
+
+Added iMp3Dithering setting
+
+
+
 .ogi version 1 specification
 ----------------------------
 

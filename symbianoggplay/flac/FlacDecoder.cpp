@@ -184,11 +184,20 @@ TInt CFlacDecoder::OpenInfo(const TDesC& aFileName)
 	if (err != KErrNone)
 		return err;
 
+	err = iFile.Size(iFileSize);
+	if (err != KErrNone)
+		{
+		iFile.Close();
+		return err;
+		}
+
 	iDecoder = FLAC__stream_decoder_new();
 	if (!iDecoder)
+		{
+		iFile.Close();
 		return KErrNoMemory;
+		}
 
-	iFile.Size(iFileSize);
 	FLAC__stream_decoder_set_metadata_respond(iDecoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
 	FLAC__StreamDecoderInitStatus status = FLACInitStream(&iFile);
 
@@ -208,12 +217,15 @@ TInt CFlacDecoder::OpenInfo(const TDesC& aFileName)
 			break;
 		}
 
+	if (err != KErrNone)
+		iFile.Close();
+
 	return err;
 	}
 
 TInt CFlacDecoder::OpenComplete()
 	{
-	return 0;
+	return KErrNone;
 	}
 
 void CFlacDecoder::Close()

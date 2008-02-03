@@ -19,7 +19,29 @@ SOURCE timer.c
 SOURCE version.c
 
 
-USERINCLUDE   .
+SOURCEPATH ..\libid3tag
+SOURCE compat.c     
+SOURCE crc.c        
+SOURCE field.c      
+SOURCE file.c       
+SOURCE id3frame.c      
+SOURCE frametype.c  
+SOURCE genre.c      
+SOURCE latin1.c     
+SOURCE parse.c      
+SOURCE render.c     
+SOURCE tag.c        
+SOURCE ucs4.c       
+SOURCE utf16.c      
+SOURCE utf8.c       
+SOURCE util.c       
+
+SOURCEPATH ..\madplay
+SOURCE xltag.c
+SOURCE mpcrc.c
+SOURCE rgain.c
+
+USERINCLUDE ..\libmad
 SYSTEMINCLUDE \Epoc32\include
 
 LIBRARY euser.lib

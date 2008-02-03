@@ -201,11 +201,11 @@ static void FLAC__MD5Update(FLAC__MD5Context *ctx, FLAC__byte const *buf, unsign
 
 	t = 64 - (t & 0x3f);	/* Space available in ctx->in (at least 1) */
 	if (t > len) {
-		_ogg_memcpy((FLAC__byte *)ctx->in + 64 - t, buf, len);
+		memcpy((FLAC__byte *)ctx->in + 64 - t, buf, len);
 		return;
 	}
 	/* First chunk is an odd size */
-	_ogg_memcpy((FLAC__byte *)ctx->in + 64 - t, buf, t);
+	memcpy((FLAC__byte *)ctx->in + 64 - t, buf, t);
 	byteSwapX16(ctx->in);
 	FLAC__MD5Transform(ctx->buf, ctx->in);
 	buf += t;
@@ -213,7 +213,7 @@ static void FLAC__MD5Update(FLAC__MD5Context *ctx, FLAC__byte const *buf, unsign
 
 	/* Process data in 64-byte chunks */
 	while (len >= 64) {
-		_ogg_memcpy(ctx->in, buf, 64);
+		memcpy(ctx->in, buf, 64);
 		byteSwapX16(ctx->in);
 		FLAC__MD5Transform(ctx->buf, ctx->in);
 		buf += 64;
@@ -221,7 +221,7 @@ static void FLAC__MD5Update(FLAC__MD5Context *ctx, FLAC__byte const *buf, unsign
 	}
 
 	/* Handle any remaining bytes of data. */
-	_ogg_memcpy(ctx->in, buf, len);
+	memcpy(ctx->in, buf, len);
 }
 
 /*
@@ -258,13 +258,13 @@ void FLAC__MD5Final(FLAC__byte digest[16], FLAC__MD5Context *ctx)
 	count = 56 - 1 - count;
 
 	if (count < 0) {	/* Padding forces an extra block */
-		_ogg_memset(p, 0, count + 8);
+		memset(p, 0, count + 8);
 		byteSwapX16(ctx->in);
 		FLAC__MD5Transform(ctx->buf, ctx->in);
 		p = (FLAC__byte *)ctx->in;
 		count = 56;
 	}
-	_ogg_memset(p, 0, count);
+	memset(p, 0, count);
 	byteSwap(ctx->in, 14);
 
 	/* Append length in bits and transform */
@@ -273,10 +273,10 @@ void FLAC__MD5Final(FLAC__byte digest[16], FLAC__MD5Context *ctx)
 	FLAC__MD5Transform(ctx->buf, ctx->in);
 
 	byteSwap(ctx->buf, 4);
-	_ogg_memcpy(digest, ctx->buf, 16);
-	_ogg_memset(ctx, 0, sizeof(ctx));	/* In case it's sensitive */
+	memcpy(digest, ctx->buf, 16);
+	memset(ctx, 0, sizeof(ctx));	/* In case it's sensitive */
 	if(0 != ctx->internal_buf) {
-		_ogg_free(ctx->internal_buf);
+		free(ctx->internal_buf);
 		ctx->internal_buf = 0;
 		ctx->capacity = 0;
 	}
@@ -295,7 +295,7 @@ static void format_input_(FLAC__byte *buf, const FLAC__int32 * const signal[], u
 #else
 	if(channels == 2 && bytes_per_sample == 2) {
 		FLAC__int16 *buf1_ = ((FLAC__int16*)buf_) + 1;
-		_ogg_memcpy(buf_, signal[0], sizeof(FLAC__int32) * samples);
+		memcpy(buf_, signal[0], sizeof(FLAC__int32) * samples);
 		for(sample = 0; sample < samples; sample++, buf1_+=2)
 			*buf1_ = (FLAC__int16)signal[1][sample];
 	}
@@ -417,9 +417,9 @@ FLAC__bool FLAC__MD5Accumulate(FLAC__MD5Context *ctx, const FLAC__int32 * const 
 		return false;
 
 	if(ctx->capacity < bytes_needed) {
-		FLAC__byte *tmp = (FLAC__byte*)_ogg_realloc(ctx->internal_buf, bytes_needed);
+		FLAC__byte *tmp = (FLAC__byte*)realloc(ctx->internal_buf, bytes_needed);
 		if(0 == tmp) {
-			_ogg_free(ctx->internal_buf);
+			free(ctx->internal_buf);
 			if(0 == (ctx->internal_buf = (FLAC__byte*)safe_malloc_(bytes_needed)))
 				return false;
 		}

@@ -29,8 +29,8 @@
 #  include <assert.h>
 # endif
 
-# include <stdlib.h>
-# include <string.h>
+// # include <stdlib.h>
+// # include <string.h>
 
 # include "id3tag.h"
 # include "parse.h"

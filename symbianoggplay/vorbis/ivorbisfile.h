@@ -23,6 +23,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+// #include <stdio.h>
 #include "ivorbiscodec.h"
 
 #define CHUNKSIZE 1024
@@ -84,22 +85,12 @@ typedef struct OggVorbis_File {
 
 } OggVorbis_File;
 
-#ifndef SEEK_SET
-#define	SEEK_SET	0	/* set file offset to offset */
-#endif
-#ifndef SEEK_CUR
-#define	SEEK_CUR	1	/* set file offset to current plus offset */
-#endif
-#ifndef SEEK_END
-#define	SEEK_END	2	/* set file offset to EOF plus offset */
-#endif
-
 IMPORT_C int ov_clear(OggVorbis_File *vf);
-IMPORT_C int ov_open(void *f,OggVorbis_File *vf,char *initial,long ibytes);
+IMPORT_C int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 IMPORT_C int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
 
-IMPORT_C int ov_test(void *f,OggVorbis_File *vf,char *initial,long ibytes);
+IMPORT_C int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 IMPORT_C int ov_test_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
 IMPORT_C int ov_test_open(OggVorbis_File *vf);

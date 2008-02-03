@@ -101,11 +101,11 @@ enum {
   MAD_PRIVATE_III	= 0x001f	/* Layer III private bits (up to 5) */
 };
 
-void mad_header_init(struct mad_header *);
+IMPORT_C void mad_header_init(struct mad_header *);
 
 # define mad_header_finish(header)  /* nothing */
 
-int mad_header_decode(struct mad_header *, struct mad_stream *);
+IMPORT_C int mad_header_decode(struct mad_header *, struct mad_stream *);
 
 IMPORT_C void mad_frame_init(struct mad_frame *);
 IMPORT_C void mad_frame_finish(struct mad_frame *);

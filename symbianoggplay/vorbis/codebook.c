@@ -15,7 +15,9 @@
 
  ********************************************************************/
 
-#include <e32def.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <math.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codebook.h"
@@ -26,7 +28,7 @@
    readies the codebook auxiliary structures for decode *************/
 int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   long i,j;
-  _ogg_memset(s,0,sizeof(*s));
+  memset(s,0,sizeof(*s));
 
   /* make sure alignment is correct */
   if(oggpack_read(opb,24)!=0x564342)goto _eofout;

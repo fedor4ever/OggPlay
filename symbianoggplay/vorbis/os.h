@@ -17,6 +17,7 @@
 
  ********************************************************************/
 
+// #include <math.h>
 #include "os_types.h"
 
 #ifndef _V_IFDEFJAIL_H_

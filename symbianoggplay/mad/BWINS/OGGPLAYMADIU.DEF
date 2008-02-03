@@ -14,4 +14,22 @@ EXPORTS
 	mad_timer_compare @ 13 NONAME
 	mad_timer_count @ 14 NONAME
 	mad_timer_set @ 15 NONAME
+	id3_field_getnstrings @ 16 NONAME
+	id3_field_getstrings @ 17 NONAME
+	id3_file_close @ 18 NONAME
+	id3_file_fdopen @ 19 NONAME
+	id3_file_tag @ 20 NONAME
+	id3_frame_field @ 21 NONAME
+	id3_genre_name @ 22 NONAME
+	id3_tag_delete @ 23 NONAME
+	id3_tag_findframe @ 24 NONAME
+	id3_tag_parse @ 25 NONAME
+	id3_tag_query @ 26 NONAME
+	id3_ucs4_latin1duplicate @ 27 NONAME
+	id3_ucs4_utf8duplicate @ 28 NONAME
+	mad_header_decode @ 29 NONAME
+	mad_header_init @ 30 NONAME
+	mad_timer_multiply @ 31 NONAME
+	tag_init @ 32 NONAME
+	tag_parse @ 33 NONAME
 

@@ -245,18 +245,18 @@ enum id3_file_mode {
 };
 
 struct id3_file *id3_file_open(char const *, enum id3_file_mode);
-struct id3_file *id3_file_fdopen(int, enum id3_file_mode);
-int id3_file_close(struct id3_file *);
+IMPORT_C struct id3_file *id3_file_fdopen(int, enum id3_file_mode);
+IMPORT_C int id3_file_close(struct id3_file *);
 
 
-struct id3_tag *id3_file_tag(struct id3_file const *);
+IMPORT_C struct id3_tag *id3_file_tag(struct id3_file const *);
 
 int id3_file_update(struct id3_file *);
 
 /* tag interface */
 
 struct id3_tag *id3_tag_new(void);
-void id3_tag_delete(struct id3_tag *);
+IMPORT_C void id3_tag_delete(struct id3_tag *);
 
 unsigned int id3_tag_version(struct id3_tag const *);
 
@@ -268,12 +268,12 @@ void id3_tag_clearframes(struct id3_tag *);
 int id3_tag_attachframe(struct id3_tag *, struct id3_frame *);
 int id3_tag_detachframe(struct id3_tag *, struct id3_frame *);
 
-struct id3_frame *id3_tag_findframe(struct id3_tag const *,
+IMPORT_C struct id3_frame *id3_tag_findframe(struct id3_tag const *,
 				    char const *, unsigned int);
 
-signed long id3_tag_query(id3_byte_t const *, id3_length_t);
+IMPORT_C signed long id3_tag_query(id3_byte_t const *, id3_length_t);
 
-struct id3_tag *id3_tag_parse(id3_byte_t const *, id3_length_t);
+IMPORT_C struct id3_tag *id3_tag_parse(id3_byte_t const *, id3_length_t);
 id3_length_t id3_tag_render(struct id3_tag const *, id3_byte_t *);
 
 /* frame interface */
@@ -281,7 +281,7 @@ id3_length_t id3_tag_render(struct id3_tag const *, id3_byte_t *);
 struct id3_frame *id3_frame_new(char const *);
 void id3_frame_delete(struct id3_frame *);
 
-union id3_field *id3_frame_field(struct id3_frame const *, unsigned int);
+IMPORT_C union id3_field *id3_frame_field(struct id3_frame const *, unsigned int);
 
 /* field interface */
 
@@ -306,8 +306,8 @@ id3_latin1_t const *id3_field_getlatin1(union id3_field const *);
 id3_latin1_t const *id3_field_getfulllatin1(union id3_field const *);
 id3_ucs4_t const *id3_field_getstring(union id3_field const *);
 id3_ucs4_t const *id3_field_getfullstring(union id3_field const *);
-unsigned int id3_field_getnstrings(union id3_field const *);
-id3_ucs4_t const *id3_field_getstrings(union id3_field const *,
+IMPORT_C unsigned int id3_field_getnstrings(union id3_field const *);
+IMPORT_C id3_ucs4_t const *id3_field_getstrings(union id3_field const *,
 				       unsigned int);
 char const *id3_field_getframeid(union id3_field const *);
 id3_byte_t const *id3_field_getbinarydata(union id3_field const *,
@@ -316,14 +316,14 @@ id3_byte_t const *id3_field_getbinarydata(union id3_field const *,
 /* genre interface */
 
 id3_ucs4_t const *id3_genre_index(unsigned int);
-id3_ucs4_t const *id3_genre_name(id3_ucs4_t const *);
+IMPORT_C id3_ucs4_t const *id3_genre_name(id3_ucs4_t const *);
 int id3_genre_number(id3_ucs4_t const *);
 
 /* ucs4 interface */
 
-id3_latin1_t *id3_ucs4_latin1duplicate(id3_ucs4_t const *);
+IMPORT_C id3_latin1_t *id3_ucs4_latin1duplicate(id3_ucs4_t const *);
 id3_utf16_t *id3_ucs4_utf16duplicate(id3_ucs4_t const *);
-id3_utf8_t *id3_ucs4_utf8duplicate(id3_ucs4_t const *);
+IMPORT_C id3_utf8_t *id3_ucs4_utf8duplicate(id3_ucs4_t const *);
 
 void id3_ucs4_putnumber(id3_ucs4_t *, unsigned long);
 unsigned long id3_ucs4_getnumber(id3_ucs4_t const *);
@@ -357,6 +357,25 @@ extern char const id3_version[];
 extern char const id3_copyright[];
 extern char const id3_author[];
 extern char const id3_build[];
+
+struct filetag {
+  struct id3_tag *tag;
+  unsigned long location;
+  id3_length_t length;
+};
+
+struct id3_file {
+  FILE *iofile;
+  enum id3_file_mode mode;
+  char *path;
+
+  int flags;
+
+  struct id3_tag *primary;
+
+  unsigned int ntags;
+  struct filetag *tags;
+};
 
 # ifdef __cplusplus
 }

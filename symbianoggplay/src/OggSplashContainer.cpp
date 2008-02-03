@@ -92,9 +92,9 @@ void CSplashContainer::ShowSplashL()
 	SetExtentToWholeScreen();
     ActivateL();
 
-	// Show the splash screen for 1 second and then load the app.
+	// Show the splash screen for 0.5 second and then load the app.
 	iDisplayTimer = new(ELeave) COggTimer(TCallBack(TimerExpired, this));
-	iDisplayTimer->Wait(1000000);
+	iDisplayTimer->Wait(500000);
 	}
 
 CSplashContainer::~CSplashContainer()

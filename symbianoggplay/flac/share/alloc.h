@@ -55,11 +55,6 @@
 #endif
 #endif
 
-// OggPlay
-void* _ogg_malloc(size_t aNumBytes);
-void* _ogg_realloc(void* aPtr, size_t aNumBytes);
-void* _ogg_calloc(size_t aNumItems, size_t aItemSize);
-
 
 /* avoid malloc()ing 0 bytes, see:
  * https://www.securecoding.cert.org/confluence/display/seccode/MEM04-A.+Do+not+make+assumptions+about+the+result+of+allocating+0+bytes?focusedCommentId=5407003
@@ -69,14 +64,14 @@ static FLaC__INLINE void *safe_malloc_(size_t size)
 	/* malloc(0) is undefined; FLAC src convention is to always allocate */
 	if(!size)
 		size++;
-	return _ogg_malloc(size);
+	return malloc(size);
 }
 
 static FLaC__INLINE void *safe_calloc_(size_t nmemb, size_t size)
 {
 	if(!nmemb || !size)
-		return _ogg_malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
-	return _ogg_calloc(nmemb, size);
+		return malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
+	return calloc(nmemb, size);
 }
 
 /*@@@@ there's probably a better way to prevent overflows when allocating untrusted sums but this works for now */
@@ -121,7 +116,7 @@ needs support for cases where sizeof(size_t) != 4
 	/* could be faster #ifdef'ing off SIZEOF_SIZE_T */
 	if(sizeof(size_t) == 4) {
 		if ((double)size1 * (double)size2 < 4294967296.0)
-			return _ogg_malloc(size1*size2);
+			return malloc(size1*size2);
 	}
 	return 0;
 }
@@ -129,23 +124,23 @@ needs support for cases where sizeof(size_t) != 4
 /* better? */
 {
 	if(!size1 || !size2)
-		return _ogg_malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
+		return malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
 	if(size1 > SIZE_MAX / size2)
 		return 0;
-	return _ogg_malloc(size1*size2);
+	return malloc(size1*size2);
 }
 #endif
 
 static FLaC__INLINE void *safe_malloc_mul_3op_(size_t size1, size_t size2, size_t size3)
 {
 	if(!size1 || !size2 || !size3)
-		return _ogg_malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
+		return malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
 	if(size1 > SIZE_MAX / size2)
 		return 0;
 	size1 *= size2;
 	if(size1 > SIZE_MAX / size3)
 		return 0;
-	return _ogg_malloc(size1*size3);
+	return malloc(size1*size3);
 }
 
 /* size1*size2 + size3 */
@@ -162,7 +157,7 @@ static FLaC__INLINE void *safe_malloc_mul2add_(size_t size1, size_t size2, size_
 static FLaC__INLINE void *safe_malloc_muladd2_(size_t size1, size_t size2, size_t size3)
 {
 	if(!size1 || (!size2 && !size3))
-		return _ogg_malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
+		return malloc(1); /* malloc(0) is undefined; FLAC src convention is to always allocate */
 	size2 += size3;
 	if(size2 < size3)
 		return 0;
@@ -174,7 +169,7 @@ static FLaC__INLINE void *safe_realloc_add_2op_(void *ptr, size_t size1, size_t 
 	size2 += size1;
 	if(size2 < size1)
 		return 0;
-	return _ogg_realloc(ptr, size2);
+	return realloc(ptr, size2);
 }
 
 static FLaC__INLINE void *safe_realloc_add_3op_(void *ptr, size_t size1, size_t size2, size_t size3)
@@ -185,7 +180,7 @@ static FLaC__INLINE void *safe_realloc_add_3op_(void *ptr, size_t size1, size_t 
 	size3 += size2;
 	if(size3 < size2)
 		return 0;
-	return _ogg_realloc(ptr, size3);
+	return realloc(ptr, size3);
 }
 
 static FLaC__INLINE void *safe_realloc_add_4op_(void *ptr, size_t size1, size_t size2, size_t size3, size_t size4)
@@ -199,23 +194,23 @@ static FLaC__INLINE void *safe_realloc_add_4op_(void *ptr, size_t size1, size_t 
 	size4 += size3;
 	if(size4 < size3)
 		return 0;
-	return _ogg_realloc(ptr, size4);
+	return realloc(ptr, size4);
 }
 
 static FLaC__INLINE void *safe_realloc_mul_2op_(void *ptr, size_t size1, size_t size2)
 {
 	if(!size1 || !size2)
-		return _ogg_realloc(ptr, 0); /* preserve POSIX realloc(ptr, 0) semantics */
+		return realloc(ptr, 0); /* preserve POSIX realloc(ptr, 0) semantics */
 	if(size1 > SIZE_MAX / size2)
 		return 0;
-	return _ogg_realloc(ptr, size1*size2);
+	return realloc(ptr, size1*size2);
 }
 
 /* size1 * (size2 + size3) */
 static FLaC__INLINE void *safe_realloc_muladd2_(void *ptr, size_t size1, size_t size2, size_t size3)
 {
 	if(!size1 || (!size2 && !size3))
-		return _ogg_realloc(ptr, 0); /* preserve POSIX realloc(ptr, 0) semantics */
+		return realloc(ptr, 0); /* preserve POSIX realloc(ptr, 0) semantics */
 	size2 += size3;
 	if(size2 < size3)
 		return 0;

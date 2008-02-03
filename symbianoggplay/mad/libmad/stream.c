@@ -18,8 +18,6 @@
  *
  */
 
-#include <OggShared.h>
-
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
@@ -63,7 +61,7 @@ EXPORT_C void mad_stream_init(struct mad_stream *stream)
 EXPORT_C void mad_stream_finish(struct mad_stream *stream)
 {
   if (stream->main_data) {
-    _ogg_free(stream->main_data);
+    free(stream->main_data);
     stream->main_data = 0;
   }
 

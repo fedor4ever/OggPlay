@@ -16,9 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// This file is for non PLUGIN_SYSTEM
-#if !defined(PLUGIN_SYSTEM)
-
 #include <barsread.h>
 #include <eikbtpan.h>
 #include <eikcmbut.h>
@@ -32,9 +29,11 @@
 
 // Platform settings
 #include <OggOs.h>
+#include <OggPlay.rsg>
 
-#ifdef __VC32__
+#if defined(__VC32__)
 #pragma warning( disable : 4244 ) // conversion from __int64 to unsigned int: Possible loss of data
+#pragma warning( disable : 4355 ) // 'this' used in base member initializer list
 #endif
 
 #include "OggLog.h"
@@ -46,21 +45,14 @@
 #include "MadDecoder.h"
 #endif
 
-// #include "ivorbiscodec.h"
-// #include "ivorbisfile.h"
-
-#include <OggPlay.rsg>
-
-#ifdef __VC32__
-#pragma warning( disable : 4355 ) // 'this' used in base member initializer list
-#endif
-
 
 COggPlayback::COggPlayback(COggMsgEnv* aEnv, MPlaybackObserver* aObserver, TInt aMachineUid)
-:  CAbsPlayback(aObserver), iEnv(aEnv), iSharedData(*this, iUIThread, iBufferingThread), iMachineUid(aMachineUid)
+: CAbsPlayback(aObserver), iEnv(aEnv), iSharedData(*this, iUIThread, iBufferingThread), iMachineUid(aMachineUid),
+iMp3LeftDither(iMp3Random), iMp3RightDither(iMp3Random)
 	{
 	}
 
+const TInt KStreamingThreadStackSize = 32768;
 void COggPlayback::ConstructL()
 	{
 	// Set up the session with the file server
@@ -84,7 +76,7 @@ void COggPlayback::ConstructL()
 	User::LeaveIfError(iBufferingThread.Open(uiThreadId));
 
 	// Create the streaming thread
-	User::LeaveIfError(iStreamingThread.Create(_L("OggPlayStream"), StreamingThread, KDefaultStackSize, NULL, &iSharedData));
+	User::LeaveIfError(iStreamingThread.Create(_L("OggPlayStream"), StreamingThread, KStreamingThreadStackSize, NULL, &iSharedData));
 
 	// Create the streaming thread panic handler
 	iStreamingThreadPanicHandler = new(ELeave) CThreadPanicHandler(EPriorityHigh, iStreamingThread, *this);
@@ -179,7 +171,7 @@ MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 
 #if defined(MP3_SUPPORT)
 	if (ext.CompareF(KMp3Ext) == 0)
-		decoder = new(ELeave) CMadDecoder(iFs);
+		decoder = new(ELeave) CMadDecoder(iFs, iMp3Dithering, iMp3LeftDither, iMp3RightDither);
 #endif
 
 	if (!decoder)
@@ -546,6 +538,11 @@ void COggPlayback::SetVolumeGain(TGainType aGain)
 	FlushBuffers(aGain);
 	}
 
+void COggPlayback::SetMp3Dithering(TBool aDithering)
+	{
+	iMp3Dithering = aDithering;
+	}
+
 void COggPlayback::SetPosition(TInt64 aPos)
 	{
 	if (iDecoder)
@@ -616,20 +613,20 @@ TInt COggPlayback::Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObse
 		return err;
 		}
 
-	decoder->ParseTags(iFFileInfo.iTitle, iFFileInfo.iArtist, iFFileInfo.iAlbum, iFFileInfo.iGenre, iFFileInfo.iTrackNumber);
+	decoder->ParseTags(iInfoFileInfo.iTitle, iInfoFileInfo.iArtist, iInfoFileInfo.iAlbum, iInfoFileInfo.iGenre, iInfoFileInfo.iTrackNumber);
 
-	iFFileInfo.iFileName = aFileName;
-	iFFileInfo.iBitRate = decoder->Bitrate();
-	iFFileInfo.iChannels = decoder->Channels();
-	iFFileInfo.iRate = decoder->Rate();
+	iInfoFileInfo.iFileName = aFileName;
 
-	iFileInfo.iFileSize = 0;
-	iFileInfo.iTime = 0;
+	iInfoFileInfo.iBitRate = 0;
+	iInfoFileInfo.iChannels = 0;
+	iInfoFileInfo.iRate = 0;
+	iInfoFileInfo.iFileSize = 0;
+	iInfoFileInfo.iTime = 0;
 
 	decoder->Close(); 
 	delete decoder;
 
-	aFileInfoObserver.FileInfoCallback(KErrNone, iFFileInfo);
+	aFileInfoObserver.FileInfoCallback(KErrNone, iInfoFileInfo);
 	return KErrNone;
 	}
 
@@ -649,20 +646,20 @@ TInt COggPlayback::FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfo
 		return err;
 		}
 
-	decoder->ParseTags(iFFileInfo.iTitle, iFFileInfo.iArtist, iFFileInfo.iAlbum, iFFileInfo.iGenre, iFFileInfo.iTrackNumber);
+	decoder->ParseTags(iInfoFileInfo.iTitle, iInfoFileInfo.iArtist, iInfoFileInfo.iAlbum, iInfoFileInfo.iGenre, iInfoFileInfo.iTrackNumber);
 
-	iFFileInfo.iFileName = aFileName;
-	iFFileInfo.iBitRate = decoder->Bitrate();
-	iFFileInfo.iChannels = decoder->Channels();
-	iFFileInfo.iRate = decoder->Rate();
+	iInfoFileInfo.iFileName = aFileName;
+	iInfoFileInfo.iBitRate = decoder->Bitrate();
+	iInfoFileInfo.iChannels = decoder->Channels();
+	iInfoFileInfo.iRate = decoder->Rate();
 
-	iFFileInfo.iFileSize = decoder->FileSize();
-	iFFileInfo.iTime = decoder->TimeTotal();
+	iInfoFileInfo.iFileSize = decoder->FileSize();
+	iInfoFileInfo.iTime = decoder->TimeTotal();
 
 	decoder->Close(); 
 	delete decoder;
 
-	aFileInfoObserver.FileInfoCallback(KErrNone, iFFileInfo);
+	aFileInfoObserver.FileInfoCallback(KErrNone, iInfoFileInfo);
 	return KErrNone;
 	}
 
@@ -692,6 +689,10 @@ void COggPlayback::Play()
 
 	// Clear the frequency analyser
 	Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
+
+	// Clear mp3 error bits
+	iMp3LeftDither.iError[0] = 0 ; iMp3LeftDither.iError[1] = 0 ; iMp3LeftDither.iError[2] = 0;
+	iMp3RightDither.iError[0] = 0 ; iMp3RightDither.iError[1] = 0 ; iMp3RightDither.iError[2] = 0;
 
 #if defined(DELAY_AUDIO_STREAMING_START)
 	// Also to avoid the first buffer problem, wait a short time before streaming, 
@@ -1243,12 +1244,11 @@ void COggPlayback::NotifyStreamingStatus(TInt aErr)
 }
 
 void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt /* aErr */)
-{
-  // Great, the streaming thread has panic'd, now what do we do!?
-  iStreamingThreadRunning = EFalse;
-  iState = EClosed;
-  
-  // Try to exit cleanly
-  iObserver->NotifyFatalPlayError();
-}
-#endif /* !PLUGIN_SYSTEM */
+	{
+	// Great, the streaming thread has panic'd, now what do we do!?
+	iStreamingThreadRunning = EFalse;
+	iState = EClosed;
+
+	// Try to exit cleanly
+	iObserver->NotifyFatalPlayError();
+	}

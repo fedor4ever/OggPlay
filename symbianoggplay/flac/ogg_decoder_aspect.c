@@ -144,14 +144,14 @@ FLAC__OggDecoderAspectReadStatus FLAC__ogg_decoder_aspect_read_callback_wrapper(
 				if ((size_t)aspect->working_packet.bytes <= n) {
 					/* the rest of the packet will fit in the buffer */
 					n = aspect->working_packet.bytes;
-					_ogg_memcpy(buffer, aspect->working_packet.packet, n);
+					memcpy(buffer, aspect->working_packet.packet, n);
 					*bytes += n;
 					buffer += n;
 					aspect->have_working_packet = false;
 				}
 				else {
 					/* only n bytes of the packet will fit in the buffer */
-					_ogg_memcpy(buffer, aspect->working_packet.packet, n);
+					memcpy(buffer, aspect->working_packet.packet, n);
 					*bytes += n;
 					buffer += n;
 					aspect->working_packet.packet += n;
@@ -175,7 +175,7 @@ FLAC__OggDecoderAspectReadStatus FLAC__ogg_decoder_aspect_read_callback_wrapper(
 						if (aspect->working_packet.bytes < (long)header_length)
 							return FLAC__OGG_DECODER_ASPECT_READ_STATUS_NOT_FLAC;
 						b += FLAC__OGG_MAPPING_PACKET_TYPE_LENGTH;
-						if (_ogg_memcmp(b, FLAC__OGG_MAPPING_MAGIC, FLAC__OGG_MAPPING_MAGIC_LENGTH))
+						if (memcmp(b, FLAC__OGG_MAPPING_MAGIC, FLAC__OGG_MAPPING_MAGIC_LENGTH))
 							return FLAC__OGG_DECODER_ASPECT_READ_STATUS_NOT_FLAC;
 						b += FLAC__OGG_MAPPING_MAGIC_LENGTH;
 						aspect->version_major = (unsigned)(*b);

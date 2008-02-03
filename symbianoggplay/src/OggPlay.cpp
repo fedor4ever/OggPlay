@@ -18,6 +18,7 @@
 
 #include <OggOs.h>
 #include <e32std.h>
+#include <e32math.h>
 #include <hal.h>
 
 #if defined(SERIES60)
@@ -1762,6 +1763,8 @@ void COggPlayAppUi::ReadIniFile()
 	iSettings.iBufferingMode = EBufferThread;
 	iSettings.iThreadPriority = ENormal;
 
+	iSettings.iMp3Dithering = ETrue;
+
 	// Open the file
 	RFile in;
     TInt err = in.Open(iCoeEnv->FsSession(), iIniFileName, EFileShareReadersOnly);
@@ -1814,7 +1817,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	{
 	// Read the version number
 	TInt err;
-	TInt iniVersion = IniRead32L(aIniFileData, 1, 1);
+	TInt iniVersion = IniRead32L(aIniFileData, 1, 2);
 	TRACEF(COggLog::VA(_L("ReadIni: version %d"), iniVersion));
 
 	// Read the OS version
@@ -1900,22 +1903,20 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iAlarmSnooze = IniRead32L(aIniFileData, 0, 3);
 
 	iSettings.iBufferingMode = IniRead32L(aIniFileData, (TInt) EBufferThread, (TInt) ENoBuffering);
-
-#if !defined(PLUGIN_SYSTEM)
 	err = ((COggPlayback*) iOggPlayback)->SetBufferingMode((TBufferingMode) iSettings.iBufferingMode);
 	if (err != KErrNone)
 		iSettings.iBufferingMode = ENoBuffering;
-#endif
 
 	iSettings.iThreadPriority = IniRead32L(aIniFileData, (TInt) ENormal, (TInt) EHigh);
-
-#if !defined(PLUGIN_SYSTEM)
 	((COggPlayback*) iOggPlayback)->SetThreadPriority((TStreamingThreadPriority) iSettings.iThreadPriority);
-#endif
 
 	TInt maxSoftKeyIndex = ((TInt) TOggplaySettings::ENumHotkeys) - 1;
 	iSettings.iSoftKeysIdle[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysPlay[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+
+	// Version 2 adds MAD mp3 dithering
+	if (iniVersion == 2)
+		iSettings.iMp3Dithering = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 
 #if defined(SERIES80)
 	iSettings.iSoftKeysIdle[1] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
@@ -2069,7 +2070,7 @@ void COggPlayAppUi::WriteIniFile()
 	// Ini file version number
 	// Please increase the version number when adding stuff
 	// (also update the range check in ReadIniFile())
-	iniFileBuf[4] = '1';
+	iniFileBuf[4] = '2';
 	iniFileBuf[5] = KIniValueTerminator;
 
 	// Ini file OS version
@@ -2215,6 +2216,9 @@ void COggPlayAppUi::WriteIniFile()
 		iniFileBuf.AppendNum(iSettings.iSoftKeysPlay[i]);
 		iniFileBuf.Append(KIniValueTerminator);
 		}
+
+	iniFileBuf.AppendNum(iSettings.iMp3Dithering ? 1 : 0);
+	iniFileBuf.Append(KIniValueTerminator);
 
 #if defined(SERIES80)
 	HBufC8* customScanDir8 = HBufC8::NewMaxLC(iSettings.iCustomScanDir.Size());
@@ -2380,6 +2384,31 @@ TInt COggPlayAppUi::FileSize(const TDesC& aFileName)
 	return fileSize; 
 	}
 
+void COggPlayAppUi::SetBufferingModeL(TBufferingMode aNewBufferingMode)
+	{
+	TInt err = ((COggPlayback *) iOggPlayback)->SetBufferingMode(aNewBufferingMode);
+	if (err == KErrNone)
+		iSettings.iBufferingMode = aNewBufferingMode;
+	else
+		{
+		// Pop up a message (reset the value in the playback options too)
+		TBuf<128> buf, tbuf;
+		iEikonEnv->ReadResourceL(tbuf, R_OGG_ERROR_20);
+		iEikonEnv->ReadResourceL(buf, R_OGG_ERROR_29);		
+		iOggMsgEnv->OggErrorMsgL(tbuf, buf);		
+
+#if defined(SERIES60)
+		iPlaybackOptionsView->BufferingModeChangedL();
+#endif
+		}
+	}
+
+void COggPlayAppUi::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority)
+	{
+	((COggPlayback *) iOggPlayback)->SetThreadPriority(aNewThreadPriority);
+	iSettings.iThreadPriority = aNewThreadPriority;
+	}
+
 void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 	{
 	iOggPlayback->SetVolumeGain(aNewGain);
@@ -2394,32 +2423,11 @@ void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 #endif
 	}
 
-#if !defined(PLUGIN_SYSTEM)
-void COggPlayAppUi::SetBufferingModeL(TBufferingMode aNewBufferingMode)
-{
-	TInt err = ((COggPlayback *) iOggPlayback)->SetBufferingMode(aNewBufferingMode);
-	if (err == KErrNone)
-		iSettings.iBufferingMode = aNewBufferingMode;
-	else
+void COggPlayAppUi::SetMp3Dithering(TBool aDithering)
 	{
-		// Pop up a message (reset the value in the playback options too)
-		TBuf<128> buf, tbuf;
-		iEikonEnv->ReadResourceL(tbuf, R_OGG_ERROR_20);
-		iEikonEnv->ReadResourceL(buf, R_OGG_ERROR_29);		
-		iOggMsgEnv->OggErrorMsgL(tbuf, buf);		
-
-#if defined(SERIES60)
-		iPlaybackOptionsView->BufferingModeChangedL();
-#endif
+	((COggPlayback *) iOggPlayback)->SetMp3Dithering(aDithering);
+	iSettings.iMp3Dithering = aDithering;
 	}
-}
-
-void COggPlayAppUi::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority)
-{
-	((COggPlayback *) iOggPlayback)->SetThreadPriority(aNewThreadPriority);
-	iSettings.iThreadPriority = aNewThreadPriority;
-}
-#endif
 
 void COggPlayAppUi::SetAlarm(TBool aAlarmActive)
 {

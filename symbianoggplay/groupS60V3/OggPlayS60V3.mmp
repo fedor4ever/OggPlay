@@ -7,6 +7,7 @@ SECUREID                                0xF000A661
 VENDORID                                0 
 EPOCSTACKSIZE                           0x8000 
 EPOCHEAPSIZE                            0x20000 0x400000 
+USERINCLUDE                             ..\mad 
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\flac 
@@ -23,8 +24,14 @@ START RESOURCE OggPlay_reg.rss
 END  
 
 
-SOURCEPATH                              ..\flac 
+SOURCEPATH                              ..\vorbis
+SOURCE                                  TremorDecoder.cpp 
+
+SOURCEPATH                              ..\flac
 SOURCE                                  FlacDecoder.cpp 
+
+SOURCEPATH                              ..\mad
+SOURCE                                  MadDecoder.cpp 
 
 SOURCEPATH                              ..\src 
 SOURCE                                  OggLog.cpp 
@@ -45,9 +52,6 @@ SOURCE                                  OggTremor.cpp
 SOURCE                                  OggMultiThread.cpp 
 SOURCE                                  OggThreadClasses.cpp 
 SOURCE                                  OggRateConvert.cpp 
-
-SOURCEPATH                              ..\vorbis 
-SOURCE                                  TremorDecoder.cpp 
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 aknskins.lib 
@@ -78,6 +82,8 @@ LIBRARY                                 mediaclientaudiostream.lib
 LIBRARY                                 OggPlayShared.lib 
 LIBRARY                                 OggPlayVorbisi.lib 
 LIBRARY                                 OggPlayFlaci.lib 
+LIBRARY                                 OggPlayMadi.lib 
+
 START BITMAP OggPlayIcon.mbm 
   TARGETPATH                              \resource\apps 
   HEADER                                   

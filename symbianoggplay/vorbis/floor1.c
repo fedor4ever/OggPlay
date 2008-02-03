@@ -15,7 +15,9 @@
 
  ********************************************************************/
 
-#include <e32def.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <math.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codec_internal.h"
@@ -44,7 +46,7 @@ typedef struct {
 static void floor1_free_info(vorbis_info_floor *i){
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
   if(info){
-    _ogg_memset(info,0,sizeof(*info));
+    memset(info,0,sizeof(*info));
     _ogg_free(info);
   }
 }
@@ -52,7 +54,7 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(look){
-    _ogg_memset(look,0,sizeof(*look));
+    memset(look,0,sizeof(*look));
     _ogg_free(look);
   }
 }
@@ -148,7 +150,7 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
 
   /* also store a sorted position index */
   for(i=0;i<n;i++)sortpointer[i]=info->postlist+i;
-  _ogg_qsort(sortpointer,n,sizeof(*sortpointer),icomp);
+  qsort(sortpointer,n,sizeof(*sortpointer),icomp);
 
   /* points from sort order back to range number */
   for(i=0;i<n;i++)look->forward_index[i]=sortpointer[i]-info->postlist;
@@ -202,7 +204,7 @@ static int render_point(int x0,int x1,int y0,int y1,int x){
   {
     int dy=y1-y0;
     int adx=x1-x0;
-    int ady=_ogg_abs(dy);
+    int ady=abs(dy);
     int err=ady*(x-x0);
     
     int off=err/adx;
@@ -287,14 +289,14 @@ static const ogg_int32_t FLOOR_fromdB_LOOKUP[256]={
 static void render_line(int x0,int x1,int y0,int y1,ogg_int32_t *d){
   int dy=y1-y0;
   int adx=x1-x0;
-  int ady=_ogg_abs(dy);
+  int ady=abs(dy);
   int base=dy/adx;
   int sy=(dy<0?base-1:base+1);
   int x=x0;
   int y=y0;
   int err=0;
 
-  ady-=_ogg_abs(base*adx);
+  ady-=abs(base*adx);
 
   d[x]= MULT31_SHIFT15(d[x],FLOOR_fromdB_LOOKUP[y]);
 
@@ -429,7 +431,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
     for(j=hx;j<n;j++)out[j]*=ly; /* be certain */    
     return(1);
   }
-  _ogg_memset(out,0,sizeof(*out)*n);
+  memset(out,0,sizeof(*out)*n);
   return(0);
 }
 

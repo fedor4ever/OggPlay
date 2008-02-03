@@ -91,6 +91,7 @@ RESOURCE ABOUTTEXT r_dialog_about
 	copyright2 = ogg_about_cpr2;
 	copyright3 = ogg_about_cpr3;
 	copyright4 = ogg_about_cpr4;
+	copyright5 = ogg_about_cpr5;
 	porting = ogg_about_port;
 	}
 
@@ -317,7 +318,14 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_playback_options_item_list
 			setting_page_resource = r_oggplay_volume_boost;
 			associated_resource = r_oggplay_volume_boost_item_list;
 			name = ogg_volume_boost;
-			}
+			},
+        AVKON_SETTING_ITEM
+			{
+			identifier = EOggSettingMp3Dithering;
+			setting_page_resource = r_oggplay_binary_setting_page;
+			associated_resource = r_oggplay_popup_setting_binary_texts;
+			name = ogg_mp3_dithering;
+			}			
         };
     }
 #endif

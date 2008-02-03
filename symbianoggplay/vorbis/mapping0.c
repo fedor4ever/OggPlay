@@ -15,7 +15,10 @@
 
  ********************************************************************/
 
-#include <e32def.h>
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <string.h>
+// #include <math.h>
 #include "ogg.h"
 #include "codebook.h"
 #include "ivorbiscodec.h"
@@ -23,7 +26,6 @@
 #include "codec_internal.h"
 #include "window.h"
 #include "registry.h"
-
 #include "misc.h"
 
 /* simplistic, wasteful way of doing this (unique lookup for each
@@ -54,7 +56,7 @@ typedef struct {
 static void mapping0_free_info(vorbis_info_mapping *i){
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)i;
   if(info){
-    _ogg_memset(info,0,sizeof(*info));
+    memset(info,0,sizeof(*info));
     _ogg_free(info);
   }
 }
@@ -73,7 +75,7 @@ static void mapping0_free_look(vorbis_look_mapping *look){
     _ogg_free(l->residue_func);
     _ogg_free(l->floor_look);
     _ogg_free(l->residue_look);
-    _ogg_memset(l,0,sizeof(*l));
+    memset(l,0,sizeof(*l));
     _ogg_free(l);
   }
 }
@@ -127,7 +129,7 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
   int i;
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)_ogg_calloc(1,sizeof(*info));
   codec_setup_info     *ci=(codec_setup_info *)vi->codec_setup;
-  _ogg_memset(info,0,sizeof(*info));
+  memset(info,0,sizeof(*info));
 
   if(oggpack_read(opb,1))
     info->submaps=oggpack_read(opb,4)+1;
@@ -206,7 +208,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
       nonzero[i]=1;
     else
       nonzero[i]=0;      
-    _ogg_memset(vb->pcm[i],0,sizeof(*vb->pcm[i])*n/2);
+    memset(vb->pcm[i],0,sizeof(*vb->pcm[i])*n/2);
   }
 
   /* channel coupling can 'dirty' the nonzero listing */

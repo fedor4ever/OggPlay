@@ -38,62 +38,63 @@ COggSettingItemList::~COggSettingItemList()
     }
 
 CAknSettingItem* COggSettingItemList::CreateSettingItemL(TInt aIdentifier)
-{
-  switch (aIdentifier)
-  {
-  case EOggSettingRepeatId:
-    return new(ELeave) CRepeatSettingItem(aIdentifier, iAppUi);
+	{
+	switch (aIdentifier)
+		{
+		case EOggSettingRepeatId:
+			return new(ELeave) CRepeatSettingItem(aIdentifier, iAppUi);
 
-  case EOggSettingScanDir:
-    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iScanmode);
+		case EOggSettingScanDir:
+			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iScanmode);
 
-  case EOggSettingManeuvringSpeed:
-    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iManeuvringSpeed);
+		case EOggSettingManeuvringSpeed:
+			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iManeuvringSpeed);
 
-  case EOggSettingAutoPlayId:
-    return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iAutoplay);
+		case EOggSettingAutoPlayId:
+			return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iAutoplay);
 
-  case EOggSettingWarningsId:
-    return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iWarningsEnabled);
+		case EOggSettingWarningsId:
+			return new(ELeave) CAknBinaryPopupSettingItem(aIdentifier, iData.iWarningsEnabled);
 
-  case EOggSettingRskIdle:
-    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iSoftKeysIdle[0]);
+		case EOggSettingRskIdle:
+			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iSoftKeysIdle[0]);
 
-  case EOggSettingRskPlay:
-    return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iSoftKeysPlay[0]);
+		case EOggSettingRskPlay:
+			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iSoftKeysPlay[0]);
 
-  case EOggSettingVolumeBoost:
-     return iGainSettingItem = new(ELeave) CGainSettingItem(aIdentifier, iAppUi);
+		case EOggSettingBufferingMode:
+			return iBufferingModeItem = new(ELeave) CBufferingModeSettingItem(aIdentifier, iAppUi);
 
-#if !defined(PLUGIN_SYSTEM)
-  case EOggSettingBufferingMode:
-    return iBufferingModeItem = new(ELeave) CBufferingModeSettingItem(aIdentifier, iAppUi);
+		case EOggSettingThreadPriority:
+			return new(ELeave) CThreadPrioritySettingItem(aIdentifier, iAppUi);
 
-  case EOggSettingThreadPriority:
-    return new(ELeave) CThreadPrioritySettingItem(aIdentifier, iAppUi);
-#endif
+		case EOggSettingVolumeBoost:
+			return iGainSettingItem = new(ELeave) CGainSettingItem(aIdentifier, iAppUi);
 
-  case EOggSettingAlarmActive:
-    return new(ELeave) CAlarmSettingItem(aIdentifier, iAppUi);
+		case EOggSettingMp3Dithering:
+			return new(ELeave) CMp3DitheringSettingItem(aIdentifier, iAppUi);
 
-  case EOggSettingAlarmTime:
-    return new(ELeave) CAlarmTimeSettingItem(aIdentifier, iAppUi);
+		case EOggSettingAlarmActive:
+			return new(ELeave) CAlarmSettingItem(aIdentifier, iAppUi);
 
-  case EOggSettingAlarmVolume:
-     return new(ELeave) CAknVolumeSettingItem(aIdentifier, iData.iAlarmVolume);
+		case EOggSettingAlarmTime:
+			return new(ELeave) CAlarmTimeSettingItem(aIdentifier, iAppUi);
 
-  case EOggSettingAlarmBoost:
-	return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmGain);
+		case EOggSettingAlarmVolume:
+			return new(ELeave) CAknVolumeSettingItem(aIdentifier, iData.iAlarmVolume);
 
-  case EOggSettingAlarmSnooze:
-	return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmSnooze);
+		case EOggSettingAlarmBoost:
+			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmGain);
 
-  default:
-    break;
-  }
+		case EOggSettingAlarmSnooze:
+			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iAlarmSnooze);
 
-  return NULL;
-}
+		default:
+			break;
+		}
+
+	return NULL;
+	}
 
 void COggSettingItemList::VolumeGainChangedL()
 	{
@@ -104,7 +105,6 @@ void COggSettingItemList::VolumeGainChangedL()
 		}
 	}
 
-#if !defined(PLUGIN_SYSTEM)
 void COggSettingItemList::BufferingModeChangedL()
 	{
 	if (iBufferingModeItem)
@@ -113,7 +113,6 @@ void COggSettingItemList::BufferingModeChangedL()
 		HandleChangeInItemArrayOrVisibilityL();
 		}
 	}
-#endif
 
 
 CRepeatSettingItem::CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
@@ -127,19 +126,6 @@ void CRepeatSettingItem::EditItemL(TBool aCalledFromMenu)
 	iAppUi.SetRepeat(InternalValue());
 	}
 
-
-CGainSettingItem::CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
-: CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iGainType), iAppUi(aAppUi)
-	{
-	}
- 
-void  CGainSettingItem::EditItemL(TBool aCalledFromMenu)
-	{
-	CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
-	iAppUi.SetVolumeGainL((TGainType) InternalValue());
-	}
-
-#if !defined(PLUGIN_SYSTEM)
 CBufferingModeSettingItem::CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
 : CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iBufferingMode), iAppUi(aAppUi)
 	{
@@ -162,7 +148,28 @@ void CThreadPrioritySettingItem::EditItemL(TBool aCalledFromMenu)
 	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
 	iAppUi.SetThreadPriority((TStreamingThreadPriority) InternalValue());
 	}
-#endif
+
+CGainSettingItem::CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iGainType), iAppUi(aAppUi)
+	{
+	}
+ 
+void  CGainSettingItem::EditItemL(TBool aCalledFromMenu)
+	{
+	CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetVolumeGainL((TGainType) InternalValue());
+	}
+
+CMp3DitheringSettingItem::CMp3DitheringSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iMp3Dithering), iAppUi(aAppUi)
+	{
+	}
+ 
+void CMp3DitheringSettingItem::EditItemL(TBool aCalledFromMenu)
+	{
+	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetMp3Dithering(InternalValue());
+	}
 
 
 CAlarmSettingItem::CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)

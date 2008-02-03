@@ -17,7 +17,12 @@
 
 #pragma warning( disable : 4127 ) // while(1)
 #pragma warning( disable : 4706 ) // Assignment within conditional expression
-#include <e32def.h>
+
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <errno.h>
+// #include <string.h>
+// #include <math.h>
 
 #include "ivorbiscodec.h"
 #include "ivorbisfile.h"
@@ -661,7 +666,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 
 /* if, eg, 64 bit stdio is configured by default, this will build with
    fseek64 */
-static int _fseek64_wrap(void *f,ogg_int64_t off,int whence){
+static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
   if(f==NULL)return(-1);
   if (off >0x7FFFFFFF)
       // Overflow.
@@ -674,7 +679,7 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
   int offsettest=(f?callbacks.seek_func(f,0,SEEK_CUR):-1);
   int ret;
 
-  _ogg_memset(vf,0,sizeof(*vf));
+  memset(vf,0,sizeof(*vf));
   vf->datasource=f;
   vf->callbacks = callbacks;
 
@@ -687,7 +692,7 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
      stream) */
   if(initial){
     unsigned char *buffer=ogg_sync_bufferin(vf->oy,ibytes);
-    _ogg_memcpy(buffer,initial,ibytes);
+    memcpy(buffer,initial,ibytes);
     ogg_sync_wrote(vf->oy,ibytes);
   }
 
@@ -748,7 +753,7 @@ EXPORT_C int ov_clear(OggVorbis_File *vf){
     ogg_sync_destroy(vf->oy);
 
     if(vf->datasource)(vf->callbacks.close_func)(vf->datasource);
-    _ogg_memset(vf,0,sizeof(*vf));
+    memset(vf,0,sizeof(*vf));
   }
 #ifdef DEBUG_LEAKS
   _VDBG_dump();
@@ -771,7 +776,7 @@ EXPORT_C int ov_open_callbacks(void *f,OggVorbis_File *vf,char *initial,long iby
   return _ov_open2(vf);
 }
 
-EXPORT_C int ov_open(void *f,OggVorbis_File *vf,char *initial,long ibytes){
+EXPORT_C int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   ov_callbacks callbacks = {
     (size_t (*)(void *, size_t, void *))  _ogg_read,
     (int (*)(void *, ogg_int64_t, int))   _fseek64_wrap,
@@ -793,7 +798,7 @@ EXPORT_C int ov_test_callbacks(void *f,OggVorbis_File *vf,char *initial,long iby
   return _ov_open1(f,vf,initial,ibytes,callbacks);
 }
 
-EXPORT_C int ov_test(void *f,OggVorbis_File *vf,char *initial,long ibytes){
+EXPORT_C int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   ov_callbacks callbacks = {
     (size_t (*)(void *, size_t, void *))  _ogg_read,
     (int (*)(void *, ogg_int64_t, int))   _fseek64_wrap,
@@ -801,7 +806,7 @@ EXPORT_C int ov_test(void *f,OggVorbis_File *vf,char *initial,long ibytes){
     (long (*)(void *))                    _ogg_tell
   };
 
-  return ov_test_callbacks(f, vf, initial, ibytes, callbacks);
+  return ov_test_callbacks((void *)f, vf, initial, ibytes, callbacks);
 }
   
 EXPORT_C int ov_test_open(OggVorbis_File *vf){
@@ -995,7 +1000,7 @@ EXPORT_C int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int lastblock=0;
     int accblock=0;
     int thisblock;
-    int eosflag = 0;
+    int eosflag=0;
 
     work_os=ogg_stream_create(vf->current_serialno); /* get the memory ready */
     while(1){
@@ -1122,8 +1127,6 @@ EXPORT_C int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
     if(pos>=total)break;
   }
 
-  //--
-
   /* search within the logical bitstream for the page with the highest
      pcm_pos preceeding (or equal to) pos.  There is a danger here;
      missing pages or incorrect frame number information in the
@@ -1200,8 +1203,6 @@ EXPORT_C int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	}
       }
     }
- 
-    //return -1;
 
     /* found our page. seek to it, update pcm offset. Easier case than
        raw_seek, don't keep packets preceeding granulepos. */

@@ -74,7 +74,7 @@ static int                  j_code3( const char * buff, int count );
 
 EXPORT_C int jcode(const char* buff)
 {
-	return j_code(buff, _ogg_strlen(buff));
+	return j_code(buff, strlen(buff));
 }
 
 static int j_code(const char* buff, int count)
@@ -108,7 +108,7 @@ static int j_code(const char* buff, int count)
 	if(c_gb > c_big5){
 		return GB_CODE;
 	}else if (c_gb ==  c_big5){ //c_gb == 0,c_big5==0
-		if(_ogg_strstr(buff,HZ_START)!=NULL && _ogg_strstr(buff,HZ_END)!=NULL){
+		if(strstr(buff,HZ_START)!=NULL && strstr(buff,HZ_END)!=NULL){
 			return HZ_CODE;
 		}
 		/*There is not "ÎÒ" and "µÄ" in the text
@@ -721,7 +721,7 @@ inGB (register const char *str, register unsigned int len)
             {
               register const char *s = wordlist[index].name;
 
-              if (*str == *s && !_ogg_strncmp (str + 1, s + 1, len - 1))
+              if (*str == *s && !strncmp (str + 1, s + 1, len - 1))
                 return &wordlist[index];
             }
           else if (index < -TOTAL_KEYWORDS)
@@ -734,7 +734,7 @@ inGB (register const char *str, register unsigned int len)
                 {
                   register const char *s = wordptr->name;
 
-                  if (*str == *s && !_ogg_strncmp (str + 1, s + 1, len - 1))
+                  if (*str == *s && !strncmp (str + 1, s + 1, len - 1))
                     return wordptr;
                   wordptr++;
                 }
@@ -1350,7 +1350,7 @@ inBig5 (register const char *str, register unsigned int len)
             {
               register const char *s = wordlist[index].name;
 
-              if (*str == *s && !_ogg_strncmp (str + 1, s + 1, len - 1))
+              if (*str == *s && !strncmp (str + 1, s + 1, len - 1))
                 return &wordlist[index];
             }
           else if (index < -TOTAL_KEYWORDS)
@@ -1363,7 +1363,7 @@ inBig5 (register const char *str, register unsigned int len)
                 {
                   register const char *s = wordptr->name;
 
-                  if (*str == *s && !_ogg_strncmp (str + 1, s + 1, len - 1))
+                  if (*str == *s && !strncmp (str + 1, s + 1, len - 1))
                     return wordptr;
                   wordptr++;
                 }

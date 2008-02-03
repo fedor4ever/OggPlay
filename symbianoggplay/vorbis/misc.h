@@ -23,6 +23,7 @@
 #include "os_types.h"
 
 #include "asm_arm.h"
+// #include <stdlib.h> /* for abs() */
   
 #ifndef _V_WIDE_MATH
 #define _V_WIDE_MATH
@@ -31,8 +32,7 @@
 /* 64 bit multiply */
 
 #ifdef LITTLE_ENDIAN
-//? inserted typedef
-typedef union magic {
+union magic {
   struct {
     ogg_int32_t lo;
     ogg_int32_t hi;
@@ -43,8 +43,7 @@ typedef union magic {
 #endif 
 
 #ifdef BIG_ENDIAN
-//? inserted typedef
-typedef union magic {
+union magic {
   struct {
     ogg_int32_t hi;
     ogg_int32_t lo;
@@ -208,7 +207,7 @@ static inline ogg_int32_t VFLOAT_MULTI(ogg_int32_t a,ogg_int32_t ap,
 				      ogg_int32_t i,
 				      ogg_int32_t *p){
 
-  int ip=_ilog(_ogg_abs(i))-31;
+  int ip=_ilog(abs(i))-31;
   return VFLOAT_MULT(a,ap,i<<-ip,ip,p);
 }
 

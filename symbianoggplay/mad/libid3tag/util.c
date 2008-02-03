@@ -25,7 +25,7 @@
 
 # include "global.h"
 
-# include <stdlib.h>
+// # include <stdlib.h>
 //FIXME
 //# include <zlib.h>
 

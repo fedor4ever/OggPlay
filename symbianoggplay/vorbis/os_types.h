@@ -25,33 +25,8 @@
 #  define LOOKUP_T const ogg_int32_t
 #endif
 
-#ifndef _STDDEF_H_
-typedef unsigned int size_t;
-#endif
-
 // Lib C replacements
-void* _ogg_malloc(size_t);
-void* _ogg_calloc(size_t, size_t);
-void* _ogg_realloc(void *, size_t);
-void _ogg_free(void *);
-
-int _ogg_abs(int aVal);
-long _ogg_labs(long aVal);
-
-void* _ogg_memchr(const void *, int, size_t);
-void* _ogg_memset(void *, int, size_t);
-void* _ogg_memcpy(void *aDst, const void *aSrc, size_t aNumBytes);
-int _ogg_memcmp(const void *aBuf1, const void *aBuf2, size_t aNumBytes);
-
-size_t _ogg_strlen(const char *aStr);
-char* _ogg_strcpy(char *aDst, const char *aSrc);
-char*_ogg_strcat(char *aDst, const char *aSrc);
-char* _ogg_strstr(const char* str1, const char* str2);
-int _ogg_strncmp(const char* str1, const char* str2, size_t num);
-
-int _ogg_toupper(int c);
-void _ogg_qsort(void *, size_t, size_t, int (*compare)(const void *, const void *));
-void _ogg_exit(int aVal);
+#include <OggShared.h>
 
 
 #ifndef chmsg

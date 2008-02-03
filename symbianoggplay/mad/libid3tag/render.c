@@ -25,8 +25,8 @@
 
 # include "global.h"
 
-# include <string.h>
-# include <stdlib.h>
+// # include <string.h>
+// # include <stdlib.h>
 
 # ifdef HAVE_ASSERT_H
 #  include <assert.h>
@@ -116,7 +116,7 @@ id3_length_t id3_render_latin1(id3_byte_t **ptr,
   id3_length_t size;
 
   if (latin1 == 0)
-    latin1 = "";
+    latin1 = (id3_latin1_t *) "";
 
   size = id3_latin1_size(latin1);
   if (!terminate)

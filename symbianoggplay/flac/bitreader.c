@@ -236,7 +236,7 @@ FLAC__bool bitreader_read_from_client_(FLAC__BitReader *br)
 	if(br->consumed_words > 0) {
 		start = br->consumed_words;
 		end = br->words + (br->bytes? 1:0);
-		_ogg_memmove(br->buffer, br->buffer+start, FLAC__BYTES_PER_WORD * (end - start));
+		memmove(br->buffer, br->buffer+start, FLAC__BYTES_PER_WORD * (end - start));
 
 		br->words -= start;
 		br->consumed_words = 0;
@@ -316,7 +316,7 @@ FLAC__bool bitreader_read_from_client_(FLAC__BitReader *br)
 
 FLAC__BitReader *FLAC__bitreader_new(void)
 {
-	FLAC__BitReader *br = (FLAC__BitReader*)_ogg_calloc(1, sizeof(FLAC__BitReader));
+	FLAC__BitReader *br = (FLAC__BitReader*)calloc(1, sizeof(FLAC__BitReader));
 
 	/* calloc() implies:
 		memset(br, 0, sizeof(FLAC__BitReader));
@@ -335,7 +335,7 @@ void FLAC__bitreader_delete(FLAC__BitReader *br)
 	FLAC__ASSERT(0 != br);
 
 	FLAC__bitreader_free(br);
-	_ogg_free(br);
+	free(br);
 }
 
 /***********************************************************************
@@ -351,7 +351,7 @@ FLAC__bool FLAC__bitreader_init(FLAC__BitReader *br, FLAC__CPUInfo cpu, FLAC__Bi
 	br->words = br->bytes = 0;
 	br->consumed_words = br->consumed_bits = 0;
 	br->capacity = FLAC__BITREADER_DEFAULT_CAPACITY;
-	br->buffer = (brword*)_ogg_malloc(sizeof(brword) * br->capacity);
+	br->buffer = (brword*)malloc(sizeof(brword) * br->capacity);
 	if(br->buffer == 0)
 		return false;
 	br->read_callback = rcb;
@@ -366,7 +366,7 @@ void FLAC__bitreader_free(FLAC__BitReader *br)
 	FLAC__ASSERT(0 != br);
 
 	if(0 != br->buffer)
-		_ogg_free(br->buffer);
+		free(br->buffer);
 	br->buffer = 0;
 	br->capacity = 0;
 	br->words = br->bytes = 0;

@@ -18,8 +18,6 @@
  *
  */
 
-#include <OggShared.h>
-
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif
@@ -285,7 +283,7 @@ enum mad_flow check_message(struct mad_decoder *decoder)
   }
 
   if (message)
-    _ogg_free(message);
+    free(message);
 
   return result;
 }
@@ -549,13 +547,13 @@ int mad_decoder_run(struct mad_decoder *decoder, enum mad_decoder_mode mode)
   if (run == 0)
     return -1;
 
-  decoder->sync = _ogg_malloc(sizeof(*decoder->sync));
+  decoder->sync = malloc(sizeof(*decoder->sync));
   if (decoder->sync == 0)
     return -1;
 
   result = run(decoder);
 
-  _ogg_free(decoder->sync);
+  free(decoder->sync);
   decoder->sync = 0;
 
   return result;

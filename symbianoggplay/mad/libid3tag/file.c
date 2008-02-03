@@ -16,8 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id$
  */
+
 #pragma warning( disable : 4127 ) // condition expression constant 
 #pragma warning( disable : 4505 ) // unreferenced local function 
 
@@ -27,9 +27,79 @@
 
 # include "global.h"
 
-# include <stdio.h>
-# include <stdlib.h>
-# include <string.h>
+// # include <stdio.h>
+// # include <stdlib.h>
+// # include <string.h>
+
+// OggPlay specific additions
+#define EOF (-1)
+#define fgetpos(a, b) _ogg_fgetpos(a, b)
+#define fsetpos(a, b) _ogg_fsetpos(a, b)
+#define strdup(a) _ogg_strdup(a)
+#define fdopen(a, b) _ogg_fdopen(a, b)
+#define fclose(a) _ogg_close(a)
+#define fread(a, b, c, d) _ogg_fread(a, b, c, d)
+#define dup(a) _ogg_dup(a)
+#define dup2(a, b) _ogg_dup2(a, b)
+#define close(a) _ogg_close2(a)
+#define ftell(a) _ogg_tell(a)
+#define fseek(a, b, c) _ogg_seek(a, b, c)
+#define rewind(a) _ogg_rewind(a)
+#define clearerr(a) _ogg_clearerr(a)
+
+typedef long fpos_t;
+int _ogg_fgetpos(FILE* file, fpos_t* pos)
+	{
+	*pos = _ogg_tell(file);
+	return (*pos == -1) ? -1 : 0;
+	}
+int _ogg_fsetpos(FILE* file, fpos_t* pos)
+	{
+	return _ogg_seek(file, *pos, SEEK_SET);
+	}
+
+
+char* _ogg_strdup(const char* strng)
+	{
+	char *dup = malloc(strlen(strng) + 1);
+	return strcpy(dup, strng);
+	}
+
+FILE *_ogg_fdopen(int fd, const char* mode)
+	{
+	return (FILE *) fd;
+	}
+
+size_t _ogg_fread(void *data, size_t size, size_t n, FILE* file)
+	{
+	size_t total = size*n;
+	size_t readtotal = _ogg_read(data, total, file);
+	return (readtotal == total) ? n : readtotal/size;
+	}
+
+int _ogg_dup(int fd)
+	{
+	return 0;
+	}
+
+int _ogg_dup2(int fd1, int fd2)
+	{
+	return 0;
+	}
+
+int _ogg_close2(int fd)
+	{
+	return 0;
+	}
+
+void _ogg_rewind(FILE* file)
+	{
+	_ogg_seek(file, 0, SEEK_SET);
+	}
+
+void clearerr(FILE* file)
+	{
+	}
 
 # ifdef HAVE_UNISTD_H
 #  include <unistd.h>
@@ -43,25 +113,6 @@
 # include "file.h"
 # include "tag.h"
 # include "field.h"
-
-struct filetag {
-  struct id3_tag *tag;
-  unsigned long location;
-  id3_length_t length;
-};
-
-struct id3_file {
-  FILE *iofile;
-  enum id3_file_mode mode;
-  char *path;
-
-  int flags;
-
-  struct id3_tag *primary;
-
-  unsigned int ntags;
-  struct filetag *tags;
-};
 
 enum {
   ID3_FILE_FLAG_ID3V1 = 0x0001
@@ -175,6 +226,7 @@ int add_filetag(struct id3_file *file, struct filetag const *filetag)
   return 0;
 }
 
+#if 0
 /*
  * NAME:	del_filetag()
  * DESCRIPTION:	delete a file tag entry
@@ -191,6 +243,7 @@ void del_filetag(struct id3_file *file, unsigned int index)
 
   --file->ntags;
 }
+#endif
 
 /*
  * NAME:	add_tag()
@@ -426,6 +479,7 @@ struct id3_file *new_file(FILE *iofile, enum id3_file_mode mode,
  * NAME:	file->open()
  * DESCRIPTION:	open a file given its pathname
  */
+#if 0
 struct id3_file *id3_file_open(char const *path, enum id3_file_mode mode)
 {
   FILE *iofile;
@@ -443,12 +497,13 @@ struct id3_file *id3_file_open(char const *path, enum id3_file_mode mode)
 
   return file;
 }
+#endif
 
 /*
  * NAME:	file->fdopen()
  * DESCRIPTION:	open a file using an existing file descriptor
  */
-struct id3_file *id3_file_fdopen(int fd, enum id3_file_mode mode)
+EXPORT_C struct id3_file *id3_file_fdopen(int fd, enum id3_file_mode mode)
 {
 # if 1 || defined(HAVE_UNISTD_H)
   FILE *iofile;
@@ -482,7 +537,7 @@ struct id3_file *id3_file_fdopen(int fd, enum id3_file_mode mode)
  * NAME:	file->close()
  * DESCRIPTION:	close a file and delete its associated tags
  */
-int id3_file_close(struct id3_file *file)
+EXPORT_C int id3_file_close(struct id3_file *file)
 {
   int result = 0;
 
@@ -500,13 +555,14 @@ int id3_file_close(struct id3_file *file)
  * NAME:	file->tag()
  * DESCRIPTION:	return the primary tag structure for a file
  */
-struct id3_tag *id3_file_tag(struct id3_file const *file)
+EXPORT_C struct id3_tag *id3_file_tag(struct id3_file const *file)
 {
   assert(file);
 
   return file->primary;
 }
 
+#if 0
 /*
  * NAME:	v1_write()
  * DESCRIPTION:	write ID3v1 tag modifications to a file
@@ -673,3 +729,4 @@ int id3_file_update(struct id3_file *file)
 
   return result;
 }
+#endif

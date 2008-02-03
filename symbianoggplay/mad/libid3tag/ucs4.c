@@ -25,7 +25,7 @@
 
 # include "global.h"
 
-# include <stdlib.h>
+// # include <stdlib.h>
 
 # include "id3tag.h"
 # include "ucs4.h"
@@ -121,7 +121,7 @@ id3_length_t id3_ucs4_utf8size(id3_ucs4_t const *ucs4)
  * NAME:	ucs4->latin1duplicate()
  * DESCRIPTION:	duplicate and encode a ucs4 string into latin1
  */
-id3_latin1_t *id3_ucs4_latin1duplicate(id3_ucs4_t const *ucs4)
+EXPORT_C id3_latin1_t *id3_ucs4_latin1duplicate(id3_ucs4_t const *ucs4)
 {
   id3_latin1_t *latin1;
 
@@ -151,7 +151,7 @@ id3_utf16_t *id3_ucs4_utf16duplicate(id3_ucs4_t const *ucs4)
  * NAME:	ucs4->utf8duplicate()
  * DESCRIPTION:	duplicate and encode a ucs4 string into utf8
  */
-id3_utf8_t *id3_ucs4_utf8duplicate(id3_ucs4_t const *ucs4)
+EXPORT_C id3_utf8_t *id3_ucs4_utf8duplicate(id3_ucs4_t const *ucs4)
 {
   id3_utf8_t *utf8;
 

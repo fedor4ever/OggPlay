@@ -694,7 +694,7 @@ void COggPluginAdaptor::SearchPluginsL(const TDesC &aExtension, TBool isEnabled)
         // Found at least one controller!  
         const RMMFFormatImplInfoArray& formatArray = controllers[ii]->PlayFormats();
     
-        TBuf8<10> ex8;
+        TBuf8<KMaxFileName> ex8;
         ex8.Copy(aExtension); // Convert the 16 bit descriptor to 8 bits
         
         TInt found = EFalse;

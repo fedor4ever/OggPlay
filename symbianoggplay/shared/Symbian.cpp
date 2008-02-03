@@ -64,6 +64,23 @@ EXPORT_C char* _ogg_strstr(const char* str1, const char* str2)
 	return NULL;
 }
 
+EXPORT_C int _ogg_strcmp(const char* str1, const char* str2)
+{
+	char chr1, chr2;
+	if ((str1 == NULL) || (str2 == NULL))
+		return 0;
+
+	for ( ; ; )
+		{
+		chr1 = *str1++;
+		chr2 = *str2++;
+		if ((chr1 != chr2) || !chr1)
+			break;
+		}
+
+	return chr1-chr2;
+}
+
 EXPORT_C int _ogg_strncmp(const char* str1, const char* str2, size_t num)
 {
 	size_t i;
@@ -444,26 +461,30 @@ EXPORT_C size_t _ogg_read(void* aBufPtr, size_t aReadSize, void* aFilePtr)
 }
 
 EXPORT_C int _ogg_seek(void* filePtr, long aOffset, int aSeekOrigin)
-{
+	{
 	RFile* file = (RFile *) filePtr;
 	TInt offset = aOffset;
-
+	TInt err = KErrArgument;
 	switch (aSeekOrigin)
-	{
+		{
 		case SEEK_SET:
-			return file->Seek(ESeekStart, offset);
+			err = file->Seek(ESeekStart, offset);
+			break;
 
 		case SEEK_CUR:
-			return file->Seek(ESeekCurrent, offset);
+			err = file->Seek(ESeekCurrent, offset);
+			break;
 
 		case SEEK_END:
-			return file->Seek(ESeekEnd, offset);
+			err = file->Seek(ESeekEnd, offset);
+			break;
 
 		default:
-			return -1;
-	}
+			break;
+		}
 
-}
+	return (err == KErrNone) ? 0 : -1;
+	}
 
 EXPORT_C int _ogg_tell(void* filePtr)
 {

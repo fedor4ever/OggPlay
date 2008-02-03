@@ -42,5 +42,6 @@ STRUCT ABOUTTEXT
     LTEXT copyright2 = "";
     LTEXT copyright3 = "";
     LTEXT copyright4 = "";
+    LTEXT copyright5 = "";
     LTEXT porting = "";
     }

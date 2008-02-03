@@ -67,16 +67,6 @@
 #include "private/md5.h"
 #include "private/memory.h"
 
-/* OggPlay */
-void* _ogg_malloc(size_t aNumBytes);
-void* _ogg_realloc(void* aPtr, size_t aNumBytes);
-void* _ogg_calloc(size_t aNumItems, size_t aItemSize);
-void _ogg_free(void* aPtr);
-
-int _ogg_memcmp(const void* aBuf1, const void* aBuf2, size_t aNumBytes);
-void* _ogg_memcpy(void *aDst, const void *aSrc, size_t aNumBytes);
-void* _ogg_memset(void* aPtr, int aVal, size_t aNumBytes);
-
 #if defined(__VC32__)
 #pragma warning( disable : 4505 ) // unreferenced local function has been removed
 #endif
@@ -301,38 +291,38 @@ FLAC_API const char * const FLAC__StreamDecoderErrorStatusString[] = {
 
 	FLAC__ASSERT(sizeof(int) >= 4); /* we want to die right away if this is not true */
 
-	decoder = (FLAC__StreamDecoder*)_ogg_calloc(1, sizeof(FLAC__StreamDecoder));
+	decoder = (FLAC__StreamDecoder*)calloc(1, sizeof(FLAC__StreamDecoder));
 	if(decoder == 0) {
 		return 0;
 	}
 
-	decoder->protected_ = (FLAC__StreamDecoderProtected*)_ogg_calloc(1, sizeof(FLAC__StreamDecoderProtected));
+	decoder->protected_ = (FLAC__StreamDecoderProtected*)calloc(1, sizeof(FLAC__StreamDecoderProtected));
 	if(decoder->protected_ == 0) {
-		_ogg_free(decoder);
+		free(decoder);
 		return 0;
 	}
 
-	decoder->private_ = (FLAC__StreamDecoderPrivate*)_ogg_calloc(1, sizeof(FLAC__StreamDecoderPrivate));
+	decoder->private_ = (FLAC__StreamDecoderPrivate*)calloc(1, sizeof(FLAC__StreamDecoderPrivate));
 	if(decoder->private_ == 0) {
-		_ogg_free(decoder->protected_);
-		_ogg_free(decoder);
+		free(decoder->protected_);
+		free(decoder);
 		return 0;
 	}
 
 	decoder->private_->input = FLAC__bitreader_new();
 	if(decoder->private_->input == 0) {
-		_ogg_free(decoder->private_);
-		_ogg_free(decoder->protected_);
-		_ogg_free(decoder);
+		free(decoder->private_);
+		free(decoder->protected_);
+		free(decoder);
 		return 0;
 	}
 
 	decoder->private_->metadata_filter_ids_capacity = 16;
-	if(0 == (decoder->private_->metadata_filter_ids = (FLAC__byte*)_ogg_malloc((FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8) * decoder->private_->metadata_filter_ids_capacity))) {
+	if(0 == (decoder->private_->metadata_filter_ids = (FLAC__byte*)malloc((FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8) * decoder->private_->metadata_filter_ids_capacity))) {
 		FLAC__bitreader_delete(decoder->private_->input);
-		_ogg_free(decoder->private_);
-		_ogg_free(decoder->protected_);
-		_ogg_free(decoder);
+		free(decoder->private_);
+		free(decoder->protected_);
+		free(decoder);
 		return 0;
 	}
 
@@ -369,16 +359,16 @@ FLAC_API const char * const FLAC__StreamDecoderErrorStatusString[] = {
 	(void)FLAC__stream_decoder_finish(decoder);
 
 	if(0 != decoder->private_->metadata_filter_ids)
-		_ogg_free(decoder->private_->metadata_filter_ids);
+		free(decoder->private_->metadata_filter_ids);
 
 	FLAC__bitreader_delete(decoder->private_->input);
 
 	for(i = 0; i < FLAC__MAX_CHANNELS; i++)
 		FLAC__format_entropy_coding_method_partitioned_rice_contents_clear(&decoder->private_->partitioned_rice_contents[i]);
 
-	_ogg_free(decoder->private_);
-	_ogg_free(decoder->protected_);
-	_ogg_free(decoder);
+	free(decoder->private_);
+	free(decoder->protected_);
+	free(decoder);
 }
 
 /***********************************************************************
@@ -701,7 +691,7 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_ogg_file(
 	FLAC__MD5Final(decoder->private_->computed_md5sum, &decoder->private_->md5context);
 
 	if(decoder->private_->has_seek_table && 0 != decoder->private_->seek_table.data.seek_table.points) {
-		_ogg_free(decoder->private_->seek_table.data.seek_table.points);
+		free(decoder->private_->seek_table.data.seek_table.points);
 		decoder->private_->seek_table.data.seek_table.points = 0;
 		decoder->private_->has_seek_table = false;
 	}
@@ -714,11 +704,11 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_ogg_file(
 		 * to keep the data well-aligned.
 		 */
 		if(0 != decoder->private_->output[i]) {
-			_ogg_free(decoder->private_->output[i]-4);
+			free(decoder->private_->output[i]-4);
 			decoder->private_->output[i] = 0;
 		}
 		if(0 != decoder->private_->residual_unaligned[i]) {
-			_ogg_free(decoder->private_->residual_unaligned[i]);
+			free(decoder->private_->residual_unaligned[i]);
 			decoder->private_->residual_unaligned[i] = decoder->private_->residual[i] = 0;
 		}
 	}
@@ -739,7 +729,7 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_ogg_file(
 	} */
 
 	if(decoder->private_->do_md5_checking) {
-		if(_ogg_memcmp(decoder->private_->stream_info.data.stream_info.md5sum, decoder->private_->computed_md5sum, 16))
+		if(memcmp(decoder->private_->stream_info.data.stream_info.md5sum, decoder->private_->computed_md5sum, 16))
 			md5_failed = true;
 	}
 	decoder->private_->is_seeking = false;
@@ -817,7 +807,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_respond_application(FLAC__
 		decoder->private_->metadata_filter_ids_capacity *= 2;
 	}
 
-	_ogg_memcpy(decoder->private_->metadata_filter_ids + decoder->private_->metadata_filter_ids_count * (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8), id, (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8));
+	memcpy(decoder->private_->metadata_filter_ids + decoder->private_->metadata_filter_ids_count * (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8), id, (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8));
 	decoder->private_->metadata_filter_ids_count++;
 
 	return true;
@@ -876,7 +866,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_ignore_application(FLAC__S
 		decoder->private_->metadata_filter_ids_capacity *= 2;
 	}
 
-	_ogg_memcpy(decoder->private_->metadata_filter_ids + decoder->private_->metadata_filter_ids_count * (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8), id, (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8));
+	memcpy(decoder->private_->metadata_filter_ids + decoder->private_->metadata_filter_ids_count * (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8), id, (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8));
 	decoder->private_->metadata_filter_ids_count++;
 
 	return true;
@@ -889,7 +879,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_ignore_all(FLAC__StreamDec
 	FLAC__ASSERT(0 != decoder->protected_);
 	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
 		return false;
-	_ogg_memset(decoder->private_->metadata_filter, 0, sizeof(decoder->private_->metadata_filter));
+	memset(decoder->private_->metadata_filter, 0, sizeof(decoder->private_->metadata_filter));
 	decoder->private_->metadata_filter_ids_count = 0;
 	return true;
 }
@@ -1035,7 +1025,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_reset(FLAC__StreamDecoder *decoder)
 
 	decoder->private_->has_stream_info = false;
 	if(decoder->private_->has_seek_table && 0 != decoder->private_->seek_table.data.seek_table.points) {
-		_ogg_free(decoder->private_->seek_table.data.seek_table.points);
+		free(decoder->private_->seek_table.data.seek_table.points);
 		decoder->private_->seek_table.data.seek_table.points = 0;
 		decoder->private_->has_seek_table = false;
 	}
@@ -1291,7 +1281,7 @@ void set_defaults_(FLAC__StreamDecoder *decoder)
 	decoder->private_->error_callback = 0;
 	decoder->private_->client_data = 0;
 
-	_ogg_memset(decoder->private_->metadata_filter, 0, sizeof(decoder->private_->metadata_filter));
+	memset(decoder->private_->metadata_filter, 0, sizeof(decoder->private_->metadata_filter));
 	decoder->private_->metadata_filter[FLAC__METADATA_TYPE_STREAMINFO] = true;
 	decoder->private_->metadata_filter_ids_count = 0;
 
@@ -1338,11 +1328,11 @@ FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, unsigned size, unsigne
 
 	for(i = 0; i < FLAC__MAX_CHANNELS; i++) {
 		if(0 != decoder->private_->output[i]) {
-			_ogg_free(decoder->private_->output[i]-4);
+			free(decoder->private_->output[i]-4);
 			decoder->private_->output[i] = 0;
 		}
 		if(0 != decoder->private_->residual_unaligned[i]) {
-			_ogg_free(decoder->private_->residual_unaligned[i]);
+			free(decoder->private_->residual_unaligned[i]);
 			decoder->private_->residual_unaligned[i] = decoder->private_->residual[i] = 0;
 		}
 	}
@@ -1359,7 +1349,7 @@ FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, unsigned size, unsigne
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
 		}
-		_ogg_memset(tmp, 0, sizeof(FLAC__int32)*4);
+		memset(tmp, 0, sizeof(FLAC__int32)*4);
 		decoder->private_->output[i] = tmp + 4;
 
 		/* WATCHOUT:
@@ -1385,7 +1375,7 @@ FLAC__bool has_id_filtered_(FLAC__StreamDecoder *decoder, FLAC__byte *id)
 	FLAC__ASSERT(0 != decoder->private_);
 
 	for(i = 0; i < decoder->private_->metadata_filter_ids_count; i++)
-		if(0 == _ogg_memcmp(decoder->private_->metadata_filter_ids + i * (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8), id, (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8)))
+		if(0 == memcmp(decoder->private_->metadata_filter_ids + i * (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8), id, (FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8)))
 			return true;
 
 	return false;
@@ -1474,7 +1464,7 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 			return false;
 
 		decoder->private_->has_stream_info = true;
-		if(0 == _ogg_memcmp(decoder->private_->stream_info.data.stream_info.md5sum, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16))
+		if(0 == memcmp(decoder->private_->stream_info.data.stream_info.md5sum, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16))
 			decoder->private_->do_md5_checking = false;
 		if(!decoder->private_->is_seeking && decoder->private_->metadata_filter[FLAC__METADATA_TYPE_STREAMINFO] && decoder->private_->metadata_callback)
 			decoder->private_->metadata_callback(decoder, &decoder->private_->stream_info, decoder->private_->client_data);
@@ -1525,7 +1515,7 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 				case FLAC__METADATA_TYPE_APPLICATION:
 					/* remember, we read the ID already */
 					if(real_length > 0) {
-						if(0 == (block.data.application.data = (FLAC__byte*)_ogg_malloc(real_length))) {
+						if(0 == (block.data.application.data = (FLAC__byte*)malloc(real_length))) {
 							decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 							return false;
 						}
@@ -1553,7 +1543,7 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 					break;
 				default:
 					if(real_length > 0) {
-						if(0 == (block.data.unknown.data = (FLAC__byte*)_ogg_malloc(real_length))) {
+						if(0 == (block.data.unknown.data = (FLAC__byte*)malloc(real_length))) {
 							decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 							return false;
 						}
@@ -1573,40 +1563,40 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 					break;
 				case FLAC__METADATA_TYPE_APPLICATION:
 					if(0 != block.data.application.data)
-						_ogg_free(block.data.application.data);
+						free(block.data.application.data);
 					break;
 				case FLAC__METADATA_TYPE_VORBIS_COMMENT:
 					if(0 != block.data.vorbis_comment.vendor_string.entry)
-						_ogg_free(block.data.vorbis_comment.vendor_string.entry);
+						free(block.data.vorbis_comment.vendor_string.entry);
 					if(block.data.vorbis_comment.num_comments > 0)
 						for(i = 0; i < block.data.vorbis_comment.num_comments; i++)
 							if(0 != block.data.vorbis_comment.comments[i].entry)
-								_ogg_free(block.data.vorbis_comment.comments[i].entry);
+								free(block.data.vorbis_comment.comments[i].entry);
 					if(0 != block.data.vorbis_comment.comments)
-						_ogg_free(block.data.vorbis_comment.comments);
+						free(block.data.vorbis_comment.comments);
 					break;
 				case FLAC__METADATA_TYPE_CUESHEET:
 					if(block.data.cue_sheet.num_tracks > 0)
 						for(i = 0; i < block.data.cue_sheet.num_tracks; i++)
 							if(0 != block.data.cue_sheet.tracks[i].indices)
-								_ogg_free(block.data.cue_sheet.tracks[i].indices);
+								free(block.data.cue_sheet.tracks[i].indices);
 					if(0 != block.data.cue_sheet.tracks)
-						_ogg_free(block.data.cue_sheet.tracks);
+						free(block.data.cue_sheet.tracks);
 					break;
 				case FLAC__METADATA_TYPE_PICTURE:
 					if(0 != block.data.picture.mime_type)
-						_ogg_free(block.data.picture.mime_type);
+						free(block.data.picture.mime_type);
 					if(0 != block.data.picture.description)
-						_ogg_free(block.data.picture.description);
+						free(block.data.picture.description);
 					if(0 != block.data.picture.data)
-						_ogg_free(block.data.picture.data);
+						free(block.data.picture.data);
 					break;
 				case FLAC__METADATA_TYPE_STREAMINFO:
 				case FLAC__METADATA_TYPE_SEEKTABLE:
 					FLAC__ASSERT(0);
 				default:
 					if(0 != block.data.unknown.data)
-						_ogg_free(block.data.unknown.data);
+						free(block.data.unknown.data);
 					break;
 			}
 		}
@@ -1798,7 +1788,7 @@ FLAC__bool read_metadata_cuesheet_(FLAC__StreamDecoder *decoder, FLAC__StreamMet
 
 	FLAC__ASSERT(FLAC__bitreader_is_consumed_byte_aligned(decoder->private_->input));
 
-	_ogg_memset(obj, 0, sizeof(FLAC__StreamMetadata_CueSheet));
+	memset(obj, 0, sizeof(FLAC__StreamMetadata_CueSheet));
 
 	FLAC__ASSERT(FLAC__STREAM_METADATA_CUESHEET_MEDIA_CATALOG_NUMBER_LEN % 8 == 0);
 	if(!FLAC__bitreader_read_byte_block_aligned_no_crc(decoder->private_->input, (FLAC__byte*)obj->media_catalog_number, FLAC__STREAM_METADATA_CUESHEET_MEDIA_CATALOG_NUMBER_LEN/8))
@@ -2134,7 +2124,7 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 		send_error_to_client_(decoder, FLAC__STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH);
 		if(do_full_decode) {
 			for(channel = 0; channel < decoder->private_->frame.header.channels; channel++) {
-				_ogg_memset(decoder->private_->output[channel], 0, sizeof(FLAC__int32) * decoder->private_->frame.header.blocksize);
+				memset(decoder->private_->output[channel], 0, sizeof(FLAC__int32) * decoder->private_->frame.header.blocksize);
 			}
 		}
 	}
@@ -2617,7 +2607,7 @@ FLAC__bool read_subframe_fixed_(FLAC__StreamDecoder *decoder, unsigned channel, 
 
 	/* decode the subframe */
 	if(do_full_decode) {
-		_ogg_memcpy(decoder->private_->output[channel], subframe->warmup, sizeof(FLAC__int32) * order);
+		memcpy(decoder->private_->output[channel], subframe->warmup, sizeof(FLAC__int32) * order);
 		FLAC__fixed_restore_signal(decoder->private_->residual[channel], decoder->private_->frame.header.blocksize-order, order, decoder->private_->output[channel]+order);
 	}
 
@@ -2696,7 +2686,7 @@ FLAC__bool read_subframe_lpc_(FLAC__StreamDecoder *decoder, unsigned channel, un
 
 	/* decode the subframe */
 	if(do_full_decode) {
-		_ogg_memcpy(decoder->private_->output[channel], subframe->warmup, sizeof(FLAC__int32) * order);
+		memcpy(decoder->private_->output[channel], subframe->warmup, sizeof(FLAC__int32) * order);
 		/*@@@@@@ technically not pessimistic enough, should be more like
 		if( (FLAC__uint64)order * ((((FLAC__uint64)1)<<bps)-1) * ((1<<subframe->qlp_coeff_precision)-1) < (((FLAC__uint64)-1) << 32) )
 		*/
@@ -2734,7 +2724,7 @@ FLAC__bool read_subframe_verbatim_(FLAC__StreamDecoder *decoder, unsigned channe
 
 	/* decode the subframe */
 	if(do_full_decode)
-		_ogg_memcpy(decoder->private_->output[channel], subframe->data, sizeof(FLAC__int32) * decoder->private_->frame.header.blocksize);
+		memcpy(decoder->private_->output[channel], subframe->data, sizeof(FLAC__int32) * decoder->private_->frame.header.blocksize);
 
 	return true;
 }

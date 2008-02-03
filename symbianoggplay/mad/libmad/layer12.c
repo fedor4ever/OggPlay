@@ -26,8 +26,6 @@
 #pragma warning( disable : 4706 ) // assignment within conditional expression 
 #endif
 
-#include <OggShared.h>
-
 # ifdef HAVE_CONFIG_H
 #  include "config.h"
 # endif

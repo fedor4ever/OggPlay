@@ -1364,11 +1364,11 @@ TBool TOggFiles::IsSupportedAudioFile(TParsePtrC& p)
     TBool result = EFalse;
     if (p.ExtPresent())
 		{
-        TPtrC pp (p.Ext().Mid(1)); // Remove the . in front of the extension
+        TPtrC pp(p.Ext().Mid(1)); // Remove the . in front of the extension
       
         for (TInt i = 0 ; i<iSupportedExtensionList->Count() ; i++)
 			{
-            result = (pp.CompareF((*iSupportedExtensionList)[i] ) == 0);  
+            result = (pp.CompareF((*iSupportedExtensionList)[i]) == 0);  
             if (result)
                 break;
 			}

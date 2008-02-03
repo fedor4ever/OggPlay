@@ -22,4 +22,5 @@ EXPORTS
 	_ogg_tell @ 21 NONAME ; CODE
 	_ogg_toupper @ 22 NONAME ; CODE
 	jcode @ 23 NONAME ; CODE
+	_ogg_strcmp @ 24 NONAME ; CODE
 

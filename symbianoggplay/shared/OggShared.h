@@ -45,6 +45,7 @@ extern "C"
 #endif
 
 IMPORT_C char* _ogg_strstr(const char* str1, const char* str2);
+IMPORT_C int _ogg_strcmp(const char* str1, const char* str2);
 IMPORT_C int _ogg_strncmp(const char* str1, const char* str2, size_t num);
 IMPORT_C char *_ogg_strcat(char *aDst, const char *aSrc);
 IMPORT_C int _ogg_toupper(int c);
@@ -58,19 +59,45 @@ IMPORT_C long _ogg_labs(long aVal);
 IMPORT_C int _ogg_abs(int aVal);
 IMPORT_C void* _ogg_memset(void* aPtr, int aVal, size_t aNumBytes);
 IMPORT_C void* _ogg_memchr(const void *aBuf, int aChr, size_t aNumBytes);
-IMPORT_C size_t _ogg_read(void* aBufPtr, size_t aReadSize, void* aFilePtr);
-IMPORT_C int _ogg_seek(void* filePtr, long aOffset, int aSeekOrigin);
-IMPORT_C int _ogg_tell(void* filePtr);
-IMPORT_C int _ogg_close(void* filePtr);
 IMPORT_C void* _ogg_malloc(size_t aNumBytes);
 IMPORT_C void* _ogg_calloc(size_t aNumItems, size_t aItemSize);
 IMPORT_C void* _ogg_realloc(void* aPtr, size_t aNumBytes);
 IMPORT_C void _ogg_free(void* aPtr);
+
+IMPORT_C size_t _ogg_read(void* aBufPtr, size_t aReadSize, void* aFilePtr);
+IMPORT_C int _ogg_seek(void* filePtr, long aOffset, int aSeekOrigin);
+IMPORT_C int _ogg_tell(void* filePtr);
+IMPORT_C int _ogg_close(void* filePtr);
+
 
 IMPORT_C int jcode(const char* buff);
 
 #ifdef __cplusplus
 }
 #endif
+
+#define strstr(a, b) _ogg_strstr(a, b)
+#define strcmp(a, b) _ogg_strcmp(a, b)
+#define strncmp(a, b, c) _ogg_strncmp(a, b, c)
+
+#define strcat(a, b) _ogg_strcat(a, b)
+#define toupper(a) _ogg_toupper(a)
+#define qsort(a, b, c, d) _ogg_qsort(a, b, c, d)
+
+#define memcmp(a, b, c) _ogg_memcmp(a, b, c)
+#define memcpy(a, b, c) _ogg_memcpy(a, b, c)
+#define memmove(a, b, c) _ogg_memmove(a, b, c)
+#define strcpy(a, b) _ogg_strcpy(a, b)
+#define strlen(a) _ogg_strlen(a)
+#define labs(a) _ogg_labs(a)
+#define abs(a) _ogg_abs(a)
+
+#define memset(a, b, c) _ogg_memset(a, b, c)
+#define memchr(a, b, c) _ogg_memchr(a, b, c)
+
+#define malloc(a) _ogg_malloc(a)
+#define calloc(a, b) _ogg_calloc(a, b)
+#define realloc(a, b) _ogg_realloc(a, b)
+#define free(a) _ogg_free(a)
 
 #endif // __OGGSHARED__

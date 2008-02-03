@@ -18,7 +18,9 @@
 /* general handling of the header and the vorbis_info structure (and
    substructures) */
 
-#include <e32def.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <ctype.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "codec_internal.h"
@@ -36,7 +38,7 @@ static void _v_readstring(oggpack_buffer *o,char *buf,int bytes){
 }
 
 void vorbis_comment_init(vorbis_comment *vc){
-  _ogg_memset(vc,0,sizeof(*vc));
+  memset(vc,0,sizeof(*vc));
 }
 
 /* This is more or less the same as strncasecmp - but that doesn't exist
@@ -44,7 +46,7 @@ void vorbis_comment_init(vorbis_comment *vc){
 static int tagcompare(const char *s1, const char *s2, int n){
   int c=0;
   while(c < n){
-    if(_ogg_toupper(s1[c]) != _ogg_toupper(s2[c]))
+    if(toupper(s1[c]) != toupper(s2[c]))
       return !0;
     c++;
   }
@@ -54,11 +56,11 @@ static int tagcompare(const char *s1, const char *s2, int n){
 char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
   long i;
   int found = 0;
-  int taglen = _ogg_strlen(tag)+1; /* +1 for the = we append */
+  int taglen = strlen(tag)+1; /* +1 for the = we append */
   char *fulltag = (char *)alloca(taglen+ 1);
 
-  _ogg_strcpy(fulltag, tag);
-  _ogg_strcat(fulltag, "=");
+  strcpy(fulltag, tag);
+  strcat(fulltag, "=");
   
   for(i=0;i<vc->comments;i++){
     if(!tagcompare(vc->user_comments[i], fulltag, taglen)){
@@ -74,10 +76,10 @@ char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
 
 int vorbis_comment_query_count(vorbis_comment *vc, char *tag){
   int i,count=0;
-  int taglen = _ogg_strlen(tag)+1; /* +1 for the = we append */
+  int taglen = strlen(tag)+1; /* +1 for the = we append */
   char *fulltag = (char *)alloca(taglen+1);
-  _ogg_strcpy(fulltag,tag);
-  _ogg_strcat(fulltag, "=");
+  strcpy(fulltag,tag);
+  strcat(fulltag, "=");
 
   for(i=0;i<vc->comments;i++){
     if(!tagcompare(vc->user_comments[i], fulltag, taglen))
@@ -95,8 +97,8 @@ void vorbis_comment_clear(vorbis_comment *vc){
     if(vc->user_comments)_ogg_free(vc->user_comments);
 	if(vc->comment_lengths)_ogg_free(vc->comment_lengths);
     if(vc->vendor)_ogg_free(vc->vendor);
+    memset(vc,0,sizeof(*vc));
   }
-  _ogg_memset(vc,0,sizeof(*vc));
 }
 
 /* blocksize 0 is guaranteed to be short, 1 is guarantted to be long.
@@ -108,7 +110,7 @@ int vorbis_info_blocksize(vorbis_info *vi,int zo){
 
 /* used by synthesis, which has a full, alloced vi */
 void vorbis_info_init(vorbis_info *vi){
-  _ogg_memset(vi,0,sizeof(*vi));
+  memset(vi,0,sizeof(*vi));
   vi->codec_setup=(codec_setup_info *)_ogg_calloc(1,sizeof(codec_setup_info));
 }
 
@@ -144,7 +146,7 @@ void vorbis_info_clear(vorbis_info *vi){
     _ogg_free(ci);
   }
 
-  _ogg_memset(vi,0,sizeof(*vi));
+  memset(vi,0,sizeof(*vi));
 }
 
 /* Header packing/unpacking ********************************************/
@@ -305,9 +307,9 @@ int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op)
     {
       char buffer[6];
       int packtype=oggpack_read(&opb,8);
-      _ogg_memset(buffer,0,6);
+      memset(buffer,0,6);
       _v_readstring(&opb,buffer,6);
-      if(_ogg_memcmp(buffer,"vorbis",6)){
+      if(memcmp(buffer,"vorbis",6)){
 	/* not a vorbis header */
 	return(OV_ENOTVORBIS);
       }

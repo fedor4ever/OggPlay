@@ -57,6 +57,9 @@ TInt CTremorDecoder::Open(const TDesC& aFileName)
 	else
 		err = KErrCorrupt; 
 
+	if (err != KErrNone)
+		iFile.Close();
+
 	return err;
 	}
 
@@ -68,11 +71,16 @@ TInt CTremorDecoder::OpenInfo(const TDesC& aFileName)
 	if (err != KErrNone)
 		return err;
 
-	TInt ret = ov_test(&iFile, &iVf, NULL, 0);
-	if (ret>=0)
+	err = ov_test(&iFile, &iVf, NULL, 0);
+	if (err>=0)
 		vi = ov_info(&iVf, -1);
+	else
+		err = KErrCorrupt; 
 
-	return ret;
+	if (err != KErrNone)
+		iFile.Close();
+
+	return err;
 	}
 
 TInt CTremorDecoder::OpenComplete()

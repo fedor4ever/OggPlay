@@ -26,105 +26,115 @@
 class CGainSettingItem;
 class CBufferingModeSettingItem;
 class COggSettingItemList : public CAknSettingItemList
-{
+	{
 public:
-  COggSettingItemList(COggPlayAppUi& aAppUi);
-  ~COggSettingItemList();
+	COggSettingItemList(COggPlayAppUi& aAppUi);
+	~COggSettingItemList();
 
-  void VolumeGainChangedL();
-
-#if !defined(PLUGIN_SYSTEM)
-  void BufferingModeChangedL();
-#endif
+	void BufferingModeChangedL();
+	void VolumeGainChangedL();
 
 protected:
-  // From CAknSettingItemList
-  CAknSettingItem* CreateSettingItemL(TInt aSettingId);
+	// From CAknSettingItemList
+	CAknSettingItem* CreateSettingItemL(TInt aSettingId);
   
 private:
-  TOggplaySettings& iData;
-  COggPlayAppUi& iAppUi;
+	TOggplaySettings& iData;
+	COggPlayAppUi& iAppUi;
 
-  CGainSettingItem* iGainSettingItem;
-
-#if !defined(PLUGIN_SYSTEM)
-  CBufferingModeSettingItem* iBufferingModeItem;
-#endif
-};
+	CBufferingModeSettingItem* iBufferingModeItem;
+	CGainSettingItem* iGainSettingItem;
+	};
 
 class CRepeatSettingItem : public CAknBinaryPopupSettingItem
-{
-public:  // Constructors and destructor
-    CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+	{
+public:
+	CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
 
-private: // Functions from base classes
-    void EditItemL(TBool aCalledFromMenu);
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
 
-private: //data
+private:
 	COggPlayAppUi& iAppUi;
-};
+	};
 
-class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 
-{
-public:  // Constructors and destructor
-    CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
-
-private: // Functions from base classes
-    void EditItemL(TBool aCalledFromMenu);
-
-private: //data
-    COggPlayAppUi& iAppUi;
-};
-
-#if !defined(PLUGIN_SYSTEM)
 class CBufferingModeSettingItem : public CAknEnumeratedTextPopupSettingItem
-{
-public:  // Constructors and destructor
-    CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+	{
+public:
+	CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
 
-private: // Functions from base classes
-    void EditItemL(TBool aCalledFromMenu);
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
 
-private: //data
+private:
 	COggPlayAppUi& iAppUi;
-};
+	};
 
 class CThreadPrioritySettingItem : public CAknBinaryPopupSettingItem
-{
-public:  // Constructors and destructor
-    CThreadPrioritySettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+	{
+public:
+	CThreadPrioritySettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
 
-private: // Functions from base classes
-    void EditItemL(TBool aCalledFromMenu);
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
 
-private: //data
+private:
 	COggPlayAppUi& iAppUi;
-};
-#endif
+	};
+
+class CGainSettingItem : public CAknEnumeratedTextPopupSettingItem 
+	{
+public:
+	CGainSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
+
+private:
+	COggPlayAppUi& iAppUi;
+	};
+
+class CMp3DitheringSettingItem : public CAknBinaryPopupSettingItem
+	{
+public:
+	CMp3DitheringSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
+
+private:
+	COggPlayAppUi& iAppUi;
+	};
 
 class CAlarmSettingItem : public CAknBinaryPopupSettingItem
-{
-public:  // Constructors and destructor
-    CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+	{
+public:
+	CAlarmSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
 
-private: // Functions from base classes
-    void EditItemL(TBool aCalledFromMenu);
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
 
-private: //data
+private:
 	COggPlayAppUi& iAppUi;
-};
+	};
 
 class CAlarmTimeSettingItem : public CAknTimeOrDateSettingItem
-{
-public:  // Constructors and destructor
-    CAlarmTimeSettingItem(TInt aIdentifier, COggPlayAppUi& aAppUi);
+	{
+public:
+	CAlarmTimeSettingItem(TInt aIdentifier, COggPlayAppUi& aAppUi);
 
-private: // Functions from base classes
-    void EditItemL(TBool aCalledFromMenu);
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
 
-private: //data
+private:
 	COggPlayAppUi& iAppUi;
-};
-
+	};
 #endif // SERIES60
 #endif

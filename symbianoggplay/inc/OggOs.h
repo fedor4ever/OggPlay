@@ -44,7 +44,7 @@ chSTR2(__LINE__) "):" #desc)
 #else
 // support for legacy audio codec (-:
 // this is experimental at the moment.
-// #define MP3_SUPPORT
+#define MP3_SUPPORT
 #endif
 
 // Force filling the buffer to at least 75% of their capacity before sending them to

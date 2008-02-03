@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id$
  */
 
 # ifdef HAVE_CONFIG_H
@@ -25,8 +24,8 @@
 
 # include "global.h"
 
-# include <string.h>
-# include <stdlib.h>
+// # include <string.h>
+// # include <stdlib.h>
 
 # ifdef HAVE_ASSERT_H
 #  include <assert.h>
@@ -74,7 +73,7 @@ struct id3_tag *id3_tag_new(void)
  * NAME:	tag->delete()
  * DESCRIPTION:	destroy a tag and deallocate all associated memory
  */
-void id3_tag_delete(struct id3_tag *tag)
+EXPORT_C void id3_tag_delete(struct id3_tag *tag)
 {
   assert(tag);
 
@@ -217,7 +216,7 @@ int id3_tag_detachframe(struct id3_tag *tag, struct id3_frame *frame)
  * NAME:	tag->findframe()
  * DESCRIPTION:	find in a tag the nth (0-based) frame with the given frame ID
  */
-struct id3_frame *id3_tag_findframe(struct id3_tag const *tag,
+EXPORT_C struct id3_frame *id3_tag_findframe(struct id3_tag const *tag,
 				    char const *id, unsigned int index)
 {
   unsigned int len, i;
@@ -286,7 +285,7 @@ void parse_header(id3_byte_t const **ptr,
  * NAME:	tag->query()
  * DESCRIPTION:	if a tag begins at the given location, return its size
  */
-signed long id3_tag_query(id3_byte_t const *data, id3_length_t length)
+EXPORT_C signed long id3_tag_query(id3_byte_t const *data, id3_length_t length)
 {
   unsigned int version;
   int flags;
@@ -351,7 +350,7 @@ int v1_attachstr(struct id3_tag *tag, char const *id,
     goto fail;
 
   if (text)
-    id3_latin1_decode(text, ucs4);
+    id3_latin1_decode((id3_latin1_t *) text, ucs4);
   else
     id3_ucs4_putnumber(ucs4, number);
 
@@ -630,7 +629,7 @@ struct id3_tag *v2_parse(id3_byte_t const *ptr)
  * NAME:	tag->parse()
  * DESCRIPTION:	parse a complete ID3 tag
  */
-struct id3_tag *id3_tag_parse(id3_byte_t const *data, id3_length_t length)
+EXPORT_C struct id3_tag *id3_tag_parse(id3_byte_t const *data, id3_length_t length)
 {
   id3_byte_t const *ptr;
   unsigned int version;

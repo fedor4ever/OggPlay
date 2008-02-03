@@ -89,7 +89,7 @@ mad_timer_t mad_timer_abs(mad_timer_t);
 
 IMPORT_C void mad_timer_set(mad_timer_t *, unsigned long, unsigned long, unsigned long);
 IMPORT_C void mad_timer_add(mad_timer_t *, mad_timer_t);
-void mad_timer_multiply(mad_timer_t *, signed long);
+IMPORT_C void mad_timer_multiply(mad_timer_t *, signed long);
 
 IMPORT_C signed long mad_timer_count(mad_timer_t, enum mad_units);
 unsigned long mad_timer_fraction(mad_timer_t, unsigned long);

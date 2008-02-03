@@ -590,7 +590,7 @@ typedef struct {
   unsigned long fraction;	/* 1/MAD_TIMER_RESOLUTION seconds */
 } mad_timer_t;
 
-const mad_timer_t mad_timer_zero = { 0, 0 };
+extern const mad_timer_t mad_timer_zero;
 
 # define MAD_TIMER_RESOLUTION	352800000UL
 
@@ -969,5 +969,17 @@ int mad_decoder_message(struct mad_decoder *, void *, unsigned int *);
 
 # ifdef __cplusplus
 }
+
+// Audio dither struct (from MadPlay)
+class TAudioDither
+	{
+public:
+	TAudioDither(mad_fixed_t& aRandom);
+
+public:
+	mad_fixed_t iError[3];
+	mad_fixed_t& iRandom;
+	};
+
 # endif
 #endif

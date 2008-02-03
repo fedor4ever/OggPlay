@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id$
  */
 
 #pragma warning( disable : 4146 )
@@ -27,8 +26,8 @@
 
 # include "global.h"
 
-# include <stdlib.h>
-# include <string.h>
+// # include <stdlib.h>
+// # include <string.h>
 
 # ifdef HAVE_ASSERT_H
 #  include <assert.h>
@@ -826,7 +825,7 @@ id3_ucs4_t const *id3_field_getfullstring(union id3_field const *field)
  * NAME:	field->getnstrings()
  * DESCRIPTION:	return the number of strings in a stringlist field
  */
-unsigned int id3_field_getnstrings(union id3_field const *field)
+EXPORT_C unsigned int id3_field_getnstrings(union id3_field const *field)
 {
   assert(field);
 
@@ -840,7 +839,7 @@ unsigned int id3_field_getnstrings(union id3_field const *field)
  * NAME:	field->getstrings()
  * DESCRIPTION:	return one value of a stringlist field
  */
-id3_ucs4_t const *id3_field_getstrings(union id3_field const *field,
+EXPORT_C id3_ucs4_t const *id3_field_getstrings(union id3_field const *field,
 				       unsigned int index)
 {
   id3_ucs4_t const *string;
