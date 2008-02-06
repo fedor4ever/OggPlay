@@ -24,5 +24,6 @@ PRJ_MMPFILES
 ..\shared\groupUIQSony\oggsharedUIQSony.mmp
 ..\vorbis\groupUIQSony\oggvorbisUIQSony.mmp
 ..\flac\groupUIQSony\oggflacUIQSony.mmp
+..\mad\groupUIQSony\oggmadUIQSony.mmp
 OggPlayUIQSony.mmp
 

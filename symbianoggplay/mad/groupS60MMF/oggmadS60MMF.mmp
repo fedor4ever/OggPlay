@@ -1,0 +1,50 @@
+TARGET        OggPlayMadi.dll
+TARGETTYPE    dll
+UID 0x1000008d 0x101FF685
+
+SOURCEPATH ..
+SOURCE dllentry.cpp     
+
+SOURCEPATH    ..\libmad
+SOURCE bit.c
+SOURCE decoder.c
+SOURCE fixed.c
+SOURCE frame.c
+SOURCE huffman.c
+SOURCE layer12.c
+SOURCE layer3.c
+SOURCE stream.c
+SOURCE synth.c
+SOURCE timer.c
+SOURCE version.c
+
+
+SOURCEPATH ..\libid3tag
+SOURCE compat.c     
+SOURCE crc.c        
+SOURCE field.c      
+SOURCE file.c       
+SOURCE id3frame.c      
+SOURCE frametype.c  
+SOURCE genre.c      
+SOURCE latin1.c     
+SOURCE parse.c      
+SOURCE render.c     
+SOURCE tag.c        
+SOURCE ucs4.c       
+SOURCE utf16.c      
+SOURCE utf8.c       
+SOURCE util.c       
+
+SOURCEPATH ..\madplay
+SOURCE xltag.c
+SOURCE mpcrc.c
+SOURCE rgain.c
+
+USERINCLUDE ..\libmad
+SYSTEMINCLUDE \Epoc32\include
+
+LIBRARY euser.lib
+LIBRARY OggPlayShared.lib      
+
+MACRO HAVE_CONFIG_H
