@@ -120,10 +120,6 @@ public:
 
 	TVwsViewId ViewId() const;
 
-#if defined(PLUGIN_SYSTEM)
-	void VolumeGainChangedL();
-#endif
-
 private:  
 	// From MCoeView
 	void ViewDeactivated();

@@ -91,7 +91,7 @@ void COggPlayAppView::ConstructL(COggPlayAppUi *aApp)
   CreateWindowL();
 
   SetComponentsToInheritVisibility(EFalse);
-  iOggFiles = new(ELeave) TOggFiles(iApp->iOggPlayback);
+  iOggFiles = new(ELeave) TOggFiles(aApp);
 
   // Construct the two canvases for flip-open and closed mode
   // Flip-open mode:
@@ -2182,15 +2182,18 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 void COggPlayAppView::OggSeek(TInt aSeekTime)
 	{
 	CAbsPlayback* playback = iApp->iOggPlayback;
-#if defined(PLUGIN_SYSTEM)
-	  // The plugin system can only seek when playing
-	  if (playback->State() != CAbsPlayback::EPlaying)
-		  return;
-#else
-	  // The multi-thread playback system can also seek when paused
-	  if ((playback->State() != CAbsPlayback::EPlaying) && (playback->State() != CAbsPlayback::EPaused))
-		  return;
-#endif
+	if (playback == iApp->iOggMTPlayback)
+		{
+		// Multi thread playback can seek when paused
+		if ((playback->State() != CAbsPlayback::EPlaying) && (playback->State() != CAbsPlayback::EPaused))
+			return;
+		}
+	else
+		{
+		// MMF playback can only seek when playing
+		if (playback->State() != CAbsPlayback::EPlaying)
+			return;
+		}
 
 	TInt64 pos = playback->Position() + aSeekTime;
 	playback->SetPosition(pos);

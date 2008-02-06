@@ -344,10 +344,7 @@ RESOURCE MENU_PANE r_options_menu
                   cascade=r_skin_menu; },
     MENU_ITEM { command=EOggOptions;	txt=ogg_settings; },
 //	MENU_ITEM { command=EOggUserHotkeys;	txt=ogg_user_hotkey; }
-#ifdef PLUGIN_SYSTEM
     MENU_ITEM { command=EOggCodecSelection; txt=ogg_codec_selection; }
-#endif
-
   };
 }
 

@@ -42,7 +42,7 @@
 
 #define BETA_VERSION
 #if defined(BETA_VERSION)
-_LIT(KBetaTxt, " beta1");
+_LIT(KBetaTxt, " beta2");
 #endif
 
 #if defined(SERIES60)
@@ -424,12 +424,6 @@ void COggAboutDialog::PreLayoutDynInitL()
 
 	TBuf<256> buf;
 	buf.Copy(resTxt);
-
-#if defined(PLUGIN_SYSTEM)
-	buf.Append(KMMFTxt);
-#elif defined(MP3_SUPPORT)
-	buf.Append(KMP3Txt);
-#endif
 
 	iRichText->InsertL(0, buf);
 

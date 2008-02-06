@@ -90,7 +90,7 @@ const TInt KOggControlFreq = 14;
 // Stream start delays
 // Avoid buffer underflows at stream startup and stop multiple starts when the user moves quickly between tracks
 const TInt KStreamStartDelay = 100000;
-const TInt KSendoStreamStartDelay = 275000;
+const TInt KSendoStreamStartDelay = 500000;
 
 // Stream stop delay
 // OggPlay doesn't wait for a play complete message so wait a little while before "stopping"
@@ -98,6 +98,9 @@ const TInt KStreamStopDelay = 100000;
 
 // Stream restart delay (the time to wait after running out of buffers before attempting to play again)
 const TInt KStreamRestartDelay = 100000;
+
+// Uid for "tremor controller" (the MTP engine)
+const TUid KOggPlayInternalController = { 0x10202030 };
 
 
 #include "mdaaudiooutputstream.h"
@@ -111,17 +114,17 @@ class CStreamingThreadListener;
 class COggPlayback : public CAbsPlayback, public MOggSampleRateFillBuffer, public MThreadPanicObserver
 	{
 public: 
-	COggPlayback(COggMsgEnv* aEnv, MPlaybackObserver* aObserver, TInt aMachineUid);
+	COggPlayback(COggMsgEnv* aEnv, CPluginSupportedList& aPluginSupportedList, MPlaybackObserver* aObserver, TInt aMachineUid);
 	~COggPlayback();
 
 	// From CAbsPlayback
 	void ConstructL();
 
-	TInt Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver);
-	TInt FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver);
+	TInt Info(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver);
+	TInt FullInfo(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver);
 	void InfoCancel();
 
-	TInt Open(const TDesC& aFileName);
+	TInt Open(const TDesC& aFileName, TUid aControllerUid);
 
 	void Pause();
 	void Play(); 
@@ -219,8 +222,6 @@ private:
 	MDecoder* iDecoder;
 	TBool iEof;
 	RFs iFs;
-
-	TBool iStreamingErrorDetected;
 
 	RThread iThread;
 	RThread iUIThread;

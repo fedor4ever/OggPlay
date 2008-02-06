@@ -4,7 +4,7 @@
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
 ;
 ;Version string to be changed
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,71,2
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,72,1
 ;
 ; 0x101F7960 for S60 v2.0 and later
 (0x101F7960),0,0,0,{ "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID", "Series60ProductID",
@@ -37,8 +37,7 @@
 "C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
 "C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
 "C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
-"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayController.dll"-"!:\system\libs\Plugins\OggPlayController.dll"
-"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayMadi.dll"-"!:\system\libs\OggPlayMadi.dll"
 
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ogi",FN

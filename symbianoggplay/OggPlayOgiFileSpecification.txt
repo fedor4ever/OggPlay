@@ -6,7 +6,7 @@ OggPlay ini file (OggPlay.ogi) specification
 ----------------------------
 
 Added iMp3Dithering setting
-
+16 bit string fields are now correctly terminated with a 16-bit '\n'
 
 
 .ogi version 1 specification
@@ -28,7 +28,7 @@ Body
 
 Data format:
 All numeric fields are plain 8-bit text and are terminated with '\n'.
-All text fields are standard Symbian 16-bit text and are terminated with '\n'
+All text fields are standard Symbian 16-bit text and are terminated with L'\n'
 All number ranges are inclusive (i.e. a --> b means all values between a and b including a and b).
 
 Body data:

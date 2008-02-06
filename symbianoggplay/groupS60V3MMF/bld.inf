@@ -25,7 +25,6 @@ PRJ_MMPFILES
 
 ..\vorbis\groupS60V3MMF\OggvorbisS60V3MMF.mmp
 ..\flac\groupS60V3MMF\oggflacS60V3MMF.mmp
-
-..\Plugin\groupS60V3MMF\OggPlayControllerS60V3MMF.mmp
+..\mad\groupS60V3MMF\oggmadS60V3MMF.mmp
 OggPlayS60V3MMF.mmp
 

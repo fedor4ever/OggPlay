@@ -313,13 +313,6 @@ TVwsViewId COggSettingsView::ViewId() const
 
 
 #if defined(PLUGIN_SYSTEM)
-void COggSettingsView::VolumeGainChangedL()
-	{
-	if (iContainer)
-		iContainer->VolumeGainChangedL();
-	}
-
-
 COggPluginSettingsView::COggPluginSettingsView(COggPlayAppView& aOggViewCtl )
 : COggViewBase(aOggViewCtl), iOggViewCtl(aOggViewCtl)
 	{
@@ -361,7 +354,8 @@ void COggPluginSettingsView::ViewDeactivated()
 	delete iCodecSelection;
 	iCodecSelection = NULL;
 	}
-#else
+#endif
+
 COggPlaybackOptionsView::COggPlaybackOptionsView(COggPlayAppView& aOggViewCtl)
 : COggViewBase(aOggViewCtl)
 	{
@@ -420,7 +414,6 @@ void COggPlaybackOptionsView::BufferingModeChangedL()
 	if (iContainer)
 		iContainer->BufferingModeChangedL();
 	}
-#endif // PLUGIN_SYSTEM
 
 
 COggUserHotkeysView::COggUserHotkeysView(COggPlayAppView& aOggViewCtl)

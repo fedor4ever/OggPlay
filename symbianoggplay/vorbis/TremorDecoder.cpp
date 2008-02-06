@@ -137,7 +137,7 @@ void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)
 	CnvUtfConverter::ConvertToUnicodeFromUtf8(aBuf,p);
 
 	// In the real world there are all kinds of coding being used, so we try to find out what it is
-#if !defined(PLUGIN_SYSTEM) // Doesn't work when used in MMF Framework. Absolutely no clue why.
+#if !defined(MMF_PLUGIN) // Doesn't work when used in MMF Framework. Absolutely no clue why.
 	TInt i= jcode((char*) aStr);
 	if (i==BIG5_CODE)
 		{

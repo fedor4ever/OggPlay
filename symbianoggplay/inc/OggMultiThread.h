@@ -111,7 +111,10 @@ enum TStreamingThreadStatus
 	EPlayInterrupted,
 
 	// Playback has underflowed (aka restart request)
-	EPlayUnderflow
+	EPlayUnderflow,
+
+	// Playback has stopped
+	EPlayStopped
 };
 
 // Shared data between the UI, buffering and streaming threads
@@ -371,6 +374,9 @@ public:
 	CStreamingThreadListener(COggPlayback& aOggPlayback, TStreamingThreadData& aSharedData);
 	~CStreamingThreadListener();
 
+	void StartListening();
+
+	// From CActive
 	void RunL();
 	void DoCancel();
 

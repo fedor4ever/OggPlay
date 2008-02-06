@@ -281,7 +281,7 @@ void CFlacDecoder::GetString(TDes& aBuf, const char* aStr)
 	TPtrC8 p((const unsigned char *)aStr);
 	CnvUtfConverter::ConvertToUnicodeFromUtf8(aBuf,p);
 
-#if !defined(PLUGIN_SYSTEM) // Doesn't work when used in MMF Framework. Absolutely no clue why.
+#if !defined(MMF_PLUGIN) // Doesn't work when used in MMF Framework. Absolutely no clue why.
 	// In the real world there are all kinds of coding being used, so we try to find out what it is
 	TInt i= jcode((char*) aStr);
 	if (i==BIG5_CODE)

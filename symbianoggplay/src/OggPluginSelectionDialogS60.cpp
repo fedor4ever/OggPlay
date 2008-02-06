@@ -72,26 +72,27 @@ void COggplayCodecSelectionSettingItemList::RefreshListboxModel()
   CDesCArray* modelArray = static_cast<CDesCArray*>(iListBox->Model()->ItemTextArray());
   modelArray->Reset();
   COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
-  iPluginSupportedList = &appUi->iOggPlayback->GetPluginListL();
+  iPluginSupportedList = appUi->PluginSupportedList();
   if (!iExtensionList)
      iExtensionList =  iPluginSupportedList->SupportedExtensions();
-  
+
   for (TInt i=0; i<iExtensionList->Count(); i++)
     {
-    TBuf <10> extension = iExtensionList->MdcaPoint(i);
-    TBuf <50> tmp;
-    CPluginInfo * info = appUi->iOggPlayback->GetPluginListL().GetSelectedPluginInfo(extension);
-	if ( info == NULL )
-	{
+    TBuf<10> extension = iExtensionList->MdcaPoint(i);
+    TBuf<50> tmp;
+    const CPluginInfo* info = iPluginSupportedList->GetSelectedPluginInfo(extension);
+	if (!info)
+		{
 	   // Codec has been disabled
-   		iEikonEnv->ReadResource(tmp,R_OGG_DISABLED);
-	}
-	else tmp = (info->iName->Left(50));
+   		iEikonEnv->ReadResource(tmp, R_OGG_DISABLED);
+		}
+	else
+		tmp = info->iName->Left(50);
 	
     listboxBuf.Format(_L("\t%S\t\t%S"), &extension, &tmp);
 	modelArray->InsertL(i,listboxBuf);
     }
-    
+
   iListBox->HandleItemAdditionL();
   DrawDeferred();
   }
@@ -107,81 +108,86 @@ CCoeControl* COggplayCodecSelectionSettingItemList::ComponentControl(TInt /*aInd
   }
 
 void COggplayCodecSelectionSettingItemList::ProcessCommandL (TInt /*aCommandId*/)
-{
-    // User has pressed the "Modify" CBA or pressed the select button.
-    // Display the list of available codecs for the selected extension
+	{
+	// User has pressed the "Modify" CBA or pressed the select button.
+	// Display the list of available codecs for the selected extension
     
 	// Create CEikTextListBox instance, list
-    CEikTextListBox* list = new(ELeave) CAknSinglePopupMenuStyleListBox;
-    CleanupStack::PushL(list);
+	CEikTextListBox* list = new(ELeave) CAknSinglePopupMenuStyleListBox;
+	CleanupStack::PushL(list);
 
 	// Create CAknPopupList instance, popupList
-    CAknPopupList* popupList = CAknPopupList::NewL(list, R_AVKON_SOFTKEYS_SELECT_CANCEL, AknPopupLayouts::EMenuWindow);
-    CleanupStack::PushL( popupList );
+	CAknPopupList* popupList = CAknPopupList::NewL(list, R_AVKON_SOFTKEYS_SELECT_CANCEL, AknPopupLayouts::EMenuWindow);
+	CleanupStack::PushL(popupList);
 
 	// Initialize listbox.
-    list->ConstructL(popupList, CEikListBox::ELeftDownInViewRect);
-    list->CreateScrollBarFrameL(ETrue);
-    list->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
+	list->ConstructL(popupList, CEikListBox::ELeftDownInViewRect);
+	list->CreateScrollBarFrameL(ETrue);
+	list->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
     
-    // The extension currently selected in the listbox.
-    TBuf <10> selectedExtension = iExtensionList->MdcaPoint(iListBox->CurrentItemIndex());
+	// The extension currently selected in the listbox.
+	TBuf <10> selectedExtension = iExtensionList->MdcaPoint(iListBox->CurrentItemIndex());
     
-    // Create the list of codecs to select
-    CDesCArrayFlat* items = new (ELeave) CDesCArrayFlat(3);
-    CArrayPtrFlat <CPluginInfo> * pluginList = iPluginSupportedList->GetPluginInfoList(selectedExtension);
+	// Create the list of codecs to select
+	CDesCArrayFlat* items = new(ELeave) CDesCArrayFlat(3);
+	const CArrayPtrFlat <CPluginInfo>* pluginList = iPluginSupportedList->GetPluginInfoList(selectedExtension);
 	
-    for(TInt i=0; i<pluginList->Count(); i++)
-    {
-        items->AppendL(*pluginList->At(i)->iName);
-    }
+	for (TInt i = 0 ; i<pluginList->Count() ; i++)
+		items->AppendL(*pluginList->At(i)->iName);
 
-    TBuf <50> tmp;
-   	iEikonEnv->ReadResource(tmp, R_OGG_USE_NO_CODEC);
+	TBuf<50> tmp;
+	iEikonEnv->ReadResource(tmp, R_OGG_USE_NO_CODEC);
 	items->AppendL(tmp);
     
-    // Push items'pointer to CleanupStack.  
-    CleanupStack::PushL( items );
-    // Set listitems.
-    CTextListBoxModel* model = list->Model();
-    model->SetItemTextArray( items );
-    model->SetOwnershipType( ELbmOwnsItemArray );
-    CleanupStack::Pop(items);
-    // Set title .
-    // popupList->SetTitleL( _L("Choose") );
-    // Show popup list and then show return value.
-    TInt popupOk = popupList->ExecuteLD();
-    // Pop the popupList's pointer from CleanupStack
-    CleanupStack::Pop();
+	// Push items'pointer to CleanupStack.  
+	CleanupStack::PushL(items);
 
-    if ( popupOk )
-        {
-          // User has selected a new codec.
-          TInt index = list->CurrentItemIndex();
-	      CPluginInfo * pluginInfo = NULL;
-          CArrayPtrFlat <CPluginInfo> *infoList = iPluginSupportedList->GetPluginInfoList(selectedExtension);
-          if ( infoList )
-             if (index <= infoList->Count()-1 )
-               pluginInfo = infoList->At(index);
-         
-	      if (pluginInfo)
-	      {
-	         iPluginSupportedList->SelectPluginL(selectedExtension, pluginInfo->iControllerUid);
-	         // Show the info about the plugin
-	 	     CCodecInfoList * infoScreen = new (ELeave) CCodecInfoList(*pluginInfo);
-             COggPlayAppUi * appUi=(COggPlayAppUi *)CEikonEnv::Static()->AppUi();
-             infoScreen->ConstructL(appUi->ClientRect()); //This is in fact an ExecuteLD
-             delete infoScreen;	
-	      }
-	       else
-	 	    iPluginSupportedList->SelectPluginL(selectedExtension, TUid::Null());
+	// Set listitems.
+	CTextListBoxModel* model = list->Model();
+	model->SetItemTextArray( items );
+	model->SetOwnershipType( ELbmOwnsItemArray );
+	CleanupStack::Pop(items);
+    
+	// Set title
+	// popupList->SetTitleL( _L("Choose") );
+
+	// Show popup list and then show return value.
+	TInt popupOk = popupList->ExecuteLD();
+
+	// Pop the popupList's pointer from CleanupStack
+	CleanupStack::Pop();
+
+	if (popupOk)
+		{
+		// User has selected a new codec.
+		TInt index = list->CurrentItemIndex();
+		CPluginInfo * pluginInfo = NULL;
+		const CArrayPtrFlat <CPluginInfo> *infoList = iPluginSupportedList->GetPluginInfoList(selectedExtension);
+		if (infoList)
+			{
+			if (index<=(infoList->Count()-1))
+				pluginInfo = infoList->At(index);
+			}
+		
+		if (pluginInfo)
+			{
+			iPluginSupportedList->SelectPluginL(selectedExtension, pluginInfo->iControllerUid);
+
+			// Show the info about the plugin
+			CCodecInfoList* infoScreen = new(ELeave) CCodecInfoList(*pluginInfo);
+			COggPlayAppUi* appUi=(COggPlayAppUi *)CEikonEnv::Static()->AppUi();
+			infoScreen->ConstructL(appUi->ClientRect()); // This is in fact an ExecuteLD
+			delete infoScreen;	
+			}
+		else
+			iPluginSupportedList->SelectPluginL(selectedExtension, TUid::Null());
 	 		
-	 	  RefreshListboxModel();
-        }
+		RefreshListboxModel();
+		}
         
-    // Pop and Destroy the list's pointer from CleanupStack
-    CleanupStack::PopAndDestroy();
-}
+	// Pop and Destroy the list's pointer from CleanupStack
+	CleanupStack::PopAndDestroy();
+	}
   
 TInt COggplayCodecSelectionSettingItemList::TimerExpired(TAny* aPtr)
 {

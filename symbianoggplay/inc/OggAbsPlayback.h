@@ -21,6 +21,7 @@
 #define OGGABSPLAYBACK_H
 
 #include <OggOs.h>
+#include <badesca.h>
 #include "OggFileInfo.h"
 #include "OggRateConvert.h"
 
@@ -28,26 +29,36 @@ const TInt KMaxVolume = 100;
 const TInt KStepVolume = 10;
 
 
-#if defined(PLUGIN_SYSTEM)
-#include <MdaAudioSampleEditor.h>
+class TPluginImplementationInformation
+	{
+public:
+	TPluginImplementationInformation(const TDesC& aDisplayName, const TDesC& aSupplier, TUid aUid, TInt aVersion);
+
+public:
+	const TDesC& iDisplayName;
+	const TDesC& iSupplier;
+
+	TUid iUid;
+	TInt iVersion;
+	};
 
 class CPluginInfo : public CBase
 	{
 public:
-    static CPluginInfo* NewL( const TDesC& anExtension, 
-	const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid);
+    static CPluginInfo* NewL(const TDesC& aExtension, const TPluginImplementationInformation &aFormatInfo, TUid aControllerUid);
 	~CPluginInfo();
     
 private :
 	CPluginInfo();
-	void ConstructL(const TDesC& anExtension, 
-	const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid);
+	void ConstructL(const TDesC& aExtension, const TPluginImplementationInformation &aFormatInfo, TUid aControllerUid);
   
 public:
 	HBufC* iExtension;
+
 	HBufC* iName;
 	HBufC* iSupplier;
 	TInt iVersion;
+
 	TUid iFormatUid;
 	TUid iControllerUid;
 	};
@@ -60,18 +71,16 @@ public:
         
 	void ConstructL();
 
-	void AddPluginL(const TDesC &extension,
-	const CMMFFormatImplementationInformation &aFormatInfo, const TUid aControllerUid);
-            
+	void AddPluginL(const TDesC &extension, const TPluginImplementationInformation &aFormatInfo, TUid aControllerUid);            
 	void SelectPluginL(const TDesC &extension, TUid aUid);
-	CPluginInfo* GetSelectedPluginInfo(const TDesC &extension);
-	CArrayPtrFlat <CPluginInfo>* GetPluginInfoList(const TDesC &extension);
+	const CPluginInfo* GetSelectedPluginInfo(const TDesC &extension) const;
+	const CArrayPtrFlat <CPluginInfo>* GetPluginInfoList(const TDesC &extension) const;
 
 	void AddExtension(const TDesC &extension);
-	CDesCArrayFlat* SupportedExtensions();
+	CDesCArrayFlat* SupportedExtensions() const;
 
 private:
-	TInt FindListL(const TDesC &anExtension);
+	TInt FindListL(const TDesC &anExtension) const;
 
 	class TExtensionList
 		{
@@ -84,29 +93,20 @@ private:
 	// Plugins that have been selected
 	CArrayPtrFlat <TExtensionList>* iPlugins;
 	};
-#endif
 
 
 class MPlaybackObserver
 	{
 public:
+	virtual void ResumeUpdates() = 0;
+
 	virtual void NotifyUpdate() = 0;
 	virtual void NotifyPlayComplete() = 0;
 	virtual void NotifyPlayInterrupted() = 0;
-	virtual void ResumeUpdates() = 0;
 
-#if !defined(PLUGIN_SYSTEM)
 	virtual void NotifyStreamOpen(TInt aErr) = 0;
-#endif
-
-#if defined(DELAY_AUDIO_STREAMING_OPEN)
 	virtual void NotifyFileOpen(TInt aErr) = 0;
-#endif
-
-#if defined (DELAY_AUDIO_STREAMING_START)
 	virtual void NotifyPlayStarted() = 0;
-#endif
-
 	virtual void NotifyFatalPlayError() = 0;
 	};
 
@@ -129,18 +129,18 @@ public:
 		EPlaying		// The playback engine is playing 
 		};
 
-	CAbsPlayback(MPlaybackObserver* aObserver);
+	CAbsPlayback(CPluginSupportedList& aPluginSupportedList, MPlaybackObserver* aObserver);
 
 	// Here is a bunch of abstract methods which need to implemented for each audio format
 	virtual void ConstructL() = 0;
 
 	// Open a file and retrieve information (meta data, file size etc.) without playing it
-	virtual TInt Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver) = 0;
-	virtual TInt FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver) = 0;
+	virtual TInt Info(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver) = 0;
+	virtual TInt FullInfo(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver) = 0;
 	virtual void InfoCancel() = 0;
 
 	// Open a file and prepare playback
-	virtual TInt Open(const TDesC& aFileName) = 0;
+	virtual TInt Open(const TDesC& aFileName, TUid aControllerUid) = 0;
 	virtual const TOggFileInfo& DecoderFileInfo();
 
 	virtual void Pause() = 0;
@@ -155,10 +155,6 @@ public:
 	virtual TInt Volume() = 0;
   
 	virtual const TInt32* GetFrequencyBins() = 0;
-
-#if defined(PLUGIN_SYSTEM)
-	virtual CPluginSupportedList& GetPluginListL() = 0;
-#endif
 
 	// Implemented Helpers 
 	virtual TState State();
@@ -182,14 +178,12 @@ public:
 
 protected:
 	TState iState;
+
+	CPluginSupportedList& iPluginSupportedList;
 	MPlaybackObserver* iObserver;
 
 	// File properties and tag information
 	TOggFileInfo iFileInfo;
-
-#if defined(PLUGIN_SYSTEM)
-	CPluginSupportedList iPluginSupportedList;
-#endif
-};
+	};
 
 #endif

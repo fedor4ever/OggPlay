@@ -45,14 +45,40 @@
 #include "MadDecoder.h"
 #endif
 
+#if defined(SERIES60V3)
+#include "S60V3ImplementationUIDs.hrh"
+#else
+#include "ImplementationUIDs.hrh"
+#endif
 
-COggPlayback::COggPlayback(COggMsgEnv* aEnv, MPlaybackObserver* aObserver, TInt aMachineUid)
-: CAbsPlayback(aObserver), iEnv(aEnv), iSharedData(*this, iUIThread, iBufferingThread), iMachineUid(aMachineUid),
+
+// The streaming thread needs to have the same stack size as the main thread (blame the mp3 plugin for this)
+const TInt KStreamingThreadStackSize = 32768;
+
+// Literals for supported formats
+_LIT(KOgg, "ogg");
+_LIT(KOggExt, ".ogg");
+
+_LIT(KOga, "oga");
+_LIT(KOgaExt, ".oga");
+
+_LIT(KFlac, "flac");
+_LIT(KFlacExt, ".flac");
+
+_LIT(KMp3, "mp3");
+_LIT(KMp3Ext, ".mp3");
+
+// Literals for our internal controller
+_LIT(KOggInternalCodec, "Internal");
+_LIT(KOggPlay, "OggPlay");
+
+
+COggPlayback::COggPlayback(COggMsgEnv* aEnv, CPluginSupportedList& aPluginSupportedList, MPlaybackObserver* aObserver, TInt aMachineUid)
+: CAbsPlayback(aPluginSupportedList, aObserver), iEnv(aEnv), iSharedData(*this, iUIThread, iBufferingThread), iMachineUid(aMachineUid),
 iMp3LeftDither(iMp3Random), iMp3RightDither(iMp3Random)
 	{
 	}
 
-const TInt KStreamingThreadStackSize = 32768;
 void COggPlayback::ConstructL()
 	{
 	// Set up the session with the file server
@@ -89,6 +115,9 @@ void COggPlayback::ConstructL()
 	iStreamingThreadListener = new(ELeave) CStreamingThreadListener(*this, iSharedData);
 	iSharedData.iStreamingThreadListener = iStreamingThreadListener;
 
+	// Listen for the audio stream open event
+	iStreamingThreadListener->StartListening();
+
 	// Launch the streaming thread
 	User::LeaveIfError(iStreamingThreadCommandHandler->ResumeCommandHandlerThread());
 
@@ -102,11 +131,34 @@ void COggPlayback::ConstructL()
 	// Add it to the buffering threads active scheduler (this thread)
 	CActiveScheduler::Add(iBufferingThreadAO);
 
-	iStartAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StartAudioStreamingCallBack, this));
-	iRestartAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
-	iStopAudioStreamingTimer = new (ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
+	iStartAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(StartAudioStreamingCallBack, this));
+	iRestartAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
+	iStopAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
 
-	iOggSampleRateConverter = new (ELeave) COggSampleRateConverter;
+	iOggSampleRateConverter = new(ELeave) COggSampleRateConverter;
+
+	// Initialise codecs
+	TPluginImplementationInformation internalPluginInfo(KOggInternalCodec, KOggPlay, TUid::Uid((TInt) KOggTremorUidPlayFormatImplementation), 0);
+	iPluginSupportedList.AddPluginL(KOgg, internalPluginInfo, KOggPlayInternalController);
+
+	internalPluginInfo.iUid = TUid::Uid((TInt) KOggFlacUidPlayFormatImplementation);
+	iPluginSupportedList.AddPluginL(KOga, internalPluginInfo, KOggPlayInternalController);
+
+	internalPluginInfo.iUid = TUid::Uid((TInt) KNativeFlacUidPlayFormatImplementation);
+	iPluginSupportedList.AddPluginL(KFlac, internalPluginInfo, KOggPlayInternalController);
+
+	internalPluginInfo.iUid = TUid::Uid((TInt) KMp3UidPlayFormatImplementation);
+	iPluginSupportedList.AddPluginL(KMp3, internalPluginInfo, KOggPlayInternalController);
+
+	// Select codecs (will be overruled by the .ogi file, if it exists)
+	iPluginSupportedList.SelectPluginL(KOgg, KOggPlayInternalController);
+	iPluginSupportedList.SelectPluginL(KOga, KOggPlayInternalController);
+	iPluginSupportedList.SelectPluginL(KFlac, KOggPlayInternalController);
+
+#if !defined(PLUGIN_SYSTEM)
+	// Only select the MAD mp3 codec if we don't have a plugin system (that will almost certainly have a mp3 codec)
+	iPluginSupportedList.SelectPluginL(KMp3, KOggPlayInternalController);
+#endif
 	}
 
 COggPlayback::~COggPlayback()
@@ -150,10 +202,6 @@ COggPlayback::~COggPlayback()
 	iFs.Close();
 	}
 
-_LIT(KOggExt, ".ogg");
-_LIT(KOgaExt, ".oga");
-_LIT(KFlacExt, ".flac");
-_LIT(KMp3Ext, ".mp3");
 MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 	{
 	TParsePtrC p(aFileName);
@@ -180,7 +228,7 @@ MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 	return decoder;
 	}
 
-TInt COggPlayback::Open(const TDesC& aFileName)
+TInt COggPlayback::Open(const TDesC& aFileName, TUid /* aControllerUid */)
 	{
 	TRACEF(COggLog::VA(_L("OPEN") ));
 
@@ -218,7 +266,10 @@ TInt COggPlayback::Open(const TDesC& aFileName)
   
 	err = SetAudioCaps(iDecoder->Channels(), iDecoder->Rate());
 	if (err == KErrNone)
+		{
 		iState = EStopped;
+		iObserver->NotifyFileOpen(KErrNone);
+		}
 	else
 		{
 		iDecoder->Close();
@@ -597,7 +648,7 @@ const TInt32* COggPlayback::GetFrequencyBins()
   return iFreqArray[idx].iFreqCoefs;
 }
 
-TInt COggPlayback::Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver)
+TInt COggPlayback::Info(const TDesC& aFileName, TUid /* aControllerUid */, MFileInfoObserver& aFileInfoObserver)
 	{
 	MDecoder* decoder = NULL;
 	TRAPD(err, decoder = GetDecoderL(aFileName));
@@ -630,7 +681,7 @@ TInt COggPlayback::Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObse
 	return KErrNone;
 	}
 
-TInt COggPlayback::FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver)
+TInt COggPlayback::FullInfo(const TDesC& aFileName, TUid /* aControllerUid */, MFileInfoObserver& aFileInfoObserver)
 	{
 	MDecoder* decoder = NULL;
 	TRAPD(err, decoder = GetDecoderL(aFileName));
@@ -694,21 +745,13 @@ void COggPlayback::Play()
 	iMp3LeftDither.iError[0] = 0 ; iMp3LeftDither.iError[1] = 0 ; iMp3LeftDither.iError[2] = 0;
 	iMp3RightDither.iError[0] = 0 ; iMp3RightDither.iError[1] = 0 ; iMp3RightDither.iError[2] = 0;
 
-#if defined(DELAY_AUDIO_STREAMING_START)
 	// Also to avoid the first buffer problem, wait a short time before streaming, 
 	// so that Application drawing have been done. Processor should then
 	// be fully available for doing audio thingies.
 	iStartAudioStreamingTimer->Wait(KStreamStartDelay);
-#else
-	StartStreaming();
-#endif
 
-	iState = EPlaying;
 	iObserver->ResumeUpdates();
-
-#if defined(DELAY_AUDIO_STREAMING_START)
-	iObserver->NotifyPlayStarted();
-#endif
+	iState = EPlaying;
 	}
 
 void COggPlayback::Pause()
@@ -754,8 +797,7 @@ void COggPlayback::Stop()
 	iFileInfo.iTime = 0;
 	iEof = EFalse;
 
-	if (iObserver)
-		iObserver->NotifyUpdate();
+	iObserver->NotifyUpdate();
 	}
 
 void COggPlayback::CancelTimers()
@@ -823,6 +865,15 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 void COggPlayback::StartAudioStreamingCallBack()
 	{
 	StartStreaming();
+
+#if defined(SERIES60) && !defined(PLUGIN_SYSTEM) // aka S60V1
+	// Older phones (eg. my battered old Sendo) had issues getting
+	// playback started at the same time as updating the user interface.
+	// To avoid this we wait a bit so that the audio can start playing
+	User::After(KSendoStreamStartDelay);
+#endif
+
+	iObserver->NotifyPlayStarted();
 	}
 
 void COggPlayback::RestartAudioStreamingCallBack()
@@ -894,6 +945,9 @@ void COggPlayback::StartStreaming()
 		iStreamingThreadCommandHandler->SetAudioProperties();
 #endif
 
+	// Start the streaming listener
+	iStreamingThreadListener->StartListening();
+
 	// Start the streaming
 	iStreamingThreadCommandHandler->StartStreaming();
 	}
@@ -902,6 +956,9 @@ void COggPlayback::StopStreaming()
 	{
 	// Stop the streaming
 	iStreamingThreadCommandHandler->StopStreaming();
+
+	// Ignore any pending stream events
+	iStreamingThreadListener->Cancel();
 
 	// Cancel the buffering AO
 	iBufferingThreadAO->Cancel();
@@ -1176,72 +1233,65 @@ TInt COggPlayback::BufferingModeChanged()
 }
 
 void COggPlayback::NotifyStreamingStatus(TInt aErr)
-{
-  // Called by the streaming thread listener when the last buffer has been copied or play has been interrupted
-  // Theoretically it's possible for a restart to be in progress, so make sure it doesn't complete
-  // (i.e. when the streaming thread generates an event at the same time as the UI thread has started processing a RW\FW key press)
-  iRestartAudioStreamingTimer->Cancel();
-
-  // Ignore streaming status if we are already handling an error
-  if (iStreamingErrorDetected)
-	return;
-
-  // Check for an error
-  if (aErr < 0)
-  {
-	// Pause the stream
-    FlushBuffers(EPlaybackPaused);
-	iStreamingErrorDetected = ETrue;
-
-	// Notify the user
-	TBuf<256> buf, tbuf;
-	if (aErr == KErrInUse)
+	{
+	// Check for an error
+	if (aErr<0)
 		{
-		CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
-		CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_30);
-		}
-	else
-		{
-		CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
-		CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);	
-		buf.AppendNum(aErr);
-		}
-
-	// Display the message and wait for the user
-	iEnv->OggErrorMsgL(tbuf, buf);
-
-	// Notify the UI, try to restart
-	iObserver->NotifyPlayInterrupted();
-	iStreamingErrorDetected = EFalse;
-	return;
-  }
-
-  // Handle stream events
-  TStreamingThreadStatus status = (TStreamingThreadStatus) aErr;
-  switch (status)
-  {
-	case ELastBufferCopied:
-		// Not all phones call MaoscPlayComplete,
-		// so start a timer that will stop playback afer a delay 
-		iStopAudioStreamingTimer->Wait(KStreamStopDelay);
-		break;
-
-	case EPlayInterrupted:
-		// Playback has been interrupted so notify the observer
-		iObserver->NotifyPlayInterrupted();
-		break;
-
-	case EPlayUnderflow:
-		// Flush buffers (and pause the stream)
+		// Pause the stream
 		FlushBuffers(EPlaybackPaused);
-		iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
-		break;
 
-	default:
-		User::Panic(_L("COggPlayback:NSS"), 0);
-		break;
-  }
-}
+		// Notify the user
+		TBuf<256> buf, tbuf;
+		if (aErr == KErrInUse)
+			{
+			CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
+			CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_30);
+			}
+		else
+			{
+			CEikonEnv::Static()->ReadResource(tbuf, R_OGG_ERROR_18);
+			CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_16);	
+			buf.AppendNum(aErr);
+			}
+
+		// Display the message and wait for the user
+		iEnv->OggErrorMsgL(tbuf, buf);
+
+		// Notify the UI, try to restart
+		iObserver->NotifyPlayInterrupted();
+		return;
+		}
+
+	// Handle stream events
+	TStreamingThreadStatus status = (TStreamingThreadStatus) aErr;
+	switch (status)
+		{
+		case ELastBufferCopied:
+			// Not all phones call MaoscPlayComplete,
+			// so start a timer that will stop playback afer a delay 
+			iStopAudioStreamingTimer->Wait(KStreamStopDelay);
+			break;
+
+		case EPlayInterrupted:
+			// Playback has been interrupted so notify the observer
+			iObserver->NotifyPlayInterrupted();
+			break;
+
+		case EPlayUnderflow:
+			// Flush buffers (and pause the stream)
+			FlushBuffers(EPlaybackPaused);
+			iRestartAudioStreamingTimer->Wait(KStreamRestartDelay);
+			break;
+
+		case EPlayStopped:
+			// Playback has stopped, but this was expected (so there's nothing to do)
+			break;
+
+		default:
+			User::Panic(_L("COggPlayback:NSS"), 0);
+			break;
+		}
+	}
 
 void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt /* aErr */)
 	{

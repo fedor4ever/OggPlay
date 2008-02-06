@@ -41,26 +41,14 @@ chSTR2(__LINE__) "):" #desc)
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 
 // use the phone built-in decoders.
 #define PLUGIN_SYSTEM
-#else
-// support for legacy audio codec (-:
-// this is experimental at the moment.
-#define MP3_SUPPORT
 #endif
+
+// Include mp3 codec (we could do with a #define to make the FLAC codec optional too)
+#define MP3_SUPPORT
 
 // Force filling the buffer to at least 75% of their capacity before sending them to
-// the audio streaming device
-// On NGage it gives a serious boost to avoid "not-ready buffer" problem.
-// UIQ_?
+// the audio streaming device. On NGage it gives a serious boost to avoid "not-ready buffer" problem.
 #define FORCE_FULL_BUFFERS
-
-#if defined(PLUGIN_SYSTEM)
-// PLUGIN SYSTEM uses asynchronous open and asynchronous play
-#define DELAY_AUDIO_STREAMING_OPEN
-#define DELAY_AUDIO_STREAMING_START
-#else
-// !PLUGIN SYSTEM uses asynchronous play
-#define DELAY_AUDIO_STREAMING_START
-#endif
 
 #if defined(SERIES60) || defined(SERIES80) || defined(DELAY_AUDIO_STREAMING_OPEN)
 // Used on S60, S80, S90

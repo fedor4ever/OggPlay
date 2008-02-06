@@ -32,189 +32,189 @@ const TInt KNofOggDescriptors = 9;         /** Nof descriptor fields in an inter
 class COggPlayback;
 class TOggFiles;
 class TOggFile : public CBase
-{
+	{
 public:
 	enum TFileTypes { EFile, EPlayList };
 
 public:
-  ~TOggFile();
+	~TOggFile();
 
-  static TOggFile* NewL();
-  static TOggFile* NewL(TFileText& tf, TInt aVersion);
-  static TOggFile* NewL(TInt aAbsoluteIndex, const TDesC& aTitle, const TDesC& anAlbum, const TDesC& anArtist,
-  const TDesC& aGenre, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName, const TDesC& aTrackNumber);
+	static TOggFile* NewL();
+	static TOggFile* NewL(TFileText& tf, TInt aVersion);
+	static TOggFile* NewL(TInt aAbsoluteIndex, const TDesC& aTitle, const TDesC& anAlbum, const TDesC& anArtist,
+	const TDesC& aGenre, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName, const TDesC& aTrackNumber);
 
-  void SetTextL(HBufC* & aBuffer, const TDesC& aText);
-  void SetTrackTitleL();
-  void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
+	void SetTextL(HBufC* & aBuffer, const TDesC& aText);
+	void SetTrackTitleL();
+	void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
 
-  void ReadL(TFileText& tf, TInt aVersion);
-  TInt Write(TInt aLineNumber, HBufC* aBuf);
+	void ReadL(TFileText& tf, TInt aVersion);
+	TInt Write(TInt aLineNumber, HBufC* aBuf);
 
-  virtual TFileTypes FileType() const;
+	virtual TFileTypes FileType() const;
 
 protected:
-  TOggFile();
+	TOggFile();
 
 public:
-  HBufC* iTitle;
-  HBufC* iAlbum;
-  HBufC* iArtist;
-  HBufC* iGenre;
-  HBufC* iFileName;
-  HBufC* iSubFolder;
-  HBufC* iShortName;
-  HBufC* iTrackNumber;
-  HBufC* iTrackTitle;
+	HBufC* iTitle;
+	HBufC* iAlbum;
+	HBufC* iArtist;
+	HBufC* iGenre;
+	HBufC* iFileName;
+	HBufC* iSubFolder;
+	HBufC* iShortName;
+	HBufC* iTrackNumber;
+	HBufC* iTrackTitle;
 
-  TInt iAbsoluteIndex;
-  TInt iPlayingIndex;
-};
+	TInt iAbsoluteIndex;
+	TInt iPlayingIndex;
+	};
 
 class TOggPlayList : public TOggFile
-{
-private :
-  TOggPlayList();
+	{
+public:
+	~TOggPlayList();
+	static TOggPlayList* NewL(TFileText& tf);
+	static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
+
+	void ReadL(TFileText& tf);
+	TInt Write(TInt aLineNumber, HBufC* aBuf );
+
+	void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
+
+	TInt Count();
+	void ScanPlayListL(RFs& aFs, TOggFiles* aFiles);
+	TOggFile* operator[] (TInt aIndex);
+
+	// From TOggFile
+	TFileTypes FileType() const;
+
+private:
+	TOggPlayList();
 
 public:
-  ~TOggPlayList();
-  static TOggPlayList* NewL(TFileText& tf);
-  static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
-
-  void ReadL(TFileText& tf);
-  TInt Write(TInt aLineNumber, HBufC* aBuf );
-
-  void SetTextFromFileL(TFileText& aTf, HBufC* & aBuffer);
-
-  TInt Count();
-  void ScanPlayListL(RFs& aFs, TOggFiles* aFiles);
-  TOggFile* operator[] (TInt aIndex);
-
-  // From TOggFile
-  TFileTypes FileType() const;
-
-public:
-  RPointerArray<TOggFile> iPlayListEntries;
-};
+	RPointerArray<TOggFile> iPlayListEntries;
+	};
 
 class TOggKey : public TKeyArrayFix
-{
- public:
-  TOggKey(TInt anOrder);
-  virtual ~TOggKey();
+	{
+public:
+	TOggKey(TInt anOrder);
+	virtual ~TOggKey();
 
-  void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
-  virtual TAny* At(TInt anIndex) const;
+	void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
+	virtual TAny* At(TInt anIndex) const;
 
- protected:
-  CArrayPtrFlat<TOggFile>* iFiles;
-  TInt                     iOrder;
-  TOggFile*                iSample;
-};
+protected:
+	CArrayPtrFlat<TOggFile>* iFiles;
+	TInt iOrder;
+	TOggFile* iSample;
+	};
 
 class TOggKeyNumeric : public TKeyArrayFix
-{
-  public:
-  TOggKeyNumeric();
-  virtual ~TOggKeyNumeric();
+	{
+public:
+	TOggKeyNumeric();
+	virtual ~TOggKeyNumeric();
 
-  void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
-  virtual TAny* At(TInt anIndex) const;
+	void SetFiles(CArrayPtrFlat<TOggFile>* theFiles);
+	virtual TAny* At(TInt anIndex) const;
 
- protected:
-  TInt iInteger;
-  CArrayPtrFlat<TOggFile>* iFiles;
-};
+protected:
+	TInt iInteger;
+	CArrayPtrFlat<TOggFile>* iFiles;
+	};
 
 class TOggFiles : public CBase, public MOggFilesSearchBackgroundProcess, public MFileInfoObserver
-{
+	{
 public:
 	enum TOggFilesNextDir { EOggFilesNextDirReady, EOggFilesNextDriveReady, EOggFilesLastDirScanned };
 
 public:
-  TOggFiles(CAbsPlayback* anOggPlayback);
-  ~TOggFiles();
+	TOggFiles(COggPlayAppUi* aApp);
+	~TOggFiles();
 
-  void CreateDb(RFs& session);
-  void CreateDbWithSingleFile(const TDesC& aFile, TRequestStatus& aRequestStatus);
+	void CreateDb(RFs& session);
+	void CreateDbWithSingleFile(const TDesC& aFile, TRequestStatus& aRequestStatus);
 
-  TBool ReadDb(const TFileName& aFileName, RFs& session);
-  void  WriteDbL(const TFileName& aFileName, RFs& session);
+	TBool ReadDb(const TFileName& aFileName, RFs& session);
+	void WriteDbL(const TFileName& aFileName, RFs& session);
 
-  void FillTitles(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TDesC& aSubFolder);
-  void FillAlbums(CDesCArray& arr, const TDesC& anArtist, const TFileName& aSubFolder);
-  void FillArtists(CDesCArray& arr, const TFileName& aSubFolder);
-  void FillGenres(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TFileName& aSubFolder);
-  void FillSubFolders(CDesCArray& arr);
-  void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
+	void FillTitles(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TDesC& aSubFolder);
+	void FillAlbums(CDesCArray& arr, const TDesC& anArtist, const TFileName& aSubFolder);
+	void FillArtists(CDesCArray& arr, const TFileName& aSubFolder);
+	void FillGenres(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TFileName& aSubFolder);
+	void FillSubFolders(CDesCArray& arr);
+	void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
-  void FillPlayLists(CDesCArray& arr);
-  void FillPlayList(CDesCArray& arr, const TDesC& aSelection);
+	void FillPlayLists(CDesCArray& arr);
+	void FillPlayList(CDesCArray& arr, const TDesC& aSelection);
 
-  TDesC & FindFromIndex(TInt anIndex);
-  TOggFile* FindFromFileNameL(TFileName& aFileName);
+	TDesC & FindFromIndex(TInt anIndex);
+	TOggFile* FindFromFileNameL(TFileName& aFileName);
 
-  static void AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TInt anAbsoluteIndex);
-  static void AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TDesC& anInternalText);
+	static void AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TInt anAbsoluteIndex);
+	static void AppendLine(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aText, const TDesC& anInternalText);
  
-  static void AppendTitleAndArtist(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TInt anAbsoluteIndex);
+	static void AppendTitleAndArtist(CDesCArray& arr, COggListBox::TItemTypes aType, const TDesC& aTitle, const TDesC& aDelim, const TDesC& aArtist, const TInt anAbsoluteIndex);
   
-  TInt SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session);
-  TInt SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session);
+	TInt SearchAllDrives(CEikDialog * aDialog, TInt aDialogID,RFs& session);
+	TInt SearchSingleDrive(const TDesC& aDir, CEikDialog * aDialog, TInt aDialogID,RFs& session);
   
- public:
-     // from MOggFilesSearchBackgroundProcess
-     void FileSearchStep(TRequestStatus& aRequestStatus);
-	 void ScanNextPlayList(TRequestStatus& aRequestStatus);
-	 void CancelOutstandingRequest();
-	 void FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists);
+public:
+	// from MOggFilesSearchBackgroundProcess
+	void FileSearchStep(TRequestStatus& aRequestStatus);
+	void ScanNextPlayList(TRequestStatus& aRequestStatus);
+	void CancelOutstandingRequest();
+	void FileSearchGetCurrentStatus(TInt &aNbDir, TInt &aNbFiles, TInt &aNbPlayLists);
 
-protected:
-  void AddDirectory(const TDesC& aDir, RFs& session);
+private:
+	void AddDirectory(const TDesC& aDir, RFs& session);
   
-  TInt AddDirectoryStart(const TDesC& aDir, RFs& session);
-  void AddDirectoryStop();
-  void ClearFiles();
+	TInt AddDirectoryStart(const TDesC& aDir, RFs& session);
+	void AddDirectoryStop();
+	void ClearFiles();
 
-  TBool IsSupportedAudioFile(TParsePtrC& p);
-  TBool IsPlayListFile(TParsePtrC& p);
+	TBool IsPlayListFile(TParsePtrC& p);
 
-  TOggFilesNextDir NextDirectory();
-  TBool AddNextFile();
+	TOggFilesNextDir NextDirectory();
+	TBool AddNextFile();
   
-  // From MFileInfoObserver
-  void FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo);
+	// From MFileInfoObserver
+	void FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo);
 
-#if defined(PLUGIN_SYSTEM)
-  CDesCArrayFlat* iSupportedExtensionList;
-#endif
+private:
+	COggPlayAppUi *iApp;
+	CArrayPtrFlat<TOggFile>* iFiles; 
 
-  CArrayPtrFlat<TOggFile>* iFiles; 
-  CAbsPlayback* iOggPlayback;
-  TOggKey iOggKeyTitles;
-  TOggKey iOggKeyAlbums;
-  TOggKey iOggKeyArtists;
-  TOggKey iOggKeyGenres;
-  TOggKey iOggKeySubFolders;
-  TOggKey iOggKeyFileNames;
-  TOggKey iOggKeyTrackTitle;
-  TOggKeyNumeric iOggKeyAbsoluteIndex;
+	CAbsPlayback* iOggPlayback;
+	TUid iControllerUid;
 
-  // Following members are only valid during the directory search:
-  CDirScan* iDs;
-  TDesC* iDirScanDir;
-  RFs* iDirScanSession;
-  TInt iNbDirScanned;
-  TInt iNbFilesFound;
-  TInt iNbPlayListsFound;
-  TInt iCurrentIndexInDirectory;
-  TInt iCurrentIndexInFiles;
-  TInt iCurrentDriveIndex;
-  CDir* iDirectory;
-  CDesC16ArrayFlat* iPathArray;
+	TOggKey iOggKeyTitles;
+	TOggKey iOggKeyAlbums;
+	TOggKey iOggKeyArtists;
+	TOggKey iOggKeyGenres;
+	TOggKey iOggKeySubFolders;
+	TOggKey iOggKeyFileNames;
+	TOggKey iOggKeyTrackTitle;
+	TOggKeyNumeric iOggKeyAbsoluteIndex;
 
-  TRequestStatus* iFileScanRequestStatus;
-  TFileName iPath;
-  TFileName iShortName;
-};
+	// Following members are only valid during the directory search:
+	CDirScan* iDs;
+	TDesC* iDirScanDir;
+	RFs* iDirScanSession;
+	TInt iNbDirScanned;
+	TInt iNbFilesFound;
+	TInt iNbPlayListsFound;
+	TInt iCurrentIndexInDirectory;
+	TInt iCurrentIndexInFiles;
+	TInt iCurrentDriveIndex;
+	CDir* iDirectory;
+	CDesC16ArrayFlat* iPathArray;
+
+	TRequestStatus* iFileScanRequestStatus;
+	TFileName iPath;
+	TFileName iShortName;
+	};
 #endif

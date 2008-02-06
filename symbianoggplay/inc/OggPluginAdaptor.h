@@ -48,17 +48,17 @@ public:
 class COggPluginAdaptor :  public CAbsPlayback,  public MMdaObjectStateChangeObserver
 	{
 public: 
-	COggPluginAdaptor(COggMsgEnv* aEnv, MPlaybackObserver* aObserver);
+	COggPluginAdaptor(COggMsgEnv* aEnv, CPluginSupportedList& aPluginSupportedList, MPlaybackObserver* aObserver);
 	~COggPluginAdaptor();
  
 	void ConstructL();
 
 	// From CAbsPlayback
-	TInt Info(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver);
-	TInt FullInfo(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver);
+	TInt Info(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver);
+	TInt FullInfo(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver);
 	void InfoCancel();
 
-	TInt Open(const TDesC& aFileName);
+	TInt Open(const TDesC& aFileName, TUid aControllerUid);
 
 	void Pause();
 	void Resume();
@@ -72,8 +72,6 @@ public:
 	TInt Volume();
 	const TInt32* GetFrequencyBins();
 	void SetVolumeGain(TGainType aGain);
-  
-	CPluginSupportedList& GetPluginListL(); 
 
 private:
 	// From MMdaObjectStateChangeObserver
@@ -82,8 +80,8 @@ private:
 	// New Functions
 	void SearchPluginsL(const TDesC &aName, TBool isEnabled);
 
-	void OpenL(const TDesC& aFileName);
-	void OpenInfoL(const TDesC& aFileName, MFileInfoObserver& aFileInfoObserver, TBool aFullInfo = EFalse);
+	void OpenL(const TDesC& aFileName, TUid aControllerUid);
+	void OpenInfoL(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver, TBool aFullInfo = EFalse);
 
 	void ConstructAPlayerL();
 	void ConstructAFileInfoUtilL();

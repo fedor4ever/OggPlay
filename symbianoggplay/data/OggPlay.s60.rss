@@ -278,19 +278,9 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 			associated_resource = r_oggplay_rsk_play_setting_item_list;
 			name = ogg_rsk_play;
 			}
-#if defined(PLUGIN_SYSTEM)
-        , AVKON_SETTING_ITEM
-			{
-			identifier = EOggSettingVolumeBoost;
-			setting_page_resource = r_oggplay_volume_boost;
-			associated_resource = r_oggplay_volume_boost_item_list;
-			name = ogg_volume_boost;
-			}
-#endif
         };
     }
 
-#if !defined(PLUGIN_SYSTEM)
 RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_playback_options_item_list
     {
     flags = EAknListBoxLoopScrolling; // EAknSettingItemNumberedStyle | 
@@ -328,7 +318,6 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_playback_options_item_list
 			}			
         };
     }
-#endif
 
 RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_alarm_s60_setting_item_list
     {
@@ -609,8 +598,6 @@ RESOURCE ARRAY r_oggplay_volume_boost_item_array
     };
     }
 
-
-#if !defined(PLUGIN_SYSTEM)
 RESOURCE AVKON_SETTING_PAGE r_oggplay_buffering_mode
     {   
     label = ogg_buffering_mode;
@@ -673,8 +660,6 @@ RESOURCE ARRAY r_oggplay_popped_up_thread_priority_texts
 		LBUF { txt = "Normal"; }
 		};
 	}
-#endif
-
 
 RESOURCE AVKON_SETTING_PAGE r_oggplay_alarm_time_page
 	{
@@ -878,12 +863,11 @@ RESOURCE MENU_PANE r_options_menu
   items= {
 	MENU_ITEM { txt=ogg_skins; cascade=r_skin_menu; },
 	MENU_ITEM { command=EOggOptions; txt=ogg_settings; },
-	MENU_ITEM { command=EOggUserHotkeys; txt=ogg_user_hotkey; }
+	MENU_ITEM { command=EOggUserHotkeys; txt=ogg_user_hotkey; },
+	MENU_ITEM { command=EOggPlaybackOptions; txt=ogg_playback; }
 
 #if defined PLUGIN_SYSTEM
 	, MENU_ITEM { command=EOggCodecSelection; txt=ogg_codec_selection; }
-#else
-	, MENU_ITEM { command=EOggPlaybackOptions; txt=ogg_playback; }
 #endif
 
 	, MENU_ITEM { command=EOggAlarmSettings; txt=ogg_alarm_s60; }

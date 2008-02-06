@@ -7,9 +7,12 @@ SECUREID                                0xF000A661
 VENDORID                                0 
 EPOCSTACKSIZE                           0x8000 
 EPOCHEAPSIZE                            0x20000 0x400000 
+USERINCLUDE                             ..\mad 
 USERINCLUDE                             ..\inc 
-USERINCLUDE                             ..\data 
-USERINCLUDE                             ..\plugin\inc 
+USERINCLUDE                             ..\vorbis 
+USERINCLUDE                             ..\flac 
+USERINCLUDE                             ..\data
+USERINCLUDE                             ..\plugin\inc
 SYSTEMINCLUDE                           \Epoc32\Include 
 SYSTEMINCLUDE                           \Epoc32\Include\mmf 
 SYSTEMINCLUDE                           \Epoc32\Include\mmf\plugin 
@@ -23,6 +26,15 @@ START RESOURCE OggPlay_reg.rss
   TARGETPATH                              \private\10003A3F\apps 
 END  
 
+
+SOURCEPATH                              ..\vorbis
+SOURCE                                  TremorDecoder.cpp 
+
+SOURCEPATH                              ..\flac
+SOURCE                                  FlacDecoder.cpp 
+
+SOURCEPATH                              ..\mad
+SOURCE                                  MadDecoder.cpp 
 
 SOURCEPATH                              ..\src 
 SOURCE                                  OggLog.cpp 
@@ -39,7 +51,12 @@ SOURCE                                  OggSettingsContainer.cpp
 SOURCE                                  OggSplashContainer.cpp 
 SOURCE                                  OggUserHotkeys.cpp 
 SOURCE                                  OggPluginSelectionDialogS60.cpp 
+SOURCE                                  OggTremor.cpp 
 SOURCE                                  OggPluginAdaptor.cpp 
+SOURCE                                  OggMultiThread.cpp 
+SOURCE                                  OggThreadClasses.cpp 
+SOURCE                                  OggRateConvert.cpp 
+SOURCE                                  OggAbsPlayback.cpp
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 aknskins.lib 
@@ -67,8 +84,13 @@ LIBRARY                                 form.lib
 LIBRARY                                 estor.lib 
 LIBRARY                                 etel.lib 
 LIBRARY                                 mediaclientaudiostream.lib 
+LIBRARY                                 OggPlayShared.lib 
+LIBRARY                                 OggPlayVorbisi.lib 
+LIBRARY                                 OggPlayFlaci.lib 
+LIBRARY                                 OggPlayMadi.lib 
 LIBRARY                                 MediaClientAudio.lib 
 LIBRARY                                 MMFControllerFramework.lib 
+
 START BITMAP OggPlayIcon.mbm 
   TARGETPATH                              \resource\apps 
   HEADER                                   

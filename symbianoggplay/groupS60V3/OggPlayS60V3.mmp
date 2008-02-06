@@ -11,7 +11,8 @@ USERINCLUDE                             ..\mad
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
 USERINCLUDE                             ..\flac 
-USERINCLUDE                             ..\data 
+USERINCLUDE                             ..\data
+USERINCLUDE                             ..\plugin\inc
 SYSTEMINCLUDE                           \Epoc32\Include 
 SOURCEPATH                              ..\data 
 START RESOURCE OggPlay.rss 
@@ -52,6 +53,7 @@ SOURCE                                  OggTremor.cpp
 SOURCE                                  OggMultiThread.cpp 
 SOURCE                                  OggThreadClasses.cpp 
 SOURCE                                  OggRateConvert.cpp 
+SOURCE                                  OggAbsPlayback.cpp
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 aknskins.lib 

@@ -215,9 +215,6 @@ class COggPlayAppUi;
 class COggPlayAppView;
 class COggFOView;
 class COggFCView;
-
-class CEikColumnListBox;
-class CEikBitmapButton;
 class COggSongList;
 
 
@@ -335,23 +332,15 @@ public:
 	void NextStartUpState(TInt aErr);
 
 	// from MPlaybackObserver
+	void ResumeUpdates();
+
 	void NotifyUpdate();
 	void NotifyPlayComplete();
 	void NotifyPlayInterrupted();
-	void ResumeUpdates();
 
-#if !defined(PLUGIN_SYSTEM)
 	void NotifyStreamOpen(TInt aErr);
-#endif
-
-#if defined(DELAY_AUDIO_STREAMING_OPEN)
 	void NotifyFileOpen(TInt aErr);
-#endif
-
-#if defined(DELAY_AUDIO_STREAMING_START)
 	void NotifyPlayStarted();
-#endif
-
 	void NotifyFatalPlayError();
 
 	// From MFileInfoObserver
@@ -407,10 +396,15 @@ public:
 	void SetAlarmTime();
 
 	TInt Rnd(TInt aMax);
-	void FileOpenErrorL(TInt aErr);
+	void FileOpenErrorL(const TDesC& aFileName, TInt aErr);
 
-	const TDesC& UnassignedTxt()
+	const TDesC& UnassignedTxt() const
 	{ return iUnassignedTxt; }
+
+	CPluginSupportedList* PluginSupportedList()
+	{ return iPluginSupportedList; }
+
+	TInt PlaybackFromFileName(const TDesC& aFileName, CAbsPlayback*& aOggPlayback, TUid& aControllerUid);
 
 private:
 	void StartOggPlay();
@@ -437,7 +431,7 @@ private:
 	TInt IniRead32L(TPtrC8& aDes, TInt aLowerLimit, TInt aUpperLimit);
 	TInt64 IniRead64L(TPtrC8& aDes);
 	TInt64 IniRead64L(TPtrC8& aDes, TInt64 aLowerLimit, TInt64 aUpperLimit);
-	void IniReadDesL(TPtrC8& aDes, TDes& value);
+	void IniReadDesL(TPtrC8& aDes, TDes& value, TInt aIniVersion);
 
 #if defined(UIQ)
 	void SetHotKey();
@@ -470,6 +464,9 @@ public:
 	TFileName iFileName;
 
 	COggPlayAppView* iAppView;
+
+	CAbsPlayback* iOggMTPlayback;
+	CAbsPlayback* iOggMMFPlayback;
 	CAbsPlayback* iOggPlayback;
 
 	COggMsgEnv* iOggMsgEnv;
@@ -497,12 +494,12 @@ private:
 #if defined(SERIES60)
 	COggSettingsView* iSettingsView;
 	COggUserHotkeysView* iUserHotkeysView;
+	COggPlaybackOptionsView* iPlaybackOptionsView;
 
 #if defined(PLUGIN_SYSTEM)
 	COggPluginSettingsView* iCodecSelectionView;
 #endif
 
-	COggPlaybackOptionsView* iPlaybackOptionsView;
 	COggAlarmSettingsView* iAlarmSettingsView;
 #endif
 
@@ -534,6 +531,8 @@ private:
 	// CFbsTypefaceStore* iTypefaceStore;
 	// TInt iFontId;
 #endif
+
+	CPluginSupportedList* iPluginSupportedList;
 
 public:
 	TStartUpState iStartUpState;

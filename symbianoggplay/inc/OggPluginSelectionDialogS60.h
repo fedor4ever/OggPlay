@@ -50,10 +50,11 @@ private:
   void ProcessCommandL (TInt aCommandId);
  
 private:
-  CEikTextListBox *iListBox;      // Owned
-  CDesCArrayFlat *iExtensionList; // Owned
-  COggTimer *iWaitTimer;          //Owned
-  CPluginSupportedList *iPluginSupportedList; // Not Owned  
+  CEikTextListBox *iListBox;
+  CDesCArrayFlat *iExtensionList;
+  COggTimer *iWaitTimer;
+  
+  CPluginSupportedList *iPluginSupportedList; 
   };
 
 

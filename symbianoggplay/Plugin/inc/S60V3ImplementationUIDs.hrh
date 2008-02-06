@@ -26,4 +26,5 @@
 #define KOggTremorUidPlayFormatImplementation 0xF01FF685
 #define KOggFlacUidPlayFormatImplementation 0xF020202D
 #define KNativeFlacUidPlayFormatImplementation 0xF020202E
+#define KMp3UidPlayFormatImplementation 0xF0202029
 #endif

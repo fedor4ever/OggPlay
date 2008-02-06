@@ -516,6 +516,11 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 			iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
 			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
 		}
+
+		// Inform the streaming listener that the stream has stopped
+		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
+		if (status->Int() == KRequestPending)
+			iSharedData.iUIThread.RequestComplete(status, EPlayStopped);
 	}
 
 	if (aResetPosition)
@@ -719,7 +724,10 @@ void CStreamingThreadPlaybackEngine::SendNextBuffer()
 	{
 		// If an error occurs notify the UI thread
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
-		iSharedData.iUIThread.RequestComplete(status, err);
+		if (status->Int() == KRequestPending)
+			iSharedData.iUIThread.RequestComplete(status, err);
+
+		return;
 	}
 
 	// Increment the number of stream buffers (we have one more now)
@@ -987,7 +995,10 @@ CStreamingThreadListener::CStreamingThreadListener(COggPlayback& aOggPlayback, T
 : CActive(EPriorityHigh), iOggPlayback(aOggPlayback), iSharedData(aSharedData), iListeningState(EListeningForOpenComplete)
 {
 	CActiveScheduler::Add(this);
+}
 
+void CStreamingThreadListener::StartListening()
+{
 	// Start listening
 	iStatus = KRequestPending;
 	SetActive();
@@ -1001,10 +1012,6 @@ void CStreamingThreadListener::RunL()
 {
 	// Get the status
 	TInt status = iStatus.Int();
-
-	// Start listening again
-	iStatus = KRequestPending;
-	SetActive();
 
 	// Handle the message
 	switch (iListeningState)
@@ -1021,8 +1028,7 @@ void CStreamingThreadListener::RunL()
 }
 
 void CStreamingThreadListener::DoCancel()
-{
-	// Stop listening
-	TRequestStatus* status = &iStatus;
-	User::RequestComplete(status, KErrCancel);
-}
+	{
+	// Nothing to do
+	// (the streaming thread will have completed the request)
+	}

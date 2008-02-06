@@ -21,21 +21,12 @@
 #include <e32math.h>
 #include <hal.h>
 
-#if defined(SERIES60)
-#include <aknnotewrappers.h>
-#include <aknmessagequerydialog.h>
-_LIT(KTsyName,"phonetsy.tsy");
-#endif
-
 #if defined(SERIES80)
 #include <eikEnv.h>
-#include "OggDialogsS80.h"
-_LIT(KTsyName,"phonetsy.tsy");
 #endif
 
 #if defined(UIQ)
 #include <quartzkeys.h>	// EStdQuartzKeyConfirm etc.
-_LIT(KTsyName,"erigsm.tsy");
 #endif
 
 #include <eiklabel.h>   // CEikLabel
@@ -44,28 +35,52 @@ _LIT(KTsyName,"erigsm.tsy");
 #include <eikmenup.h>	// CEikMenuPane
 #include <barsread.h>
 
+#if defined(SERIES60V3)
+#include <eikstart.h>
+#endif
+
+#if defined(SERIES60)
+#include <aknnotewrappers.h>
+#include <aknmessagequerydialog.h>
+#endif
+
 #include "OggControls.h"
+#include "OggTremor.h"
 
 #if defined(PLUGIN_SYSTEM)
 #include "OggPluginAdaptor.h"
+
+#if defined(SERIES60V3)
+#include "S60V3ImplementationUIDs.hrh"
 #else
-#include "OggTremor.h"
+#include "ImplementationUIDs.hrh"
+#endif
 #endif
 
 #include "OggPlayAppView.h"
 #include "OggDialogs.h" 
+
+#if defined(SERIES80)
+#include "OggDialogsS80.h"
+#endif
+
 #include "OggLog.h"
 #include "OggFilesSearchDialogs.h"
 
+#if defined(SERIES60) || defined(SERIES80)
+_LIT(KTsyName,"phonetsy.tsy");
+#else // UIQ
+_LIT(KTsyName,"erigsm.tsy");
+#endif
 
 #if !defined(SERIES60V3)
 // Minor compatibility tweak
 #define ReadResourceL ReadResource
 #endif
 
+
 // Application entry point
 #if defined(SERIES60V3)
-#include <eikstart.h>
 static CApaApplication* NewApplication()
 	{
 	return new COggPlayApplication;
@@ -512,12 +527,8 @@ void COggPlayAppUi::StartOggPlay()
 	{
 	TRAPD(err, StartOggPlayL());
 
-#if defined(PLUGIN_SYSTEM)
-	NextStartUpState(err);
-#else
 	if (err != KErrNone)
 		StartUpError(err);
-#endif
 	}
 
 void COggPlayAppUi::ActivateStartUpView()
@@ -550,12 +561,12 @@ void COggPlayAppUi::ActivateStartUpViewL()
 	iUserHotkeysView = new(ELeave) COggUserHotkeysView(*iAppView);
 	RegisterViewL(*iUserHotkeysView);
 
+	iPlaybackOptionsView = new(ELeave) COggPlaybackOptionsView(*iAppView);
+	RegisterViewL(*iPlaybackOptionsView);
+
 #if defined(PLUGIN_SYSTEM)
     iCodecSelectionView = new(ELeave) COggPluginSettingsView(*iAppView);
     RegisterViewL(*iCodecSelectionView);
-#else
-	iPlaybackOptionsView = new(ELeave) COggPlaybackOptionsView(*iAppView);
-	RegisterViewL(*iPlaybackOptionsView);
 #endif
 
 	iAlarmSettingsView = new(ELeave) COggAlarmSettingsView(*iAppView);
@@ -634,14 +645,18 @@ void COggPlayAppUi::StartOggPlayL()
 	
 	iOggMsgEnv = new(ELeave) COggMsgEnv(iSettings.iWarningsEnabled);
 
+	iPluginSupportedList = new(ELeave) CPluginSupportedList;
+	iPluginSupportedList->ConstructL();
+
+	iOggMTPlayback = new(ELeave) COggPlayback(iOggMsgEnv, *iPluginSupportedList, this, iMachineUid);
+	iOggMTPlayback->ConstructL();
+
 #if defined(PLUGIN_SYSTEM)
-	iOggPlayback = new(ELeave) COggPluginAdaptor(iOggMsgEnv, this);
-#else
-	iOggPlayback = new(ELeave) COggPlayback(iOggMsgEnv, this, iMachineUid);
+	iOggMMFPlayback = new(ELeave) COggPluginAdaptor(iOggMsgEnv, *iPluginSupportedList, this);
+	iOggMMFPlayback->ConstructL();
 #endif
 
-	iOggPlayback->ConstructL();
-
+	iOggPlayback = iOggMTPlayback;
 	ReadIniFile();
 
  	iAppView = new(ELeave) COggPlayAppView;
@@ -714,7 +729,21 @@ void COggPlayAppUi::PostConstructL()
 #endif
 
 	// Set the playback volume
-	iOggPlayback->SetVolume(iVolume);
+	iOggMTPlayback->SetVolume(iVolume);
+	iOggMTPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
+	if (iOggMMFPlayback)
+		{
+		iOggMMFPlayback->SetVolume(iVolume);
+		iOggMMFPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
+		}
+
+	// Set buffering mode
+	TInt err = ((COggPlayback *) iOggMTPlayback)->SetBufferingMode((TBufferingMode) iSettings.iBufferingMode);
+	if (err != KErrNone)
+		iSettings.iBufferingMode = ENoBuffering;
+
+	// Set thread priority
+	((COggPlayback *) iOggMTPlayback)->SetThreadPriority((TStreamingThreadPriority) iSettings.iThreadPriority);
 
 	// Start a song playing if autoplay is enabled
 	if (iSettings.iAutoplay && !iIsRunningEmbedded)
@@ -835,6 +864,12 @@ COggPlayAppUi::~COggPlayAppUi()
 		delete iUserHotkeysView;
 		}
 
+	if (iPlaybackOptionsView)
+		{
+		DeregisterView(*iPlaybackOptionsView);
+  		delete iPlaybackOptionsView;
+		}
+
 #if defined(PLUGIN_SYSTEM)
 	if (iCodecSelectionView)
 		{
@@ -842,12 +877,6 @@ COggPlayAppUi::~COggPlayAppUi()
 		delete iCodecSelectionView;
 		}
 #endif
-
-	if (iPlaybackOptionsView)
-		{
-		DeregisterView(*iPlaybackOptionsView);
-  		delete iPlaybackOptionsView;
-		}
 
 	if (iAlarmSettingsView)
 		{
@@ -864,7 +893,9 @@ COggPlayAppUi::~COggPlayAppUi()
 	delete iActive;
 #endif
 
-	delete iOggPlayback;
+	delete iOggMTPlayback;
+	delete iOggMMFPlayback;
+	delete iPluginSupportedList;
 
 	if (iCapturedKeyHandle)
 		iEikonEnv->RootWin().CancelCaptureKey(iCapturedKeyHandle);
@@ -902,24 +933,23 @@ void COggPlayAppUi::ActivateOggViewL(const TUid aViewId)
 	ActivateViewL(viewId);
 	}
 
-#if !defined(PLUGIN_SYSTEM)
 void COggPlayAppUi::NotifyStreamOpen(TInt aErr)
 	{
 	NextStartUpState(aErr);
 	}
-#endif
 
 void COggPlayAppUi::NotifyUpdate()
 	{
 	// Try to resume after sound device was stolen
-	if (iTryResume>0 && iOggPlayback->State()==CAbsPlayback::EPaused)
+	if ((iTryResume>0) && (iOggPlayback->State() == CAbsPlayback::EPaused))
 		{
-		if (iOggPlayback->State()!=CAbsPlayback::EPaused)
-			iTryResume= 0;
+		if (iOggPlayback->State() != CAbsPlayback::EPaused)
+			iTryResume = 0;
 		else
 			{
 			iTryResume--;
-			if (iTryResume==0 && iOggPlayback->State()==CAbsPlayback::EPaused) HandleCommandL(EOggPauseResume);
+			if ((iTryResume == 0) && (iOggPlayback->State() == CAbsPlayback::EPaused))
+				HandleCommandL(EOggPauseResume);
 			}
 		}
 	}
@@ -935,33 +965,24 @@ void COggPlayAppUi::NotifyPlayComplete()
 	NextSong();
 	}
 
-#if defined(DELAY_AUDIO_STREAMING_OPEN)
 void COggPlayAppUi::NotifyFileOpen(TInt aErr)
 	{
 	if (aErr != KErrNone)
 		{
-		FileOpenErrorL(aErr);
+		FileOpenErrorL(iFileName, aErr);
 		HandleCommandL(EOggStop);
 		return;
 		}
 
 	iOggPlayback->Play();
-
-#if !defined(DELAY_AUDIO_STREAMING_START)
-	iAppView->Update();
-	UpdateSoftkeys();
-#endif
 	}
-#endif
 
-#if defined(DELAY_AUDIO_STREAMING_START)
 void COggPlayAppUi::NotifyPlayStarted()
 	{
 	// Update the appView and the softkeys
 	iAppView->Update();
 	UpdateSoftkeys();
 	}
-#endif
 
 void COggPlayAppUi::ResumeUpdates()
 	{
@@ -1089,7 +1110,7 @@ void COggPlayAppUi::HandleCommandL(TInt aCommand)
 		case EOggCodecSelection:
 			{
 #if defined(SERIES80)
-			CCodecsS80Dialog *cd = new(ELeave) CCodecsS80Dialog();
+			CCodecsS80Dialog *cd = new(ELeave) CCodecsS80Dialog;
 			cd->ExecuteLD(R_DIALOG_CODECS);
 #else
 			ActivateOggViewL(KOggPlayUidCodecSelectionView);
@@ -1285,34 +1306,22 @@ void COggPlayAppUi::PlaySelect()
             (iSongList->IsSelectedFromListBoxCurrentlyPlaying()))
 			{
             iOggPlayback->Resume();
-
-			#if !defined(DELAY_AUDIO_STREAMING_START)
-			iAppView->Update();
-			UpdateSoftkeys();
-			#endif
-
 			return;
 			}
 
 		iOggPlayback->Stop();
+
 		iSongList->SetPlayingFromListBox(idx);
-
 		iFileName = iSongList->GetPlaying();
-		TInt err = iOggPlayback->Open(iFileName);
-		if (err == KErrNone)
-			{
-#if !defined(DELAY_AUDIO_STREAMING_OPEN)
-			iOggPlayback->Play();
 
-#if !defined(DELAY_AUDIO_STREAMING_START)
-			iAppView->Update();
-			UpdateSoftkeys();
-#endif
-#endif
-			}
-		else
+		TUid controllerUid;
+		TInt err = PlaybackFromFileName(iFileName, iOggPlayback, controllerUid);
+		if (err == KErrNone)
+			err = iOggPlayback->Open(iFileName, controllerUid);
+
+		if (err != KErrNone)
 			{
-			FileOpenErrorL(err);
+			FileOpenErrorL(iFileName, err);
 
 			iSongList->SetPlayingFromListBox(ENoFileSelected);
 			UpdateSoftkeys();
@@ -1329,14 +1338,7 @@ void COggPlayAppUi::PauseResume()
 		UpdateSoftkeys();
 		}
 	else if (iOggPlayback->State() == CAbsPlayback::EPaused)
-		{
 		iOggPlayback->Resume();
-
-#if !defined(DELAY_AUDIO_STREAMING_START)
-		iAppView->Update();
-		UpdateSoftkeys();
-#endif
-		}
 	else
 		PlaySelect();
 	}
@@ -1431,11 +1433,17 @@ void COggPlayAppUi::ShowFileInfo()
 			playList = (TOggPlayList*) iAppView->GetFile(selectedIndex);
 		else
 			{
-			iFileName = iAppView->GetFileName(selectedIndex);
-			TInt err = iOggPlayback->FullInfo(iFileName, *this);
+			const TDesC& fileName = iAppView->GetFileName(selectedIndex);
+
+			TUid controllerUid;
+			CAbsPlayback* oggPlayback;
+			TInt err = PlaybackFromFileName(fileName, oggPlayback, controllerUid);
+			if (err == KErrNone)
+				err = oggPlayback->FullInfo(fileName, controllerUid, *this);
+
 			if (err != KErrNone)
 				{
-				FileOpenErrorL(err);
+				FileOpenErrorL(fileName, err);
 				return;
 				}
 			}
@@ -1457,11 +1465,17 @@ void COggPlayAppUi::ShowFileInfo()
 				playList = (TOggPlayList*) iAppView->GetFile(selectedIndex);
 			else
 				{
-				iFileName = iAppView->GetFileName(selectedIndex);
-				TInt err = iOggPlayback->FullInfo(iFileName, *this);
+				const TDesC& fileName = iAppView->GetFileName(selectedIndex);
+
+				TUid controllerUid;
+				CAbsPlayback* oggPlayback;
+				TInt err = PlaybackFromFileName(fileName, oggPlayback, controllerUid);
+				if (err == KErrNone)
+					err = oggPlayback->FullInfo(fileName, controllerUid, *this);
+
 				if (err != KErrNone)
 					{
-					FileOpenErrorL(err);
+					FileOpenErrorL(fileName, err);
 					return;
 					}
 				}
@@ -1505,7 +1519,7 @@ void COggPlayAppUi::FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo)
 	else
 		{
 		// Display error message
-		FileOpenErrorL(aErr);
+		FileOpenErrorL(aFileInfo.iFileName, aErr);
 		}
 	}
 
@@ -1525,21 +1539,15 @@ void COggPlayAppUi::NextSong()
 			}
 
 		iOggPlayback->Stop();
-		TInt err = iOggPlayback->Open(iFileName);
-        if (err == KErrNone)
-			{
-#if !defined(DELAY_AUDIO_STREAMING_OPEN)
-            iOggPlayback->Play();
 
-#if !defined(DELAY_AUDIO_STREAMING_START)
-			UpdateSoftkeys();
-            iAppView->Update();
-#endif
-#endif
-			}
-		else
+		TUid controllerUid;
+		TInt err = PlaybackFromFileName(iFileName, iOggPlayback, controllerUid);
+		if (err == KErrNone)
+			err = iOggPlayback->Open(iFileName, controllerUid);
+
+        if (err != KErrNone)
 			{
-			FileOpenErrorL(err);
+			FileOpenErrorL(iFileName, err);
             HandleCommandL(EOggStop);
 			}
 		}
@@ -1573,12 +1581,29 @@ void COggPlayAppUi::NextSong()
 
 void COggPlayAppUi::PreviousSong()
 	{
-	// Do nothing if there isn't a song playing
+	// If there isn't a song playing we try to play the previous song (if there is one)
 	if (!iSongList->AnySongPlaying())
-		return;
+		{
+		if ((iViewBy != ETitle) && (iViewBy != EFileName))
+			return;
 
-	// If a song is currently playing, stop playback and play the previous song (if there is one)
-	iFileName = iSongList->GetPreviousSong();
+		TInt idx = iAppView->GetSelectedIndex();
+		if (idx == 0)
+			return;
+
+		idx--;
+		if (iAppView->GetItemType(idx) == COggListBox::EBack)
+			return;
+
+		iSongList->SetPlayingFromListBox(idx);
+		iFileName = iSongList->GetPlaying();
+		}
+	else
+		{
+		// If a song is currently playing, stop playback and play the previous song
+		iFileName = iSongList->GetPreviousSong();
+		}
+
 	if (!iFileName.Length())
 		{
 		HandleCommandL(EOggStop);
@@ -1586,21 +1611,15 @@ void COggPlayAppUi::PreviousSong()
 		}
 
 	iOggPlayback->Stop();
-	TInt err = iOggPlayback->Open(iFileName);
-	if (err == KErrNone)
-		{
-#if !defined(DELAY_AUDIO_STREAMING_OPEN)
-		iOggPlayback->Play();
 
-#if !defined(DELAY_AUDIO_STREAMING_START)
-		UpdateSoftkeys();
-		iAppView->Update();
-#endif
-#endif
-		}
-	else
+	TUid controllerUid;
+	TInt err = PlaybackFromFileName(iFileName, iOggPlayback, controllerUid);
+	if (err == KErrNone)
+		err = iOggPlayback->Open(iFileName, controllerUid);
+
+	if (err != KErrNone)
 		{
-		FileOpenErrorL(err);
+		FileOpenErrorL(iFileName, err);
 		HandleCommandL(EOggStop);
 		}
 	}
@@ -1761,7 +1780,12 @@ void COggPlayAppUi::ReadIniFile()
     iSettings.iScanmode = TOggplaySettings::EFullScan;
 
 	iSettings.iBufferingMode = EBufferThread;
+
+#if defined(SERIES60V3)
+	iSettings.iThreadPriority = EHigh;
+#else
 	iSettings.iThreadPriority = ENormal;
+#endif
 
 	iSettings.iMp3Dithering = ETrue;
 
@@ -1816,7 +1840,6 @@ void COggPlayAppUi::ReadIniFile()
 void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	{
 	// Read the version number
-	TInt err;
 	TInt iniVersion = IniRead32L(aIniFileData, 1, 2);
 	TRACEF(COggLog::VA(_L("ReadIni: version %d"), iniVersion));
 
@@ -1843,6 +1866,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	TInt osVersion = 5;
 #endif
 
+#if !defined(__WINS__)
 	// In principle we could cope with OS version mismatches but
 	// it's far more likely that if the version doesn't match the file is corrupt.
 	if (osVersion != iniOsVersion)
@@ -1852,6 +1876,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 		if ((osVersion>1) || (iniOsVersion>1))
 			User::Leave(KErrCorrupt);
 		}
+#endif
 
 	// Determine if this .ogi file was written with the non-mmf or mmf version
 	TBool mmfDataPresent = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
@@ -1895,7 +1920,6 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iWarningsEnabled = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 	iSettings.iRandom = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 	iSettings.iGainType = IniRead32L(aIniFileData, (TInt) EMinus24dB, (TInt) EStatic12dB);
-	iOggPlayback->SetVolumeGain((TGainType) iSettings.iGainType);
 
 	iSettings.iAlarmActive = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 	iSettings.iAlarmVolume = IniRead32L(aIniFileData, 1, 10);
@@ -1903,12 +1927,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iAlarmSnooze = IniRead32L(aIniFileData, 0, 3);
 
 	iSettings.iBufferingMode = IniRead32L(aIniFileData, (TInt) EBufferThread, (TInt) ENoBuffering);
-	err = ((COggPlayback*) iOggPlayback)->SetBufferingMode((TBufferingMode) iSettings.iBufferingMode);
-	if (err != KErrNone)
-		iSettings.iBufferingMode = ENoBuffering;
-
 	iSettings.iThreadPriority = IniRead32L(aIniFileData, (TInt) ENormal, (TInt) EHigh);
-	((COggPlayback*) iOggPlayback)->SetThreadPriority((TStreamingThreadPriority) iSettings.iThreadPriority);
 
 	TInt maxSoftKeyIndex = ((TInt) TOggplaySettings::ENumHotkeys) - 1;
 	iSettings.iSoftKeysIdle[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
@@ -1926,7 +1945,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iSoftKeysIdle[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysPlay[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 
-	TRAP(err, IniReadDesL(aIniFileData, iSettings.iCustomScanDir));
+	TRAP(err, IniReadDesL(aIniFileData, iSettings.iCustomScanDir, iniVersion));
 	if (err != KErrNone)
 		{
 		// Reset the values if the ReadDesL() fails
@@ -1936,7 +1955,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 		}
 #endif
 
-	// For the non-MMF version that's the end of the file
+	// For the non MMF version that's the end of the file
 	if (!mmfDataPresent)
 		return;
 
@@ -1945,12 +1964,17 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	for (i = 0 ; i<numExtensions ; i++)
 		{
 		TFileName extension;
-		IniReadDesL(aIniFileData, extension);
+		IniReadDesL(aIniFileData, extension, iniVersion);
 
 		TUid uid;
 		uid.iUid = (TInt32) IniRead32L(aIniFileData);
 
-		TRAP(err, iOggPlayback->GetPluginListL().SelectPluginL(extension, uid));
+		// The old ini file will probably be looking for the OggPlay controller
+		// It's not there anymore, so ignore the request to use it.
+		if ((iniVersion == 1) && (uid.iUid == ((TInt32) KOggPlayUidControllerImplementation)))
+			continue;
+
+		TRAPD(err, iPluginSupportedList->SelectPluginL(extension, uid));
 		TRACEF(COggLog::VA(_L("Looking for controller %S:%x Result:%i"), &extension, uid.iUid, err));
 		}
 #endif
@@ -2019,38 +2043,59 @@ TInt64 COggPlayAppUi::IniRead64L(TPtrC8& aDes, TInt64 aLowerLimit, TInt64 aUpper
 	}
 
 const TUint8 KIniValueTerminator = '\n';
-void COggPlayAppUi::IniReadDesL(TPtrC8& aDes, TDes& aValue)
+const TUint16 KIniValueTerminator16 = L'\n';
+void COggPlayAppUi::IniReadDesL(TPtrC8& aDes, TDes& aValue, TInt aIniVersion)
 	{
 	aValue.Zero();
 	TInt maxBytes = aValue.MaxSize();
 
 	TInt i;
+	TChar char16;
 	for (i = 0 ; i<maxBytes ; i += 2)
 		{
-		// Check for at least one 8 bit character
-		if (!aDes.Length())
-			User::Leave(KErrCorrupt);
+		if (aIniVersion == 1)
+			{
+			// Check for at least one 8 bit character
+			if (!aDes.Length())
+				User::Leave(KErrCorrupt);
 
-		// Check for terminator
-		if (aDes[0] == KIniValueTerminator)
-			break;
+			// Check for terminator
+			if (aDes[0] == KIniValueTerminator)
+				break;
+			}
+		else // aIniVersion>=2
+			{
+			// Check for at least one 16 bit character
+			if (aDes.Length()<2)
+				User::Leave(KErrCorrupt);
+
+			// Check for terminator
+			char16 = ((TUint16) aDes[0]) | (((TUint16) (aDes[1])) << 8);
+			if (char16 == KIniValueTerminator16)
+				break;
+			}
 
 		// Check for at least one 16 bit character
 		if (aDes.Length()<2)
 			User::Leave(KErrCorrupt);
 
 		// Append it to the output string
-		TChar char16 = ((TUint16) aDes[0]) | (((TUint16) (aDes[1])) << 8);
+		char16 = ((TUint16) aDes[0]) | (((TUint16) (aDes[1])) << 8);
 		aValue.Append(char16);
 
 		// Advance one 16 bit character
 		aDes.Set(aDes.Ptr()+2, aDes.Length()-2);
 		}
 	
+	// Check if we ran out of bytes before reaching the terminator
 	if (i == maxBytes)
 		User::Leave(KErrOverflow);
 
-	aDes.Set(aDes.Ptr()+1, aDes.Length()-1);
+	// Advance past terminator
+	if (aIniVersion == 1)
+		aDes.Set(aDes.Ptr()+1, aDes.Length()-1);
+	else // aIniVersion>=2
+		aDes.Set(aDes.Ptr()+2, aDes.Length()-2);
 	}
 
 void COggPlayAppUi::WriteIniFile()
@@ -2226,11 +2271,12 @@ void COggPlayAppUi::WriteIniFile()
 
 	iniFileBuf.Append(*customScanDir8);
 	iniFileBuf.Append(KIniValueTerminator);
+	iniFileBuf.Append(0);
 	CleanupStack::PopAndDestroy(customScanDir8);
 #endif
 
 #if defined(PLUGIN_SYSTEM)
-	CDesCArrayFlat * supportedExtensionList = iOggPlayback->GetPluginListL().SupportedExtensions();
+	CDesCArrayFlat * supportedExtensionList = iPluginSupportedList->SupportedExtensions();
 	CleanupStack::PushL(supportedExtensionList);
     
 	TInt supportedExtensionListCount = supportedExtensionList->Count();
@@ -2245,9 +2291,10 @@ void COggPlayAppUi::WriteIniFile()
 
 		iniFileBuf.Append(*supportedExtension8);
 		iniFileBuf.Append(KIniValueTerminator);
+		iniFileBuf.Append(0);
 		CleanupStack::PopAndDestroy(supportedExtension8);
 
-		CPluginInfo* selected = iOggPlayback->GetPluginListL().GetSelectedPluginInfo(supportedExtension);
+		const CPluginInfo* selected = iPluginSupportedList->GetSelectedPluginInfo(supportedExtension);
 		if (selected)
 			{
 			iniFileBuf.AppendNum((TInt) selected->iControllerUid.iUid);
@@ -2262,7 +2309,7 @@ void COggPlayAppUi::WriteIniFile()
         
 	CleanupStack::PopAndDestroy(supportedExtensionList);
 #endif
-	
+
 	// Now we've got all the data, write the file
     RFile out;
 	TInt err = out.Replace(iCoeEnv->FsSession(), iIniFileName, EFileWrite);
@@ -2415,11 +2462,7 @@ void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 	iSettings.iGainType = aNewGain;
 
 #if defined(SERIES60)
-#if defined(PLUGIN_SYSTEM)
-	iSettingsView->VolumeGainChangedL();
-#else
 	iPlaybackOptionsView->VolumeGainChangedL();
-#endif
 #endif
 	}
 
@@ -2480,13 +2523,13 @@ void COggPlayAppUi::HandleResourceChangeL(TInt aType)
 	}
 #endif
 
-void COggPlayAppUi::FileOpenErrorL(TInt aErr)
+void COggPlayAppUi::FileOpenErrorL(const TDesC& aFileName, TInt aErr)
 	{
 	TBuf<64> buf, buf2;
 	CEikonEnv::Static()->ReadResourceL(buf, R_OGG_ERROR_14);
 
 	buf2.Format(buf, aErr);
-	iOggMsgEnv->OggErrorMsgL(buf2, iFileName);
+	iOggMsgEnv->OggErrorMsgL(buf2, aFileName);
 	}
 
 TInt COggPlayAppUi::Rnd(TInt aMax)
@@ -2502,6 +2545,25 @@ TInt COggPlayAppUi::Rnd(TInt aMax)
 #endif
 	}
 
+TInt COggPlayAppUi::PlaybackFromFileName(const TDesC& aFileName, CAbsPlayback*& aOggPlayback, TUid& aControllerUid)
+	{
+	// Find the selected plugin, corresponding to file type
+	TParsePtrC p(aFileName);
+	TPtrC pp(p.Ext());
+	if (!pp.Length())
+		return KErrNotSupported;
+
+    const CPluginInfo* info = iPluginSupportedList->GetSelectedPluginInfo(pp.Mid(1));
+	if (info)
+		{
+		aOggPlayback = (info->iControllerUid == KOggPlayInternalController) ? iOggMTPlayback : iOggMMFPlayback;
+		aControllerUid = info->iControllerUid;
+
+		return KErrNone;
+		}
+
+	return KErrNotSupported;
+	}
 
 COggSongList::COggSongList(COggPlayAppView* aAppView)
 : iAppView(aAppView)
@@ -2598,13 +2660,7 @@ void COggSongList::SetPlaying(TInt aPlaying)
 	{
     iPlayingIdx = aPlaying;
     if (iPlayingIdx != ENoFileSelected)
-		{
         iAppView->SelectFile(iFileList[iPlayingIdx]);
-
-		#if !defined(DELAY_AUDIO_STREAMING_START)
-		iAppView->Update();
-		#endif
-		}
 	else
 		iAppView->Update();
 	}
@@ -2878,90 +2934,4 @@ const TDesC& COggRandomPlay::GetPreviousSong()
 	TOggFile* file = iFullFileList[iFullListPlayingIdx];
 	SetPlaying(file->iPlayingIndex);
 	return *(file->iFileName);
-	}
-
-
-CAbsPlayback::CAbsPlayback(MPlaybackObserver* aObserver)
-: iState(CAbsPlayback::EClosed), iObserver(aObserver)
-	{
-	}
-
-CAbsPlayback::TState CAbsPlayback::State()
-	{
-	return iState;
-	}
-   
-const TOggFileInfo& CAbsPlayback::DecoderFileInfo()
-	{
-	return iFileInfo;
-	}
-
-TInt CAbsPlayback::BitRate()
-	{
-	return iFileInfo.iBitRate;
-	}
-
-TInt CAbsPlayback::Channels()
-	{
-	return iFileInfo.iChannels;
-	}
-
-TInt CAbsPlayback::FileSize()
-	{
-	return iFileInfo.iFileSize;
-	}
-
-TInt CAbsPlayback::Rate()
-	{
-	return iFileInfo.iRate;
-	}
-
-TInt64 CAbsPlayback::Time()
-	{
-	return iFileInfo.iTime;
-	}
-
-const TDesC& CAbsPlayback::Album()
-	{
-	return iFileInfo.iAlbum;
-	}
-
-const TDesC& CAbsPlayback::Artist()
-	{
-	return iFileInfo.iArtist;
-	}
-
-const TFileName& CAbsPlayback::FileName()
-	{
-	return iFileInfo.iFileName;
-	}
-
-const TDesC& CAbsPlayback::Genre()
-	{
-	return iFileInfo.iGenre;
-	}
-
-const TDesC& CAbsPlayback::Title()
-	{
-	return iFileInfo.iTitle;
-	}
-
-const TDesC& CAbsPlayback::TrackNumber()
-	{
-	return iFileInfo.iTrackNumber;
-	}
-
-void CAbsPlayback::ClearComments()
-	{
-	iFileInfo.iArtist.SetLength(0);
-	iFileInfo.iTitle.SetLength(0);
-	iFileInfo.iAlbum.SetLength(0);
-	iFileInfo.iGenre.SetLength(0);
-	iFileInfo.iTrackNumber.SetLength(0);
-	iFileInfo.iFileName.SetLength(0);
-	}
-
-void CAbsPlayback::SetVolumeGain(TGainType /*aGain*/)
-	{
-	/* No gain by default */
 	}
