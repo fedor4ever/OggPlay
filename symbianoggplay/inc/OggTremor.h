@@ -31,17 +31,24 @@
 #include "OggAbsPlayback.h"
 #include "OggMultiThread.h"
 
-// Total number of buffers
+// No buffering buffers
 const TInt KNoBuffers = 1;
+
+#if defined(SERIES60V3)
+// Total number of buffers
 const TInt KSingleThreadBuffers = 16;
 const TInt KMultiThreadBuffers = 64;
 
 // The actual number of buffers to use
-#if defined(SERIES60V3)
 const TInt KSingleThreadBuffersToUse = 16;
 const TInt KMultiThreadBuffersToUse = 64;
 #else
-// Set to one less than KBuffers
+// Total number of buffers
+const TInt KSingleThreadBuffers = 16;
+const TInt KMultiThreadBuffers = 64;
+
+// The actual number of buffers to use
+// Set to one less than the total
 // This is a workaround for a bug in Symbian's buffering code
 // MaoscBufferCopied gets called before it has actually copied the buffer
 const TInt KSingleThreadBuffersToUse = 15;
@@ -64,11 +71,17 @@ const TInt KBufferThreadHighThreshold = 32;
 
 // Number of buffers required to cause the thread priority of the buffering thread to be increased
 // The buffering thread priority will remain at an increased level until the number of buffers reaches KBufferHighThreshold
-const TInt KBufferThreadLowThreshold = 10;
+const TInt KBufferThreadLowThreshold = 12;
 
 // The number of buffers at which to resume buffering
+// #define LAZY_BUFFERING
+#if defined(LAZY_BUFFERING)
 const TInt KSingleThreadLowThreshold = 5;
-const TInt KMultiThreadLowThreshold = 16;
+const TInt KMultiThreadLowThreshold = 20;
+#else
+const TInt KSingleThreadLowThreshold = KSingleThreadBuffersToUse;
+const TInt KMultiThreadLowThreshold = KMultiThreadBuffersToUse;
+#endif
 
 #if defined(SERIES60)
   const TInt KAudioPriority = 70; // S60 audio players typically uses 60-75.

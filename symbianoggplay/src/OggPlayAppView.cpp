@@ -55,205 +55,206 @@ const TInt KSnoozeTime[4] = { 5, 10, 20, 30 };
 COggPlayAppView::COggPlayAppView()
 : iPosChanged(-1), iFocusControlsPresent(EFalse), iFocusControlsHeader(_FOFF(COggControl, iDlink)),
 iFocusControlsIter(iFocusControlsHeader), iCycleFrequencyCounter(KOggControlFreq)
-{
-}
+	{
+	}
 
 COggPlayAppView::~COggPlayAppView()
-{
-  delete iTextArray;
+	{
+	delete iTextArray;
 
-  ClearCanvases();
+	ClearCanvases();
 
-  if (iTimer)
-	  iTimer->Cancel();
+	if (iTimer)
+		iTimer->Cancel();
 
-  delete iTimer;
-  delete iCallBack;
+	delete iTimer;
+	delete iCallBack;
 
-  if (iAlarmTimer)
-	  iAlarmTimer->Cancel();
+	if (iAlarmTimer)
+		iAlarmTimer->Cancel();
 
-  delete iAlarmTimer;
-  delete iAlarmCallBack;
-  delete iAlarmErrorCallBack;
+	delete iAlarmTimer;
+	delete iAlarmCallBack;
+	delete iAlarmErrorCallBack;
 
-  delete iCanvas[1];
-  delete iCanvas[0];
+	delete iCanvas[1];
+	delete iCanvas[0];
 
-  delete iOggFiles;
-}
+	delete iOggFiles;
+	}
 
 void COggPlayAppView::ConstructL(COggPlayAppUi *aApp)
-{
-  iTextArray = new(ELeave) CDesCArrayFlat(10);
+	{
+	iTextArray = new(ELeave) CDesCArrayFlat(10);
 
-  iApp = aApp;
-  CreateWindowL();
+	iApp = aApp;
+	CreateWindowL();
 
-  SetComponentsToInheritVisibility(EFalse);
-  iOggFiles = new(ELeave) TOggFiles(aApp);
+	SetComponentsToInheritVisibility(EFalse);
+	iOggFiles = new(ELeave) TOggFiles(aApp);
 
-  // Construct the two canvases for flip-open and closed mode
-  // Flip-open mode:
-  iCanvas[0] = new(ELeave) COggCanvas;
-  iCanvas[0]->SetContainerWindowL(*this);
+	// Construct the two canvases for flip-open and closed mode
+	// Flip-open mode:
+	iCanvas[0] = new(ELeave) COggCanvas;
+	iCanvas[0]->SetContainerWindowL(*this);
 
-  // Flip-closed mode
+	// Flip-closed mode
 #if defined(UIQ) || defined(SERIES60SUI)
-  iCanvas[1]= new(ELeave) COggCanvas;
-  iCanvas[1]->SetContainerWindowL(*this);
+	iCanvas[1] = new(ELeave) COggCanvas;
+	iCanvas[1]->SetContainerWindowL(*this);
 #endif
 
-  // Set up all the other components
-  // Create the canvas refresh timer (KCallBackPeriod):
-  iTimer = CPeriodic::NewL(CActive::EPriorityStandard);
-  iCallBack = new(ELeave) TCallBack(COggPlayAppView::CallBack, this);
+	// Set up all the other components
+	// Create the canvas refresh timer (KCallBackPeriod):
+	iTimer = CPeriodic::NewL(CActive::EPriorityStandard);
+	iCallBack = new(ELeave) TCallBack(COggPlayAppView::CallBack, this);
 
-  iAlarmCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmCallBack, this);
-  iAlarmErrorCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmErrorCallBack, this);
-  iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack, *iAlarmErrorCallBack);
-}
+	iAlarmCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmCallBack, this);
+	iAlarmErrorCallBack = new(ELeave) TCallBack(COggPlayAppView::AlarmErrorCallBack, this);
+	iAlarmTimer = new(ELeave) COggTimer(*iAlarmCallBack, *iAlarmErrorCallBack);
+	}
 
 _LIT(KBeginToken,"{");
 _LIT(KEndToken,"}");
 void COggPlayAppView::ReadSkin(const TFileName& aFileName)
-{
-  ClearCanvases();
+	{
+	ClearCanvases();
 
-  iIconFileName = aFileName.Left(aFileName.Length()-4);
-  iIconFileName.Append(_L(".mbm"));
+	iIconFileName = aFileName.Left(aFileName.Length()-4);
+	iIconFileName.Append(_L(".mbm"));
 
-  TOggParser p(iCoeEnv->FsSession(), aFileName);
-  if (p.iState!=TOggParser::ESuccess)
-  {
-    p.ReportError();
-    User::Leave(-1);
-    return;
-  }
+	TOggParser p(iCoeEnv->FsSession(), aFileName);
+	if (p.iState!=TOggParser::ESuccess)
+		{
+		p.ReportError();
+		User::Leave(-1);
+		return;
+		}
 
-  if (!p.ReadHeader())
-  {
-    p.ReportError();
-    User::Leave(-1);
-    return;
-  }
+	if (!p.ReadHeader())
+		{
+		p.ReportError();
+		User::Leave(-1);
+		return;
+		}
 
-  p.ReadToken();
-  if (p.iToken!=_L("FlipOpen"))
-  {
-    p.iState= TOggParser::EFlipOpenExpected;
-    p.ReportError();
-    User::Leave(-1);
-    return;
-  }
+	p.ReadToken();
+	if (p.iToken!=_L("FlipOpen"))
+		{
+		p.iState= TOggParser::EFlipOpenExpected;
+		p.ReportError();
+		User::Leave(-1);
+		return;
+		}
   
-  p.ReadToken();
-  if (p.iToken!=KBeginToken)
-  {
-    p.iState= TOggParser::EBeginExpected;
-    p.ReportError();
-    User::Leave(-1);
-    return;
-  }
+	p.ReadToken();
+	if (p.iToken!=KBeginToken)
+		{
+		p.iState= TOggParser::EBeginExpected;
+		p.ReportError();
+		User::Leave(-1);
+		return;
+		}
 
-  ReadCanvas(0, p);
-  if (p.iState!=TOggParser::ESuccess)
-  {
-    p.ReportError();
-    User::Leave(-1);
-    return;
-  }
+	ReadCanvas(0, p);
+	if (p.iState!=TOggParser::ESuccess)
+		{
+		p.ReportError();
+		User::Leave(-1);
+		return;
+		}
 
-  // First canvas loaded
-  iModeMax = 0;
+	// First canvas loaded
+	iModeMax = 0;
 
 #if defined(UIQ) || defined(SERIES60SUI)
-  p.ReadToken();
-  if (p.iToken==_L("FlipClosed"))
-  {
-    p.ReadToken();
-    if (p.iToken!=KBeginToken)
-	{
-      p.iState= TOggParser::EBeginExpected;
-      p.ReportError();
-      User::Leave(-1);
-      return;
-    }
+	p.ReadToken();
+	if (p.iToken==_L("FlipClosed"))
+		{
+		p.ReadToken();
+		if (p.iToken!=KBeginToken)
+			{
+			p.iState= TOggParser::EBeginExpected;
+			p.ReportError();
+			User::Leave(-1);
+			return;
+			}
 
-	ReadCanvas(1, p);
-    if (p.iState!=TOggParser::ESuccess)
-	{
-      p.ReportError();
-      User::Leave(-1);
-      return;
-    }
+		ReadCanvas(1, p);
+		if (p.iState!=TOggParser::ESuccess)
+			{
+			p.ReportError();
+			User::Leave(-1);
+			return;
+			}
 
-	// Second canvas loaded 
-	iModeMax = 1;
-  }
+		// Second canvas loaded 
+		iModeMax = 1;
+		}
 #endif
 
-  iFocusControlsIter.SetToFirst();
-  COggControl* c=iFocusControlsIter;
-  if(c) c->SetFocus(ETrue);
+	iFocusControlsIter.SetToFirst();
+	COggControl* c=iFocusControlsIter;
+	if (c)
+		c->SetFocus(ETrue);
 
-  if (iMode>iModeMax)
-	  iMode = iModeMax;
-}
+	if (iMode>iModeMax)
+		iMode = iModeMax;
+	}
 
 void COggPlayAppView::ClearCanvases()
-  {
-  COggControl* oggControl;
-  iFocusControlsIter.SetToFirst();
-  while ((oggControl = iFocusControlsIter++) != NULL)
-  {
-    oggControl->iDlink.Deque();
-  }
+	{
+	COggControl* oggControl;
+	iFocusControlsIter.SetToFirst();
+	while ((oggControl = iFocusControlsIter++) != NULL)
+		{
+		oggControl->iDlink.Deque();
+		}
 
-  if (iCanvas[0])
-	iCanvas[0]->ClearControls();
+	if (iCanvas[0])
+		iCanvas[0]->ClearControls();
 
-  if (iCanvas[1])
-	iCanvas[1]->ClearControls();
+	if (iCanvas[1])
+		iCanvas[1]->ClearControls();
 
-  // Reset all our pointers
-  iClock[0] = NULL ; iClock[1] = NULL;
-  iAlarm[0] = NULL ; iAlarm[1] = NULL;
-  iAlarmIcon[0] = NULL ; iAlarmIcon[1]= NULL;
-  iPlayed[0] = NULL ; iPlayed[1] = NULL;
-  iPlayedDigits[0] = NULL ; iPlayedDigits[1]= NULL;
-  iTotalDigits[0]= NULL ; iTotalDigits[1]= NULL;
-  iPaused[0]= NULL ; iPaused[1]= NULL;
-  iPlaying[0]= NULL ; iPlaying[1]= NULL;
-  iPlayButton[0]= NULL ; iPlayButton[1] = NULL;
-  iPauseButton[0]= NULL ; iPauseButton[1]= NULL;
-  iPlayButton2[0]= NULL ; iPlayButton2[1] = NULL;
-  iPauseButton2[0] = NULL ; iPauseButton2[1] = NULL;
-  iStopButton[0] = NULL ; iStopButton[1] = NULL;
-  iNextSongButton[0]= NULL ; iNextSongButton[1] = NULL;
-  iPrevSongButton[0]= NULL ; iPrevSongButton[1]= NULL;
-  iListBox[0] = NULL ; iListBox[1] = NULL;
-  iTitle[0] = NULL ; iTitle[1] = NULL;
-  iAlbum[0] = NULL ; iAlbum[1] = NULL;
-  iArtist[0] = NULL ; iArtist[1] = NULL;
-  iGenre[0] = NULL ; iGenre[1] = NULL;
-  iTrackNumber[0] = NULL ; iTrackNumber[1] = NULL;
-  iFileName[0] = NULL ; iFileName[1] = NULL;
-  iPosition[0] = NULL ; iPosition[1] = NULL;
-  iVolume[0] = NULL ; iVolume[1] = NULL;
-  iVolumeBoost[0] = NULL ; iVolumeBoost[1] = NULL;
-  iAnalyzer[0] = NULL ; iAnalyzer[1] = NULL;
-  iRepeatIcon[0]= NULL ; iRepeatIcon[1] = NULL;
-  iRepeatButton[0] = NULL ; iRepeatButton[1] = NULL;
-  iRandomIcon[0] = NULL ; iRandomIcon[1] = NULL;
-  iRandomButton[0] = NULL ; iRandomButton[1] = NULL;
-  iScrollBar[0] = NULL ; iScrollBar[1] = NULL;
-  iAnimation[0] = NULL ; iAnimation[1] = NULL;
-  iLogo[0] = NULL ; iLogo[1] = NULL;
+	// Reset all our pointers
+	iClock[0] = NULL ; iClock[1] = NULL;
+	iAlarm[0] = NULL ; iAlarm[1] = NULL;
+	iAlarmIcon[0] = NULL ; iAlarmIcon[1]= NULL;
+	iPlayed[0] = NULL ; iPlayed[1] = NULL;
+	iPlayedDigits[0] = NULL ; iPlayedDigits[1]= NULL;
+	iTotalDigits[0]= NULL ; iTotalDigits[1]= NULL;
+	iPaused[0]= NULL ; iPaused[1]= NULL;
+	iPlaying[0]= NULL ; iPlaying[1]= NULL;
+	iPlayButton[0]= NULL ; iPlayButton[1] = NULL;
+	iPauseButton[0]= NULL ; iPauseButton[1]= NULL;
+	iPlayButton2[0]= NULL ; iPlayButton2[1] = NULL;
+	iPauseButton2[0] = NULL ; iPauseButton2[1] = NULL;
+	iStopButton[0] = NULL ; iStopButton[1] = NULL;
+	iNextSongButton[0]= NULL ; iNextSongButton[1] = NULL;
+	iPrevSongButton[0]= NULL ; iPrevSongButton[1]= NULL;
+	iListBox[0] = NULL ; iListBox[1] = NULL;
+	iTitle[0] = NULL ; iTitle[1] = NULL;
+	iAlbum[0] = NULL ; iAlbum[1] = NULL;
+	iArtist[0] = NULL ; iArtist[1] = NULL;
+	iGenre[0] = NULL ; iGenre[1] = NULL;
+	iTrackNumber[0] = NULL ; iTrackNumber[1] = NULL;
+	iFileName[0] = NULL ; iFileName[1] = NULL;
+	iPosition[0] = NULL ; iPosition[1] = NULL;
+	iVolume[0] = NULL ; iVolume[1] = NULL;
+	iVolumeBoost[0] = NULL ; iVolumeBoost[1] = NULL;
+	iAnalyzer[0] = NULL ; iAnalyzer[1] = NULL;
+	iRepeatIcon[0]= NULL ; iRepeatIcon[1] = NULL;
+	iRepeatButton[0] = NULL ; iRepeatButton[1] = NULL;
+	iRandomIcon[0] = NULL ; iRandomIcon[1] = NULL;
+	iRandomButton[0] = NULL ; iRandomButton[1] = NULL;
+	iScrollBar[0] = NULL ; iScrollBar[1] = NULL;
+	iAnimation[0] = NULL ; iAnimation[1] = NULL;
+	iLogo[0] = NULL ; iLogo[1] = NULL;
 
-  // Reset the max mode
-  iModeMax = -1;
-  }
+	// Reset the max mode
+	iModeMax = -1;
+	}
 
 void COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 	{
@@ -1048,23 +1049,31 @@ void COggPlayAppView::UpdateRepeat()
 }
 
 void COggPlayAppView::UpdateRandom()
-{
-  if (iApp->iSettings.iRandom) {
-    if (iRandomIcon[iMode]) iRandomIcon[iMode]->Show();
-    if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(1);
-  } else {
-    if (iRandomIcon[iMode]) iRandomIcon[iMode]->Hide();
-    if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(0);
-  }
-}
+	{
+	if (iApp->iSettings.iRandom)
+		{
+		if (iRandomIcon[iMode])
+			iRandomIcon[iMode]->Show();
+
+		if (iRandomButton[iMode]) iRandomButton[iMode]->SetState(1);
+		}
+	else
+		{
+		if (iRandomIcon[iMode])
+			iRandomIcon[iMode]->Hide();
+
+		if (iRandomButton[iMode])
+			iRandomButton[iMode]->SetState(0);
+		}
+	}
 
 TInt COggPlayAppView::CallBack(TAny* aPtr)
-{
-  COggPlayAppView* self = (COggPlayAppView*) aPtr;
-  self->HandleCallBack();
+	{
+	COggPlayAppView* self = (COggPlayAppView*) aPtr;
+	self->HandleCallBack();
 
-  return 1;
-}
+	return 1;
+	}
 
 void COggPlayAppView::HandleCallBack()
 	{

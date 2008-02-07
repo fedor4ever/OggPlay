@@ -18,8 +18,8 @@
 
 // Platform settings
 #include <OggOs.h>
-
 #include <e32std.h>
+
 #include "OggLog.h"
 #include "OggTremor.h"
 #include "OggMultiThread.h"
@@ -67,62 +67,62 @@ void CBufferingAO::PrimeNextBuffer()
 // This AO is owned by the COggPlayback object and runs in the buffering thread
 CBufferingThreadAO::CBufferingThreadAO(TStreamingThreadData& aSharedData)
 : CBufferingAO(EPriorityIdle, aSharedData)
-{
-}
+	{
+	}
 
 CBufferingThreadAO::~CBufferingThreadAO()
-{
-}
+	{
+	}
 
 void CBufferingThreadAO::StartListening()
-{
+	{
 	// Set the AO active (wait for the streaming thread to make a buffering request)
 	iStatus = KRequestPending;
 	SetActive();
-}
+	}
 
 // Prime the next buffer and self complete to prime more buffers if possible
 void CBufferingThreadAO::RunL()
-{
+	{
 	// Decode the next buffer
 	PrimeNextBuffer();
 
 	// Stop buffering if we have filled all the buffers (or if we have got to the last buffer)
 	if ((iSharedData.NumBuffers() == iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
-	{
-	  // Listen for the next buffering request
-	  iStatus = KRequestPending;
-	  SetActive();
+		{
+		// Listen for the next buffering request
+		iStatus = KRequestPending;
+		SetActive();
 
-	  iSharedData.iBufRequestInProgress = EFalse;
-	}
+		iSharedData.iBufRequestInProgress = EFalse;
+		}
 	else if (!iSharedData.iLastBuffer)
-	{
-	  // More buffers are required, so self complete
-	  TRequestStatus* status = &iStatus;
-	  User::RequestComplete(status, KErrNone);
+		{
+		// More buffers are required, so self complete
+		TRequestStatus* status = &iStatus;
+		User::RequestComplete(status, KErrNone);
 
-	  SetActive();
-	}
+		SetActive();
+		}
 	else
-	  iSharedData.iBufRequestInProgress = EFalse;
-}
+		iSharedData.iBufRequestInProgress = EFalse;
+	}
 
 // The buffering thread AO is owned by COggPlayback
 // The COggPlayback object must ensure that the buffering AO is not cancelled if the streaming thread could be about to make a buffering request
 // In other words, the streaming thread must be in a known, "inactive", state before the buffering thread AO is cancelled
 void CBufferingThreadAO::DoCancel()
-{
+	{
 	// If iSharedData.iBufRequestInProgress is true we will have self completed so there is nothing to do
 	// If iSharedData.iBufRequestInProgress is false we are waiting for a request from the streaming thread so we must complete the request with KErrCancel
 	if (!iSharedData.iBufRequestInProgress)
-	{
+		{
 		TRequestStatus* status = &iStatus;
 		User::RequestComplete(status, KErrCancel);
-	}
+		}
 
 	iSharedData.iBufRequestInProgress = EFalse;
-}
+	}
 
 // Streaming thread AO (It is used in SingleThread and MultiThread mode only)
 // The streaming thread AO is owned by the playback engine and runs in the streaming thread
