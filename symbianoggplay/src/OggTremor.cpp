@@ -126,6 +126,9 @@ void COggPlayback::ConstructL()
 
 	// Create the buffering active object
 	iBufferingThreadAO = new(ELeave) CBufferingThreadAO(iSharedData);
+	iBufferingThreadAO->CreateTimerL();
+
+	// Share it with the streaming thread
 	iSharedData.iBufferingThreadAO = iBufferingThreadAO;
 
 	// Add it to the buffering threads active scheduler (this thread)

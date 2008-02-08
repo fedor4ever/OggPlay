@@ -206,16 +206,24 @@ public:
 
 // Base class for the buffering AOs
 class CBufferingAO : public CActive
-{
+	{
 public:
 	CBufferingAO(TInt aPriority, TStreamingThreadData& aSharedData);
 	~CBufferingAO();
 
+	void CreateTimerL();
 	void PrimeNextBuffer();
 
 protected:
+	void SelfComplete();
+	void SelfCompleteCancel();
+
+protected:
 	TStreamingThreadData& iSharedData;
-};
+
+private:
+	RTimer iTimer;
+	};
 
 // Buffering thread active object
 // Performs buffering when requested to by the streaming thread
