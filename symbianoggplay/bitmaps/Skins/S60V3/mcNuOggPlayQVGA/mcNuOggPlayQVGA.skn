@@ -56,6 +56,15 @@ OggPlay 1 {
       Position 154 203 18 22
       Icon 43 44
     }
+    RepeatIcon {
+      Position 86 207 19 13
+      Icon 49 50
+      NextIcon 51 52
+    }
+    RandomIcon {
+      Position 122 206 19 14
+      Icon 53 54
+    }
   }
   FlipClosed {
     Played {

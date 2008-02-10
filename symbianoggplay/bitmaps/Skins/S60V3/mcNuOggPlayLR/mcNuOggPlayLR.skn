@@ -56,5 +56,14 @@ OggPlay 1 {
       Position 112 130 13 15
       Icon 43 44
     }
+    RepeatIcon {
+      Position 64 133 14 9
+      Icon 47 48
+      NextIcon 49 50
+    }
+    RandomIcon {
+      Position 90 132 14 10
+      Icon 51 52
+    }
   }
 }

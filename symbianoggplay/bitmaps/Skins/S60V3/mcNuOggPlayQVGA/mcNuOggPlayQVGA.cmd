@@ -47,3 +47,9 @@ mcNuOggPlayQVGA.mbm /c12bitmaps/file.bmp
 /1bitmaps/volboost.mask.bmp
 /c12bitmaps/trackerslider2.bmp
 /1bitmaps/trackerslider2.mask.bmp
+/c16bitmaps/repeaticon.bmp
+/1bitmaps/repeaticon.mask.bmp
+/c16bitmaps/repeatplaylisticon.bmp
+/1bitmaps/repeatplaylisticon.mask.bmp
+/c16bitmaps/randomicon.bmp
+/1bitmaps/randomicon.mask.bmp
