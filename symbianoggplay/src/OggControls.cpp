@@ -759,39 +759,19 @@ TBool COggText::ReadArguments(TOggParser& p)
 
 
 COggIcon::COggIcon()
-: iBlinkFrequency(5), iBlinking(EFalse)
 	{
 	}
 
 COggIcon::~COggIcon()
 	{
 	delete iIcon;
-	delete iBlinkIcon;
 	}
 
-void COggIcon::SetIcon(CGulIcon* anIcon)
+void COggIcon::SetIcon(CGulIcon* aIcon)
 	{
 	delete iIcon;
-	iIcon = anIcon;
-	iCurrentIcon = iIcon;
+	iIcon = aIcon;
 
-	iRedraw = ETrue;
-	}
-
-void COggIcon::SetBlinkIcon(CGulIcon* anIcon)
-	{
-	delete iBlinkIcon;
-	iBlinkIcon = anIcon;
-
-	iRedraw = ETrue;
-	}
-
-void COggIcon::Blink()
-	{
-	iBlinking = ETrue;
-	iVisible = ETrue;
-	iCycle = 0;
-	
 	iRedraw = ETrue;
 	}
 
@@ -800,7 +780,6 @@ void COggIcon::Show()
 	if (!iVisible)
 		iRedraw = ETrue;
 
-	iBlinking = EFalse;
 	iVisible = ETrue;
 	}
 
@@ -809,22 +788,88 @@ void COggIcon::Hide()
 	if (iVisible)
 		iRedraw = ETrue;
 
-	iBlinking = EFalse;
 	iVisible = EFalse;
 	}
 
-void COggIcon::SetBlinkFrequency(TInt aFrequency)
+void COggIcon::Draw(CBitmapContext& aBitmapContext)
+	{
+	if (!iIcon)
+		return;
+
+	aBitmapContext.BitBltMasked(TPoint(ix,iy), iIcon->Bitmap(),
+	TRect(TPoint(0, 0), iIcon->Bitmap()->SizeInPixels()), iIcon->Mask(), ETrue);
+	}
+
+TBool COggIcon::ReadArguments(TOggParser& p)
+	{
+	TBool success = COggControl::ReadArguments(p);
+	if (success && p.iToken==_L("Icon"))
+		{
+		p.Debug(_L("Setting icon."));
+		SetIcon(p.ReadIcon(iBitmapFile));
+		success = (iIcon != NULL);
+		}
+
+	return success;
+	}
+
+
+COggBlinkIcon::COggBlinkIcon()
+: iBlinkFrequency(5), iBlinking(EFalse)
+	{
+	}
+
+COggBlinkIcon::~COggBlinkIcon()
+	{
+	delete iBlinkIcon;
+	}
+
+void COggBlinkIcon::SetIcon(CGulIcon* aIcon)
+	{
+	COggIcon::SetIcon(aIcon);
+	iCurrentIcon = iIcon;
+	}
+
+void COggBlinkIcon::SetBlinkIcon(CGulIcon* aIcon)
+	{
+	delete iBlinkIcon;
+	iBlinkIcon = aIcon;
+
+	iRedraw = ETrue;
+	}
+
+void COggBlinkIcon::Blink()
+	{
+	iBlinking = ETrue;
+	iVisible = ETrue;
+	iCycle = 0;
+	
+	iRedraw = ETrue;
+	}
+
+void COggBlinkIcon::Show()
+	{
+	COggIcon::Show();
+	iBlinking = EFalse;
+	}
+
+void COggBlinkIcon::Hide()
+	{
+	COggIcon::Hide();
+	iBlinking = EFalse;
+	}
+
+void COggBlinkIcon::SetBlinkFrequency(TInt aFrequency)
 	{
 	iBlinkFrequency = aFrequency;
 	}
 
-void COggIcon::Cycle()
+void COggBlinkIcon::Cycle()
 	{
 	if (!iBlinking)
 		return;
 
 	iCycle++;
-
 	if (iCycle<iBlinkFrequency)
 		return;
 
@@ -837,7 +882,7 @@ void COggIcon::Cycle()
 	iCycle = 0;
 	}
 
-void COggIcon::Draw(CBitmapContext& aBitmapContext)
+void COggBlinkIcon::Draw(CBitmapContext& aBitmapContext)
 	{
 	if (!iCurrentIcon)
 		return;
@@ -846,20 +891,13 @@ void COggIcon::Draw(CBitmapContext& aBitmapContext)
 	TRect(TPoint(0, 0), iCurrentIcon->Bitmap()->SizeInPixels()), iCurrentIcon->Mask(), ETrue);
 	}
 
-TBool COggIcon::ReadArguments(TOggParser& p)
+TBool COggBlinkIcon::ReadArguments(TOggParser& p)
 	{
-	TBool success = COggControl::ReadArguments(p);
+	TBool success = COggIcon::ReadArguments(p);
 	if (success && p.iToken==_L("BlinkFrequency"))
 		{
 		p.Debug(_L("Setting blink frequency."));
 		success = p.ReadToken(iBlinkFrequency);
-		}
-
-	if (success && p.iToken==_L("Icon"))
-		{
-		p.Debug(_L("Setting icon."));
-		SetIcon(p.ReadIcon(iBitmapFile));
-		success = (iIcon != NULL);
 		}
 
 	if (success && p.iToken==_L("BlinkIcon"))
@@ -871,6 +909,59 @@ TBool COggIcon::ReadArguments(TOggParser& p)
 
 	return success;
 	}
+
+
+COggMultiStateIcon::COggMultiStateIcon()
+	{
+	}
+
+COggMultiStateIcon::~COggMultiStateIcon()
+	{
+	delete iNextIcon;
+	}
+
+void COggMultiStateIcon::SetState(TInt aState)
+	{
+	iState = aState;
+	iRedraw = ETrue;
+
+	(iState>0) ? Show() : Hide();
+	}
+
+void COggMultiStateIcon::SetNextIcon(CGulIcon* aNextIcon)
+	{
+	delete iNextIcon;
+	iNextIcon = aNextIcon;
+
+	iRedraw = ETrue;
+	}
+
+void COggMultiStateIcon::Draw(CBitmapContext& aBitmapContext)
+	{
+	if (!iIcon)
+		return;
+
+	CGulIcon* currentIcon = (iState>1) ? iNextIcon : iIcon;
+	if (!currentIcon)
+		currentIcon = iIcon;
+
+	aBitmapContext.BitBltMasked(TPoint(ix,iy), currentIcon->Bitmap(),
+	TRect(TPoint(0, 0), currentIcon->Bitmap()->SizeInPixels()), currentIcon->Mask(), ETrue);
+	}
+
+TBool COggMultiStateIcon::ReadArguments(TOggParser& p)
+	{
+	TBool success = COggIcon::ReadArguments(p);
+	if (success && p.iToken==_L("NextIcon"))
+		{
+		p.Debug(_L("Setting next icon."));
+		SetNextIcon(p.ReadIcon(iBitmapFile));
+		success = (iNextIcon != NULL);
+		}
+
+	return success;
+	}
+
 
 COggAnimation::COggAnimation()
 : iBitmaps(10), iPause(100), iFrequency(2), iFirstBitmap(0), iStyle(0)

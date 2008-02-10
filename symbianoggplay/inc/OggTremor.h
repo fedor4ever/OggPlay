@@ -103,7 +103,6 @@ const TInt KOggControlFreq = 14;
 // Stream start delays
 // Avoid buffer underflows at stream startup and stop multiple starts when the user moves quickly between tracks
 const TInt KStreamStartDelay = 100000;
-const TInt KSendoStreamStartDelay = 500000;
 
 // Stream stop delay
 // OggPlay doesn't wait for a play complete message so wait a little while before "stopping"

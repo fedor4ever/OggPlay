@@ -46,10 +46,23 @@ private:
 	CGainSettingItem* iGainSettingItem;
 	};
 
-class CRepeatSettingItem : public CAknBinaryPopupSettingItem
+class CRepeatSettingItem : public CAknEnumeratedTextPopupSettingItem
 	{
 public:
 	CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
+
+private:
+	// Functions from base classes
+	void EditItemL(TBool aCalledFromMenu);
+
+private:
+	COggPlayAppUi& iAppUi;
+	};
+
+class CRandomSettingItem : public CAknBinaryPopupSettingItem
+	{
+public:
+	CRandomSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi);
 
 private:
 	// Functions from base classes

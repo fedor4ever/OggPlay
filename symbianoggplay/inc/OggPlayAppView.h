@@ -174,10 +174,11 @@ private:
 	COggDigits* iTotalDigits[2];
 
 	COggIcon* iAlarmIcon[2];
-	COggIcon* iRepeatIcon[2];
 	COggIcon* iRandomIcon[2];
 	COggIcon* iPlaying[2];
-	COggIcon* iPaused[2];
+
+	COggMultiStateIcon* iRepeatIcon[2];
+	COggBlinkIcon* iPaused[2];
 
 	COggSlider* iVolume[2];
 	COggSlider* iVolumeBoost[2];

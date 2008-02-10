@@ -36,30 +36,31 @@
 
 
 COggUserHotkeysControl::COggUserHotkeysControl( TOggplaySettings& aData ) : iData(aData)
-  {
-  }
+	{
+	}
 
 void COggUserHotkeysControl::ConstructL(const TRect& aRect)
-  {
-  CreateWindowL();
+	{
+	CreateWindowL();
 
-  iListBox = new (ELeave) CAknSettingStyleListBox;
-  iListBox->SetMopParent(this);
-  iListBox->SetContainerWindowL( *this );
-  iListBox->ConstructL( this, EAknListBoxSelectionList );
-  iListBox->Model()->SetOwnershipType(ELbmOwnsItemArray);
+	iListBox = new(ELeave) CAknSettingStyleListBox;
+	iListBox->SetMopParent(this);
+	iListBox->SetContainerWindowL(*this);
+	iListBox->ConstructL(this, EAknListBoxSelectionList);
+	iListBox->Model()->SetOwnershipType(ELbmOwnsItemArray);
 
-  // Scroll bar arrow indicators
-  iListBox->CreateScrollBarFrameL(ETrue);
-	iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff,CEikScrollBarFrame::EAuto);
+	// Scroll bar arrow indicators
+	iListBox->CreateScrollBarFrameL(ETrue);
+	iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
 
-  RefreshListboxModel();
+	RefreshListboxModel();
  
-  iListBox->ActivateL();
-  SetRect(aRect);
+	iListBox->ActivateL();
+	SetRect(aRect);
 	ActivateL();
-  iListBox->SetRect(Rect());
-  }
+
+	iListBox->SetRect(Rect());
+	}
 
 
 COggUserHotkeysControl::~COggUserHotkeysControl()
@@ -111,7 +112,7 @@ void COggUserHotkeysControl::RefreshListboxModel()
 	CleanupStack::PushL(array);
 
 	CDesCArray* modelArray = (CDesCArray *) iListBox->Model()->ItemTextArray();
-	for (TInt i = TOggplaySettings::EFirstHotkeyIndex; i<=TOggplaySettings::EHotkeyVolumeBoostDown ; i++) 
+	for (TInt i = TOggplaySettings::EFirstHotkeyIndex; i<=TOggplaySettings::EHotkeyToggleRepeat ; i++)
 		{
 		keyBuf.Zero();
 		switch (iData.iUserHotkeys[i])
@@ -167,32 +168,27 @@ CCoeControl* COggUserHotkeysControl::ComponentControl(TInt /*aIndex*/) const
   return iListBox;
   }
 
-TKeyResponse COggUserHotkeysControl::OfferKeyEventL(
-    const TKeyEvent& aKeyEvent,
-    TEventCode aType )
-  {
-  TInt validKey = TOggplaySettings::ENoHotkey;
+TKeyResponse COggUserHotkeysControl::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
+	{
+	TInt validKey = TOggplaySettings::ENoHotkey;
 
-  if( (Rng((TInt)'0', aKeyEvent.iScanCode, (TInt)'9') || 
-      aKeyEvent.iScanCode == EStdKeyHash || 
-      aKeyEvent.iScanCode == EStdKeyNkpAsterisk ||
-      aKeyEvent.iScanCode == '*' ||
-      aKeyEvent.iScanCode == EStdKeyBackspace ||
-      aKeyEvent.iScanCode == EStdKeyLeftShift ||
-      aKeyEvent.iScanCode == EStdKeyRightShift) && aType == EEventKeyDown )
-    validKey = aKeyEvent.iScanCode;
+	if ((Rng((TInt) '0', aKeyEvent.iScanCode, (TInt) '9') || 
+	aKeyEvent.iScanCode == EStdKeyHash || aKeyEvent.iScanCode == EStdKeyNkpAsterisk ||
+	aKeyEvent.iScanCode == '*' || aKeyEvent.iScanCode == EStdKeyBackspace ||
+	aKeyEvent.iScanCode == EStdKeyLeftShift || aKeyEvent.iScanCode == EStdKeyRightShift) && aType == EEventKeyDown)
+		validKey = aKeyEvent.iScanCode;
  
-  // Save if a valid key or save a ENoHotkey to clear current entry if LSK (Clear) were pressed
-  if( validKey != TOggplaySettings::ENoHotkey || aKeyEvent.iScanCode == EStdKeyDevice0 )
-    {
-    TInt row = iListBox->CurrentItemIndex();
-    SetHotkey(row, validKey);
-    RefreshListboxModel();
-    return EKeyWasConsumed;
-    }
-  else
-	return iListBox->OfferKeyEventL( aKeyEvent, aType );
-  }
+	// Save if a valid key or save a ENoHotkey to clear current entry if LSK (Clear) were pressed
+	if (validKey != TOggplaySettings::ENoHotkey || aKeyEvent.iScanCode == EStdKeyDevice0)
+		{
+		TInt row = iListBox->CurrentItemIndex();
+		SetHotkey(row, validKey);
+		RefreshListboxModel();
+		return EKeyWasConsumed;
+		}
+	else
+		return iListBox->OfferKeyEventL( aKeyEvent, aType );
+	}
 
 void COggUserHotkeysS60::SetSoftkeys(TBool aPlaying)
 	{

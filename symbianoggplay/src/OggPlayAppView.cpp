@@ -418,8 +418,8 @@ void COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 			_LIT(KAL,"Adding PausedIcon");
 			p.Debug(KAL);
 
-			c = new(ELeave) COggIcon;
-			iPaused[aCanvas] = (COggIcon *) c;
+			c = new(ELeave) COggBlinkIcon;
+			iPaused[aCanvas] = (COggBlinkIcon *) c;
 			iPaused[aCanvas]->Hide();
 			}
 		else if (p.iToken == _L("AlarmIcon"))
@@ -433,12 +433,12 @@ void COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 			}
 		else if (p.iToken == _L("RepeatIcon"))
 			{
-			_LIT(KAL,"Adding RepeadIcon");
+			_LIT(KAL,"Adding RepeatIcon");
 			p.Debug(KAL);
 
-			c = new(ELeave) COggIcon;
-			iRepeatIcon[aCanvas] = (COggIcon *) c;
-			iRepeatIcon[aCanvas]->MakeVisible(iApp->iSettings.iRepeat);
+			c = new(ELeave) COggMultiStateIcon;
+			iRepeatIcon[aCanvas] = (COggMultiStateIcon *) c;
+			iRepeatIcon[aCanvas]->MakeVisible(iApp->iSettings.iRepeat ? ETrue : EFalse);
 			}    
 		else if (p.iToken == _L("RandomIcon"))
 			{
@@ -1035,18 +1035,24 @@ void COggPlayAppView::ListBoxPageUp()
 	}
 
 void COggPlayAppView::UpdateRepeat()
-{
-  if (iApp->iSettings.iRepeat)
-  {
-    if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Show();
-    if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(1);
-  }
-  else
-  {
-    if (iRepeatIcon[iMode]) iRepeatIcon[iMode]->Hide();
-    if (iRepeatButton[iMode]) iRepeatButton[iMode]->SetState(0);
-  }
-}
+	{
+	if (iApp->iSettings.iRepeat)
+		{
+		if (iRepeatIcon[iMode])
+			iRepeatIcon[iMode]->SetState(iApp->iSettings.iRepeat);
+
+		if (iRepeatButton[iMode])
+			iRepeatButton[iMode]->SetState(1);
+		}
+	else
+		{
+		if (iRepeatIcon[iMode])
+			iRepeatIcon[iMode]->Hide();
+
+		if (iRepeatButton[iMode])
+			iRepeatButton[iMode]->SetState(0);
+		}
+	}
 
 void COggPlayAppView::UpdateRandom()
 	{
@@ -2000,6 +2006,14 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 
 			return EKeyWasConsumed;
 			}
+
+		case TOggplaySettings::EHotkeyToggleShuffle:
+			iApp->ToggleRandomL();
+			return EKeyWasConsumed;
+
+		case TOggplaySettings::EHotkeyToggleRepeat:
+			iApp->ToggleRepeat();
+			return EKeyWasConsumed;
 
 		default:
 			break;

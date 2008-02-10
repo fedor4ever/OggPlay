@@ -27,7 +27,7 @@
 
 // Thread commands for the Streaming thread
 enum TStreamingThreadCommand
-{
+	{
 	// Set the audio properties
 	EStreamingThreadSetAudioProperties = EThreadShutdown+1,
 
@@ -60,11 +60,11 @@ enum TStreamingThreadCommand
 
 	// Get the streaming position
 	EStreamingThreadPosition
-};
+	};
 
 // Buffering mode to use
 enum TBufferingMode
-{
+	{
 	// Multi thread playback (currently one thread buffers, the other one streams audio)
 	EBufferThread,
 
@@ -73,11 +73,11 @@ enum TBufferingMode
 
 	// No buffering (one thread streams and decodes the next buffer only)
 	ENoBuffering
-};
+	};
 
 // Flush buffer event (the event that has made flushing the buffers necessary)
 enum TFlushBufferEvent
-{
+	{
 	// The user has changed the volume gain
 	EVolumeGainChanged,
 
@@ -89,21 +89,21 @@ enum TFlushBufferEvent
 
 	// The user has changed the position (ff/rw)
 	EPositionChanged
-};
+	};
 
 // Thread priorities to use (relative/normal or absolute/high)
 enum TStreamingThreadPriority
-{
+	{
 	// Use normal thread priorities (EPriorityNormal and EPriorityMore)
 	ENormal,
 
 	// Use high thread priorities (EPriorityAbsoluteForeground and EPriorityAbsoluteHigh)
 	EHigh
-};
+	};
 
 // Streaming thread status event
 enum TStreamingThreadStatus
-{
+	{
 	// The last buffer has been copied to the server (played)
 	ELastBufferCopied,
 
@@ -115,7 +115,7 @@ enum TStreamingThreadStatus
 
 	// Playback has stopped
 	EPlayStopped
-};
+	};
 
 // Shared data between the UI, buffering and streaming threads
 // Owned by the UI thread (part of COggPlayback)
@@ -124,7 +124,7 @@ class CStreamingThreadCommandHandler;
 class CStreamingThreadListener;
 class COggPlayback;
 class TStreamingThreadData
-{
+	{
 public:
 	TStreamingThreadData(COggPlayback& aOggPlayback, RThread& aUIThread, RThread& aBufferingThread);
 
@@ -202,7 +202,10 @@ public:
 
 	// Streaming position
 	TTimeIntervalMicroSeconds iStreamingPosition;
-};
+
+	// Machine uid (for identifying the phone model)
+	TInt iMachineUid;
+	};
 
 // Base class for the buffering AOs
 class CBufferingAO : public CActive

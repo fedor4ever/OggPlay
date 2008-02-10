@@ -230,7 +230,7 @@ private:
 };
 
 
-// COggIcon:
+// COggIcon
 // An icon (bitmap+mask) that can blink.
 // Ownership of the CGulIcon is taken!
 class COggIcon : public COggControl
@@ -239,14 +239,34 @@ public:
 	COggIcon();
 	~COggIcon();
 
-	void SetIcon(CGulIcon* anIcon);
-	void SetBlinkIcon(CGulIcon* anIcon);
+	void SetIcon(CGulIcon* aIcon);
 
-	void Blink();
 	void Show();
 	void Hide();
 
+protected:
+	virtual TBool ReadArguments(TOggParser& p);
+
+	virtual void Draw(CBitmapContext& aBitmapContext);
+
+protected:
+	CGulIcon* iIcon;
+	};
+
+class COggBlinkIcon : public COggIcon
+	{
+public:
+	COggBlinkIcon();
+	~COggBlinkIcon();
+
+	void SetIcon(CGulIcon* aIcon);
+	void SetBlinkIcon(CGulIcon* aIcon);
 	void SetBlinkFrequency(TInt aFrequency);
+
+	void Show();
+	void Hide();
+
+	void Blink();
 
 protected:
 	virtual TBool ReadArguments(TOggParser& p);
@@ -254,12 +274,32 @@ protected:
 	virtual void Cycle();
 	virtual void Draw(CBitmapContext& aBitmapContext);
 
-	CGulIcon* iIcon;
+protected:
 	CGulIcon* iBlinkIcon;
 	CGulIcon* iCurrentIcon;
 
 	TBool iBlinkFrequency;
 	TBool iBlinking;
+	};
+
+class COggMultiStateIcon : public COggIcon
+	{
+public:
+	COggMultiStateIcon();
+	~COggMultiStateIcon();
+
+	void SetState(TInt aState);
+
+protected:
+	virtual TBool ReadArguments(TOggParser& p);
+	virtual void Draw(CBitmapContext& aBitmapContext);
+
+private:
+	void SetNextIcon(CGulIcon* aNextIcon);
+
+private:
+	TInt iState;
+	CGulIcon* iNextIcon;
 	};
 
 

@@ -44,6 +44,9 @@ CAknSettingItem* COggSettingItemList::CreateSettingItemL(TInt aIdentifier)
 		case EOggSettingRepeatId:
 			return new(ELeave) CRepeatSettingItem(aIdentifier, iAppUi);
 
+		case EOggSettingRandomId:
+			return new(ELeave) CRandomSettingItem(aIdentifier, iAppUi);
+
 		case EOggSettingScanDir:
 			return new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iData.iScanmode);
 
@@ -116,14 +119,25 @@ void COggSettingItemList::BufferingModeChangedL()
 
 
 CRepeatSettingItem::CRepeatSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
-: CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iRepeat), iAppUi(aAppUi)
+: CAknEnumeratedTextPopupSettingItem(aIdentifier, aAppUi.iSettings.iRepeat), iAppUi(aAppUi)
 	{
 	}
  
 void CRepeatSettingItem::EditItemL(TBool aCalledFromMenu)
 	{
-	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+	CAknEnumeratedTextPopupSettingItem::EditItemL(aCalledFromMenu);
 	iAppUi.SetRepeat(InternalValue());
+	}
+
+CRandomSettingItem::CRandomSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)
+: CAknBinaryPopupSettingItem(aIdentifier, aAppUi.iSettings.iRandom), iAppUi(aAppUi)
+	{
+	}
+ 
+void CRandomSettingItem::EditItemL(TBool aCalledFromMenu)
+	{
+	CAknBinaryPopupSettingItem::EditItemL(aCalledFromMenu);
+	iAppUi.SetRandomL(InternalValue());
 	}
 
 CBufferingModeSettingItem::CBufferingModeSettingItem(TInt aIdentifier,  COggPlayAppUi& aAppUi)

@@ -134,10 +134,15 @@ void COggPlayback::ConstructL()
 	// Add it to the buffering threads active scheduler (this thread)
 	CActiveScheduler::Add(iBufferingThreadAO);
 
+	// Allow the access to the machine uid (for phone specific code paths)
+	iSharedData.iMachineUid = iMachineUid;
+
+	// Create the timers
 	iStartAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(StartAudioStreamingCallBack, this));
 	iRestartAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(RestartAudioStreamingCallBack, this));
 	iStopAudioStreamingTimer = new(ELeave) COggTimer(TCallBack(StopAudioStreamingCallBack, this));
 
+	// Create the sample rate converter (it also does the buffering and volume boost)
 	iOggSampleRateConverter = new(ELeave) COggSampleRateConverter;
 
 	// Initialise codecs
@@ -867,16 +872,8 @@ TInt COggPlayback::GetNewSamples(TDes8 &aBuffer)
 
 void COggPlayback::StartAudioStreamingCallBack()
 	{
-	StartStreaming();
-
-#if defined(SERIES60) && !defined(PLUGIN_SYSTEM) // aka S60V1
-	// Older phones (eg. my battered old Sendo) had issues getting
-	// playback started at the same time as updating the user interface.
-	// To avoid this we wait a bit so that the audio can start playing
-	User::After(KSendoStreamStartDelay);
-#endif
-
 	iObserver->NotifyPlayStarted();
+	StartStreaming();
 	}
 
 void COggPlayback::RestartAudioStreamingCallBack()
@@ -942,9 +939,9 @@ void COggPlayback::StartStreaming()
 	if (iSharedData.iBufferingMode == EBufferThread)
 		iBufferingThreadAO->StartListening();
 
-#if defined(SERIES60) && !defined(SERIES60V3)
-	// The NGage has a poor memory and always forgets the audio settings
-	if ((iMachineUid == EMachineUid_NGage) || (iMachineUid == EMachineUid_NGageQD))
+#if defined(SERIES60) && !defined(PLUGIN_SYSTEM) // aka S60V1
+	// The NGage and 3650 have poor memories and always forget the audio settings
+	if ((iMachineUid == EMachineUid_NGage) || (iMachineUid == EMachineUid_NGageQD) || (iMachineUid == EMachineUid_N3650))
 		iStreamingThreadCommandHandler->SetAudioProperties();
 #endif
 

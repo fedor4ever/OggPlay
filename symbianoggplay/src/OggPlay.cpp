@@ -1644,10 +1644,6 @@ void COggPlayAppUi::DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane)
 		if (iSettings.iRandom) 
 			aMenuPane->SetItemButtonState(EOggShuffle, EEikMenuItemSymbolOn);
 
-#elif defined(SERIES60)
-		TBuf<50> buf;
-		iEikonEnv->ReadResourceL(buf, iSettings.iRandom ? R_OGG_RANDOM_OFF : R_OGG_RANDOM_ON);
-		aMenuPane->SetItemTextL(EOggShuffle, buf);
 #endif
 
 		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName) || (iViewBy == EPlayList));
@@ -1754,6 +1750,9 @@ void COggPlayAppUi::ReadIniFile()
 
 	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyVolumeBoostUp] = '9';
 	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyVolumeBoostDown] = '7';
+
+	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyToggleShuffle] = EStdKeyHash;
+	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyToggleRepeat] = '0';
 #elif defined(SERIES80)
 	iSettings.iSoftKeysIdle[0] = TOggplaySettings::EHotkeyPlay;
     iSettings.iSoftKeysIdle[1] = TOggplaySettings::EHotkeyBack;
@@ -1916,7 +1915,16 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	TInt numHotKeys = IniRead32L(aIniFileData, 0, (TInt) TOggplaySettings::ENumHotkeys);
 	for (i = TOggplaySettings::EFirstHotkeyIndex ; i<numHotKeys ; i++) 
 		iSettings.iUserHotkeys[i] = IniRead32L(aIniFileData, 0, KMaxTInt);
-      
+
+#if defined(SERIES60)
+	if (iniVersion == 1)
+		{
+		// These weren't used in previous versions, so set them back to the defaults
+		iSettings.iUserHotkeys[TOggplaySettings::EHotkeyToggleShuffle] = EStdKeyHash;
+		iSettings.iUserHotkeys[TOggplaySettings::EHotkeyToggleRepeat] = '0';
+		}
+#endif
+
 	iSettings.iWarningsEnabled = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 	iSettings.iRandom = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 	iSettings.iGainType = IniRead32L(aIniFileData, (TInt) EMinus24dB, (TInt) EStatic12dB);
@@ -2387,16 +2395,15 @@ void COggPlayAppUi::SetRandomL(TBool aRandom)
 
 void COggPlayAppUi::ToggleRepeat()
 	{
-	if (iSettings.iRepeat)
-	      SetRepeat(EFalse);
-	    else
-	      SetRepeat(ETrue);
+	SetRepeat(iSettings.iRepeat+1);
 	}
 
-void COggPlayAppUi::SetRepeat(TBool aRepeat)
+void COggPlayAppUi::SetRepeat(TInt aRepeat)
 	{
-    iSettings.iRepeat = aRepeat;
+	if (aRepeat>TOggplaySettings::ERepeatPlaylist)
+		aRepeat = TOggplaySettings::ERepeatNone;
 
+    iSettings.iRepeat = aRepeat;
     iSongList->SetRepeat(aRepeat);
     iAppView->UpdateRepeat();
 	}
@@ -2733,21 +2740,24 @@ const TDesC& COggNormalPlay::GetNextSong()
         return KNullDesC;
 		}
 
-	if (iFullListPlayingIdx+1<nSongs)
+	if (iRepeat != TOggplaySettings::ERepeatSong)
 		{
-        // We are in the middle of the song list. Now play the next song.
-		iFullListPlayingIdx++;
-		}
-	else if (iRepeat)
-		{
-		// We are at the end of the song list, repeat it
-		iFullListPlayingIdx = 0;
-		}
-    else 
-		{
-        // We are at the end of the playlist, stop here.
-        SetPlaying(ENoFileSelected);
-        return KNullDesC;
+		if (iFullListPlayingIdx+1<nSongs)
+			{
+			// We are in the middle of the song list. Now play the next song.
+			iFullListPlayingIdx++;
+			}
+		else if (iRepeat == TOggplaySettings::ERepeatPlaylist)
+			{
+			// We are at the end of the song list, repeat it
+			iFullListPlayingIdx = 0;
+			}
+	    else 
+			{
+			// We are at the end of the playlist, stop here.
+	        SetPlaying(ENoFileSelected);
+		    return KNullDesC;
+			}
 		}
 
 	TOggFile* file = iFullFileList[iFullListPlayingIdx];
@@ -2863,30 +2873,33 @@ const TDesC& COggRandomPlay::GetNextSong()
         return KNullDesC;
 		}
 
-	if (iRandomMemoryIdx+1<nSongs)
+	if (iRepeat != TOggplaySettings::ERepeatSong)
 		{
-        // We are in the middle of the song list. Now play the next song.
-		iRandomMemoryIdx++;
-		}
-	else if (iRepeat)
-		{
-		// We are at the end of the song list, repeat it
-		// Find a new track to start with and generate a new random list
-		TInt fullFileListIdx;
-		do
+		if (iRandomMemoryIdx+1<nSongs)
 			{
-			fullFileListIdx = iAppUi->Rnd(nSongs);
+	        // We are in the middle of the song list. Now play the next song.
+			iRandomMemoryIdx++;
 			}
-		while (fullFileListIdx == iFullListPlayingIdx);
+		else if (iRepeat == TOggplaySettings::ERepeatPlaylist)
+			{
+			// We are at the end of the song list, repeat it
+			// Find a new track to start with and generate a new random list
+			TInt fullFileListIdx;
+			do
+				{
+				fullFileListIdx = iAppUi->Rnd(nSongs);
+				}
+			while (fullFileListIdx == iFullListPlayingIdx);
 
-		iFullListPlayingIdx = fullFileListIdx;
-		GenerateRandomListL();
-		}
-    else 
-		{
-        // We are at the end of the playlist, stop here.
-        SetPlaying(ENoFileSelected);
-        return KNullDesC;
+			iFullListPlayingIdx = fullFileListIdx;
+			GenerateRandomListL();
+			}
+		else 
+			{
+		    // We are at the end of the playlist, stop here.
+			SetPlaying(ENoFileSelected);
+	        return KNullDesC;
+			}
 		}
 
 	iFullListPlayingIdx = iRandomMemory[iRandomMemoryIdx];

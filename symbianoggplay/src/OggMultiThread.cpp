@@ -51,13 +51,23 @@ void CBufferingAO::CreateTimerL()
 
 void CBufferingAO::SelfComplete()
 	{
-#if !defined(__VC32__) && !defined(__CW32__)
-	iTimer.After(iStatus, 1000);
-#else
-	TRequestStatus* status = &iStatus;
-	User::RequestComplete(status, KErrNone);
+#if defined(SERIES60) && !defined(PLUGIN_SYSTEM) // aka S60V1
+	if (iSharedData.iMachineUid == EMachineUid_SendoX)
+		{
+		// The Sendo has an issue that sometimes the timers on the phone run slow
+		// Consequently, we just self complete here and avoid using timers at all
+		TRequestStatus* status = &iStatus;
+		User::RequestComplete(status, KErrNone);
+
+		SetActive();
+		return;
+		}
 #endif
 
+	// On all other phones we manually de-schedule the thread in order to improve
+	// multi-tasking performance and also to improve stability on S60V3 (I had some issues
+	// that were possibly file server related, so by de-scheduling we try to avoid accessing the fileserver too much)
+	iTimer.After(iStatus, 1000);
 	SetActive();
 	}
 
@@ -781,7 +791,7 @@ void CStreamingThreadPlaybackEngine::MaoscOpenComplete(TInt aErr)
 
 // MaoscBufferCopied does all of the work to manage the buffering
 void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& aBuffer)
-{
+	{
 	// Error codes:
 	// KErrCancel      -3  (not sure when this happens, but ignore for now)
 	// KErrUnderflow  -10  (ignore this, do as if nothing has happend, and live happily ever after)
@@ -807,49 +817,49 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 		return;
 
 	if ((aErr != KErrNone) && (aErr != KErrUnderflow))
-	{
+		{
 		// Notify the UI thread (unknown error)
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
 		if (status->Int() == KRequestPending)
 			iSharedData.iUIThread.RequestComplete(status, aErr);
 
 		return;
-	}
+		}
 
 	// If we have reached the last buffer, notify the UI thread
 	if (iSharedData.iLastBuffer == &aBuffer)
-	{
+		{
 		// Notify the UI thread that we have copied the last buffer to the stream
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
 		iSharedData.iUIThread.RequestComplete(status, ELastBufferCopied);
 		return;
-	}
+		}
 
 	// Dynamically adjust the buffering thread priority
 	TBool streamingThreadActive = iStreamingThreadAO->IsActive();
 	if (iSharedData.iBufferingMode == EBufferThread)
-	{
+		{
 		TInt numBuffers = iSharedData.NumBuffers();
 		if (numBuffers < KBufferThreadLowThreshold)
-		{
-			if ((iBufferingThreadPriority != EPriorityMore) && (iBufferingThreadPriority != EPriorityAbsoluteHigh))
 			{
-				if (!streamingThreadActive && !iSharedData.iLastBuffer)
+			if ((iBufferingThreadPriority != EPriorityMore) && (iBufferingThreadPriority != EPriorityAbsoluteHigh))
 				{
+				if (!streamingThreadActive && !iSharedData.iLastBuffer)
+					{
 					iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityNormal) ? EPriorityMore : EPriorityAbsoluteHigh;
 					iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+					}
+				}
+			}
+		else if (numBuffers > KBufferThreadHighThreshold)
+			{
+			if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
+				{
+				iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
+				iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
 				}
 			}
 		}
-		else if (numBuffers > KBufferThreadHighThreshold)
-		{
-			if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
-			{
-				iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
-				iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
-			}
-		}
-	}
  
 	// Ignore underflow if there are stream buffers left
 	if ((aErr == KErrUnderflow) && iStreamBuffers)
@@ -858,12 +868,12 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 	// Check if we have available buffers
 	TInt availBuffers = iSharedData.NumBuffers() - iStreamBuffers;
 	if (!availBuffers)
-	{
+		{
 		// If the streaming thread is doing the buffering, prime another buffer now 
 		if ((streamingThreadActive || (iSharedData.iBufferingMode == ENoBuffering)) && (aErr != KErrUnderflow))
 			iStreamingThreadAO->PrimeNextBuffer();
 		else
-		{
+			{
 			// If we still have stream buffers, ignore the fact there are no buffers left
 			if (iStreamBuffers)
 				return;
@@ -872,41 +882,29 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 			TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
 			iSharedData.iUIThread.RequestComplete(status, EPlayUnderflow);
 			return;
+			}
 		}
-	}
 
 	// Stream the next buffer
 	SendNextBuffer();
 
 	availBuffers = iSharedData.NumBuffers() - iStreamBuffers;
 	if ((iStreamBuffers<iMaxStreamBuffers) && availBuffers)
-	{
+		{
 		// Try to catch up by writing another buffer
 		SendNextBuffer();
-	}
+		}
 
 	// If the number of buffers has dropped below a certain threshold, request the buffering thread to start buffering
 	if (iSharedData.NumBuffers()<iBufferLowThreshold) 
-	{
+		{
 		// Nothing to do if the streaming thread is already buffering
 		// If a buffer flush is pending we don't want to start any more buffering
 		if (streamingThreadActive || iBufferFlushPending)
-		{
-			if (streamingThreadActive)
-			{
-				// Deschedule the streaming thread for a little while (1ms)
-				// This gives other threads a chance to run and really helps
-				// on phones where the thread scheduling doesn't work properly
-				#if !defined(__VC32__) && !defined(__CW32__)
-				User::After(1000);
-				#endif
-			}
-
 			return;
-		}
 
 		switch (iSharedData.iBufferingMode)
-		{
+			{
 			case ENoBuffering:
 				break;
 
@@ -917,37 +915,27 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 
 			case EBufferThread:
 				{
-					// Nothing to do if the buffering thread is already buffering
-					if (iSharedData.iBufRequestInProgress)
-						break;
+				// Nothing to do if the buffering thread is already buffering
+				if (iSharedData.iBufRequestInProgress)
+					break;
 
-					// Nothing to do if we have reached eof
-					if (iSharedData.iLastBuffer)
-						break;
+				// Nothing to do if we have reached eof
+				if (iSharedData.iLastBuffer)
+					break;
 
-					// Issue a buffering request
-					iSharedData.iBufRequestInProgress = ETrue;
-					TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
-					iSharedData.iBufferingThread.RequestComplete(status, KErrNone);
+				// Issue a buffering request
+				iSharedData.iBufRequestInProgress = ETrue;
+				TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
+				iSharedData.iBufferingThread.RequestComplete(status, KErrNone);
 				}
 				break;
 
 			default:
 				User::Panic(_L("STPE: MaoscBC"), 0);
 				break;
+			}
 		}
 	}
-
-	if (streamingThreadActive)
-	{
-		// Deschedule the streaming thread for a little while (1ms)
-		// This gives other threads a chance to run and really helps
-		// on phones where the thread scheduling doesn't work properly
-		#if !defined(__VC32__) && !defined(__CW32__)
-		User::After(1000);
-		#endif
-	}
-}
 
 // Handle play complete
 // There are five possibilities possibilities:

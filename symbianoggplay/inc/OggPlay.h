@@ -161,7 +161,16 @@ public:
 		};
 
 	TInt iUserHotkeys[ENumHotkeys];
-	TBool iRepeat;
+
+	enum TRepeatMode
+		{
+		ERepeatNone,
+		ERepeatSong,
+		ERepeatPlaylist
+		};
+
+	TInt iRepeat;
+
 	TBool iRandom;
 
 	// Multi thread playback settings
