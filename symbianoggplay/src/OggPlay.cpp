@@ -1743,7 +1743,7 @@ void COggPlayAppUi::ReadIniFile()
     iSettings.iUserHotkeys[TOggplaySettings::EHotkeyNextSong] = '6';
     iSettings.iUserHotkeys[TOggplaySettings::EHotkeyPreviousSong] = '4';
 
-    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyKeylock] = '*';
+    iSettings.iUserHotkeys[TOggplaySettings::EHotkeyKeylock] = EStdKeyNkpAsterisk;
 
     iSettings.iUserHotkeys[TOggplaySettings::EHotkeyPauseResume] = '5';
 	iSettings.iUserHotkeys[TOggplaySettings::EHotkeyStop] = EStdKeyBackspace;
@@ -1886,7 +1886,11 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	/* iHotkey = */ IniRead32L(aIniFileData, 0, 0);
 #endif
 
-	iSettings.iRepeat = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
+	if (iniVersion == 1)
+		iSettings.iRepeat = IniRead32L(aIniFileData, 0, 1) ? TOggplaySettings::ERepeatPlaylist : TOggplaySettings::ERepeatNone;
+	else
+		iSettings.iRepeat = IniRead32L(aIniFileData, 0, (TInt32) TOggplaySettings::ERepeatPlaylist);
+
 	iVolume = IniRead32L(aIniFileData, 0, KMaxVolume);
 	
 	iSettings.iAlarmTime = TTime(IniRead64L(aIniFileData));
@@ -2167,7 +2171,7 @@ void COggPlayAppUi::WriteIniFile()
 	iniFileBuf.AppendNum(iHotkey);
 	iniFileBuf.Append(KIniValueTerminator);
 
-	iniFileBuf.AppendNum(iSettings.iRepeat ? 1 : 0);
+	iniFileBuf.AppendNum(iSettings.iRepeat);
 	iniFileBuf.Append(KIniValueTerminator);
 
 	iniFileBuf.AppendNum(iVolume);
