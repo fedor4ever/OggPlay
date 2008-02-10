@@ -438,7 +438,7 @@ void COggPlayAppView::ReadCanvas(TInt aCanvas, TOggParser& p)
 
 			c = new(ELeave) COggMultiStateIcon;
 			iRepeatIcon[aCanvas] = (COggMultiStateIcon *) c;
-			iRepeatIcon[aCanvas]->MakeVisible(iApp->iSettings.iRepeat ? ETrue : EFalse);
+			iRepeatIcon[aCanvas]->SetState(iApp->iSettings.iRepeat);
 			}    
 		else if (p.iToken == _L("RandomIcon"))
 			{
