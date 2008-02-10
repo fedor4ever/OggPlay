@@ -154,8 +154,8 @@ public:
 		EHotkeyExit,
 		EHotkeyBack,
 		EHotkeyVolumeHelp,
-		EHotkeyToggleShuffle,
 		EHotkeyToggleRepeat,
+		EHotkeyToggleShuffle,
 
 		ENumHotkeys
 		};

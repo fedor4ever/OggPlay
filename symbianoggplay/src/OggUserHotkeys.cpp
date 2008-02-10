@@ -71,6 +71,9 @@ COggUserHotkeysControl::~COggUserHotkeysControl()
 void COggUserHotkeysControl::SetHotkey(TInt aRow, TInt aCode)
 	{
 	aRow += TOggplaySettings::EFirstHotkeyIndex;
+	if (aRow>TOggplaySettings::EHotkeyVolumeBoostDown)
+		aRow += 3; // Skip unused entries
+
 	for (TInt i = TOggplaySettings::EFirstHotkeyIndex ; i<TOggplaySettings::ENumHotkeys ; i++)
 		{
 		if( i == aRow )
@@ -112,7 +115,7 @@ void COggUserHotkeysControl::RefreshListboxModel()
 	CleanupStack::PushL(array);
 
 	CDesCArray* modelArray = (CDesCArray *) iListBox->Model()->ItemTextArray();
-	for (TInt i = TOggplaySettings::EFirstHotkeyIndex, j = 0; i<=TOggplaySettings::EHotkeyToggleRepeat ; i++)
+	for (TInt i = TOggplaySettings::EFirstHotkeyIndex, j = 0; i<=TOggplaySettings::EHotkeyToggleShuffle ; i++)
 		{
 		// Skip hotkeys that are not used on S60
 		if ((i == TOggplaySettings::EHotkeyExit) || (i == TOggplaySettings::EHotkeyBack) || (i == TOggplaySettings::EHotkeyVolumeHelp))
