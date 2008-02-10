@@ -1149,7 +1149,7 @@ void COggPlayAppView::HandleAlarmCallBack()
   if (iApp->iOggPlayback->State() != CAbsPlayback::EPlaying)
   {
 	 // Set the volume and volume boost
-	iApp->iVolume = (iApp->iSettings.iAlarmVolume * KMaxVolume)/10;
+	iApp->SetVolume((iApp->iSettings.iAlarmVolume * KMaxVolume)/10);
 	iApp->SetVolumeGainL((TGainType) iApp->iSettings.iAlarmGain);
 
 	// Play the next song or unpause the current one
@@ -2041,18 +2041,19 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 			{
 			if (playbackState == CAbsPlayback::EPlaying)
 				{
+				TInt volume = iApp->iVolume;
 				if ((scanCode == EOggUp) || (scanCode == EOggRight))
-					iApp->iVolume += KStepVolume;
+					volume += KStepVolume;
 				else if ((scanCode == EOggDown) || (scanCode == EOggLeft))
-					iApp->iVolume -= KStepVolume;
+					volume -= KStepVolume;
 
-				if (iApp->iVolume>KMaxVolume)
-					iApp->iVolume = KMaxVolume;
+				if (volume>KMaxVolume)
+					volume = KMaxVolume;
 
-				if (iApp->iVolume<0)
-					iApp->iVolume = 0;
+				if (volume<0)
+					volume = 0;
 
-				iApp->iOggPlayback->SetVolume(iApp->iVolume);
+				iApp->SetVolume(volume);
 				UpdateVolume();
 				}
 			}
@@ -2165,13 +2166,14 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 			// Volume
 			if ((aKeyEvent.iScanCode == EOggUp) || (aKeyEvent.iScanCode == EOggDown))
 				{
-				if ((aKeyEvent.iScanCode == EOggUp) && (iApp->iVolume<100))
-					iApp->iVolume += 5;
+				TInt volume = iApp->iVolume;
+				if ((aKeyEvent.iScanCode == EOggUp) && (volume<100))
+					volume += 5;
 
-				if ((aKeyEvent.iScanCode == EOggDown) && (iApp->iVolume>0))
-					iApp->iVolume -= 5;
+				if ((aKeyEvent.iScanCode == EOggDown) && (volume>0))
+					volume -= 5;
 
-				iApp->iOggPlayback->SetVolume(iApp->iVolume);
+				iApp->SetVolume(volume);
 				UpdateVolume();
 
 				return EKeyWasConsumed;
@@ -2282,23 +2284,24 @@ void COggPlayAppView::OggPointerEvent(COggControl* c, const TPointerEvent& p)
 		}
 
 	if (c == iVolume[iMode])
-		{
-		iApp->iVolume= iVolume[iMode]->CurrentValue();
-		iApp->iOggPlayback->SetVolume(iApp->iVolume);
-		}
+		iApp->SetVolume(iVolume[iMode]->CurrentValue());
 
 	if (c == iAnalyzer[iMode])
 		iApp->iAnalyzerState= iAnalyzer[iMode]->Style();
 	}
 
-void COggPlayAppView::AddControlToFocusList(COggControl* c) {
-  COggControl* currentitem = iFocusControlsIter; 
-  if (currentitem) {
-    iFocusControlsPresent=ETrue;
-    c->iDlink.Enque(&currentitem->iDlink);
-    iFocusControlsIter.Set(*c);
-  } else {
-    iFocusControlsHeader.AddFirst(*c);
-    iFocusControlsIter.SetToFirst(); 
-  }
-}
+void COggPlayAppView::AddControlToFocusList(COggControl* c)
+	{
+	COggControl* currentitem = iFocusControlsIter; 
+	if (currentitem)
+		{
+		iFocusControlsPresent = ETrue;
+		c->iDlink.Enque(&currentitem->iDlink);
+		iFocusControlsIter.Set(*c);
+		}
+	else
+		{
+		iFocusControlsHeader.AddFirst(*c);
+		iFocusControlsIter.SetToFirst(); 
+		}
+	}

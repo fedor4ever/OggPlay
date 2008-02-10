@@ -2442,9 +2442,18 @@ TInt COggPlayAppUi::FileSize(const TDesC& aFileName)
 	return fileSize; 
 	}
 
+void COggPlayAppUi::SetVolume(TInt aVolume)
+	{
+	iVolume = aVolume;
+
+	iOggMTPlayback->SetVolume(iVolume);
+	if (iOggMMFPlayback)
+		iOggMMFPlayback->SetVolume(iVolume);
+	}
+
 void COggPlayAppUi::SetBufferingModeL(TBufferingMode aNewBufferingMode)
 	{
-	TInt err = ((COggPlayback *) iOggPlayback)->SetBufferingMode(aNewBufferingMode);
+	TInt err = ((COggPlayback *) iOggMTPlayback)->SetBufferingMode(aNewBufferingMode);
 	if (err == KErrNone)
 		iSettings.iBufferingMode = aNewBufferingMode;
 	else
@@ -2463,13 +2472,16 @@ void COggPlayAppUi::SetBufferingModeL(TBufferingMode aNewBufferingMode)
 
 void COggPlayAppUi::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority)
 	{
-	((COggPlayback *) iOggPlayback)->SetThreadPriority(aNewThreadPriority);
+	((COggPlayback *) iOggMTPlayback)->SetThreadPriority(aNewThreadPriority);
 	iSettings.iThreadPriority = aNewThreadPriority;
 	}
 
 void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 	{
-	iOggPlayback->SetVolumeGain(aNewGain);
+	iOggMTPlayback->SetVolumeGain(aNewGain);
+	if (iOggMMFPlayback)
+		iOggMMFPlayback->SetVolumeGain(aNewGain);
+
 	iSettings.iGainType = aNewGain;
 
 #if defined(SERIES60)
@@ -2479,7 +2491,7 @@ void COggPlayAppUi::SetVolumeGainL(TGainType aNewGain)
 
 void COggPlayAppUi::SetMp3Dithering(TBool aDithering)
 	{
-	((COggPlayback *) iOggPlayback)->SetMp3Dithering(aDithering);
+	((COggPlayback *) iOggMTPlayback)->SetMp3Dithering(aDithering);
 	iSettings.iMp3Dithering = aDithering;
 	}
 

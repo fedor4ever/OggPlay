@@ -396,6 +396,8 @@ public:
 	{ return CEikonEnv::Static()->AppUiFactory()->ToolBar();} 
 #endif
 
+	void SetVolume(TInt aVolume);
+
 	void SetBufferingModeL(TBufferingMode aNewBufferingMode);
 	void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
 	void SetVolumeGainL(TGainType aNewGain);
