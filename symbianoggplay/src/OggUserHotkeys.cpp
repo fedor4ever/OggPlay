@@ -148,7 +148,7 @@ void COggUserHotkeysControl::RefreshListboxModel()
 			}
 
 		TBuf<64> title;
-		title.Copy(array->MdcaPoint(i));
+		title.Copy(array->MdcaPoint(j + TOggplaySettings::EFirstHotkeyIndex));
 		listboxBuf.Format(_L("\t%S\t\t%S"), &title, &keyBuf);
 
 		modelArray->InsertL(j, listboxBuf);

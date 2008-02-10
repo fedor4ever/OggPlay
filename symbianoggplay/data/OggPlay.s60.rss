@@ -902,9 +902,6 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_stop; },
 	LBUF { txt = ogg_boost_up; },
 	LBUF { txt = ogg_boost_down; },
-	LBUF { txt = ""; }, // Not used on S60
-	LBUF { txt = ""; }, // Not used on S60
-	LBUF { txt = ""; }, // Not used on S60
 	LBUF { txt = ogg_repeat2; },
 	LBUF { txt = ogg_random_on; }
   };
