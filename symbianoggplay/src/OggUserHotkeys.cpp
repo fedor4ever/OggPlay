@@ -112,8 +112,12 @@ void COggUserHotkeysControl::RefreshListboxModel()
 	CleanupStack::PushL(array);
 
 	CDesCArray* modelArray = (CDesCArray *) iListBox->Model()->ItemTextArray();
-	for (TInt i = TOggplaySettings::EFirstHotkeyIndex; i<=TOggplaySettings::EHotkeyToggleRepeat ; i++)
+	for (TInt i = TOggplaySettings::EFirstHotkeyIndex, j = 0; i<=TOggplaySettings::EHotkeyToggleRepeat ; i++)
 		{
+		// Skip hotkeys that are not used on S60
+		if ((i == TOggplaySettings::EHotkeyExit) || (i == TOggplaySettings::EHotkeyBack) || (i == TOggplaySettings::EHotkeyVolumeHelp))
+			continue;
+
 		keyBuf.Zero();
 		switch (iData.iUserHotkeys[i])
 			{
@@ -146,10 +150,12 @@ void COggUserHotkeysControl::RefreshListboxModel()
 		TBuf<64> title;
 		title.Copy(array->MdcaPoint(i));
 		listboxBuf.Format(_L("\t%S\t\t%S"), &title, &keyBuf);
-		
-		modelArray->InsertL(i-TOggplaySettings::EFirstHotkeyIndex, listboxBuf);
-		if ((modelArray->MdcaCount()-1) > (i-TOggplaySettings::EFirstHotkeyIndex))
-			modelArray->Delete((i-TOggplaySettings::EFirstHotkeyIndex)+1);
+
+		modelArray->InsertL(j, listboxBuf);
+		if ((modelArray->MdcaCount()-1) > j)
+			modelArray->Delete(j+1);
+
+		j++;
 		}
 
 	iListBox->HandleItemAdditionL();
