@@ -239,9 +239,16 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_oggplay_display_setting_item_list
 	    AVKON_SETTING_ITEM
 	        {  
 	        identifier = EOggSettingRepeatId;
+			setting_page_resource = r_oggplay_repeat_page;
+			associated_resource = r_oggplay_repeat_setting_item_list;
+			name = ogg_repeat2;    
+	        },
+	    AVKON_SETTING_ITEM
+	        {  
+	        identifier = EOggSettingRandomId;
 			setting_page_resource = r_oggplay_binary_setting_page;
 			associated_resource = r_oggplay_popup_setting_binary_texts;
-			name = ogg_repeat2;    
+			name = ogg_random_on;
 	        },
 		AVKON_SETTING_ITEM
 			{
@@ -436,6 +443,46 @@ RESOURCE ARRAY r_oggplay_popped_up_on_off_texts
 		};
 	}
 
+
+// -------------------------------------------------------------------------
+// 
+
+RESOURCE AVKON_SETTING_PAGE r_oggplay_repeat_page
+    {   
+    label = ogg_repeat2;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_oggplay_popup_setting_list_new_entry;
+    }
+
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_oggplay_repeat_setting_item_list
+    {
+    setting_texts_resource = r_oggplay_repeat_setting_page_list;
+    popped_up_texts_resource = r_oggplay_repeat_item_array;
+    }
+
+RESOURCE ARRAY r_oggplay_repeat_setting_page_list
+    {
+    items = { 
+		AVKON_ENUMERATED_TEXT { 
+		   value = 0;
+		   text = "Off";  },
+		AVKON_ENUMERATED_TEXT {
+		   value = 1;
+		   text = "Repeat song"; },
+		AVKON_ENUMERATED_TEXT { 
+		   value = 2;
+		   text = "Repeat playlist"; }
+		};
+	}
+
+RESOURCE ARRAY r_oggplay_repeat_item_array
+    {
+    items = { 
+		LBUF { txt = "Off"; },
+		LBUF { txt = "Repeat song"; },
+		LBUF { txt = "Repeat playlist"; }
+		};
+    }
 
 // -------------------------------------------------------------------------
 // 
@@ -854,15 +901,16 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_pause; },
 	LBUF { txt = ogg_stop; },
 	LBUF { txt = ogg_boost_up; },
-	LBUF { txt = ogg_boost_down; }
+	LBUF { txt = ogg_boost_down; },
+	LBUF { txt = ogg_repeat2; },
+	LBUF { txt = ogg_random_on; }
   };
 }
 
 RESOURCE MENU_PANE r_options_menu
 {
   items= {
-	MENU_ITEM { txt=ogg_skins; cascade=r_skin_menu; },
-	MENU_ITEM { command=EOggOptions; txt=ogg_settings; },
+	MENU_ITEM { command=EOggOptions; txt="Application"; },
 	MENU_ITEM { command=EOggUserHotkeys; txt=ogg_user_hotkey; },
 	MENU_ITEM { command=EOggPlaybackOptions; txt=ogg_playback; }
 
@@ -878,9 +926,10 @@ RESOURCE MENU_PANE r_file_menu
 {
   items= {
       MENU_ITEM { command=EOggInfo;	txt=ogg_file_info; },
-      MENU_ITEM { command=EOggShuffle; txt=""; flags=EEikMenuItemCheckBox; },
+      MENU_ITEM { txt="Settings"; cascade=r_options_menu; },
+      MENU_ITEM { txt=ogg_skins; cascade=r_skin_menu; },
+ 
       MENU_ITEM { command=EOggViewRebuild; txt=ogg_find_files; },
-      MENU_ITEM { txt=ogg_options_cascade; cascade=r_options_menu; },
       MENU_ITEM { command=EOggAbout; txt=ogg_about_label; },
       MENU_ITEM { command=EEikCmdExit; txt=ogg_exit_label; }
   };
