@@ -7,7 +7,6 @@ SOURCE dllentry.cpp
 
 SOURCEPATH    ..\libmad
 SOURCE bit.c
-SOURCE decoder.c
 SOURCE fixed.c
 SOURCE frame.c
 SOURCE huffman.c
@@ -29,7 +28,6 @@ SOURCE frametype.c
 SOURCE genre.c      
 SOURCE latin1.c     
 SOURCE parse.c      
-SOURCE render.c     
 SOURCE tag.c        
 SOURCE ucs4.c       
 SOURCE utf16.c      

@@ -815,7 +815,7 @@ TBool COggIcon::ReadArguments(TOggParser& p)
 
 
 COggBlinkIcon::COggBlinkIcon()
-: iBlinkFrequency(5), iBlinking(EFalse)
+: iBlinkFrequency(5)
 	{
 	}
 

@@ -38,7 +38,11 @@
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlay\Fish.mbm"-"!:\resource\apps\OggPlay\Fish.mbm"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\resource\apps\OggPlayIcon.mbm"-"!:\resource\apps\OggPlayIcon.mbm"
 
+IF DisplayXPixels=240 AND DisplayYPixels=320
+"C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\OggSplashQVGA.mbm"-"!:\private\F000A661\OggSplash.mbm"
+ELSE
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\data\z\private\F000A661\OggSplash.mbm"-"!:\private\F000A661\OggSplash.mbm"
+ENDIF
 
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggPlayShared.dll"-"!:\sys\bin\OggPlayShared.dll"
 "C:\Symbian\9.1\S60_3rd_MR\epoc32\release\gcce\urel\OggplayVorbisi.dll"-"!:\sys\bin\OggplayVorbisi.dll"

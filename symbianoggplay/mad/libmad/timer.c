@@ -69,6 +69,7 @@ void mad_timer_negate(mad_timer_t *timer)
   }
 }
 
+#if 0
 /*
  * NAME:	timer->abs()
  * DESCRIPTION:	return the absolute value of a timer
@@ -80,6 +81,7 @@ mad_timer_t mad_timer_abs(mad_timer_t timer)
 
   return timer;
 }
+#endif
 
 /*
  * NAME:	reduce_timer()
@@ -314,6 +316,7 @@ EXPORT_C signed long mad_timer_count(mad_timer_t timer, enum mad_units units)
   return 0;
 }
 
+#if 0
 /*
  * NAME:	timer->fraction()
  * DESCRIPTION:	return fractional part of timer in arbitrary terms
@@ -334,6 +337,7 @@ unsigned long mad_timer_fraction(mad_timer_t timer, unsigned long denom)
     return scale_rational(timer.fraction, MAD_TIMER_RESOLUTION, denom);
   }
 }
+#endif
 
 /*
  * NAME:	timer->string()

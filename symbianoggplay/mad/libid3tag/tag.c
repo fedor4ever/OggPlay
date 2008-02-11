@@ -667,6 +667,7 @@ EXPORT_C struct id3_tag *id3_tag_parse(id3_byte_t const *data, id3_length_t leng
   return 0;
 }
 
+#if 0
 static
 void v1_renderstr(struct id3_tag const *tag, char const *frameid,
 		  id3_byte_t **buffer, id3_length_t length)
@@ -906,3 +907,4 @@ id3_length_t id3_tag_render(struct id3_tag const *tag, id3_byte_t *buffer)
 
   return size;
 }
+#endif

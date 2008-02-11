@@ -54,6 +54,6 @@ struct rgain {
 # define RGAIN_DB(rgain)  ((rgain)->adjustment / 10.0)
 
 void rgain_parse(struct rgain *, struct mad_bitptr *);
-char const *rgain_originator(struct rgain const *);
+// char const *rgain_originator(struct rgain const *);
 
 # endif

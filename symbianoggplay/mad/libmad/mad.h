@@ -644,18 +644,18 @@ enum mad_units {
 
 # define mad_timer_reset(timer)	((void) (*(timer) = mad_timer_zero))
 
-int mad_timer_compare(mad_timer_t, mad_timer_t);
+IMPORT_C int mad_timer_compare(mad_timer_t, mad_timer_t);
 
 # define mad_timer_sign(timer)	mad_timer_compare((timer), mad_timer_zero)
 
 void mad_timer_negate(mad_timer_t *);
 mad_timer_t mad_timer_abs(mad_timer_t);
 
-void mad_timer_set(mad_timer_t *, unsigned long, unsigned long, unsigned long);
-void mad_timer_add(mad_timer_t *, mad_timer_t);
-void mad_timer_multiply(mad_timer_t *, signed long);
+IMPORT_C void mad_timer_set(mad_timer_t *, unsigned long, unsigned long, unsigned long);
+IMPORT_C void mad_timer_add(mad_timer_t *, mad_timer_t);
+IMPORT_C void mad_timer_multiply(mad_timer_t *, signed long);
 
-signed long mad_timer_count(mad_timer_t, enum mad_units);
+IMPORT_C signed long mad_timer_count(mad_timer_t, enum mad_units);
 unsigned long mad_timer_fraction(mad_timer_t, unsigned long);
 void mad_timer_string(mad_timer_t, char *, char const *,
 		      enum mad_units, enum mad_units, unsigned long);
@@ -735,15 +735,15 @@ enum {
 # endif
 };
 
-void mad_stream_init(struct mad_stream *);
-void mad_stream_finish(struct mad_stream *);
+IMPORT_C void mad_stream_init(struct mad_stream *);
+IMPORT_C void mad_stream_finish(struct mad_stream *);
 
 # define mad_stream_options(stream, opts)  \
     ((void) ((stream)->options = (opts)))
 
-void mad_stream_buffer(struct mad_stream *,
+IMPORT_C void mad_stream_buffer(struct mad_stream *,
 		       unsigned char const *, unsigned long);
-void mad_stream_skip(struct mad_stream *, unsigned long);
+IMPORT_C void mad_stream_skip(struct mad_stream *, unsigned long);
 
 int mad_stream_sync(struct mad_stream *);
 
@@ -833,16 +833,16 @@ enum {
   MAD_PRIVATE_III	= 0x001f	/* Layer III private bits (up to 5) */
 };
 
-void mad_header_init(struct mad_header *);
+IMPORT_C void mad_header_init(struct mad_header *);
 
 # define mad_header_finish(header)  /* nothing */
 
-int mad_header_decode(struct mad_header *, struct mad_stream *);
+IMPORT_C int mad_header_decode(struct mad_header *, struct mad_stream *);
 
-void mad_frame_init(struct mad_frame *);
-void mad_frame_finish(struct mad_frame *);
+IMPORT_C void mad_frame_init(struct mad_frame *);
+IMPORT_C void mad_frame_finish(struct mad_frame *);
 
-int mad_frame_decode(struct mad_frame *, struct mad_stream *);
+IMPORT_C int mad_frame_decode(struct mad_frame *, struct mad_stream *);
 
 void mad_frame_mute(struct mad_frame *);
 
@@ -887,13 +887,13 @@ enum {
   MAD_PCM_CHANNEL_STEREO_RIGHT = 1
 };
 
-void mad_synth_init(struct mad_synth *);
+IMPORT_C void mad_synth_init(struct mad_synth *);
 
 # define mad_synth_finish(synth)  /* nothing */
 
 void mad_synth_mute(struct mad_synth *);
 
-void mad_synth_frame(struct mad_synth *, struct mad_frame const *);
+IMPORT_C void mad_synth_frame(struct mad_synth *, struct mad_frame const *);
 
 # endif
 

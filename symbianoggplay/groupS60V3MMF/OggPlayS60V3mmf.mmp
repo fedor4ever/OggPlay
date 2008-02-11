@@ -117,7 +117,13 @@ START BITMAP OggSplash.mbm
   TARGETPATH                              \private\F000A661 
   HEADER                                   
   SOURCEPATH                              ..\bitmaps 
-  SOURCE                                  c12 s60V3MMFsplash.bmp 
+  SOURCE                                  c16 s60V3MMFsplash.bmp 
+END  
 
+START BITMAP OggSplashQVGA.mbm 
+  TARGETPATH                              \private\F000A661 
+  HEADER                                   
+  SOURCEPATH                              ..\bitmaps 
+  SOURCE                                  c16 s60V3MMFQVGAsplash.bmp 
 END  
 

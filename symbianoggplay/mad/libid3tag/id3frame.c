@@ -482,6 +482,7 @@ struct id3_frame *id3_frame_parse(id3_byte_t const **ptr, id3_length_t length,
   return frame;
 }
 
+#if 0
 static
 id3_length_t render_data(id3_byte_t **ptr,
 			 union id3_field *fields, unsigned int length)
@@ -625,3 +626,4 @@ id3_length_t id3_frame_render(struct id3_frame const *frame,
 
   return size;
 }
+#endif

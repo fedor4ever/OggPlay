@@ -331,6 +331,7 @@ int id3_field_parse(union id3_field *field, id3_byte_t const **ptr,
   return -1;
 }
 
+#if 0
 /*
  * NAME:	field->render()
  * DESCRIPTION:	render a field value
@@ -441,6 +442,7 @@ int id3_field_setint(union id3_field *field, signed long number)
 
   return 0;
 }
+#endif
 
 /*
  * NAME:	field->settextencoding()
@@ -461,6 +463,7 @@ int id3_field_settextencoding(union id3_field *field,
   return 0;
 }
 
+#if 0
 static
 int set_latin1(union id3_field *field, id3_latin1_t const *latin1)
 {
@@ -519,6 +522,7 @@ int id3_field_setfulllatin1(union id3_field *field, id3_latin1_t const *latin1)
 
   return set_latin1(field, latin1);
 }
+#endif
 
 static
 int set_string(union id3_field *field, id3_ucs4_t const *string)

@@ -478,7 +478,7 @@ EXPORT_C int mad_frame_decode(struct mad_frame *frame, struct mad_stream *stream
  * NAME:	frame->mute()
  * DESCRIPTION:	zero all subband values so the frame becomes silent
  */
-EXPORT_C void mad_frame_mute(struct mad_frame *frame)
+void mad_frame_mute(struct mad_frame *frame)
 {
   unsigned int s, sb;
 

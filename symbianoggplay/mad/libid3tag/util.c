@@ -31,6 +31,7 @@
 # include "id3tag.h"
 # include "util.h"
 
+#if 0
 /*
  * NAME:	util->unsynchronise()
  * DESCRIPTION:	perform (in-place) unsynchronisation
@@ -65,6 +66,7 @@ id3_length_t id3_util_unsynchronise(id3_byte_t *data, id3_length_t length)
 
   return length + bytes;
 }
+#endif
 
 /*
  * NAME:	util->deunsynchronise()
@@ -89,6 +91,7 @@ id3_length_t id3_util_deunsynchronise(id3_byte_t *data, id3_length_t length)
   return new - data;
 }
 
+#if 0
 /*
  * NAME:	util->compress()
  * DESCRIPTION:	perform zlib deflate method compression
@@ -121,6 +124,7 @@ id3_byte_t *id3_util_compress(id3_byte_t const *data, id3_length_t length,
 
   return compressed;
 }
+#endif
 
 /*
  * NAME:	util->decompress()

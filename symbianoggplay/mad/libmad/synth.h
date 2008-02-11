@@ -61,7 +61,7 @@ IMPORT_C void mad_synth_init(struct mad_synth *);
 
 # define mad_synth_finish(synth)  /* nothing */
 
-IMPORT_C void mad_synth_mute(struct mad_synth *);
+void mad_synth_mute(struct mad_synth *);
 
 IMPORT_C void mad_synth_frame(struct mad_synth *, struct mad_frame const *);
 

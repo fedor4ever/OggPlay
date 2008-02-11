@@ -112,6 +112,6 @@ IMPORT_C void mad_frame_finish(struct mad_frame *);
 
 IMPORT_C int mad_frame_decode(struct mad_frame *, struct mad_stream *);
 
-IMPORT_C void mad_frame_mute(struct mad_frame *);
+void mad_frame_mute(struct mad_frame *);
 
 # endif

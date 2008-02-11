@@ -119,6 +119,7 @@ int mad_stream_sync(struct mad_stream *stream)
   return 0;
 }
 
+#if 0
 /*
  * NAME:	stream->errorstr()
  * DESCRIPTION:	return a string description of the current error condition
@@ -156,3 +157,4 @@ char const *mad_stream_errorstr(struct mad_stream const *stream)
 
   return 0;
 }
+#endif

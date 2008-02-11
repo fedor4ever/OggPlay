@@ -239,7 +239,7 @@ public:
 	COggIcon();
 	~COggIcon();
 
-	void SetIcon(CGulIcon* aIcon);
+	virtual void SetIcon(CGulIcon* aIcon);
 
 	void Show();
 	void Hide();

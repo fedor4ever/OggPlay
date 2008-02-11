@@ -47,7 +47,7 @@ EXPORT_C void mad_synth_init(struct mad_synth *synth)
  * NAME:	synth->mute()
  * DESCRIPTION:	zero all polyphase filterbank values, resetting synthesis
  */
-EXPORT_C void mad_synth_mute(struct mad_synth *synth)
+void mad_synth_mute(struct mad_synth *synth)
 {
   unsigned int ch, s, v;
 

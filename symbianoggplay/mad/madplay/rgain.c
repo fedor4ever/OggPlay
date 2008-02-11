@@ -46,6 +46,7 @@ void rgain_parse(struct rgain *rgain, struct mad_bitptr *ptr)
     rgain->adjustment = -rgain->adjustment;
 }
 
+#if 0
 /*
  * NAME:	rgain->originator()
  * DESCRIPTION:	return a string description of a Replay Gain originator
@@ -70,3 +71,4 @@ char const *rgain_originator(struct rgain const *rgain)
 
   return originator ? originator : ("other");
 }
+#endif
