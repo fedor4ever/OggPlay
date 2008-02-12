@@ -35,7 +35,7 @@
 #include "TremorDecoder.h"
 #include "FlacDecoder.h"
 
-#if defined(MP3_SUPPORT)
+#if defined(MP3_PLUGIN_SUPPORT)
 #include "MadDecoder.h"
 #endif
 
@@ -865,7 +865,7 @@ MDecoder* COggPlayController::GetDecoderL()
 	if (ext.CompareF(KFlacExt) == 0)
 		decoder = new(ELeave) CNativeFlacDecoder(iFs);
 
-#if defined(MP3_SUPPORT)
+#if defined(MP3_PLUGIN_SUPPORT)
 	if (ext.CompareF(KMp3Ext) == 0)
 		decoder = new(ELeave) CMadDecoder(iFs);
 #endif

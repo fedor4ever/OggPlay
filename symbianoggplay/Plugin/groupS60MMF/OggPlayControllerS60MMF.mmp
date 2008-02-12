@@ -42,3 +42,5 @@ LIBRARY                                 efsrv.lib
 
 LIBRARY                                 OggPlayVorbisi.lib
 LIBRARY                                 OggPlayFlaci.lib
+
+MACRO MMF_PLUGIN

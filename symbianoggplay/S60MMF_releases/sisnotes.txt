@@ -1,14 +1,16 @@
-  Welcome to OggPlay 1.71a MMF
+  Welcome to OggPlay 1.72
 
-Welcome to the Series 60
+Welcome to the Series 60 V2
 version of OggPlay, the open
 source media player on Symbian,
 released under the GPL by 
 Leif H. Wilden.
 
 New for this release:
-Minor bug fixes and improvements
-Some internal changes(Old settings will not be preserved if upgrading)
-
+Added mp3 decoder (MAD)
+Added repeat and shuffle hot keys
+Added repeat and shuffle skin icons
+Added repeat modes (Repeat song, Repeat playlist)
+New playback engine for oggs, ogas and flacs (optional for mp3s)
 
 Enjoy!

@@ -1,0 +1,12 @@
+;Version string to be changed
+#{"OggPlay MMF Plugin"},(0x101FF683),1,0,1
+
+; 0x101F7960 for S60 v2.0 and later
+(0x101F7960),0,0,0,{"Series60ProductID"}
+
+; OggPlay libs
+@"OggPlayLibsS60V2.sis",(0x1020202C)
+
+; MMF plugin files
+"C:\Symbian\8.1a\S60_2nd_FP3\epoc32\release\armi\urel\OggPlayController.dll"-"!:\system\libs\Plugins\OggPlayController.dll"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"

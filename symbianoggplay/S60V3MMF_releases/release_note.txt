@@ -1,10 +1,27 @@
 
-This is the Release Note for Release 1.71b MMF of Oggplay for S60 V3
+This is the Release Note for Release 1.72 of Oggplay for S60 V3
 
 *******************************************************************
 If you experience problems please report them to our public forums
 and remember to include the version number and the model of your phone.
 *******************************************************************
+
+
+What's new in Release 1.72:
+----------------------------
+
+Added mp3 decoder (MAD). This is disabled by default (To enable it go to the codecs page and select mp3->Internal).
+Added repeat and shuffle hot keys (these are 0 and # by default)
+Added repeat and shuffle icons to the default skin
+Added repeat modes (Repeat song, Repeat playlist)
+New playback engine for oggs, ogas and flacs (optional for mp3s)
+Some internal changes and improvements
+
+Note that installing OggPlay no longer allows oggs and flacs to be played by the
+built-in music player or used as ringtones. In order to add this functionality download and install the MMF plugin.
+
+Note also that if you are upgrading from earlier versions and have skin packages installed, these will need to re-installed.
+
 
 What's new in Release 1.71b:
 ----------------------------
