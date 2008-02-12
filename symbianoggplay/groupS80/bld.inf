@@ -25,6 +25,5 @@ PRJ_MMPFILES
 
 ..\vorbis\groupS80\OggvorbisS80.mmp
 ..\flac\groupS80\oggflacS80.mmp
-
-..\Plugin\groupS80\OggPlayControllerS80.mmp
+..\mad\groupS80\oggmadS80.mmp
 OggPlayS80.mmp

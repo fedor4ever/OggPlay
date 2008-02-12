@@ -1957,7 +1957,7 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iSoftKeysIdle[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysPlay[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 
-	TRAP(err, IniReadDesL(aIniFileData, iSettings.iCustomScanDir, iniVersion));
+	TRAPD(err, IniReadDesL(aIniFileData, iSettings.iCustomScanDir, iniVersion));
 	if (err != KErrNone)
 		{
 		// Reset the values if the ReadDesL() fails

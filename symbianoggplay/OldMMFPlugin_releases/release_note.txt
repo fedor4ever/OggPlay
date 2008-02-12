@@ -1,0 +1,25 @@
+
+This is the Release Note for Release 1.0 of Oggplay OldMMFPlugin for S60 V2
+
+*******************************************************************
+If you experience problems please report them to our public forums
+and remember to include the version number and the model of your phone.
+*******************************************************************
+
+
+What's new in Release 1.0:
+--------------------------
+
+First release of the "old mmf" plugin
+This version contains compatibility fixes for older phones (e.g Nokia 6600, 6630).
+
+
+Links:
+------
+For more information about Oggplay, please see the webpage at
+http://symbianoggplay.sourceforge.net/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+-the S60 Oggplay developers.

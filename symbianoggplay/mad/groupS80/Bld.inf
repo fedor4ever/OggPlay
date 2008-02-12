@@ -2,7 +2,7 @@
 // Component description file
 
 PRJ_PLATFORMS 
-WINSCW ARMI
+WINS ARMI
 
 PRJ_MMPFILES
-oggmadS60MMF.mmp
+oggmadS80.mmp

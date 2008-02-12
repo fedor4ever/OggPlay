@@ -244,7 +244,7 @@ CCodecsS80Dialog::PreLayoutDynInitL()
   {
     // Build the menu on the fly, according to the list plugins.
   	COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
-    CDesCArrayFlat * extensions = appUi->iOggPlayback->GetPluginListL().SupportedExtensions();
+    CDesCArrayFlat * extensions = appUi->PluginSupportedList()->SupportedExtensions();
  	CleanupStack::PushL(extensions);
  	
     TInt foo;
@@ -322,23 +322,24 @@ TKeyResponse CCodecsLabel::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode 
 }
 
 void CCodecsLabel::SetLabel()
-{
-	COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
-	CPluginInfo * info = appUi->iOggPlayback->GetPluginListL().GetSelectedPluginInfo(*iCodecExtension);
-	if ( info == NULL )
 	{
-	   // Codec has been disabled
-	    TBuf <50> tmp;
-   		iEikonEnv->ReadResource(tmp,R_OGG_DISABLED);
+	COggPlayAppUi* appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
+	const CPluginInfo* info = appUi->PluginSupportedList()->GetSelectedPluginInfo(*iCodecExtension);
+	if (!info)
+		{
+		// Codec has been disabled
+		TBuf<50> tmp;
+		iEikonEnv->ReadResource(tmp, R_OGG_DISABLED);
 		SetTextL(tmp);
+		}
+	else
+		SetTextL(*info->iName);
 	}
-	else SetTextL(*info->iName);
-}
 
 TCoeInputCapabilities CCodecsLabel::InputCapabilities() const
-{ 
-   return TCoeInputCapabilities::ENone;
-}
+	{
+	return TCoeInputCapabilities::ENone;
+	}
 
 
 CCodecsLabel::~CCodecsLabel()
@@ -359,124 +360,125 @@ void CCodecsS80Container::ConstructFromResourceL(TResourceReader& /*aReader*/)
 }
 
 void CCodecsS80Container::ConstructL()
-{
-    TSize aSize(402,155); // The maximal size of an S80 dialog
-    SetSize(aSize);
+	{
+	TSize aSize(402,155); // The maximal size of an S80 dialog
+	SetSize(aSize);
     
-    COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
- 
-	iPluginList = &appUi->iOggPlayback->GetPluginListL();
+	COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
+	iPluginList = appUi->PluginSupportedList();
      
-    iListBox = new (ELeave) CEikTextListBox;
+	iListBox = new(ELeave) CEikTextListBox;
+	iListBox->ConstructL(this);
+	iListBox->SetContainerWindowL(*this);
+	iListBox->SetListBoxObserver(this);
 
-    iListBox->ConstructL(this);
-    iListBox->SetContainerWindowL(*this);
-    iListBox->SetListBoxObserver(this);
-    
-    // Create an array to hold the messages
-    iMessageList = new (ELeave) CDesCArrayFlat(10);
-	CArrayPtrFlat <CPluginInfo> * list = iPluginList->GetPluginInfoList(iCodecExtension);
-    for(TInt i=0; i<list->Count(); i++)
-    {
-        iMessageList->AppendL(*list->At(i)->iName);
-    }
+	// Create an array to hold the messages
+	iMessageList = new(ELeave) CDesCArrayFlat(10);
+	const CArrayPtrFlat<CPluginInfo>* list = iPluginList->GetPluginInfoList(iCodecExtension);
+	for (TInt i = 0 ; i<list->Count() ; i++)
+		iMessageList->AppendL(*list->At(i)->iName);
 
-    TBuf <50> tmp;
-   	iEikonEnv->ReadResource(tmp,R_OGG_USE_NO_CODEC);
+	TBuf<50> tmp;
+	iEikonEnv->ReadResource(tmp, R_OGG_USE_NO_CODEC);
 	iMessageList->AppendL(tmp);
    
-    // Give it to the control
-    CTextListBoxModel* model = iListBox->Model();
-    model->SetItemTextArray(iMessageList);
-    model->SetOwnershipType(ELbmOwnsItemArray); // transfer ownership of iMessageList
-    iListBox->SetFocus(ETrue);
-    iInputFrame = CCknInputFrame::NewL(iListBox, ETrue, NULL);
-    iInputFrame->SetRect(TRect(TPoint(0,0), TSize(150,155)));
-    iInputFrame->ActivateL();
-    iInputFrame->SetContainerWindowL(*this);
+	// Give it to the control
+	CTextListBoxModel* model = iListBox->Model();
+	model->SetItemTextArray(iMessageList);
+	model->SetOwnershipType(ELbmOwnsItemArray); // transfer ownership of iMessageList
+	iListBox->SetFocus(ETrue);
 
-    iCurrentIndex = iListBox->CurrentItemIndex();
-    
-    ///// Create the description pane    
-    iDescriptionBox = new (ELeave) CEikColumnListBox();
-    iDescriptionBox->ConstructL(this);
-    iDescriptionBox->SetContainerWindowL(*this);
-    iDescriptionBox->SetBorder(TGulBorder::ESingleDotted);
-    TRect aRect(TPoint(155,40), TSize(245,100));
-    iDescriptionBox->SetRect(aRect);
-    
-    model = iDescriptionBox->Model();
-    model->SetItemTextArray(new (ELeave) CDesCArrayFlat(10));
-    model->SetOwnershipType(ELbmOwnsItemArray);
-    RefreshListboxModel();
+	iInputFrame = CCknInputFrame::NewL(iListBox, ETrue, NULL);
+	iInputFrame->SetRect(TRect(TPoint(0,0), TSize(150,155)));
+	iInputFrame->ActivateL();
+	iInputFrame->SetContainerWindowL(*this);
 
-    // Set the listbox's first column to fill the listbox's whole width
-    CColumnListBoxData* data = iDescriptionBox->ItemDrawer()->ColumnData();
-    data->SetColumnWidthPixelL(0, 100);
-    data->SetColumnWidthPixelL(1, 150);
-     
-    SetFocus(ETrue);
-    ActivateL();	
-}
+	iCurrentIndex = iListBox->CurrentItemIndex();
+    
+	///// Create the description pane    
+	iDescriptionBox = new(ELeave) CEikColumnListBox();
+	iDescriptionBox->ConstructL(this);
+	iDescriptionBox->SetContainerWindowL(*this);
+	iDescriptionBox->SetBorder(TGulBorder::ESingleDotted);
+	TRect aRect(TPoint(155, 40), TSize(245, 100));
+	iDescriptionBox->SetRect(aRect);
+
+	model = iDescriptionBox->Model();
+	model->SetItemTextArray(new(ELeave) CDesCArrayFlat(10));
+	model->SetOwnershipType(ELbmOwnsItemArray);
+	RefreshListboxModel();
+
+	// Set the listbox's first column to fill the listbox's whole width
+	CColumnListBoxData* data = iDescriptionBox->ItemDrawer()->ColumnData();
+	data->SetColumnWidthPixelL(0, 100);
+	data->SetColumnWidthPixelL(1, 150);
+ 
+	SetFocus(ETrue);
+	ActivateL();	
+	}
 
 void CCodecsS80Container::RefreshListboxModel()
-{
-    TBuf<64+64+1> listboxBuf;
+	{
+	TBuf<64+64+1> listboxBuf;
     
-    CDesCArrayFlat* array = iCoeEnv->ReadDesCArrayResourceL(R_CODEC_INFO_ITEMS);
-    CDesCArray* modelArray = static_cast<CDesCArray*>(iDescriptionBox->Model()->ItemTextArray());
+	CDesCArrayFlat* array = iCoeEnv->ReadDesCArrayResourceL(R_CODEC_INFO_ITEMS);
+	CleanupStack::PushL(array);
 
-    modelArray->Reset();
+	CDesCArray* modelArray = static_cast<CDesCArray*>(iDescriptionBox->Model()->ItemTextArray());
+	modelArray->Reset();
     
-    CPluginInfo * pluginInfo = NULL;
-    CArrayPtrFlat <CPluginInfo> *infoList = iPluginList->GetPluginInfoList(iCodecExtension);
-    if ( infoList )
-       if (iCurrentIndex <= infoList->Count()-1 )
-           pluginInfo = infoList->At(iCurrentIndex);
-	   
-    for( TInt i=0; i<4; i++ ) 
-    {
-        listboxBuf.Zero();
-        
-        TBuf<64> title;
-        TBuf<64> value; 
-        title.Copy(array->MdcaPoint(i));
-        if ( pluginInfo == NULL )
-        {
-    	  value = KNullDesC;
-        }
-        else 
-        {    
-        
-    	    switch (i)
-	        {
-	        case 0:
-	            // Name
-	            value = pluginInfo->iName->Left(64);
-	            break;
-	        case 1:
-	            // Supplier
-	            value = pluginInfo->iSupplier->Left(64);
-	            break;
-	        case 2:
-	            // Version
-	            value.Format(_L("%i"), pluginInfo->iVersion);
-	            break;
-	        case 3:
-	            // Version
-	            value = pluginInfo->iControllerUid.Name().Left(64);
-	            break;
-	            
-	        }
-        }
-        listboxBuf.Format(_L("%S\t%S"), &title, &value);
-        modelArray->AppendL(listboxBuf);
-    }
+	CPluginInfo* pluginInfo = NULL;
+	const CArrayPtrFlat<CPluginInfo> *infoList = iPluginList->GetPluginInfoList(iCodecExtension);
+	if (infoList)
+		{
+		if (iCurrentIndex <= (infoList->Count()-1))
+			pluginInfo = infoList->At(iCurrentIndex);
+		}
 
-    iDescriptionBox->HandleItemAdditionL();
-    DrawDeferred();
-    delete array;
-}
+	for (TInt i = 0 ; i<4 ; i++) 
+		{
+		listboxBuf.Zero();
+
+		TBuf<64> title;
+		TBuf<64> value; 
+		title.Copy(array->MdcaPoint(i));
+		if (!pluginInfo)
+			value = KNullDesC;
+		else 
+			{
+			switch (i)
+				{
+				case 0:
+					// Name
+					value = pluginInfo->iName->Left(64);
+					break;
+
+				case 1:
+					// Supplier
+					value = pluginInfo->iSupplier->Left(64);
+					break;
+
+				case 2:
+					// Version
+					value.Format(_L("%i"), pluginInfo->iVersion);
+					break;
+
+				case 3:
+					// Version
+					value = pluginInfo->iControllerUid.Name().Left(64);
+					break;
+				}
+			}
+
+		listboxBuf.Format(_L("%S\t%S"), &title, &value);
+		modelArray->AppendL(listboxBuf);
+		}
+
+	iDescriptionBox->HandleItemAdditionL();
+	DrawDeferred();
+
+	CleanupStack::PopAndDestroy(array);
+	}
 
 void CCodecsS80Container::HandleListBoxEventL(CEikListBox* /*aListBox*/,TListBoxEvent aEventType)
 {
@@ -529,26 +531,28 @@ TCoeInputCapabilities CCodecsS80Container::InputCapabilities() const
     return TCoeInputCapabilities::ENone;
     }
 
-void CCodecsS80Container::ProcessCommandL (TInt aCommandId)
-{
-	if (aCommandId==EUserSelectCBA)
+void CCodecsS80Container::ProcessCommandL(TInt aCommandId)
 	{
-	// User has selected a new codec.
-	  CPluginInfo * pluginInfo = NULL;
-      CArrayPtrFlat <CPluginInfo> *infoList = iPluginList->GetPluginInfoList(iCodecExtension);
-      if ( infoList )
-         if (iCurrentIndex <= infoList->Count()-1 )
-            pluginInfo = infoList->At(iCurrentIndex);
-         
-	 if (pluginInfo)
-		iPluginList->SelectPluginL(iCodecExtension, pluginInfo->iControllerUid);
-	 else
-	 	iPluginList->SelectPluginL(iCodecExtension, TUid::Null());
-	 
-	 // Call the original process command (to dismiss the dialog)
-	 iCommandObserver->ProcessCommandL(EEikCmdCanceled);	 
+	if (aCommandId == EUserSelectCBA)
+		{
+		// User has selected a new codec.
+		CPluginInfo* pluginInfo = NULL;
+		const CArrayPtrFlat <CPluginInfo> *infoList = iPluginList->GetPluginInfoList(iCodecExtension);
+		if (infoList)
+			{
+			if (iCurrentIndex <= (infoList->Count()-1))
+				pluginInfo = infoList->At(iCurrentIndex);
+			}
+
+		if (pluginInfo)
+			iPluginList->SelectPluginL(iCodecExtension, pluginInfo->iControllerUid);
+		else
+			iPluginList->SelectPluginL(iCodecExtension, TUid::Null());
+
+		// Call the original process command (to dismiss the dialog)
+		iCommandObserver->ProcessCommandL(EEikCmdCanceled);	 
+		}
 	}
-}
 
 TKeyResponse CCodecsS80Container::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
   {

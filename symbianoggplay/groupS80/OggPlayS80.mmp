@@ -4,11 +4,14 @@ TARGETPATH                              \system\apps\Oggplay
 UID                                     0x100039CE 0x1000A661 
 EPOCSTACKSIZE                           0x8000
 
+SYSTEMINCLUDE                           \Epoc32\Include 
+
 USERINCLUDE                             ..\inc 
 USERINCLUDE                             ..\vorbis 
+USERINCLUDE                             ..\flac
+USERINCLUDE                             ..\mad
 USERINCLUDE                             ..\data 
 USERINCLUDE                             ..\plugin\inc 
-SYSTEMINCLUDE                           \Epoc32\Include 
 
 SOURCEPATH                              ..\data 
 START RESOURCE                          OggPlay.rss 
@@ -19,6 +22,15 @@ END
 START RESOURCE                          OggPlay_caption.rss
 TARGETPATH                              \system\apps\Oggplay 
 END
+
+SOURCEPATH                              ..\vorbis
+SOURCE                                  TremorDecoder.cpp 
+
+SOURCEPATH                              ..\flac
+SOURCE                                  FlacDecoder.cpp 
+
+SOURCEPATH                              ..\mad
+SOURCE                                  MadDecoder.cpp 
 
 SOURCEPATH                              ..\src 
 SOURCE                                  OggLog.cpp 
@@ -33,8 +45,13 @@ SOURCE                                  OggHelperFcts.cpp
 SOURCE                                  OggFilesSearchDialogs.cpp 
 SOURCE                                  OggDialogsS80.cpp 
 SOURCE                                  OggUserHotkeysS80.cpp 
+SOURCE                                  OggTremor.cpp 
 SOURCE                                  OggPluginAdaptor.cpp 
+SOURCE                                  OggMultiThread.cpp 
+SOURCE                                  OggThreadClasses.cpp 
 SOURCE                                  OggSplashContainer.cpp
+SOURCE                                  OggRateConvert.cpp 
+SOURCE                                  OggAbsPlayback.cpp
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 euser.lib 
@@ -60,6 +77,10 @@ LIBRARY                                 form.lib
 LIBRARY                                 estor.lib 
 LIBRARY                                 etel.lib 
 LIBRARY                                 mediaclientaudiostream.lib 
+LIBRARY                                 OggPlayShared.lib 
+LIBRARY                                 OggPlayVorbisi.lib 
+LIBRARY                                 OggPlayFlaci.lib 
+LIBRARY                                 OggPlayMadi.lib 
 LIBRARY                                 MediaClientAudio.lib 
 LIBRARY                                 MMFControllerFramework.lib 
 LIBRARY                                 cknctl.lib 

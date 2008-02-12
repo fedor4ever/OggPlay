@@ -1,0 +1,28 @@
+
+This is the Release Note for Release 1.0 of Oggplay MMFPlugin for S60 V2
+
+*******************************************************************
+If you experience problems please report them to our public forums
+and remember to include the version number and the model of your phone.
+*******************************************************************
+
+
+What's new in Release 1.0:
+--------------------------
+
+First release of the mmf plugin
+This version should be compatible with most Nokia S60V2 phones.
+
+However some older models may not be compatible and this version of the plugin may not work correctly.
+For users of older phones that are having issues please install the "old mmf" version instead.
+ 
+
+Links:
+------
+For more information about Oggplay, please see the webpage at
+http://symbianoggplay.sourceforge.net/
+
+For help and open discussion about OggPlay see under 'Public Forums' on
+http://sourceforge.net/projects/symbianoggplay/
+
+-the S60 Oggplay developers.
