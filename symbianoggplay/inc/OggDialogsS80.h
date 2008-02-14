@@ -62,7 +62,7 @@ class CSettingsS80Dialog : public CEikDialog,MEikCommandObserver
   //data
    CEikComboBox* iScanDirControl;
    CEikCheckBox*  iAutostartControl;
-   CEikCheckBox* iRepeatControl;
+   CEikChoiceList* iRepeatControl;
    CEikCheckBox* iRandomControl;
    CEikChoiceList* iCbaControl [2][4];
    CEikChoiceList* iVolumeBoostControl;

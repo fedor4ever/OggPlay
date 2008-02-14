@@ -1244,146 +1244,210 @@ TBool COggDigits::ReadArguments(TOggParser& p)
 
 
 COggButton::COggButton()
-: iActiveMask(0), iNormalIcon(0), iPressedIcon(0), iDimmedIcon(0), iState(0), iStyle(0)
-{
-}
+	{
+	}
 
 COggButton::~COggButton()
-{
-  if (iActiveMask)
-	  iActiveMask->Reset();
-
-  delete iActiveMask;
-  delete iNormalIcon;
-  delete iPressedIcon;
-  delete iDimmedIcon;
-}
-
-void COggButton::SetActiveMask(const TFileName& aFileName, TInt anIdx)
-{
-  iActiveMask = new(ELeave) CFbsBitmap;
-  int err= iActiveMask->Load(aFileName,anIdx);
-  if (err!=KErrNone)
-  {
-    TBuf<256> buf;
-    CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_1);
-    buf.AppendNum(err);
-    User::InfoPrint(buf);
+	{
+	if (iActiveMask)
+		iActiveMask->Reset();
 
 	delete iActiveMask;
-    iActiveMask= 0;
-  }
-}
+	delete iNormalIcon;
+	delete iPressedIcon;
+	delete iDimmedIcon;
+	}
+
+void COggButton::SetActiveMask(const TFileName& aFileName, TInt anIdx)
+	{
+	iActiveMask = new(ELeave) CFbsBitmap;
+	TInt err = iActiveMask->Load(aFileName, anIdx);
+	if (err!=KErrNone)
+		{
+		TBuf<256> buf;
+		CEikonEnv::Static()->ReadResource(buf, R_OGG_ERROR_1);
+		buf.AppendNum(err);
+		User::InfoPrint(buf);
+
+		delete iActiveMask;
+		iActiveMask = 0;
+		}
+	}
 
 void COggButton::SetNormalIcon(CGulIcon* anIcon)
-{
-  delete iNormalIcon;
-  iNormalIcon= anIcon;
+	{
+	delete iNormalIcon;
+	iNormalIcon = anIcon;
 
-  iRedraw= ETrue;
-}
+	iRedraw = ETrue;
+	}
 
 void COggButton::SetPressedIcon(CGulIcon* anIcon)
-{
-  delete iPressedIcon;
-  iPressedIcon= anIcon;
+	{
+	delete iPressedIcon;
+	iPressedIcon = anIcon;
 
-  iRedraw= ETrue;
-}
+	iRedraw = ETrue;
+	}
+
+void COggButton::SetNextPressedIcon(CGulIcon* anIcon)
+	{
+	delete iNextPressedIcon;
+	iNextPressedIcon = anIcon;
+
+	iRedraw = ETrue;
+	}
 
 void COggButton::SetDimmedIcon(CGulIcon* anIcon)
-{
-  delete iDimmedIcon;
-  iDimmedIcon= anIcon;
+	{
+	delete iDimmedIcon;
+	iDimmedIcon = anIcon;
 
-  iRedraw= ETrue;
-}
-
+	iRedraw = ETrue;
+	}
 
 void COggButton::SetStyle(TInt aStyle)
-{
-  iStyle= aStyle;
-}
+	{
+	iStyle = aStyle;
+	}
 
 void COggButton::SetState(TInt aState)
-{
-  if (iState!=aState)
-  {
-    iState= aState;
-    iRedraw= ETrue;
-  }
-}
+	{
+	if (iState != aState)
+		{
+		iState = aState;
+		iRedraw = ETrue;
+		}
+	}
 
 void COggButton::Draw(CBitmapContext& aBitmapContext)
-{  
-  if (iDimmed) {
-    if (iDimmedIcon) DrawCenteredIcon(aBitmapContext,iDimmedIcon);
-    else if (iNormalIcon) DrawCenteredIcon(aBitmapContext,iNormalIcon);
-    if (iFocus) DrawFocus(aBitmapContext);
-  }
-  else {
-    if (iState==0) {
-      if (iFocus) DrawFocus(aBitmapContext);
-      else if (iNormalIcon) DrawCenteredIcon(aBitmapContext,iNormalIcon);
-    }
-    if (iState==1) {
-      if (iPressedIcon) DrawCenteredIcon(aBitmapContext,iPressedIcon);
-      else if (iNormalIcon) DrawCenteredIcon(aBitmapContext,iNormalIcon);
-    }
-  }
-}
+	{
+	if (iDimmed)
+		{
+		if (iDimmedIcon)
+			DrawCenteredIcon(aBitmapContext, iDimmedIcon);
+		else if (iNormalIcon)
+			DrawCenteredIcon(aBitmapContext, iNormalIcon);
+
+		if (iFocus)
+			DrawFocus(aBitmapContext);
+		}
+	else
+		{
+		switch (iState)
+			{
+			case 0:
+				if (iFocus)
+					DrawFocus(aBitmapContext);
+				else if (iNormalIcon)
+					DrawCenteredIcon(aBitmapContext,iNormalIcon);
+				break;
+
+			case 1:
+				if (iPressedIcon)
+					DrawCenteredIcon(aBitmapContext, iPressedIcon);
+				else if (iNormalIcon)
+					DrawCenteredIcon(aBitmapContext, iNormalIcon);
+				break;
+
+			case 2:
+				if (iNextPressedIcon)
+					DrawCenteredIcon(aBitmapContext, iNextPressedIcon);
+				else if (iPressedIcon)
+					DrawCenteredIcon(aBitmapContext, iPressedIcon);
+				else if (iNormalIcon)
+					DrawCenteredIcon(aBitmapContext, iNormalIcon);
+				break;
+			}
+		}
+	}
 
 void COggButton::PointerEvent(const TPointerEvent& p)
-{
-  if (iDimmed || !iVisible) return;
+	{
+	if (iDimmed || !iVisible)
+		return;
 
-  if (p.iType==TPointerEvent::EButton1Down) {
-    if (iStyle==0) iState= 1; 
-    else {
-      if (iState==0) iState= 1; else iState= 0;
-    }
-    iRedraw= ETrue;
-    if (iObserver) iObserver->OggControlEvent(this,0,0);
-  }
+	if (p.iType == TPointerEvent::EButton1Down)
+		{
+		if (iStyle == 0)
+			iState= 1; 
+	else
+		{
+		iState++;
+		TInt stateMax = iNextPressedIcon ? 2 : 1;
+		if (iState>stateMax)
+			iState = 0;
+		}
 
-  if (p.iType==TPointerEvent::EButton1Up) {
-    if (iStyle==0) iState= 0;
-    iRedraw= ETrue;
-  }
+	iRedraw = ETrue;
+	if (iObserver)
+		iObserver->OggControlEvent(this, 0, 0);
+	}
 
-  COggControl::PointerEvent(p);
-}
+	if (p.iType == TPointerEvent::EButton1Up)
+		{
+		if (iStyle == 0)
+			iState= 0;
 
+		iRedraw = ETrue;
+		}
+
+	COggControl::PointerEvent(p);
+	}
 
 TBool COggButton::ReadArguments(TOggParser& p)
-{
-  TBool success= ETrue;
-  if (p.iToken==_L("NormalIcon")) {
-    p.Debug(_L("Setting normal icon."));
-    CGulIcon* i= p.ReadIcon(iBitmapFile);
-    success= i!=0;
-    if (success) SetNormalIcon(i);
-  }
-  else if (p.iToken==_L("PressedIcon")) {
-    p.Debug(_L("Setting pressed icon."));
-    CGulIcon* i= p.ReadIcon(iBitmapFile);
-    success= i!=0;
-    if (success) SetPressedIcon(i);
-  }
-  else if (p.iToken==_L("DimmedIcon")) {
-    p.Debug(_L("Setting dimmed icon."));
-    CGulIcon* i= p.ReadIcon(iBitmapFile);
-    success= i!=0;
-    if (success) SetDimmedIcon(i);
-  }
-  else if (p.iToken==_L("Style")) {
-    p.Debug(_L("Setting style."));
-    TInt s;
-    success= p.ReadToken(s);
-    if (success) SetStyle(s);
-  }
-  return success && COggControl::ReadArguments(p);
-}
+	{
+	TBool success = ETrue;
+	CGulIcon* newIcon;
+	if (p.iToken == _L("NormalIcon"))
+		{
+		p.Debug(_L("Setting normal icon."));
+
+		newIcon = p.ReadIcon(iBitmapFile);
+		success = newIcon != NULL;
+		if (success)
+			SetNormalIcon(newIcon);
+		}
+	else if (p.iToken == _L("PressedIcon"))
+		{
+		p.Debug(_L("Setting pressed icon."));
+
+		newIcon = p.ReadIcon(iBitmapFile);
+		success = newIcon != NULL;
+		if (success)
+			SetPressedIcon(newIcon);
+		}
+	else if (p.iToken == _L("NextPressedIcon"))
+		{
+		p.Debug(_L("Setting next pressed icon."));
+
+		newIcon = p.ReadIcon(iBitmapFile);
+		success = newIcon != NULL;
+		if (success)
+			SetNextPressedIcon(newIcon);
+		}
+	else if (p.iToken == _L("DimmedIcon"))
+		{
+		p.Debug(_L("Setting dimmed icon."));
+
+		newIcon = p.ReadIcon(iBitmapFile);
+		success = newIcon != NULL;
+		if (success)
+			SetDimmedIcon(newIcon);
+		}
+	else if (p.iToken == _L("Style"))
+		{
+		p.Debug(_L("Setting style."));
+
+		TInt s;
+		success = p.ReadToken(s);
+		if (success)
+			SetStyle(s);
+		}
+
+	return success && COggControl::ReadArguments(p);
+	}
+
 
 // There are two versions of the slider (TInt and TInt64)
 // This should be done using templates but TInt64 is not a built-in type on older OS versions.

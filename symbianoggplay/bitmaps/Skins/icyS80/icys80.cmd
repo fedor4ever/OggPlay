@@ -46,4 +46,5 @@ icys80.mbm /c12bitmaps/file.bmp
 /c12bitmaps/randombutt.bmp
 /c12bitmaps/graybar2.bmp
 /1bitmaps/graybar.bmp
+/c12bitmaps/repeatbutt2.bmp
 

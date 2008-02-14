@@ -87,6 +87,7 @@ RESOURCE ABOUTTEXT r_dialog_about
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;
 	copyright3 = ogg_about_cpr3;
+	copyright4 = ogg_about_cpr4;
 	porting = ogg_about_port_S80;
 	}
 
@@ -211,7 +212,7 @@ RESOURCE DIALOG r_dialog_playlist_info {
 	{
 		txt=ogg_filename_unknown;
 		horiz_align=EEikLabelAlignHLeft;
-	};	
+	};
     } ,
     DLG_LINE {
 	type = EEikCtLabel;
@@ -257,10 +258,19 @@ RESOURCE ARRAY r_user_hotkey_items
 	LBUF { txt = ogg_cba_exit; },
 	LBUF { txt = ogg_cba_back; },
 	LBUF { txt = ogg_format_text_volume_help; },
-	LBUF { txt = ogg_toggle_shuffle; },
-	LBUF { txt = ogg_toggle_repeat; }
+	LBUF { txt = ogg_toggle_repeat; },
+	LBUF { txt = ogg_toggle_shuffle; }
   };
 }
+
+RESOURCE ARRAY r_repeat_items
+	{
+    items = { 
+		LBUF { txt = "Off"; },
+		LBUF { txt = "Repeat song"; },
+		LBUF { txt = "Repeat playlist"; }
+    };
+	}
 
 RESOURCE ARRAY r_volume_boost_items
     {
@@ -382,10 +392,13 @@ RESOURCE ARRAY options_multipage1
 {
    items = {
     DLG_LINE {
-              type = EEikCtCheckBox;
+              type = EEikCtChoiceList;
               prompt = ogg_repeat2;
               id = EOggSettingRepeatId;
-              },
+              control = CHOICELIST {
+                array_id= r_repeat_items;
+              };
+             },
     DLG_LINE {
               type = EEikCtCheckBox;
               prompt = ogg_random_on ;

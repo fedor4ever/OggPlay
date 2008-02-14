@@ -1036,22 +1036,11 @@ void COggPlayAppView::ListBoxPageUp()
 
 void COggPlayAppView::UpdateRepeat()
 	{
-	if (iApp->iSettings.iRepeat)
-		{
-		if (iRepeatIcon[iMode])
-			iRepeatIcon[iMode]->SetState(iApp->iSettings.iRepeat);
+	if (iRepeatIcon[iMode])
+		iRepeatIcon[iMode]->SetState(iApp->iSettings.iRepeat);
 
-		if (iRepeatButton[iMode])
-			iRepeatButton[iMode]->SetState(1);
-		}
-	else
-		{
-		if (iRepeatIcon[iMode])
-			iRepeatIcon[iMode]->Hide();
-
-		if (iRepeatButton[iMode])
-			iRepeatButton[iMode]->SetState(0);
-		}
+	if (iRepeatButton[iMode])
+		iRepeatButton[iMode]->SetState(iApp->iSettings.iRepeat);
 	}
 
 void COggPlayAppView::UpdateRandom()

@@ -404,7 +404,7 @@ void COggAboutDialog::PreLayoutDynInitL()
 	CParaFormat *paraFormat = CParaFormat::NewL();
 	CleanupStack::PushL(paraFormat);
 	TParaFormatMask paraFormatMask;  
-	iRichText->AppendParagraphL(9);
+	iRichText->AppendParagraphL(10);
 
 	// Now add the text
 	paraFormatMask.SetAttrib(EAttAlignment);
@@ -463,10 +463,17 @@ void COggAboutDialog::PreLayoutDynInitL()
 	resTxt.Set(resReader.ReadTPtrC());
 	iRichText->InsertL(pos, resTxt);
 
+	pos = iRichText->CharPosOfParagraph(len, 7); // get start of 8th para
+	iRichText->ApplyParaFormatL(paraFormat, paraFormatMask, pos, 1); // Center align
+
+	resTxt.Set(resReader.ReadTPtrC());
+	iRichText->InsertL(pos, resTxt);
+
+	pos = iRichText->CharPosOfParagraph(len, 9); // get start of 10th para
+	iRichText->ApplyParaFormatL(paraFormat, paraFormatMask, pos, 1); // Center align
+
 	resReader.ReadTPtrC();
 	resTxt.Set(resReader.ReadTPtrC());
-
-	pos = iRichText->CharPosOfParagraph(len, 8); // get start of 9th para
 	iRichText->InsertL(pos, resTxt);
 
 	UpdateModelL(iRichText);

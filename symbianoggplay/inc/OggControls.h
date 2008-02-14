@@ -371,33 +371,35 @@ protected:
 // - the pressed state + mask
 // Ownership of the bitmaps is taken!
 class COggButton : public COggControl
-{
+	{
 public:
-  COggButton();
-  ~COggButton();
+	COggButton();
+	~COggButton();
 
-  void SetActiveMask(const TFileName& aFileName, TInt anIdx);
-  void SetNormalIcon(CGulIcon* anIcon);
-  void SetPressedIcon(CGulIcon* anIcon);
-  void SetDimmedIcon(CGulIcon* anIcon);
-  void SetStyle(TInt aStyle);
-  void SetState(TInt aState);
+	void SetActiveMask(const TFileName& aFileName, TInt anIdx);
+	void SetNormalIcon(CGulIcon* anIcon);
+	void SetPressedIcon(CGulIcon* anIcon);
+	void SetNextPressedIcon(CGulIcon* anIcon);
+	void SetDimmedIcon(CGulIcon* anIcon);
+	void SetStyle(TInt aStyle);
+	void SetState(TInt aState);
 
 protected:
-  virtual TBool ReadArguments(TOggParser& p);
+	virtual TBool ReadArguments(TOggParser& p);
 
-  virtual void Draw(CBitmapContext& aBitmapContext);
-  virtual void PointerEvent(const TPointerEvent& p);
-  
-  CFbsBitmap* iActiveMask;
-  CGulIcon*   iNormalIcon;
-  CGulIcon*   iPressedIcon;
-  CGulIcon*   iDimmedIcon;
+	virtual void Draw(CBitmapContext& aBitmapContext);
+	virtual void PointerEvent(const TPointerEvent& p);
 
-  TInt        iState; // 0 = normal; 1= pressed
-  TInt        iStyle; // 0 = action button; 1 = two state button
-};
+private:
+	CFbsBitmap* iActiveMask;
+	CGulIcon* iNormalIcon;
+	CGulIcon* iPressedIcon;
+	CGulIcon* iDimmedIcon;
+	CGulIcon* iNextPressedIcon;
 
+	TInt iState; // 0 = normal; 1= pressed
+	TInt iStyle; // 0 = action button; 1 = two state button
+	};
 
 // COggSlider
 // A slider control with different styles:

@@ -46,7 +46,8 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     RepeatIcon {
-      Icon 43 44
+      Icon 49 44
+      NextIcon 43 44
       Position 357 19 40 13
     }
     RandomIcon {

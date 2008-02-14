@@ -1945,10 +1945,6 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iSoftKeysIdle[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysPlay[0] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 
-	// Version 2 adds MAD mp3 dithering
-	if (iniVersion == 2)
-		iSettings.iMp3Dithering = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
-
 #if defined(SERIES80)
 	iSettings.iSoftKeysIdle[1] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysPlay[1] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
@@ -1956,6 +1952,23 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 	iSettings.iSoftKeysPlay[2] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysIdle[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
 	iSettings.iSoftKeysPlay[3] = IniRead32L(aIniFileData, 0, maxSoftKeyIndex);
+
+	if (iniVersion == 1)
+		{
+		// Just to be difficult, repeat and random have now been swapped
+		for (i = 0 ; i<4 ; i++)
+			{
+			if (iSettings.iSoftKeysIdle[i] == TOggplaySettings::EHotkeyToggleRepeat)
+				iSettings.iSoftKeysIdle[i] = TOggplaySettings::EHotkeyToggleShuffle;
+			else if (iSettings.iSoftKeysIdle[i] == TOggplaySettings::EHotkeyToggleShuffle)
+				iSettings.iSoftKeysIdle[i] = TOggplaySettings::EHotkeyToggleRepeat;
+
+			if (iSettings.iSoftKeysPlay[i] == TOggplaySettings::EHotkeyToggleRepeat)
+				iSettings.iSoftKeysPlay[i] = TOggplaySettings::EHotkeyToggleShuffle;
+			else if (iSettings.iSoftKeysPlay[i] == TOggplaySettings::EHotkeyToggleShuffle)
+				iSettings.iSoftKeysPlay[i] = TOggplaySettings::EHotkeyToggleRepeat;
+			}
+		}
 
 	TRAPD(err, IniReadDesL(aIniFileData, iSettings.iCustomScanDir, iniVersion));
 	if (err != KErrNone)
@@ -1966,6 +1979,10 @@ void COggPlayAppUi::ReadIniFileL(TPtrC8& aIniFileData)
 		User::Leave(err);
 		}
 #endif
+
+	// Version 2 adds MAD mp3 dithering
+	if (iniVersion == 2)
+		iSettings.iMp3Dithering = IniRead32L(aIniFileData, 0, 1) ? ETrue : EFalse;
 
 	// For the non MMF version that's the end of the file
 	if (!mmfDataPresent)

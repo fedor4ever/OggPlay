@@ -1,17 +1,17 @@
-;
 ; Series 80 multilingual installer - ARMI urel
-;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
-;
+
 ;Version string to be changed
 #{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,72,1
-;
+
 ;Supports Series 80 v2.0
 (0x101F8ED2), 0, 0, 0, {"Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID",
 "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID", "Series80ProductID" }
-;
+
+; OggPlay libs
+@"OggPlayLibsS80.sis",(0x1020202C)
+
 ; Display Release notes
-;
 "..\S80_releases\sisnotes.txt" - "",FT,TC
 
 "\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
@@ -33,12 +33,6 @@
 "..\bitmaps\Skins\ClearS80\ClearS80.mbm"-"!:\system\apps\oggplay\ClearS80.mbm"
 "..\bitmaps\Skins\icyS80\icyS80.skn"-"!:\system\apps\oggplay\IcyS80.skn"
 "..\bitmaps\Skins\icyS80\icyS80.mbm"-"!:\system\apps\oggplay\IcyS80.mbm"
-
-"\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
-"\epoc32\release\armi\urel\OggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
-"\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
-"\epoc32\release\armi\urel\OggPlayController.dll"-"!:\system\libs\Plugins\OggPlayController.dll"
-"\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
 
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ogi",FN

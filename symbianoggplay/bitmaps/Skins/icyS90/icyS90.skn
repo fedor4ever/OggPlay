@@ -52,7 +52,8 @@ OggPlay 1 {
       KnobIcon 26 27
     }
     RepeatButton {
-      PressedIcon 43 44
+      PressedIcon 48 44
+      NextPressedIcon 43 44
       Position 396 25 31 13
     }
     RandomButton {

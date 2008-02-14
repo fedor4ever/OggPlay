@@ -85,7 +85,7 @@ CSettingsS80Dialog::PreLayoutDynInitL()
 {
   iScanDirControl = static_cast <CEikComboBox*> (Control(EOggSettingScanDir));
   iAutostartControl = static_cast <CEikCheckBox*> (Control(EOggSettingAutoPlayId));
-  iRepeatControl = static_cast <CEikCheckBox*> (Control(EOggSettingRepeatId));
+  iRepeatControl = static_cast <CEikChoiceList*> (Control(EOggSettingRepeatId));
   iRandomControl = static_cast <CEikCheckBox*> (Control(EOggSettingRandomId));
   iCbaControl[0][0] = static_cast <CEikChoiceList*> (Control(EOggSettingCba01));
   iCbaControl[0][1] = static_cast <CEikChoiceList*> (Control(EOggSettingCba02));
@@ -109,7 +109,7 @@ CSettingsS80Dialog::PreLayoutDynInitL()
   iScanDirControl->SetTextL(&(iSettings->iCustomScanDir));
   iAutostartControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iAutoplay));
   
-  iRepeatControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iRepeat));
+  iRepeatControl->SetCurrentItem(iSettings->iRepeat);
   iRandomControl->SetState(static_cast <CEikButtonBase::TState>(iSettings->iRandom));
   iVolumeBoostControl->SetCurrentItem(iSettings->iGainType);
 
@@ -180,7 +180,7 @@ void CSettingsS80Dialog::HandleControlStateChangeL(TInt aControlId)
 	COggPlayAppUi * appUi = static_cast <COggPlayAppUi*> (CEikonEnv::Static()->AppUi());
 	if (aControlId == EOggSettingRepeatId)
 		{
-		appUi->SetRepeat(iRepeatControl->State());
+		appUi->SetRepeat(iRepeatControl->CurrentItem());
 		}
 	else if (aControlId == EOggSettingRandomId)
 		{

@@ -25,7 +25,6 @@ PRJ_MMPFILES
 
 ..\vorbis\groupS90\OggvorbisS90.mmp
 ..\flac\groupS90\oggflacS90.mmp
-
-..\Plugin\groupS90\OggPlayControllerS90.mmp
+..\mad\groupS90\oggmadS90.mmp
 OggPlayS90.mmp
 

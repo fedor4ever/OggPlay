@@ -1,17 +1,17 @@
-;
 ; Series 90 multilingual installer - ARMI urel
-;
 &EN,FR,GE,DU,IT,SP,SW,TU,DA,PO,RU
-;
+
 ;Version string to be changed
 #{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay"},(0x1000A661),1,72,1
-;
+
 ;Supports Series 90
 (0x101FBE05), 0, 0, 0, {"Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID",
 "Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID", "Series90ProductID" }
-;
+
+; OggPlay libs
+@"OggPlayLibsS90.sis",(0x1020202C)
+
 ; Display Release notes
-;
 "..\S90_releases\sisnotes.txt" - "",FT,TC
 
 "\epoc32\release\armi\urel\OggPlay.app"-"!:\system\apps\OggPlay\OggPlay.app"
@@ -31,12 +31,6 @@
 "\Epoc32\data\z\system\apps\OGGPLAY\fish.mbm"-"!:\system\apps\OggPlay\fish.mbm"
 "..\bitmaps\Skins\icys90\icys90.skn"-"!:\system\apps\oggplay\Icys90.skn"
 "..\bitmaps\Skins\icys90\icys90.mbm"-"!:\system\apps\oggplay\Icys90.mbm"
-
-"\epoc32\release\armi\urel\OggPlayShared.dll"-"!:\system\libs\OggPlayShared.dll"
-"\epoc32\release\armi\urel\OggPlayVorbisi.dll"-"!:\system\libs\OggPlayVorbisi.dll"
-"\epoc32\release\armi\urel\OggPlayFlaci.dll"-"!:\system\libs\OggPlayFlaci.dll"
-"\epoc32\release\armi\urel\OggPlayController.dll"-"!:\system\libs\Plugins\OggPlayController.dll"
-"\Epoc32\data\z\system\libs\plugins\101FF683.RSC"-"!:\system\libs\Plugins\101FF683.RSC"
 
 ; we try to be nice and uninstall our configuration files
 ""-"!:\system\apps\OggPlay\oggplay.ogi",FN
