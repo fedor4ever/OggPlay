@@ -1,5 +1,5 @@
 
-This is the Release Note for Release 1.71a of Oggplay for UIQ (P800/P900).
+This is the Release Note for Release 1.72 of Oggplay for UIQ (P800/P900).
 
 *******************************************************************
  This release is only experimental and hasn't been thoroughly tested.
@@ -7,6 +7,12 @@ This is the Release Note for Release 1.71a of Oggplay for UIQ (P800/P900).
  If you experience problems please report them to our public forums
  and remember to include the version number and your phone model.
 *******************************************************************
+
+
+What's new in Release 1.72:
+----------------------------
+Added mp3 decoder (MAD)
+Fixed minor skin issue with clock / alarm
 
 
 What's new in Release 1.71a:

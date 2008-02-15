@@ -962,6 +962,14 @@ void COggPlayAppUi::NotifyPlayInterrupted()
 
 void COggPlayAppUi::NotifyPlayComplete()
 	{
+#if defined(PROFILE_PERF)
+	iPlayStopTime = User::NTickCount();
+	TRACEF(COggLog::VA(_L("Play time: %u"), iPlayStopTime-iPlayStartTime));		
+
+	iTotalPlayTime += iPlayStopTime-iPlayStartTime;
+	TRACEF(COggLog::VA(_L("Total time: %u"), iTotalPlayTime));		
+#endif
+
 	NextSong();
 	}
 
@@ -979,6 +987,10 @@ void COggPlayAppUi::NotifyFileOpen(TInt aErr)
 
 void COggPlayAppUi::NotifyPlayStarted()
 	{
+#if defined(PROFILE_PERF)
+	iPlayStartTime = User::NTickCount();
+#endif
+
 	// Update the appView and the softkeys
 	iAppView->Update();
 	UpdateSoftkeys();
@@ -2416,7 +2428,12 @@ void COggPlayAppUi::SetRandomL(TBool aRandom)
 
 void COggPlayAppUi::ToggleRepeat()
 	{
+#if defined(UIQ)
+	// UIQ doesn't have support for different types of repeat
+	SetRepeat(iSettings.iRepeat == TOggplaySettings::ERepeatNone ? TOggplaySettings::ERepeatPlaylist : TOggplaySettings::ERepeatNone);
+#else
 	SetRepeat(iSettings.iRepeat+1);
+#endif
 	}
 
 void COggPlayAppUi::SetRepeat(TInt aRepeat)

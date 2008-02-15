@@ -1,10 +1,10 @@
 OggPlay 1 {
   FlipOpen {
     Clock {
-      Position 73 3 40 14
+      Position 73 3 54 14
     }
     Alarm {
-      Position 134 3 40 14
+      Position 134 3 54 14
     }
     Title {
       Position 6 20 196 16
@@ -46,7 +46,7 @@ OggPlay 1 {
       DimmedIcon 33 33
     }
     AlarmIcon {
-      Position 185 3 20 16
+      Position 192 3 20 16
       Icon 39 40
     }
     ListBox {
@@ -60,10 +60,10 @@ OggPlay 1 {
   }
   FlipClosed {
     Clock {
-      Position 134 15 59 14
+      Position 134 15 54 14
     }
     Alarm {
-      Position 134 30 59 14
+      Position 134 30 54 14
     }
     Title {
       Position 6 53 196 16
@@ -90,7 +90,7 @@ OggPlay 1 {
       Position 60 120 88 16
     }
     AlarmIcon {
-      Position 185 30 20 16
+      Position 192 30 20 16
       Icon 39 40
     }
     Volume {

@@ -7,15 +7,18 @@ SECUREID                                0xF000A661
 VENDORID                                0 
 EPOCSTACKSIZE                           0x8000 
 EPOCHEAPSIZE                            0x20000 0x400000 
-USERINCLUDE                             ..\mad 
-USERINCLUDE                             ..\inc 
-USERINCLUDE                             ..\vorbis 
-USERINCLUDE                             ..\flac 
-USERINCLUDE                             ..\data
-USERINCLUDE                             ..\plugin\inc
+
 SYSTEMINCLUDE                           \Epoc32\Include 
 SYSTEMINCLUDE                           \Epoc32\Include\mmf 
 SYSTEMINCLUDE                           \Epoc32\Include\mmf\plugin 
+
+USERINCLUDE                             ..\inc 
+USERINCLUDE                             ..\vorbis 
+USERINCLUDE                             ..\flac 
+USERINCLUDE                             ..\mad 
+USERINCLUDE                             ..\data
+USERINCLUDE                             ..\plugin\inc
+
 SOURCEPATH                              ..\data 
 START RESOURCE OggPlay.rss 
   TARGETPATH                              resource\apps 

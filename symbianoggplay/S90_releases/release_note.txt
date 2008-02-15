@@ -1,46 +1,45 @@
 
-This is the Release Note for Release 1.6.7 of Oggplay for Series90.
+This is the Release Note for Release 1.72 of Oggplay for S90
 
-******************************************************************************
-**** This release will only work on Series90 phones (eg. Nokia 7710)      ****
-****                                                                      ****
-****                                                                      ****
-******************************************************************************
+*******************************************************************
+If you experience problems please report them to our public forums
+and remember to include the version number and the model of your phone.
+*******************************************************************
 
-OggPlay is a music player for phones running on the Symbian Operating system. 
-It comes bundled with a .ogg file format decoder, but it detects and uses MMF 
-plugins which may come built-in your phone or that might have been installed
-later on. MP3, AAC, MP4, M4A plugins are supported.
+What's new in Release 1.72:
+---------------------------
 
-See the ReadMeFirst.html to see which file formats your phone supports.
+Added mp3 decoder (MAD). This is disabled by default (To enable it go to the codecs page and select mp3->Internal).
+Added repeat modes (Repeat song, Repeat playlist)
+New playback engine for oggs, ogas and flacs (optional for mp3s)
+Some internal changes and improvements
 
-This release will only work on phones that supports MMF framework.
-         
-
-History
---------------------------------------------------------------------------------------------
-
-What's new in Release 1.6.7:
---------------------------
-First release for S90.
+Note that installing OggPlay no longer allows oggs and flacs to be played by the
+built-in music player or used as ringtones. In order to add this functionality the MMF plugin must be installed. If any S90 users require the MMF plugin please let me know by posting a message to the OggPlay forums.
 
 
-What's missing:
----------------
-Some features present in the non-MMF version have been dropped, since quite a lot of work is required to
-make them work in a MMF plugin. They will be reintroduced in future releases.
-These features are:
-  - Frequency analyzer
 
+What's new in Release 1.71a:
+----------------------------
+
+Oggplay will now play Flac encoded audio (both native and Ogg Flac) 
+More variable volume boost (-24db to +12db in smaller steps)
+Previous song now works properly in Shuffle mode
+"Key repeats" have been enabled for changing volume and scrolling through tracks
+"Key repeats" have been disabled when navigating between views
+Added "Toggle random" and "Toggle repeat" soft key options 
+"File Info" now includes the duration of the track
+Playlists are no longer included in files and subfolders views 
+Some internal changes(Old settings will not be preserved if upgrading)
+A few other miscellaneous bug fixes
 
 
 Links:
----------------------------------------------------------------------------------------------
+------
 For more information about Oggplay, please see the webpage at
 http://symbianoggplay.sourceforge.net/
 
 For help and open discussion about OggPlay see under 'Public Forums' on
 http://sourceforge.net/projects/symbianoggplay/
-
 
 -the S60 Oggplay developers.

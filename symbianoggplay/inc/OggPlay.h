@@ -545,6 +545,13 @@ private:
 
 	CPluginSupportedList* iPluginSupportedList;
 
+#if defined(PROFILE_PERF)
+	TUint32 iPlayStartTime;
+	TUint32 iPlayStopTime;
+
+	TUint32 iTotalPlayTime;
+#endif
+
 public:
 	TStartUpState iStartUpState;
 

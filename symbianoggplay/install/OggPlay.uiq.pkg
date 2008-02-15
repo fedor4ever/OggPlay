@@ -10,11 +10,11 @@
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlay.aif"-"!:\system\apps\OggPlay\OggPlay.aif"
 
 IF MachineUID=0x101F408B
-"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP800.mbm"-"!:\system\apps\OggPlay\OggPlayP800.mbm"
-"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP800.skn"-"!:\system\apps\OggPlay\OggPlayP800.skn"
+"..\bitmaps\Skins\P800\OggPlayP800.mbm"-"!:\system\apps\OggPlay\OggPlayP800.mbm"
+"..\bitmaps\Skins\P800\OggPlayP800.skn"-"!:\system\apps\OggPlay\OggPlayP800.skn"
 ELSE
-"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP900.mbm"-"!:\system\apps\OggPlay\OggPlayP900.mbm"
-"C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggPlayP900.skn"-"!:\system\apps\OggPlay\OggPlayP900.skn"
+"..\bitmaps\Skins\P900\OggPlayP900.mbm"-"!:\system\apps\OggPlay\OggPlayP900.mbm"
+"..\bitmaps\Skins\P900\OggPlayP900.skn"-"!:\system\apps\OggPlay\OggPlayP900.skn"
 ENDIF
 
 "C:\Symbian\UIQ_21\epoc32\data\z\system\apps\OggPlay\OggSplash.mbm"-"!:\system\apps\OggPlay\OggSplash.mbm"

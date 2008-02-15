@@ -370,6 +370,49 @@ void CStreamingThreadCommandHandler::DoCancel()
 	User::RequestComplete(status, KErrCancel);
 }
 
+#if defined(PROFILE_PERF)
+CProfilePerfAO::CProfilePerfAO(CStreamingThreadPlaybackEngine& aEngine)
+: CActive(EPriorityStandard), iEngine(aEngine), iBuffers(100)
+	{
+	CActiveScheduler::Add(this);
+	}
+
+CProfilePerfAO::~CProfilePerfAO()
+	{
+	iBuffers.Close();
+	}
+
+void CProfilePerfAO::SendNextBuffer(TDesC8* aNextBuffer)
+	{
+	iBuffers.Append(aNextBuffer);
+	if (!IsActive())
+		{
+		TRequestStatus* status = &iStatus;
+		User::RequestComplete(status, KErrNone);
+
+		SetActive();
+		}
+	}
+
+void CProfilePerfAO::RunL()
+	{
+	iEngine.MaoscBufferCopied(KErrNone, *iBuffers[0]);
+	iBuffers.Remove(0);
+
+	if (iBuffers.Count() && !IsActive())
+		{
+		TRequestStatus* status = &iStatus;
+		User::RequestComplete(status, KErrNone);
+
+		SetActive();
+		}
+	}
+
+void CProfilePerfAO::DoCancel()
+	{
+	}
+#endif
+
 // Playback engine class
 // Handles communication with the media server (CMdaAoudioOutputStream) and manages the audio buffering
 CStreamingThreadPlaybackEngine* CStreamingThreadPlaybackEngine::NewLC(TStreamingThreadData& aSharedData)
@@ -399,11 +442,15 @@ void CStreamingThreadPlaybackEngine::ConstructL()
 	iStreamingThreadAO = new(ELeave) CStreamingThreadAO(iSharedData, iBufferFlushPending, iBufferingThreadPriority);
 	iStreamingThreadAO->CreateTimerL();
 
+#if defined(PROFILE_PERF)
+	iProfilePerfAO = new(ELeave) CProfilePerfAO(*this);
+#endif
+
 	CActiveScheduler::Add(iStreamingThreadAO);
 	}
 
 CStreamingThreadPlaybackEngine::~CStreamingThreadPlaybackEngine()
-{
+	{
 	if (iStreamingThreadAO)
 		iStreamingThreadAO->Cancel();
 
@@ -411,7 +458,11 @@ CStreamingThreadPlaybackEngine::~CStreamingThreadPlaybackEngine()
 
 	delete iStreamingThreadAO;
 	delete iStream;
-}
+
+#if defined(PROFILE_PERF)
+	delete iProfilePerfAO;
+#endif
+	}
 
 void CStreamingThreadPlaybackEngine::SetAudioPropertiesL()
 {
@@ -549,6 +600,10 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
 		if (status->Int() == KRequestPending)
 			iSharedData.iUIThread.RequestComplete(status, EPlayStopped);
+
+#if defined(PROFILE_PERF)
+		iProfilePerfAO->Cancel();
+#endif
 	}
 
 	if (aResetPosition)
@@ -747,6 +802,9 @@ void CStreamingThreadPlaybackEngine::Shutdown()
 // iBufNum holds the index of the next buffer
 void CStreamingThreadPlaybackEngine::SendNextBuffer()
 {
+#if defined(PROFILE_PERF)
+	iProfilePerfAO->SendNextBuffer(iSharedData.iOggPlayback.iBuffer[iBufNum]);
+#else
 	TRAPD(err, iStream->WriteL(*iSharedData.iOggPlayback.iBuffer[iBufNum]));
 	if (err != KErrNone)
 	{
@@ -757,6 +815,7 @@ void CStreamingThreadPlaybackEngine::SendNextBuffer()
 
 		return;
 	}
+#endif
 
 	// Increment the number of stream buffers (we have one more now)
 	iStreamBuffers++;

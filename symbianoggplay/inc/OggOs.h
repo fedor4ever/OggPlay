@@ -36,6 +36,9 @@ chSTR2(__LINE__) "):" #desc)
 // DEBUGGING
 #define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
 
+// Enable codec performance profiling
+// #define PROFILE_PERF
+
 #if defined(OS70S)
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 
 // are using the MMF Player, a ECom Plugin. That allows, among other thing, to 

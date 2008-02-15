@@ -146,6 +146,14 @@ RESOURCE DIALOG r_dialog_about_uiq {
 	type = EEikCtLabel;
 	control = LABEL 
 	{
+		txt=ogg_about_cpr4;
+		horiz_align=EEikLabelAlignHCenter;
+	};
+    } ,
+    DLG_LINE {
+	type = EEikCtLabel;
+	control = LABEL 
+	{
 		txt=ogg_about_port;
 		horiz_align=EEikLabelAlignHCenter;
 	};

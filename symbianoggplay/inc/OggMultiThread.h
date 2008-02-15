@@ -300,6 +300,25 @@ private:
 	CStreamingThreadPlaybackEngine* iPlaybackEngine;
 };
 
+#if defined(PROFILE_PERF)
+class CProfilePerfAO : public CActive
+	{
+public:
+	CProfilePerfAO(CStreamingThreadPlaybackEngine& aEngine);
+	~CProfilePerfAO();
+
+	void SendNextBuffer(TDesC8* aNextBuffer);
+
+	// From CActive
+	void RunL();
+	void DoCancel();
+
+private:
+	CStreamingThreadPlaybackEngine& iEngine;
+	RPointerArray<TDesC8> iBuffers;
+	};
+#endif
+
 // Playback engine (not an AO, although it handles call backs from the CMdaAudioOutputStream which is an AO)
 // The playback engine handles all access to the CMdaAudioOutputStream as well as managing the buffering and decoding process
 class COggTimer;
@@ -372,6 +391,11 @@ private:
 	// Boolean used to inhibit buffering requests
 	// (if a buffer flush is pending the streaming thread must not issue buffering requests)
 	TBool iBufferFlushPending;
+
+#if defined(PROFILE_PERF)
+	CProfilePerfAO* iProfilePerfAO;
+	friend class CProfilePerfAO;
+#endif
 };
 
 // Listener active object (running in the UI thread)
