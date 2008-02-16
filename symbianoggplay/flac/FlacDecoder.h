@@ -87,11 +87,8 @@ private:
 	TDes* iGenre;
 	TDes* iTrackNumber;
 
-	TUint16* iOverflowBuf;
+	const FLAC__int32* iOverflowBuf[2];
 	TInt iOverflowBufSize;
-
-	TUint16* iOverflowBuffer;
-	TInt iOverflowBufferSize;
 
 	TUint16* iBuffer;
 	TInt iLen;

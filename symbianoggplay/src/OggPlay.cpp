@@ -2935,11 +2935,16 @@ const TDesC& COggRandomPlay::GetNextSong()
 			// We are at the end of the song list, repeat it
 			// Find a new track to start with and generate a new random list
 			TInt fullFileListIdx;
-			do
+			if (nSongs == 1)
+				fullFileListIdx = 0;
+			else
 				{
-				fullFileListIdx = iAppUi->Rnd(nSongs);
+				do
+					{
+					fullFileListIdx = iAppUi->Rnd(nSongs);
+					}
+				while (fullFileListIdx == iFullListPlayingIdx);
 				}
-			while (fullFileListIdx == iFullListPlayingIdx);
 
 			iFullListPlayingIdx = fullFileListIdx;
 			GenerateRandomListL();
@@ -2977,11 +2982,16 @@ const TDesC& COggRandomPlay::GetPreviousSong()
 		// We are at the top of the playlist, repeat it
 		// Find a new track to start with and generate a new random list
 		TInt fullFileListIdx;
-		do
+		if (nSongs == 1)
+			fullFileListIdx = 0;
+		else
 			{
-			fullFileListIdx = iAppUi->Rnd(nSongs);
+			do
+				{
+				fullFileListIdx = iAppUi->Rnd(nSongs);
+				}
+			while (fullFileListIdx == iFullListPlayingIdx);
 			}
-		while (fullFileListIdx == iFullListPlayingIdx);
 
 		iFullListPlayingIdx = fullFileListIdx;
 		GenerateRandomListL();

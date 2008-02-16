@@ -37,7 +37,7 @@ static FLAC__StreamDecoderReadStatus FlacReadCallback(const FLAC__StreamDecoder*
 
 	RFile* file = (RFile *) aFilePtr;
 	TPtr8 buf((TUint8 *) aBuffer, 0, bytes);
-	TInt err = file->Read(buf, bytes);
+	TInt err = file->Read(buf);
 	bytes = buf.Length();
 
 	if ((err == KErrNone) && !buf.Length())
@@ -156,11 +156,7 @@ TInt CFlacDecoder::Clear()
 		FLAC__stream_decoder_delete(iDecoder);
 		}
 
-	User::Free(iOverflowBuf);
-	iOverflowBuf = NULL;
 	iOverflowBufSize = 0;
-	iOverflowBufferSize = 0;
-
 	iDecoder = NULL;
 	return 0;
 	}
@@ -239,24 +235,36 @@ TInt CFlacDecoder::Read(TDes8& aBuffer, TInt aPos)
 	iBuffer = (TUint16 *) (aBuffer.Ptr() + aPos);
 	iLen = aBuffer.MaxLength()-aPos;
 	TInt len = iLen;
+	TInt lenSamples = len>>2;
 
 	TInt i;
-	for (i = 0 ; (i<iOverflowBufferSize) && iLen ; i++, iLen-=4)
+	TInt iMax;
+	if (lenSamples>iOverflowBufSize)
 		{
-		iBuffer[0] = *iOverflowBuffer++;
-		iBuffer[1] = *iOverflowBuffer++;
+		iMax = iOverflowBufSize;
+		iLen -= iOverflowBufSize << 2;
+		}
+	else
+		{
+		iMax = lenSamples;
+		iLen = 0;
+		}
+
+	for (i = 0 ; i<iMax ; i++)
+		{
+		iBuffer[0] = (TUint16) iOverflowBuf[0][i];
+		iBuffer[1] = (TUint16) iOverflowBuf[1][i];
 
 		iBuffer += 2;
 		}
 
 	if (!iLen)
 		{
-		iOverflowBufferSize -= i; 
+		iOverflowBufSize -= i;
 		return len;
 		}
 
-	iOverflowBufferSize = 0;
-	iOverflowBuffer = iOverflowBuf;
+	iOverflowBufSize = 0;
 	TBool frameRead = FLAC__stream_decoder_process_single(iDecoder);
 	if (!frameRead)
 		return KErrGeneral;
@@ -365,7 +373,20 @@ void CFlacDecoder::ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer
 		return;
 
 	TInt i;
-	for (i = 0 ; (i < aBlockSize) && iLen ; i++, iLen-= 4)
+	TInt iMax;
+	TInt lenSamples = iLen >> 2;
+	if (lenSamples>aBlockSize)
+		{
+		iMax = aBlockSize;
+		iLen -= aBlockSize << 2;
+		}
+	else
+		{
+		iMax = lenSamples;
+		iLen = 0;
+		}
+
+	for (i = 0 ; i<iMax ; i++)
 		{
 		iBuffer[0] = (TUint16) aBuffer[0][i];
 		iBuffer[1] = (TUint16) aBuffer[1][i];
@@ -373,22 +394,9 @@ void CFlacDecoder::ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer
 		iBuffer += 2;
 		}
 
-	iOverflowBufferSize = aBlockSize - i;
-	if (iOverflowBufferSize>iOverflowBufSize)
-		{
-		User::Free(iOverflowBuf);
-		iOverflowBuf = (TUint16 *) User::Alloc(4*iOverflowBufferSize);
-		iOverflowBufSize = iOverflowBufferSize;
-		}
-
-	iOverflowBuffer = iOverflowBuf;
-	TUint16* overflowBuffer = iOverflowBuffer;
-	for (; i < aBlockSize ; i++)
-		{
-		*overflowBuffer++ = (TUint16) aBuffer[0][i];
-		*overflowBuffer++ = (TUint16) aBuffer[1][i];
-		}
-
+	iOverflowBufSize = aBlockSize - i;
+	iOverflowBuf[0] = &aBuffer[0][i];
+	iOverflowBuf[1] = &aBuffer[1][i];
 	iBuffer = NULL;
 	}
 
