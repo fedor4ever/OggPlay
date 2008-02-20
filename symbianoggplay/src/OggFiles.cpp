@@ -489,9 +489,9 @@ void TOggFiles::AddDirectory(const TDesC& aDir, RFs& session)
     AddDirectoryStop();
 	}
 
-TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
+TInt TOggFiles::AddDirectoryStart(const TDesC& aDir, RFs& session)
 	{
-	TRACE(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir ));
+	// TRACEF(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir));
 
 	// Check if the drive is available (i.e. memory stick is inserted)
 #if defined(UIQ)
@@ -507,10 +507,10 @@ TInt TOggFiles::AddDirectoryStart(const TDesC& aDir,RFs& session)
  
 	if (!iPathArray)
 		{
-		iPathArray = new(ELeave) CDesC16ArrayFlat (3);
+		iPathArray = new(ELeave) CDesC16ArrayFlat(3);
 		iDs = CDirScan::NewL(session);
 		iDirScanSession = &session;
-		iDirScanDir = const_cast < TDesC *> (&aDir);
+		iDirScanDir = const_cast <TDesC *>(&aDir);
 		iNbDirScanned = 0;
 		iNbFilesFound = 0;
 		iNbPlayListsFound = 0;
@@ -627,6 +627,7 @@ TBool TOggFiles::AddNextFile()
 	TFileName fullName;
 	fullName.Copy(iDs->FullPath());
 	fullName.Append(e.iName);
+	// TRACEF(COggLog::VA(_L("AddNextFile: %S"), &fullName));
 
 	TParsePtrC p(fullName);
 	if (iApp->PlaybackFromFileName(fullName, iOggPlayback, iControllerUid) == KErrNone) 
@@ -643,7 +644,7 @@ TBool TOggFiles::AddNextFile()
         else
 			{
 			// Just skip the file if there is an error
-            TRACEF(COggLog::VA(_L("AddNextFile failed with code %d"), err));
+			TRACEF(COggLog::VA(_L("AddNextFile failed with code %d"), err));
 			}
 		}
 	else if (IsPlayListFile(p))

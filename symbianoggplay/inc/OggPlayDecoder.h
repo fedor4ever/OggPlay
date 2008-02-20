@@ -65,7 +65,7 @@ public:
 	virtual void GetFrequencyBins(TInt32* aBins, TInt aNumberOfBins) = 0;
 	virtual TBool RequestingFrequencyBins() = 0;
 
-	virtual void FileThreadTransfer() = 0;
+	virtual void ThreadRelease() = 0;
 	};
 
 #endif

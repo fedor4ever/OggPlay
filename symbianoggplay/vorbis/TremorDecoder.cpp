@@ -215,6 +215,6 @@ TBool CTremorDecoder::RequestingFrequencyBins()
 	return ov_reqFreqBin(&iVf) ? ETrue : EFalse;
 	}
 
-void CTremorDecoder::FileThreadTransfer()
+void CTremorDecoder::ThreadRelease()
 	{
 	}

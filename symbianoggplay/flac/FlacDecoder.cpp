@@ -80,6 +80,7 @@ void CDBFileAO::DoCancel()
 	iFileRequestPending = EFalse;
 	}
 
+// #define FORCE_SYNCHRONOUS_READS
 void CDBFileAO::Read()
 	{
 	// Check if a read request is pending
@@ -102,11 +103,16 @@ void CDBFileAO::Read()
 
 	// Issue the read request
 	iBufPtr.Set(iBuf+writeIdx, 0, iHalfBufSize);
+
+#if defined (FORCE_SYNCHRONOUS_READS)
+	ReadComplete(iFile.Read(iBufPtr));
+#else
 	iFile.Read(iBufPtr, iStatus);
 	iFileRequestPending = ETrue;
 
 	if (!IsActive())
 		SetActive();
+#endif
 	}
 
 TInt CDBFileAO::WaitForCompletion()
@@ -238,7 +244,7 @@ void RDBFile::CopyData(TUint8* aBuf, TInt aSize)
 	iDataSize -= aSize;
 	}
 
-void RDBFile::FileThreadTransfer()
+void RDBFile::ThreadRelease()
 	{
 	if (!iDBFileAO)
 		return;
@@ -671,9 +677,9 @@ void CFlacDecoder::ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer
 	iBuffer = NULL;
 	}
 
-void CFlacDecoder::FileThreadTransfer()
+void CFlacDecoder::ThreadRelease()
 	{
-	iFile.FileThreadTransfer();
+	iFile.ThreadRelease();
 	}
 
 

@@ -207,7 +207,7 @@ void CStreamingThreadAO::RunL()
 
 		// Inform the playback object that we are transfering buffering to another thread
 		// i.e. that the buffering thread will access the file from now on
-		iSharedData.iOggPlayback.FileThreadTransfer();
+		iSharedData.iOggPlayback.ThreadRelease();
 
 		// Set the new buffering mode
 		iSharedData.iCurrentBufferingMode = EBufferThread;
@@ -586,7 +586,7 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 
 		// Inform the playback object that we have finished with file access for now
 		if ((iSharedData.iCurrentBufferingMode == ENoBuffering) || (iSharedData.iCurrentBufferingMode == EBufferStream))
-			iSharedData.iOggPlayback.FileThreadTransfer();
+			iSharedData.iOggPlayback.ThreadRelease();
 
 		// Reset the current buffering mode
 		iSharedData.iCurrentBufferingMode = ENoBuffering;

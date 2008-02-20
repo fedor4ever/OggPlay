@@ -1080,7 +1080,7 @@ TBool CMadDecoder::RequestingFrequencyBins()
 	return EFalse;
 	}
 
-void CMadDecoder::FileThreadTransfer()
+void CMadDecoder::ThreadRelease()
 	{
 	}
 

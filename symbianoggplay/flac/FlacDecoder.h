@@ -70,7 +70,7 @@ public:
 	TInt Read(TDes8& aBuf);
 	TInt Seek(TSeek aMode, TInt &aPos);
 
-	void FileThreadTransfer();
+	void ThreadRelease();
 
 private:
 	void CopyData(TUint8* aBuf, TInt aSize);
@@ -112,7 +112,7 @@ public:
 	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
-	void FileThreadTransfer();
+	void ThreadRelease();
 
 	void GetString(TDes& aBuf, const char* aStr);
 

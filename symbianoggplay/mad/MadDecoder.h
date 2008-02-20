@@ -64,7 +64,7 @@ public:
 	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
-	void FileThreadTransfer();
+	void ThreadRelease();
 
 private:
 	// Helper functions

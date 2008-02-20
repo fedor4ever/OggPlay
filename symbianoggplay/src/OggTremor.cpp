@@ -277,7 +277,7 @@ TInt COggPlayback::Open(const TDesC& aFileName, TUid /* aControllerUid */)
 		{
 		// Transfer the file across to the streaming thread
 		// The streaming thread will control access to the file from now on
-		FileThreadTransfer();
+		ThreadRelease();
 
 		iState = EStopped;
 		iObserver->NotifyFileOpen(KErrNone);
@@ -1026,7 +1026,7 @@ TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
 
 	// Transfer file access back to the streaming thread (so that it can do the seek)
 	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		FileThreadTransfer();
+		ThreadRelease();
 
 	// Cancel the buffering
 	iBufferingThreadAO->Cancel();
@@ -1045,7 +1045,7 @@ TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
 
 	// Transfer file access back to the streaming thread (so that it can do the seek)
 	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		FileThreadTransfer();
+		ThreadRelease();
 
 	// Cancel the buffering
 	iBufferingThreadAO->Cancel();
@@ -1064,7 +1064,7 @@ void COggPlayback::FlushBuffers(TGainType aNewGain)
 
 	// Transfer file access back to the streaming thread (so that it can do the seek)
 	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		FileThreadTransfer();
+		ThreadRelease();
 
 	// Cancel the buffering
 	iBufferingThreadAO->Cancel();
@@ -1329,9 +1329,9 @@ void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt aErr)
 	iObserver->NotifyFatalPlayError();
 	}
 
-void COggPlayback::FileThreadTransfer()
+void COggPlayback::ThreadRelease()
 	{
 	// Inform the decoder that access to the file will now be done from a different thread
 	if (iDecoder)
-		iDecoder->FileThreadTransfer();
+		iDecoder->ThreadRelease();
 	}

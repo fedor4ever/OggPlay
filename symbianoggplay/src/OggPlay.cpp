@@ -2870,7 +2870,6 @@ COggRandomPlay::~COggRandomPlay()
 void COggRandomPlay::ConstructL(COggSongList* aSongList)
 	{
 	COggSongList::ConstructL(aSongList);
-
 	if (aSongList)
 		GenerateRandomListL();
 	}
@@ -2911,7 +2910,8 @@ void COggRandomPlay::GenerateRandomListL()
 void COggRandomPlay::SetPlayingFromListBox(TInt aPlaying)
 	{
 	COggSongList::SetPlayingFromListBox(aPlaying);
-	GenerateRandomListL();
+	if (aPlaying != ENoFileSelected)
+		GenerateRandomListL();
 	}
 
 const TDesC& COggRandomPlay::GetNextSong()
