@@ -22,7 +22,7 @@
 class MDecoder
 {
 public:
-	virtual ~MDecoder() { };
+	virtual ~MDecoder() { }
 
 	// Initialize Decoder settings
 	virtual TInt Clear() = 0;
@@ -64,6 +64,8 @@ public:
 	// Get frequency coefficients for analyzer
 	virtual void GetFrequencyBins(TInt32* aBins, TInt aNumberOfBins) = 0;
 	virtual TBool RequestingFrequencyBins() = 0;
+
+	virtual void FileThreadTransfer() = 0;
 	};
 
 #endif

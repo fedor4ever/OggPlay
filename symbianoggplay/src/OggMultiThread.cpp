@@ -27,9 +27,9 @@
 
 // Shared data class
 TStreamingThreadData::TStreamingThreadData(COggPlayback& aOggPlayback, RThread& aUIThread, RThread& aBufferingThread)
-: iOggPlayback(aOggPlayback), iUIThread(aUIThread), iBufferingThread(aBufferingThread),
-iNumBuffersRead(0), iNumBuffersPlayed(0), iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL),
-iBufferBytesRead(0), iBufferBytesPlayed(0), iTotalBufferBytes(0), iSampleRate(8000), iChannels(1), iBufferingMode(ENoBuffering)
+: iOggPlayback(aOggPlayback), iUIThread(aUIThread), iBufferingThread(aBufferingThread), iNumBuffersRead(0), iNumBuffersPlayed(0),
+iPrimeBufNum(0), iBufRequestInProgress(EFalse), iLastBuffer(NULL), iBufferBytesRead(0), iBufferBytesPlayed(0), iTotalBufferBytes(0),
+iSampleRate(8000), iChannels(1), iBufferingMode(ENoBuffering), iCurrentBufferingMode(ENoBuffering)
 	{
 	}
 
@@ -205,6 +205,13 @@ void CStreamingThreadAO::RunL()
 		iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityNormal) ? EPriorityMore : EPriorityAbsoluteHigh;
 		iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
 
+		// Inform the playback object that we are transfering buffering to another thread
+		// i.e. that the buffering thread will access the file from now on
+		iSharedData.iOggPlayback.FileThreadTransfer();
+
+		// Set the new buffering mode
+		iSharedData.iCurrentBufferingMode = EBufferThread;
+
 		// Transfer buffering to the buffering thread
 		TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
 		iSharedData.iBufferingThread.RequestComplete(status, KErrNone);
@@ -296,7 +303,7 @@ void CStreamingThreadCommandHandler::ListenForCommands(CStreamingThreadPlaybackE
 // Handle commands
 // The AO completion status is the command to execute
 void CStreamingThreadCommandHandler::RunL()
-{
+	{
 	// Get the status
 	TInt status = iStatus.Int();
 
@@ -307,61 +314,61 @@ void CStreamingThreadCommandHandler::RunL()
 	// Dispatch commands to the playback engine
 	TInt err = KErrNone;
 	switch (status)
-	{
-	case EStreamingThreadSetAudioProperties:
-		TRAP(err, iPlaybackEngine->SetAudioPropertiesL());
-		break;
+		{
+		case EStreamingThreadSetAudioProperties:
+			TRAP(err, iPlaybackEngine->SetAudioPropertiesL());
+			break;
 
-	case EStreamingThreadVolume:
-		iPlaybackEngine->Volume();
-		break;
+		case EStreamingThreadVolume:
+			iPlaybackEngine->Volume();
+			break;
 
-	case EStreamingThreadSetVolume:
-		iPlaybackEngine->SetVolume();
-		break;
+		case EStreamingThreadSetVolume:
+			iPlaybackEngine->SetVolume();
+			break;
 
-	case EStreamingThreadStartStreaming:
-		iPlaybackEngine->StartStreaming();
-		break;
+		case EStreamingThreadStartStreaming:
+			iPlaybackEngine->StartStreaming();
+			break;
 
-	case EStreamingThreadStopStreaming:
-		iPlaybackEngine->StopStreaming();
-		break;
+		case EStreamingThreadStopStreaming:
+			iPlaybackEngine->StopStreaming();
+			break;
 
-	case EStreamingThreadSetBufferingMode:
-		iPlaybackEngine->SetBufferingMode();
-		break;
+		case EStreamingThreadSetBufferingMode:
+			iPlaybackEngine->SetBufferingMode();
+			break;
 
-	case EStreamingThreadSetThreadPriority:
-		iPlaybackEngine->SetThreadPriority();
-		break;
+		case EStreamingThreadSetThreadPriority:
+			iPlaybackEngine->SetThreadPriority();
+			break;
 
-	case EStreamingThreadPosition:
-		iPlaybackEngine->Position();
-		break;
+		case EStreamingThreadPosition:
+			iPlaybackEngine->Position();
+			break;
 
-	case EStreamingThreadPrepareToFlushBuffers:
-		err = iPlaybackEngine->PrepareToFlushBuffers() ? 1 : 0;
-		break;
+		case EStreamingThreadPrepareToFlushBuffers:
+			err = iPlaybackEngine->PrepareToFlushBuffers() ? 1 : 0;
+			break;
 
-	case EStreamingThreadFlushBuffers:
-		err = iPlaybackEngine->FlushBuffers() ? 1 : 0;
-		break;
+		case EStreamingThreadFlushBuffers:
+			err = iPlaybackEngine->FlushBuffers() ? 1 : 0;
+			break;
 
-	case EThreadShutdown:
-		iPlaybackEngine->Shutdown();
-		CActiveScheduler::Stop();
-		return;
+		case EThreadShutdown:
+			iPlaybackEngine->Shutdown();
+			CActiveScheduler::Stop();
+			return;
 
-	default:
-		// Panic if we get an unkown command
-		User::Panic(_L("STCL: RunL"), 0);
-		break;
-	}
+		default:
+			// Panic if we get an unkown command
+			User::Panic(_L("STCL: RunL"), 0);
+			break;
+		}
 
 	// Complete the request
 	RequestComplete(err);
-}
+	}
 
 void CStreamingThreadCommandHandler::DoCancel()
 {
@@ -531,7 +538,7 @@ void CStreamingThreadPlaybackEngine::SetVolume()
 }
 
 void CStreamingThreadPlaybackEngine::StartStreaming()
-{
+	{
 	if (iStreaming)
 		User::Panic(_L("STPE: StartStream"), 0);
 
@@ -540,38 +547,51 @@ void CStreamingThreadPlaybackEngine::StartStreaming()
 	iStreaming = ETrue;
 
 	if (iSharedData.iBufferingMode == ENoBuffering)
-	{
+		{
+		// Set the current buffering mode
+		iSharedData.iCurrentBufferingMode = ENoBuffering;
+
 		// Fetch the first buffer
 		iStreamingThreadAO->PrimeNextBuffer();
 
 		// Stream the first buffer
 		SendNextBuffer();
-	}
+		}
 	else
-	{
+		{
+		// Set the current buffering mode
+		iSharedData.iCurrentBufferingMode = EBufferStream;
+
 		// Start the streaming thread AO
 		iStreamingThreadAO->StartBuffering();
 
 		// Stream the pre buffers
 		for (TInt i = 0 ; i<KPreBuffers ; i++)
 			SendNextBuffer();
+		}
 	}
-}
 
 void CStreamingThreadPlaybackEngine::PauseStreaming()
-{
+	{
 	// Stop the stream, but don't reset the position
 	StopStreaming(EFalse);
-}
+	}
 
 void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
-{
-	if (iStreaming)
 	{
+	if (iStreaming)
+		{
 		// Stop the stream
 		iStream->Stop();
 
-		// Stop the AOs
+		// Inform the playback object that we have finished with file access for now
+		if ((iSharedData.iCurrentBufferingMode == ENoBuffering) || (iSharedData.iCurrentBufferingMode == EBufferStream))
+			iSharedData.iOggPlayback.FileThreadTransfer();
+
+		// Reset the current buffering mode
+		iSharedData.iCurrentBufferingMode = ENoBuffering;
+
+		// Stop the streaming AO
 		iStreamingThreadAO->Cancel();
 
 		// Reset streaming data
@@ -591,10 +611,10 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 
 		// Reset the thread priorities
 		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
-		{
+			{
 			iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
 			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
-		}
+			}
 
 		// Inform the streaming listener that the stream has stopped
 		TRequestStatus* status = &iSharedData.iStreamingThreadListener->iStatus;
@@ -604,20 +624,20 @@ void CStreamingThreadPlaybackEngine::StopStreaming(TBool aResetPosition)
 #if defined(PROFILE_PERF)
 		iProfilePerfAO->Cancel();
 #endif
-	}
+		}
 
 	if (aResetPosition)
 		iSharedData.iTotalBufferBytes = 0;
-}
+	}
 
 void CStreamingThreadPlaybackEngine::SetBufferingMode()
-{
+	{
 	if (iStreaming)
 		User::Panic(_L("STPE: SBM1"), 0);
 
 	// Set the buffering values
 	switch(iSharedData.iBufferingMode)
-	{
+		{
 		case ENoBuffering:
 			iMaxStreamBuffers = KNoBuffers;
 			iBufferLowThreshold = KNoBuffers;
@@ -636,8 +656,8 @@ void CStreamingThreadPlaybackEngine::SetBufferingMode()
 		default:
 			User::Panic(_L("STPE: SBM2"), 0);
 			break;
+		}
 	}
-}
 
 void CStreamingThreadPlaybackEngine::SetThreadPriority()
 {
@@ -677,21 +697,21 @@ void CStreamingThreadPlaybackEngine::SetThreadPriority()
 }
 
 void CStreamingThreadPlaybackEngine::Position()
-{
+	{
 	iSharedData.iStreamingPosition = iStream->Position();
-}
+	}
 
 TBool CStreamingThreadPlaybackEngine::PrepareToFlushBuffers()
-{
+	{
 	// Mark that a buffer flush is pending (this inhibits requests to the buffering thread)
 	iBufferFlushPending = ETrue;
 
 	// Return streaming status
 	return iStreaming;
-}
+	}
 
 TBool CStreamingThreadPlaybackEngine::FlushBuffers()
-{
+	{
 	// Return the streaming status
 	// (Get the value before we flush the buffers and possibly change it)
 	TBool ret = iStreaming;
@@ -702,26 +722,26 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 	// Reset the audio stream (move position / change volume gain)
 	const TInt64 KConst500 = TInt64(500);
 	switch (iSharedData.iFlushBufferEvent)
-	{
+		{
 		case EPlaybackPaused:
 		case EBufferingModeChanged:
-		{
+			{
 			// Flush all of the data
 			TInt bufferBytes = iSharedData.BufferBytes();
 			if (bufferBytes)
-			{
+				{
 				iSharedData.iTotalBufferBytes-= bufferBytes;
 				TInt64 newPositionMillisecs = (KConst500*iSharedData.iTotalBufferBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
 				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
-			}
+				}
 
 			// Pause the stream
 			PauseStreaming();
 			break;
-		}
+			}
 
 		case EVolumeGainChanged:
-		{
+			{
 			// Calculate how much data needs to be flushed
 			// Don't flush buffers that are already in the stream and leave another KPreBuffers unflushed
 			TInt availBuffers = iSharedData.NumBuffers() - iStreamBuffers;
@@ -731,34 +751,34 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 
 			TInt bytesFlushed = 0;
 			if (buffersToFlush)
-			{
+				{
 				TInt bufNum = iBufNum + KPreBuffers;
 				if (bufNum>=iSharedData.iMaxBuffers)
 					bufNum -= iSharedData.iMaxBuffers;
 				iSharedData.iPrimeBufNum = bufNum;
 
 				for (TInt i = 0 ; i<numFlushBuffers ; i++)
-				{
+					{
 					bytesFlushed += iSharedData.iOggPlayback.iBuffer[bufNum]->Length();
 					bufNum++;
 					if (bufNum == iSharedData.iMaxBuffers)
 						bufNum = 0;
-				}
+					}
 				iSharedData.iBufferBytesRead-= bytesFlushed;
-			}
+				}
 
 			// Reset the decoder position
 			if (bytesFlushed)
-			{
+				{
 				iSharedData.iTotalBufferBytes-= bytesFlushed;
 				TInt64 newPositionMillisecs = (KConst500*iSharedData.iTotalBufferBytes)/TInt64(iSharedData.iSampleRate*iSharedData.iChannels);
 				iSharedData.iOggPlayback.SetDecoderPosition(newPositionMillisecs);
-			}
+				}
 
 			// Set the new volume gain (and carry on as if nothing had happened)
 			iSharedData.iOggPlayback.SetSampleRateConverterVolumeGain(iSharedData.iNewGain);
 			break;
-		}
+			}
 
 		case EPositionChanged:
 			// Recalculate the number of buffer bytes
@@ -773,23 +793,24 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 
 		default:
 			User::Panic(_L("STPE: Flush"), 0);		
-	}
-
-	// Start the streaming thread AO
-	if (iStreaming && !iStreamingThreadAO->IsActive() && (iSharedData.iBufferingMode != ENoBuffering))
-	{
-		// Reset the buffering thread priority
-		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
-		{
-			iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
-			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
 		}
 
+	// Start the streaming thread AO
+	if (iStreaming && (iSharedData.iCurrentBufferingMode != EBufferStream) && (iSharedData.iBufferingMode != ENoBuffering))
+		{
+		// Reset the buffering thread priority
+		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
+			{
+			iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityMore) ? EPriorityNormal : EPriorityAbsoluteForeground;
+			iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
+			}
+
+		iSharedData.iCurrentBufferingMode = EBufferStream;
 		iStreamingThreadAO->ResumeBuffering();
-	}
+		}
 
 	return ret;
-}
+	}
 
 void CStreamingThreadPlaybackEngine::Shutdown()
 {
@@ -895,7 +916,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 		}
 
 	// Dynamically adjust the buffering thread priority
-	TBool streamingThreadActive = iStreamingThreadAO->IsActive();
+	TBool streamingThreadActive = (iSharedData.iCurrentBufferingMode == EBufferStream);
 	if (iSharedData.iBufferingMode == EBufferThread)
 		{
 		TInt numBuffers = iSharedData.NumBuffers();

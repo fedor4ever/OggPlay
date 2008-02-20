@@ -197,6 +197,9 @@ public:
 	// The buffering mode (used by SetBufferingMode()) 
 	TBufferingMode iBufferingMode;
 
+	// The current buffering mode (used to determine which thread is currently reading from the file) 
+	TBufferingMode iCurrentBufferingMode;
+
 	// The thread priorities to use (used by SetThreadPriority())
 	TStreamingThreadPriority iStreamingThreadPriority;
 

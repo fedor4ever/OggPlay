@@ -27,6 +27,66 @@ typedef unsigned int size_t;
 
 #include "OggPlayDecoder.h"
 
+
+class CDBFileAO : public CActive
+	{
+public:
+	CDBFileAO(RFile& aFile, TUint8* aBuf, TInt aBufSize, TInt &aReadIdx, TInt& aDataSize, TInt& aFilePos);
+	~CDBFileAO();
+
+	void Read();
+	TInt WaitForCompletion();
+
+	// From CAcive
+	void RunL();
+	void DoCancel();
+
+private:
+	void ReadComplete(TInt aErr);
+
+private:
+	RFile& iFile;
+	TBool iFileRequestPending;
+
+	TUint8* iBuf;
+	TInt iBufSize;
+	TInt iHalfBufSize;
+	TPtr8 iBufPtr;
+
+	TInt& iReadIdx;
+	TInt& iDataSize;
+	TInt& iFilePos;
+	};
+
+const TInt KDefaultRFileDBBufSize = 131072; // 2 x 64K
+class RDBFile : public RFile
+	{
+public:
+	RDBFile(TInt aBufSize = KDefaultRFileDBBufSize);
+
+	TInt Open(RFs& aFs, const TDesC& aFileName, TUint aMode);
+	void Close();
+
+	TInt Read(TDes8& aBuf);
+	TInt Seek(TSeek aMode, TInt &aPos);
+
+	void FileThreadTransfer();
+
+private:
+	void CopyData(TUint8* aBuf, TInt aSize);
+
+private:
+	TUint8* iBuf;
+	TInt iBufSize;
+	TInt iHalfBufSize;
+
+	TInt iReadIdx;
+	TInt iDataSize;
+
+	CDBFileAO* iDBFileAO;
+	TInt iFilePos;
+	};
+
 class CFlacDecoder : public CBase, public MDecoder
 	{
 public:
@@ -52,6 +112,8 @@ public:
 	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
+	void FileThreadTransfer();
+
 	void GetString(TDes& aBuf, const char* aStr);
 
 	void SetStreamInfo(const FLAC__StreamMetadata_StreamInfo* aStreamInfo); 
@@ -73,7 +135,7 @@ public:
 	void ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer[]);
 
 protected:
-	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RFile* f);
+	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RDBFile* f);
 
 protected:
 	FLAC__StreamDecoder* iDecoder;
@@ -95,7 +157,7 @@ private:
 
 	TInt iFileSize;
 
-	RFile iFile;
+	RDBFile iFile;
 	RFs& iFs;
 	};
 
@@ -105,7 +167,7 @@ public:
 	CNativeFlacDecoder(RFs& aFs);
 
 protected:
-	FLAC__StreamDecoderInitStatus FLACInitStream(RFile* f);
+	FLAC__StreamDecoderInitStatus FLACInitStream(RDBFile* f);
 	};
 
 #endif

@@ -1701,7 +1701,7 @@ void COggPlayAppUi::FindSkins()
 	TRAPD(err, ds->SetScanDataL(iSkinFileDir,KEntryAttNormal,ESortByName|EAscending,CDirScan::EScanDownTree));
 	if (err != KErrNone)
 		{
-        TRACEF(COggLog::VA(_L("Error in FindSkins: %d"), err));		
+		TRACEF(COggLog::VA(_L("Error in FindSkins: %d"), err));
 		CleanupStack::PopAndDestroy(ds);
 		return;
 		}

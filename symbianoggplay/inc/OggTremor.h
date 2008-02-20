@@ -172,6 +172,8 @@ public:
 	void NotifyOpenComplete(TInt aErr);
 	void NotifyStreamingStatus(TInt aErr);
 
+	void FileThreadTransfer();
+
 private:
 	TBool GetNextLowerRate(TInt& usedRate, TMdaAudioDataSettings::TAudioCaps& rt);
 	TInt SetAudioCaps(TInt theChannels, TInt theRate);

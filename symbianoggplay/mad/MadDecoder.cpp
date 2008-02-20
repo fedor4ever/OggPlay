@@ -1071,7 +1071,7 @@ void CMadDecoder::ProcessId3()
 		}
   	}
 
-void CMadDecoder::GetFrequencyBins(TInt32* /*aBins*/,TInt /*NumberOfBins*/)
+void CMadDecoder::GetFrequencyBins(TInt32* /*aBins*/, TInt /*NumberOfBins*/)
 	{
 	}
 
@@ -1079,4 +1079,9 @@ TBool CMadDecoder::RequestingFrequencyBins()
 	{
 	return EFalse;
 	}
+
+void CMadDecoder::FileThreadTransfer()
+	{
+	}
+
 #endif // MP3_SUPPORT

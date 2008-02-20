@@ -237,7 +237,6 @@ void COggPluginAdaptor::Stop()
 
 void COggPluginAdaptor::SetVolume(TInt aVol)
 	{
-    TRACEF(_L("COggPluginAdaptor::SetVolume()"));
     if ((aVol<0) || (aVol>KMaxVolume))
 	    return;
 

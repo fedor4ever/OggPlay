@@ -275,6 +275,10 @@ TInt COggPlayback::Open(const TDesC& aFileName, TUid /* aControllerUid */)
 	err = SetAudioCaps(iDecoder->Channels(), iDecoder->Rate());
 	if (err == KErrNone)
 		{
+		// Transfer the file across to the streaming thread
+		// The streaming thread will control access to the file from now on
+		FileThreadTransfer();
+
 		iState = EStopped;
 		iObserver->NotifyFileOpen(KErrNone);
 		}
@@ -616,7 +620,7 @@ void COggPlayback::SetPosition(TInt64 aPos)
 
 		// Pause/Restart the stream instead of just flushing buffers
 	    // This works better with FF/RW because, like next/prev track, key repeats are possible (and very likely on FF/RW)
-        TBool streamStopped = FlushBuffers(aPos);
+		TBool streamStopped = FlushBuffers(aPos);
 
 		// Restart streaming
 		if (streamStopped)
@@ -1011,134 +1015,155 @@ void COggPlayback::SetThreadPriority(TStreamingThreadPriority aNewThreadPriority
 	}
 
 TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
-{
-  __ASSERT_DEBUG((aFlushBufferEvent == EBufferingModeChanged) || (aFlushBufferEvent == EPlaybackPaused), User::Panic(_L("COggPlayback::FB"), 0));
+	{
+	__ASSERT_DEBUG((aFlushBufferEvent == EBufferingModeChanged) || (aFlushBufferEvent == EPlaybackPaused), User::Panic(_L("COggPlayback::FB"), 0));
 
-  // Set the flush buffer event
-  iSharedData.iFlushBufferEvent = aFlushBufferEvent;
+	// Set the flush buffer event
+	iSharedData.iFlushBufferEvent = aFlushBufferEvent;
 
-  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
-  iBufferingThreadAO->Cancel();
+	// Inform the streaming thread we are going to flush buffers
+	iStreamingThreadCommandHandler->PrepareToFlushBuffers();
 
-  return iStreamingThreadCommandHandler->FlushBuffers();
-}
+	// Transfer file access back to the streaming thread (so that it can do the seek)
+	if (iSharedData.iCurrentBufferingMode == EBufferThread)
+		FileThreadTransfer();
+
+	// Cancel the buffering
+	iBufferingThreadAO->Cancel();
+
+	return iStreamingThreadCommandHandler->FlushBuffers();
+	}
 
 TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
-{
-  // The position has been changed so flush the buffers (and set the new position)
-  iSharedData.iFlushBufferEvent = EPositionChanged;
-  iSharedData.iNewPosition = aNewPosition;
+	{
+	// The position has been changed so flush the buffers (and set the new position)
+	iSharedData.iFlushBufferEvent = EPositionChanged;
+	iSharedData.iNewPosition = aNewPosition;
 
-  iStreamingThreadCommandHandler->PrepareToFlushBuffers();
-  iBufferingThreadAO->Cancel();
+	// Inform the streaming thread we are going to flush buffers
+	iStreamingThreadCommandHandler->PrepareToFlushBuffers();
 
-  return iStreamingThreadCommandHandler->FlushBuffers();
-}
+	// Transfer file access back to the streaming thread (so that it can do the seek)
+	if (iSharedData.iCurrentBufferingMode == EBufferThread)
+		FileThreadTransfer();
+
+	// Cancel the buffering
+	iBufferingThreadAO->Cancel();
+
+	return iStreamingThreadCommandHandler->FlushBuffers();
+	}
 
 void COggPlayback::FlushBuffers(TGainType aNewGain)
-{
-  // The volume gain has been changed so flush the buffers (and set the new gain)
-  iSharedData.iFlushBufferEvent = EVolumeGainChanged;
-  iSharedData.iNewGain = aNewGain;
+	{
+	// The volume gain has been changed so flush the buffers (and set the new gain)
+	iSharedData.iFlushBufferEvent = EVolumeGainChanged;
+	iSharedData.iNewGain = aNewGain;
 
-  TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
-  iBufferingThreadAO->Cancel();
+	// Inform the streaming thread we are going to flush buffers
+	TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
 
-  if (streaming && (iSharedData.iBufferingMode == EBufferThread))
-	iBufferingThreadAO->StartListening();
+	// Transfer file access back to the streaming thread (so that it can do the seek)
+	if (iSharedData.iCurrentBufferingMode == EBufferThread)
+		FileThreadTransfer();
 
-  iStreamingThreadCommandHandler->FlushBuffers();
-}
+	// Cancel the buffering
+	iBufferingThreadAO->Cancel();
+
+	if (streaming && (iSharedData.iBufferingMode == EBufferThread))
+		iBufferingThreadAO->StartListening();
+
+	iStreamingThreadCommandHandler->FlushBuffers();
+	}
 
 void COggPlayback::SetDecoderPosition(TInt64 aPos)
-{
-  // Set the deocder position (aPos is in milliseconds)
-  iDecoder->Setposition(aPos);
-}
+	{
+	// Set the deocder position (aPos is in milliseconds)
+	iDecoder->Setposition(aPos);
+	}
 
 void COggPlayback::SetSampleRateConverterVolumeGain(TGainType aGain)
-{
-  // Set the volume gain (called by the streaming thread after the buffers have been flushed)
-  iOggSampleRateConverter->SetVolumeGain(aGain);
-}
+	{
+	// Set the volume gain (called by the streaming thread after the buffers have been flushed)
+	iOggSampleRateConverter->SetVolumeGain(aGain);
+	}
 
 TInt COggPlayback::StreamingThread(TAny* aThreadData)
-{
-  // Access the shared data / command handler
-  TStreamingThreadData& sharedData = *((TStreamingThreadData *) aThreadData);
-  CStreamingThreadCommandHandler& streamingThreadCommandHandler = *sharedData.iStreamingThreadCommandHandler;
+	{
+	// Access the shared data / command handler
+	TStreamingThreadData& sharedData = *((TStreamingThreadData *) aThreadData);
+	CStreamingThreadCommandHandler& streamingThreadCommandHandler = *sharedData.iStreamingThreadCommandHandler;
 
-  // Create a cleanup stack
-  CTrapCleanup* cleanupStack = CTrapCleanup::New();
-  if (!cleanupStack)
-  {
-	// Inform the UI thread that starting the streaming thread failed
-	streamingThreadCommandHandler.ResumeComplete(KErrNoMemory);
-	return KErrNoMemory;
-  }
+	// Create a cleanup stack
+	CTrapCleanup* cleanupStack = CTrapCleanup::New();
+	if (!cleanupStack)
+		{
+		// Inform the UI thread that starting the streaming thread failed
+		streamingThreadCommandHandler.ResumeComplete(KErrNoMemory);
+		return KErrNoMemory;
+		}
 
-  // Set the thread priority
-  RThread streamingThread;
-  streamingThread.SetPriority(EPriorityMore);
-  streamingThread.Close();
+	// Set the thread priority
+	RThread streamingThread;
+	streamingThread.SetPriority(EPriorityMore);
+	streamingThread.Close();
 
-  // Allocate resources and start the active scheduler
-  TRAPD(err, StreamingThreadL(sharedData));
+	// Allocate resources and start the active scheduler
+	TRAPD(err, StreamingThreadL(sharedData));
 
-  // Cleanup
-  COggLog::Exit();  
-  delete cleanupStack;
+	// Cleanup
+	COggLog::Exit();  
+	delete cleanupStack;
 
-  // Complete the shutdown request
-  streamingThreadCommandHandler.ShutdownComplete(err);
-  return err;
-}
+	// Complete the shutdown request
+	streamingThreadCommandHandler.ShutdownComplete(err);
+	return err;
+	}
 
 void COggPlayback::StreamingThreadL(TStreamingThreadData& aSharedData)
-{
-  // Attach to the file session
-  User::LeaveIfError(aSharedData.iOggPlayback.AttachToFs());
+	{
+	// Attach to the file session
+	User::LeaveIfError(aSharedData.iOggPlayback.AttachToFs());
 
-  // Create a scheduler
-  CActiveScheduler* scheduler = new(ELeave) CActiveScheduler;
-  CleanupStack::PushL(scheduler);
+	// Create a scheduler
+	CActiveScheduler* scheduler = new(ELeave) CActiveScheduler;
+	CleanupStack::PushL(scheduler);
 
-  // Install the scheduler
-  CActiveScheduler::Install(scheduler);
+	// Install the scheduler
+	CActiveScheduler::Install(scheduler);
 
-  // Add the streaming command handler to the scheduler
-  CStreamingThreadCommandHandler& streamingThreadCommandHandler = *aSharedData.iStreamingThreadCommandHandler;
-  CActiveScheduler::Add(&streamingThreadCommandHandler);
+	// Add the streaming command handler to the scheduler
+	CStreamingThreadCommandHandler& streamingThreadCommandHandler = *aSharedData.iStreamingThreadCommandHandler;
+	CActiveScheduler::Add(&streamingThreadCommandHandler);
 
-  // Create the audio playback engine
-  CStreamingThreadPlaybackEngine* playbackEngine = CStreamingThreadPlaybackEngine::NewLC(aSharedData);
+	// Create the audio playback engine
+	CStreamingThreadPlaybackEngine* playbackEngine = CStreamingThreadPlaybackEngine::NewLC(aSharedData);
 
-  // Listen for commands and dispatch them to the playback engine
-  streamingThreadCommandHandler.ListenForCommands(*playbackEngine);
+	// Listen for commands and dispatch them to the playback engine
+	streamingThreadCommandHandler.ListenForCommands(*playbackEngine);
 
-  // Inform the UI thread that the streaming thread has started
-  streamingThreadCommandHandler.ResumeComplete(KErrNone);
+	// Inform the UI thread that the streaming thread has started
+	streamingThreadCommandHandler.ResumeComplete(KErrNone);
 
-  // Start the scheduler
-  CActiveScheduler::Start();
+	// Start the scheduler
+	CActiveScheduler::Start();
 
-  // Cancel the command handler
-  streamingThreadCommandHandler.Cancel();
+	// Cancel the command handler
+	streamingThreadCommandHandler.Cancel();
 
-  // Uninstall the scheduler
-  CActiveScheduler::Install(NULL);
+	// Uninstall the scheduler
+	CActiveScheduler::Install(NULL);
 
-  // Delete the scheduler and audio engine
-  CleanupStack::PopAndDestroy(2, scheduler);
-}
+	// Delete the scheduler and audio engine
+	CleanupStack::PopAndDestroy(2, scheduler);
+	}
 
 TBool COggPlayback::PrimeBuffer(HBufC8& buf)
-{
-  // Read and decode the next buffer
-  TPtr8 bufPtr(buf.Des());
-  iOggSampleRateConverter->FillBuffer(bufPtr);
-  return iEof;
-}
+	{
+	// Read and decode the next buffer
+	TPtr8 bufPtr(buf.Des());
+	iOggSampleRateConverter->FillBuffer(bufPtr);
+	return iEof;
+	}
 
 void COggPlayback::NotifyOpenComplete(TInt aErr)
 	{
@@ -1150,87 +1175,87 @@ void COggPlayback::NotifyOpenComplete(TInt aErr)
 	}
 
 TInt COggPlayback::BufferingModeChanged()
-{
-  // The buffering mode has changed so allocate or free buffers
-  TInt i;
-  TInt allocError = KErrNone;
-  switch (iSharedData.iBufferingMode)
-  {
-	case ENoBuffering:
-		iSharedData.iBuffersToUse = KNoBuffers;
-		iSharedData.iMaxBuffers = KNoBuffers;
-
-		// Delete all the buffers
-		for (i = 1 ; i<KMultiThreadBuffers ; i++)
+	{
+	// The buffering mode has changed so allocate or free buffers
+	TInt i;
+	TInt allocError = KErrNone;
+	switch (iSharedData.iBufferingMode)
 		{
-			delete iBuffer[i];
-			iBuffer[i] = NULL;
-		}
-		break;
+		case ENoBuffering:
+			iSharedData.iBuffersToUse = KNoBuffers;
+			iSharedData.iMaxBuffers = KNoBuffers;
 
-	case EBufferStream:
-		iSharedData.iBuffersToUse = KSingleThreadBuffersToUse;
-		iSharedData.iMaxBuffers = KSingleThreadBuffers;
-
-		if (iBuffer[KNoBuffers])
-		{
-			// The previous mode was EBufferThread so free some buffers
-			for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
-			{
+			// Delete all the buffers
+			for (i = 1 ; i<KMultiThreadBuffers ; i++)
+				{
 				delete iBuffer[i];
 				iBuffer[i] = NULL;
-			}
-		}
-		else
-		{
-			// Allocate the buffers
-			for (i = 1 ; i<KSingleThreadBuffers ; i++)
-			{
-				iBuffer[i] = HBufC8::New(KBufferSize48K);
-				if (!iBuffer[i])
-				{
-					allocError = KErrNoMemory;
-					break;
 				}
-			}
-		}
-		break;
+			break;
 
-	case EBufferThread:
-		iSharedData.iBuffersToUse = KMultiThreadBuffersToUse;
-		iSharedData.iMaxBuffers = KMultiThreadBuffers;
+		case EBufferStream:
+			iSharedData.iBuffersToUse = KSingleThreadBuffersToUse;
+			iSharedData.iMaxBuffers = KSingleThreadBuffers;
 
-		if (iBuffer[KNoBuffers])
-		{
-			// The previous mode was EBufferStream so allocate some more buffers
-			for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
-			{
-				iBuffer[i] = HBufC8::New(KBufferSize48K);
-				if (!iBuffer[i])
+			if (iBuffer[KNoBuffers])
 				{
-					allocError = KErrNoMemory;
-					break;
+				// The previous mode was EBufferThread so free some buffers
+				for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
+					{
+					delete iBuffer[i];
+					iBuffer[i] = NULL;
+					}
 				}
-			}
-		}
-		else
-		{
-			// Allocate the buffers
-			for (i = 1 ; i<KMultiThreadBuffers ; i++)
-			{
-				iBuffer[i] = HBufC8::New(KBufferSize48K);
-				if (!iBuffer[i])
+			else
 				{
-					allocError = KErrNoMemory;
-					break;
+				// Allocate the buffers
+				for (i = 1 ; i<KSingleThreadBuffers ; i++)
+					{
+					iBuffer[i] = HBufC8::New(KBufferSize48K);
+					if (!iBuffer[i])
+						{
+						allocError = KErrNoMemory;
+						break;
+						}
+					}
 				}
-			}
-		}
-		break;
-  }
+			break;
 
-  return allocError;
-}
+		case EBufferThread:
+			iSharedData.iBuffersToUse = KMultiThreadBuffersToUse;
+			iSharedData.iMaxBuffers = KMultiThreadBuffers;
+
+			if (iBuffer[KNoBuffers])
+				{
+				// The previous mode was EBufferStream so allocate some more buffers
+				for (i = KSingleThreadBuffers ; i<KMultiThreadBuffers ; i++)
+					{
+					iBuffer[i] = HBufC8::New(KBufferSize48K);
+					if (!iBuffer[i])
+						{
+						allocError = KErrNoMemory;
+						break;
+						}
+					}
+				}
+			else
+				{
+				// Allocate the buffers
+				for (i = 1 ; i<KMultiThreadBuffers ; i++)
+					{
+					iBuffer[i] = HBufC8::New(KBufferSize48K);
+					if (!iBuffer[i])
+						{
+						allocError = KErrNoMemory;
+						break;
+						}
+					}
+				}
+			break;
+		}
+
+	return allocError;
+	}
 
 void COggPlayback::NotifyStreamingStatus(TInt aErr)
 	{
@@ -1293,12 +1318,20 @@ void COggPlayback::NotifyStreamingStatus(TInt aErr)
 		}
 	}
 
-void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt /* aErr */)
+void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt aErr)
 	{
 	// Great, the streaming thread has panic'd, now what do we do!?
+	TRACEF(COggLog::VA(_L("Handle Thread Panic: %d"), aErr));		
 	iStreamingThreadRunning = EFalse;
 	iState = EClosed;
 
 	// Try to exit cleanly
 	iObserver->NotifyFatalPlayError();
+	}
+
+void COggPlayback::FileThreadTransfer()
+	{
+	// Inform the decoder that access to the file will now be done from a different thread
+	if (iDecoder)
+		iDecoder->FileThreadTransfer();
 	}

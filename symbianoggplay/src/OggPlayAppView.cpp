@@ -1182,25 +1182,25 @@ void COggPlayAppView::HandleAlarmCallBack()
 }
 
 void COggPlayAppView::Invalidate()
-{
-  iCanvas[iMode]->Invalidate();
-}
+	{
+	iCanvas[iMode]->Invalidate();
+	}
 
 void COggPlayAppView::InitView()
-{
-  // fill the list box with some initial content:
-  if (!iOggFiles->ReadDb(iApp->iDbFileName, iCoeEnv->FsSession()))
-  {
-    iOggFiles->CreateDb(iCoeEnv->FsSession());
-    iOggFiles->WriteDbL(iApp->iDbFileName, iCoeEnv->FsSession());
-  }
+	{
+	// fill the list box with some initial content:
+	if (!iOggFiles->ReadDb(iApp->iDbFileName, iCoeEnv->FsSession()))
+		{
+		iOggFiles->CreateDb(iCoeEnv->FsSession());
+		iOggFiles->WriteDbL(iApp->iDbFileName, iCoeEnv->FsSession());
+		}
 
-  const TBuf<16> dummy;
-  FillView(COggPlayAppUi::ETop, COggPlayAppUi::ETop, dummy);
+	const TBuf<16> dummy;
+	FillView(COggPlayAppUi::ETop, COggPlayAppUi::ETop, dummy);
 
-  if (iAnalyzer[0]) iAnalyzer[0]->SetStyle(iApp->iAnalyzerState);
-  if (iAnalyzer[1]) iAnalyzer[1]->SetStyle(iApp->iAnalyzerState);
-}
+	if (iAnalyzer[0]) iAnalyzer[0]->SetStyle(iApp->iAnalyzerState);
+	if (iAnalyzer[1]) iAnalyzer[1]->SetStyle(iApp->iAnalyzerState);
+	}
 
 void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::TViews thePreviousView, const TDesC& aSelection)
 	{

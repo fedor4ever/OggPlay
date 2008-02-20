@@ -64,6 +64,8 @@ public:
 	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
+	void FileThreadTransfer();
+
 private:
 	// Helper functions
 	static TInt16 MadFixedToTInt16Fast(mad_fixed_t aSample);

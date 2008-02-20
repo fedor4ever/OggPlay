@@ -50,6 +50,8 @@ public:
 	void GetFrequencyBins(TInt32* aBins, TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
+	void FileThreadTransfer();
+
 private:
 	void GetString(TDes& aBuf, const char* aStr);
 
