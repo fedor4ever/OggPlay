@@ -52,17 +52,17 @@
 
 COggFilesSearchDialog::COggFilesSearchDialog(MOggFilesSearchBackgroundProcess *aBackgroundProcess)
 : iBackgroundProcess(aBackgroundProcess)
-{
-}
+	{
+	}
 
 SEikControlInfo COggFilesSearchDialog::CreateCustomControlL(TInt aControlType)
-{
+	{
     if (aControlType == EOggFileSearchControl) 
         iContainer = new(ELeave) COggFilesSearchContainer(*this, iBackgroundProcess, &ButtonGroupContainer());
 
 	SEikControlInfo info = {iContainer, 0, 0};
     return info;
-}
+	}
 
 
 COggFilesSearchContainer::COggFilesSearchContainer(COggFilesSearchDialog& aDlg, MOggFilesSearchBackgroundProcess* aBackgroundProcess, CEikButtonGroupContainer* aCba)
@@ -124,7 +124,7 @@ TTypeUid::Ptr COggFilesSearchContainer::MopSupplyObject(TTypeUid aId)
 _LIT(KMaxScanTxt, " 0000");
 _LIT(KFormatTxt, "%S %d");
 TSize COggFilesSearchContainer::MinimumSize()
-{
+	{
 #if defined(SERIES60SUI)
 	const CFont* titleFont = AknLayoutUtils::FontFromId(EAknLogicalFontPrimaryFont, NULL);
 	const CFont* textFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont, NULL);
@@ -179,14 +179,14 @@ TSize COggFilesSearchContainer::MinimumSize()
 	iFishStepX = (iFishMaxX - iFishMinX) / 20;
 
 	return TSize(totalWidth, totalHeight);
-}
+	}
 
 #if defined(SERIES60SUI)
 void COggFilesSearchContainer::SizeChanged()
-{
+	{
 	iBgContext->SetRect(Rect());
 	iBgContext->SetParentPos(PositionRelativeToScreen());
-}
+	}
 #endif
 
 #if defined(SERIES60SUI)
@@ -292,11 +292,11 @@ void COggFilesSearchContainer::UpdateCba()
 #endif
 
     iCba->DrawNow();
-}
+	}
 #endif
 
 void COggFilesSearchContainer::UpdateControl()
-{
+	{
 	iBackgroundProcess->FileSearchGetCurrentStatus(iFoldersCount, iFilesCount, iPlayListCount);
 
 	iFishPosition.iX -= iFishStepX;
@@ -304,7 +304,7 @@ void COggFilesSearchContainer::UpdateControl()
         iFishPosition.iX = iFishMaxX;
 
 	DrawNow();
-}
+	}
 
 
 COggFilesSearchAO::COggFilesSearchAO(COggFilesSearchContainer * aContainer)
@@ -330,7 +330,10 @@ void COggFilesSearchAO::RunL()
 	if (result != KErrNone)
 		{
 		if (result == KOggFileScanStepComplete)
+			{
+			TRACEF(_L("File search next step"));
 			iSearchStatus = (TSearchStatus) (((TInt) iSearchStatus) + 1);
+			}
 		else
 			{
 			TRACEF(COggLog::VA(_L("File search step error: %d"), result));

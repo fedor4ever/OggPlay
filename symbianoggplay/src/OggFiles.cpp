@@ -160,13 +160,35 @@ void TOggPlayList::ScanPlayListL(RFs& aFs, TOggFiles* aFiles)
 		if (bufPtr[i] == '#')
 			continue;
 
+		// Skip the file if the length is too big (corrupt entry?)
+		TInt fileNameLength = (j-i) + 1;
+		if (fileNameLength>KMaxFileName)
+			continue;
+
 		// Construct the filename (add the playlist path if the filename is relative)
 		TFileName fileName;
-		fileName.Copy(bufPtr.Mid(i, (j-i) + 1));
+		fileName.Copy(bufPtr.Mid(i, fileNameLength));
 		if (fileName[0] == '\\')
+			{
+			// Check the length again
+			fileNameLength += 2;
+			if (fileNameLength>KMaxFileName)
+				continue;
+
+			// Add the drive name
 			fileName.Insert(0, TPtrC(iFileName->Ptr(), 2));
+			}
 		else if (fileName[1] != ':')
-			fileName.Insert(0, TPtrC(iFileName->Ptr(), iFileName->Length()-(iShortName->Length()+4)));
+			{
+			// Check the length again
+			TInt playListPathLength = iFileName->Length()-(iShortName->Length()+4);
+			fileNameLength += playListPathLength;
+			if (fileNameLength>KMaxFileName)
+				continue;
+
+			// Add the playlist path
+			fileName.Insert(0, TPtrC(iFileName->Ptr(), playListPathLength));
+			}
 
 		// Search for the file and add it to the list (if found)
 		TOggFile* o = aFiles->FindFromFileNameL(fileName);
@@ -491,7 +513,7 @@ void TOggFiles::AddDirectory(const TDesC& aDir, RFs& session)
 
 TInt TOggFiles::AddDirectoryStart(const TDesC& aDir, RFs& session)
 	{
-	// TRACEF(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir));
+	TRACEF(COggLog::VA(_L("Scanning directory %S for oggfiles"), &aDir));
 
 	// Check if the drive is available (i.e. memory stick is inserted)
 #if defined(UIQ)
@@ -726,6 +748,7 @@ void TOggFiles::ScanNextPlayList(TRequestStatus& aRequestStatus)
 		if (o->FileType() == TOggFile::EPlayList)
 			{
 			// Parse the playlist, ignoring any errors.
+			// TRACEF(COggLog::VA(_L("Scanning playlist: %S"), o->iFileName));
 			TRAPD(err, ((TOggPlayList*) o)->ScanPlayListL(*iDirScanSession, this));
 			iCurrentIndexInFiles++;
 			break;
