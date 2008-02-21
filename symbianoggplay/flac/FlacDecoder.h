@@ -66,8 +66,10 @@ private:
 	TInt& iFilePos;
 	};
 
-#if defined(SERIES60) && !defined(PLUGIN_SYSTEM) // aka S60V1
+#if defined(UIQ) || (defined(SERIES60) && !defined(PLUGIN_SYSTEM)) // aka S60V1
 const TInt KDefaultRFileDBBufSize = 65536; // 2 x 32K
+#elif !defined(SERIES60V3)
+const TInt KDefaultRFileDBBufSize = 131072; // 2 x 64K
 #else
 const TInt KDefaultRFileDBBufSize = 262144; // 2 x 128K
 #endif

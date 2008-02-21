@@ -138,7 +138,7 @@ TInt CDBFileAO::WaitForCompletion()
 
 
 RDBFile::RDBFile(TInt aBufSize)
-: iBuf(NULL), iBufSize(aBufSize), iHalfBufSize(aBufSize/2), iReadIdx(aBufSize), iDataSize(0), iDBFileAO(NULL), iFilePos(0)
+: iBuf(NULL), iBufSize(aBufSize), iHalfBufSize(aBufSize>>1), iReadIdx(aBufSize), iDataSize(0), iDBFileAO(NULL), iFilePos(0)
 	{
 	}
 
@@ -147,6 +147,9 @@ TInt RDBFile::Open(RFs& aFs, const TDesC& aFileName, TUint aMode)
 	__ASSERT_DEBUG(!iBuf, User::Panic(_L("RDBFile::Open"), 0));
 
 	iBuf = (TUint8 *) User::Alloc(iBufSize);
+	if (!iBuf)
+		return KErrNoMemory;
+
 	return RFile::Open(aFs, aFileName, aMode);
 	}
 
