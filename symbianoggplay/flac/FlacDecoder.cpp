@@ -29,8 +29,9 @@
 #include "OggLog.h"
 
 
+#if defined(FLAC_DOUBLE_BUFFER_READS)
 CDBFileAO::CDBFileAO(RFile& aFile, TUint8* aBuf, TInt aBufSize, TInt &aReadIdx, TInt& aDataSize, TInt& aFilePos)
-: CActive(EPriorityIdle), iFile(aFile), iBuf(aBuf), iBufSize(aBufSize), iHalfBufSize(aBufSize/2), iBufPtr(NULL, 0 ,0),
+: CActive(EPriorityIdle), iFile(aFile), iBuf(aBuf), iBufSize(aBufSize), iHalfBufSize(aBufSize/2), iBufPtr(NULL, 0, 0),
 iReadIdx(aReadIdx), iDataSize(aDataSize), iFilePos(aFilePos)
 	{
 	CActiveScheduler::Add(this);
@@ -80,7 +81,6 @@ void CDBFileAO::DoCancel()
 	iFileRequestPending = EFalse;
 	}
 
-// #define FORCE_SYNCHRONOUS_READS
 void CDBFileAO::Read()
 	{
 	// Check if a read request is pending
@@ -104,7 +104,7 @@ void CDBFileAO::Read()
 	// Issue the read request
 	iBufPtr.Set(iBuf+writeIdx, 0, iHalfBufSize);
 
-#if defined (FORCE_SYNCHRONOUS_READS)
+#if defined (FLAC_DB_SYNCHRONOUS_READS)
 	ReadComplete(iFile.Read(iBufPtr));
 #else
 	iFile.Read(iBufPtr, iStatus);
@@ -138,7 +138,7 @@ TInt CDBFileAO::WaitForCompletion()
 
 
 RDBFile::RDBFile(TInt aBufSize)
-: iBuf(NULL), iBufSize(aBufSize), iHalfBufSize(aBufSize/2), iReadIdx(aBufSize), iDataSize(0), iDBFileAO(NULL)
+: iBuf(NULL), iBufSize(aBufSize), iHalfBufSize(aBufSize/2), iReadIdx(aBufSize), iDataSize(0), iDBFileAO(NULL), iFilePos(0)
 	{
 	}
 
@@ -166,6 +166,7 @@ void RDBFile::Close()
 	iDataSize = 0;
 	iReadIdx = iBufSize;
 
+	iFilePos = 0;
 	RFile::Close();
 	}
 
@@ -304,6 +305,9 @@ TInt RDBFile::Seek(TSeek aMode, TInt& aPos)
 
 	return err;
 	}
+#else
+#define RDBFile RFile
+#endif // FLAC_DOUBLE_BUFFER_READS
 
 static FLAC__StreamDecoderReadStatus FlacReadCallback(const FLAC__StreamDecoder* /* aDecoder */, FLAC__byte aBuffer[], size_t *aBytes, void *aFilePtr)
 	{
@@ -537,6 +541,9 @@ TInt CFlacDecoder::Read(TDes8& aBuffer, TInt aPos)
 	if (!iLen)
 		{
 		iOverflowBufSize -= i;
+
+		iOverflowBuf[0] = &iOverflowBuf[0][i];
+		iOverflowBuf[1] = &iOverflowBuf[1][i];
 		return len;
 		}
 
@@ -679,7 +686,9 @@ void CFlacDecoder::ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer
 
 void CFlacDecoder::ThreadRelease()
 	{
+#if defined(FLAC_DOUBLE_BUFFER_READS)
 	iFile.ThreadRelease();
+#endif
 	}
 
 

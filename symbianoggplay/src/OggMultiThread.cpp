@@ -198,19 +198,19 @@ void CStreamingThreadAO::RunL()
 		if (iBufferFlushPending)
 			return;
 
-		// Set the buffering request flag
-		iSharedData.iBufRequestInProgress = ETrue;
-
-		// Increase the buffering thread priority
-		iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityNormal) ? EPriorityMore : EPriorityAbsoluteHigh;
-		iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
-
 		// Inform the playback object that we are transfering buffering to another thread
 		// i.e. that the buffering thread will access the file from now on
 		iSharedData.iOggPlayback.ThreadRelease();
 
 		// Set the new buffering mode
 		iSharedData.iCurrentBufferingMode = EBufferThread;
+
+		// Set the buffering request flag
+		iSharedData.iBufRequestInProgress = ETrue;
+
+		// Increase the buffering thread priority
+		iBufferingThreadPriority = (iBufferingThreadPriority == EPriorityNormal) ? EPriorityMore : EPriorityAbsoluteHigh;
+		iSharedData.iBufferingThread.SetPriority(iBufferingThreadPriority);
 
 		// Transfer buffering to the buffering thread
 		TRequestStatus* status = &iSharedData.iBufferingThreadAO->iStatus;
@@ -796,7 +796,7 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 		}
 
 	// Start the streaming thread AO
-	if (iStreaming && (iSharedData.iCurrentBufferingMode != EBufferStream) && (iSharedData.iBufferingMode != ENoBuffering))
+	if (iStreaming && !iStreamingThreadAO->IsActive() && (iSharedData.iBufferingMode != ENoBuffering))
 		{
 		// Reset the buffering thread priority
 		if ((iBufferingThreadPriority != EPriorityNormal) && (iBufferingThreadPriority != EPriorityAbsoluteForeground))
@@ -916,7 +916,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 		}
 
 	// Dynamically adjust the buffering thread priority
-	TBool streamingThreadActive = (iSharedData.iCurrentBufferingMode == EBufferStream);
+	TBool streamingThreadActive = iStreamingThreadAO->IsActive();
 	if (iSharedData.iBufferingMode == EBufferThread)
 		{
 		TInt numBuffers = iSharedData.NumBuffers();

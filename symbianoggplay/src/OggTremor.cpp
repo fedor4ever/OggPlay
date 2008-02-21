@@ -732,7 +732,7 @@ void COggPlayback::InfoCancel()
 
 void COggPlayback::Play() 
 	{
-	TRACEF(COggLog::VA(_L("PLAY %i "), iState ));
+	TRACEF(COggLog::VA(_L("PLAY %i "), iState));
 	switch(iState)
 		{
 		case EPaused:
@@ -1018,24 +1018,29 @@ TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
 	{
 	__ASSERT_DEBUG((aFlushBufferEvent == EBufferingModeChanged) || (aFlushBufferEvent == EPlaybackPaused), User::Panic(_L("COggPlayback::FB"), 0));
 
+	// Transfer file access back to the streaming thread (so that it can do the seek)
+	if (iSharedData.iCurrentBufferingMode == EBufferThread)
+		ThreadRelease();
+
 	// Set the flush buffer event
 	iSharedData.iFlushBufferEvent = aFlushBufferEvent;
 
 	// Inform the streaming thread we are going to flush buffers
 	iStreamingThreadCommandHandler->PrepareToFlushBuffers();
 
-	// Transfer file access back to the streaming thread (so that it can do the seek)
-	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		ThreadRelease();
-
 	// Cancel the buffering
 	iBufferingThreadAO->Cancel();
 
+	// Flush the buffers
 	return iStreamingThreadCommandHandler->FlushBuffers();
 	}
 
 TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
 	{
+	// Transfer file access back to the streaming thread (so that it can do the seek)
+	if (iSharedData.iCurrentBufferingMode == EBufferThread)
+		ThreadRelease();
+
 	// The position has been changed so flush the buffers (and set the new position)
 	iSharedData.iFlushBufferEvent = EPositionChanged;
 	iSharedData.iNewPosition = aNewPosition;
@@ -1043,18 +1048,19 @@ TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
 	// Inform the streaming thread we are going to flush buffers
 	iStreamingThreadCommandHandler->PrepareToFlushBuffers();
 
-	// Transfer file access back to the streaming thread (so that it can do the seek)
-	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		ThreadRelease();
-
 	// Cancel the buffering
 	iBufferingThreadAO->Cancel();
 
+	// Flush the buffers
 	return iStreamingThreadCommandHandler->FlushBuffers();
 	}
 
 void COggPlayback::FlushBuffers(TGainType aNewGain)
 	{
+	// Transfer file access back to the streaming thread (so that it can do the seek)
+	if (iSharedData.iCurrentBufferingMode == EBufferThread)
+		ThreadRelease();
+
 	// The volume gain has been changed so flush the buffers (and set the new gain)
 	iSharedData.iFlushBufferEvent = EVolumeGainChanged;
 	iSharedData.iNewGain = aNewGain;
@@ -1062,16 +1068,14 @@ void COggPlayback::FlushBuffers(TGainType aNewGain)
 	// Inform the streaming thread we are going to flush buffers
 	TBool streaming = iStreamingThreadCommandHandler->PrepareToFlushBuffers();
 
-	// Transfer file access back to the streaming thread (so that it can do the seek)
-	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		ThreadRelease();
-
 	// Cancel the buffering
 	iBufferingThreadAO->Cancel();
 
+	// Start listening if we are still streaming (and in buffer thread mode) 
 	if (streaming && (iSharedData.iBufferingMode == EBufferThread))
 		iBufferingThreadAO->StartListening();
 
+	// Flush the buffers
 	iStreamingThreadCommandHandler->FlushBuffers();
 	}
 

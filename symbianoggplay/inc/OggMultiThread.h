@@ -324,7 +324,6 @@ private:
 
 // Playback engine (not an AO, although it handles call backs from the CMdaAudioOutputStream which is an AO)
 // The playback engine handles all access to the CMdaAudioOutputStream as well as managing the buffering and decoding process
-class COggTimer;
 class CStreamingThreadPlaybackEngine : public CBase, public MMdaAudioOutputStreamCallback
 {
 public:

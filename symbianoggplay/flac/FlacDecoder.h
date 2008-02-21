@@ -27,7 +27,15 @@ typedef unsigned int size_t;
 
 #include "OggPlayDecoder.h"
 
+// Double buffer file reading
+#define FLAC_DOUBLE_BUFFER_READS
 
+// Force the double buffering to read synchronously
+// (it read asynchronously otherwise)
+// #define FLAC_DB_SYNCHRONOUS_READS
+
+
+#if defined(FLAC_DOUBLE_BUFFER_READS)
 class CDBFileAO : public CActive
 	{
 public:
@@ -58,7 +66,12 @@ private:
 	TInt& iFilePos;
 	};
 
-const TInt KDefaultRFileDBBufSize = 131072; // 2 x 64K
+#if defined(SERIES60) && !defined(PLUGIN_SYSTEM) // aka S60V1
+const TInt KDefaultRFileDBBufSize = 65536; // 2 x 32K
+#else
+const TInt KDefaultRFileDBBufSize = 262144; // 2 x 128K
+#endif
+
 class RDBFile : public RFile
 	{
 public:
@@ -86,6 +99,7 @@ private:
 	CDBFileAO* iDBFileAO;
 	TInt iFilePos;
 	};
+#endif // FLAC_DOUBLE_BUFFER_READS
 
 class CFlacDecoder : public CBase, public MDecoder
 	{
@@ -135,7 +149,11 @@ public:
 	void ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer[]);
 
 protected:
+#if defined(FLAC_DOUBLE_BUFFER_READS)
 	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RDBFile* f);
+#else
+	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RFile* f);
+#endif
 
 protected:
 	FLAC__StreamDecoder* iDecoder;
@@ -157,7 +175,12 @@ private:
 
 	TInt iFileSize;
 
+#if defined(FLAC_DOUBLE_BUFFER_READS)
 	RDBFile iFile;
+#else
+	RFile iFile;
+#endif
+
 	RFs& iFs;
 	};
 
@@ -167,7 +190,11 @@ public:
 	CNativeFlacDecoder(RFs& aFs);
 
 protected:
+#if defined(FLAC_DOUBLE_BUFFER_READS)
 	FLAC__StreamDecoderInitStatus FLACInitStream(RDBFile* f);
+#else
+	FLAC__StreamDecoderInitStatus FLACInitStream(RFile* f);
+#endif
 	};
 
 #endif
