@@ -95,6 +95,11 @@ void CDBFileAO::Read()
 		// The correct buffer depends on the amount of data we currently have
 		writeIdx = (iDataSize) ? iHalfBufSize : 0;
 		}
+	else if (iReadIdx == iHalfBufSize)
+		{
+		// The correct buffer depends on the amount of data we currently have
+		writeIdx = (iDataSize) ? 0 : iHalfBufSize;
+		}
 	else
 		{
 		// The correct buffer depends on which half the read idx is in

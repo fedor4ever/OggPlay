@@ -423,22 +423,22 @@ void CProfilePerfAO::DoCancel()
 // Playback engine class
 // Handles communication with the media server (CMdaAoudioOutputStream) and manages the audio buffering
 CStreamingThreadPlaybackEngine* CStreamingThreadPlaybackEngine::NewLC(TStreamingThreadData& aSharedData)
-{
+	{
 	CStreamingThreadPlaybackEngine* self = new(ELeave) CStreamingThreadPlaybackEngine(aSharedData);
 	CleanupStack::PushL(self);
 	self->ConstructL();
 	return self;
-}
+	}
 
 CStreamingThreadPlaybackEngine::CStreamingThreadPlaybackEngine(TStreamingThreadData& aSharedData)
 : iSharedData(aSharedData), iBufferingThreadPriority(EPriorityNormal)
-{
+	{
 	// Initialise buffer settings
 	iSharedData.iBuffersToUse = KNoBuffers;
 	iSharedData.iMaxBuffers = KNoBuffers;
 	iMaxStreamBuffers = KNoBuffers;
 	iBufferLowThreshold = KNoBuffers;
-}
+	}
 
 void CStreamingThreadPlaybackEngine::ConstructL()
 	{
@@ -719,6 +719,9 @@ TBool CStreamingThreadPlaybackEngine::FlushBuffers()
 	// Reset the buffer flush pending flag 
 	iBufferFlushPending = EFalse;
 
+	// Reset the current buffering mode
+	iSharedData.iCurrentBufferingMode = ENoBuffering;
+
 	// Reset the audio stream (move position / change volume gain)
 	const TInt64 KConst500 = TInt64(500);
 	switch (iSharedData.iFlushBufferEvent)
@@ -940,7 +943,7 @@ void CStreamingThreadPlaybackEngine::MaoscBufferCopied(TInt aErr, const TDesC8& 
 				}
 			}
 		}
- 
+
 	// Ignore underflow if there are stream buffers left
 	if ((aErr == KErrUnderflow) && iStreamBuffers)
 		return;
