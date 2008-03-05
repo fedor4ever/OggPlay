@@ -21,9 +21,11 @@
 
 #include <e32base.h>
 #include <e32std.h>
+#include <f32file.h>
 #include <mdaaudiooutputstream.h>
 #include <mda\common\audio.h>
 #include "OggThreadClasses.h"
+#include "OggMTFile.h"
 
 // Thread commands for the Streaming thread
 enum TStreamingThreadCommand
@@ -59,7 +61,34 @@ enum TStreamingThreadCommand
 	EStreamingThreadSetThreadPriority,
 
 	// Get the streaming position
-	EStreamingThreadPosition
+	EStreamingThreadPosition,
+
+	// Open a file
+	EStreamingThreadFileOpen,
+
+	// Open a stream
+	EStreamingThreadStreamOpen,
+
+	// Close a file or stream
+	EStreamingThreadSourceClose,
+
+	// Read from a file or stream
+	EStreamingThreadSourceReadBuf,
+
+	// Read from a file or stream
+	EStreamingThreadSourceRead,
+
+	// Request read from a file or stream
+	EStreamingThreadSourceReadRequest,
+
+	// Cancel reading
+	EStreamingThreadSourceReadCancel,
+
+	// Seek a file
+	EStreamingThreadFileSeek,
+
+	// Size a file
+	EStreamingThreadFileSize
 	};
 
 // Buffering mode to use
@@ -121,6 +150,7 @@ enum TStreamingThreadStatus
 // Owned by the UI thread (part of COggPlayback)
 class CBufferingThreadAO;
 class CStreamingThreadCommandHandler;
+class CStreamingThreadSourceHandler;
 class CStreamingThreadListener;
 class COggPlayback;
 class TStreamingThreadData
@@ -146,10 +176,14 @@ public:
 	// The AOs are owned by the UI thread
 	// The buffering thread AO runs in the buffering thread
 	// The streaming thread listener runs in the UI thread
-	// The streaming thread command handledr runs in the streaming thread
+	// The streaming thread command handler runs in the streaming thread
 	CBufferingThreadAO* iBufferingThreadAO;
 	CStreamingThreadListener* iStreamingThreadListener;
 	CStreamingThreadCommandHandler* iStreamingThreadCommandHandler;
+
+	// Access to the source reader from the streaming thread
+	// (Access from the buffering thread is via the command handler)
+	CStreamingThreadSourceHandler* iStreamingThreadSourceHandler;
 
 	// Shared data
 	// Used by the buffering AOs and by the playback engine
@@ -181,6 +215,10 @@ public:
 	// The number of audio PCM bytes currently read from the file (used to work out the position)
 	TInt64 iTotalBufferBytes;
 
+	// Machine uid (for identifying the phone model)
+	TInt iMachineUid;
+
+
 	// Shared data for commands (These should be a union, really (TO DO))
 	// Sample Rate and channels (for SetAudioProperties)
 	TInt iSampleRate;
@@ -197,17 +235,30 @@ public:
 	// The buffering mode (used by SetBufferingMode()) 
 	TBufferingMode iBufferingMode;
 
-	// The current buffering mode (used to determine which thread is currently reading from the file) 
-	TBufferingMode iCurrentBufferingMode;
-
 	// The thread priorities to use (used by SetThreadPriority())
 	TStreamingThreadPriority iStreamingThreadPriority;
 
 	// Streaming position
 	TTimeIntervalMicroSeconds iStreamingPosition;
 
-	// Machine uid (for identifying the phone model)
-	TInt iMachineUid;
+	// Source name
+	const TDesC* iSourceName;
+
+	// Source data
+	TMTSourceData* iSourceData;
+	TMTSourceData* iDecoderSourceData;
+
+	// Source size
+	TInt iSourceSize;
+
+	// Source seek mode
+	TSeek iSourceSeekMode;
+
+	// Source seek pos
+	TInt iSourceSeekPos;
+
+	// File buf
+	TDes8* iSourceBuf;
 	};
 
 // Base class for the buffering AOs
@@ -234,7 +285,7 @@ private:
 // Buffering thread active object
 // Performs buffering when requested to by the streaming thread
 class CBufferingThreadAO : public CBufferingAO
-{
+	{
 public:
 	CBufferingThreadAO(TStreamingThreadData& aSharedData);
 	~CBufferingThreadAO();
@@ -244,14 +295,14 @@ public:
 	// From CActive
 	void RunL();
 	void DoCancel();
-};
+	};
 
 // Streaming thread active object
 // Responsible for buffering in single thread mode
 // Responsible for buffering when play starts in multi thread mode
 // (Once enough buffers have been decoded, buffering is transfered to the buffering thread)
 class CStreamingThreadAO : public CBufferingAO
-{
+	{
 public:
 	CStreamingThreadAO(TStreamingThreadData& aSharedData, TBool& aBufferFlushPending, TThreadPriority& aBufferingThreadPriority);
 	~CStreamingThreadAO();
@@ -266,18 +317,19 @@ public:
 private:
 	TBool& iBufferFlushPending;
 	TThreadPriority& iBufferingThreadPriority;
-};
+	};
 
 // Command handler for the streaming thread (Active object)
 // Command functions are called by the UI thread (RunL executes them in the streaming thread)
 class CStreamingThreadPlaybackEngine;
-class CStreamingThreadCommandHandler : public CThreadCommandHandler
-{
+class CStreamingThreadSourceReader;
+class CStreamingThreadCommandHandler : public CThreadCommandHandler, public MMTSourceHandler
+	{
 public:
-	CStreamingThreadCommandHandler(RThread& aCommandThread, RThread& aStreamingThread, CThreadPanicHandler& aPanicHandler);
+	CStreamingThreadCommandHandler(RThread& aCommandThread, RThread& aStreamingThread, CThreadPanicHandler& aPanicHandler, TStreamingThreadData& aSharedData);
 	~CStreamingThreadCommandHandler();
 
-	void ListenForCommands(CStreamingThreadPlaybackEngine& aPlaybackEngine);
+	void ListenForCommands(CStreamingThreadPlaybackEngine& aPlaybackEngine, CStreamingThreadSourceReader& aSourceReader);
 
 	void Volume();
 	void SetVolume();
@@ -294,14 +346,58 @@ public:
 
 	void Position();
 
+	// From MMTSourceHandler
+	TInt OpenFile(const TDesC& aFileName, TMTSourceData& aSourceData);
+	TInt OpenStream(const TDesC& aStreamName, TMTSourceData& aSourceData);
+	void SourceClose(TMTSourceData& aSourceData);
+
+	TInt Read(TMTSourceData& aSourceData, TDes8& aBuf);
+
+	TInt Read(TMTSourceData& aSourceData);
+	void ReadRequest(TMTSourceData& aSourceData);
+	void ReadCancel(TMTSourceData& aSourceData);
+
+	TInt FileSeek(TSeek aMode, TInt &aPos, TMTSourceData& aSourceData);
+	TInt FileSize(TInt& aSize, TMTSourceData& aSourceData);
+
 protected:
 	// From CActive
 	void RunL();
 	void DoCancel();
 
 private:
+	TStreamingThreadData& iSharedData;
+
 	CStreamingThreadPlaybackEngine* iPlaybackEngine;
-};
+	CStreamingThreadSourceReader* iSourceReader;
+	};
+
+class CStreamingThreadSourceHandler : public CBase, public MMTSourceHandler
+	{
+public:
+	CStreamingThreadSourceHandler(TStreamingThreadData& aSharedData);
+	~CStreamingThreadSourceHandler();
+
+	void SetSourceReader(CStreamingThreadSourceReader* aSourceReader);
+
+	// From MMTSourceHandler
+	TInt OpenFile(const TDesC& aFileName, TMTSourceData& aSourceData);
+	TInt OpenStream(const TDesC& aStreamName, TMTSourceData& aSourceData);
+	void SourceClose(TMTSourceData& aSourceData);
+
+	TInt Read(TMTSourceData& aSourceData, TDes8& aBuf);
+
+	TInt Read(TMTSourceData& aSourceData);
+	void ReadRequest(TMTSourceData& aSourceData);
+	void ReadCancel(TMTSourceData& aSourceData);
+
+	TInt FileSeek(TSeek aMode, TInt &aPos, TMTSourceData& aSourceData);
+	TInt FileSize(TInt& aSize, TMTSourceData& aSourceData);
+
+private:
+	TStreamingThreadData& iSharedData;
+	CStreamingThreadSourceReader* iSourceReader;
+	};
 
 #if defined(PROFILE_PERF)
 class CProfilePerfAO : public CActive
@@ -322,14 +418,85 @@ private:
 	};
 #endif
 
+// Source
+class COggMTSource : public CActive
+	{
+public:
+	COggMTSource(TAny* aSource, TMTSourceData& aSourceData);
+	~COggMTSource();
+
+	TInt ReadBuf(TDes8& aBuf);
+
+	void Read();
+	void Read(RThread& aRequestThread, TRequestStatus& aRequestStatus);
+	
+	TInt WaitForCompletion();
+	void WaitForCompletion(RThread& aRequestThread, TRequestStatus& aRequestStatus);
+
+	// From CActive
+	void RunL();
+	void DoCancel();
+
+private:
+	void ReadComplete(TInt aErr);
+
+private:
+	TMTSourceData& iSourceData;
+	TAny* iSource;
+	TPtr8 iBufPtr;
+
+	RThread* iRequestThread;
+	TRequestStatus* iRequestStatus;
+
+	TBool iFileRequestPending;
+	TBool iReadCancel;
+
+	friend class CStreamingThreadSourceReader;
+	};
+
+// Source Reader
+class CStreamingThreadSourceReader : public CActive
+	{
+public:
+	static CStreamingThreadSourceReader* NewLC(TStreamingThreadData& aThreadData);
+	~CStreamingThreadSourceReader();
+
+	TInt OpenFile();
+	void SourceClose();
+
+	TInt FileSize();
+	TInt FileSeek(); 
+
+	TInt ReadBuf();
+
+	TInt Read();
+	void Read(RThread& aRequestThread, TRequestStatus& aRequestStatus);
+
+	void ReadRequest();
+	void ScheduleRead();
+
+	void ReadCancel();
+	void ReadCancel(RThread& aRequestThread, TRequestStatus& aRequestStatus);
+
+	// From CActive
+	void RunL();
+	void DoCancel();
+	
+private:
+	CStreamingThreadSourceReader(TStreamingThreadData& aThreadData);
+	void ConstructL();
+
+private:
+	TStreamingThreadData& iSharedData;
+	RFs iFs;
+	};
+
 // Playback engine (not an AO, although it handles call backs from the CMdaAudioOutputStream which is an AO)
 // The playback engine handles all access to the CMdaAudioOutputStream as well as managing the buffering and decoding process
 class CStreamingThreadPlaybackEngine : public CBase, public MMdaAudioOutputStreamCallback
 {
 public:
-	static CStreamingThreadPlaybackEngine* NewLC(TStreamingThreadData& aThreadData);
-
-	CStreamingThreadPlaybackEngine(TStreamingThreadData& aThreadData);
+	static CStreamingThreadPlaybackEngine* NewLC(TStreamingThreadData& aThreadData, CStreamingThreadSourceReader& aSourceReader);
 	~CStreamingThreadPlaybackEngine();
 
 	void Volume();
@@ -351,6 +518,7 @@ public:
 	void Shutdown();
 
 private:
+	CStreamingThreadPlaybackEngine(TStreamingThreadData& aThreadData, CStreamingThreadSourceReader& aSourceReader);
 	void ConstructL();
 
 	// From MMdaAudioOutputStreamCallback
@@ -393,6 +561,9 @@ private:
 	// Boolean used to inhibit buffering requests
 	// (if a buffer flush is pending the streaming thread must not issue buffering requests)
 	TBool iBufferFlushPending;
+
+	// Source reader (used for scheduling async reads)
+	CStreamingThreadSourceReader& iSourceReader;
 
 #if defined(PROFILE_PERF)
 	CProfilePerfAO* iProfilePerfAO;

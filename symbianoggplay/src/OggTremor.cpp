@@ -108,8 +108,12 @@ void COggPlayback::ConstructL()
 	iStreamingThreadPanicHandler = new(ELeave) CThreadPanicHandler(EPriorityHigh, iStreamingThread, *this);
 
 	// Create the streaming thread command handler
-	iStreamingThreadCommandHandler = new(ELeave) CStreamingThreadCommandHandler(iUIThread, iStreamingThread, *iStreamingThreadPanicHandler);
+	iStreamingThreadCommandHandler = new(ELeave) CStreamingThreadCommandHandler(iUIThread, iStreamingThread, *iStreamingThreadPanicHandler, iSharedData);
 	iSharedData.iStreamingThreadCommandHandler = iStreamingThreadCommandHandler;
+
+	// Create the streaming thread source handler
+	iStreamingThreadSourceHandler = new(ELeave) CStreamingThreadSourceHandler(iSharedData);
+	iSharedData.iStreamingThreadSourceHandler = iStreamingThreadSourceHandler;
 
 	// Create the streaming thread listener
 	iStreamingThreadListener = new(ELeave) CStreamingThreadListener(*this, iSharedData);
@@ -202,6 +206,7 @@ COggPlayback::~COggPlayback()
 	delete iBufferingThreadAO;
 	delete iStreamingThreadListener;
 	delete iStreamingThreadCommandHandler;
+	delete iStreamingThreadSourceHandler;
 	delete iStreamingThreadPanicHandler;
 
 	for (TInt i = 0 ; i<KMultiThreadBuffers ; i++)
@@ -217,17 +222,33 @@ MDecoder* COggPlayback::GetDecoderL(const TDesC& aFileName)
 
 	MDecoder* decoder = NULL;
 	if (ext.CompareF(KOggExt) == 0)
+#if defined(MULTITHREAD_SOURCE_READS)
+		decoder = new(ELeave) CTremorDecoder(iFs, *iStreamingThreadCommandHandler, *iStreamingThreadSourceHandler);
+#else
 		decoder = new(ELeave) CTremorDecoder(iFs);
+#endif
 
 	if (ext.CompareF(KOgaExt) == 0)
+#if defined(MULTITHREAD_SOURCE_READS)
+		decoder = new(ELeave) CFlacDecoder(iFs, *iStreamingThreadCommandHandler, *iStreamingThreadSourceHandler);
+#else
 		decoder = new(ELeave) CFlacDecoder(iFs);
+#endif
 
 	if (ext.CompareF(KFlacExt) == 0)
+#if defined(MULTITHREAD_SOURCE_READS)
+		decoder = new(ELeave) CNativeFlacDecoder(iFs, *iStreamingThreadCommandHandler, *iStreamingThreadSourceHandler);
+#else
 		decoder = new(ELeave) CNativeFlacDecoder(iFs);
+#endif
 
 #if defined(MP3_SUPPORT)
 	if (ext.CompareF(KMp3Ext) == 0)
+#if defined(MULTITHREAD_SOURCE_READS)
+		decoder = new(ELeave) CMadDecoder(iFs, *iStreamingThreadCommandHandler, *iStreamingThreadSourceHandler, iMp3Dithering, iMp3LeftDither, iMp3RightDither);
+#else
 		decoder = new(ELeave) CMadDecoder(iFs, iMp3Dithering, iMp3LeftDither, iMp3RightDither);
+#endif
 #endif
 
 	if (!decoder)
@@ -243,9 +264,10 @@ TInt COggPlayback::Open(const TDesC& aFileName, TUid /* aControllerUid */)
 	if (iDecoder)
 		{	
 		iDecoder->Close();
-
 		delete iDecoder;
+
 		iDecoder = NULL;
+		iSharedData.iDecoderSourceData = NULL;
 		}
 
 	TRAPD(err, iDecoder = GetDecoderL(aFileName));
@@ -256,13 +278,13 @@ TInt COggPlayback::Open(const TDesC& aFileName, TUid /* aControllerUid */)
 	if (err != KErrNone)
 		{
 		iDecoder->Close();
-
 		delete iDecoder;
-		iDecoder = NULL;
 
+		iDecoder = NULL;
 		return err;
 		}
 
+	iSharedData.iDecoderSourceData = iSharedData.iSourceData;
 	iDecoder->ParseTags(iFileInfo.iTitle, iFileInfo.iArtist, iFileInfo.iAlbum, iFileInfo.iGenre, iFileInfo.iTrackNumber);
 
 	iFileInfo.iFileName = aFileName;
@@ -275,19 +297,16 @@ TInt COggPlayback::Open(const TDesC& aFileName, TUid /* aControllerUid */)
 	err = SetAudioCaps(iDecoder->Channels(), iDecoder->Rate());
 	if (err == KErrNone)
 		{
-		// Transfer the file across to the streaming thread
-		// The streaming thread will control access to the file from now on
-		ThreadRelease();
-
 		iState = EStopped;
 		iObserver->NotifyFileOpen(KErrNone);
 		}
 	else
 		{
 		iDecoder->Close();
-
 		delete iDecoder;
+
 		iDecoder = NULL;
+		iSharedData.iDecoderSourceData = NULL;
 		}
 
 	return err;
@@ -800,9 +819,10 @@ void COggPlayback::Stop()
 	if (iDecoder)
 		{
 		iDecoder->Close();
-
 		delete iDecoder;
+
 		iDecoder = NULL;
+		iSharedData.iDecoderSourceData = NULL;
 		}
 
 	ClearComments();
@@ -937,7 +957,11 @@ void COggPlayback::StartStreaming()
 	iLastFreqArrayIdx = 0;
 	Mem::FillZ(&iFreqArray, sizeof(iFreqArray));
 
+	// Reset the last play bytes
 	iLastPlayTotalBytes = iSharedData.iTotalBufferBytes;
+
+	// Prepare to play (enable double buffering for file reads)
+	PrepareToPlay();
 
 	// Start the buffering listener
 	if (iSharedData.iBufferingMode == EBufferThread)
@@ -1018,10 +1042,6 @@ TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
 	{
 	__ASSERT_DEBUG((aFlushBufferEvent == EBufferingModeChanged) || (aFlushBufferEvent == EPlaybackPaused), User::Panic(_L("COggPlayback::FB"), 0));
 
-	// Transfer file access back to the streaming thread (so that it can do the seek)
-	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		ThreadRelease();
-
 	// Set the flush buffer event
 	iSharedData.iFlushBufferEvent = aFlushBufferEvent;
 
@@ -1037,10 +1057,6 @@ TBool COggPlayback::FlushBuffers(TFlushBufferEvent aFlushBufferEvent)
 
 TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
 	{
-	// Transfer file access back to the streaming thread (so that it can do the seek)
-	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		ThreadRelease();
-
 	// The position has been changed so flush the buffers (and set the new position)
 	iSharedData.iFlushBufferEvent = EPositionChanged;
 	iSharedData.iNewPosition = aNewPosition;
@@ -1057,10 +1073,6 @@ TBool COggPlayback::FlushBuffers(TInt64 aNewPosition)
 
 void COggPlayback::FlushBuffers(TGainType aNewGain)
 	{
-	// Transfer file access back to the streaming thread (so that it can do the seek)
-	if (iSharedData.iCurrentBufferingMode == EBufferThread)
-		ThreadRelease();
-
 	// The volume gain has been changed so flush the buffers (and set the new gain)
 	iSharedData.iFlushBufferEvent = EVolumeGainChanged;
 	iSharedData.iNewGain = aNewGain;
@@ -1139,11 +1151,17 @@ void COggPlayback::StreamingThreadL(TStreamingThreadData& aSharedData)
 	CStreamingThreadCommandHandler& streamingThreadCommandHandler = *aSharedData.iStreamingThreadCommandHandler;
 	CActiveScheduler::Add(&streamingThreadCommandHandler);
 
+	// Create the source reader
+	CStreamingThreadSourceReader* sourceReader = CStreamingThreadSourceReader::NewLC(aSharedData);
+
 	// Create the audio playback engine
-	CStreamingThreadPlaybackEngine* playbackEngine = CStreamingThreadPlaybackEngine::NewLC(aSharedData);
+	CStreamingThreadPlaybackEngine* playbackEngine = CStreamingThreadPlaybackEngine::NewLC(aSharedData, *sourceReader);
+
+	// Set the source reader (needed by the buffering thread source handler)
+	aSharedData.iStreamingThreadSourceHandler->SetSourceReader(sourceReader);
 
 	// Listen for commands and dispatch them to the playback engine
-	streamingThreadCommandHandler.ListenForCommands(*playbackEngine);
+	streamingThreadCommandHandler.ListenForCommands(*playbackEngine, *sourceReader);
 
 	// Inform the UI thread that the streaming thread has started
 	streamingThreadCommandHandler.ResumeComplete(KErrNone);
@@ -1157,8 +1175,8 @@ void COggPlayback::StreamingThreadL(TStreamingThreadData& aSharedData)
 	// Uninstall the scheduler
 	CActiveScheduler::Install(NULL);
 
-	// Delete the scheduler and audio engine
-	CleanupStack::PopAndDestroy(2, scheduler);
+	// Delete the scheduler, audio engine and source reader
+	CleanupStack::PopAndDestroy(3, scheduler);
 	}
 
 TBool COggPlayback::PrimeBuffer(HBufC8& buf)
@@ -1331,6 +1349,19 @@ void COggPlayback::HandleThreadPanic(RThread& /* aPanicThread */, TInt aErr)
 
 	// Try to exit cleanly
 	iObserver->NotifyFatalPlayError();
+	}
+
+void COggPlayback::PrepareToSetPosition()
+	{
+	// Inform the decoder that seeking may occur
+	if (iDecoder)
+		iDecoder->PrepareToSetPosition();
+	}
+
+void COggPlayback::PrepareToPlay()
+	{
+	// Inform the decoder that playback is going to start
+	iDecoder->PrepareToPlay();
 	}
 
 void COggPlayback::ThreadRelease()

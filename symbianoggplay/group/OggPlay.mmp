@@ -43,6 +43,7 @@ SOURCE OggMultiThread.cpp
 SOURCE OggThreadClasses.cpp
 SOURCE OggRateConvert.cpp
 SOURCE OggAbsPlayback.cpp
+SOURCE OggMTFile.cpp
 
 //  Resource Files
 RESOURCE ..\data\OggPlay.rss

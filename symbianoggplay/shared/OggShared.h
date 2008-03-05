@@ -65,10 +65,14 @@ IMPORT_C void* _ogg_realloc(void* aPtr, size_t aNumBytes);
 IMPORT_C void _ogg_free(void* aPtr);
 
 IMPORT_C size_t _ogg_read(void* aBufPtr, size_t aReadSize, void* aFilePtr);
-IMPORT_C int _ogg_seek(void* filePtr, long aOffset, int aSeekOrigin);
-IMPORT_C int _ogg_tell(void* filePtr);
-IMPORT_C int _ogg_close(void* filePtr);
+IMPORT_C int _ogg_seek(void* aFilePtr, long aOffset, int aSeekOrigin);
+IMPORT_C int _ogg_tell(void* aFilePtr);
+IMPORT_C int _ogg_close(void* aFilePtr);
 
+IMPORT_C size_t _ogg_rfread(void* aBufPtr, size_t aReadSize, void* aFilePtr);
+IMPORT_C int _ogg_rfseek(void* aFilePtr, long aOffset, int aSeekOrigin);
+IMPORT_C int _ogg_rftell(void* aFilePtr);
+IMPORT_C int _ogg_rfclose(void* aFilePtr);
 
 IMPORT_C int jcode(const char* buff);
 

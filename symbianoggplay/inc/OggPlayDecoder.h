@@ -65,6 +65,8 @@ public:
 	virtual void GetFrequencyBins(TInt32* aBins, TInt aNumberOfBins) = 0;
 	virtual TBool RequestingFrequencyBins() = 0;
 
+	virtual void PrepareToSetPosition() = 0;
+	virtual void PrepareToPlay() = 0;
 	virtual void ThreadRelease() = 0;
 	};
 

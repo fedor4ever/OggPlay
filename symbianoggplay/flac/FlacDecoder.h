@@ -15,7 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #ifndef FLACDECODER_H
 #define FLACDECODER_H
 
@@ -24,89 +24,21 @@
 
 typedef unsigned int size_t;
 #include "FLAC/stream_decoder.h"
-
 #include "OggPlayDecoder.h"
 
-// Double buffer file reading
-#define FLAC_DOUBLE_BUFFER_READS
-
-// Force the double buffering to read synchronously
-// (it read asynchronously otherwise)
-// #define FLAC_DB_SYNCHRONOUS_READS
-
-
-#if defined(FLAC_DOUBLE_BUFFER_READS)
-class CDBFileAO : public CActive
-	{
-public:
-	CDBFileAO(RFile& aFile, TUint8* aBuf, TInt aBufSize, TInt &aReadIdx, TInt& aDataSize, TInt& aFilePos);
-	~CDBFileAO();
-
-	void Read();
-	TInt WaitForCompletion();
-
-	// From CAcive
-	void RunL();
-	void DoCancel();
-
-private:
-	void ReadComplete(TInt aErr);
-
-private:
-	RFile& iFile;
-	TBool iFileRequestPending;
-
-	TUint8* iBuf;
-	TInt iBufSize;
-	TInt iHalfBufSize;
-	TPtr8 iBufPtr;
-
-	TInt& iReadIdx;
-	TInt& iDataSize;
-	TInt& iFilePos;
-	};
-
-#if defined(UIQ) || (defined(SERIES60) && !defined(PLUGIN_SYSTEM)) // aka S60V1
-const TInt KDefaultRFileDBBufSize = 65536; // 2 x 32K
-#elif !defined(SERIES60V3)
-const TInt KDefaultRFileDBBufSize = 131072; // 2 x 64K
-#else
-const TInt KDefaultRFileDBBufSize = 262144; // 2 x 128K
+#if defined(MULTITHREAD_SOURCE_READS)
+#include "OggMTFile.h"
 #endif
 
-class RDBFile : public RFile
-	{
-public:
-	RDBFile(TInt aBufSize = KDefaultRFileDBBufSize);
-
-	TInt Open(RFs& aFs, const TDesC& aFileName, TUint aMode);
-	void Close();
-
-	TInt Read(TDes8& aBuf);
-	TInt Seek(TSeek aMode, TInt &aPos);
-
-	void ThreadRelease();
-
-private:
-	void CopyData(TUint8* aBuf, TInt aSize);
-
-private:
-	TUint8* iBuf;
-	TInt iBufSize;
-	TInt iHalfBufSize;
-
-	TInt iReadIdx;
-	TInt iDataSize;
-
-	CDBFileAO* iDBFileAO;
-	TInt iFilePos;
-	};
-#endif // FLAC_DOUBLE_BUFFER_READS
 
 class CFlacDecoder : public CBase, public MDecoder
 	{
 public:
+#if defined(MULTITHREAD_SOURCE_READS)
+	CFlacDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2);
+#else
 	CFlacDecoder(RFs& aFs);
+#endif
 	~CFlacDecoder();
 
 	TInt Clear();
@@ -128,6 +60,8 @@ public:
 	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
+	void PrepareToSetPosition();
+	void PrepareToPlay();
 	void ThreadRelease();
 
 	void GetString(TDes& aBuf, const char* aStr);
@@ -151,8 +85,8 @@ public:
 	void ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer[]);
 
 protected:
-#if defined(FLAC_DOUBLE_BUFFER_READS)
-	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RDBFile* f);
+#if defined(MULTITHREAD_SOURCE_READS)
+	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RMTFile* f);
 #else
 	virtual FLAC__StreamDecoderInitStatus FLACInitStream(RFile* f);
 #endif
@@ -176,24 +110,27 @@ private:
 	TInt iLen;
 
 	TInt iFileSize;
+	RFs& iFs;
 
-#if defined(FLAC_DOUBLE_BUFFER_READS)
-	RDBFile iFile;
+#if defined(MULTITHREAD_SOURCE_READS)
+	RMTFile iFile;
 #else
 	RFile iFile;
 #endif
-
-	RFs& iFs;
 	};
 
 class CNativeFlacDecoder : public CFlacDecoder
 	{
 public:
+#if defined(MULTITHREAD_SOURCE_READS)
+	CNativeFlacDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2);
+#else
 	CNativeFlacDecoder(RFs& aFs);
+#endif
 
 protected:
-#if defined(FLAC_DOUBLE_BUFFER_READS)
-	FLAC__StreamDecoderInitStatus FLACInitStream(RDBFile* f);
+#if defined(MULTITHREAD_SOURCE_READS)
+	FLAC__StreamDecoderInitStatus FLACInitStream(RMTFile* f);
 #else
 	FLAC__StreamDecoderInitStatus FLACInitStream(RFile* f);
 #endif

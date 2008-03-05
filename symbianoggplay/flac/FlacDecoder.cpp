@@ -28,294 +28,9 @@
 #include "FlacDecoder.h"
 #include "OggLog.h"
 
-
-#if defined(FLAC_DOUBLE_BUFFER_READS)
-CDBFileAO::CDBFileAO(RFile& aFile, TUint8* aBuf, TInt aBufSize, TInt &aReadIdx, TInt& aDataSize, TInt& aFilePos)
-: CActive(EPriorityIdle), iFile(aFile), iBuf(aBuf), iBufSize(aBufSize), iHalfBufSize(aBufSize/2), iBufPtr(NULL, 0, 0),
-iReadIdx(aReadIdx), iDataSize(aDataSize), iFilePos(aFilePos)
-	{
-	CActiveScheduler::Add(this);
-	}
-
-CDBFileAO::~CDBFileAO()
-	{
-	}
-
-void CDBFileAO::RunL()
-	{
-	ReadComplete(iStatus.Int());
-	}
-
-void CDBFileAO::ReadComplete(TInt aErr)
-	{
-	iFileRequestPending = EFalse;
-	if (aErr != KErrNone)
-		{
-		TRACEF(COggLog::VA(_L("CDBFileAO Read Complete: %d"), aErr));
-		return;
-		}
-
-	// Adjust the data size and file position
-	iDataSize += iBufPtr.Size();
-	iFilePos += iBufPtr.Size();
-	}
-
-void CDBFileAO::DoCancel()
-	{
-	if (iFileRequestPending)
-		{
-		// There is a file request pending, so cancel it
-		// (or on earlier OS versions, just wait for it to complete)
-#if defined(SERIES60V3)
-		iFile.ReadCancel(iStatus);
+#if defined(MULTITHREAD_SOURCE_READS)
+#define RFile RMTFile
 #endif
-		}
-	else
-		{
-		// We are active, but no request is pending
-		// Consequently we have to generate one
-		TRequestStatus* status = &iStatus;
-		User::RequestComplete(status, KErrCancel);
-		}
-
-	iFileRequestPending = EFalse;
-	}
-
-void CDBFileAO::Read()
-	{
-	// Check if a read request is pending
-	// If so we must return as we can only handle one request at a time
-	if (iFileRequestPending)
-		return;
-
-	// Figure out which half buffer to read into
-	TInt writeIdx;
-	if (iReadIdx == iBufSize)
-		{
-		// The correct buffer depends on the amount of data we currently have
-		writeIdx = (iDataSize) ? iHalfBufSize : 0;
-		}
-	else if (iReadIdx == iHalfBufSize)
-		{
-		// The correct buffer depends on the amount of data we currently have
-		writeIdx = (iDataSize) ? 0 : iHalfBufSize;
-		}
-	else
-		{
-		// The correct buffer depends on which half the read idx is in
-		writeIdx = (iReadIdx>=iHalfBufSize) ? 0 : iHalfBufSize;
-		}
-
-	// Issue the read request
-	iBufPtr.Set(iBuf+writeIdx, 0, iHalfBufSize);
-
-#if defined (FLAC_DB_SYNCHRONOUS_READS)
-	ReadComplete(iFile.Read(iBufPtr));
-#else
-	iFile.Read(iBufPtr, iStatus);
-	iFileRequestPending = ETrue;
-
-	if (!IsActive())
-		SetActive();
-#endif
-	}
-
-TInt CDBFileAO::WaitForCompletion()
-	{
-	TInt err;
-	if (IsActive())
-		{
-		// If we are still active the RunL() has not been called, so we must consume the event
-		User::WaitForRequest(iStatus);
-
-		// Handle the completion
-		err = iStatus.Int();
-		ReadComplete(err);
-
-		// The caller might not make another read request, so we must reset the state
-		iStatus = KRequestPending;
-		}
-	else
-		err = iStatus.Int();
-
-	return err;
-	}
-
-
-RDBFile::RDBFile(TInt aBufSize)
-: iBuf(NULL), iBufSize(aBufSize), iHalfBufSize(aBufSize>>1), iReadIdx(aBufSize), iDataSize(0), iDBFileAO(NULL), iFilePos(0)
-	{
-	}
-
-TInt RDBFile::Open(RFs& aFs, const TDesC& aFileName, TUint aMode)
-	{
-	__ASSERT_DEBUG(!iBuf, User::Panic(_L("RDBFile::Open"), 0));
-
-	iBuf = (TUint8 *) User::Alloc(iBufSize);
-	if (!iBuf)
-		return KErrNoMemory;
-
-	return RFile::Open(aFs, aFileName, aMode);
-	}
-
-void RDBFile::Close()
-	{
-	if (iDBFileAO)
-		{
-		iDBFileAO->Cancel();
-
-		delete iDBFileAO;
-		iDBFileAO = NULL;
-		}
-
-	User::Free(iBuf);
-	iBuf = NULL;
-
-	iDataSize = 0;
-	iReadIdx = iBufSize;
-
-	iFilePos = 0;
-	RFile::Close();
-	}
-
-TInt RDBFile::Read(TDes8& aBuf)
-	{
-	if (!iDBFileAO)
-		{
-		iDBFileAO = new CDBFileAO(*this, iBuf, iBufSize, iReadIdx, iDataSize, iFilePos);
-		if (!iDBFileAO)
-			return KErrNoMemory;
-		}
-
-	TInt err = KErrNone;
-	TInt readSize = 0;
-	TInt maxReadSize = aBuf.MaxSize();
-	TUint8* bufPtr = (TUint8 *) aBuf.Ptr();
-	for ( ; ; )
-		{
-		// Copy the data if we have enough
-		TInt dataToCopy = maxReadSize - readSize;
-		if (iDataSize>=dataToCopy)
-			{
-			CopyData(bufPtr, dataToCopy);
-			aBuf.SetLength(maxReadSize);
-			break;
-			}
-
-		// We didn't have enough, copy what we've got
-		dataToCopy = iDataSize;
-		CopyData(bufPtr, dataToCopy);
-
-		// Advance the buffer ptr
-		bufPtr += dataToCopy;
-		readSize += dataToCopy;
-
-		// Issue another read
-		iDBFileAO->Read();
-
-		// Wait for the read to complete
-		err = iDBFileAO->WaitForCompletion();
-		if ((err != KErrNone) || (iDataSize == 0))
-			{
-			aBuf.SetLength(readSize);
-			break;
-			}
-		}
-
-	if (err != KErrNone)
-		return err;
-
-	// Read more if the remaining data is less than half the buffer
-	// (i.e. we double-buffer the data)
-	if (iDataSize<=iHalfBufSize)
-		iDBFileAO->Read();
-
-	return KErrNone;
-	}
-
-void RDBFile::CopyData(TUint8* aBuf, TInt aSize)
-	{
-	if ((iReadIdx+aSize)<=iBufSize)
-		{
-		Mem::Copy((TAny *) aBuf, (TAny *) (iBuf+iReadIdx), aSize);
-		iReadIdx += aSize;
-		}
-	else
-		{
-		// Two copies required
-		TInt endDataSize = iBufSize-iReadIdx;
-		Mem::Copy((TAny *) aBuf, (TAny *) (iBuf+iReadIdx), endDataSize);
-
-		iReadIdx = aSize - endDataSize;
-		Mem::Copy((TAny *) (aBuf + endDataSize), (TAny *) iBuf, iReadIdx);
-		}
-
-	iDataSize -= aSize;
-	}
-
-void RDBFile::ThreadRelease()
-	{
-	if (!iDBFileAO)
-		return;
-
-	// Wait for any outstanding read to complete
-	iDBFileAO->WaitForCompletion();
-
-	// Cancel the AO
-	iDBFileAO->Cancel();
-
-	// Get rid of it (we're gonna need a new one)
-	delete iDBFileAO;
-	iDBFileAO = NULL;
-	}
-
-TInt RDBFile::Seek(TSeek aMode, TInt& aPos)
-	{
-	// Figure out if this is actually a seek or a current position request
-	TBool readPosition = (aMode == ESeekCurrent) && (aPos == 0);
-	if (readPosition)
-		{
-		// The file position will be out by the amount that we've
-		// read ahead, so adjust the position accordingly
-		aPos = iFilePos - iDataSize;
-		return KErrNone;
-		}
-
-	// Seek "internally", if possible
-	TInt destFilePos = aPos; // Only support seek start for now (as that's all we need)
-	if ((destFilePos<=iFilePos) && (destFilePos>=(iFilePos-iDataSize)))
-		{
-		TInt seekDistance = iDataSize - (iFilePos - destFilePos);
-
-		iDataSize -= seekDistance;
-		iReadIdx += seekDistance;
-		if (iReadIdx>=iBufSize)
-			iReadIdx -= iBufSize;
-
-		return KErrNone;
-		}
-
-	// Cancel any outstanding read
-	if (iDBFileAO)
-		iDBFileAO->Cancel();
-
-	// Seek to the new position
-	TInt err = RFile::Seek(aMode, aPos);
-	if (err == KErrNone)
-		{
-		// Invalidate any existing data
-		iDataSize = 0;
-		iReadIdx = iBufSize;
-
-		// Update the file position
-		iFilePos = aPos;
-		}
-
-	return err;
-	}
-#else
-#define RDBFile RFile
-#endif // FLAC_DOUBLE_BUFFER_READS
 
 static FLAC__StreamDecoderReadStatus FlacReadCallback(const FLAC__StreamDecoder* /* aDecoder */, FLAC__byte aBuffer[], size_t *aBytes, void *aFilePtr)
 	{
@@ -323,7 +38,7 @@ static FLAC__StreamDecoderReadStatus FlacReadCallback(const FLAC__StreamDecoder*
 	if (!bytes)
 		return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
 
-	RDBFile* file = (RDBFile *) aFilePtr;
+	RFile* file = (RFile *) aFilePtr;
 	TPtr8 buf((TUint8 *) aBuffer, 0, bytes);
 	TInt err = file->Read(buf);
 	bytes = buf.Length();
@@ -338,7 +53,7 @@ static FLAC__StreamDecoderReadStatus FlacReadCallback(const FLAC__StreamDecoder*
 
 static FLAC__StreamDecoderSeekStatus FlacSeekCallback(const FLAC__StreamDecoder* /* aDecoder */, FLAC__uint64 aByteOffset, void *aFilePtr)
 	{
-    RDBFile* file = (RDBFile *) aFilePtr;
+    RFile* file = (RFile *) aFilePtr;
 	TInt byteOffset = (TInt) aByteOffset;
 	TInt err = file->Seek(ESeekStart, byteOffset);
 
@@ -347,7 +62,7 @@ static FLAC__StreamDecoderSeekStatus FlacSeekCallback(const FLAC__StreamDecoder*
 
 static FLAC__StreamDecoderTellStatus FlacTellCallback(const FLAC__StreamDecoder* /*aDecoder */, FLAC__uint64* aByteOffset, void *aFilePtr) 
 	{
- 	RDBFile* file = (RDBFile *) aFilePtr;
+ 	RFile* file = (RFile *) aFilePtr;
 	TInt pos = 0;
 
 	TInt err = file->Seek(ESeekCurrent, pos);
@@ -358,7 +73,7 @@ static FLAC__StreamDecoderTellStatus FlacTellCallback(const FLAC__StreamDecoder*
 
 static FLAC__StreamDecoderLengthStatus FlacLengthCallback(const FLAC__StreamDecoder* /* aDecoder */, FLAC__uint64* aStreamLength, void *aFilePtr)
 	{
- 	RDBFile* file = (RDBFile *) aFilePtr;
+ 	RFile* file = (RFile *) aFilePtr;
 	TInt size;
 	TInt err = file->Size(size);
 	*aStreamLength = (FLAC__uint64) size;
@@ -426,8 +141,13 @@ static void FlacErrorCallback(const FLAC__StreamDecoder* /* aDecoder */, FLAC__S
 	{
 	}
 
+#if defined(MULTITHREAD_SOURCE_READS)
+CFlacDecoder::CFlacDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2)
+: iFs(aFs), iFile(aSourceHandler1, aSourceHandler2)
+#else
 CFlacDecoder::CFlacDecoder(RFs& aFs)
 : iFs(aFs)
+#endif
 	{
 	}
 
@@ -449,7 +169,7 @@ TInt CFlacDecoder::Clear()
 	return 0;
 	}
 
-FLAC__StreamDecoderInitStatus CFlacDecoder::FLACInitStream(RDBFile* f)
+FLAC__StreamDecoderInitStatus CFlacDecoder::FLACInitStream(RFile* f)
 	{
 	return FLAC__stream_decoder_init_ogg_stream(iDecoder, FlacReadCallback, FlacSeekCallback,
 	FlacTellCallback, FlacLengthCallback, FlacEofCallback, FlacWriteCallback, FlacMetadataCallback, FlacErrorCallback, (void *) f);
@@ -464,7 +184,12 @@ TInt CFlacDecoder::OpenInfo(const TDesC& aFileName)
 	{
 	Close();
 
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt err = iFile.Open(aFileName);
+#else
 	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
+#endif
+
 	if (err != KErrNone)
 		return err;
 
@@ -692,20 +417,46 @@ void CFlacDecoder::ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer
 	iBuffer = NULL;
 	}
 
+void CFlacDecoder::PrepareToSetPosition()
+	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	// Release the file (the streaming thread will do the setting of the position)
+	iFile.ThreadRelease();
+
+	// Disable double buffering (seeking with buffering enabled is far too slow)
+	iFile.DisableDoubleBuffering();
+#endif
+	}
+
+void CFlacDecoder::PrepareToPlay()
+	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	iFile.EnableDoubleBuffering();
+
+	// Release the file (the streaming thread will do the initial buffering)
+	iFile.ThreadRelease();
+#endif
+	}
+
 void CFlacDecoder::ThreadRelease()
 	{
-#if defined(FLAC_DOUBLE_BUFFER_READS)
+#if defined(MULTITHREAD_SOURCE_READS)
 	iFile.ThreadRelease();
 #endif
 	}
 
 
+#if defined(MULTITHREAD_SOURCE_READS)
+CNativeFlacDecoder::CNativeFlacDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2)
+: CFlacDecoder(aFs, aSourceHandler1, aSourceHandler2)
+#else
 CNativeFlacDecoder::CNativeFlacDecoder(RFs& aFs)
 : CFlacDecoder(aFs)
+#endif
 	{
 	}
 
-FLAC__StreamDecoderInitStatus CNativeFlacDecoder::FLACInitStream(RDBFile* f)
+FLAC__StreamDecoderInitStatus CNativeFlacDecoder::FLACInitStream(RFile* f)
 	{
 	return FLAC__stream_decoder_init_stream(iDecoder, FlacReadCallback, FlacSeekCallback,
 	FlacTellCallback, FlacLengthCallback, FlacEofCallback, FlacWriteCallback, FlacMetadataCallback, FlacErrorCallback, (void *) f);

@@ -60,6 +60,7 @@ SOURCE                                  OggMultiThread.cpp
 SOURCE                                  OggThreadClasses.cpp 
 SOURCE                                  OggRateConvert.cpp 
 SOURCE                                  OggAbsPlayback.cpp
+SOURCE                                  OggMTFile.cpp
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 aknskins.lib 

@@ -172,6 +172,8 @@ public:
 	void NotifyOpenComplete(TInt aErr);
 	void NotifyStreamingStatus(TInt aErr);
 
+	void PrepareToSetPosition();
+	void PrepareToPlay();
 	void ThreadRelease();
 
 private:
@@ -244,6 +246,7 @@ private:
 
 	CThreadPanicHandler* iStreamingThreadPanicHandler;
 	CStreamingThreadCommandHandler* iStreamingThreadCommandHandler;
+	CStreamingThreadSourceHandler* iStreamingThreadSourceHandler;
 	CBufferingThreadAO* iBufferingThreadAO;
 	CStreamingThreadListener* iStreamingThreadListener;
 

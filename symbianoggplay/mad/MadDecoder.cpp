@@ -45,8 +45,13 @@ TAudioDither::TAudioDither(mad_fixed_t& aRandom)
 	}
 
 
+#if defined(MULTITHREAD_SOURCE_READS)
+CMadDecoder::CMadDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2, const TBool& aDitherAudio, TAudioDither& aLeftDither, TAudioDither& aRightDither)
+: iFs(aFs), iFile(aSourceHandler1, aSourceHandler2), iTimerArray(100), iTimerIdx(-1), iDitherAudio(aDitherAudio), iLeftDither(aLeftDither), iRightDither(aRightDither)
+#else
 CMadDecoder::CMadDecoder(RFs& aFs, const TBool& aDitherAudio, TAudioDither& aLeftDither, TAudioDither& aRightDither)
 : iFs(aFs), iTimerArray(100), iTimerIdx(-1), iDitherAudio(aDitherAudio), iLeftDither(aLeftDither), iRightDither(aRightDither)
+#endif
 	{
 	}
 
@@ -237,7 +242,12 @@ TInt CMadDecoder::OpenInfo(const TDesC& aFileName)
 	Close();
 
 	iFileName = aFileName;
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt err = iFile.Open(iFileName);
+#else
 	TInt err = iFile.Open(iFs, iFileName, EFileShareReadersOnly);
+#endif
+
 	if (err != KErrNone)
 		return err;
 
@@ -526,7 +536,11 @@ TInt CMadDecoder::MadRead(TInt16* aOutputBuffer, TInt aLength)
 	return KErrNone; // (Unreachable)
 	}
 
+#if defined(MULTITHREAD_SOURCE_READS)
+TInt CMadDecoder::MadReadData(mad_stream& aStream, RMTFile& aFile, TInt& aFilePos, TInt& aBufFilePos, TUint8* aBuf)
+#else
 TInt CMadDecoder::MadReadData(mad_stream& aStream, RFile& aFile, TInt& aFilePos, TInt& aBufFilePos, TUint8* aBuf)
+#endif
 	{
 	TUint readSize;
 	TUint remaining;
@@ -1080,8 +1094,32 @@ TBool CMadDecoder::RequestingFrequencyBins()
 	return EFalse;
 	}
 
+void CMadDecoder::PrepareToSetPosition()
+	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	// Release the file (the streaming thread will do the setting of the position)
+	iFile.ThreadRelease();
+
+	// Disable double buffering (seeking with buffering enabled is far too slow)
+	iFile.DisableDoubleBuffering();
+#endif
+	}
+
+void CMadDecoder::PrepareToPlay()
+	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	iFile.EnableDoubleBuffering();
+
+	// Release the file (the streaming thread will do the initial buffering)
+	iFile.ThreadRelease();
+#endif
+	}
+
 void CMadDecoder::ThreadRelease()
 	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	iFile.ThreadRelease();
+#endif
 	}
 
 #endif // MP3_SUPPORT

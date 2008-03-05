@@ -31,4 +31,8 @@ EXPORTS
 	_ogg_toupper @ 30 NONAME
 	jcode @ 31 NONAME
 	_ogg_strcmp @ 32 NONAME
+	_ogg_rfclose @ 33 NONAME
+	_ogg_rfread @ 34 NONAME
+	_ogg_rfseek @ 35 NONAME
+	_ogg_rftell @ 36 NONAME
 

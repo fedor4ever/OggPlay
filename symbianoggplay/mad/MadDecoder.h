@@ -27,6 +27,10 @@
 #include "madplay\xltagx.h"
 #include "OggPlayDecoder.h"
 
+#if defined(MULTITHREAD_SOURCE_READS)
+#include "OggMTFile.h"
+#endif
+
 const TInt KInputBufferSize = 8192;
 const TInt KInputBufferMaxSize = 8192+MAD_BUFFER_GUARD;
 
@@ -41,7 +45,12 @@ public:
 class CMadDecoder : public CBase, public MDecoder
 {
 public:
+#if defined(MULTITHREAD_SOURCE_READS)
+	CMadDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2, const TBool& aDitherAudio, TAudioDither& aLeftDither, TAudioDither& aRightDither);
+#else
 	CMadDecoder(RFs& aFs, const TBool& aDitherAudio, TAudioDither& aLeftDither, TAudioDither& aRightDither);
+#endif
+
 	~CMadDecoder();
 
 	TInt Clear();
@@ -64,6 +73,8 @@ public:
 	void GetFrequencyBins(TInt32* aBins,TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
+	void PrepareToSetPosition();
+	void PrepareToPlay();
 	void ThreadRelease();
 
 private:
@@ -76,9 +87,13 @@ private:
 
 	TInt MadHandleError(mad_stream& aStream, TInt &aFilePos, RFile* aFile = NULL);
 	void MadSeek(const mad_timer_t& aNewTimer);
-
 	void MadTimeTotal();
+
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt MadReadData(mad_stream& aStream, RMTFile& aFile, TInt& aFilePos, TInt& aBufFilePos, TUint8* aBuf);
+#else
 	TInt MadReadData(mad_stream& aStream, RFile& aFile, TInt& aFilePos, TInt& aBufFilePos, TUint8* aBuf);
+#endif
 
 	id3_tag* GetId3(id3_length_t tagsize);
 	void ProcessId3();
@@ -106,8 +121,14 @@ private:
 	TInt iFileSize;
 	TInt iFilePos;
 	TInt iBufFilePos;
-	RFile iFile;
+
 	RFs& iFs;
+
+#if defined(MULTITHREAD_SOURCE_READS)
+	RMTFile iFile;
+#else
+	RFile iFile;
+#endif
 
 	RArray<TMadFrameTimer> iTimerArray;
 	TInt iTimerIdx;

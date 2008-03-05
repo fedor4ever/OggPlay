@@ -25,10 +25,19 @@
 #include "ivorbisfile.h"
 #include "OggPlayDecoder.h"
 
+#if defined(MULTITHREAD_SOURCE_READS)
+#include "OggMTFile.h"
+#endif
+
 class CTremorDecoder: public CBase, public MDecoder
 	{
 public:
+#if defined(MULTITHREAD_SOURCE_READS)
+	CTremorDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2);
+#else
 	CTremorDecoder(RFs& aFs);
+#endif
+
 	~CTremorDecoder();
 
 	TInt Clear();
@@ -50,6 +59,8 @@ public:
 	void GetFrequencyBins(TInt32* aBins, TInt NumberOfBins);
 	TBool RequestingFrequencyBins();
 
+	void PrepareToSetPosition();
+	void PrepareToPlay();
 	void ThreadRelease();
 
 private:
@@ -61,7 +72,12 @@ private:
 	vorbis_info *vi;
 
 	RFs& iFs;
+
+#if defined(MULTITHREAD_SOURCE_READS)
+	RMTFile iFile;
+#else
 	RFile iFile;
+#endif
 	};
 
 #endif

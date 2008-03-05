@@ -37,27 +37,26 @@
 #define fsetpos(a, b) _ogg_fsetpos(a, b)
 #define strdup(a) _ogg_strdup(a)
 #define fdopen(a, b) _ogg_fdopen(a, b)
-#define fclose(a) _ogg_close(a)
+#define fclose(a) _ogg_rfclose(a)
 #define fread(a, b, c, d) _ogg_fread(a, b, c, d)
 #define dup(a) _ogg_dup(a)
 #define dup2(a, b) _ogg_dup2(a, b)
 #define close(a) _ogg_close2(a)
-#define ftell(a) _ogg_tell(a)
-#define fseek(a, b, c) _ogg_seek(a, b, c)
+#define ftell(a) _ogg_rftell(a)
+#define fseek(a, b, c) _ogg_rfseek(a, b, c)
 #define rewind(a) _ogg_rewind(a)
 #define clearerr(a) _ogg_clearerr(a)
 
 typedef long fpos_t;
 int _ogg_fgetpos(FILE* file, fpos_t* pos)
 	{
-	*pos = _ogg_tell(file);
+	*pos = _ogg_rftell(file);
 	return (*pos == -1) ? -1 : 0;
 	}
 int _ogg_fsetpos(FILE* file, fpos_t* pos)
 	{
-	return _ogg_seek(file, *pos, SEEK_SET);
+	return _ogg_rfseek(file, *pos, SEEK_SET);
 	}
-
 
 char* _ogg_strdup(const char* strng)
 	{
@@ -73,7 +72,7 @@ FILE *_ogg_fdopen(int fd, const char* mode)
 size_t _ogg_fread(void *data, size_t size, size_t n, FILE* file)
 	{
 	size_t total = size*n;
-	size_t readtotal = _ogg_read(data, total, file);
+	size_t readtotal = _ogg_rfread(data, total, file);
 	return (readtotal == total) ? n : readtotal/size;
 	}
 
@@ -94,7 +93,7 @@ int _ogg_close2(int fd)
 
 void _ogg_rewind(FILE* file)
 	{
-	_ogg_seek(file, 0, SEEK_SET);
+	_ogg_rfseek(file, 0, SEEK_SET);
 	}
 
 void clearerr(FILE* file)

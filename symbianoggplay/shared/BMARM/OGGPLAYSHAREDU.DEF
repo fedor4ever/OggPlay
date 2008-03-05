@@ -24,4 +24,8 @@ EXPORTS
 	_ogg_toupper @ 23 NONAME R3UNUSED ; (null)
 	__udivdi3 @ 24 NONAME ; (null)
 	_ogg_strcmp @ 25 NONAME R3UNUSED ; (null)
+	_ogg_rfclose @ 26 NONAME R3UNUSED ; (null)
+	_ogg_rfread @ 27 NONAME R3UNUSED ; (null)
+	_ogg_rfseek @ 28 NONAME R3UNUSED ; (null)
+	_ogg_rftell @ 29 NONAME R3UNUSED ; (null)
 

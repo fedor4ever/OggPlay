@@ -34,10 +34,14 @@ chSTR2(__LINE__) "):" #desc)
 #endif
 
 // DEBUGGING
-#define TRACE_ON          // See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
+// See OggLog. Manually create "C:\Logs\OggPlay" to get disk logging.
+#define TRACE_ON
 
 // Enable codec performance profiling
 // #define PROFILE_PERF
+
+// Enable source (i.e. file or stream) reading using the streaming thread
+#define MULTITHREAD_SOURCE_READS
 
 #if defined(OS70S)
 // When MMF is supported by the OS (from 7.0S), the OggPlay Plugin system 

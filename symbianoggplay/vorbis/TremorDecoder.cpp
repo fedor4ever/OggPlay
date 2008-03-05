@@ -28,8 +28,13 @@
 #include "TremorDecoder.h"
 #include "OggLog.h"
 
+#if defined(MULTITHREAD_SOURCE_READS)
+CTremorDecoder::CTremorDecoder(RFs& aFs, MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2)
+: iFs(aFs), iFile(aSourceHandler1, aSourceHandler2)
+#else
 CTremorDecoder::CTremorDecoder(RFs& aFs)
 : iFs(aFs)
+#endif
 	{
 	}
 
@@ -47,7 +52,12 @@ TInt CTremorDecoder::Open(const TDesC& aFileName)
 	{
 	Close();
 
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt err = iFile.Open(aFileName);
+#else
 	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
+#endif
+
 	if (err != KErrNone)
 		return err;
 
@@ -67,7 +77,12 @@ TInt CTremorDecoder::OpenInfo(const TDesC& aFileName)
 	{
 	Close();
 
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt err = iFile.Open(aFileName);
+#else
 	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
+#endif
+
 	if (err != KErrNone)
 		return err;
 
@@ -215,6 +230,31 @@ TBool CTremorDecoder::RequestingFrequencyBins()
 	return ov_reqFreqBin(&iVf) ? ETrue : EFalse;
 	}
 
+void CTremorDecoder::PrepareToSetPosition()
+	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	// Release the file (the streaming thread will do the setting of the position)
+	iFile.ThreadRelease();
+
+	// Disable double buffering (seeking with buffering enabled is far too slow)
+	iFile.DisableDoubleBuffering();
+#endif
+	}
+
+void CTremorDecoder::PrepareToPlay()
+	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	// Enable double buffering (maximise reading performance)
+	iFile.EnableDoubleBuffering();
+
+	// Release the file (the streaming thread will do the initial buffering)
+	iFile.ThreadRelease();
+#endif
+	}
+
 void CTremorDecoder::ThreadRelease()
 	{
+#if defined(MULTITHREAD_SOURCE_READS)
+	iFile.ThreadRelease();
+#endif
 	}
