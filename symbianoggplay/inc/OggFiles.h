@@ -74,9 +74,9 @@ public:
 class TOggPlayList : public TOggFile
 	{
 public:
-	~TOggPlayList();
 	static TOggPlayList* NewL(TFileText& tf);
 	static TOggPlayList* NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, const TDesC& aFileName, const TDesC& aShortName);
+	~TOggPlayList();
 
 	void ReadL(TFileText& tf);
 	TInt Write(TInt aLineNumber, HBufC* aBuf );
@@ -95,6 +95,7 @@ private:
 
 public:
 	RPointerArray<TOggFile> iPlayListEntries;
+	RPointerArray<TOggFile> iUrls;	
 	};
 
 class TOggKey : public TKeyArrayFix
@@ -149,6 +150,7 @@ public:
 	void FillFileNames(CDesCArray& arr, const TDesC& anAlbum, const TDesC& anArtist, const TDesC& aGenre, const TFileName& aSubFolder);
 
 	void FillPlayLists(CDesCArray& arr);
+	void FillStreams(CDesCArray& arr);
 	void FillPlayList(CDesCArray& arr, const TDesC& aSelection);
 
 	TDesC & FindFromIndex(TInt anIndex);

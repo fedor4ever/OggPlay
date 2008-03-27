@@ -58,7 +58,7 @@ public:
 	TInt FullInfo(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver);
 	void InfoCancel();
 
-	TInt Open(const TDesC& aFileName, TUid aControllerUid);
+	TInt Open(const TOggSource& aSource, TUid aControllerUid);
 
 	void Pause();
 	void Resume();
@@ -66,6 +66,7 @@ public:
 	void Stop();
 	void SetVolume(TInt aVol);
 	void SetPosition(TInt64 aPos);
+	TBool Seekable();
 
 	TInt64 Position();
 	TInt64 Time();

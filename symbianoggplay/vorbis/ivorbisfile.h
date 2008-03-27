@@ -66,6 +66,7 @@ typedef struct OggVorbis_File {
   ogg_int64_t     *pcmlengths;
   vorbis_info     *vi;
   vorbis_comment  *vc;
+  int              headers_to_read;
 
   /* Decoding working state local storage */
   ogg_int64_t      pcm_offset;
@@ -89,6 +90,7 @@ IMPORT_C int ov_clear(OggVorbis_File *vf);
 IMPORT_C int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 IMPORT_C int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
+IMPORT_C int ov_asyncin_open(OggVorbis_File *vf);
 
 IMPORT_C int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 IMPORT_C int ov_test_callbacks(void *datasource, OggVorbis_File *vf,

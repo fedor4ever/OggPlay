@@ -20,6 +20,7 @@
 #include "OggFiles.h"
 
 #include "OggAbsPlayback.h"
+#include "OggHttpSource.h"
 #include "OggLog.h"
 
 #include <eikfutil.h>
@@ -45,8 +46,8 @@ TOggPlayList* TOggPlayList::NewL(TInt aAbsoluteIndex, const TDesC& aSubFolder, c
 	self->iSubFolder = aSubFolder.AllocL();
 	self->iFileName = aFileName.AllocL();
 	self->iShortName = aShortName.AllocL();
-
 	self->iAbsoluteIndex = aAbsoluteIndex;
+
 	CleanupStack::Pop(self);
 	return self;
 	}
@@ -73,6 +74,7 @@ TOggPlayList* TOggPlayList::NewL(TFileText& tf)
 TOggPlayList::~TOggPlayList()
 	{
 	iPlayListEntries.Close();
+	iUrls.ResetAndDestroy();
 	}
 
 TInt TOggPlayList::Count()
@@ -98,7 +100,7 @@ void TOggPlayList::SetTextFromFileL(TFileText& aTf, HBufC* &aBuffer)
 	delete aBuffer;
 	aBuffer = NULL;
   
-	aBuffer= buf.AllocL();  
+	aBuffer = buf.AllocL();  
 	}
 
 void TOggPlayList::ReadL(TFileText& tf)
@@ -168,32 +170,80 @@ void TOggPlayList::ScanPlayListL(RFs& aFs, TOggFiles* aFiles)
 		// Construct the filename (add the playlist path if the filename is relative)
 		TFileName fileName;
 		fileName.Copy(bufPtr.Mid(i, fileNameLength));
-		if (fileName[0] == '\\')
+		if (COggHttpSource::IsNameValid(fileName))
 			{
-			// Check the length again
-			fileNameLength += 2;
-			if (fileNameLength>KMaxFileName)
-				continue;
+			TOggFile* o = TOggFile::NewL();
+			o->SetTextL(o->iFileName, fileName);
 
-			// Add the drive name
-			fileName.Insert(0, TPtrC(iFileName->Ptr(), 2));
-			}
-		else if (fileName[1] != ':')
-			{
-			// Check the length again
-			TInt playListPathLength = iFileName->Length()-(iShortName->Length()+4);
-			fileNameLength += playListPathLength;
-			if (fileNameLength>KMaxFileName)
-				continue;
+			// Try to guess the name of song
+			TFileName fn1;
+			i = fileName.Locate('/');
+			if (i<0)
+				i = 0;
+			else
+				i += 2;
 
-			// Add the playlist path
-			fileName.Insert(0, TPtrC(iFileName->Ptr(), playListPathLength));
-			}
+			fn1 = fileName.Mid(i);
+			if ((fileName.Length()-i)>25)
+				{
+				TInt j = fn1.Locate('.');
+				if (j<0)
+					j = fn1.Locate('/');
 
-		// Search for the file and add it to the list (if found)
-		TOggFile* o = aFiles->FindFromFileNameL(fileName);
-		if (o)
+				if (j>0)
+					{
+					fn1.SetLength(j);
+					fn1.Append(_L("..."));
+					}
+				else
+					fn1.SetLength(0);
+
+				j = fileName.LocateReverse('/');
+				if (j>0)
+					{
+					while (++j<fileName.Length())
+						{
+						if (!(TChar(fileName[j]).IsDigit()) && (fileName[j] != ' ') && (fileName[j] != '_'))
+							break;
+						}
+
+					fn1.Append(fileName.Mid(j));
+					}
+				}
+
+			o->SetTextL(o->iShortName, fn1);
+			iUrls.Append(o);
 			iPlayListEntries.Append(o);
+			}
+		else
+			{
+				if (fileName[0] == '\\')
+				{
+				// Check the length again
+				fileNameLength += 2;
+				if (fileNameLength>KMaxFileName)
+					continue;
+
+				// Add the drive name
+				fileName.Insert(0, TPtrC(iFileName->Ptr(), 2));
+				}
+			else if (fileName[1] != ':')
+				{
+				// Check the length again
+				TInt playListPathLength = iFileName->Length()-(iShortName->Length()+4);
+				fileNameLength += playListPathLength;
+				if (fileNameLength>KMaxFileName)
+					continue;
+
+				// Add the playlist path
+				fileName.Insert(0, TPtrC(iFileName->Ptr(), playListPathLength));
+				}
+
+			// Search for the file and add it to the list (if found)
+			TOggFile* o = aFiles->FindFromFileNameL(fileName);
+			if (o)
+				iPlayListEntries.Append(o);
+			}
 		}
 
 	CleanupStack::PopAndDestroy(2, &file); 
@@ -1349,7 +1399,29 @@ void TOggFiles::FillPlayLists(CDesCArray& arr)
 		{
 		TOggFile* o = (*iFiles)[i];
 		if (o->FileType() == TOggFile::EPlayList)
-			AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
+			{
+			TOggPlayList* p = (TOggPlayList *) o;
+			if (!p->iUrls.Count())
+				AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
+			}
+		}
+	}
+
+void TOggFiles::FillStreams(CDesCArray& arr)
+	{
+	arr.Reset();
+	iFiles->Sort(iOggKeyFileNames);
+
+	TInt numFiles = iFiles->Count();
+	for (TInt i=0 ; i<numFiles ; i++)
+		{
+		TOggFile* o = (*iFiles)[i];
+		if (o->FileType() == TOggFile::EPlayList)
+			{
+			TOggPlayList* p = (TOggPlayList *) o;
+			if (p->iUrls.Count())
+				AppendLine(arr, COggListBox::EPlayList, *(o->iShortName), (TInt) o);
+			}
 		}
 	}
 

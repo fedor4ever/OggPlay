@@ -71,8 +71,9 @@ const TUid KOggPlayUidCodecSelectionView = { 7 };
 const TUid KOggPlayUidPlaybackOptionsView = { 8 };
 const TUid KOggPlayUidAlarmSettingsView = { 9 };
 
-struct TKeyCodes
+class TKeyCodes
 	{
+public:
 	TInt code; 
 	TInt mask;
 	};
@@ -217,8 +218,7 @@ const TInt KHotkeysActions[]  =
 	EOggShuffle,        // EHotkeyToggleShuffle
 	EOggRepeat          // EHotkeyToggleRepeat
 	};
- 
- 
+
 // Forward declarations
 class COggPlayAppUi;
 class COggPlayAppView;
@@ -316,6 +316,8 @@ private:
 
 #if defined(SERIES60)
 class CAknErrorNote;
+class CEikProgressInfo;
+class CAknProgressDialog;
 class COggPlayAppUi : public CAknAppUi, public MPlaybackObserver, public MFileInfoObserver
 #elif defined(SERIES80)
 class COggPlayAppUi : public CEikAppUi, public MPlaybackObserver, public MFileInfoObserver
@@ -331,7 +333,7 @@ public:
 
 	// The views supported by the listbox
 	enum TViews
-	{ ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EPlayList, ETop, ETrackTitle };
+	{ ETitle, EAlbum, EArtist, EGenre, ESubFolder, EFileName, EPlayList, EStream, ETop, ETrackTitle };
 
 public:
 	COggPlayAppUi();
@@ -348,8 +350,10 @@ public:
 	void NotifyPlayInterrupted();
 
 	void NotifyStreamOpen(TInt aErr);
-	void NotifyFileOpen(TInt aErr);
+	void NotifySourceOpenState(TInt aState);
+	void NotifySourceOpen(TInt aErr);
 	void NotifyPlayStarted();
+	void NotifyNextTrack();
 	void NotifyFatalPlayError();
 
 	// From MFileInfoObserver
@@ -415,6 +419,7 @@ public:
 	CPluginSupportedList* PluginSupportedList()
 	{ return iPluginSupportedList; }
 
+	TInt PlaybackFromSource(TOggSource& aSource, CAbsPlayback*& aOggPlayback, TUid& aControllerUid);
 	TInt PlaybackFromFileName(const TDesC& aFileName, CAbsPlayback*& aOggPlayback, TUid& aControllerUid);
 
 private:
@@ -472,7 +477,7 @@ public:
 
 	TFileName iDbFileName;
 	TFileName iIniFileName;
-	TFileName iFileName;
+	TOggSource iSource;
 
 	COggPlayAppView* iAppView;
 
@@ -536,6 +541,9 @@ private:
 
 #if defined(SERIES60)
 	CAknErrorNote* iStartUpErrorDlg;
+
+	CAknProgressDialog *iProgressDialog;
+	CEikProgressInfo* iProgressInfo;
 #endif
 
 #if defined(SERIES60SUI)

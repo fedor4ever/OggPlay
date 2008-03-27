@@ -3,7 +3,7 @@ TARGET                                  OggPlayVorbisi.dll
 TARGETTYPE                              dll 
 UID                                     0x1000008d 0xF01FD21D
 
-CAPABILITY                              NONE 
+CAPABILITY                              NetworkServices
 SECUREID                                0xF01FD21D
 VENDORID                                0
 

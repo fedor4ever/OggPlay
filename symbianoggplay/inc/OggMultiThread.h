@@ -26,6 +26,8 @@
 #include <mda\common\audio.h>
 #include "OggThreadClasses.h"
 #include "OggMTFile.h"
+#include "OggHttpSource.h"
+#include "OggMessageQueue.h"
 
 // Thread commands for the Streaming thread
 enum TStreamingThreadCommand
@@ -63,11 +65,8 @@ enum TStreamingThreadCommand
 	// Get the streaming position
 	EStreamingThreadPosition,
 
-	// Open a file
-	EStreamingThreadFileOpen,
-
-	// Open a stream
-	EStreamingThreadStreamOpen,
+	// Open a file or stream
+	EStreamingThreadSourceOpen,
 
 	// Close a file or stream
 	EStreamingThreadSourceClose,
@@ -130,25 +129,25 @@ enum TStreamingThreadPriority
 	EHigh
 	};
 
-// Streaming thread status event
-enum TStreamingThreadStatus
+#if defined(BUFFER_FLOW_DEBUG)
+class TBufRecord
 	{
-	// The last buffer has been copied to the server (played)
-	ELastBufferCopied,
+public:
+	TBufRecord(TInt aBufNum, TInt aType)
+	: iBufNum(aBufNum), iType(aType)
+	{ }
 
-	// Play has been interrupted by another process
-	EPlayInterrupted,
-
-	// Playback has underflowed (aka restart request)
-	EPlayUnderflow,
-
-	// Playback has stopped
-	EPlayStopped
+public:
+	TInt iBufNum;
+	TInt iType;
 	};
+#endif
 
 // Shared data between the UI, buffering and streaming threads
 // Owned by the UI thread (part of COggPlayback)
+class CBufferFillerAO;
 class CBufferingThreadAO;
+class CStreamingThreadAO;
 class CStreamingThreadCommandHandler;
 class CStreamingThreadSourceHandler;
 class CStreamingThreadListener;
@@ -178,6 +177,7 @@ public:
 	// The streaming thread listener runs in the UI thread
 	// The streaming thread command handler runs in the streaming thread
 	CBufferingThreadAO* iBufferingThreadAO;
+	CStreamingThreadAO* iStreamingThreadAO;
 	CStreamingThreadListener* iStreamingThreadListener;
 	CStreamingThreadCommandHandler* iStreamingThreadCommandHandler;
 
@@ -205,6 +205,15 @@ public:
 	// Flag used in multi thread mode to indicate that the buffering thread's AO is active
 	TBool iBufRequestInProgress;
 
+	// Flag used to determine if a buffer fill is in progress
+	TBool iBufferFillInProgress;
+
+	// Flag used to determine if the source reader is waiting for data (only applicable for streams)
+	CBufferFillerAO* iBufferFillWaitingForData;
+
+	// Pointer to the new section buffer (set when a new section is reached)
+	TDesC8* iNewSection;
+
 	// Pointer to the last buffer (set when eof is reached)
 	TDesC8* iLastBuffer;
 
@@ -218,6 +227,8 @@ public:
 	// Machine uid (for identifying the phone model)
 	TInt iMachineUid;
 
+	// Message queue for streaming messages
+	ROggMessageQueue* iStreamingMessageQueue;
 
 	// Shared data for commands (These should be a union, really (TO DO))
 	// Sample Rate and channels (for SetAudioProperties)
@@ -259,17 +270,65 @@ public:
 
 	// File buf
 	TDes8* iSourceBuf;
+
+	// Http source (valid when opening a stream)
+	COggHttpSource* iSourceHttp;
+
+#if defined(BUFFER_FLOW_DEBUG)
+	RArray<TBufRecord> iDebugBuf;
+#endif
 	};
 
+class MPrimeNextBufferObserver
+	{
+public:
+	virtual void PrimeNextBufferCallBack(TInt aNumBuffers) = 0;
+	};
+
+class CBufferFillerAO : public CActive
+	{
+public:
+	CBufferFillerAO(TStreamingThreadData& aSharedData);
+	void PrimeNextBuffer(TInt aNumBuffers, MPrimeNextBufferObserver* aObserver);
+	void DataReceived();
+
+	// Overload CActive::Cancel()
+	void Cancel();
+
+	// From CActive
+	void RunL();
+	void DoCancel();
+
+private:
+	void SelfComplete();
+
+private:
+	TInt iBufferBytes;
+	TInt iBufferBytesRequired;
+
+	TBool iNextBuffer;
+	TInt iNumBuffersFilled;
+	TInt iNumBuffersToFill;
+	
+	MPrimeNextBufferObserver* iObserver;
+	TStreamingThreadData& iSharedData;
+	};
+
+	
 // Base class for the buffering AOs
 class CBufferingAO : public CActive
 	{
 public:
 	CBufferingAO(TInt aPriority, TStreamingThreadData& aSharedData);
 	~CBufferingAO();
+	void ConstructL();
 
-	void CreateTimerL();
-	void PrimeNextBuffer();
+	void PrimeNextBuffer(TInt aNumBuffers, MPrimeNextBufferObserver* aObserver);
+	void DataReceived();
+
+	// Overload CActive IsActive() && Cancel()
+	TBool IsActive();
+	void Cancel();
 
 protected:
 	void SelfComplete();
@@ -280,11 +339,12 @@ protected:
 
 private:
 	RTimer iTimer;
+	CBufferFillerAO* iBufferFillerAO;
 	};
 
 // Buffering thread active object
 // Performs buffering when requested to by the streaming thread
-class CBufferingThreadAO : public CBufferingAO
+class CBufferingThreadAO : public CBufferingAO, public MPrimeNextBufferObserver
 	{
 public:
 	CBufferingThreadAO(TStreamingThreadData& aSharedData);
@@ -295,13 +355,16 @@ public:
 	// From CActive
 	void RunL();
 	void DoCancel();
+
+	// From MPrimeNextBufferObserver
+	void PrimeNextBufferCallBack(TInt aNumBuffers);
 	};
 
 // Streaming thread active object
 // Responsible for buffering in single thread mode
 // Responsible for buffering when play starts in multi thread mode
 // (Once enough buffers have been decoded, buffering is transfered to the buffering thread)
-class CStreamingThreadAO : public CBufferingAO
+class CStreamingThreadAO : public CBufferingAO, public MPrimeNextBufferObserver
 	{
 public:
 	CStreamingThreadAO(TStreamingThreadData& aSharedData, TBool& aBufferFlushPending, TThreadPriority& aBufferingThreadPriority);
@@ -313,6 +376,9 @@ public:
 	// From CActive
 	void RunL();
 	void DoCancel();
+
+	// From MPrimeNextBufferObserver
+	void PrimeNextBufferCallBack(TInt aNumBuffers);
 
 private:
 	TBool& iBufferFlushPending;
@@ -347,8 +413,7 @@ public:
 	void Position();
 
 	// From MMTSourceHandler
-	TInt OpenFile(const TDesC& aFileName, TMTSourceData& aSourceData);
-	TInt OpenStream(const TDesC& aStreamName, TMTSourceData& aSourceData);
+	TInt OpenSource(const TDesC& aSourceName, COggHttpSource* aHttpSource, TMTSourceData& aSourceData);
 	void SourceClose(TMTSourceData& aSourceData);
 
 	TInt Read(TMTSourceData& aSourceData, TDes8& aBuf);
@@ -375,14 +440,11 @@ private:
 class CStreamingThreadSourceHandler : public CBase, public MMTSourceHandler
 	{
 public:
-	CStreamingThreadSourceHandler(TStreamingThreadData& aSharedData);
+	CStreamingThreadSourceHandler(TStreamingThreadData& aSharedData, CStreamingThreadSourceReader& aSourceReader);
 	~CStreamingThreadSourceHandler();
 
-	void SetSourceReader(CStreamingThreadSourceReader* aSourceReader);
-
 	// From MMTSourceHandler
-	TInt OpenFile(const TDesC& aFileName, TMTSourceData& aSourceData);
-	TInt OpenStream(const TDesC& aStreamName, TMTSourceData& aSourceData);
+	TInt OpenSource(const TDesC& aSourceName, COggHttpSource* aHttpSource, TMTSourceData& aSourceData);
 	void SourceClose(TMTSourceData& aSourceData);
 
 	TInt Read(TMTSourceData& aSourceData, TDes8& aBuf);
@@ -396,7 +458,7 @@ public:
 
 private:
 	TStreamingThreadData& iSharedData;
-	CStreamingThreadSourceReader* iSourceReader;
+	CStreamingThreadSourceReader& iSourceReader;
 	};
 
 #if defined(PROFILE_PERF)
@@ -422,17 +484,28 @@ private:
 class COggMTSource : public CActive
 	{
 public:
-	COggMTSource(TAny* aSource, TMTSourceData& aSourceData);
+	enum TMTSourceType { EMTFile, EMTHttpSource };
+
+public:
+	COggMTSource(RFile* aFile, TMTSourceData& aSourceData);
+	COggMTSource(COggHttpSource* aHttpSource, TMTSourceData& aSourceData);
 	~COggMTSource();
 
 	TInt ReadBuf(TDes8& aBuf);
 
 	void Read();
 	void Read(RThread& aRequestThread, TRequestStatus& aRequestStatus);
+
+	TBool CheckRead();
+	void CheckAndStartRead();
+	void StartRead();
 	
 	TInt WaitForCompletion();
 	void WaitForCompletion(RThread& aRequestThread, TRequestStatus& aRequestStatus);
 
+	TBool Seekable()
+	{ return (iSourceType == EMTFile); }	
+	
 	// From CActive
 	void RunL();
 	void DoCancel();
@@ -442,7 +515,9 @@ private:
 
 private:
 	TMTSourceData& iSourceData;
+
 	TAny* iSource;
+	TMTSourceType iSourceType;
 	TPtr8 iBufPtr;
 
 	RThread* iRequestThread;
@@ -455,13 +530,16 @@ private:
 	};
 
 // Source Reader
-class CStreamingThreadSourceReader : public CActive
+class CStreamingThreadSourceReader : public CActive, public MHttpSourceObserver
 	{
+public:
+	enum TReaderState { EInactive, EReadRequest = 1, EHttpDataReceived = 2};
+
 public:
 	static CStreamingThreadSourceReader* NewLC(TStreamingThreadData& aThreadData);
 	~CStreamingThreadSourceReader();
 
-	TInt OpenFile();
+	TInt OpenSource();
 	void SourceClose();
 
 	TInt FileSize();
@@ -473,15 +551,25 @@ public:
 	void Read(RThread& aRequestThread, TRequestStatus& aRequestStatus);
 
 	void ReadRequest();
-	void ScheduleRead();
-
 	void ReadCancel();
 	void ReadCancel(RThread& aRequestThread, TRequestStatus& aRequestStatus);
+	
+	// From MHttpSourceObserver
+	void HttpStateUpdate(TInt aState);
+	void HttpOpenComplete();
+
+	void HttpDataReceived();
+	void HttpError(TInt aErr);
 
 	// From CActive
 	void RunL();
 	void DoCancel();
-	
+
+	void TimerComplete();
+	void SelfComplete();
+
+	void ScheduleRead();
+
 private:
 	CStreamingThreadSourceReader(TStreamingThreadData& aThreadData);
 	void ConstructL();
@@ -489,12 +577,15 @@ private:
 private:
 	TStreamingThreadData& iSharedData;
 	RFs iFs;
+
+	TReaderState iReaderState;
+	RTimer iTimer;
 	};
 
 // Playback engine (not an AO, although it handles call backs from the CMdaAudioOutputStream which is an AO)
 // The playback engine handles all access to the CMdaAudioOutputStream as well as managing the buffering and decoding process
-class CStreamingThreadPlaybackEngine : public CBase, public MMdaAudioOutputStreamCallback
-{
+class CStreamingThreadPlaybackEngine : public CBase, public MMdaAudioOutputStreamCallback, public MOggMessageObserver, public MPrimeNextBufferObserver
+	{
 public:
 	static CStreamingThreadPlaybackEngine* NewLC(TStreamingThreadData& aThreadData, CStreamingThreadSourceReader& aSourceReader);
 	~CStreamingThreadPlaybackEngine();
@@ -516,6 +607,12 @@ public:
 	TBool FlushBuffers();
 
 	void Shutdown();
+
+	// From MOggMessageObserver
+	void MessagePosted();
+
+	// From MPrimeNextBufferObserver
+	void PrimeNextBufferCallBack(TInt aNumBuffers);
 
 private:
 	CStreamingThreadPlaybackEngine(TStreamingThreadData& aThreadData, CStreamingThreadSourceReader& aSourceReader);
@@ -569,14 +666,14 @@ private:
 	CProfilePerfAO* iProfilePerfAO;
 	friend class CProfilePerfAO;
 #endif
-};
+	};
 
 // Listener active object (running in the UI thread)
 // Handles stream events (stream open, last buffer copied, play complete, streaming errors)
 class CStreamingThreadListener : public CActive
-{
+	{
 public:
-	enum TStreamingThreadListeningState { EListeningForOpenComplete, EListeningForStreamingStatus };
+	enum TStreamingThreadListeningState { EListeningForStreamOpen, EListeningForStreamingStatus };
 
 public:
 	CStreamingThreadListener(COggPlayback& aOggPlayback, TStreamingThreadData& aSharedData);
@@ -593,6 +690,6 @@ private:
 	TStreamingThreadData& iSharedData;
 
 	TStreamingThreadListeningState iListeningState;
-};
+	};
 
 #endif // _OggMulti_h

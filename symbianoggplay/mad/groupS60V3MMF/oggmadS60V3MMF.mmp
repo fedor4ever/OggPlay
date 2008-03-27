@@ -1,7 +1,7 @@
 TARGET                                  OggPlayMadi.dll 
 TARGETTYPE                              dll 
 UID                                     0x1000008d 0xF01FF685 
-CAPABILITY                              NONE 
+CAPABILITY                              NetworkServices
 SECUREID                                0xF01FF685 
 VENDORID                                0 
 

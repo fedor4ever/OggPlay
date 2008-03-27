@@ -26,6 +26,7 @@
 #include <OggShared.h>
 
 #include "TremorDecoder.h"
+#include "OggHttpSource.h"
 #include "OggLog.h"
 
 #if defined(MULTITHREAD_SOURCE_READS)
@@ -48,12 +49,72 @@ TInt CTremorDecoder::Clear()
 	return ov_clear(&iVf);
 	}
 
-TInt CTremorDecoder::Open(const TDesC& aFileName)
+TPtr8 CTremorDecoder::AsyncFeedGetBuffer(TAny* p, TInt bytes)
+	{
+	CTremorDecoder* self = (CTremorDecoder*) p;
+	return TPtr8(ogg_sync_bufferin(self->iVf.oy, bytes), bytes);
+	}
+
+TInt CTremorDecoder::AsyncFeedWrote(TAny* p, TInt bytes, TBool& aOpenComplete)
+	{
+	CTremorDecoder* self= (CTremorDecoder*)p;
+	if (!self || !self->iVf.oy)
+		return OV_EINVAL;
+
+	TInt ret= ogg_sync_wrote(self->iVf.oy, bytes);
+	if (ret == OGG_SUCCESS)
+		{
+		while (!(self->iVf.vi && self->iVf.vi->rate && self->iVf.vc && self->iVf.vc->vendor))
+			{
+			// Keep processing incoming stream until info and comment header is scanned
+			ret = ov_read(&(self->iVf), NULL, 0, &(self->iCurrentSection));
+			if (self->iVf.vi && self->iVf.vi->rate && self->iVf.vc && self->iVf.vc->vendor)
+				aOpenComplete = ETrue;
+
+			if (ret<1)
+				break;
+			}
+
+		if (!self->iVf.oy)
+			{
+			// recheck pointer for the case of close of decoder!?
+			return OV_EINVAL;
+			}
+
+		return self->iVf.oy->fifo_fill;
+		}
+
+	return ret;
+	}
+
+TInt CTremorDecoder::FifoLength(TAny* p, TBool aMax)
+	{
+	CTremorDecoder* self = (CTremorDecoder*) p;
+	if (aMax)
+		return 256*1024; // Actually limited only by free memory
+
+	if (!self || !self->iVf.oy)
+		return 0;
+
+	return self->iVf.oy->fifo_fill;
+	}
+
+TInt CTremorDecoder::Open(const TDesC& aFileName, COggHttpSource* aHttpSource)
 	{
 	Close();
 
+	iHttpSource = aHttpSource;
+	if (iHttpSource)
+		{
+		// Initialise the source
+		iHttpSource->AsyncFeeding(TAsyncCB(&FifoLength, &AsyncFeedGetBuffer, &AsyncFeedWrote, this));
+
+		// Open the stream
+		ov_asyncin_open(&iVf);
+  		}
+
 #if defined(MULTITHREAD_SOURCE_READS)
-	TInt err = iFile.Open(aFileName);
+	TInt err = iFile.Open(aFileName, iHttpSource);
 #else
 	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
 #endif
@@ -61,14 +122,17 @@ TInt CTremorDecoder::Open(const TDesC& aFileName)
 	if (err != KErrNone)
 		return err;
 
-	err = ov_open(&iFile, &iVf, NULL, 0);
-	if (err>=0)
-		vi = ov_info(&iVf, -1);
-	else
-		err = KErrCorrupt; 
+	if (!iHttpSource)
+		{
+		err = ov_open(&iFile, &iVf, NULL, 0);
+		if (err>=0)
+			vi = ov_info(&iVf, -1);
+		else
+			err = KErrCorrupt; 
 
-	if (err != KErrNone)
-		iFile.Close();
+		if (err != KErrNone)
+			iFile.Close();
+		}
 
 	return err;
 	}
@@ -78,7 +142,7 @@ TInt CTremorDecoder::OpenInfo(const TDesC& aFileName)
 	Close();
 
 #if defined(MULTITHREAD_SOURCE_READS)
-	TInt err = iFile.Open(aFileName);
+	TInt err = iFile.Open(aFileName, NULL);
 #else
 	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
 #endif
@@ -105,13 +169,39 @@ TInt CTremorDecoder::OpenComplete()
 
 void CTremorDecoder::Close()
 	{
-	Clear();
 	iFile.Close();
+	Clear();
 	}
 
-TInt CTremorDecoder::Read(TDes8& aBuffer,int Pos) 
+TInt CTremorDecoder::Read(TDes8& aBuffer, TInt aPos) 
 	{
-	return ov_read(&iVf, (char *) &(aBuffer.Ptr()[Pos]), aBuffer.MaxLength()-Pos, &iCurrentSection);
+	if (iHttpSource)
+		{
+		// The http code is implemented differently.
+		// Access to the buffers is NOT necessarily thread safe, so we have to use a lock
+		// By comparison the file stuff is thread safe because it copies the data instead.
+		// For small copies (i.e. the small reads that all the codecs use) this is potentially
+		// better than locking for two reasons: 1. There are no thread context switches required.
+		// 2. As long as no paging happens, the time spent blocking is a small fixed duration.
+		//
+		// Another problem is that we don't go through the RMTFile::Read() API so we have to
+		// make a check here to see if we are running low on data
+
+		// For future development, it would be good to make both streams and files work the same way
+		// (with slightly different buffering schemes to cope with the potentially very large difference in latency)
+		// See also my comments in OggMTFile.cpp
+		if (iHttpSource->CheckRead())
+			iFile.ReadRequest();
+
+		iHttpSource->Lock();
+		}
+
+	TInt err = ov_read(&iVf, (char *) &(aBuffer.Ptr()[aPos]), aBuffer.MaxLength()-aPos, &iCurrentSection);
+	
+	if (iHttpSource)
+		iHttpSource->Unlock();
+
+	return err;
 	}
 
 void CTremorDecoder::ParseTags(TDes& aTitle, TDes& aArtist, TDes& aAlbum, TDes& aGenre, TDes& aTrackNumber) 
@@ -171,16 +261,25 @@ void CTremorDecoder::GetString(TDes& aBuf, const char* aStr)
 
 TInt CTremorDecoder::Channels()
 	{
+	if (!vi)
+		vi = ov_info(&iVf, -1);
+
 	return vi->channels;
 	}
 
 TInt CTremorDecoder::Rate()
 	{
+	if (!vi)
+		vi = ov_info(&iVf, -1);
+
 	return vi->rate;
 	}
 
 TInt CTremorDecoder::Bitrate()
 	{
+	if (!vi)
+		vi = ov_info(&iVf, -1);
+
 	return vi->bitrate_nominal;
 	}
 
@@ -194,18 +293,21 @@ void CTremorDecoder::Setposition(TInt64 aPosition)
 
 	ov_time_seek(&iVf, pos);
 #endif
-}
+	}
 
 TInt64 CTremorDecoder::TimeTotal()
 	{
-	ogg_int64_t pos(0);
-	pos = ov_time_total(&iVf,-1);
+	ogg_int64_t oggTime;
+	oggTime = ov_time_total(&iVf, -1);
+
+	if (oggTime<0)
+		oggTime = 0;
 
 #if defined(SERIES60V3)
-	return pos;
+	return oggTime;
 #else
 	TInt64 time;
-	Mem::Copy(&time, &pos, 8);
+	Mem::Copy(&time, &oggTime, 8);
 
 	return time;
 #endif
@@ -213,7 +315,11 @@ TInt64 CTremorDecoder::TimeTotal()
 
 TInt CTremorDecoder::FileSize()
 	{
-	return (TInt) ov_raw_total(&iVf,-1);
+	ogg_int64_t oggSize = ov_raw_total(&iVf, -1);
+	if (oggSize<0)
+		oggSize = 0;
+
+	return (TInt) oggSize; 
 	}
 
 void CTremorDecoder::GetFrequencyBins(TInt32* aBins,TInt aNumberOfBins)
@@ -257,4 +363,14 @@ void CTremorDecoder::ThreadRelease()
 #if defined(MULTITHREAD_SOURCE_READS)
 	iFile.ThreadRelease();
 #endif
+	}
+
+TInt CTremorDecoder::Section()
+	{
+	return iCurrentSection;
+	}
+
+TBool CTremorDecoder::LastBuffer()
+	{
+	return iFile.LastBuffer();
 	}

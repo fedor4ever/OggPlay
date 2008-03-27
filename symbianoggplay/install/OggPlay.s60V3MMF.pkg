@@ -7,7 +7,7 @@
 
 :"OggPlay"
 
-#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay", "OggPlay"},(0xF000A661),1,72,1
+#{"OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay","OggPlay", "OggPlay"},(0xF000A661),1,80,2
 
 ;Supports Series 60 v3.0
 [0x101F7961],0,0,0,{"Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID","Series60ProductID"

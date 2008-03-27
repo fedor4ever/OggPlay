@@ -232,9 +232,56 @@ TInt CMadDecoder::Clear()
 	return KErrNone;
 	}
 
-TInt CMadDecoder::Open(const TDesC& aFileName)
+TInt CMadDecoder::Open(const TDesC& aFileName, COggHttpSource* aHttpSource)
 	{
-	return OpenInfo(aFileName);
+	Close();
+
+	iFileName = aFileName;
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt err = iFile.Open(aFileName, aHttpSource);
+#else
+	TInt err = iFile.Open(iFs, iFileName, EFileShareReadersOnly);
+#endif
+
+	if (err != KErrNone)
+		return err;
+
+	err = iFile.Size(iFileSize);
+	if (err != KErrNone)
+		{
+		iFile.Close();
+		return err;
+		}
+
+	// Initialise mad structures
+	mad_stream_init(&iStream);
+	mad_frame_init(&iFrame);
+	mad_synth_init(&iSynth);
+
+	// Init Xing / Lame tag
+	tag_init(&iXLtag);
+
+	// Dummy read to fill header values
+	err = MadRead(NULL, 0);
+	if (err != KErrNone)
+		{
+		iFile.Close();
+		return err;
+		}
+
+	if (iId3tag)
+		return KErrNone; // there was an ID3v2 tag at the beginning. Good.
+
+	if (!aHttpSource)
+		{
+		// If there wasn't we open the file and look for an ID3v1 tag
+		RFile* file = new(ELeave) RFile;
+		err = file->Open(iFs, iFileName, EFileShareReadersOnly);
+		if (err == KErrNone)
+			iFiletag = id3_file_fdopen((int) file, ID3_FILE_MODE_READONLY);
+		}
+
+	return KErrNone;
 	}
 
 TInt CMadDecoder::OpenInfo(const TDesC& aFileName)
@@ -243,7 +290,7 @@ TInt CMadDecoder::OpenInfo(const TDesC& aFileName)
 
 	iFileName = aFileName;
 #if defined(MULTITHREAD_SOURCE_READS)
-	TInt err = iFile.Open(iFileName);
+	TInt err = iFile.Open(aFileName, NULL);
 #else
 	TInt err = iFile.Open(iFs, iFileName, EFileShareReadersOnly);
 #endif
@@ -1122,4 +1169,13 @@ void CMadDecoder::ThreadRelease()
 #endif
 	}
 
+TInt CMadDecoder::Section()
+	{
+	return KErrNotFound;
+	}
+
+TBool CMadDecoder::LastBuffer()
+	{
+	return iFile.LastBuffer();
+	}
 #endif // MP3_SUPPORT

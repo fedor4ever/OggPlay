@@ -40,9 +40,9 @@
 #include "OggPlay.hrh"
 #include <OggPlay.rsg>
 
-// #define BETA_VERSION
+#define BETA_VERSION
 #if defined(BETA_VERSION)
-_LIT(KBetaTxt, " beta2");
+_LIT(KBetaTxt, " beta 2");
 #endif
 
 #if defined(SERIES60)

@@ -104,6 +104,7 @@
 #define ogg_text_string_12 "(playlists)"
 #define ogg_text_string_13 "(unassigned)"
 #define ogg_text_string_14 "To change the volume, use the right & left arrow keys, while the song is playing"
+#define ogg_text_string_15 "(streams)"
 
 // S60 Hotkey settings
 #define ogg_user_hotkey              "Hotkeys"

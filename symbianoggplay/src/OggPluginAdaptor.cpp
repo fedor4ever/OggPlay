@@ -180,11 +180,11 @@ void COggPluginAdaptor::ParseMetaDataValueL(CMMFMetaDataEntry &aMetaData, TDes &
 	CleanupStack::PopAndDestroy(tempBuf);
 	}
 
-TInt COggPluginAdaptor::Open(const TDesC& aFileName, TUid aControllerUid)
-{
-    TRAPD(err, OpenL(aFileName, aControllerUid));
+TInt COggPluginAdaptor::Open(const TOggSource& aSource, TUid aControllerUid)
+	{
+    TRAPD(err, OpenL(aSource.iSourceName, aControllerUid));
     return err;
-}
+	}
 
 void COggPluginAdaptor::Pause()
 	{
@@ -399,7 +399,7 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* aObject, TInt aPreviousStat
 	if (aCurrentState == CMdaAudioClipUtility::ENotReady)
 		{
 		// Error opening file
-		iObserver->NotifyFileOpen(aErr);
+		iObserver->NotifySourceOpen(aErr);
 		}
 
 	if ((aPreviousState == CMdaAudioClipUtility::ENotReady) && (aCurrentState == CMdaAudioClipUtility::EOpen))
@@ -424,7 +424,7 @@ void COggPluginAdaptor::MoscoStateChangeEvent(CBase* aObject, TInt aPreviousStat
 			aErr = iPlayer->PlayControllerCustomCommandSync(packedMsg, EOggPlayControllerStreamWait, KNullDesC8, KNullDesC8);
 			}
 
-		iObserver->NotifyFileOpen(aErr);
+		iObserver->NotifySourceOpen(aErr);
 		}
 
     if (aCurrentState == CMdaAudioClipUtility::EPlaying)
@@ -579,6 +579,12 @@ void COggPluginAdaptor::RetrieveFileInfo(CMdaAudioRecorderUtility* aUtil, TOggFi
 
 	if (aFullInfo)
 	 	GetAudioProperties(aFileInfo, aUtil, aControllerUid);
+	}
+
+TBool COggPluginAdaptor::Seekable()
+	{
+	// MMF playback can only seek when playing
+	return (iState == EPlaying);
 	}
 
 #endif // PLUGIN_SYSTEM

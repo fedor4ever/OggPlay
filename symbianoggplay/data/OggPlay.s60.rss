@@ -85,7 +85,7 @@ RESOURCE MENU_BAR r_oggplay_menubar
 // Dialogs
 RESOURCE ABOUTTEXT r_dialog_about
 	{
-	version = "OggPlay 1.72";
+	version = "OggPlay 1.80";
 	copyright = ogg_about_cpr;
 	link = ogg_about_lnk;
 	copyright2 = ogg_about_cpr2;
@@ -207,6 +207,26 @@ RESOURCE DIALOG r_dialog_files_search
     playlistsFoundStr =ogg_filescan_label3;
 	};
     }	
+  };
+}
+
+RESOURCE DIALOG r_dialog_open
+{
+  flags = EEikDialogFlagWait | EAknProgressNoteFlags;
+  buttons = R_AVKON_SOFTKEYS_CANCEL;
+
+  items =
+  {
+    DLG_LINE
+    {
+      type = EAknCtNote;
+      id = EOggProgressNote;
+      control = AVKON_NOTE
+        {
+        layout = EProgressLayout;
+        singular_label = "Connecting...";
+        };
+    }
   };
 }
 
@@ -1000,6 +1020,7 @@ RESOURCE TBUF r_ogg_string_11 { buf=ogg_text_string_11; }
 RESOURCE TBUF r_ogg_string_12 { buf=ogg_text_string_12; }
 RESOURCE TBUF r_ogg_string_13 { buf=ogg_text_string_13; }
 RESOURCE TBUF r_ogg_string_14 { buf=ogg_text_string_14; }
+RESOURCE TBUF r_ogg_string_15 { buf=ogg_text_string_15; }
 
 
 RESOURCE TBUF r_ogg_play           { buf="OggPlay"; }               // Main view title (E61 only) 

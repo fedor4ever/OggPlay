@@ -2,7 +2,7 @@
 TARGET                                  OggPlay.exe 
 TARGETTYPE                              EXE 
 UID                                     0x100039CE 0xF000A661 
-CAPABILITY                              NONE 
+CAPABILITY                              NetworkServices
 SECUREID                                0xF000A661 
 VENDORID                                0 
 EPOCSTACKSIZE                           0x8000 
@@ -27,7 +27,7 @@ END
 
 START RESOURCE OggPlay_reg.rss 
   TARGETPATH                              \private\10003A3F\apps 
-END  
+END
 
 
 SOURCEPATH                              ..\vorbis
@@ -61,6 +61,8 @@ SOURCE                                  OggThreadClasses.cpp
 SOURCE                                  OggRateConvert.cpp 
 SOURCE                                  OggAbsPlayback.cpp
 SOURCE                                  OggMTFile.cpp
+SOURCE                                  OggHttpSource.cpp
+SOURCE                                  OggMessageQueue.cpp
 
 LANG                                    SC EN FR GE DU IT SP SW TU DA PO RU 
 LIBRARY                                 aknskins.lib 
@@ -94,6 +96,10 @@ LIBRARY                                 OggPlayFlaci.lib
 LIBRARY                                 OggPlayMadi.lib 
 LIBRARY                                 MediaClientAudio.lib 
 LIBRARY                                 MMFControllerFramework.lib 
+
+LIBRARY                                 esock.lib
+LIBRARY                                 insock.lib
+LIBRARY                                 Inetprotutil.lib 
 
 START BITMAP OggPlayIcon.mbm 
   TARGETPATH                              \resource\apps 

@@ -40,6 +40,10 @@ chSTR2(__LINE__) "):" #desc)
 // Enable codec performance profiling
 // #define PROFILE_PERF
 
+// Enable buffer debugging code
+// #define BUFFER_FLOW_DEBUG
+
+
 // Enable source (i.e. file or stream) reading using the streaming thread
 #define MULTITHREAD_SOURCE_READS
 

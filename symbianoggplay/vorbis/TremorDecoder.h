@@ -29,6 +29,7 @@
 #include "OggMTFile.h"
 #endif
 
+class COggHttpSource;
 class CTremorDecoder: public CBase, public MDecoder
 	{
 public:
@@ -41,7 +42,7 @@ public:
 	~CTremorDecoder();
 
 	TInt Clear();
-	TInt Open(const TDesC& aFilename);
+	TInt Open(const TDesC& aFileName, COggHttpSource* aHttpSource);
 	TInt OpenInfo(const TDesC& aFilename);
 	TInt OpenComplete();
 
@@ -63,6 +64,13 @@ public:
 	void PrepareToPlay();
 	void ThreadRelease();
 
+	static TInt FifoLength(TAny* p, TBool aMax);
+	static TPtr8 AsyncFeedGetBuffer(TAny* p, TInt bytes);
+	static TInt AsyncFeedWrote(TAny* p, TInt bytes, TBool& aOpenComplete);
+
+	TInt Section();
+	TBool LastBuffer();
+
 private:
 	void GetString(TDes& aBuf, const char* aStr);
 
@@ -78,6 +86,8 @@ private:
 #else
 	RFile iFile;
 #endif
+
+	COggHttpSource* iHttpSource;
 	};
 
 #endif

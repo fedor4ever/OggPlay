@@ -25,7 +25,6 @@
 #include <f32file.h>
 
 class COggMTSource;
-class MMTSourceHandler;
 class TMTSourceData
 	{
 public:
@@ -46,11 +45,11 @@ public:
 	TInt iReadIdx;
 	};
 
+class COggHttpSource;
 class MMTSourceHandler
 	{
 public:
-	virtual TInt OpenFile(const TDesC& aFileName, TMTSourceData& aSourceData) = 0;
-	virtual TInt OpenStream(const TDesC& aStreamName, TMTSourceData& aSourceData) = 0;
+	virtual TInt OpenSource(const TDesC& aSourceName, COggHttpSource* aHttpSource, TMTSourceData& aSourceData) = 0;
 	virtual void SourceClose(TMTSourceData& aSourceData) = 0;
 
 	virtual TInt Read(TMTSourceData& aSourceData, TDes8& aBuf) = 0;
@@ -67,10 +66,8 @@ public:
 // For example, playback start is noticibly slower on the Sendo with larger buffers (so use smaller ones!)
 #if defined(UIQ) || (defined(SERIES60) && !defined(PLUGIN_SYSTEM)) // aka S60V1
 const TInt KDefaultRFileMTBufSize = 65536; // 2 x 32K
-#elif !defined(SERIES60V3)
-const TInt KDefaultRFileMTBufSize = 131072; // 2 x 64K
 #else
-const TInt KDefaultRFileMTBufSize = 262144; // 2 x 128K
+const TInt KDefaultRFileMTBufSize = 131072; // 2 x 64K
 #endif
 
 class RMTFile
@@ -81,10 +78,11 @@ public:
 public:
 	RMTFile(MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHandler2);
 
-	TInt Open(const TDesC& aFileName, TInt aBufSize = KDefaultRFileMTBufSize);
+	TInt Open(const TDesC& aFileName, COggHttpSource* aHttpSource, TInt aBufSize = KDefaultRFileMTBufSize);
 	void Close();
 
 	TInt Read(TDes8& aBuf);
+	void ReadRequest();
 
 	TInt Seek(TSeek aMode, TInt &aPos);
 	TInt Size(TInt& aSize);
@@ -92,6 +90,9 @@ public:
 	void EnableDoubleBuffering();
 	void DisableDoubleBuffering();
 	void ThreadRelease();
+
+	TBool LastBuffer()
+	{ return iSourceData.iLastBuffer; }
 
 private:
 	void CopyData(TUint8* aBuf, TInt aSize);

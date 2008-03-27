@@ -29,6 +29,7 @@
 #include "OggRateConvert.h"
 #include "TremorDecoder.h"
 #include "OggAbsPlayback.h"
+#include "OggMessageQueue.h"
 #include "OggMultiThread.h"
 
 // No buffering buffers
@@ -136,7 +137,8 @@ public:
 	TInt FullInfo(const TDesC& aFileName, TUid aControllerUid, MFileInfoObserver& aFileInfoObserver);
 	void InfoCancel();
 
-	TInt Open(const TDesC& aFileName, TUid aControllerUid);
+	TInt Open(const TOggSource& aSource, TUid aControllerUid);
+	void OpenComplete(TInt aErr);
 
 	void Pause();
 	void Play(); 
@@ -145,17 +147,19 @@ public:
 
 	void SetVolume(TInt aVol);
 	void SetPosition(TInt64 aPos);
+	TBool Seekable();
 
 	TInt64 Position();
 	TInt Volume();
 
 	const TInt32* GetFrequencyBins();
 
+
 	// From MOggSampleRateFillBuffer
 	TInt GetNewSamples(TDes8 &aBuffer);
 
 	// New functions (Multi thread playback fns.)
-	TBool PrimeBuffer(HBufC8& buf);
+	TBool PrimeBuffer(HBufC8& buf, TBool& aNewSection);
 
 	TInt SetBufferingMode(TBufferingMode aNewBufferingMode);
 	void SetThreadPriority(TStreamingThreadPriority aNewThreadPriority);
@@ -169,8 +173,8 @@ public:
 	void SetDecoderPosition(TInt64 aPos);
 	void SetSampleRateConverterVolumeGain(TGainType aGain);
 
-	void NotifyOpenComplete(TInt aErr);
-	void NotifyStreamingStatus(TInt aErr);
+	void NotifyStreamOpen(TInt aErr);
+	TBool NotifyStreamingStatus(TStreamingEvent aEvent, TInt aErr);
 
 	void PrepareToSetPosition();
 	void PrepareToPlay();
@@ -181,7 +185,7 @@ private:
 	TInt SetAudioCaps(TInt theChannels, TInt theRate);
 
 	void SamplingRateSupportedMessage(TBool aConvertRate, TInt aRate, TBool aConvertChannel, TInt aNbOfChannels);
-	MDecoder* GetDecoderL(const TDesC& aFileName);
+	MDecoder* GetDecoderL(const TDesC& aFileName, COggHttpSource* aHttpSource);
 
 	void StartAudioStreamingCallBack();
 	static TInt StartAudioStreamingCallBack(TAny* aPtr);
@@ -193,8 +197,6 @@ private:
 	static TInt StopAudioStreamingCallBack(TAny* aPtr);
 
 	void CancelTimers();
-
-	TInt AttachToFs();
 
 	TInt SetAudioProperties(TInt aSampleRate, TInt aChannels);
 	void StartStreaming();
@@ -233,6 +235,7 @@ private:
 	TInt iBytesSinceLastFrequencyBin;
 	TInt iMaxBytesBetweenFrequencyBins;
 	TInt64 iLastPlayTotalBytes;
+	TInt64 iSectionStartBytes;
 
 	// Communication with the decoder
 	MDecoder* iDecoder;
@@ -246,7 +249,6 @@ private:
 
 	CThreadPanicHandler* iStreamingThreadPanicHandler;
 	CStreamingThreadCommandHandler* iStreamingThreadCommandHandler;
-	CStreamingThreadSourceHandler* iStreamingThreadSourceHandler;
 	CBufferingThreadAO* iBufferingThreadAO;
 	CStreamingThreadListener* iStreamingThreadListener;
 
@@ -262,6 +264,10 @@ private:
 	TAudioDither iMp3LeftDither;
 	TAudioDither iMp3RightDither;
 	mad_fixed_t iMp3Random;
+
+	TInt iSection;
+	TBool iNewSection;
+	TBool iRestartPending;
 	};
     
 #endif // _OggTremor_h

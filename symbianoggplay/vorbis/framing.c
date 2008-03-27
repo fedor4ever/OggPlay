@@ -586,7 +586,7 @@ int ogg_sync_destroy(ogg_sync_state *oy){
   return OGG_SUCCESS;
 }
 
-unsigned char *ogg_sync_bufferin(ogg_sync_state *oy, long bytes){
+EXPORT_C unsigned char *ogg_sync_bufferin(ogg_sync_state *oy, long bytes){
 
   /* [allocate and] expose a buffer for data submission.
 
@@ -630,7 +630,7 @@ unsigned char *ogg_sync_bufferin(ogg_sync_state *oy, long bytes){
   return oy->fifo_head->buffer->data;
 }
 
-int ogg_sync_wrote(ogg_sync_state *oy, long bytes){ 
+EXPORT_C int ogg_sync_wrote(ogg_sync_state *oy, long bytes){ 
   if(!oy->fifo_head)return OGG_EINVAL;
   if(oy->fifo_head->buffer->size-oy->fifo_head->length-oy->fifo_head->begin < 
      bytes)return OGG_EINVAL;
@@ -953,8 +953,13 @@ static void _span_queued_page(ogg_stream_state *os){
 
 int ogg_stream_pagein(ogg_stream_state *os, ogg_page *og){
 
-  int serialno=ogg_page_serialno(og);
-  int version=ogg_page_version(og);
+  int serialno;
+  int version;
+
+  if (! og->header) return OGG_HOLE;
+
+  serialno=ogg_page_serialno(og);
+  version=ogg_page_version(og);
 
   /* check the serial number */
   if(serialno!=os->serialno){

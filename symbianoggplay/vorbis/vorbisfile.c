@@ -246,12 +246,15 @@ static int _fetch_headers(OggVorbis_File *vf,
 			  vorbis_info *vi,
 			  vorbis_comment *vc,
 			  ogg_uint32_t *serialno,
-			  ogg_page *og_ptr){
+                          ogg_page *og_subm){
   ogg_page og={0,0,0,0};
   ogg_packet op={0,0,0,0,0,0};
+  ogg_page *og_ptr;
   int i,ret;
   
-  if(!og_ptr){
+  if(og_subm){
+    og_ptr= og_subm;
+  }else{
     ogg_int64_t llret=_get_next_page(vf,&og,CHUNKSIZE);
     if(llret==OV_EREAD)return(OV_EREAD);
     if(llret<0)return OV_ENOTVORBIS;
@@ -283,11 +286,21 @@ static int _fetch_headers(OggVorbis_File *vf,
       }
       i++;
     }
-    if(i<3)
-      if(_get_next_page(vf,og_ptr,CHUNKSIZE)<0){
+    if(i<3) {
+      if(og_subm){
+        ret= _get_next_page(vf,og_ptr,0);
+        if (ret==OV_FALSE) {
+          vf->headers_to_read=3-i;
+          break;
+        } else if (ret<0) {
+          ret=OV_EBADHEADER;
+          goto bail_header;
+        }
+      }else if(_get_next_page(vf,og_ptr,CHUNKSIZE)<0){
 	ret=OV_EBADHEADER;
 	goto bail_header;
       }
+    }
   }
 
   ogg_packet_release(&op);
@@ -421,7 +434,7 @@ static void _make_decode_ready(OggVorbis_File *vf){
     vorbis_synthesis_init(&vf->vd,vf->vi+vf->current_link);
   }else{
     vorbis_synthesis_init(&vf->vd,vf->vi);
-  }    
+  }
   vorbis_block_init(&vf->vd,&vf->vb);
   vf->ready_state=INITSET;
   vf->bittrack=0;
@@ -578,10 +591,9 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
     if(vf->ready_state>=OPENED){
       int ret;
       if(!readp){
-	ret=0;
-	goto cleanup;
-      }
-      if((ret=(int)_get_next_page(vf,&og,-1))<0){
+        ret=ogg_sync_pageout(vf->oy,&og);
+        if(ret<=0) goto cleanup;
+      } else if((ret=_get_next_page(vf,&og,-1))<0){
 	ret=OV_EOF; /* eof. leave unitialized */
 	goto cleanup;
       }
@@ -652,9 +664,19 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	  vf->current_link++;
 	  link=0;
 	}
+      } else while(vf->headers_to_read){
+        int result=ogg_stream_packetout(vf->os,&op);
+        if(result<=0){
+          break;
       }
-      
+        ret=vorbis_synthesis_headerin(vf->vi,vf->vc,&op);
+        if(!ret) {
+          vf->headers_to_read--;
+        }
+      }
+      if(!vf->headers_to_read){
       _make_decode_ready(vf);
+    }
     }
     ogg_stream_pagein(vf->os,&og);
   }
@@ -1552,12 +1574,18 @@ EXPORT_C vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
 	    *section) set to the logical bitstream number */
 
 EXPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int bytes_req,int *bitstream){
-  int i,j;
+  int i,j, ret;
 
   ogg_int32_t **pcm = NULL;
   long samples=0;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
+
+  if (!buffer) { /* suck one packet if no output buffer given */
+    ret= _fetch_and_process_packet(vf,vf->datasource?1:0,1);
+    if(bitstream)*bitstream=vf->current_link;
+    return ret;
+  }
 
   while(1){
     if(vf->ready_state==INITSET){
@@ -1567,7 +1595,7 @@ EXPORT_C long ov_read(OggVorbis_File *vf,char *buffer,int bytes_req,int *bitstre
 
     /* suck in another packet */
     {
-      int ret=_fetch_and_process_packet(vf,1,1);
+      ret=_fetch_and_process_packet(vf,vf->datasource?1:0,1);
       if(ret==OV_EOF)
 	return(0);
       if(ret<=0)
@@ -1617,4 +1645,33 @@ EXPORT_C void ov_getFreqBin(OggVorbis_File *vf, int active, ogg_int32_t *freqBin
 EXPORT_C int ov_reqFreqBin(OggVorbis_File *vf)
 {
     return vf->vb.performAnalysys;
+}
+
+/* Open the OggVorbis file for asynchronous feeding
+   To feed source data:
+      - Expose a buffer using ogg_sync_bufferin().
+      - Read data into the buffer.
+      - Call ogg_sync_wrote() to tell the synchronization layer how many bytes you wrote into the buffer. 
+   Use ov_read() for reading decoded output.
+*/
+EXPORT_C int ov_asyncin_open(OggVorbis_File *vf)
+{
+  /* init the framing state */
+  if (! vf->oy) {
+    vf->oy=ogg_sync_create();
+  } else {
+    ogg_sync_reset(vf->oy);
+  }
+  
+  /* Set up a 'single' (current) logical bitstream entry for partial open */
+  vf->links=1;
+  if (! vf->vi) {
+    vf->vi=(vorbis_info*)_ogg_calloc(vf->links,sizeof(*vf->vi));
+  }
+  vf->vc=(vorbis_comment*)_ogg_calloc(vf->links,sizeof(*vf->vc));
+  vf->os=ogg_stream_create(-1); /* fill in the serialno later */
+
+  vf->ready_state= OPENED;
+
+  return 0;
 }

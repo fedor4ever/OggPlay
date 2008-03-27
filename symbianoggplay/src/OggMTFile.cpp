@@ -20,6 +20,9 @@
 
 // Support for multi-thread source reads
 #if defined(MULTITHREAD_SOURCE_READS)
+#include "OggHttpSource.h"
+#include "OggRateConvert.h"
+#include "OggMultiThread.h"
 #include "OggMTFile.h"
 #include "OggLog.h"
 
@@ -29,7 +32,7 @@ RMTFile::RMTFile(MMTSourceHandler& aSourceHandler1, MMTSourceHandler& aSourceHan
 	Mem::FillZ(&iSourceData, sizeof(TMTSourceData));
 	}
 
-TInt RMTFile::Open(const TDesC& aFileName, TInt aBufSize)
+TInt RMTFile::Open(const TDesC& aFileName, COggHttpSource* aHttpSource, TInt aBufSize)
 	{
 	__ASSERT_DEBUG(!iSourceData.iBuf, User::Panic(_L("RDBFile::Open"), 0));
 
@@ -41,7 +44,7 @@ TInt RMTFile::Open(const TDesC& aFileName, TInt aBufSize)
 	iSourceData.iHalfBufSize = aBufSize >> 1;
 	iSourceData.iReadIdx = aBufSize;
 	iSourceHandler = &iSourceHandler1;
-	return iSourceHandler->OpenFile(aFileName, iSourceData);
+	return iSourceHandler->OpenSource(aFileName, aHttpSource, iSourceData);
 	}
 
 void RMTFile::Close()
@@ -53,7 +56,7 @@ void RMTFile::Close()
 		iSourceHandler = (threadId == iThreadId) ? &iSourceHandler1 : &iSourceHandler2;
 		}
 
-	// Close the file
+	// Close the source
 	iSourceHandler->SourceClose(iSourceData);
 
 	// Free allocated memory
@@ -153,6 +156,18 @@ TInt RMTFile::Read(TDes8& aBuf)
 	return KErrNone;
 	}
 
+void RMTFile::ReadRequest()
+	{
+	// Get the source handler
+	if (!iSourceHandler)
+		{
+		TThreadId threadId = RThread().Id();
+		iSourceHandler = (threadId == iThreadId) ? &iSourceHandler1 : &iSourceHandler2;
+		}
+
+	iSourceHandler->ReadRequest(iSourceData);
+	}
+
 void RMTFile::CopyData(TUint8* aBuf, TInt aSize)
 	{
 	if ((iSourceData.iReadIdx+aSize)<=iSourceData.iBufSize)
@@ -226,7 +241,9 @@ void RMTFile::EnableDoubleBuffering()
 		}
 
 	// Read some data (this is to help with playback start, EnableDoubleBuffering() gets called just before Play())
-	if (!iSourceData.iLastBuffer && (iSourceData.DataSize()<=iSourceData.iHalfBufSize))
+	// Only do this for files (Seekable() source == file source, at the moment), http sources work differently.
+	// The way forward really is to get the http streaming code using the same buffering scheme (and change to multi-buffer, http more, smaller buffers. Files fewer, larger buffers)
+	if (iSourceData.iSource->Seekable() && !iSourceData.iLastBuffer && (iSourceData.DataSize()<=iSourceData.iHalfBufSize))
 		iSourceHandler->Read(iSourceData);
 	}
 
@@ -241,7 +258,9 @@ void RMTFile::DisableDoubleBuffering()
 		iSourceHandler = (threadId == iThreadId) ? &iSourceHandler1 : &iSourceHandler2;
 		}
 
-	iSourceHandler->ReadCancel(iSourceData);
+	// Cancel any outstanding reads (wait for them to complete)
+	if (iSourceData.iSource->Seekable())
+		iSourceHandler->ReadCancel(iSourceData);
 	}
 
 void RMTFile::ThreadRelease()

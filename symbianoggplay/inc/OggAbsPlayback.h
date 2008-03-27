@@ -105,8 +105,10 @@ public:
 	virtual void NotifyPlayInterrupted() = 0;
 
 	virtual void NotifyStreamOpen(TInt aErr) = 0;
-	virtual void NotifyFileOpen(TInt aErr) = 0;
+	virtual void NotifySourceOpenState(TInt aState) = 0;
+	virtual void NotifySourceOpen(TInt aErr) = 0;
 	virtual void NotifyPlayStarted() = 0;
+	virtual void NotifyNextTrack() = 0;
 	virtual void NotifyFatalPlayError() = 0;
 	};
 
@@ -114,6 +116,23 @@ class MFileInfoObserver
 	{
 public:
 	virtual void FileInfoCallback(TInt aErr, const TOggFileInfo& aFileInfo) = 0;
+	};
+
+class TOggSource
+	{
+public:
+	enum TOggSourceType { EFile, EStream };
+
+public:
+	TOggSource& operator =(const TFileName& aFileName)
+	{ iSourceName = aFileName; return *this; }
+
+	TBool IsStream() const
+	{ return iSourceType == EStream; }
+
+public:
+	TFileName iSourceName;
+	TOggSourceType iSourceType;	
 	};
 
 class CAbsPlayback : public CBase
@@ -124,6 +143,7 @@ public:
 		{
 		EClosed,		// The playback engine is closed (playback is not possible)
 		EStreamOpen,	// The playback engine is open, but not ready (playback is not possible)
+		EOpening,       // The playback engine is opening a file or stream (playback is not possible)
 		EStopped,		// The playback engine is ready to play
 		EPaused,		// The playback engine is paused
 		EPlaying		// The playback engine is playing 
@@ -140,7 +160,7 @@ public:
 	virtual void InfoCancel() = 0;
 
 	// Open a file and prepare playback
-	virtual TInt Open(const TDesC& aFileName, TUid aControllerUid) = 0;
+	virtual TInt Open(const TOggSource& aSource, TUid aControllerUid) = 0;
 	virtual const TOggFileInfo& DecoderFileInfo();
 
 	virtual void Pause() = 0;
@@ -150,6 +170,7 @@ public:
 
 	virtual void SetVolume(TInt aVol) = 0;
 	virtual void SetPosition(TInt64 aPos) = 0;
+	virtual TBool Seekable() = 0;
 
 	virtual TInt64 Position() = 0;
 	virtual TInt Volume() = 0;

@@ -39,6 +39,7 @@ enum {
   EOggViewBySubFolder,
   EOggViewByFileName,
   EOggViewByPlayList,
+  EOggViewByStreams,
   EOggViewRebuild,
 
   EOggSkinOne,
@@ -79,6 +80,8 @@ enum {
   EOggFileSearchControl,
   EOggFileSearchControlDialog,
 
+  EOggProgressNote,
+  
   EOggCodecSelection,  //For the Codec Settings view
   EOggPlaybackOptions,
 

@@ -2,7 +2,7 @@
 TARGET                                  OggPlayFlaci.dll 
 TARGETTYPE                              dll 
 UID                                     0x1000008d 0xF020202B 
-CAPABILITY                              NONE 
+CAPABILITY                              NetworkServices
 SECUREID                                0xF020202B 
 VENDORID                                0 
 /* [+] */ macro                         FLAC__NO_DLL FLAC__INTEGER_ONLY_LIBRARY FLAC__HAS_OGG 

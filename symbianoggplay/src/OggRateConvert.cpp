@@ -21,13 +21,13 @@
 
 COggSampleRateConverter::COggSampleRateConverter()
 : iGain(ENoGain)
-{
-}
+	{
+	}
 
 void COggSampleRateConverter::Init(MOggSampleRateFillBuffer *aSampleRateFillBufferProvider,
 TInt /*aBufferSize*/, TInt aMinimumSamplesInBuffer, TInt aInputSampleRate,
 TInt aOutputSampleRate, TInt aInputChannel, TInt aOutputChannel)
-{
+	{
     iFillBufferProvider = aSampleRateFillBufferProvider;
     iMinimumSamplesInBuffer = aMinimumSamplesInBuffer;
     iRateConvertionNeeded = aInputSampleRate != aOutputSampleRate;
@@ -40,85 +40,85 @@ TInt aOutputSampleRate, TInt aInputChannel, TInt aOutputChannel)
 
     iSamplingRateFactor = static_cast<TReal> (aInputSampleRate) /aOutputSampleRate;
     if (iRateConvertionNeeded)
-    {
+		{
         __ASSERT_ALWAYS(iSamplingRateFactor>1, User::Panic(_L("Sampling rate factor should be >1"), 0));
         iDtb = static_cast<TUint32> (iSamplingRateFactor*(1<<15) + 0.5);    /* Fixed-point representation */
         iTime = 0;
         iValidX1 = EFalse;
         ix1 = 0;
 		ix2 = 0;
-    }
+		}
 
     if (iRateConvertionNeeded || iChannelMixingNeeded)
-    {
+		{
 		if (!iIntermediateBuffer)
 			iIntermediateBuffer = HBufC8::NewL(4096);
-    }
+		}
 	else
-	{
+		{
 		delete iIntermediateBuffer;
 		iIntermediateBuffer = NULL;
+		}
 	}
-}
 
 COggSampleRateConverter::~COggSampleRateConverter()
-{
+	{
 	delete iIntermediateBuffer;
-}
+	}
 
 
 void COggSampleRateConverter::SetVolumeGain(TGainType aGain)
-{
+	{
     iGain = aGain;
-}
+	}
 
 TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
-{
-    long ret=0;
-    aBuffer.SetLength(0);
+	{
+    TInt ret = 0;
+	TInt bufLength = aBuffer.Length();
 
-    TPtr8 interBuffer(NULL, 0);
+	TPtr8 interBuffer(NULL, 0);
     if (iIntermediateBuffer)
         interBuffer.Set(iIntermediateBuffer->Des());
   
     // Audio Processing Routing
 	// Request frequency bins for each complete buffer
     switch( (iChannelMixingNeeded <<1) + iRateConvertionNeeded )
-    {
-    case 0:
-        // No Channel mixing, No rate convertion
-        while (aBuffer.Length() <= iMinimumSamplesInBuffer) 
-        {
-            ret = iFillBufferProvider->GetNewSamples(aBuffer);
-            if (ret <=0)
-				break;
-        }
-        break;
+	    {
+		case 0:
+	        // No Channel mixing, No rate convertion
+		    while (aBuffer.Length() <= iMinimumSamplesInBuffer) 
+				{
+	            ret = iFillBufferProvider->GetNewSamples(aBuffer);
+		        if (ret<=0)
+					break;
+				}
+			break;
         
-    case 1:
-        // No Channel mixing, rate convertion
-        while(aBuffer.Length() <= iMinimumSamplesInBuffer)
-        {
-            interBuffer.SetLength(0);
+		case 1:
+			// No Channel mixing, rate convertion
+			while(aBuffer.Length() <= iMinimumSamplesInBuffer)
+				{
+		        interBuffer.SetLength(0);
 
-            TInt remains = (TInt) ((aBuffer.MaxLength() - aBuffer.Length()) * iSamplingRateFactor) - 4;
-            if (remains<4096)
-                interBuffer.Set((TUint8 *) interBuffer.Ptr(), 0, remains);
+			    TInt remains = (TInt) ((aBuffer.MaxLength() - aBuffer.Length()) * iSamplingRateFactor) - 4;
+				if (remains<4096)
+					interBuffer.Set((TUint8 *) interBuffer.Ptr(), 0, remains);
 
-            ret = iFillBufferProvider->GetNewSamples(interBuffer);
-            if (ret<=0)
-				break;
+				ret = iFillBufferProvider->GetNewSamples(interBuffer);
+				if (ret<=0)
+					break;
 
-	        (this->*iConvertRateFn)(interBuffer, aBuffer);			
-        }
-        break;
+				(this->*iConvertRateFn)(interBuffer, aBuffer);			
+				}
+			break;
 
-    case 2:
-        // Channel mixing, no rate convertion
-        {
+		case 2:
+			// Channel mixing, no rate conversion
+	        {
             TPtr8 outBufferPtr((TUint8*) aBuffer.Ptr(), aBuffer.MaxLength());
             while(aBuffer.Length() <= iMinimumSamplesInBuffer)
-            {
+		        {
                 interBuffer.SetLength(0);
                 TInt remains = (aBuffer.MaxLength()-aBuffer.Length())<<1;
                 if (remains<4096)
@@ -132,14 +132,14 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
                 MixChannels(interBuffer, outBufferPtr);
                 outBufferPtr.Set((TUint8 *) &(outBufferPtr.Ptr()[ret]), 0, outBufferPtr.MaxLength() - ret);
                 aBuffer.SetLength(aBuffer.Length()+ret);
-            }
+			    }
             break;
-        }
+			}
 
-	case 3:
+		case 3:
         // Channel mixing, Rate convertion
         while(aBuffer.Length() <= iMinimumSamplesInBuffer)
-        {
+			{
             interBuffer.SetLength(0);
             TInt remains = (TInt) (((aBuffer.MaxLength() - aBuffer.Length()) << 1) * iSamplingRateFactor) - 2;
 
@@ -152,87 +152,90 @@ TInt COggSampleRateConverter::FillBuffer(TDes8 &aBuffer)
 
             MixChannels(interBuffer, interBuffer);
             ConvertRateMono(interBuffer, aBuffer);
-        }
-        break;
-    }
+			}
+		break;
+		}
 
+	// Apply the gain to the new samples that have been added
+	TInt bytesAdded = aBuffer.Length() - bufLength;
+	TPtr8 buffer((TUint8*) (aBuffer.Ptr()+bufLength), bytesAdded, bytesAdded);
     switch (iGain)
-    {
-    case ENoGain:
-        break;
+	    {
+		case ENoGain:
+			break;
 
-    case EMinus3dB:
-		// 11/16 = -3.25dB
-        ApplyNegativeGain(aBuffer, 11, 4);
-        break;
+	    case EMinus3dB:
+			// 11/16 = -3.25dB
+			ApplyNegativeGain(buffer, 11, 4);
+	        break;
 
-	case EMinus6dB:
-        ApplyNegativeGain(aBuffer, 1);
-        break;
+		case EMinus6dB:
+		    ApplyNegativeGain(buffer, 1);
+			break;
 
-	case EMinus9dB:
-		// 11/32 = -9.28dB
-        ApplyNegativeGain(aBuffer, 11, 5);
-        break;
+		case EMinus9dB:
+			// 11/32 = -9.28dB
+			ApplyNegativeGain(buffer, 11, 5);
+	        break;
 
-	case EMinus12dB:
-        ApplyNegativeGain(aBuffer, 2);
-        break;
+		case EMinus12dB:
+		    ApplyNegativeGain(buffer, 2);
+			break;
 
-	case EMinus15dB:
-		// 11/64 = -15.3dB
-        ApplyNegativeGain(aBuffer, 11, 6);
-        break;
+		case EMinus15dB:
+			// 11/64 = -15.3dB
+			ApplyNegativeGain(buffer, 11, 6);
+	        break;
 
-	case EMinus18dB:
-        ApplyNegativeGain(aBuffer, 3);
-        break;
+		case EMinus18dB:
+	        ApplyNegativeGain(buffer, 3);
+		    break;
 
-	case EMinus21dB:
-		// 11/128 = -21.3dB
-        ApplyNegativeGain(aBuffer, 11, 7);
-        break;
+		case EMinus21dB:
+			// 11/128 = -21.3dB
+	        ApplyNegativeGain(buffer, 11, 7);
+		    break;
 
-	case EMinus24dB:
-        ApplyNegativeGain(aBuffer, 4);
-        break;
+		case EMinus24dB:
+			ApplyNegativeGain(buffer, 4);
+	        break;
 
-	case EStatic1dB:
-		// 9/8 = +1.02dB
-		ApplyGain(aBuffer, 9, 3);
-		break;
+		case EStatic1dB:
+			// 9/8 = +1.02dB
+			ApplyGain(buffer, 9, 3);
+			break;
 
-	case EStatic2dB:
-		// 5/4 = +1.94dB
-		ApplyGain(aBuffer, 5, 2);
-		break;
+		case EStatic2dB:
+			// 5/4 = +1.94dB
+			ApplyGain(buffer, 5, 2);
+			break;
 
-	case EStatic4dB:
-		// 25/16 = +3.88dB
-		ApplyGain(aBuffer, 25, 4);
-		break;
+		case EStatic4dB:
+			// 25/16 = +3.88dB
+			ApplyGain(buffer, 25, 4);
+			break;
 
-	case EStatic6dB:
-        ApplyGain(aBuffer, 1);
-        break;
+		case EStatic6dB:
+			ApplyGain(buffer, 1);
+			break;
 
-	case EStatic8dB:
-		// 20/8 = +7.96dB
-        ApplyGain(aBuffer, 20, 3);
-        break;
+		case EStatic8dB:
+			// 20/8 = +7.96dB
+	        ApplyGain(buffer, 20, 3);
+		    break;
 
-	case EStatic10dB:
-		// 25/8 = +9.90dB
-        ApplyGain(aBuffer, 25, 3);
-        break;
+		case EStatic10dB:
+			// 25/8 = +9.90dB
+	        ApplyGain(buffer, 25, 3);
+		    break;
 
-	case EStatic12dB:   
-        ApplyGain(aBuffer, 2);
-        break;
-    }
+		case EStatic12dB:   
+			ApplyGain(buffer, 2);
+			break;
+	    }
 
     return ret;
-}
+	}
 
 void COggSampleRateConverter::ConvertRateMono(TDes8 &aInputBuffer, TDes8 &aOutputBuffer)
 {

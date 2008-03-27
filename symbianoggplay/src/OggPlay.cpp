@@ -42,9 +42,13 @@
 #if defined(SERIES60)
 #include <aknnotewrappers.h>
 #include <aknmessagequerydialog.h>
+
+#include <eikprogi.h>
+#include <aknprogressdialog.h>
 #endif
 
 #include "OggControls.h"
+#include "OggHttpSource.h"
 #include "OggTremor.h"
 
 #if defined(PLUGIN_SYSTEM)
@@ -773,7 +777,7 @@ void COggPlayAppUi::StartRunningEmbedded()
 	if (iIsRunningEmbedded)
 		{
 		iStartUpEmbeddedAO = new(ELeave) COggStartUpEmbeddedAO(*this, *(iAppView->iOggFiles));
-		iStartUpEmbeddedAO->CreateDbWithSingleFile(iFileName);
+		iStartUpEmbeddedAO->CreateDbWithSingleFile(iSource.iSourceName);
 		}
 	else
 		NextStartUpState(KErrNone);
@@ -973,15 +977,36 @@ void COggPlayAppUi::NotifyPlayComplete()
 	NextSong();
 	}
 
-void COggPlayAppUi::NotifyFileOpen(TInt aErr)
+void COggPlayAppUi::NotifySourceOpenState(TInt aState)
 	{
+	iProgressInfo->IncrementAndDraw(aState);
+	}
+
+void COggPlayAppUi::NotifySourceOpen(TInt aErr)
+	{
+	// Dismiss dialog
+	if (iProgressDialog)
+		{
+		iProgressInfo->IncrementAndDraw(6);
+		iProgressDialog->ProcessFinishedL();
+		iProgressDialog = NULL;
+		iProgressInfo = NULL;
+		}
+
+	// Check for an open error
 	if (aErr != KErrNone)
 		{
-		FileOpenErrorL(iFileName, aErr);
+		// Cleanup decoder
 		HandleCommandL(EOggStop);
+
+		// Display a message
+		if (aErr != KErrCancel)
+			FileOpenErrorL(iSource.iSourceName, aErr);
+
 		return;
 		}
 
+	// Start playback
 	iOggPlayback->Play();
 	}
 
@@ -994,6 +1019,12 @@ void COggPlayAppUi::NotifyPlayStarted()
 	// Update the appView and the softkeys
 	iAppView->Update();
 	UpdateSoftkeys();
+	}
+
+void COggPlayAppUi::NotifyNextTrack()
+	{
+	// Update the appView
+	iAppView->Update();
 	}
 
 void COggPlayAppUi::ResumeUpdates()
@@ -1156,6 +1187,7 @@ void COggPlayAppUi::HandleCommandL(TInt aCommand)
 		case EOggViewBySubFolder:
 		case EOggViewByFileName:
 		case EOggViewByPlayList:
+		case EOggViewByStreams:
 			iAppView->FillView((TViews)(aCommand-EOggViewByTitle), ETop, buf);
 			break;
 
@@ -1306,7 +1338,7 @@ void COggPlayAppUi::PlaySelect()
 		return;
 		}
 
-	if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy == EPlayList) 
+	if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy == EPlayList || iViewBy == EStream) 
 		{
 		SelectNextView();
 		return;
@@ -1324,16 +1356,29 @@ void COggPlayAppUi::PlaySelect()
 		iOggPlayback->Stop();
 
 		iSongList->SetPlayingFromListBox(idx);
-		iFileName = iSongList->GetPlaying();
+		iSource = iSongList->GetPlaying();
 
 		TUid controllerUid;
-		TInt err = PlaybackFromFileName(iFileName, iOggPlayback, controllerUid);
+		TInt err = PlaybackFromSource(iSource, iOggPlayback, controllerUid);
 		if (err == KErrNone)
-			err = iOggPlayback->Open(iFileName, controllerUid);
+			err = iOggPlayback->Open(iSource, controllerUid);
 
-		if (err != KErrNone)
+		if (err == KErrNone)
 			{
-			FileOpenErrorL(iFileName, err);
+			if (iSource.IsStream())
+				{
+				iProgressDialog = new(ELeave)CAknProgressDialog((CEikDialog **) &iProgressDialog);
+				iProgressDialog->PrepareLC(R_DIALOG_OPEN);
+				iProgressInfo = iProgressDialog->GetProgressInfoL();
+				iProgressInfo->SetFinalValue(6);
+				TBool cancelled = !iProgressDialog->RunLD();
+				if (cancelled)
+					HandleCommandL(EOggStop);
+				}
+			}
+		else
+			{
+			FileOpenErrorL(iSource.iSourceName, err);
 
 			iSongList->SetPlayingFromListBox(ENoFileSelected);
 			UpdateSoftkeys();
@@ -1405,7 +1450,7 @@ void COggPlayAppUi::SelectNextView()
 		return;
 		}
 		
-	if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==EPlayList))
+	if (!(iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==EPlayList || iViewBy == EStream))
 		return;
 
 	if (iAppView->GetItemType(idx) == COggListBox::EBack)
@@ -1415,7 +1460,7 @@ void COggPlayAppUi::SelectNextView()
 
 	TBuf<128> filter;
 	iAppView->GetFilterData(idx, filter);
-	if ((iViewBy == EPlayList) || (iViewBy == ESubFolder))
+	if ((iViewBy == EPlayList) || (iViewBy == EStream) || (iViewBy == ESubFolder))
 		iAppView->FillView(EFileName, iViewBy, filter);
 	else
 		iAppView->FillView(ETitle, iViewBy, filter);
@@ -1425,9 +1470,6 @@ void COggPlayAppUi::ShowFileInfo()
 	{
     TBool songPlaying = iSongList->AnySongPlaying();
 	TInt selectedIndex = iAppView->GetSelectedIndex();
-	if (!songPlaying && (selectedIndex<0))
-		return;
-
 	COggListBox::TItemTypes itemType;
 	TOggPlayList* playList = NULL;
 	TBool gotFileInfo = EFalse;
@@ -1435,10 +1477,10 @@ void COggPlayAppUi::ShowFileInfo()
 		{
 		// No song is playing, show info for selected song if possible
 		itemType = iAppView->GetItemType(selectedIndex);
-		if (itemType==COggListBox::EBack)
+		if (itemType == COggListBox::EBack)
 			return;
 
-		if (iViewBy==EAlbum || iViewBy==EArtist || iViewBy==EGenre || iViewBy==ESubFolder || iViewBy==ETop)
+		if ((iViewBy == EAlbum) || (iViewBy == EArtist) || (iViewBy == EGenre) || (iViewBy == ESubFolder) || (iViewBy == ETop))
 			return;
 
 		if (itemType == COggListBox::EPlayList)
@@ -1478,17 +1520,21 @@ void COggPlayAppUi::ShowFileInfo()
 			else
 				{
 				const TDesC& fileName = iAppView->GetFileName(selectedIndex);
-
-				TUid controllerUid;
-				CAbsPlayback* oggPlayback;
-				TInt err = PlaybackFromFileName(fileName, oggPlayback, controllerUid);
-				if (err == KErrNone)
-					err = oggPlayback->FullInfo(fileName, controllerUid, *this);
-
-				if (err != KErrNone)
+				if (fileName == iOggPlayback->FileName() || COggHttpSource::IsNameValid(fileName))
+					gotFileInfo = ETrue;
+				else
 					{
-					FileOpenErrorL(fileName, err);
-					return;
+					TUid controllerUid;
+					CAbsPlayback* oggPlayback;
+					TInt err = PlaybackFromFileName(fileName, oggPlayback, controllerUid);
+					if (err == KErrNone)
+						err = oggPlayback->FullInfo(fileName, controllerUid, *this);
+
+					if (err != KErrNone)
+						{
+						FileOpenErrorL(fileName, err);
+						return;
+						}
 					}
 				}
 			}
@@ -1543,8 +1589,8 @@ void COggPlayAppUi::NextSong()
 	if (iSongList->AnySongPlaying()) 
 		{
         // If a song is currently playing, stop playback and play the next song (if there is one)
-		iFileName = iSongList->GetNextSong();
-		if (!iFileName.Length())
+		iSource = iSongList->GetNextSong();
+		if (!iSource.iSourceName.Length())
 			{
             HandleCommandL(EOggStop);
 			return;
@@ -1553,13 +1599,13 @@ void COggPlayAppUi::NextSong()
 		iOggPlayback->Stop();
 
 		TUid controllerUid;
-		TInt err = PlaybackFromFileName(iFileName, iOggPlayback, controllerUid);
+		TInt err = PlaybackFromSource(iSource, iOggPlayback, controllerUid);
 		if (err == KErrNone)
-			err = iOggPlayback->Open(iFileName, controllerUid);
+			err = iOggPlayback->Open(iSource, controllerUid);
 
         if (err != KErrNone)
 			{
-			FileOpenErrorL(iFileName, err);
+			FileOpenErrorL(iSource.iSourceName, err);
             HandleCommandL(EOggStop);
 			}
 		}
@@ -1608,15 +1654,15 @@ void COggPlayAppUi::PreviousSong()
 			return;
 
 		iSongList->SetPlayingFromListBox(idx);
-		iFileName = iSongList->GetPlaying();
+		iSource = iSongList->GetPlaying();
 		}
 	else
 		{
 		// If a song is currently playing, stop playback and play the previous song
-		iFileName = iSongList->GetPreviousSong();
+		iSource = iSongList->GetPreviousSong();
 		}
 
-	if (!iFileName.Length())
+	if (!iSource.iSourceName.Length())
 		{
 		HandleCommandL(EOggStop);
 		return;
@@ -1625,13 +1671,13 @@ void COggPlayAppUi::PreviousSong()
 	iOggPlayback->Stop();
 
 	TUid controllerUid;
-	TInt err = PlaybackFromFileName(iFileName, iOggPlayback, controllerUid);
+	TInt err = PlaybackFromSource(iSource, iOggPlayback, controllerUid);
 	if (err == KErrNone)
-		err = iOggPlayback->Open(iFileName, controllerUid);
+		err = iOggPlayback->Open(iSource, controllerUid);
 
 	if (err != KErrNone)
 		{
-		FileOpenErrorL(iFileName, err);
+		FileOpenErrorL(iSource.iSourceName, err);
 		HandleCommandL(EOggStop);
 		}
 	}
@@ -1658,8 +1704,19 @@ void COggPlayAppUi::DynInitMenuPaneL(TInt aMenuId, CEikMenuPane* aMenuPane)
 
 #endif
 
-		TBool isSongList= ((iViewBy==ETitle) || (iViewBy==EFileName) || (iViewBy == EPlayList));
-		aMenuPane->SetItemDimmed(EOggInfo, (!iSongList->AnySongPlaying()) && (iAppView->GetSelectedIndex()<0 || !isSongList));
+		TInt selectedIndex = iAppView->GetSelectedIndex();
+		COggListBox::TItemTypes itemType = iAppView->GetItemType(selectedIndex);
+		TBool isSongList = ((iViewBy == ETitle) || (iViewBy == EFileName) || (iViewBy == EPlayList) || (iViewBy == EStream));
+		TBool isDimmed = ETrue;
+		if (isSongList)
+			{
+			if (itemType == COggListBox::EFileName)
+				isDimmed = COggHttpSource::IsNameValid(iAppView->GetFileName(selectedIndex));
+			else if ((itemType == COggListBox::ETitle) || (itemType == COggListBox::EPlayList))
+				isDimmed = EFalse;
+			}
+
+		aMenuPane->SetItemDimmed(EOggInfo, (!iSongList->AnySongPlaying() && isDimmed));
 		}
 	
 	if (aMenuId == R_SKIN_MENU)
@@ -2459,7 +2516,9 @@ TBool COggPlayAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName& 
 
 void COggPlayAppUi::OpenFileL(const TDesC& aFileName)
 	{
-	iFileName = aFileName;
+	iSource = aFileName;
+	iSource.iSourceType = TOggSource::EFile;
+
 	iIsRunningEmbedded = ETrue;
 	}
 
@@ -2600,6 +2659,26 @@ TInt COggPlayAppUi::Rnd(TInt aMax)
 #else
 	return result64.GetTInt();
 #endif
+	}
+
+TInt COggPlayAppUi::PlaybackFromSource(TOggSource& aSource, CAbsPlayback*& aOggPlayback, TUid& aControllerUid)
+	{
+	if (COggHttpSource::IsNameValid(aSource.iSourceName))
+		{
+		// Set the source type
+		aSource.iSourceType = TOggSource::EStream;
+
+		// Http address, use internal playback
+		aOggPlayback = iOggMTPlayback;
+		aControllerUid = KOggPlayInternalController;
+		return KErrNone;
+		}
+
+	// Set the source type
+	aSource.iSourceType = TOggSource::EFile;
+
+	// Get the correct playback
+	return PlaybackFromFileName(aSource.iSourceName, aOggPlayback, aControllerUid);
 	}
 
 TInt COggPlayAppUi::PlaybackFromFileName(const TDesC& aFileName, CAbsPlayback*& aOggPlayback, TUid& aControllerUid)

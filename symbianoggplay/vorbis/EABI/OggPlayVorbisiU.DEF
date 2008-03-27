@@ -24,4 +24,7 @@ EXPORTS
 	ov_time_seek @ 23 NONAME ; CODE
 	ov_time_tell @ 24 NONAME ; CODE
 	ov_time_total @ 25 NONAME ; CODE
+	ogg_sync_bufferin @ 26 NONAME ; CODE
+	ov_asyncin_open @ 27 NONAME ; CODE
+	ogg_sync_wrote @ 28 NONAME ; CODE
 

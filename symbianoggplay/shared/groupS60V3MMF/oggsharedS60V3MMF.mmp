@@ -3,7 +3,7 @@ TARGET        OggPlayShared.dll
 TARGETTYPE    dll
 UID 0x1000008d 0xF020202C
 
-CAPABILITY                              NONE 
+CAPABILITY                              NetworkServices 
 SECUREID                                0xF020202C
 VENDORID                                0
 

@@ -54,7 +54,7 @@ public:
 	~CMadDecoder();
 
 	TInt Clear();
-	TInt Open(const TDesC& aFilename);
+	TInt Open(const TDesC& aFilename, COggHttpSource* aHttpSource);
 	TInt OpenInfo(const TDesC& aFilename);
 	TInt OpenComplete();
 
@@ -76,6 +76,9 @@ public:
 	void PrepareToSetPosition();
 	void PrepareToPlay();
 	void ThreadRelease();
+
+	TInt Section();
+	TBool LastBuffer();
 
 private:
 	// Helper functions

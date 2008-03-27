@@ -154,8 +154,8 @@ extern ogg_sync_state *ogg_sync_create(void);
 extern int      ogg_sync_destroy(ogg_sync_state *oy);
 extern int      ogg_sync_reset(ogg_sync_state *oy);
 
-extern unsigned char *ogg_sync_bufferin(ogg_sync_state *oy, long size);
-extern int      ogg_sync_wrote(ogg_sync_state *oy, long bytes);
+IMPORT_C unsigned char *ogg_sync_bufferin(ogg_sync_state *oy, long size);
+IMPORT_C int      ogg_sync_wrote(ogg_sync_state *oy, long bytes);
 extern long     ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og);
 extern int      ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og);
 extern int      ogg_stream_pagein(ogg_stream_state *os, ogg_page *og);

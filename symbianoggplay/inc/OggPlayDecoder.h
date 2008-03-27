@@ -19,8 +19,12 @@
 #ifndef OGGPLAYDECODER_H
 #define OGGPLAYDECODER_H
 
+#include <e32std.h>
+
+
+class COggHttpSource;
 class MDecoder
-{
+	{
 public:
 	virtual ~MDecoder() { }
 
@@ -28,7 +32,7 @@ public:
 	virtual TInt Clear() = 0;
 
 	// Open file and get ready to decode
-	virtual TInt Open(const TDesC& aFilename) = 0;
+	virtual TInt Open(const TDesC& aFilename, COggHttpSource* aHttpSource) = 0;
 
 	// Internal cleanup
 	virtual void Close() = 0;
@@ -68,6 +72,9 @@ public:
 	virtual void PrepareToSetPosition() = 0;
 	virtual void PrepareToPlay() = 0;
 	virtual void ThreadRelease() = 0;
+
+	virtual TInt Section() = 0; // section of chained stream
+	virtual TBool LastBuffer() = 0;
 	};
 
 #endif

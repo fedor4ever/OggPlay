@@ -1231,6 +1231,9 @@ void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::
 
 		iEikonEnv->ReadResource(buf, R_OGG_STRING_12);
 		TOggFiles::AppendLine(*GetTextArray(), COggListBox::EPlayList, buf, dummy);
+
+		iEikonEnv->ReadResource(buf, R_OGG_STRING_15);
+		TOggFiles::AppendLine(*GetTextArray(), COggListBox::EPlayList, buf, dummy);
 		}
 	else if (thePreviousView == COggPlayAppUi::ETop)
 		{
@@ -1262,6 +1265,10 @@ void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::
 
 			case COggPlayAppUi::EPlayList:
 				iOggFiles->FillPlayLists(*GetTextArray());
+				break;
+
+			case COggPlayAppUi::EStream:
+				iOggFiles->FillStreams(*GetTextArray());
 				break;
 
 			default:
@@ -1311,6 +1318,10 @@ void COggPlayAppView::FillView(COggPlayAppUi::TViews theNewView, COggPlayAppUi::
 				break;
 
 			case COggPlayAppUi::EPlayList:
+				iOggFiles->FillPlayList(*GetTextArray(), aSelection);
+				break;
+
+			case COggPlayAppUi::EStream:
 				iOggFiles->FillPlayList(*GetTextArray(), aSelection);
 				break;
 
@@ -1390,51 +1401,53 @@ void COggPlayAppView::UpdateAnalyzer()
 	}
 
 void COggPlayAppView::UpdateListbox()
-{
-  if ((iApp->iViewBy != COggPlayAppUi::ETitle) && (iApp->iViewBy != COggPlayAppUi::EFileName))
-  {
-    if (iListBox[iMode])
-		iListBox[iMode]->Redraw();
-
-	return;
-  }
-
-  CDesCArray* txt = GetTextArray();
-  // BERT: Add a check if there is a song currently playing...
-  TBool paused = iApp->iOggPlayback->State()==CAbsPlayback::EPaused;
-  const TOggFile* currSong = iApp->iSongList->GetPlayingFile();
-
-  for (TInt i=0; i<txt->Count(); i++) {
-    TPtrC sel;
-    sel.Set((*txt)[i]);
-    TBuf<512> buf(sel);
-
-	COggListBox::TItemTypes type = GetItemType(i);
-	if (type!=COggListBox::EBack) {
-		TBuf<1> playState;
-		if ((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type == COggListBox::EPlayList))
+	{
+	if ((iApp->iViewBy != COggPlayAppUi::ETitle) && (iApp->iViewBy != COggPlayAppUi::EFileName))
 		{
-			if ( GetFile(i) == currSong ) {
-				// Mark as paused or playing
-				if (paused)
-					playState.Num((TUint) COggListBox::EPaused);
-				else
-					playState.Num((TUint) COggListBox::EPlaying);
-			}
-			else
-				playState.Num(0);
+		if (iListBox[iMode])
+			iListBox[iMode]->Redraw();
 
-			buf.Replace(buf.Length()-1, 1, playState);
+		return;
 		}
-    }
 
-    txt->Delete(i);
-    txt->InsertL(i,buf);
-  }
+	CDesCArray* txt = GetTextArray();
+	TBool paused = iApp->iOggPlayback->State() == CAbsPlayback::EPaused;
+	const TOggFile* currSong = iApp->iSongList->GetPlayingFile();
 
-  if (iListBox[iMode])
-	  iListBox[iMode]->Redraw();
-}
+	for (TInt i = 0 ; i<txt->Count() ; i++)
+		{
+		TPtrC sel;
+		sel.Set((*txt)[i]);
+		TBuf<512> buf(sel);
+
+		COggListBox::TItemTypes type = GetItemType(i);
+		if (type != COggListBox::EBack)
+			{
+			TBuf<1> playState;
+			if ((type == COggListBox::ETitle) || (type == COggListBox::EFileName) || (type == COggListBox::EPlayList))
+				{
+				if (GetFile(i) == currSong)
+					{
+					// Mark as paused or playing
+					if (paused)
+						playState.Num((TUint) COggListBox::EPaused);
+					else
+						playState.Num((TUint) COggListBox::EPlaying);
+					}
+				else
+					playState.Num(0);
+
+				buf.Replace(buf.Length()-1, 1, playState);
+				}
+			}
+
+		txt->Delete(i);
+		txt->InsertL(i, buf);
+		}
+
+	if (iListBox[iMode])
+		iListBox[iMode]->Redraw();
+	}
 
 TBool COggPlayAppView::CanPlay()
 	{
@@ -2196,18 +2209,8 @@ TKeyResponse COggPlayAppView::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventC
 void COggPlayAppView::OggSeek(TInt aSeekTime)
 	{
 	CAbsPlayback* playback = iApp->iOggPlayback;
-	if (playback == iApp->iOggMTPlayback)
-		{
-		// Multi thread playback can seek when paused
-		if ((playback->State() != CAbsPlayback::EPlaying) && (playback->State() != CAbsPlayback::EPaused))
-			return;
-		}
-	else
-		{
-		// MMF playback can only seek when playing
-		if (playback->State() != CAbsPlayback::EPlaying)
-			return;
-		}
+	if (!playback->Seekable())
+		return;
 
 	TInt64 pos = playback->Position() + aSeekTime;
 	playback->SetPosition(pos);

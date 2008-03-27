@@ -31,6 +31,7 @@ typedef unsigned int size_t;
 #endif
 
 
+class COggHttpSource;
 class CFlacDecoder : public CBase, public MDecoder
 	{
 public:
@@ -42,7 +43,7 @@ public:
 	~CFlacDecoder();
 
 	TInt Clear();
-	TInt Open(const TDesC& aFilename);
+	TInt Open(const TDesC& aFilename, COggHttpSource* aHttpSource);
 	TInt OpenInfo(const TDesC& aFilename);
 	TInt OpenComplete();
 	
@@ -83,6 +84,9 @@ public:
 	{ *iTrackNumber = aTrackNumber; }
 
 	void ParseBuffer(TInt aBlockSize, const FLAC__int32* const aBuffer[]);
+
+	TInt Section();
+	TBool LastBuffer();
 
 protected:
 #if defined(MULTITHREAD_SOURCE_READS)

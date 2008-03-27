@@ -175,17 +175,12 @@ FLAC__StreamDecoderInitStatus CFlacDecoder::FLACInitStream(RFile* f)
 	FlacTellCallback, FlacLengthCallback, FlacEofCallback, FlacWriteCallback, FlacMetadataCallback, FlacErrorCallback, (void *) f);
 	}
 
-TInt CFlacDecoder::Open(const TDesC& aFilename) 
-	{
-	return OpenInfo(aFilename);
-	}
-
-TInt CFlacDecoder::OpenInfo(const TDesC& aFileName) 
+TInt CFlacDecoder::Open(const TDesC& aFileName, COggHttpSource* /* aHttpSource */) 
 	{
 	Close();
 
 #if defined(MULTITHREAD_SOURCE_READS)
-	TInt err = iFile.Open(aFileName);
+	TInt err = iFile.Open(aFileName, NULL);
 #else
 	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
 #endif
@@ -208,9 +203,61 @@ TInt CFlacDecoder::OpenInfo(const TDesC& aFileName)
 		}
 
 	FLAC__stream_decoder_set_metadata_respond(iDecoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
-	FLAC__StreamDecoderInitStatus status = FLACInitStream(&iFile);
+	FLAC__StreamDecoderInitStatus flacStatus = FLACInitStream(&iFile);
 
-	switch(status)
+	switch(flacStatus)
+		{
+		case FLAC__STREAM_DECODER_INIT_STATUS_OK:
+			iDecoder->parent = (void *) this;
+			err = KErrNone;
+			break;
+
+		case FLAC__STREAM_DECODER_INIT_STATUS_MEMORY_ALLOCATION_ERROR:
+			err = KErrNoMemory;
+			break;
+
+		default:
+			err = KErrCorrupt;
+			break;
+		}
+
+	if (err != KErrNone)
+		iFile.Close();
+
+	return err;
+	}
+
+TInt CFlacDecoder::OpenInfo(const TDesC& aFileName) 
+	{
+	Close();
+
+#if defined(MULTITHREAD_SOURCE_READS)
+	TInt err = iFile.Open(aFileName, NULL);
+#else
+	TInt err = iFile.Open(iFs, aFileName, EFileShareReadersOnly);
+#endif
+
+	if (err != KErrNone)
+		return err;
+
+	err = iFile.Size(iFileSize);
+	if (err != KErrNone)
+		{
+		iFile.Close();
+		return err;
+		}
+
+	iDecoder = FLAC__stream_decoder_new();
+	if (!iDecoder)
+		{
+		iFile.Close();
+		return KErrNoMemory;
+		}
+
+	FLAC__stream_decoder_set_metadata_respond(iDecoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
+	FLAC__StreamDecoderInitStatus flacStatus = FLACInitStream(&iFile);
+
+	switch(flacStatus)
 		{
 		case FLAC__STREAM_DECODER_INIT_STATUS_OK:
 			iDecoder->parent = (void *) this;
@@ -443,6 +490,16 @@ void CFlacDecoder::ThreadRelease()
 #if defined(MULTITHREAD_SOURCE_READS)
 	iFile.ThreadRelease();
 #endif
+	}
+
+TInt CFlacDecoder::Section()
+	{
+	return KErrNotFound;
+	}
+
+TBool CFlacDecoder::LastBuffer()
+	{
+	return iFile.LastBuffer();
 	}
 
 
