@@ -151,7 +151,7 @@ TInt CPluginSupportedList::FindListL(const TDesC &aExtension) const
 
     return KErrNotFound;
 	}
-    
+
 const CPluginInfo* CPluginSupportedList::GetSelectedPluginInfo(const TDesC &aExtension) const
 	{
 	TInt index = FindListL(aExtension);
