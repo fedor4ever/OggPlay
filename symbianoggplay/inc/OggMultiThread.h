@@ -282,7 +282,7 @@ public:
 class MPrimeNextBufferObserver
 	{
 public:
-	virtual void PrimeNextBufferCallBack(TInt aNumBuffers) = 0;
+	virtual void PrimeNextBufferCallBack(TInt aErr, TInt aNumBuffers) = 0;
 	};
 
 class CBufferFillerAO : public CActive
@@ -357,7 +357,7 @@ public:
 	void DoCancel();
 
 	// From MPrimeNextBufferObserver
-	void PrimeNextBufferCallBack(TInt aNumBuffers);
+	void PrimeNextBufferCallBack(TInt aErr, TInt aNumBuffers);
 	};
 
 // Streaming thread active object
@@ -378,7 +378,7 @@ public:
 	void DoCancel();
 
 	// From MPrimeNextBufferObserver
-	void PrimeNextBufferCallBack(TInt aNumBuffers);
+	void PrimeNextBufferCallBack(TInt aErr, TInt aNumBuffers);
 
 private:
 	TBool& iBufferFlushPending;
@@ -612,7 +612,7 @@ public:
 	void MessagePosted();
 
 	// From MPrimeNextBufferObserver
-	void PrimeNextBufferCallBack(TInt aNumBuffers);
+	void PrimeNextBufferCallBack(TInt aErr, TInt aNumBuffers);
 
 private:
 	CStreamingThreadPlaybackEngine(TStreamingThreadData& aThreadData, CStreamingThreadSourceReader& aSourceReader);

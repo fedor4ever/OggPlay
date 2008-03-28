@@ -106,7 +106,7 @@ void CBufferFillerAO::RunL()
 		if ((iNumBuffersFilled == iNumBuffersToFill))
 			{
 			// Job done
-			iObserver->PrimeNextBufferCallBack(iNumBuffersFilled);
+			iObserver->PrimeNextBufferCallBack(KErrNone, iNumBuffersFilled);
 			iObserver = NULL;
 			}
 		else
@@ -128,7 +128,8 @@ void CBufferFillerAO::RunL()
 	else if (iSharedData.iLastBuffer)
 		{
 		// No more data in the stream, return with what we've got
-		iObserver->PrimeNextBufferCallBack(iNumBuffersFilled);
+		iNumBuffersFilled++;
+		iObserver->PrimeNextBufferCallBack(KErrEof, iNumBuffersFilled);
 		iObserver = NULL;
 		}
 	else
@@ -162,7 +163,7 @@ void CBufferFillerAO::Cancel()
 
 	// Call back with what we've got
 	if (iObserver)
-		iObserver->PrimeNextBufferCallBack(iNumBuffersFilled);
+		iObserver->PrimeNextBufferCallBack(KErrCancel, iNumBuffersFilled);
 
 	iObserver = NULL;
 	}
@@ -321,7 +322,7 @@ void CBufferingThreadAO::RunL()
 	PrimeNextBuffer(1, this);
 	}
 
-void CBufferingThreadAO::PrimeNextBufferCallBack(TInt /* aNumBuffers */)
+void CBufferingThreadAO::PrimeNextBufferCallBack(TInt /* aErr */, TInt /* aNumBuffers */)
 	{
 	// Stop buffering if we have filled all the buffers (or if we have got to the last buffer)
 	if ((iSharedData.NumBuffers() == iSharedData.iBuffersToUse) && !iSharedData.iLastBuffer)
@@ -383,7 +384,7 @@ CStreamingThreadAO::~CStreamingThreadAO()
 	{
 	}
 
-void CStreamingThreadAO::PrimeNextBufferCallBack(TInt /* aNumBuffers */)
+void CStreamingThreadAO::PrimeNextBufferCallBack(TInt /* aErr */, TInt /* aNumBuffers */)
 	{
 	// If we've got enough buffers and more buffering is required, transfer the buffering to the buffering thread
 	if ((iSharedData.NumBuffers() > KPrimeBuffers) && !iSharedData.iLastBuffer && (iSharedData.iBufferingMode == EBufferThread))
@@ -1164,7 +1165,7 @@ void CStreamingThreadSourceReader::HttpDataReceived()
 
 void CStreamingThreadSourceReader::HttpError(TInt aErr)
 	{
-	if (aErr == KErrEof)
+	if ((aErr == KErrEof) || (aErr == KErrDisconnected))
 		{
 		iSharedData.iDecoderSourceData->iLastBuffer = ETrue;
 		return;
@@ -1278,6 +1279,7 @@ void CStreamingThreadSourceReader::RunL()
 
 void CStreamingThreadSourceReader::DoCancel()
 	{
+	iReaderState = EInactive;
 	iTimer.Cancel();
 	}
 
@@ -1446,8 +1448,12 @@ void CStreamingThreadPlaybackEngine::StartStreaming()
 		}
 	}
 
-void CStreamingThreadPlaybackEngine::PrimeNextBufferCallBack(TInt aNumBuffersFilled)
+void CStreamingThreadPlaybackEngine::PrimeNextBufferCallBack(TInt aErr, TInt aNumBuffersFilled)
 	{
+	// Abandon playback if the request gets cancelled
+	if (aErr == KErrCancel)
+		return;
+
 	// Stream the first buffer(s)
 	for (TInt i = 0 ; i<aNumBuffersFilled ; i++)
 		SendNextBuffer();
