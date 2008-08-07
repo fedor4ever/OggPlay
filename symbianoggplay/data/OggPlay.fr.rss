@@ -11,8 +11,8 @@
 #define ogg_about_cpr3 "© codec Flac Josh Coalson"
 #define ogg_about_cpr4 "© MAD codec Robert Leslie"
 #define ogg_about_cpr5 "© Vera fonts Bitstream Inc."
-#define ogg_about_port "Adaptation pour S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
-#define ogg_about_port_S80 "Adaptation pour S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_port "Adaptation pour S60:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher\nTomas Vanek"
+#define ogg_about_port_S80 "Adaptation pour S60: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher, Tomas Vanek"
 #define ogg_about_translation "Traduit par Colin Savary et Berthier Lemieux"
 
 #define ogg_file_prop "Propriétés du fichier"

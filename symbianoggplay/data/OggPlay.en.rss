@@ -11,8 +11,8 @@
 #define ogg_about_cpr3 "© Flac codec Josh Coalson"
 #define ogg_about_cpr4 "© MAD codec Robert Leslie"
 #define ogg_about_cpr5 "© Vera fonts Bitstream Inc."
-#define ogg_about_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher"
-#define ogg_about_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher"
+#define ogg_about_port "Additional Developers:\nClaus Bjerre\nBerthier Lemieux\nPascal Wolff\nStuart Fisher\nTomas Vanek"
+#define ogg_about_port_S80 "Additional Developers: Claus Bjerre, Berthier Lemieux, Pascal Wolff, Stuart Fisher, Tomas Vanek"
 #define ogg_about_translation ""
 
 #define ogg_file_prop "File properties"
